@@ -20,3 +20,5 @@
 # Github pages Mkdocs
 /docs/site
 /docs/aux
+
+.vscode
