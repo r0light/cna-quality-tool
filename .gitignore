@@ -1,0 +1,22 @@
+## Bibliography auxiliary files (bibtex/biblatex/biber):
+*.bbl
+*.bcf
+*.blg
+*-blx.aux
+*-blx.bib
+*.run.xml
+
+## Editors:
+# WinEdt
+*.bak
+*.sav
+
+# Texpad
+.texpadtmp
+
+# Kile
+*.backup
+
+# Github pages Mkdocs
+/docs/site
+/docs/aux
