@@ -1,6 +1,6 @@
 # A Prototypical Web-Based Modeling Application
 
-This directory includes a prototypical implementation of a modeling application.
+This directory includes a prototypical implementation of a modeling application and is related to the [https://github.com/KarolinDuerr/MA-CNA-ModelingSupport](https://github.com/KarolinDuerr/MA-CNA-ModelingSupport) repository.
 
 
 ## How to start the application
