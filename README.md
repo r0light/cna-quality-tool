@@ -16,8 +16,9 @@ The application uses:
 
 ## TODO
 
+### features
+
 - [ ] preserve state in case of page reload
-- [ ] look at TODOs in Code
 - [ ] new Tab: Quality Evaluation
   - [ ] calculated metrics
   - [ ] product factors and their "presence" expressed as value or color
@@ -27,6 +28,12 @@ The application uses:
   - [ ] Edit evaluations (relation between )
   - [ ] Edit product factors
   - [ ] Edit quality aspects
+
+### Editor features
+
+- [ ] Delete element with delete button
+
+### technical things
 
 - [ ] refactor to TypeScript
 - [ ] add tests for quality calculations
