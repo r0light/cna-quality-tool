@@ -423,13 +423,14 @@ const DetailsSidebar = joint.mvc.View.extend({
                         height = Number(newValue);
                     }
 
-                    // ensure aspect ratio
-                    const defaultEntitySize = this._currentEntitySelection.prop("defaults/size");
-                    const aspectRatio = defaultEntitySize.height / defaultEntitySize.width;
-                    height = Number((aspectRatio * width).toFixed(2));
-                    console.log(this._currentEntitySelection.prop("defaults/size"));
-
-                    console.log(width + " " + height);
+                    if (this._currentEntitySelection.prop("entity/type") !== EntityTypes.INFRASTRUCTURE) {
+                        // ensure aspect ratio except for infrastructure
+                        const defaultEntitySize = this._currentEntitySelection.prop("defaults/size");
+                        const aspectRatio = defaultEntitySize.height / defaultEntitySize.width;
+                        height = Number((aspectRatio * width).toFixed(2));
+                        console.log(this._currentEntitySelection.prop("defaults/size"));
+                        console.log(width + " " + height);
+                    }
                     this._currentEntitySelection.resize(width, height, { deep: true });
                 default:
                     break;

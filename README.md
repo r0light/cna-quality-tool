@@ -32,7 +32,7 @@ The application uses:
 ### Editor features
 
 - [ ] Delete element with delete button
-- [ ] Do not let infrastructure element grow in height
+- [x] Do not let infrastructure element grow in height
 
 ### technical things
 

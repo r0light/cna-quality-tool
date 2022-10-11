@@ -572,7 +572,7 @@ const Infrastructure = joint.dia.Element.define("qualityModel.Infrastructure", {
     },
     attrs: {
         body: {
-            points: 'calc(0.15 * l),0 calc(0.85 * l),0 calc(l),calc(0.5 * l) 0,calc(0.5 * l)',
+            points: 'calc(0.15 * w),0 calc(0.85 * w),0 calc(w),calc(h) 0,calc(h)',
             strokeWidth: 2,
             stroke: "black",
             fill: "white",
