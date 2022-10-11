@@ -1,11 +1,3 @@
-// TODO JQuery here too? Import in every file that needs jointJS?
-/**
- * JointJS dependencies
- */
-import 'https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.js';
-import 'https://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.4.0/backbone.js';
-import 'https://cdnjs.cloudflare.com/ajax/libs/jointjs/3.5.5/joint.js';
-
 import ModelingArea from './modelingArea.mjs';
 import Toolbar from './toolbar.js';
 import EntitySidebar from './entitySidebar.mjs';
