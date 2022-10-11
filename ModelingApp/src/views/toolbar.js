@@ -208,9 +208,13 @@ class Toolbar extends joint.mvc.View {
     }
 
     zoomInPaper() {
-        // TODO allow more finegrained
         const dimensionsBeforeZoom = this.options.paper.getComputedSize();
-        this.options.paper.scale(1.5);
+        let currentScale = this.options.paper.scale();
+        if (currentScale.sx >= 1) {
+            this.options.paper.scale(currentScale.sx + 0.5);
+        } else {
+            this.options.paper.scale(currentScale.sx * 2);
+        }
         this.options.paper.fitToContent({
             padding: 50,
             minWidth: dimensionsBeforeZoom.width,
@@ -219,9 +223,13 @@ class Toolbar extends joint.mvc.View {
     }
 
     zoomOutPaper() {
-        // TODO allow more finegrained
         const dimensionsBeforeZoom = this.options.paper.getComputedSize();
-        this.options.paper.scale(1);
+        let currentScale = this.options.paper.scale();
+        if (Math.round(currentScale.sx) <= 1) {
+            this.options.paper.scale(currentScale.sx * 0.5);
+        } else {
+            this.options.paper.scale(currentScale.sx - 0.5);
+        }
         this.options.paper.fitToContent({
             padding: 50,
             minWidth: dimensionsBeforeZoom.width,

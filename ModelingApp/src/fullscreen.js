@@ -1,3 +1,5 @@
+//TODO problem with dark mode?
+
 document.addEventListener("fullscreenchange", function() {
   if (document.title !== null && document.title.toLowerCase() === String("CNA Modeling: Modeling Application").toLowerCase()) {
     if (document.fullscreenElement) {
