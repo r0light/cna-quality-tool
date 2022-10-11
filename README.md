@@ -13,3 +13,20 @@ Afterwards you can go to [http://localhost:8001/modelingApplication.html](http:/
 
 The application uses:
 - the open-source modeling library [JointJS](https://www.jointjs.com/opensource) published under the [Open Source Mozilla Public License Version 2.0](https://www.mozilla.org/en-US/MPL/2.0/). The modeling application used the library as-is.
+
+## TODO
+
+- [ ] preserve state in case of page reload
+- [ ] look at TODOs in Code
+- [ ] new Tab: Quality Evaluation
+  - [ ] calculated metrics
+  - [ ] product factors and their "presence" expressed as value or color
+  - [ ] quality ratings based on quality aspects
+- [ ] new Tab: QM Configuration
+  - [ ] Edit measures
+  - [ ] Edit evaluations (relation between )
+  - [ ] Edit product factors
+  - [ ] Edit quality aspects
+
+- [ ] refactor to TypeScript
+- [ ] add tests for quality calculations

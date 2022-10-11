@@ -34,7 +34,7 @@ const ModelingArea = joint.mvc.View.extend({
 
         let paper = new joint.dia.Paper({
             el: $("#jointPaper"),
-            width: 1200,
+            width: 3000,
             height: 3000,
             gridSize: 10,
             drawGrid: true,

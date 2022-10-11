@@ -9,8 +9,6 @@
 
 .system-container {
     position: relative;
-    overflow: scroll;
-    /* box-sizing: border-box;     */
     width: 100%;
     height: 100%;
     cursor: grab;
@@ -18,9 +16,11 @@
 
 .system-container>.system-container-modeling-area {
     position: relative;
-    overflow: hidden;
+    overflow: scroll;
     margin: 0;
     display: inline-block;
+    width: 100%;
+    height: 100%;
     /* vertical-align: top; */
     background: var(--paper-background-colour);
     box-shadow: 3px 0px 3px 3px rgba(52, 58, 64, 0.3); 
