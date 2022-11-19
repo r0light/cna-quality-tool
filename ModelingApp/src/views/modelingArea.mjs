@@ -15,6 +15,7 @@ const ModelingArea = joint.mvc.View.extend({
 
     _currentSelection: "",
     _currentRequestTraceViewSelection: "",
+    _currentKeypressHandler: new function() {},
 
     _hiddenEntities: new Set(),
 
@@ -112,7 +113,7 @@ const ModelingArea = joint.mvc.View.extend({
                 </div>
             </div>
         </div>`
-        $('.visible-modeling-area').append(modelingArea);
+        this.$el.append(modelingArea);
     },
 
     render() {
@@ -325,9 +326,17 @@ const ModelingArea = joint.mvc.View.extend({
 
     configureHandlingPaperEvents() {
 
+        function onKeyPressedWithElementHighlighted(keydownEvent) {
+            if (keydownEvent.code === "Delete") {
+                this.remove(); // this is the cellView 
+                document.removeEventListener("keydown", this. _currentKeypressHandler, false);
+            }
+        }
+
         this._paper.on({
             'element:pointerdown': function (cellView, evt, x, y) {
                 this.hideTools();
+                document.removeEventListener("keydown", this. _currentKeypressHandler, false);
                 let currentPaper = this;
                 this.model.getLinks().forEach(function (link) {
                     joint.highlighters.stroke.remove(link.findView(currentPaper));
@@ -336,10 +345,13 @@ const ModelingArea = joint.mvc.View.extend({
                 // if (cellView.paper.options.interactive == false) {
                 //     return;
                 // }
+                this._currentKeypressHandler = onKeyPressedWithElementHighlighted.bind(cellView);
+                document.addEventListener("keydown", this._currentKeypressHandler, false);
                 cellView.showTools();
             },
             'blank:pointerdown': function (evt, x, y) {
                 this.hideTools();
+                document.removeEventListener("keydown", this. _currentKeypressHandler, false);
                 let currentPaper = this;
                 this.model.getLinks().forEach(function (link) {
                     joint.highlighters.stroke.remove(link.findView(currentPaper));
@@ -375,7 +387,7 @@ const ModelingArea = joint.mvc.View.extend({
             "link:connect": (linkView, evt, elementViewConnected, magnet, arrowhead) => this.configureLink(linkView, evt, elementViewConnected, magnet, arrowhead),
 
             "element:icon:pointerclick": (elementView, evt) => this.onEntityCollapsed(evt, elementView),
-            "requestTrace:icon:pointerclick": (elementView, evt, x, y) => this.onShowRequestTraceIncludedEntities(elementView, evt),
+            "requestTrace:icon:pointerclick": (elementView, evt, x, y) => this.onShowRequestTraceIncludedEntities(elementView, evt)
             // "cell:pointerdbclick": function (elementView, evt, x, y) {
             //     console.log("Double click"); // doesn't work at the moment
             // },
@@ -540,7 +552,7 @@ const ModelingArea = joint.mvc.View.extend({
         modalDialog.create(InvalidToscaConnectionDialogConfig);
         modalDialog.render("modals", true);
         modalDialog.show();
-    }
+    },
 });
 
 // TODO keep here? --> currently shown every time new problematic connection is added

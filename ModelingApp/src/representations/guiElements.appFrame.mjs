@@ -7,6 +7,9 @@ class ModelingApplicationFrame {
         $("#" + parentId).append(this.getApplicationFrameTemplate);
     }
 
+
+    
+
     getApplicationFrameTemplate() {
         return `${this.#createInitialOverlay()}${this.#createApplicationArea()}`;
     }

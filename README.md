@@ -28,11 +28,16 @@ The application uses:
   - [ ] Edit evaluations (relation between )
   - [ ] Edit product factors
   - [ ] Edit quality aspects
+- [ ] Import JSON model
+- [ ] Import TOSCA model
+- [ ] More specific show/hide features (all backing services, all infrastructure and deployment mappings, )
 
 ### Editor features
 
-- [ ] Delete element with delete button
+- [x] Delete element with delete button
 - [x] Do not let infrastructure element grow in height
+- [ ] make Paper draggable with mouse (https://stackoverflow.com/questions/28431384/how-to-make-a-paper-draggable)
+- [ ] increase element size to ensure embedded elements are within the element when added
 
 ### technical things
 
