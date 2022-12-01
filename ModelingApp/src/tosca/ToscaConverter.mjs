@@ -1,4 +1,4 @@
-import * as yaml from 'https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.mjs';
+import * as yaml from '../../../static/js/js-yaml.js';
 
 import * as Entities from '../entities.mjs'
 
