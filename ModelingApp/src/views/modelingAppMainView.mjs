@@ -5,7 +5,7 @@ import ModalDialog from './modalDialog.mjs';
 import DetailsSidebar from './detailsSidebar.mjs';
 
 import ToolbarConfig from "../config/toolbarConfiguration.mjs";
-import SidebarEntityShapes from '../config/entityShapeConfiguration.mjs';
+import SidebarEntityShapes from '../config/entitySidebarShape.config.mjs';
 import { DetailsSidebarConfig } from '../config/detailsSidebarConfig.mjs';
 
 /**

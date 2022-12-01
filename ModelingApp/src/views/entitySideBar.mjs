@@ -150,7 +150,7 @@ const EntitySidebar = joint.mvc.View.extend({
     },
 
     onDragEntity(cellView, event, x, y) {
-        // console.log(event);
+        //console.log(event);
 
         if (!this._dragging) {
             return;
