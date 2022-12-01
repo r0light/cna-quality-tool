@@ -12,7 +12,7 @@ let CloneButton = joint.elementTools.Button.extend({
             tagName: "image",
             selector: "icon",
             attributes: {
-                href: "icon/copy-solid.svg",
+                href: "static/icons/copy-solid.svg",
                 fill: "black",
                 transform: "translate(-6, -6) scale(0.1)",
                 cursor: "pointer",
@@ -55,7 +55,7 @@ let CreateLinkButton = joint.elementTools.Connect.extend({
         tagName: "image",
         selector: "icon",
         attributes: {
-            href: "icon/arrows-split-up-and-left-solid.svg",
+            href: "static/icons/arrows-split-up-and-left-solid.svg",
             fill: "white",
             transform: "scale(0.1) rotate(90)",
             cursor: "pointer",
@@ -106,7 +106,7 @@ let CollapseButton = joint.elementTools.Button.extend({
             tagName: "image",
             selector: "icon",
             attributes: {
-                href: "icon/circle-minus-solid.svg",
+                href: "static/icons/circle-minus-solid.svg",
                 transform: "translate(-6, -6) scale(0.1)",
                 // href: "icon/dash-circle.svg",
                 // transform: "translate(-10, -6) scale(0.9)",

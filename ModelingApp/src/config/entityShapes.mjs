@@ -10,7 +10,7 @@ import EntityTypes from "./entityTypes.mjs";
 // TODO decide
 const defaultTextFont = "sans-serif";
 // const defaultTextFont = "Roboto Condensed"
-const expandEntityIconPath = "icon/magnifying-glass-plus-solid.svg";
+const expandEntityIconPath = "static/icons/magnifying-glass-plus-solid.svg";
 
 /**
  * Shape for a Component entity. Creates a regular rectangle shape using the value of 
