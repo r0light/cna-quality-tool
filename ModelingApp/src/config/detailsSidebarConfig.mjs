@@ -1,4 +1,26 @@
 import EntityTypes from "./entityTypes.mjs";
+import { getComponentProperties, getBackingServiceProperties } from "../entities.mjs";
+
+function parseProperties(properties) {
+    return properties.map(property => {
+        var propertyConfig = {
+            providedFeature: property.key,
+            contentType: PropertyContentType.INPUT_TEXTBOX,
+            label: property.name,
+            properties: {
+                disabled: false,
+                required: property.required
+            },
+            attributes: {
+                placeholder: property.example,
+                helpText: {
+                    text: property.description
+                }
+            }
+        }
+        return propertyConfig;
+    })
+}
 
 const PropertyContentType = Object.freeze({
     BUTTON: "button",
@@ -250,23 +272,7 @@ const EntityDetailsConfig = {
     },
     BackingService: {
         type: EntityTypes.BACKING_SERVICE,
-        specificProperties: [
-            {
-                providedFeature: "providedFunctionality",
-                contentType: PropertyContentType.INPUT_TEXTBOX,
-                label: "Provided Functionality:",
-                properties: {
-                    disabled: false,
-                    required: false
-                },
-                attributes: {
-                    placeholder: "e.g. Logging",
-                    helpText: {
-                        text: "A short description of the provided functionality."
-                    }
-                }
-            }
-        ]
+        specificProperties: parseProperties(getComponentProperties()).concat(parseProperties(getBackingServiceProperties()))
     },
     StorageBackingService: {
         type: EntityTypes.STORAGE_BACKING_SERVICE,

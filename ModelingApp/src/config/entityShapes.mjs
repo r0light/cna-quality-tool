@@ -1,4 +1,5 @@
 
+import { getComponentProperties, getBackingServiceProperties } from "../entities.mjs";
 import EntityTypes from "./entityTypes.mjs";
 
 // TODO section:
@@ -11,6 +12,14 @@ import EntityTypes from "./entityTypes.mjs";
 const defaultTextFont = "sans-serif";
 // const defaultTextFont = "Roboto Condensed"
 const expandEntityIconPath = "static/icons/magnifying-glass-plus-solid.svg";
+
+function parseProperties(entityProperties) {
+    return entityProperties.map(property => {
+        var keyValueOnlyProperty = {}
+        keyValueOnlyProperty[property.key] = property.value;
+        return keyValueOnlyProperty;
+    });
+}
 
 /**
  * Shape for a Component entity. Creates a regular rectangle shape using the value of 
@@ -281,9 +290,12 @@ const BackingService = joint.dia.Element.define("qualityModel.BackingService", {
     entityTypeHidden: false,
     entity: {
         type: EntityTypes.BACKING_SERVICE,
+        /*
         properties: {
             providedFunctionality: ""
         }
+        */
+        properties: parseProperties(getComponentProperties()).concat(parseProperties(getBackingServiceProperties()))
     }
 }, {
     markup: [{

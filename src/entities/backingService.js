@@ -1,9 +1,21 @@
+import { EntityProperty } from './entityProperty.js'
 import { Component } from './component.js'
 
 /**
  * The module for aspects related to a Backing Service quality model entity.
  * @module entities/backingService
  */
+
+function getBackingServiceProperties() {
+    return [
+        new EntityProperty("providedFunctionality", 
+        "Provided Functionality:", 
+        "A short description of the provided functionality.",
+        "e.g. Logging",
+        false,
+        "")
+    ]
+}
 
 /**
  * Class representing a Backing Service entity.
@@ -20,6 +32,7 @@ class BackingService extends Component {
      */
     constructor(name, modelId, hostingInfrastructure) {
         super(name, modelId, hostingInfrastructure)
+        this.addProperties(getBackingServiceProperties());
     }
 
     /**
@@ -31,4 +44,4 @@ class BackingService extends Component {
     }
 }
 
-export { BackingService };
+export { BackingService, getBackingServiceProperties };

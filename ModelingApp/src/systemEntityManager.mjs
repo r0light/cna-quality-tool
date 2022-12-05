@@ -174,7 +174,13 @@ class SystemEntityManager {
             componentModelEntity = new Entities.Service(graphElement.attr("label/textWrap/text"), graphElement.id, infrastructure);
         } else if (endpointEntityType === EntityTypes.BACKING_SERVICE) {
             componentModelEntity = new Entities.BackingService(graphElement.attr("label/textWrap/text"), graphElement.id, infrastructure);
-            componentModelEntity["providedFunctionality"] = graphElement.prop("entity/properties/providedFunctionality");
+            for (property of componentModelEntity.getProperties()) {
+                // try to read property from graph
+                // TODO test this
+                property.value = graphElement.prop("entity/properties/" + property.key)
+                // previous code:
+                //componentModelEntity["providedFunctionality"] = graphElement.prop("entity/properties/providedFunctionality");
+            }
         } else if (endpointEntityType === EntityTypes.STORAGE_BACKING_SERVICE) {
             componentModelEntity = new Entities.StorageBackingService(graphElement.attr("label/textWrap/text"), graphElement.id, infrastructure);
             componentModelEntity["properties"] = {

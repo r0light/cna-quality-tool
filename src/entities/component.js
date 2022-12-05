@@ -1,3 +1,4 @@
+import { EntityProperty } from './entityProperty.js'
 import { Endpoint } from './endpoint.js'
 import { ExternalEndpoint } from './externalEndpoint.js'
 import { DataAggregate } from './dataAggregate.js'
@@ -8,6 +9,11 @@ import { Infrastructure } from './infrastructure.js'
  * The module for aspects related to a Component quality model entity.
  * @module entities/component
  */
+
+function getComponentProperties() {
+    return [];
+}
+
 
 /**
  * Class representing a Component entity.
@@ -33,6 +39,8 @@ class Component {
 
     #includedLinkEntities = new Array();
 
+    #properties = new Array();
+
     /**
      * Create a Component entity.
      * @param {string} name The name of the Component entity. 
@@ -43,6 +51,7 @@ class Component {
         this.name = name;
         this.#modelId = modelId;
         this.#hostedBy = hostingInfrastructure;
+        this.#properties = getComponentProperties();
     }
 
     /**
@@ -166,6 +175,23 @@ class Component {
     }
 
     /**
+     * Adds additional properties to this entity, only intended for subtypes to add additional properties
+     * 
+     * @param {EntityProperty[]} entityProperties 
+     */
+    addProperties(entityProperties) {
+        this.#properties = this.#properties.concat(entityProperties);
+    }
+
+    /**
+     * Returns all properties of this entity
+     * @returns {EntityProperty[]}
+     */
+    getProperties() {
+        return this.#properties;
+    }
+
+    /**
      * Transforms the Component object into a String. 
      * @returns {string}
      */
@@ -178,4 +204,4 @@ class Component {
     }
 }
 
-export { Component };
+export { Component, getComponentProperties };
