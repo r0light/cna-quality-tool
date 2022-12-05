@@ -168,29 +168,24 @@ class SystemEntityManager {
         }
 
         let componentModelEntity;
-        if (endpointEntityType === EntityTypes.COMPONENT) {
-            componentModelEntity = new Entities.Component(graphElement.attr("label/textWrap/text"), graphElement.id, infrastructure);
-        } else if (endpointEntityType === EntityTypes.SERVICE) {
-            componentModelEntity = new Entities.Service(graphElement.attr("label/textWrap/text"), graphElement.id, infrastructure);
-        } else if (endpointEntityType === EntityTypes.BACKING_SERVICE) {
-            componentModelEntity = new Entities.BackingService(graphElement.attr("label/textWrap/text"), graphElement.id, infrastructure);
-            for (property of componentModelEntity.getProperties()) {
-                // try to read property from graph
-                // TODO test this
-                property.value = graphElement.prop("entity/properties/" + property.key)
-                // previous code:
-                //componentModelEntity["providedFunctionality"] = graphElement.prop("entity/properties/providedFunctionality");
-            }
-        } else if (endpointEntityType === EntityTypes.STORAGE_BACKING_SERVICE) {
-            componentModelEntity = new Entities.StorageBackingService(graphElement.attr("label/textWrap/text"), graphElement.id, infrastructure);
-            componentModelEntity["properties"] = {
-                databaseName: graphElement.prop("entity/properties/databaseName"),
-                port: graphElement.prop("entity/properties/port")
-            };
-        } else {
-            componentModelEntity = new Entities.Component(graphElement.attr("label/textWrap/text"), graphElement.id, infrastructure);
+        switch(endpointEntityType) {
+            case EntityTypes.SERVICE:
+                componentModelEntity = new Entities.Service(graphElement.attr("label/textWrap/text"), graphElement.id, infrastructure);
+                break;
+            case EntityTypes.BACKING_SERVICE:
+                componentModelEntity = new Entities.BackingService(graphElement.attr("label/textWrap/text"), graphElement.id, infrastructure);
+                break;
+            case EntityTypes.STORAGE_BACKING_SERVICE:
+                componentModelEntity = new Entities.StorageBackingService(graphElement.attr("label/textWrap/text"), graphElement.id, infrastructure);
+                break;
+            case EntityTypes.COMPONENT:
+            default:
+                componentModelEntity = new Entities.Component(graphElement.attr("label/textWrap/text"), graphElement.id, infrastructure);
         }
-
+        // set entity properties
+        for (let property of componentModelEntity.getProperties()) {
+            property.value = graphElement.prop("entity/properties/" + property.getKey)
+        }
 
         let embeddedCells = graphElement.getEmbeddedCells();
         for (const embeddedCell of embeddedCells) {
@@ -418,19 +413,22 @@ class SystemEntityManager {
             return null;
         }
 
-        if (endpointEntityType === EntityTypes.EXTERNAL_ENDPOINT) {
-            let externalEndpoint = new Entities.ExternalEndpoint(graphElement.id, endpointType, endpointPath, port, graphElement.getParentCell().attr("label/textWrap/text"));
-            externalEndpoint["position"] = graphElement.position();
-            externalEndpoint["size"] = graphElement.size();
-            externalEndpoint["label"] = graphElement.attr("label/textWrap/text");
-            return externalEndpoint;
-        } else {
-            let endpoint = new Entities.Endpoint(graphElement.id, endpointType, endpointPath, port, graphElement.getParentCell().attr("label/textWrap/text"));
-            endpoint["position"] = graphElement.position();
-            endpoint["size"] = graphElement.size();
-            endpoint["label"] = graphElement.attr("label/textWrap/text");
-            return endpoint;
+        let endpointEntity;
+        switch (endpointEntityType) {
+            case EntityTypes.EXTERNAL_ENDPOINT:
+                endpointEntity = new Entities.ExternalEndpoint(graphElement.id, graphElement.getParentCell().attr("label/textWrap/text"));
+                break;
+            case EntityTypes.ENDPOINT:
+            default:
+                endpointEntity = new Entities.Endpoint(graphElement.id, graphElement.getParentCell().attr("label/textWrap/text"));
         }
+        endpointEntity["position"] = graphElement.position();
+        endpointEntity["size"] = graphElement.size();
+        endpointEntity["label"] = graphElement.attr("label/textWrap/text");
+        for (let property of endpointEntity.getProperties()) {
+            property.value = graphElement.prop("entity/properties/" + property.getKey);
+        }
+        return endpointEntity;
     }
 
     #createRequestTrace(graphElement) {

@@ -1,5 +1,4 @@
-
-import { getComponentProperties, getBackingServiceProperties } from "../entities.mjs";
+import { getComponentProperties, getBackingServiceProperties, getStorageBackingServiceProperties, getEndpointProperties } from "../entities.mjs";
 import EntityTypes from "./entityTypes.mjs";
 
 // TODO section:
@@ -16,7 +15,7 @@ const expandEntityIconPath = "static/icons/magnifying-glass-plus-solid.svg";
 function parseProperties(entityProperties) {
     return entityProperties.map(property => {
         var keyValueOnlyProperty = {}
-        keyValueOnlyProperty[property.key] = property.value;
+        keyValueOnlyProperty[property.getKey] = property.value;
         return keyValueOnlyProperty;
     });
 }
@@ -103,7 +102,8 @@ const Component = joint.dia.Element.define("qualityModel.Component", {
     collapsed: false,
     entityTypeHidden: false,
     entity: {
-        type: EntityTypes.COMPONENT
+        type: EntityTypes.COMPONENT,
+        properties: parseProperties(getComponentProperties())
     }
 }, {
     markup: [{
@@ -197,7 +197,8 @@ const Service = joint.dia.Element.define("qualityModel.Service", {
     collapsed: false,
     entityTypeHidden: false,
     entity: {
-        type: EntityTypes.SERVICE
+        type: EntityTypes.SERVICE,
+        properties: parseProperties(getComponentProperties())
     }
 }, {
     markup: [{
@@ -290,11 +291,6 @@ const BackingService = joint.dia.Element.define("qualityModel.BackingService", {
     entityTypeHidden: false,
     entity: {
         type: EntityTypes.BACKING_SERVICE,
-        /*
-        properties: {
-            providedFunctionality: ""
-        }
-        */
         properties: parseProperties(getComponentProperties()).concat(parseProperties(getBackingServiceProperties()))
     }
 }, {
@@ -375,10 +371,7 @@ const StorageBackingService = joint.shapes.standard.Cylinder.define("qualityMode
     entityTypeHidden: false,
     entity: {
         type: EntityTypes.STORAGE_BACKING_SERVICE,
-        properties: {
-            databaseName: "",
-            port: ""
-        }
+        properties: parseProperties(getStorageBackingServiceProperties())
     }
 }, {
     markup: [{
@@ -455,11 +448,12 @@ const Endpoint = joint.shapes.standard.Circle.define("qualityModel.Endpoint", {
     entity: {
         type: EntityTypes.ENDPOINT,
         isEmbedded: false,
-        properties: {
+        /*properties: {
             endpointType: "",
             endpointPath: "",
             port: ""
-        }
+        }*/
+        properties: parseProperties(getEndpointProperties())
     }
 }, {
     markup: [{
@@ -531,11 +525,7 @@ const ExternalEndpoint = joint.shapes.standard.Circle.define("qualityModel.Exter
     entity: {
         type: EntityTypes.EXTERNAL_ENDPOINT,
         isEmbedded: false,
-        properties: {
-            endpointType: "",
-            endpointPath: "",
-            port: ""
-        }
+        properties: parseProperties(getEndpointProperties())
     }
 }, {
     markup: [{

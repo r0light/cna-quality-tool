@@ -13,6 +13,9 @@ function getBackingServiceProperties() {
         "A short description of the provided functionality.",
         "e.g. Logging",
         false,
+        "text",
+        0,
+        [],
         "")
     ]
 }

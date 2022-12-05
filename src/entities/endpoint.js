@@ -1,9 +1,62 @@
+import { EntityProperty } from "./entityProperty.js";
+
 /**
  * The module for aspects related to a Endpoint quality model Entity.
  * @module entities/endpoint
  */
 
+function getEndpointProperties() {
+    return [
+        new EntityProperty(
+            "endpointType",
+            "Endpoint Type:",
+            "The type of endpoint, can be REST, Topic, ...",
+            "e.g. GET",
+            false,
+            "list",
+            0,
+            [{
+                value: "GET",
+                text: "GET"
+            },
+            {
+                value: "POST",
+                text: "POST"
+            },
+            {
+                value: "Topic send-to",
+                text: "Topic send-to"
+            },
+            {
+                value: "Topic receive-from",
+                text: "Topic receive-from"
+            }
+            ],
+            ""),
+        new EntityProperty(
+            "endpointPath",
+            "Endpoint Path:",
+            "The path where this endpoint is reachable",
+            "e.g. /orders",
+            false,
+            "text",
+            0,
+            []
+        ),
+        new EntityProperty(
+            "port",
+            "Port:",
+            "e.g. 3306",
+            false,
+            "number",
+            4,
+            []
+        )
+    ]
+}
+
 /**
+ * TODO: currently only used here? combine with property config
  * Enum for the possible Endpoint types. Includes asynchronous and synchronous types. 
  * @readonly
  * @enum {string}
@@ -29,72 +82,63 @@ const endpointTypes = Object.freeze({
  */
 class Endpoint {
 
-    #nameId;
-
     #modelId;
 
     #parentName;
 
-    endpointType;
-
-    endpointName;
-
-    port;
+    #properties;
 
     // TODO ref Component here?
 
     /**
      * Create an Endpoint entity.
      * @param {modelId} modelId The ID, the respective entity representation has in the joint.dia.Graph model.
-     * @param {endpointType} endpointType The type of the endpoint entity, e.g. a GET or SEND_TO {@link endpointTypes}. 
-     * @param {string} endpointName The actual endpoint, e.g. /helloWorld.
-     * @param {number} port The port at which the Endpoint is available.
      * @param {string} parentName The name of the parent Entity.
      */
-    constructor(modelId, endpointType, endpointName, port, parentName) {
+    constructor(modelId, parentName) {
         this.#modelId = modelId;
-        this.endpointType = endpointType;
-        this.endpointName = endpointName;
-        this.port = port;
         this.#parentName = parentName;
-        this.#nameId = this.#convertNameId(parentName);
-    }
-
-    #convertNameId(parentName) {
-        let endpointDescription;
-
-        if (this.endpointType?.toLowerCase().includes("topic")) {
-            endpointDescription = this.endpointName + "-" + this.endpointType.replace(/Topic/gi, "").trim();
-        } else {
-            let type = `${this.endpointType.slice(0,1).toUpperCase()}${this.endpointType.slice(1).toLowerCase()}`;
-            let splittedPath = this.endpointName.split("/");
-            let name = "";
-            for (const splittedWord of splittedPath) {
-                if (splittedWord.includes("?")) {
-                    let additionalSplit = splittedWord.split("?");
-                    let remainingString = additionalSplit[1].split("="); console.log(remainingString)
-                    name += `${additionalSplit[0].slice(0,1).toUpperCase()}${additionalSplit[0].slice(1).toLowerCase()}By${remainingString[0].slice(0,1).toUpperCase()}${remainingString[0].slice(1).toLowerCase()}`
-                } else if (splittedWord.includes("{")) {
-                    let correctedString = splittedWord.replace("{", "").replace("}", "");
-                    name += `By${correctedString.slice(0,1).toUpperCase()}${correctedString.slice(1).toLowerCase()}`;
-                } else if (splittedWord === "") {
-                    // ignore
-                } else {
-                    name += `${splittedWord.slice(0,1).toUpperCase()}${splittedWord.slice(1).toLowerCase()}`;
-                }
-            }
-            endpointDescription = type + name;
-        }
-
-        return `${parentName}-${endpointDescription}`;
+        this.#properties = getEndpointProperties();
     }
 
     /**
      * Returns the ne name ID, which is a combination of the parent Entity's name and the Endpoint URL Path (parentName-urlPath).
      * @returns {string}
      */
-    get getNameId() {
-        return this.#nameId;
+    getNameId() {
+        let endpointDescription;
+
+        console.log(this)
+        console.log(this.#properties);
+        console.log(properties);
+
+        let endpointType = this.#properties.find(property => property.getKey === "endpointType").value;
+        let endpointName = this.#properties.find(property => property.getKey === "endpointPath").value;
+
+        if (endpointType?.toLowerCase().includes("topic")) {
+            endpointDescription = endpointName + "-" + endpointType.replace(/Topic/gi, "").trim();
+        } else {
+            let type = `${endpointType.slice(0, 1).toUpperCase()}${endpointType.slice(1).toLowerCase()}`;
+            let splittedPath = endpointName.split("/");
+            let name = "";
+            for (const splittedWord of splittedPath) {
+                if (splittedWord.includes("?")) {
+                    let additionalSplit = splittedWord.split("?");
+                    let remainingString = additionalSplit[1].split("="); console.log(remainingString)
+                    name += `${additionalSplit[0].slice(0, 1).toUpperCase()}${additionalSplit[0].slice(1).toLowerCase()}By${remainingString[0].slice(0, 1).toUpperCase()}${remainingString[0].slice(1).toLowerCase()}`
+                } else if (splittedWord.includes("{")) {
+                    let correctedString = splittedWord.replace("{", "").replace("}", "");
+                    name += `By${correctedString.slice(0, 1).toUpperCase()}${correctedString.slice(1).toLowerCase()}`;
+                } else if (splittedWord === "") {
+                    // ignore
+                } else {
+                    name += `${splittedWord.slice(0, 1).toUpperCase()}${splittedWord.slice(1).toLowerCase()}`;
+                }
+            }
+            endpointDescription = type + name;
+        }
+
+        return `${this.#parentName}-${endpointDescription}`;
     }
 
     /**
@@ -105,28 +149,8 @@ class Endpoint {
         return this.#modelId;
     }
 
-    /**
-     * Returns the type of the endpoint entity, e.g. a GET or SEND_TO {@link endpointTypes}. 
-     * @returns {string}
-     */
-    get getEndpointType() {
-        return this.endpointType;
-    }
-
-    /**
-     * Return the actual endpoint, e.g. /helloWorld.
-     * @returns {string}
-     */
-    get getEndpointName() {
-        return this.endpointName;
-    }
-
-    /**
-     * Return the port where this Endpoint is available.
-     * @returns {string}
-     */
-    get getPort() {
-        return this.port;
+    getProperties() {
+        return this.#properties;
     }
 
     /**
@@ -146,4 +170,4 @@ class Endpoint {
     }
 }
 
-export { Endpoint, endpointTypes }; // TODO keep endpointType?
+export { Endpoint, endpointTypes, getEndpointProperties }; // TODO keep endpointType?

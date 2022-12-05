@@ -1,9 +1,35 @@
 import { Component } from './component.js'
+import { EntityProperty } from './entityProperty.js';
 
 /**
  * The module for aspects related to a Component quality model Entity.
  * @module entities/storageBackingService
  */
+
+function getStorageBackingServiceProperties() {
+    return [
+        new EntityProperty(
+            "databaseName",
+            "Database Name:",
+            "e.g. Order",
+            false,
+            "text",
+            0,
+            [],
+            ""
+        ),
+        new EntityProperty(
+            "databasePort",
+            "Port:",
+            "e.g. 3306",
+            false,
+            "number",
+            4,
+            [],
+            ""
+        )
+    ]
+}
 
 /**
  * Class representing a Storage Backing Service entity.
@@ -12,8 +38,6 @@ import { Component } from './component.js'
  */
 class StorageBackingService extends Component {
 
-    // TODO
-
     /**
      * Create a Storage Backing Service entity.
      * @param {string} name The name of the Storage Backing Service entity. 
@@ -21,7 +45,8 @@ class StorageBackingService extends Component {
      * @param {Infrastructure} hostingInfrastructure The {@link Infrastructure} entity that hosts this Storage Backing Service entity.
      */
     constructor(name, modelId, hostingInfrastructure) {
-        super(name, modelId, hostingInfrastructure)
+        super(name, modelId, hostingInfrastructure);
+        this.addProperties(getStorageBackingServiceProperties());
     }
 
     /**
@@ -33,4 +58,4 @@ class StorageBackingService extends Component {
     }
 }
 
-export { StorageBackingService };
+export { StorageBackingService, getStorageBackingServiceProperties };

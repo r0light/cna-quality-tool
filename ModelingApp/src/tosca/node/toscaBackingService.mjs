@@ -25,12 +25,13 @@ class ToscaBackingService {
 
     capabilities;
 
-    constructor(modelId, componentHost, endpointLinks, usesDataItems, usesBackingDataItems, endpoints, externalEndpoints, persistedData, providedFunctionality, position, size) {
+    constructor(modelId, componentHost, endpointLinks, usesDataItems, usesBackingDataItems, endpoints, externalEndpoints, persistedData, properties, position, size) {
         this.metadata = new MetaDataContent(modelId, position, size);
 
-        if (providedFunctionality) {
-            this.properties = {
-                provided_functionality: providedFunctionality
+        this.properties = {};
+        if (properties) {
+            for (let property of properties) {
+                this.properties[property.getKey] = property.value;
             }
         }
 

@@ -1,22 +1,37 @@
 import EntityTypes from "./entityTypes.mjs";
-import { getComponentProperties, getBackingServiceProperties } from "../entities.mjs";
+import { getComponentProperties, getBackingServiceProperties, getStorageBackingServiceProperties, getEndpointProperties } from "../entities.mjs";
 
 function parseProperties(properties) {
     return properties.map(property => {
         var propertyConfig = {
-            providedFeature: property.key,
-            contentType: PropertyContentType.INPUT_TEXTBOX,
-            label: property.name,
+            providedFeature: property.getKey,
+            label: property.getName,
             properties: {
                 disabled: false,
-                required: property.required
+                required: property.getRequired
             },
             attributes: {
-                placeholder: property.example,
+                placeholder: property.getExample,
                 helpText: {
-                    text: property.description
+                    text: property.getDescription
                 }
             }
+        }
+        switch(property.getDataType) {
+            case "boolean":
+                propertyConfig.contentType = PropertyContentType.CHECKBOX;
+                break;
+            case "number":
+                propertyConfig.contentType = PropertyContentType.INPUT_NUMBERBOX;
+                propertyConfig.attributes.maxlength = property.getMaxLength;
+                break;
+            case "list":
+                propertyConfig.contentType = PropertyContentType.INPUT_LIST;
+                propertyConfig.attributes.datalistItems = property.getOptions;
+                break;
+            case "text":
+            default:
+                propertyConfig.contentType = PropertyContentType.INPUT_TEXTBOX;
         }
         return propertyConfig;
     })
@@ -264,11 +279,11 @@ const linkSvgRepresentation = () => {
 const EntityDetailsConfig = {
     Component: {
         type: EntityTypes.COMPONENT,
-        specificProperties: []
+        specificProperties: parseProperties(getComponentProperties())
     },
     Service: {
         type: EntityTypes.SERVICE,
-        specificProperties: []
+        specificProperties: parseProperties(getComponentProperties())
     },
     BackingService: {
         type: EntityTypes.BACKING_SERVICE,
@@ -276,159 +291,15 @@ const EntityDetailsConfig = {
     },
     StorageBackingService: {
         type: EntityTypes.STORAGE_BACKING_SERVICE,
-        specificProperties: [
-            {
-                providedFeature: "databaseName",
-                contentType: PropertyContentType.INPUT_TEXTBOX,
-                label: "Database Name:",
-                properties: {
-                    disabled: false,
-                    required: false
-                },
-                attributes: {
-                    placeholder: "e.g. Order"
-                }
-            },
-            {
-                providedFeature: "databasePort",
-                contentType: PropertyContentType.INPUT_NUMBERBOX,
-                label: "Port:",
-                properties: {
-                    disabled: false,
-                    required: false
-                },
-                attributes: {
-                    placeholder: "e.g. 3306",
-                    maxlength: 4
-                }
-            }
-        ]
+        specificProperties: parseProperties(getComponentProperties()).concat(parseProperties(getStorageBackingServiceProperties()))
     },
     Endpoint: {
         type: EntityTypes.ENDPOINT,
-        specificProperties: [
-            // {
-            //     providedFeature: "protocol"
-            // },
-            {
-                providedFeature: "endpointType",
-                contentType: PropertyContentType.INPUT_LIST,
-                label: "Endpoint Type:",
-                properties: {
-                    disabled: false,
-                    required: true
-                },
-                attributes: {
-                    placeholder: "e.g. GET",
-                    datalistItems: [
-                        {
-                            value: "GET",
-                            text: "GET"
-                        },
-                        {
-                            value: "POST",
-                            text: "POST"
-                        },
-                        {
-                            value: "Topic send-to",
-                            text: "Topic send-to"
-                        },
-                        {
-                            value: "Topic receive-from",
-                            text: "Topic receive-from"
-                        }
-                    ]
-                }
-            },
-            {
-                providedFeature: "endpointPath",
-                contentType: PropertyContentType.INPUT_TEXTBOX,
-                label: "Endpoint Path:",
-                properties: {
-                    disabled: false,
-                    required: true
-                },
-                attributes: {
-                    placeholder: "e.g. /orders"
-                }
-            },
-            {
-                providedFeature: "port",
-                contentType: PropertyContentType.INPUT_NUMBERBOX,
-                label: "Port:",
-                properties: {
-                    disabled: false,
-                    required: false
-                },
-                attributes: {
-                    placeholder: "e.g. 3306",
-                    maxlength: 4
-                }
-            }
-        ]
+        specificProperties: parseProperties(getEndpointProperties())
     },
     ExternalEndpoint: {
         type: EntityTypes.EXTERNAL_ENDPOINT,
-        specificProperties: [
-            // {
-            //     providedFeature: "protocol"
-            // },
-            {
-                providedFeature: "endpointType",
-                contentType: PropertyContentType.INPUT_LIST,
-                label: "Endpoint Type:",
-                properties: {
-                    disabled: false,
-                    required: true
-                },
-                attributes: {
-                    placeholder: "e.g. GET",
-                    datalistItems: [
-                        {
-                            value: "GET",
-                            text: "GET"
-                        },
-                        {
-                            value: "POST",
-                            text: "POST"
-                        },
-                        {
-                            value: "Topic send-to",
-                            text: "Topic send-to"
-                        },
-                        {
-                            value: "Topic receive-from",
-                            text: "Topic receive-from"
-                        }
-                    ]
-                }
-            },
-            {
-                providedFeature: "endpointPath",
-                contentType: PropertyContentType.INPUT_TEXTBOX,
-                label: "Endpoint Path:",
-                properties: {
-                    disabled: false,
-                    required: true
-                },
-                attributes: {
-                    placeholder: "e.g. /orders"
-                }
-            },
-            {
-                providedFeature: "port",
-                contentType: PropertyContentType.INPUT_NUMBERBOX,
-                label: "Port:",
-                properties: {
-                    disabled: false,
-                    required: false
-                },
-                attributes: {
-                    placeholder: "e.g. 3306",
-                    maxlength: 4 // does not work...
-                }
-            }
-        ]
+        specificProperties: parseProperties(getEndpointProperties())
     },
     Link: {
         type: EntityTypes.LINK,

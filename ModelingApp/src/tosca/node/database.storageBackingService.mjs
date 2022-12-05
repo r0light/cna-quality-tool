@@ -28,10 +28,10 @@ class DatabaseStorageBackingService {
     constructor(modelId, componentHost, endpointLinks, usesDataItems, usesBackingDataItems, endpoints, externalEndpoints, persistedData, properties, position, size) {
         this.metadata = new MetaDataContent(modelId, position, size);
 
-        if (properties && (properties.databaseName || properties.port)) {
-            this.properties = {
-                name: properties.databaseName,
-                port: properties.port
+        this.properties = {};
+        if (properties) {
+            for (let property of properties) {
+                this.properties[property.getKey] = property.value;
             }
         }
 

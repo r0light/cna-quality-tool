@@ -329,6 +329,7 @@ const ModelingArea = joint.mvc.View.extend({
         function onKeyPressedWithElementHighlighted(keydownEvent) {
             if (keydownEvent.code === "Delete") {
                 this.remove(); // this is the cellView 
+                // TODO also remove from graph!
                 document.removeEventListener("keydown", this. _currentKeypressHandler, false);
             }
         }

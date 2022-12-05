@@ -11,9 +11,18 @@ import { Infrastructure } from './infrastructure.js'
  */
 
 function getComponentProperties() {
-    return [];
+    return [
+        new EntityProperty("managed",
+            "Managed cloud service?",
+            "A component is managed if it is operated by a cloud provider",
+            "e.g. yes",
+            false,
+            "text",
+            0,
+            [],
+            "")
+        ];
 }
-
 
 /**
  * Class representing a Component entity.
@@ -22,7 +31,7 @@ function getComponentProperties() {
 class Component {
 
     #id;
-    
+
     #modelId;
 
     name;

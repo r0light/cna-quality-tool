@@ -68,37 +68,45 @@ class ToscaConverter {
                 return this.#ensureNoWhiteSpace(entity.getName);
             });
             let endpoints = componentEntity.getEndpointEntities.map((entity) => {
-                return {
-                    metadata: {
-                        position: entity.position,
-                        size: entity.size,
-                        label: entity.label
-                    },
-                    protocol: entity.getEndpointType.toLowerCase().includes("topic") ? "udp" : "http",
-                    port: entity.getPort,
-                    path: this.#createEndpointPathName(entity)
-                }
+                let endpoint = {};
+                endpoint["metadata"] = {
+                    position: entity.position,
+                    size: entity.size,
+                    label: entity.label
+                };
+                let endpointType = entity.getProperties().find(property => property.getKey === "endpointType").value;
+                let endpointPath = entity.getProperties().find(property => property.getKey === "endpointPath").value;
+                let endpointPort = entity.getProperties().find(property => property.getKey === "endpointPath").value;
+                
+                endpoint["protocol"] = endpointType.toLowerCase().includes("topic") ? "udp" : "http";
+                endpoint["port"] = endpointPort;
+                endpoint["path"] = this.#createEndpointPathName(endpointType, endpointPath);
+                return endpoint;
             });
             let externalEndpoints = componentEntity.getExternalEndpointEntities.map((entity) => {
-                return {
-                    metadata: {
-                        position: entity.position,
-                        size: entity.size,
-                        label: entity.label
-                    },
-                    protocol: entity.getEndpointType.toLowerCase().includes("topic") ? "udp" : "http",
-                    port: entity.getPort,
-                    path: this.#createEndpointPathName(entity)
-                }
+                let endpoint = {};
+                endpoint["metadata"] = {
+                    position: entity.position,
+                    size: entity.size,
+                    label: entity.label
+                };
+                let endpointType = entity.getProperties().find(property => property.getKey === "endpointType").value;
+                let endpointPath = entity.getProperties().find(property => property.getKey === "endpointPath").value;
+                let endpointPort = entity.getProperties().find(property => property.getKey === "endpointPath").value;
+                
+                endpoint["protocol"] = endpointType.toLowerCase().includes("topic") ? "udp" : "http";
+                endpoint["port"] = endpointPort;
+                endpoint["path"] = this.#createEndpointPathName(endpointType, endpointPath);
+                return endpoint;
             });
             let persistedData = ""; // TODO
 
             if (componentEntity instanceof Entities.Service) {
                 this.#nodeTemplates[this.#ensureNoWhiteSpace(componentEntity.getName)] = new SoftwareComponentService(componentEntity.getModelId, componentHost, endpointLinks, usesDataItems, usesBackingDataItems, endpoints, externalEndpoints, persistedData, componentEntity.position, componentEntity.size);
             } else if (componentEntity instanceof Entities.BackingService) {
-                this.#nodeTemplates[this.#ensureNoWhiteSpace(componentEntity.getName)] = new ToscaBackingService(componentEntity.getModelId, componentHost, endpointLinks, usesDataItems, usesBackingDataItems, endpoints, externalEndpoints, persistedData, componentEntity.providedFunctionality, componentEntity.position, componentEntity.size);
+                this.#nodeTemplates[this.#ensureNoWhiteSpace(componentEntity.getName)] = new ToscaBackingService(componentEntity.getModelId, componentHost, endpointLinks, usesDataItems, usesBackingDataItems, endpoints, externalEndpoints, persistedData, componentEntity.getProperties(), componentEntity.position, componentEntity.size);
             } else if (componentEntity instanceof Entities.StorageBackingService) {
-                this.#nodeTemplates[this.#ensureNoWhiteSpace(componentEntity.getName)] = new DatabaseStorageBackingService(componentEntity.getModelId, componentHost, endpointLinks, usesDataItems, usesBackingDataItems, endpoints, externalEndpoints, persistedData, componentEntity.properties, componentEntity.position, componentEntity.size);
+                this.#nodeTemplates[this.#ensureNoWhiteSpace(componentEntity.getName)] = new DatabaseStorageBackingService(componentEntity.getModelId, componentHost, endpointLinks, usesDataItems, usesBackingDataItems, endpoints, externalEndpoints, persistedData, componentEntity.getProperties(), componentEntity.position, componentEntity.size);
             } else {
                 this.#nodeTemplates[this.#ensureNoWhiteSpace(componentEntity.getName)] = new RootComponent(componentEntity.getModelId, componentHost, endpointLinks, usesDataItems, usesBackingDataItems, endpoints, externalEndpoints, persistedData, componentEntity.position, componentEntity.size);
             }
@@ -144,7 +152,7 @@ class ToscaConverter {
         const requestTraceEntities = this.#systemEntity.getRequestTraceEntities;
 
         for (const requestTraceEntity of requestTraceEntities.values()) {
-            const key = `RT_${this.#ensureNoWhiteSpace(requestTraceEntity.getExternalEndpoint.getEndpointType)}_${this.#ensureNoWhiteSpace(requestTraceEntity.getExternalEndpoint.getNameId)}`;
+            const key = `RT_${this.#ensureNoWhiteSpace(requestTraceEntity.getExternalEndpoint.getEndpointType)}_${this.#ensureNoWhiteSpace(requestTraceEntity.getExternalEndpoint.getNameId())}`;
             let involvedLinks = requestTraceEntity.getLinkEntities.map((entity) => {
                 return this.#ensureNoWhiteSpace(this.#createLinkNameKey(entity));
             });
@@ -180,11 +188,11 @@ class ToscaConverter {
     }
 
     #createLinkNameKey(linkEntity) {
-        return linkEntity.getSourceEntity.getName + "_connects-to_" + linkEntity.getTargetEntity.getNameId;
+        return linkEntity.getSourceEntity.getName + "_connects-to_" + linkEntity.getTargetEntity.getNameId();
     }
 
-    #createEndpointPathName(entity) {
-        return entity.getEndpointType?.toLowerCase().includes("topic") ? `${entity.getEndpointName} ${entity.getEndpointType}` : `${entity.getEndpointType} ${entity.getEndpointName}`
+    #createEndpointPathName(endpointType, endpointName) {
+        return endpointType?.toLowerCase().includes("topic") ? `${endpointName} ${endpointType}` : `${endpointType} ${endpointName}`
     }
 }
 
