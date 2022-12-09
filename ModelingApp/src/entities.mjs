@@ -6,7 +6,7 @@ export { StorageBackingService, getStorageBackingServiceProperties } from '../..
 export { Endpoint, getEndpointProperties } from '../../src/entities/endpoint.js';
 export { ExternalEndpoint } from '../../src/entities/externalEndpoint.js';
 export { Link } from '../../src/entities/link.js';
-export { Infrastructure, InfrastructureTypes } from '../../src/entities/infrastructure.js';
+export { Infrastructure, InfrastructureTypes, getInfrastructureProperties } from '../../src/entities/infrastructure.js';
 export { DeploymentMapping } from '../../src/entities/deploymentMapping.js';
 export { RequestTrace } from '../../src/entities/requestTrace.js';
 export { DataAggregate } from '../../src/entities/dataAggregate.js';

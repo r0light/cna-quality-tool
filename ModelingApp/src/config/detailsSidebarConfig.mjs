@@ -1,5 +1,5 @@
 import EntityTypes from "./entityTypes.mjs";
-import { getComponentProperties, getBackingServiceProperties, getStorageBackingServiceProperties, getEndpointProperties } from "../entities.mjs";
+import { getComponentProperties, getBackingServiceProperties, getStorageBackingServiceProperties, getEndpointProperties, getInfrastructureProperties } from "../entities.mjs";
 
 function parseProperties(properties) {
     return properties.map(property => {
@@ -320,7 +320,7 @@ const EntityDetailsConfig = {
     },
     Infrastructure: {
         type: EntityTypes.INFRASTRUCTURE,
-        specificProperties: [/* currently no properties */]
+        specificProperties: parseProperties(getInfrastructureProperties())
     },
     DeploymentMapping: {
         type: EntityTypes.DEPLOYMENT_MAPPING,

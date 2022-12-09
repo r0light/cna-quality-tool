@@ -10,6 +10,10 @@ const InfrastructureTypes = Object.freeze({
    DBMS: "dbms" 
 });
 
+function getInfrastructureProperties() {
+    return []
+}
+
 /**
  * Class representing an Infrastructure entity.
  * @class
@@ -28,6 +32,8 @@ class Infrastructure {
 
     #backingDataEntities = new Array();
 
+    #properties;
+
     /**
      * Create an Infrastructure entity.
      * @param {string} name The name of the Infrastructure entity. 
@@ -37,6 +43,7 @@ class Infrastructure {
         this.name = name;
         this.#modelId = modelId;
         this.#infrastructureType = !(Object.values(InfrastructureTypes).includes(infrastructureType)) ? InfrastructureTypes.COMPUTE : infrastructureType;
+        this.#properties = getInfrastructureProperties();
     }
 
     /**
@@ -111,6 +118,14 @@ class Infrastructure {
     }
 
     /**
+     * Returns all properties of this entity
+     * @returns {EntityProperty[]}
+     */
+         getProperties() {
+            return this.#properties;
+        }
+
+    /**
      * Transforms the Infrastructure object into a String. 
      * @returns {string}
      */
@@ -123,4 +138,4 @@ class Infrastructure {
     }
 }
 
-export { Infrastructure, InfrastructureTypes };
+export { Infrastructure, InfrastructureTypes, getInfrastructureProperties };

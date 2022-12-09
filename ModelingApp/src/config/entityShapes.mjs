@@ -1,4 +1,4 @@
-import { getComponentProperties, getBackingServiceProperties, getStorageBackingServiceProperties, getEndpointProperties } from "../entities.mjs";
+import { getComponentProperties, getBackingServiceProperties, getStorageBackingServiceProperties, getEndpointProperties, getInfrastructureProperties } from "../entities.mjs";
 import EntityTypes from "./entityTypes.mjs";
 
 // TODO section:
@@ -615,7 +615,8 @@ const Infrastructure = joint.dia.Element.define("qualityModel.Infrastructure", {
     entityTypeHidden: false,
     collapsed: false,
     entity: {
-        type: EntityTypes.INFRASTRUCTURE
+        type: EntityTypes.INFRASTRUCTURE,
+        properties: parseProperties(getInfrastructureProperties())
     }
 }, {
     markup: [{
