@@ -1,5 +1,6 @@
-import { EntityProperty } from './entityProperty.js'
-import { Component } from './component.js'
+import { EntityProperty } from './entityProperty'
+import { Component } from './component'
+import { Infrastructure } from './infrastructure'
 
 /**
  * The module for aspects related to a Backing Service quality model entity.
@@ -33,7 +34,7 @@ class BackingService extends Component {
      * @param {modelId} modelId The ID, the respective entity representation has in the joint.dia.Graph model.
      * @param {Infrastructure} hostingInfrastructure The {@link Infrastructure} entity that hosts this Backing Service entity.
      */
-    constructor(name, modelId, hostingInfrastructure) {
+    constructor(name: string, modelId: string, hostingInfrastructure: Infrastructure) {
         super(name, modelId, hostingInfrastructure)
         this.addProperties(getBackingServiceProperties());
     }

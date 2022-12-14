@@ -1,4 +1,4 @@
-import { Endpoint, endpointTypes } from "./endpoint.js";
+import { Endpoint } from "./endpoint";
 
 /**
  * The module for aspects related to a External Endpoint quality model Entity.
@@ -19,7 +19,7 @@ class ExternalEndpoint extends Endpoint {
      * @param {modelId} modelId The ID, the respective entity representation has in the joint.dia.Graph model.
      * @param {string} parentName The name of the parent Entity.
      */
-    constructor(modelId, parentName) {
+    constructor(modelId: string, parentName: string) {
         super(modelId, parentName);
     }
 

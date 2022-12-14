@@ -1,4 +1,4 @@
-import { EntityProperty } from './entityProperty.js'
+import { EntityProperty } from './entityProperty'
 import { Endpoint } from './endpoint.js'
 import { ExternalEndpoint } from './externalEndpoint.js'
 import { DataAggregate } from './dataAggregate.js'
@@ -10,7 +10,7 @@ import { Infrastructure } from './infrastructure.js'
  * @module entities/component
  */
 
-function getComponentProperties() {
+function getComponentProperties(): EntityProperty[] {
     return [
         new EntityProperty("managed",
             "Managed cloud service?",
@@ -30,11 +30,11 @@ function getComponentProperties() {
  */
 class Component {
 
-    #id;
+    #id: string;
 
-    #modelId;
+    #modelId: string;
 
-    name;
+    name: string;
 
     #hostedBy;
 
@@ -48,7 +48,7 @@ class Component {
 
     #includedLinkEntities = new Array();
 
-    #properties = new Array();
+    #properties: EntityProperty[] = new Array();
 
     /**
      * Create a Component entity.
@@ -103,7 +103,7 @@ class Component {
         }
 
         const errorMessage = "The provided entity cannot be added. Only Endpoint, ExternalEndpoint, DataAggregate or BackingData entities are allowed. However, the object to add was: " + Object.getPrototypeOf(entityToAdd) + JSON.stringify(entityToAdd);
-        throw new TypeError(errorMessage, "component.js");
+        throw new TypeError(errorMessage);
     };
 
     addLinkEntity(linkEntity) {
@@ -188,7 +188,7 @@ class Component {
      * 
      * @param {EntityProperty[]} entityProperties 
      */
-    addProperties(entityProperties) {
+    addProperties(entityProperties: EntityProperty[]) {
         this.#properties = this.#properties.concat(entityProperties);
     }
 

@@ -3,29 +3,36 @@
  * @module entities/entityProperty
  */
 
+type listOptions = {
+    value: string,
+    text: string
+}
+
+type propertyDatatype = "text" | "number" | "boolean" | "list"
+
 /**
  * Class representing a Entity property
  * @class
  */
 class EntityProperty {
 
-    #key; //string
+    #key: string; //string
 
-    #name; //string
+    #name: string; //string
 
-    #description; //string
+    #description: string; //string
 
-    #example; //string
+    #example: string; //string
 
-    #required; //boolean
+    #required: boolean; //boolean
 
-    #datatype; //constant text, number, boolean, list
+    #datatype: propertyDatatype; //constant text, number, boolean, list
 
-    #maxLength; // only needed for datatype number
+    #maxLength: number; // only needed for datatype number
 
-    #options; // only needed for datatype list: objects {value: string, text: string}
+    #options: listOptions[]; // only needed for datatype list: objects {value: string, text: string}
 
-    value;
+    value: any;
 
     /**
      * Create an Entity property
@@ -39,7 +46,7 @@ class EntityProperty {
      * @param {options} options only for the "list" type, an array of options to choose from
      * @param {value} value the actual value of this property
      */
-    constructor(key, name, description, example, required, datatype, maxLength, options, value) {
+    constructor(key: string, name: string, description: string, example: string, required: boolean, datatype: propertyDatatype, maxLength: number, options: listOptions[], value: any) {
         this.#key = key;
         this.#name = name;
         this.#description = description;

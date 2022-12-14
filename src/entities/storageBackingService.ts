@@ -1,5 +1,5 @@
-import { Component } from './component.js'
-import { EntityProperty } from './entityProperty.js';
+import { Component } from './component'
+import { EntityProperty } from './entityProperty';
 
 /**
  * The module for aspects related to a Component quality model Entity.
@@ -11,6 +11,7 @@ function getStorageBackingServiceProperties() {
         new EntityProperty(
             "databaseName",
             "Database Name:",
+            "The name of the database",
             "e.g. Order",
             false,
             "text",
@@ -21,6 +22,7 @@ function getStorageBackingServiceProperties() {
         new EntityProperty(
             "databasePort",
             "Port:",
+            "The port of the database",
             "e.g. 3306",
             false,
             "number",
@@ -44,7 +46,7 @@ class StorageBackingService extends Component {
      * @param {modelId} modelId The ID, the respective entity representation has in the joint.dia.Graph model.
      * @param {Infrastructure} hostingInfrastructure The {@link Infrastructure} entity that hosts this Storage Backing Service entity.
      */
-    constructor(name, modelId, hostingInfrastructure) {
+    constructor(name: string, modelId: string, hostingInfrastructure: string) {
         super(name, modelId, hostingInfrastructure);
         this.addProperties(getStorageBackingServiceProperties());
     }

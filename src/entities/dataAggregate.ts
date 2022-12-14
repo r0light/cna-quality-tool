@@ -9,11 +9,13 @@
  */
 class DataAggregate {
 
-    name;
+    #id: string; //TODO
 
-    #modelId;
+    #modelId: string;
 
-    #persistedBy;
+    name: string;
+
+    #persistedBy: string[];
 
     // TODO ref components here?
 
@@ -34,6 +36,14 @@ class DataAggregate {
      */
     addPersistedByEntity(persistedByEntity) {
         this.#persistedBy.push(persistedByEntity);
+    }
+
+    /**
+    * Returns the ID of this Component entity.
+    * @returns {string}
+    */
+    get getId() {
+        return this.#id;
     }
 
     /**

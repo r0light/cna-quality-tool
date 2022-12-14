@@ -1,6 +1,6 @@
 
-import { ExternalEndpoint } from "./externalEndpoint.js";
-import { Link } from "./link.js";
+import { ExternalEndpoint } from "./externalEndpoint";
+import { Link } from "./link";
 
 /**
  * The module for aspects related to a Component quality model Entity.
@@ -13,17 +13,15 @@ import { Link } from "./link.js";
  */
 class RequestTrace {
 
-    #id;
-    
-    #modelId;
+    #id: string;
 
-    #name;
+    #modelId: string;
 
-    #externalEndpoint;
+    #name: string;
 
-    #linkEntityIds = new Set();
+    #externalEndpoint: ExternalEndpoint;
 
-    #linkEntities = new Map();
+    #linkEntityIds: Set<string> = new Set();
 
     /**
      * Create a Request Trace entity.
@@ -33,26 +31,12 @@ class RequestTrace {
      * @param {string} linkEntityOrEntities The Id {@link Link} entity or entities that take part in this Request Trace (1...N)
      * @throws {TypeError} If a wrong entity type is being provided
      */
-    constructor(name, modelId, externalEndpoint, linkEntityOrEntities) {
-        if (!(externalEndpoint instanceof ExternalEndpoint)) {
-            const providedType = externalEndpoint ? Object.getPrototypeOf(externalEndpoint) + JSON.stringify(externalEndpoint) : "null";
-            const errorMessage = "Wrong entity type provided. Only an ExternalEndpoint entity is allowed. However, the provided entity was: " + providedType;
-            throw new TypeError(errorMessage);
-        }
-
-        if (linkEntityOrEntities instanceof Array) {
-            for (const linkEntity of linkEntityOrEntities) {
-                if (this.#linkEntityIds.has(linkEntity)) {
-                    return;
-                }
-        
-                this.#linkEntityIds.add(linkEntity);
-            }
-        } else {                        
+    constructor(name, modelId, externalEndpoint: ExternalEndpoint, linkEntityOrEntities: string[]) {
+        for (const linkEntity of linkEntityOrEntities) {
             if (this.#linkEntityIds.has(linkEntity)) {
                 return;
             }
-    
+
             this.#linkEntityIds.add(linkEntity);
         }
 
@@ -68,18 +52,13 @@ class RequestTrace {
       * @param {Link} linkEntityToAdd A {@link Link} entity that is part of this RequestTrace.
       * @throws {TypeError} If a wrong entity type is being provided
       */
-    addLinkEntity(linkEntityToAdd) {
-        if (!(linkEntityToAdd instanceof Link)) {
-            const providedType = linkEntityToAdd ? Object.getPrototypeOf(linkEntityToAdd) + JSON.stringify(linkEntityToAdd) : "null";
-            const errorMessage = "Wrong entity type provided. Only an Link entity is allowed. However, the provided entity was: " + providedType;
-            throw new TypeError(errorMessage);
-        }
+    addLinkEntity(linkEntityIdToAdd: string) {
 
-        if (this.#linkEntities.has(linkEntityToAdd.getModelId)) {
+        if (this.#linkEntityIds.has(linkEntityIdToAdd)) {
             return;
         }
 
-        this.#linkEntities.set(linkEntityToAdd.getModelId, linkEntityToAdd);
+        this.#linkEntityIds.add(linkEntityIdToAdd);
     }
 
     /**
@@ -134,14 +113,6 @@ class RequestTrace {
      */
     get getLinkEntityIds() {
         return this.#linkEntityIds;
-    }
-
-    /**
-     * Returns the {@link Link} entities involved in this RequestTrace entity.
-     * @returns {Link}
-     */
-    get getLinkEntities() {
-        return Array.from(this.#linkEntities.values()) ?? new Array();
     }
 
     /**

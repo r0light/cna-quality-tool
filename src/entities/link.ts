@@ -1,9 +1,9 @@
-import { BackingService } from './backingService.js';
-import { Component } from './component.js'
-import { Endpoint } from './endpoint.js'
-import { ExternalEndpoint } from './externalEndpoint.js';
-import { Service } from './service.js';
-import { StorageBackingService } from './storageBackingService.js';
+import { BackingService } from './backingService';
+import { Component } from './component'
+import { Endpoint } from './endpoint'
+import { ExternalEndpoint } from './externalEndpoint';
+import { Service } from './service';
+import { StorageBackingService } from './storageBackingService';
 
 /**
  * The module for aspects related to a Link quality model entity.
@@ -16,15 +16,15 @@ import { StorageBackingService } from './storageBackingService.js';
  */
 class Link {
 
-    #id; // TODO
+    #id: string; // TODO
     
-    #modelId;
+    #modelId: string;
 
-    #sourceEntity;
+    #sourceEntity: Component;
 
-    #targetEndpoint;
+    #targetEndpoint: Endpoint;
 
-    #relationType;
+    #relationType: string;
 
     /**
      * Create a Link entity. Represents the connection between {@link Component}, {@link Service}, {@link BackingService} or {@link StorageBackingService} and an {@link Endpoint} or {@link ExternalEndpoint} entity.
@@ -34,35 +34,16 @@ class Link {
      * @throws {TypeError} If a wrong entity type is being provided
      * @throws {Error} If the targeted Endpoint is included in the sourceEntity.
      */
-    constructor(modelId, sourceEntity, targetEndpoint) {
-        if (!(sourceEntity instanceof Component)) {
-            const errorMessage = "Wrong entity type provided. Only Component, Service, BackingService or StorageBackingService entity allowed. However, the provided entity was: " + Object.getPrototypeOf(sourceEntity) + JSON.stringify(sourceEntity);
-            throw new TypeError(errorMessage);
-        }
-
-        if (!(targetEndpoint instanceof Endpoint)) {
-            const errorMessage = "Wrong entity type provided. Only Endpoint or ExternalEndpoint entity allowed. However, the provided entity was: " + Object.getPrototypeOf(targetEndpoint) + JSON.stringify(targetEndpoint);
-            throw new TypeError(errorMessage);
-        }
-
-        let endpointAlreadyIncluded = (newTargetEndpoint) => {
-            if (sourceEntity.getEndpointEntities.some(endpoint => JSON.stringify(endpoint) === JSON.stringify(newTargetEndpoint))) {
-                return true;
-            } else if (sourceEntity.getExternalEndpointEntities.some(externalEndpoint => JSON.stringify(externalEndpoint) === JSON.stringify(newTargetEndpoint))) {
-                return true;
-            }
-            return false;
-        }
-
-        // if (sourceEntity.getEndpointEntities.includes(targetEndpoint) || sourceEntity.getExternalEndpointsEntities.includes(targetEndpoint)) { // TODO remove when decided if deep compare
-        if (endpointAlreadyIncluded(targetEndpoint)) {
-            const errorMessage = "A Link cannot be created from an entity to its own included Endpoint.";
-            throw new Error(errorMessage);
-        }
-
+    constructor(modelId: string, sourceEntity: Component, targetEndpoint: Endpoint) {
         this.#modelId = modelId;
         this.#sourceEntity = sourceEntity;
         this.#targetEndpoint = targetEndpoint;
+
+        // if (sourceEntity.getEndpointEntities.includes(targetEndpoint) || sourceEntity.getExternalEndpointsEntities.includes(targetEndpoint)) { // TODO remove when decided if deep compare
+        if (this.endpointAlreadyIncluded(targetEndpoint)) {
+            const errorMessage = "A Link cannot be created from an entity to its own included Endpoint.";
+            throw new Error(errorMessage);
+        }
     }
 
     /**
@@ -103,13 +84,8 @@ class Link {
       * @throws {TypeError} If a wrong entity type is being provided
       * @throws {Error} If the targeted Endpoint is included in the newSourceEntity.
       */
-    set setSourceEntity(newSourceEntity) {
-        if (!(newSourceEndpoint instanceof Component)) {
-            const errorMessage = "Wrong entity type provided. Only Component, Service, BackingService or StorageBackingService entity allowed. However, the provided entity was: " + Object.getPrototypeOf(newSourceEndpoint) + JSON.stringify(newSourceEndpoint);
-            throw new TypeError(errorMessage);
-        }
-
-        if (endpointAlreadyIncluded(this.#targetEndpoint)) {
+    set setSourceEntity(newSourceEntity: Component) {
+        if (this.endpointAlreadyIncluded(this.#targetEndpoint)) {
             const errorMessage = "A Link cannot connect an entity to its own included Endpoint.";
             throw new Error(errorMessage);
         }
@@ -131,13 +107,9 @@ class Link {
       * @throws {TypeError} If a wrong entity type is being provided
       * @throws {Error} If the targeted Endpoint is included in the sourceEntity.
       */
-    set setTargetEntity(newTargetEndpoint) {
-        if (!(targetEndpoint instanceof Endpoint)) {
-            const errorMessage = "Wrong entity type provided. Only Endpoint or ExternalEndpoint entity allowed. However, the provided entity was: " + Object.getPrototypeOf(targetEndpoint) + JSON.stringify(targetEndpoint);
-            throw new TypeError(errorMessage);
-        }
+    set setTargetEntity(newTargetEndpoint: Endpoint) {
 
-        if (endpointAlreadyIncluded(this.#targetEndpoint)) {
+        if (this.endpointAlreadyIncluded(this.#targetEndpoint)) {
             const errorMessage = "A Link cannot connect an entity to its own included Endpoint.";
             throw new Error(errorMessage);
         }
@@ -151,6 +123,15 @@ class Link {
      */
     get getRelationType() {
         return this.#relationType
+    }
+
+    endpointAlreadyIncluded(newTargetEndpoint: Endpoint) {
+        if (this.#sourceEntity.getEndpointEntities.some(endpoint => JSON.stringify(endpoint) === JSON.stringify(newTargetEndpoint))) {
+            return true;
+        } else if (this.#sourceEntity.getExternalEndpointEntities.some(externalEndpoint => JSON.stringify(externalEndpoint) === JSON.stringify(newTargetEndpoint))) {
+            return true;
+        }
+        return false;
     }
 
     /**

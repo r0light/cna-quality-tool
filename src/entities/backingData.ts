@@ -9,13 +9,13 @@
  */
 class BackingData {
 
-    #id; // TODO
+    #id: string; // TODO?
 
-    name;
+    name: string;
 
-    #modelId;
+    #modelId: string;
 
-    #includedData;
+    #includedData: any[]; //TODO more specific type
 
     /**
      * Create a Backing Data entity.
@@ -23,7 +23,7 @@ class BackingData {
      * @param {string} name The name of the Backing Data entity. 
      * @param {Array} includedData The included data values with key of this Backing Data entity.
      */
-    constructor(modelId, name, includedData) {
+    constructor(modelId: string, name: string, includedData: any[]) {
         this.name = name;
         this.#includedData = includedData;
         this.#modelId = modelId;

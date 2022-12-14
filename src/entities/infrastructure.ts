@@ -1,4 +1,5 @@
-import { BackingData } from "./backingData.js";
+import { BackingData } from "./backingData";
+import { EntityProperty } from "./entityProperty";
 
 /**
  * The module for aspects related to an Infrastructure quality model entity.
@@ -6,9 +7,11 @@ import { BackingData } from "./backingData.js";
  */
 
 const InfrastructureTypes = Object.freeze({
-   COMPUTE: "compute",
-   DBMS: "dbms" 
+    COMPUTE: "compute",
+    DBMS: "dbms"
 });
+
+type infrastructureType = "compute" | "dbms"
 
 function getInfrastructureProperties() {
     return []
@@ -20,29 +23,29 @@ function getInfrastructureProperties() {
  */
 class Infrastructure {
 
-    #id; // TODO
-    
-    #modelId;
+    #id: string; // TODO
 
-    #infrastructureType;
+    #modelId: string;
 
-    name;
+    #infrastructureType: infrastructureType;
 
-    #hostedBy;
+    name: string;
 
-    #backingDataEntities = new Array();
+    #hostedBy: Infrastructure;
 
-    #properties;
+    #backingDataEntities: BackingData[] = new Array();
+
+    #properties: EntityProperty[];
 
     /**
      * Create an Infrastructure entity.
      * @param {string} name The name of the Infrastructure entity. 
      * @param {modelId} modelId The ID, the respective entity representation has in the joint.dia.Graph model.
      */
-    constructor(name, modelId, infrastructureType) {
+    constructor(name: string, modelId: string, infrastructureType: infrastructureType) {
         this.name = name;
         this.#modelId = modelId;
-        this.#infrastructureType = !(Object.values(InfrastructureTypes).includes(infrastructureType)) ? InfrastructureTypes.COMPUTE : infrastructureType;
+        this.#infrastructureType = infrastructureType;
         this.#properties = getInfrastructureProperties();
     }
 
@@ -51,22 +54,21 @@ class Infrastructure {
      * @param {BackingData} backingDataEntity The Backing Data entity that should be added.
      * @throws {TypeError} If the provided parameter is neither an instance of External Endpoint, Endpoint, Data Aggregate or Backing Data.  
      */
-    addBackingDataEntity(backingDataEntity) {
-        if (backingDataEntity instanceof BackingData) {
-            this.#backingDataEntities.push(backingDataEntity);
-            return;
-        }
+    addBackingDataEntity(backingDataEntity: BackingData) {
+        this.#backingDataEntities.push(backingDataEntity);
 
+        /*
         const errorMessage = "The provided entity cannot be added. Only BackingData entities are allowed. However, the object to add was: " + Object.getPrototypeOf(backingDataEntity) + JSON.stringify(backingDataEntity);
-        throw new TypeError(errorMessage, "component.js");
+        throw new TypeError(errorMessage);
+        */
     }
 
     /**
      * Add the name of the hosting {@link Infrastructure} entity for this {@link Infrastructure} entity.
      * @param {Infrastructure} infrastructureName The name of the hosting {@link Infrastructure} entity.
      */
-    addHostingEntity(infrastructureName) {
-        this.#hostedBy = infrastructureName;
+    addHostingEntity(infrastructure: Infrastructure) {
+        this.#hostedBy = infrastructure;
     }
 
     /**
@@ -121,9 +123,9 @@ class Infrastructure {
      * Returns all properties of this entity
      * @returns {EntityProperty[]}
      */
-         getProperties() {
-            return this.#properties;
-        }
+    getProperties() {
+        return this.#properties;
+    }
 
     /**
      * Transforms the Infrastructure object into a String. 

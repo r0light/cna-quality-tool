@@ -1,4 +1,4 @@
-import { EntityProperty } from "./entityProperty.js";
+import { EntityProperty } from "./entityProperty";
 
 /**
  * The module for aspects related to a Endpoint quality model Entity.
@@ -41,16 +41,19 @@ function getEndpointProperties() {
             false,
             "text",
             0,
-            []
+            [],
+            ""
         ),
         new EntityProperty(
             "port",
             "Port:",
+            "The port where this endpoint is available",
             "e.g. 3306",
             false,
             "number",
             4,
-            []
+            [],
+            ""
         )
     ]
 }
@@ -82,11 +85,13 @@ const endpointTypes = Object.freeze({
  */
 class Endpoint {
 
-    #modelId;
+    #id: string; //TODO
 
-    #parentName;
+    #modelId: string;
 
-    #properties;
+    #parentName: string; //TODO change to id
+
+    #properties: EntityProperty[];
 
     // TODO ref Component here?
 
@@ -95,7 +100,7 @@ class Endpoint {
      * @param {modelId} modelId The ID, the respective entity representation has in the joint.dia.Graph model.
      * @param {string} parentName The name of the parent Entity.
      */
-    constructor(modelId, parentName) {
+    constructor(modelId: string, parentName: string) {
         this.#modelId = modelId;
         this.#parentName = parentName;
         this.#properties = getEndpointProperties();
@@ -107,10 +112,6 @@ class Endpoint {
      */
     getNameId() {
         let endpointDescription;
-
-        console.log(this)
-        console.log(this.#properties);
-        console.log(properties);
 
         let endpointType = this.#properties.find(property => property.getKey === "endpointType").value;
         let endpointName = this.#properties.find(property => property.getKey === "endpointPath").value;
@@ -139,6 +140,14 @@ class Endpoint {
         }
 
         return `${this.#parentName}-${endpointDescription}`;
+    }
+
+    /**
+    * Returns the ID of this Backing Data entity.
+    * @returns {string}
+    */
+    get getId() {
+        return this.#id;
     }
 
     /**

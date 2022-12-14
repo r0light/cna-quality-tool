@@ -1,6 +1,5 @@
-import { Component } from './component.js'
-import { Infrastructure } from './infrastructure.js'
-import { Service } from './service.js';
+import { Component } from './component'
+import { Infrastructure } from './infrastructure'
 
 /**
  * The module for aspects related to a Deployment Mapping quality model entity.
@@ -13,13 +12,13 @@ import { Service } from './service.js';
  */
 class DeploymentMapping {
 
-    #id;
+    #id: string;
     
-    #modelId;
+    #modelId: string;
     
-    #deployedEntity;
+    #deployedEntity: Component | Infrastructure;
 
-    #underlyingInfrastructure;
+    #underlyingInfrastructure: Infrastructure;
 
     /**
      * Create a Deployment Mapping entity. Represents the connection between either {@link Component} - {@link Infrastructure} or {@link Infrastructure} - {@link Infrastructure}. 
@@ -29,7 +28,7 @@ class DeploymentMapping {
      * @throws {TypeError} If a wrong entity type is being provided.
      * @throws {Error} If the deployedEntity and the underylingInfrastructure are the same.
      */
-    constructor(modelId, deployedEntity, underlyingInfrastructure) {
+    constructor(modelId: string, deployedEntity: Component | Infrastructure, underlyingInfrastructure: Infrastructure) {
         if (deployedEntity.toJson() === underlyingInfrastructure.toJson()) {
             const errorMessage = "The entities for which the DeploymentMapping is defined have to be distinguishable.";
             throw new Error(errorMessage);
@@ -81,7 +80,7 @@ class DeploymentMapping {
      * @throws {TypeError} If a wrong entity type is being provided.
      * @throws {Error} If the newDeployedEntity and the underylingInfrastructure are the same.
      */
-    set setDeployedEntity(newDeployedEntity) {
+    set setDeployedEntity(newDeployedEntity: Component | Infrastructure) {
         if (!(newDeployedEntity instanceof Component || newDeployedEntity instanceof Infrastructure)) {
             const errorMessage = "Wrong entity type provided. Only Component, Service, BackingService, StorageBackingService or Infrastructure entities can be deployed by an underlying Infrastructure. However, the provided entity was: " + Object.getPrototypeOf(newDeployedEntity) + JSON.stringify(newDeployedEntity);
             throw new TypeError(errorMessage);
@@ -109,14 +108,10 @@ class DeploymentMapping {
     * @throws {TypeError} If a wrong entity type is being provided.
     * @throws {Error} If the newUnderlyingInfrastructure and the deployedEntity are the same.
     */
-    set setUnderlyingInfrastructure(newUnderlyingInfrastructure) {
-        if (!(underlyingInfrastructure instanceof Infrastructure)) {
-            const errorMessage = "Wrong entity type provided. Only an Infrastructure entity is able to deploy other entities. However, the provided entity was: " + Object.getPrototypeOf(newUnderlyingInfrastructure) + JSON.stringify(newUnderlyingInfrastructure);
-            throw new TypeError(errorMessage);
-        }
+    set setUnderlyingInfrastructure(newUnderlyingInfrastructure: Infrastructure) {
 
         if (JSON.stringify(newUnderlyingInfrastructure) === JSON.stringify(this.#deployedEntity)) {
-            const errorMessage = "The entity is already included as the underyling infrastructure.";
+            const errorMessage = "The entity is already included as being deployed on this infrastructure";
             throw new Error(errorMessage);
         }
 

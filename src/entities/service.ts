@@ -1,4 +1,5 @@
-import { Component } from './component.js'
+import { Component } from './component'
+import { Infrastructure } from './infrastructure';
 
 /**
  * The module for aspects related to a Component quality model Entity.
@@ -18,7 +19,7 @@ class Service extends Component {
      * @param {modelId} modelId The ID, the respective entity representation has in the joint.dia.Graph model.
      * @param {Infrastructure} hostingInfrastructure The {@link Infrastructure} entity that hosts this Service entity.
      */
-    constructor(name, modelId, hostingInfrastructure) {
+    constructor(name: string, modelId: string, hostingInfrastructure: Infrastructure) {
         super(name, modelId, hostingInfrastructure)
     }
 
