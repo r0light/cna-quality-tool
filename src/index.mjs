@@ -1,4 +1,4 @@
-import ModelingApplication from '../ModelingApp/modelingApp.mjs'
+import ModelingApplication from './modeling/modelingApp.mjs'
 import Homepage from './home.mjs';
 
 // get element to which the content is supposed to be added

@@ -1,6 +1,6 @@
-import ModelingApplicationFrame from './src/representations/guiElements.appFrame.mjs'
-import SystemEntityManager from './src/systemEntityManager.mjs';
-import ModelingAppMainView from './src/views/modelingAppMainView.mjs'
+import ModelingApplicationFrame from './representations/guiElements.appFrame.mjs'
+import SystemEntityManager from './systemEntityManager.mjs';
+import ModelingAppMainView from './views/modelingAppMainView.mjs'
 
 class ModelingApplication {
 
