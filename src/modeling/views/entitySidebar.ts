@@ -122,8 +122,7 @@ const EntitySidebar = mvc.View.extend({
 
     // TODO endpoints
     addEntity(eventElement) {
-        let cell = this._entityShapeGraph.getCell(eventElement.model.id);
-        console.log(cell);
+        let cell: dia.Element = this._entityShapeGraph.getCell(eventElement.model.id);
         let newElement = cell.clone();
         newElement.resize(cell.prop("defaults/size/width"), cell.prop("defaults/size/height"));
         newElement.attr("label/fontSize", cell.prop("defaults/fontSize"));

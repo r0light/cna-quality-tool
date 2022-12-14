@@ -205,15 +205,15 @@ class ModalDialog {
     show() {        
         $("#staticModal button").on("click", () => { $(':focus').blur(); });
         console.log("show called in modelDialog: fix this in code")
-        /*$("#staticModal").modal("show");*/
+        $("#staticModal").modal("show");
     }
 
     hide() {
-        /*$("#staticModal").modal("hide");*/
+        $("#staticModal").modal("hide");
     }
 
     destroyDialog() {
-        /*$("#staticModal").modal("hide");*/
+        $("#staticModal").modal("hide");
         this.resetDialog();
     }
 

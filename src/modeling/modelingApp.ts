@@ -77,11 +77,10 @@ class ModelingApplication {
         }
 
         if (!this.#currentSystemName) {
-            $("#appNameTitle").trigger(
-                "initialSystemName",
+            $("#appNameTitle").trigger($.Event("initialSystemName",
                 { systemName: systemName }
-            );
-            this.#currentSystemGraph.trigger("initialSystemName", { systemName: systemName });
+            ));
+            this.#currentSystemGraph.trigger($.Event("initialSystemName", { systemName: systemName }));
         }
 
         this.#currentSystemName = systemName;

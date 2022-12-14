@@ -1,4 +1,4 @@
-import * as $ from 'jquery';
+import jquery, * as $ from 'jquery';
 
 class AccordionCollapse {
 
@@ -239,19 +239,24 @@ class AccordionCollapse {
 
             if (event.target.getAttribute("data-property-type") === "entity") {
                 $("#" + this.#containerId).trigger(
-                    "entitySpecificPropertyChanged", {
-                    propertyId: event.target.id,
-                    originalTarget: event.target,
-                    orginalEvent: event
-                });
+                    $.Event(
+                        "entitySpecificPropertyChanged",
+                        {
+                            propertyId: event.target.id,
+                            originalTarget: event.target,
+                            orginalEvent: event
+                        }
+                    ));
             } else {
                 $("#" + this.#containerId).trigger(
-                    "entityPropertyChanged", {
-                    propertyId: event.target.id,
-                    propertyType: event.target.getAttribute("data-property-type"),
-                    originalTarget: event.target,
-                    orginalEvent: event
-                });
+                    $.Event("entityPropertyChanged",
+                        {
+                            propertyId: event.target.id,
+                            propertyType: event.target.getAttribute("data-property-type"),
+                            originalTarget: event.target,
+                            orginalEvent: event
+                        }
+                    ));
             }
 
             event.preventDefault();

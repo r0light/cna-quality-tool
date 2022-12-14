@@ -9,15 +9,6 @@ import UIModalDialog from "../representations/guiElements.dialog";
 import ToolbarTools from "../representations/guiElements.toolbarTools";
 
 
-interface ToolbarViewOptions extends Backbone.ViewOptions {
-    currentSystemName: string,
-    appTools: typeof ToolbarConfig.Tools,
-    entityTools: typeof ToolbarConfig.EntityConfig,
-    additionalRowTools: typeof ToolbarConfig.ToolbarRowConfig,
-    applicationModalDialog: ModalDialog,
-    toolbarButtonActionConfig: typeof ToolbarConfig.ToolbarButtonActionConfig
-}
-
 class Toolbar extends mvc.View<Backbone.Model, Element> {
 
     "use strict";
@@ -483,11 +474,11 @@ class Toolbar extends mvc.View<Backbone.Model, Element> {
                 this.currentSystemName = editedAppName;
 
                 // 
-                $("#appNameTitle").trigger("systemNameChanged", 
+                $("#appNameTitle").trigger($.Event("systemNameChanged", 
                     {
                       updatedSystemName: editedAppName
                     }
-                );
+                ));
 
                 this.graph.trigger("systemNameChanged", { editedAppName: editedAppName });
             }
@@ -513,9 +504,9 @@ class Toolbar extends mvc.View<Backbone.Model, Element> {
     #toggleApplicationNameEditingMode() {
         let systemTitleInputField = $("#appNameTitle");
         if (systemTitleInputField.attr("disabled")) {
-            systemTitleInputField.attr("disabled", "false");
+            systemTitleInputField.attr("disabled", null); // disabled false
         } else {
-            systemTitleInputField.attr("disabled", "true");
+            systemTitleInputField.attr("disabled", ""); // disabled true
         }
 
         $("#editApplicationNameBtn").toggle();
