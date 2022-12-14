@@ -1,4 +1,4 @@
-import ToscaTopologyTemplate from "./TopologyTemplate.mjs";
+import ToscaTopologyTemplate from "./TopologyTemplate";
 
 class MetaDataContent {
 
