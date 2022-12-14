@@ -1,4 +1,5 @@
 import * as $ from 'jquery';
+import { util } from 'jointjs'
 import { PropertyContentType } from "../config/detailsSidebarConfig";
 
 class Table {
@@ -119,7 +120,7 @@ class Table {
             const columnEntry = rowContent[columnKey];
             if ("attributes".localeCompare(columnKey) === 0) {
                 // ignore -> representation relevant information
-            } else if (joint.util.isObject(columnEntry)) {
+            } else if (util.isObject(columnEntry)) {
                 const specialContent = this.#createSpecialContent(columnEntry, columnKey);
                 rowToAdd = rowToAdd + `<td data-table-context="${columnKey}">${specialContent}</td>`;
             } else {

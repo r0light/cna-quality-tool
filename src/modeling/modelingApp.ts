@@ -27,7 +27,7 @@ class ModelingApplication {
 
         document.getElementById("app").addEventListener("openModelingApplicationOverlay", () => {
             document.getElementById("init-overlay").style.display = "block";
-            $("#appToolbarContainer button").attr("disabled", "true");
+            $("#appToolbarContainer button").attr("disabled", "");
         });
 
         document.getElementById("createNewDiagramBtn").onclick = () => {
@@ -118,7 +118,7 @@ class ModelingApplication {
         this.setCurrentSystemName = providedAppName;
         $("#appNameTitle").val(providedAppName);
         $("#init-overlay").toggle();
-        $("#appToolbarContainer button").attr("disabled", "false");
+        $("#appToolbarContainer button").attr("disabled", null);
     }
 }
 

@@ -289,10 +289,8 @@ class Toolbar extends mvc.View<Backbone.Model, Element> {
         }
 
         console.log("tooltop should be hidden again");
-        /* TODO enable again
         $('[data-toggle="tooltip"]').tooltip("hide");
         $('[data-tooltip-toggle="tooltip"]').tooltip("hide");
-        */
         (document.activeElement as HTMLElement).blur();
     }
 
