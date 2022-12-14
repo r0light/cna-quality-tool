@@ -1,33 +1,49 @@
-import { ApplicationSettingsDialogConfig } from "../config/actionDialogConfig.mjs";
-import EntityTypes from "../config/entityTypes.mjs";
-import UIModalDialog from "../representations/guiElements.dialog.mjs";
-import ToolbarTools from "../representations/guiElements.toolbarTools.mjs";
-import ModalDialog from "./modalDialog.mjs";
+import * as $ from 'jquery';
+import * as Backbone from 'backbone';
+import { dia, mvc, util, highlighters } from "jointjs";
+import { ApplicationSettingsDialogConfig } from "../config/actionDialogConfig";
+import EntityTypes from "../config/entityTypes";
+import ToolbarConfig from "../config/toolbarConfiguration";
+import ModalDialog from "./modalDialog";
+import UIModalDialog from "../representations/guiElements.dialog";
+import ToolbarTools from "../representations/guiElements.toolbarTools";
 
-class Toolbar extends joint.mvc.View {
+
+interface ToolbarViewOptions extends Backbone.ViewOptions {
+    currentSystemName: string,
+    appTools: typeof ToolbarConfig.Tools,
+    entityTools: typeof ToolbarConfig.EntityConfig,
+    additionalRowTools: typeof ToolbarConfig.ToolbarRowConfig,
+    applicationModalDialog: ModalDialog,
+    toolbarButtonActionConfig: typeof ToolbarConfig.ToolbarButtonActionConfig
+}
+
+class Toolbar extends mvc.View<Backbone.Model, Element> {
 
     "use strict";
 
-    currentSystemName = ""; // TODO keep here?
+    currentSystemName: string = ""; // TODO keep here?
 
-    appTools = [];
+    paper: dia.Paper;
 
-    entityTools = [];
+    graph: dia.Graph;
 
-    additionalRowTools = [];
+    appTools: typeof ToolbarConfig.Tools;
 
-    #applicationModalDialog = {};
+    entityTools: typeof ToolbarConfig.EntityConfig;
 
-    #toolbarButtonActionConfig = {};
+    additionalRowTools: typeof ToolbarConfig.ToolbarRowConfig;
 
-    constructor(documentElement, currentPaper, toolbarConfig, modalDialog, currentSystemName) { // TODO get current applicationName
-        if (!(currentPaper instanceof joint.dia.Paper)) {
-            throw new TypeError("Toolbar: The provided current paper has to be a joint.dia.Paper element");
-        }
+    #toolbarButtonActionConfig: typeof ToolbarConfig.ToolbarButtonActionConfig;
+
+    #applicationModalDialog: ModalDialog; 
+
+    constructor(documentElement: HTMLElement, currentPaper: dia.Paper, toolbarConfig: typeof ToolbarConfig, currentSystemName: string) { // TODO get current applicationName
 
         super({
             className: "toolbar",
             el: documentElement,
+            /*
             paper: currentPaper,
             graph: currentPaper.model,
             appTools: toolbarConfig && toolbarConfig.Tools ? toolbarConfig.Tools : [],
@@ -35,6 +51,7 @@ class Toolbar extends joint.mvc.View {
             additionalRowToolsConfig: toolbarConfig && toolbarConfig.ToolbarRowConfig ? toolbarConfig.ToolbarRowConfig : [],
             toolbarButtonActionConfig: toolbarConfig && toolbarConfig.ToolbarButtonActionConfig ? toolbarConfig.ToolbarButtonActionConfig : {},
             currentSystemName: currentSystemName,
+            */
 
             events: {
                 "initialSystemName #appNameTitle": "setInitialSystemName",
@@ -76,20 +93,22 @@ class Toolbar extends joint.mvc.View {
 
         });
 
-        this.appTools = this.options.appTools;
-        this.entityTools = this.options.entityTools;
-        this.additionalRowTools = this.options.additionalRowToolsConfig;
-        this.#toolbarButtonActionConfig = this.options.toolbarButtonActionConfig;
-        this.currentSystemName = this.options.currentSystemName;
+        this.paper = currentPaper;
+        this.graph = currentPaper.model;
+        this.appTools = toolbarConfig.Tools;
+        this.entityTools = toolbarConfig.EntityConfig;
+        this.additionalRowTools = toolbarConfig.ToolbarRowConfig;
+        this.#toolbarButtonActionConfig = toolbarConfig.ToolbarButtonActionConfig;
+        this.currentSystemName = currentSystemName;
 
         this.delegateEvents();
 
-        this.listenTo(this.options.graph, "add", this.entityAdded);
-        this.listenTo(this.options.graph, "remove", this.entityRemoved);
-        this.listenTo(this.options.graph, "change:entity", (element, entity, opt) => { this.entityTypeChanged(opt.previousType, entity.type) });
-        this.listenTo(this.options.graph, "change:attrs", this.entityVisibilityChanged);
+        this.listenTo(this.graph, "add", this.entityAdded);
+        this.listenTo(this.graph, "remove", this.entityRemoved);
+        this.listenTo(this.graph, "change:entity", (element, entity, opt) => { this.entityTypeChanged(opt.previousType, entity.type) });
+        this.listenTo(this.graph, "change:attrs", this.entityVisibilityChanged);
 
-        this.#applicationModalDialog = (modalDialog instanceof ModalDialog) ? modalDialog : {};
+        this.#applicationModalDialog = new ModalDialog();
     }
 
     init() {
@@ -100,8 +119,8 @@ class Toolbar extends joint.mvc.View {
 
     }
 
-    confirmUpdate() {
-
+    confirmUpdate(flag: number, opt: { [key: string]: any; }) {
+        return 0;
     }
 
     onSetTheme(oldTheme, newTheme) {
@@ -152,7 +171,7 @@ class Toolbar extends joint.mvc.View {
     toggleFullScreen() {
         // decide what should be toggled --> Fix design and scrolling
         // joint.util.toggleFullScreen(document.getElementById("app"));
-        joint.util.toggleFullScreen();
+        util.toggleFullScreen();
         let openFullScreenButtonId = "fullScreen-button";
         let closeFullScreenButtonId = "closefullScreen-button";
         $("#" + openFullScreenButtonId).toggle();
@@ -161,8 +180,8 @@ class Toolbar extends joint.mvc.View {
     }
 
     fitActivePaperToContent() {
-        this.options.paper.fitToContent({
-            padding: joint.util.normalizeSides(25),
+        this.paper.fitToContent({
+            padding: util.normalizeSides(25),
             minWidth: 300,
             minHeight: 250
         });
@@ -170,14 +189,14 @@ class Toolbar extends joint.mvc.View {
 
     // TODO if lock mechanism is included
     // togglePaperInteractivity() {
-    //     if (this.options.paper.options.interactive == false) {
-    //         this.options.paper.setInteractivity({
+    //     if (this.paper.options.interactive == false) {
+    //         this.paper.setInteractivity({
     //             labelMove: false,
     //             addLinkFromMagnet: true,
     //             linkMove: true
     //         });
     //     } else {
-    //         this.options.paper.setInteractivity(false);
+    //         this.paper.setInteractivity(false);
     //     }
 
     //     $("#lockPaperInteractivity-button").toggle();
@@ -190,16 +209,16 @@ class Toolbar extends joint.mvc.View {
             let modalDialog = new UIModalDialog("extern-clear", "clearActivePaper");
             modalDialog.create(config);
             modalDialog.render("modals", true);
-            modalDialog.configureSaveButtonAction(() => { this.options.graph.clear() });
+            modalDialog.configureSaveButtonAction(() => { this.graph.clear() });
             modalDialog.show();
         } else {
-            this.options.graph.clear();
+            this.graph.clear();
         }
     }
 
     changeGrid() {
         // TODO for options
-        this.options.paper.clearGrid();
+        this.paper.clearGrid();
     }
 
     printActivePaper() {
@@ -208,14 +227,14 @@ class Toolbar extends joint.mvc.View {
     }
 
     zoomInPaper() {
-        const dimensionsBeforeZoom = this.options.paper.getComputedSize();
-        let currentScale = this.options.paper.scale();
+        const dimensionsBeforeZoom = this.paper.getComputedSize();
+        let currentScale = this.paper.scale();
         if (currentScale.sx >= 1) {
-            this.options.paper.scale(currentScale.sx + 0.5);
+            this.paper.scale(currentScale.sx + 0.5);
         } else {
-            this.options.paper.scale(currentScale.sx * 2);
+            this.paper.scale(currentScale.sx * 2);
         }
-        this.options.paper.fitToContent({
+        this.paper.fitToContent({
             padding: 50,
             minWidth: dimensionsBeforeZoom.width,
             minHeight: dimensionsBeforeZoom.height
@@ -223,14 +242,14 @@ class Toolbar extends joint.mvc.View {
     }
 
     zoomOutPaper() {
-        const dimensionsBeforeZoom = this.options.paper.getComputedSize();
-        let currentScale = this.options.paper.scale();
+        const dimensionsBeforeZoom = this.paper.getComputedSize();
+        let currentScale = this.paper.scale();
         if (Math.round(currentScale.sx) <= 1) {
-            this.options.paper.scale(currentScale.sx * 0.5);
+            this.paper.scale(currentScale.sx * 0.5);
         } else {
-            this.options.paper.scale(currentScale.sx - 0.5);
+            this.paper.scale(currentScale.sx - 0.5);
         }
-        this.options.paper.fitToContent({
+        this.paper.fitToContent({
             padding: 50,
             minWidth: dimensionsBeforeZoom.width,
             minHeight: dimensionsBeforeZoom.height
@@ -238,7 +257,7 @@ class Toolbar extends joint.mvc.View {
     }
 
     convertToJson() {
-        let jsonSerlializedGraph = this.options.graph.toJSON();
+        let jsonSerlializedGraph = this.graph.toJSON();
         // download created yaml taken from https://stackoverflow.com/a/22347908
         let downloadElement = document.createElement("a");
         downloadElement.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify(jsonSerlializedGraph)));
@@ -252,7 +271,7 @@ class Toolbar extends joint.mvc.View {
             let modalDialog = new UIModalDialog("tosca-export", "convertToTosca");
             modalDialog.create(config);
             modalDialog.render("modals", true);
-            modalDialog.configureSaveButtonAction(() => { this.options.graph.trigger("startToscaTransformation"); });
+            modalDialog.configureSaveButtonAction(() => { this.graph.trigger("startToscaTransformation"); });
             modalDialog.show();
         }
     }
@@ -269,16 +288,19 @@ class Toolbar extends joint.mvc.View {
             return;
         }
 
+        console.log("tooltop should be hidden again");
+        /* TODO enable again
         $('[data-toggle="tooltip"]').tooltip("hide");
         $('[data-tooltip-toggle="tooltip"]').tooltip("hide");
-        document.activeElement.blur();
+        */
+        (document.activeElement as HTMLElement).blur();
     }
 
     fitAllElementsToEmbedded() {
-        let elements = this.options.graph.getElements();
+        let elements = this.graph.getElements();
 
         for (const element of elements) {
-            if (element.getEmbeddedCells("embeds").length === 0) {
+            if (element.getEmbeddedCells().length === 0) {
                 continue;
             }
 
@@ -296,7 +318,7 @@ class Toolbar extends joint.mvc.View {
     }
 
     toggleEntityExpansion(event) {
-        let elements = this.options.graph.getElements();
+        let elements = this.graph.getElements();
         elements.forEach(element => {
             if (!element.attr("icon") || element.prop("entity/type") === EntityTypes.REQUEST_TRACE) {
                 return;
@@ -330,22 +352,22 @@ class Toolbar extends joint.mvc.View {
 
     editApplicationSettings() {
         ApplicationSettingsDialogConfig.saveButton.action = () => {
-            let newWidth = $("#" + ApplicationSettingsDialogConfig.content.Size.sectionContent.PaperWidth.providedFeature).val();
-            let newHeight = $("#" + ApplicationSettingsDialogConfig.content.Size.sectionContent.PaperHeight.providedFeature).val();
-            let newGridSize = $("#" + ApplicationSettingsDialogConfig.content.Grid.sectionContent.Size.providedFeature).val();
-            let newGridThickness = $("#" + ApplicationSettingsDialogConfig.content.Grid.sectionContent.Thickness.providedFeature).val();
-            this.options.paper.setDimensions(newWidth, newHeight);
-            this.options.paper.setGridSize(newGridSize);
-            this.options.paper.drawGrid({ thickness: newGridThickness });
+            let newWidth = $("#" + ApplicationSettingsDialogConfig.content.Size.sectionContent.PaperWidth.providedFeature).val() as string;
+            let newHeight = $("#" + ApplicationSettingsDialogConfig.content.Size.sectionContent.PaperHeight.providedFeature).val() as string;
+            let newGridSize = $("#" + ApplicationSettingsDialogConfig.content.Grid.sectionContent.Size.providedFeature).val() as number;
+            let newGridThickness = $("#" + ApplicationSettingsDialogConfig.content.Grid.sectionContent.Thickness.providedFeature).val() as number;
+            this.paper.setDimensions(newWidth, newHeight);
+            this.paper.setGridSize(newGridSize);
+            this.paper.drawGrid({ thickness: newGridThickness });
         };
         // get current values
-        ApplicationSettingsDialogConfig.content.Size.sectionContent.PaperWidth.min = this.options.paper.getFitToContentArea({ padding: joint.util.normalizeSides(25) }).width;
-        ApplicationSettingsDialogConfig.content.Size.sectionContent.PaperHeight.min = this.options.paper.getFitToContentArea({ padding: joint.util.normalizeSides(25) }).height;
-        ApplicationSettingsDialogConfig.content.Size.sectionContent.PaperWidth.defaultValue = this.options.paper.options.width;
-        ApplicationSettingsDialogConfig.content.Size.sectionContent.PaperHeight.defaultValue = this.options.paper.options.height;
-        ApplicationSettingsDialogConfig.content.Grid.sectionContent.Size.defaultValue = this.options.paper.options.gridSize;
+        ApplicationSettingsDialogConfig.content.Size.sectionContent.PaperWidth.min = this.paper.getFitToContentArea({ padding: util.normalizeSides(25) }).width;
+        ApplicationSettingsDialogConfig.content.Size.sectionContent.PaperHeight.min = this.paper.getFitToContentArea({ padding: util.normalizeSides(25) }).height;
+        ApplicationSettingsDialogConfig.content.Size.sectionContent.PaperWidth.defaultValue = this.paper.options.width as number;
+        ApplicationSettingsDialogConfig.content.Size.sectionContent.PaperHeight.defaultValue = this.paper.options.height as number;
+        ApplicationSettingsDialogConfig.content.Grid.sectionContent.Size.defaultValue = this.paper.options.gridSize;
         // TODO fix access
-        ApplicationSettingsDialogConfig.content.Grid.sectionContent.Thickness.defaultValue = this.options.paper._gridSettings[0].thickness;
+        ApplicationSettingsDialogConfig.content.Grid.sectionContent.Thickness.defaultValue = this.paper["_gridSettings"][0].thickness;
         // create dialog with information
         this.#applicationModalDialog.renderActionDialog(ApplicationSettingsDialogConfig.title, ApplicationSettingsDialogConfig.content, ApplicationSettingsDialogConfig.cancelButton.text, ApplicationSettingsDialogConfig.saveButton);
 
@@ -395,7 +417,7 @@ class Toolbar extends joint.mvc.View {
         let affectedEntityType = event.target.value;
         let clickedCheckbox = $('.entityCheckBox[data-entity-type="' + affectedEntityType + '"]');
 
-        let graphCells = this.options.graph.getCells();
+        let graphCells = this.graph.getCells();
         let filteredGraphCells = graphCells.filter((graphCell) => {
             return graphCell.attributes.entity.type === affectedEntityType;
         });
@@ -422,9 +444,9 @@ class Toolbar extends joint.mvc.View {
 
     entityVisibilityChanged(element, attrs, opt) {
         if (opt.propertyPath && opt.propertyPath.includes("visibility")) {
-            let cellView = element.findView(this.options.paper);
+            let cellView = element.findView(this.paper);
             cellView.hideTools();
-            joint.highlighters.stroke.remove(cellView);
+            highlighters.stroke.remove(cellView);
         }
     }
 
@@ -455,7 +477,7 @@ class Toolbar extends joint.mvc.View {
         });
 
         $("#submitEditApplicationNameBtn").on("click", () => {
-            let editedAppName = $("#appNameTitle").val();
+            let editedAppName = $("#appNameTitle").val() as string;
             if (!editedAppName) {
                 $("#appNameTitle").val(this.currentSystemName);
             } else {
@@ -463,12 +485,13 @@ class Toolbar extends joint.mvc.View {
                 this.currentSystemName = editedAppName;
 
                 // 
-                $("#appNameTitle").trigger({
-                    type: "systemNameChanged",
-                    updatedSystemName: editedAppName
-                });
+                $("#appNameTitle").trigger("systemNameChanged", 
+                    {
+                      updatedSystemName: editedAppName
+                    }
+                );
 
-                this.options.graph.trigger("systemNameChanged", { editedAppName: editedAppName });
+                this.graph.trigger("systemNameChanged", { editedAppName: editedAppName });
             }
 
             this.#toggleApplicationNameEditingMode();
@@ -492,9 +515,9 @@ class Toolbar extends joint.mvc.View {
     #toggleApplicationNameEditingMode() {
         let systemTitleInputField = $("#appNameTitle");
         if (systemTitleInputField.attr("disabled")) {
-            systemTitleInputField.attr("disabled", false);
+            systemTitleInputField.attr("disabled", "false");
         } else {
-            systemTitleInputField.attr("disabled", true);
+            systemTitleInputField.attr("disabled", "true");
         }
 
         $("#editApplicationNameBtn").toggle();

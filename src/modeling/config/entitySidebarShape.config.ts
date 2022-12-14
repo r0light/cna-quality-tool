@@ -1,3 +1,9 @@
+import { util, shapes } from 'jointjs'
+import { Component, Service, BackingService, StorageBackingService,
+    Endpoint, ExternalEndpoint, Link,
+    Infrastructure, DeploymentMapping,
+    RequestTrace, DataAggregate, BackingData } from './entityShapes'
+
 /**
  * Configuration of the available entity shapes  
  */
@@ -5,7 +11,7 @@ const SidebarEntityShapes = {
 
     Component: {
         index: 1,
-        shape: new joint.shapes.qualityModel.Component({
+        shape: new Component({
             position: { x: 20, y: 26 },
             size: { width: 100, height: 45 },
             attrs: {
@@ -27,7 +33,7 @@ const SidebarEntityShapes = {
 
     Service: {
         index: 2,
-        shape: new joint.shapes.qualityModel.Service({
+        shape: new Service({
             position: { x: 145, y: 18 },
             size: { width: 80, height: 45 },
             attrs: {
@@ -49,7 +55,7 @@ const SidebarEntityShapes = {
 
     BackingService: {
         index: 3,
-        shape: new joint.shapes.qualityModel.BackingService({
+        shape: new BackingService({
             position: { x: 20, y: 100 },
             size: { width: 100, height: 45 },
             attrs: {
@@ -71,7 +77,7 @@ const SidebarEntityShapes = {
 
     StorageBackingService: {
         index: 4,
-        shape: new joint.shapes.qualityModel.StorageBackingService({
+        shape: new StorageBackingService({
             position: { x: 145, y: 100 },
             size: { width: 80, height: 60 },
             attrs: {
@@ -93,7 +99,7 @@ const SidebarEntityShapes = {
 
     Endpoint: {
         index: 5,
-        shape: new joint.shapes.qualityModel.Endpoint({
+        shape: new Endpoint({
             position: { x: 41, y: 182 },
             size: { width: 55, height: 55 },
             attrs: {
@@ -115,7 +121,7 @@ const SidebarEntityShapes = {
 
     ExternalEndpoint: {
         index: 6,
-        shape: new joint.shapes.qualityModel.ExternalEndpoint({
+        shape: new ExternalEndpoint({
             position: { x: 155, y: 182 },
             size: { width: 55, height: 55 },
             attrs: {
@@ -137,7 +143,7 @@ const SidebarEntityShapes = {
 
     Infrastructure: {
         index: 7,
-        shape: new joint.shapes.qualityModel.Infrastructure({
+        shape: new Infrastructure({
             position: { x: 20, y: 264 },
             size: { width: 100, height: 45 },
             attrs: {
@@ -159,7 +165,7 @@ const SidebarEntityShapes = {
 
     DataAggregate: {
         index: 8,
-        shape: new joint.shapes.qualityModel.DataAggregate({
+        shape: new DataAggregate({
             position: { x: 140, y: 264 },
             size: { width: 45, height: 25 },
             attrs: {
@@ -181,7 +187,7 @@ const SidebarEntityShapes = {
 
     RequestTrace: {
         index: 9,
-        shape: new joint.shapes.qualityModel.RequestTrace({
+        shape: new RequestTrace({
             position: { x: 18, y: 348 },
             size: { width: 110, height: 45 },
             attrs: {
@@ -203,7 +209,7 @@ const SidebarEntityShapes = {
 
     BackingData: {
         index: 10,
-        shape: new joint.shapes.qualityModel.BackingData({
+        shape: new BackingData({
             position: { x: 147, y: 346 },
             size: { width: 80, height: 60 },
             attrs: {
@@ -225,7 +231,7 @@ const SidebarEntityShapes = {
 
     Link: {
         index: 11,
-        shape: new joint.shapes.qualityModel.Link({
+        shape: new Link({
             source: { x: 20, y: 434 },
             target: { x: 120, y: 434 },
             labels: [
@@ -258,7 +264,7 @@ const SidebarEntityShapes = {
 
     DeploymentMapping: {
         index: 12,
-        shape: new joint.shapes.qualityModel.DeploymentMapping({
+        shape: new DeploymentMapping({
             source: { x: 145, y: 434 },
             target: { x: 225, y: 434 },
             labels: [
@@ -268,7 +274,7 @@ const SidebarEntityShapes = {
                             fill: "none"
                         },
                         text: {
-                            text: joint.util.breakText("Deployment Mapping", { width: "100" })
+                            text: util.breakText("Deployment Mapping", { width: 100 })
                         }
                     },
                     position: {

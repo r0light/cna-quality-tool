@@ -1,3 +1,5 @@
+import * as $ from 'jquery';
+
 class ModelingApplicationFrame {
 
     #applicationNameElementId = "applicationNameInputField";

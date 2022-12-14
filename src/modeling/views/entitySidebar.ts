@@ -1,8 +1,10 @@
-import EntityTypes from "../config/entityTypes.mjs";
-import ConnectionSelectionTools from "./tools/connectionSelectionTools.mjs";
-import EntitySelectionTools from "./tools/entitySelectionTools.mjs";
+import * as $ from 'jquery';
+import { dia, mvc, shapes } from "jointjs";
+import EntityTypes from "../config/entityTypes";
+import ConnectionSelectionTools from "./tools/connectionSelectionTools";
+import EntitySelectionTools from "./tools/entitySelectionTools";
 
-const EntitySidebar = joint.mvc.View.extend({
+const EntitySidebar = mvc.View.extend({
 
     className: "entitySideBar",
 
@@ -26,7 +28,7 @@ const EntitySidebar = joint.mvc.View.extend({
     },
 
     init() {
-        if (!(this.options.paper instanceof joint.dia.Paper)) {
+        if (!(this.options.paper instanceof dia.Paper)) {
             throw new TypeError("EntitySideBar: The provided current paper has to be a joint.dia.Paper element");
         }
 
@@ -81,8 +83,8 @@ const EntitySidebar = joint.mvc.View.extend({
         // get colour from container element but change opacity value (otherwise the colour will appear darker than intended)
         let parentBackgroundColorElements = $(".entityShapes-sidebar-container").first().css("backgroundColor").split(",");
         let adaptedBackgroundColor = parentBackgroundColorElements[0].concat(",", parentBackgroundColorElements[1]).concat(",", parentBackgroundColorElements[2]).concat(", ", "0)");
-        this._entityShapeGraph = new joint.dia.Graph();
-        this._entityShapePaper = new joint.dia.Paper({
+        this._entityShapeGraph = new dia.Graph();
+        this._entityShapePaper = new dia.Paper({
             el: $('.entityShapes-paper'),
             width: Math.floor(this.options.width) >= 244 ? Math.floor(this.options.width) : 244,
             height: Math.floor(paperHeight) >= 547 ? Math.floor(paperHeight) : 547,
@@ -94,7 +96,7 @@ const EntitySidebar = joint.mvc.View.extend({
                 color: adaptedBackgroundColor
             },
             interactive: false,
-            cellNamespace: joint.shapes
+            cellViewNamespace: shapes
         });
 
         this._entityShapePaper.render();
@@ -121,6 +123,7 @@ const EntitySidebar = joint.mvc.View.extend({
     // TODO endpoints
     addEntity(eventElement) {
         let cell = this._entityShapeGraph.getCell(eventElement.model.id);
+        console.log(cell);
         let newElement = cell.clone();
         newElement.resize(cell.prop("defaults/size/width"), cell.prop("defaults/size/height"));
         newElement.attr("label/fontSize", cell.prop("defaults/fontSize"));

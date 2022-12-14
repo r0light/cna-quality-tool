@@ -1,5 +1,8 @@
-import ModelingApplication from './modeling/modelingApp.mjs'
-import Homepage from './home.mjs';
+import * as $ from 'jquery';
+import * as bootstrap from 'bootstrap';
+import { ModelingApplication } from './modeling/modelingApp'
+import Homepage from './home';
+
 
 // get element to which the content is supposed to be added
 const mainSection = document.querySelector("main");
@@ -12,25 +15,25 @@ const homepage = new Homepage();
 const menuItems = document.querySelectorAll("a[data-entry-module]");
 const navbarItems = new Map();
 for (const menuItem of menuItems) {
-    navbarItems.set(menuItem.dataset.menuIndex, menuItem.parentNode);
+    navbarItems.set(menuItem["dataset"].menuIndex, menuItem.parentNode);
     menuItem.addEventListener("click", async (event) => {
         // prevent loading href since it is dynamically rendered
         event.preventDefault();
 
         const activeElement = document.querySelector("li.active");
         activeElement?.classList.remove("active");
-        menuItem.parentNode.classList.add("active");
+        menuItem.parentNode["classList"].add("active");
 
         mainSection.innerHTML = "";
         document.title = "CNA Modeling:";
-        if (menuItem.dataset.entryModule.includes("ModelingApp")) {
+        if (menuItem["dataset"].entryModule.includes("modeling")) {
             modelingApp.renderInto(mainSection);
-            sessionStorage.setItem("currentMenuSelectionIndex", menuItem.dataset.menuIndex);
+            sessionStorage.setItem("currentMenuSelectionIndex", menuItem["dataset"].menuIndex);
             triggerModelingApplicationFirstLoad();
             document.title += " Modeling Application";
         } else {
             homepage.renderInto(mainSection);
-            sessionStorage.setItem("currentMenuSelectionIndex", menuItem.dataset.menuIndex);
+            sessionStorage.setItem("currentMenuSelectionIndex", menuItem["dataset"].menuIndex);
             document.title += " Home";
         }
     });
@@ -71,7 +74,7 @@ const triggerModelingApplicationFirstLoad = () => {
         // trigger modeling app overlay
         const overlayEvent = new Event("openModelingApplicationOverlay");
         document.getElementById("app")?.dispatchEvent(overlayEvent);
-        sessionStorage.setItem("reloadModelingApplication", true);
+        sessionStorage.setItem("reloadModelingApplication", "true");
     }
 }
 

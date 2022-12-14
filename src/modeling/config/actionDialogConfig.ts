@@ -8,6 +8,7 @@ const SectionContentType = Object.freeze({
 
 const ApplicationSettingsDialogConfig = {
     title: {
+        type: "normal",
         text: "Application Settings",
         icon: "fa-solid fa-gear"
     },

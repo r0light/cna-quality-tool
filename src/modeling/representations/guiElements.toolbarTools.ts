@@ -1,3 +1,5 @@
+import * as $ from 'jquery';
+
 const ToolbarElementType = Object.freeze({
     BUTTON: "button",
     BUTTON_DROPDOWN: "button-dropdown"

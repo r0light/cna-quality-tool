@@ -1,6 +1,7 @@
-import EntityTypes from "../../config/entityTypes.mjs";
+import { dia, elementTools } from "jointjs";
+import EntityTypes from "../../config/entityTypes";
 
-let CloneButton = joint.elementTools.Button.extend({
+let CloneButton = elementTools.Button.extend({
     name: "clone-button",
     options: {
         markup: [{
@@ -44,7 +45,7 @@ let CloneButton = joint.elementTools.Button.extend({
     }
 });
 
-let CreateLinkButton = joint.elementTools.Connect.extend({
+let CreateLinkButton = elementTools.Connect.extend({
     name: "link",
     children: [{
         tagName: "title",
@@ -64,7 +65,7 @@ let CreateLinkButton = joint.elementTools.Connect.extend({
     }]
 });
 
-let CustomRemoveButton = joint.elementTools.Remove.extend({
+let CustomRemoveButton = elementTools.Remove.extend({
     name: "remove",
     children: [{
         tagName: "title",
@@ -94,7 +95,7 @@ let CustomRemoveButton = joint.elementTools.Remove.extend({
 });
 
 
-let CollapseButton = joint.elementTools.Button.extend({
+let CollapseButton = elementTools.Button.extend({
     name: "collapse-button",
     options: {
         markup: [{
@@ -145,7 +146,7 @@ let CollapseButton = joint.elementTools.Button.extend({
 });
 
 
-class EntitySelectionTools extends joint.dia.ToolsView {
+class EntitySelectionTools extends dia.ToolsView {
 
     "use strict";
 
@@ -172,7 +173,7 @@ class EntitySelectionTools extends joint.dia.ToolsView {
     }
 
     createBoundaryTool() {
-        let boundaryTool = new joint.elementTools.Boundary({
+        let boundaryTool = new elementTools.Boundary({
             padding: 2,
             attributes: {
                 fill: "none",

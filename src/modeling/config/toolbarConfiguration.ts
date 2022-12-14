@@ -1,5 +1,5 @@
-import { ToolbarElementType } from "../representations/guiElements.toolbarTools.mjs";
-import EntityTypes from "./entityTypes.mjs";
+import { ToolbarElementType } from "../representations/guiElements.toolbarTools";
+import EntityTypes from "./entityTypes";
 
 const ItemType = Object.freeze({
     BUTTON: "button",

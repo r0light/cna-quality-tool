@@ -1,8 +1,10 @@
-import { dataAggregateSvgRepresentation, ParentRelation, PropertyContentType } from "../../config/detailsSidebarConfig.mjs";
-import EntityTypes from "../../config/entityTypes.mjs";
-import { UIContentType } from "../../config/toolbarConfiguration.mjs";
-import UIModalDialog, { DialogSize } from "../guiElements.dialog.mjs";
-import { FormGroup } from "../guiElements.mjs";
+import * as $ from 'jquery';
+import { dataAggregateSvgRepresentation, ParentRelation, PropertyContentType } from "../../config/detailsSidebarConfig";
+import EntityTypes from "../../config/entityTypes";
+import { UIContentType } from "../../config/toolbarConfiguration";
+import UIModalDialog, { DialogSize } from "../guiElements.dialog";
+import { FormGroup } from "../guiElements";
+import { dia } from 'jointjs';
 
 const componentSvgRepresentation = () => {
     return '<rect width="24" height="12" rx="2" ry="2" transform="translate(2.2, 2)" stroke-dasharray="0" stroke-width="2" stroke="black" fill="white"></rect>';
@@ -45,9 +47,9 @@ const EditModelDialogConfig = () => {
 class DataAggregatePropertiesViewer {
 
     #propertyGroupContainer = "entity";
-    #selectedDataAggregateElement = {};
+    #selectedDataAggregateElement: dia.Cell;
 
-    #modalDialog = {};
+    #modalDialog: UIModalDialog;
 
     #embeddedMode = false;
     #hasParent = false;
@@ -119,6 +121,8 @@ class DataAggregatePropertiesViewer {
             attributes: {
                 placeholder: "No family assigned",
                 provideEditButton: false, // TODO only if time
+                title: "",
+                value: ""
             }
 
         },
@@ -343,9 +347,9 @@ class DataAggregatePropertiesViewer {
 
     saveFamilyConfig(actionParentObject) {
         const includedDataAggregateElements = $("#dataAggregate-familyConfig-table input[data-entity-property=dataAggregate-familyConfig-included]:checked").get();
-        const newIncludedDataAggregateElements = includedDataAggregateElements.map((checkbox) => { return checkbox.value });
+        const newIncludedDataAggregateElements = includedDataAggregateElements.map((checkbox) => { return checkbox["value"] });
         const nonIncludedDataAggregateElements = $("#dataAggregate-familyConfig-table input[data-entity-property=dataAggregate-familyConfig-included]:not(:checked)").get();
-        const newNonIncludedDataAggregateElements = nonIncludedDataAggregateElements.map((checkbox) => { return checkbox.value });
+        const newNonIncludedDataAggregateElements = nonIncludedDataAggregateElements.map((checkbox) => { return checkbox["value"] });
 
         const currentFamilyName = actionParentObject.getSelectedDataAggregateElement.attr("label/textWrap/text");
         for (const dataAggregate of actionParentObject.getDataAggregateList) {

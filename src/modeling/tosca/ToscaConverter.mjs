@@ -1,7 +1,5 @@
-import * as yaml from '../../../static/js/js-yaml.js';
-
-import * as Entities from '../entities.mjs'
-
+import * as yaml from 'js-yaml';
+import * as Entities from '../entities'
 import ComputeInfrastructure, { DBMSInfrastructure } from './node/compute.infrastructure.mjs';
 import ToscaDataAggregate from './node/toscaDataAggregate.mjs';
 import ToscaBackingData from './node/toscaBackingData.mjs';

@@ -1,4 +1,6 @@
-let CustomRemoveLinkButton = joint.linkTools.Remove.extend({
+import { dia, linkTools } from 'jointjs'
+
+let CustomRemoveLinkButton = linkTools.Remove.extend({
     name: "remove",
     children: [{
         tagName: "title",
@@ -27,7 +29,7 @@ let CustomRemoveLinkButton = joint.linkTools.Remove.extend({
     }]
 });
 
-class ConnectionSelectionTools extends joint.dia.ToolsView {
+class ConnectionSelectionTools extends dia.ToolsView {
 
     "use strict";
 
@@ -61,7 +63,7 @@ class ConnectionSelectionTools extends joint.dia.ToolsView {
     }
 
     createSourceArrowHeadTool() {
-        let sourceArrowheadTool = new joint.linkTools.SourceArrowhead({
+        let sourceArrowheadTool = new linkTools.SourceArrowhead({
             focusOpacity: 0.5
         });
 
@@ -69,7 +71,7 @@ class ConnectionSelectionTools extends joint.dia.ToolsView {
     }
 
     createArrowHeadTool() {
-        let targetArrowheadTool = new joint.linkTools.TargetArrowhead({
+        let targetArrowheadTool = new linkTools.TargetArrowhead({
             focusOpacity: 0.5
         });
 
@@ -77,7 +79,7 @@ class ConnectionSelectionTools extends joint.dia.ToolsView {
     }
 
     createSourceAnchorTool() {
-        let sourceAnchor = new joint.linkTools.SourceAnchor({
+        let sourceAnchor = new linkTools.SourceAnchor({
             focusOpacity: 0.5
         });
         sourceAnchor.options.customAnchorAttributes.r = 4;
@@ -87,13 +89,13 @@ class ConnectionSelectionTools extends joint.dia.ToolsView {
     }
 
     createTargetAnchorTool() {
-        return new joint.linkTools.TargetAnchor({
+        return new linkTools.TargetAnchor({
             focusOpacity: 0.5
         });
     }
 
     createSegmentsTool() {
-        let segmentsTool =  new joint.linkTools.Segments({
+        let segmentsTool =  new linkTools.Segments({
             focusOpacity: 0.5
         });
 
@@ -101,7 +103,7 @@ class ConnectionSelectionTools extends joint.dia.ToolsView {
     }
 
     createVerticesTools() {
-        let verticesTool = new joint.linkTools.Vertices({
+        let verticesTool = new linkTools.Vertices({
             focusOpacity: 0.5,
             vertexAdding: false
         });

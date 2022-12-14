@@ -1,12 +1,13 @@
-import ModelingArea from './modelingArea.mjs';
+import * as $ from 'jquery';
+import { dia, mvc } from "jointjs";
+import ModelingArea from './modelingArea';
 import Toolbar from './toolbar.js';
-import EntitySidebar from './entitySidebar.mjs';
-import ModalDialog from './modalDialog.mjs';
-import DetailsSidebar from './detailsSidebar.mjs';
+import EntitySidebar from './entitySidebar';
+import DetailsSidebar from './detailsSidebar';
 
-import ToolbarConfig from "../config/toolbarConfiguration.mjs";
-import SidebarEntityShapes from '../config/entitySidebarShape.config.mjs';
-import { DetailsSidebarConfig } from '../config/detailsSidebarConfig.mjs';
+import ToolbarConfig from "../config/toolbarConfiguration";
+import SidebarEntityShapes from '../config/entitySidebarShape.config';
+import { DetailsSidebarConfig } from '../config/detailsSidebarConfig';
 
 /**
  * The module for the main view of the modeling application.
@@ -18,9 +19,9 @@ import { DetailsSidebarConfig } from '../config/detailsSidebarConfig.mjs';
  * entity representation, the main modeling area and a detailsbar for the currently selected entity.
  * 
  * @class
- * @extends joint.mvc.View
+ * @extends mvc.View
  */
-const ModelingAppMainView = joint.mvc.View.extend({
+const ModelingAppMainView = mvc.View.extend({
 
     className: 'modelingAppMainView',
 
@@ -32,9 +33,6 @@ const ModelingAppMainView = joint.mvc.View.extend({
     },
 
     init() {
-        if (!(this.options.modelingAreaGraph instanceof joint.dia.Graph)) {
-            throw new TypeError("ModelingAppMainView: The provided graph has to be a joint.dia.Graph element");
-        }
 
         this.initializeModelingArea(this.options.modelingAreaGraph);
         this.initializeToolbar(this.mainPaper);
@@ -47,10 +45,7 @@ const ModelingAppMainView = joint.mvc.View.extend({
      * 
      * @param {joint.dia.Graph} modelingAreaGraph The Graph model that will include all information about the currently modeled system.
      */
-    initializeModelingArea(modelingAreaGraph) {
-        if (!(modelingAreaGraph instanceof joint.dia.Graph)) {            
-            throw new TypeError("ModelingAppMainView: The provided graph has to be a joint.dia.Graph element");
-        }
+    initializeModelingArea(modelingAreaGraph: dia.Graph) {
 
         let modelingArea = new ModelingArea({
             graph: modelingAreaGraph
@@ -64,15 +59,9 @@ const ModelingAppMainView = joint.mvc.View.extend({
      * 
      * @param {joint.dia.Paper} modelingAreaPaper The Paper view of the main modeling area for which the tools are provided.
      */
-    initializeToolbar(modelingAreaPaper) {
-        if (!(modelingAreaPaper instanceof joint.dia.Paper)) {
-            throw new TypeError("ModelingAppMainView: The provided paper has to be a joint.dia.Paper element");
-        }
+    initializeToolbar(modelingAreaPaper: dia.Paper) {
 
-        // TODO remove following line
-        let modalDialog = new ModalDialog();
-
-        const toolbar = new Toolbar(this.$(".app-header"), modelingAreaPaper, ToolbarConfig, modalDialog, this.options.currentSystemName);
+        const toolbar = new Toolbar(this.$(".app-header"), modelingAreaPaper, ToolbarConfig, this.options.currentSystemName);
         toolbar.render();
     },
 
@@ -82,7 +71,7 @@ const ModelingAppMainView = joint.mvc.View.extend({
      * @param {joint.dia.Paper} modelingAreaPaper The Paper view of the main modeling area to which the selected entity will be added.
      */
     initializeEntitySidebar(modelingAreaPaper) {
-        if (!(modelingAreaPaper instanceof joint.dia.Paper)) {
+        if (!(modelingAreaPaper instanceof dia.Paper)) {
             throw new TypeError("ModelingAppMainView: The provided paper has to be a joint.dia.Paper element");
         }
 
@@ -101,7 +90,7 @@ const ModelingAppMainView = joint.mvc.View.extend({
      * @param {joint.dia.Paper} modelingAreaPaper The Paper view of the main modeling area for which information will be shown in sidebar.
      */
     initializeDetailsSidebar(modelingAreaPaper) {
-        if (!(modelingAreaPaper instanceof joint.dia.Paper)) {
+        if (!(modelingAreaPaper instanceof dia.Paper)) {
             throw new TypeError("ModelingAppMainView: The provided paper has to be a joint.dia.Paper element");
         }
 
@@ -112,7 +101,7 @@ const ModelingAppMainView = joint.mvc.View.extend({
         });
         detailsSidebar.render();
 
-        this.listenTo(this.mainPaper, "cell:pointerdown", (cellView) => {
+        this.listenTo(this.mainPaper, "cell:pointerdown", (cellView: dia.CellView) => {
             detailsSidebar.renderEntitySelectionProperties(cellView.model);
         });
 

@@ -1,6 +1,9 @@
-import ModelingApplicationFrame from './representations/guiElements.appFrame.mjs'
+import * as $ from 'jquery';
+import * as bootstrap from "bootstrap";
+import { dia } from 'jointjs'
+import ModelingApplicationFrame from './representations/guiElements.appFrame'
 import SystemEntityManager from './systemEntityManager.mjs';
-import ModelingAppMainView from './views/modelingAppMainView.mjs'
+import ModelingAppMainView from './views/modelingAppMainView'
 
 class ModelingApplication {
 
@@ -14,7 +17,7 @@ class ModelingApplication {
     #systemEntityManager = null;
 
     constructor() {
-        this.#currentSystemGraph = new joint.dia.Graph;
+        this.#currentSystemGraph = new dia.Graph;
         this.#systemEntityManager = new SystemEntityManager(this.#currentSystemGraph);
     }
 
@@ -24,7 +27,7 @@ class ModelingApplication {
 
         document.getElementById("app").addEventListener("openModelingApplicationOverlay", () => {
             document.getElementById("init-overlay").style.display = "block";
-            $("#appToolbarContainer button").attr("disabled", true);
+            $("#appToolbarContainer button").attr("disabled", "true");
         });
 
         document.getElementById("createNewDiagramBtn").onclick = () => {
@@ -47,13 +50,17 @@ class ModelingApplication {
 
         $("#appNameTitle").on("systemNameChanged", (event) => {
         // this.#currentSystemGraph.on("systemNameChanged", (event) => {
-            this.setCurrentSystemName = event.updatedSystemName;
+            if (event.data && event.data["updatedSystemName"]) {
+                this.setCurrentSystemName =   event.data["updatedSystemName"];
+            }
         });
 
+        /* TODO is this needed?
         $(document).ready(function () {
             $('[data-toggle="tooltip"]').tooltip();
             $('[data-tooltip-toggle="tooltip"]').tooltip();
         });
+        */ 
     }
 
     getModeledSystemEntity() {
@@ -64,16 +71,16 @@ class ModelingApplication {
         return this.#currentSystemName;
     }
 
-    set setCurrentSystemName(systemName) {
+    set setCurrentSystemName(systemName: string) {
         if (!systemName) {
             return;
         }
 
         if (!this.#currentSystemName) {
-            $("#appNameTitle").trigger({
-                type: "initialSystemName",
-                systemName: systemName
-            });
+            $("#appNameTitle").trigger(
+                "initialSystemName",
+                { systemName: systemName }
+            );
             this.#currentSystemGraph.trigger("initialSystemName", { systemName: systemName });
         }
 
@@ -97,7 +104,7 @@ class ModelingApplication {
     }
 
     #configureGetSystemName() {
-        let providedAppName = $("#applicationNameInputField").val();
+        let providedAppName = $("#applicationNameInputField").val() as string;
         let forms = $("#init-overlay .needs-validation");
 
         for (const form of forms) {
@@ -111,8 +118,8 @@ class ModelingApplication {
         this.setCurrentSystemName = providedAppName;
         $("#appNameTitle").val(providedAppName);
         $("#init-overlay").toggle();
-        $("#appToolbarContainer button").attr("disabled", false);
+        $("#appToolbarContainer button").attr("disabled", "false");
     }
 }
 
-export default ModelingApplication;
+export { ModelingApplication };

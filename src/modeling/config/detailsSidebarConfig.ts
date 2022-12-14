@@ -1,5 +1,5 @@
-import EntityTypes from "./entityTypes.mjs";
-import { getComponentProperties, getBackingServiceProperties, getStorageBackingServiceProperties, getEndpointProperties, getInfrastructureProperties } from "../entities.mjs";
+import EntityTypes from "./entityTypes";
+import { getComponentProperties, getBackingServiceProperties, getStorageBackingServiceProperties, getEndpointProperties, getInfrastructureProperties } from "../entities";
 
 function parseProperties(properties) {
     return properties.map(property => {
@@ -14,8 +14,11 @@ function parseProperties(properties) {
                 placeholder: property.getExample,
                 helpText: {
                     text: property.getDescription
-                }
-            }
+                },
+                maxlength: Number.MAX_VALUE,
+                datalistItems: []
+            },
+            contentType: {}
         }
         switch(property.getDataType) {
             case "boolean":

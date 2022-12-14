@@ -1,11 +1,12 @@
+import * as $ from 'jquery';
+import { dia, mvc , routers, shapes, highlighters } from "jointjs";
+import { DeploymentMapping, Link } from "../config/entityShapes";
+import EntityTypes from "../config/entityTypes";
+import { UIContentType } from "../config/toolbarConfiguration";
+import UIModalDialog from "../representations/guiElements.dialog";
+import ConnectionSelectionTools from "./tools/connectionSelectionTools";
 
-import { DeploymentMapping, Link } from "../config/entityShapes.mjs";
-import EntityTypes from "../config/entityTypes.mjs";
-import { UIContentType } from "../config/toolbarConfiguration.mjs";
-import UIModalDialog from "../representations/guiElements.dialog.mjs";
-import ConnectionSelectionTools from "./tools/connectionSelectionTools.mjs";
-
-const ModelingArea = joint.mvc.View.extend({
+const ModelingArea = mvc.View.extend({
 
     className: "modelingArea",
 
@@ -21,19 +22,15 @@ const ModelingArea = joint.mvc.View.extend({
 
     options: {
         el: ".visible-modeling-area",
-        graph: null,
-        paper: null
+        graph: dia.Graph,
+        paper: dia.Paper
     },
 
     init() {
-        if (!(this.options.graph instanceof joint.dia.Graph)) {
-            throw new TypeError("ModelingArea: The provided graph has to be a joint.dia.Graph element");
-        }
-
         this._createModelingArea();
         this.$document = $(this.el.ownerDocument);
 
-        let paper = new joint.dia.Paper({
+        let paper = new dia.Paper({
             el: $("#jointPaper"),
             width: 3000,
             height: 3000,
@@ -45,10 +42,10 @@ const ModelingArea = joint.mvc.View.extend({
                 color: "rgba(192, 192, 192, 0.3)"
             },
             async: true,
-            sorting: joint.dia.Paper.sorting.APPROX,
+            sorting: dia.Paper.sorting.APPROX,
 
-            cellNamespace: joint.shapes,
-            routerNamespace: joint.routers,
+            cellViewNamespace: shapes,
+            routerNamespace: routers,
 
             // defaults:
             defaultLink: (cellView, magnet) => this.defaultLink(cellView, magnet),
@@ -69,7 +66,7 @@ const ModelingArea = joint.mvc.View.extend({
                 }
             },
 
-            linkView: joint.dia.LinkView.extend({
+            linkView: dia.LinkView.extend({
                 pointerdblclick: function (evt, x, y) {
                     this.addVertex(x, y);
                 }
@@ -292,10 +289,10 @@ const ModelingArea = joint.mvc.View.extend({
     },
 
     validateUnembedding(childView) {
-        return !childView.model.attributes.entity.type === EntityTypes.ENDPOINT ||
-            !childView.model.attributes.entity.type === EntityTypes.EXTERNAL_ENDPOINT ||
-            !childView.model.attributes.entity.type === EntityTypes.DATA_AGGREGATE ||
-            !childView.model.attributes.entity.type === EntityTypes.BACKING_DATA;
+        return !(childView.model.attributes.entity.type === EntityTypes.ENDPOINT) ||
+            !(childView.model.attributes.entity.type === EntityTypes.EXTERNAL_ENDPOINT) ||
+            !(childView.model.attributes.entity.type === EntityTypes.DATA_AGGREGATE) ||
+            !(childView.model.attributes.entity.type === EntityTypes.BACKING_DATA);
     },
 
     checkCreatedLink(linkView, paper) {
@@ -339,7 +336,7 @@ const ModelingArea = joint.mvc.View.extend({
                 document.removeEventListener("keydown", this. _currentKeypressHandler, false);
                 let currentPaper = this;
                 this.model.getLinks().forEach(function (link) {
-                    joint.highlighters.stroke.remove(link.findView(currentPaper));
+                    highlighters.stroke.remove(link.findView(currentPaper));
                 });
                 // TODO if lock mechanism is included 
                 // if (cellView.paper.options.interactive == false) {
@@ -354,7 +351,7 @@ const ModelingArea = joint.mvc.View.extend({
                 document.removeEventListener("keydown", this. _currentKeypressHandler, false);
                 let currentPaper = this;
                 this.model.getLinks().forEach(function (link) {
-                    joint.highlighters.stroke.remove(link.findView(currentPaper));
+                    highlighters.stroke.remove(link.findView(currentPaper));
                 });
             },
             'element:contextmenu': function (cellView, evt, x, y) {
@@ -378,7 +375,7 @@ const ModelingArea = joint.mvc.View.extend({
                     this.hideTools();
                     this.model.getLinks().forEach(function (link) {
                         if (!(link === cellView.model)) {
-                            joint.highlighters.stroke.remove(link.findView(cellView.paper));
+                            highlighters.stroke.remove(link.findView(cellView.paper));
                             return;
                         }
                     });

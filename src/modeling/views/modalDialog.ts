@@ -1,4 +1,10 @@
-import { SectionContentType } from "../config/actionDialogConfig.mjs";
+import * as $ from 'jquery';
+import * as bootstrap from "bootstrap";
+import { SectionContentType } from "../config/actionDialogConfig";
+
+type dialogTitle = {type: string, icon: string, text: string}
+
+type saveButton = {icon: string, text: string, action: Function}
 
 class ModalDialog {
 
@@ -36,7 +42,7 @@ class ModalDialog {
         $("#staticModal button").on("click", () => { $(':focus').blur(); });
     }
 
-    renderDialogBasics(title = "", cancelButtonText = "Cancel", saveButton = "", contentContainerIdToUse = "", modalSize="") {
+    renderDialogBasics(title = "", cancelButtonText = "Cancel", saveButton = undefined, contentContainerIdToUse = "", modalSize="") {
         this.#configureTitle(title);
         this.#configureCancelButton(cancelButtonText);
 
@@ -48,7 +54,7 @@ class ModalDialog {
         this.#configureSaveButton(saveButton);
     }
 
-    renderDialog(title = "", content = "", cancelButtonText = "Cancel", saveButton = "") {
+    renderDialog(title = "", content = "", cancelButtonText = "Cancel", saveButton = undefined) {
         this.#configureTitle(title);
         this.#configureCancelButton(cancelButtonText);
 
@@ -59,7 +65,7 @@ class ModalDialog {
         this.#configureSaveButton(saveButton);
     }
 
-    renderActionDialog(title = "", actionContent = {}, cancelButtonText = "Cancel", saveButton = "") {
+    renderActionDialog(title: dialogTitle | string = "", actionContent = {}, cancelButtonText = "Cancel", saveButton = undefined) {
         this.#configureTitle(title);
         this.#configureCancelButton(cancelButtonText);
         this.#configureSaveButton(saveButton);
@@ -153,7 +159,7 @@ class ModalDialog {
         });
 
         $("#" + sectionContent.providedFeature).on("change input", (event) => {
-            $("#" + sectionContent.providedFeature + "-currentValue").text($("#" + sectionContent.providedFeature).val());
+            $("#" + sectionContent.providedFeature + "-currentValue").text($("#" + sectionContent.providedFeature).val() as string);
         });
 
         for (const additionalItem of sectionContent.additionalItems) {
@@ -163,7 +169,7 @@ class ModalDialog {
         }
     }
 
-    #configureTitle(title = "") {
+    #configureTitle(title: dialogTitle | string) {
         if (title instanceof Object) {
             $("#modalTitleIcon").attr("data-type", (title.type ? title.type : "normal"));
             $("#modalTitleIcon").removeClass();
@@ -179,7 +185,7 @@ class ModalDialog {
         $("#modalCancelButton").click(() => { this.resetDialog(); });
     }
 
-    #configureSaveButton(saveButton = "") {
+    #configureSaveButton(saveButton: saveButton = undefined) {
         if (!saveButton || !(saveButton instanceof Object) || !saveButton.action) {
             $("#modalSaveButton").css("display", "none");
             return;
@@ -198,15 +204,16 @@ class ModalDialog {
 
     show() {        
         $("#staticModal button").on("click", () => { $(':focus').blur(); });
-        $("#staticModal").modal("show");
+        console.log("show called in modelDialog: fix this in code")
+        /*$("#staticModal").modal("show");*/
     }
 
     hide() {
-        $("#staticModal").modal("hide");
+        /*$("#staticModal").modal("hide");*/
     }
 
     destroyDialog() {
-        $("#staticModal").modal("hide");
+        /*$("#staticModal").modal("hide");*/
         this.resetDialog();
     }
 

@@ -1,3 +1,5 @@
+import * as $ from 'jquery';
+
 class AccordionCollapse {
 
     #context = "";
@@ -236,15 +238,15 @@ class AccordionCollapse {
             }
 
             if (event.target.getAttribute("data-property-type") === "entity") {
-                $("#" + this.#containerId).trigger({
-                    type: "entitySpecificPropertyChanged",
+                $("#" + this.#containerId).trigger(
+                    "entitySpecificPropertyChanged", {
                     propertyId: event.target.id,
                     originalTarget: event.target,
                     orginalEvent: event
                 });
             } else {
-                $("#" + this.#containerId).trigger({
-                    type: "entityPropertyChanged",
+                $("#" + this.#containerId).trigger(
+                    "entityPropertyChanged", {
                     propertyId: event.target.id,
                     propertyType: event.target.getAttribute("data-property-type"),
                     originalTarget: event.target,

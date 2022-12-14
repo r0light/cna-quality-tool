@@ -1,4 +1,5 @@
-import { PropertyContentType } from "../config/detailsSidebarConfig.mjs";
+import * as $ from 'jquery';
+import { PropertyContentType } from "../config/detailsSidebarConfig";
 
 class Table {
 

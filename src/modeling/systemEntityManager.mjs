@@ -1,10 +1,11 @@
-import EntityTypes from './config/entityTypes.mjs';
-import * as Entities from './entities.mjs';
-import ErrorMessage, { ErrorType } from './errorMessage.mjs'
+import { dia } from "jointjs";
+import EntityTypes from './config/entityTypes';
+import * as Entities from './entities';
+import ErrorMessage, { ErrorType } from './errorMessage'
 import ToscaConverter from './tosca/ToscaConverter.mjs';
-import { UIContentType } from './config/toolbarConfiguration.mjs';
-import UIModalDialog, { DialogSize } from './representations/guiElements.dialog.mjs';
-import { PropertyContentType } from './config/detailsSidebarConfig.mjs';
+import { UIContentType } from './config/toolbarConfiguration';
+import UIModalDialog, { DialogSize } from './representations/guiElements.dialog';
+import { PropertyContentType } from './config/detailsSidebarConfig';
 
 class SystemEntityManager {
 
@@ -17,7 +18,7 @@ class SystemEntityManager {
     #includedDataAggregateEntities = new Map();
 
     constructor(currentGraph) {
-        if (!(currentGraph instanceof joint.dia.Graph)) {
+        if (!(currentGraph instanceof dia.Graph)) {
             throw new TypeError("SystemEntityManager: The provided graph has to be a joint.dia.Graph element");
         }
 

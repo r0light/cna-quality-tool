@@ -1,3 +1,6 @@
+import * as $ from 'jquery';
+import { util } from "jointjs";
+
 class FormGroup {
 
     #formGroupId = "";
@@ -234,7 +237,7 @@ class FormGroup {
     }
 
     #createInputProperties(inputProperties = {}, disabled = "", checked = "", required = "", selected = "", readonly = "") { // TODO second element with options
-        if (!inputProperties || !(joint.util.isObject(inputProperties)) || (Object.keys(inputProperties).length <= 0)) {
+        if (!inputProperties || !(util.isObject(inputProperties)) || (Object.keys(inputProperties).length <= 0)) {
             return '';
         }
         let shouldBeDisabled = inputProperties.disabled ? true : (disabled ? disabled : false);
@@ -248,7 +251,7 @@ class FormGroup {
     }
 
     #createHelpTextForElementIfProvided(helpText = {}) {
-        if (!helpText || !(joint.util.isObject(helpText)) || (Object.keys(helpText).length <= 0)) {
+        if (!helpText || !(util.isObject(helpText)) || (Object.keys(helpText).length <= 0)) {
             return '';
         }
         return `<small id="${this.#formGroupId}-helpText" class="form-text text-muted">${helpText.text}</small>`;
@@ -459,7 +462,7 @@ class FormGroup {
     }
 
     #setInputProperties(inputProperties = {}, elementId = this.#formGroupId) {
-        if (!inputProperties || !(joint.util.isObject(inputProperties)) || (Object.keys(inputProperties).length <= 0)) {
+        if (!inputProperties || !(util.isObject(inputProperties)) || (Object.keys(inputProperties).length <= 0)) {
             return;
         }
 
@@ -471,7 +474,7 @@ class FormGroup {
     }
 
     #addHelpTextForElementIfProvided(helpText = {}) {
-        if (!helpText || !(joint.util.isObject(helpText)) || (Object.keys(helpText).length <= 0)) {
+        if (!helpText || !(util.isObject(helpText)) || (Object.keys(helpText).length <= 0)) {
             return;
         }
 

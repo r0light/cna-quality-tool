@@ -1,8 +1,10 @@
-import { PropertyContentType } from "../../config/detailsSidebarConfig.mjs";
-import EntityTypes from "../../config/entityTypes.mjs";
-import { UIContentType } from "../../config/toolbarConfiguration.mjs";
-import UIModalDialog, { DialogSize } from "../guiElements.dialog.mjs";
-import { FormGroup } from "../guiElements.mjs";
+import * as $ from 'jquery';
+import { dia, util } from "jointjs";
+import { PropertyContentType } from "../../config/detailsSidebarConfig";
+import EntityTypes from "../../config/entityTypes";
+import { UIContentType } from "../../config/toolbarConfiguration";
+import UIModalDialog, { DialogSize } from "../guiElements.dialog";
+import { FormGroup } from "../guiElements";
 
 const linkSvgRepresentation = () => {
     let marker = '<defs><marker id="arrowHead" orient="auto" overflow="visible" markerUnits="userSpaceOnUse"><path id="v-66" stroke="black" fill="black" transform="rotate(180)" d="M 8 -4.5 0 0 8 4.5 z"></path></marker></defs>';
@@ -13,9 +15,9 @@ const linkSvgRepresentation = () => {
 class RequestTracePropertiesViewer {
 
     #propertyGroupContainer = "entity";
-    #selectedRequestTraceElement = {};
+    #selectedRequestTraceElement: dia.Cell;
 
-    #modalDialog = {};
+    #modalDialog: UIModalDialog;
 
     specificProperties = {
         "referredEndpoint": {
@@ -121,7 +123,7 @@ class RequestTracePropertiesViewer {
         const specificProperty = this.specificProperties["referredEndpoint"];
         const propertyForm = new FormGroup(specificProperty.providedFeature, this.#propertyGroupContainer);
 
-        const groupedElements = joint.util.groupBy(this.#selectedRequestTraceElement.graph.getElements(), (element) => {
+        const groupedElements = util.groupBy(this.#selectedRequestTraceElement.graph.getElements(), (element) => {
             return element.prop("entity/type");
         });
 
@@ -242,7 +244,7 @@ class RequestTracePropertiesViewer {
 
     saveInvolvedLinks(actionParentObject) {
         const includedLinkElements = $("#involvedLinks-table input[data-entity-property=involvedLinks-included]:checked").get();
-        const newInvolvedLinks = new Array(includedLinkElements.map((checkbox) => { return checkbox.value }));
+        const newInvolvedLinks = new Array(includedLinkElements.map((checkbox) => { return checkbox["value"] }));
         actionParentObject.getSelectedRequestTraceElement.prop("entity/properties/involvedLinks", newInvolvedLinks, { rewrite: true, isolate: true });
     }
 

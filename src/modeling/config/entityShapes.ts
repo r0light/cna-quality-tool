@@ -1,5 +1,6 @@
-import { getComponentProperties, getBackingServiceProperties, getStorageBackingServiceProperties, getEndpointProperties, getInfrastructureProperties } from "../entities.mjs";
-import EntityTypes from "./entityTypes.mjs";
+import { dia, shapes } from 'jointjs'
+import { getComponentProperties, getBackingServiceProperties, getStorageBackingServiceProperties, getEndpointProperties, getInfrastructureProperties } from "../entities";
+import EntityTypes from "./entityTypes";
 
 // TODO section:
 /*  -   Icon on first load not on correct position --> with firefox for every F5, 
@@ -39,7 +40,7 @@ function parseProperties(entityProperties) {
             }
         })
  */
-const Component = joint.dia.Element.define("qualityModel.Component", {
+const Component = dia.Element.define("qualityModel.Component", {
     defaults: {
         size: {
             width: 160,
@@ -138,7 +139,7 @@ const Component = joint.dia.Element.define("qualityModel.Component", {
             }
         })
  */
-const Service = joint.dia.Element.define("qualityModel.Service", {
+const Service = dia.Element.define("qualityModel.Service", {
     defaults: {
         size: {
             width: 140,
@@ -233,7 +234,7 @@ const Service = joint.dia.Element.define("qualityModel.Service", {
             }
         })
  */
-const BackingService = joint.dia.Element.define("qualityModel.BackingService", {
+const BackingService = dia.Element.define("qualityModel.BackingService", {
     defaults: {
         size: {
             width: 200,
@@ -308,7 +309,7 @@ const BackingService = joint.dia.Element.define("qualityModel.BackingService", {
 
 
 // TODO ensure aspect ratio
-const StorageBackingService = joint.shapes.standard.Cylinder.define("qualityModel.StorageBackingService", {
+const StorageBackingService = shapes.standard.Cylinder.define("qualityModel.StorageBackingService", {
     defaults: {
         size: {
             width: 160,
@@ -408,7 +409,7 @@ const StorageBackingService = joint.shapes.standard.Cylinder.define("qualityMode
             }
         })
  */
-const Endpoint = joint.shapes.standard.Circle.define("qualityModel.Endpoint", {
+const Endpoint = shapes.standard.Circle.define("qualityModel.Endpoint", {
     defaults: {
         size: {
             width: 50,
@@ -485,7 +486,7 @@ const Endpoint = joint.shapes.standard.Circle.define("qualityModel.Endpoint", {
             }
         })
  */
-const ExternalEndpoint = joint.shapes.standard.Circle.define("qualityModel.ExternalEndpoint", {
+const ExternalEndpoint = shapes.standard.Circle.define("qualityModel.ExternalEndpoint", {
     defaults: {
         size: {
             width: 50,
@@ -557,7 +558,7 @@ const ExternalEndpoint = joint.shapes.standard.Circle.define("qualityModel.Exter
             }
         })
  */
-const Infrastructure = joint.dia.Element.define("qualityModel.Infrastructure", {
+const Infrastructure = dia.Element.define("qualityModel.Infrastructure", {
     defaults: {
         size: {
             width: 180,
@@ -652,7 +653,7 @@ const Infrastructure = joint.dia.Element.define("qualityModel.Infrastructure", {
             }
         })
  */
-const RequestTrace = joint.dia.Element.define("qualityModel.RequestTrace", {
+const RequestTrace = dia.Element.define("qualityModel.RequestTrace", {
     defaults: {
         size: {
             width: 190,
@@ -749,7 +750,7 @@ const RequestTrace = joint.dia.Element.define("qualityModel.RequestTrace", {
             }
         })
  */
-const Link = joint.shapes.standard.Link.define("qualityModel.Link", {
+const Link = shapes.standard.Link.define("qualityModel.Link", {
     attrs: {
         root: {
             title: "Link"
@@ -795,7 +796,7 @@ const Link = joint.shapes.standard.Link.define("qualityModel.Link", {
             }
         })
  */
-const DeploymentMapping = joint.shapes.standard.Link.define("qualityModel.DeploymentMapping", {
+const DeploymentMapping = shapes.standard.Link.define("qualityModel.DeploymentMapping", {
     attrs: {
         root: {
             title: "Deployment Mapping"
@@ -833,7 +834,7 @@ const DeploymentMapping = joint.shapes.standard.Link.define("qualityModel.Deploy
             }
         })
  */
-const DataAggregate = joint.dia.Element.define("qualityModel.DataAggregate", {
+const DataAggregate = dia.Element.define("qualityModel.DataAggregate", {
     defaults: {
         size: {
             width: 50,
@@ -923,7 +924,7 @@ const DataAggregate = joint.dia.Element.define("qualityModel.DataAggregate", {
             }
         })
  */
-const BackingData = joint.dia.Element.define("qualityModel.BackingData", {
+const BackingData = dia.Element.define("qualityModel.BackingData", {
     defaults: {
         size: {
             width: 100,

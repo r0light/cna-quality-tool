@@ -1,7 +1,9 @@
-import { PropertyContentType } from "../config/detailsSidebarConfig.mjs";
-import { UIContentType } from "../config/toolbarConfiguration.mjs";
-import { FormGroup } from "./guiElements.mjs";
-import Table from "./guiElements.table.mjs";
+import * as $ from 'jquery';
+import { util } from "jointjs";
+import { PropertyContentType } from "../config/detailsSidebarConfig";
+import { UIContentType } from "../config/toolbarConfiguration";
+import { FormGroup } from "./guiElements";
+import Table from "./guiElements.table";
 
 // Bootstrap-provided classes
 const DialogSize = Object.freeze({
@@ -75,7 +77,7 @@ class UIModalDialog {
      * @returns 
      */
     create(modalDialogConfig) {
-        if (!modalDialogConfig || !(joint.util.isObject(modalDialogConfig)) ||
+        if (!modalDialogConfig || !(util.isObject(modalDialogConfig)) ||
             !(modalDialogConfig.header) || !(modalDialogConfig.footer) || !(modalDialogConfig.content)) {
             return;
         }
@@ -90,7 +92,7 @@ class UIModalDialog {
      * @returns 
      */
     createHeader(headerProperties) {
-        if (!headerProperties || !(joint.util.isObject(headerProperties))) {
+        if (!headerProperties || !(util.isObject(headerProperties))) {
             return;
         }
 
@@ -110,7 +112,7 @@ class UIModalDialog {
      * @returns 
      */
     createFooter(footerProperties) {
-        if (!footerProperties || !(joint.util.isObject(footerProperties))) {
+        if (!footerProperties || !(util.isObject(footerProperties))) {
             return;
         }
 
@@ -144,7 +146,7 @@ class UIModalDialog {
      * @returns 
      */
     createContent(contentProperties) {
-        if (!contentProperties || !(joint.util.isObject(contentProperties))) {
+        if (!contentProperties || !(util.isObject(contentProperties))) {
             return;
         }
 
@@ -313,7 +315,7 @@ class UIModalDialog {
         if (closeButtonElements.length) {
             // Ensure Close Button exists
             this.#closeButtonsAction = () => { action(); }
-            closeButtonsAction.click(this.#closeButtonsAction);
+            /*closeButtonsAction.click(this.#closeButtonsAction);*/
         }
     }
 

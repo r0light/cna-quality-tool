@@ -1,12 +1,14 @@
-import { ColourConfig, EntityDetailsConfig, EntityGeneralProperties, PropertyContentType } from "../config/detailsSidebarConfig.mjs";
-import EntityTypes from "../config/entityTypes.mjs";
-import { FormGroup } from "../representations/guiElements.mjs";
-import AccordionCollapse from "../representations/guiElements.AccordionCollapse.mjs";
-import RequestTracePropertiesViewer from "../representations/entityProperties/RequestTracePropertiesViewer.mjs";
-import DataAggregatePropertiesViewer from "../representations/entityProperties/DataAggregatePropertiesViewer.mjs";
-import BackingDataPropertiesViewer from "../representations/entityProperties/BackingDataPropertiesViewer.mjs";
+import * as $ from 'jquery';
+import { dia, mvc, util } from "jointjs";
+import { ColourConfig, EntityDetailsConfig, EntityGeneralProperties, PropertyContentType } from "../config/detailsSidebarConfig";
+import EntityTypes from "../config/entityTypes";
+import { FormGroup } from "../representations/guiElements";
+import AccordionCollapse from "../representations/guiElements.AccordionCollapse";
+import RequestTracePropertiesViewer from "../representations/entityProperties/RequestTracePropertiesViewer";
+import DataAggregatePropertiesViewer from "../representations/entityProperties/DataAggregatePropertiesViewer";
+import BackingDataPropertiesViewer from "../representations/entityProperties/BackingDataPropertiesViewer";
 
-const DetailsSidebar = joint.mvc.View.extend({
+const DetailsSidebar = mvc.View.extend({
 
     className: "detailsSideBar",
 
@@ -33,7 +35,7 @@ const DetailsSidebar = joint.mvc.View.extend({
     },
 
     init() {
-        if (!(this.options.paper instanceof joint.dia.Paper)) {
+        if (!(this.options.paper instanceof dia.Paper)) {
             throw new TypeError("DetailsSideBar: The provided current paper has to be a joint.dia.Paper element");
         }
 
@@ -64,7 +66,7 @@ const DetailsSidebar = joint.mvc.View.extend({
         return this;
     },
 
-    renderEntitySelectionProperties(cell) {
+    renderEntitySelectionProperties(cell: dia.Cell) {
         if (this._currentEntitySelection === cell) {
             // ignore multiple clicks while selection didn't change
             return;
@@ -145,7 +147,7 @@ const DetailsSidebar = joint.mvc.View.extend({
         }
     },
 
-    renderPropertyInformation(appendToPropertyGroup = "", providedFeature = "", infoContent = "") {
+    renderPropertyInformation(appendToPropertyGroup = "", providedFeature = "", infoContent: any = "") {
         let textIcon = infoContent.iconClass ? '<i class="' + infoContent.iconClass + '" style="margin-right: 10px;"></i>' : '';
         let info = '<p id="' + providedFeature + '" class="text-muted">' + textIcon + infoContent.text + '</p>';
         this._propertyDetailsContainer.addContentToAccordionGroup(appendToPropertyGroup, info);
@@ -201,7 +203,7 @@ const DetailsSidebar = joint.mvc.View.extend({
                 return;
                 // break;
             case PropertyContentType.INPUT_LIST:
-                preparedPropertyFormTemplate._addDataListElementWithLabel(labelText, inputAttributes, inputProperties, new Array());
+                preparedPropertyFormTemplate._addDataListElementWithLabel(labelText, inputAttributes, inputProperties);
                 preparedPropertyFormTemplate._addFormFeedbackSection("Reset: Invalid input provided", "Successfully changed.");
                 const datalistForm = preparedPropertyFormTemplate.getCreatedFormTemplate(true);
                 this._propertyDetailsContainer.addContentToAccordionGroup(appendToPropertyGroup, datalistForm);
@@ -223,7 +225,7 @@ const DetailsSidebar = joint.mvc.View.extend({
                 propertyForm.addInputRangeElementWithLabel(labelText, inputAttributes, inputProperties);
                 break;
             default:
-                propertyForm.addInputTextElementWithLabel(labelText, inputAttributes, inputProperties);
+                propertyForm.addTextElementWithLabel(labelText, inputAttributes, inputProperties);
                 break;
         }
 
@@ -263,6 +265,7 @@ const DetailsSidebar = joint.mvc.View.extend({
     },
 
     renderEntitySpecificProperties() {
+        console.log("rendering")
         this._emptyEntitySpecificProperties();
         switch (this._currentEntitySelection.prop("entity/type")) {
             case EntityTypes.REQUEST_TRACE:
@@ -361,7 +364,7 @@ const DetailsSidebar = joint.mvc.View.extend({
 
     dataAggregateSelectionChanged(event) {
         this._previousDataAggregateSelection ? this._previousDataAggregateSelection.attr("body/fill", "white") : "";
-        if (!joint.util.isEmpty(event.target.value)) {
+        if (!util.isEmpty(event.target.value)) {
             this._previousDataAggregateSelection = this.options.graph.getCell(event.target.value);
 
             if (!this._previousDataAggregateSelection) {
@@ -374,7 +377,7 @@ const DetailsSidebar = joint.mvc.View.extend({
 
     backingDataSelectionChanged(event) {
         this._previousBackingDataSelection ? this._previousBackingDataSelection.attr("body/fill", "white") : "";
-        if (!joint.util.isEmpty(event.target.value)) {
+        if (!util.isEmpty(event.target.value)) {
             this._previousBackingDataSelection = this.options.graph.getCell(event.target.value);
 
             if (!this._previousBackingDataSelection) {
@@ -480,7 +483,7 @@ const DetailsSidebar = joint.mvc.View.extend({
     },
 
     handleRequestTraceExternalEndpointChanged(event) {
-        if (!joint.util.isEmpty(event.target.value)) {
+        if (!util.isEmpty(event.target.value)) {
             const externalEndpoint = this.options.graph.getCell(event.target.value);
 
             if (!externalEndpoint && externalEndpoint.isLink()) {
@@ -496,7 +499,7 @@ const DetailsSidebar = joint.mvc.View.extend({
     },
 
     handleDataAggregateParentRelationChanged(event) {
-        if (!joint.util.isEmpty(event.target.value) && this._currentEntitySelection.parent()) {
+        if (!util.isEmpty(event.target.value) && this._currentEntitySelection.parent()) {
             // const parentEntity = this.options.graph.getCell(this._currentEntitySelection.parent());
             // TODO save also in parent?
 

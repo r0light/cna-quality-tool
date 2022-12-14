@@ -1,8 +1,10 @@
-import { backingDataSvgRepresentation, dataAggregateSvgRepresentation, ParentRelation, PropertyContentType } from "../../config/detailsSidebarConfig.mjs";
-import EntityTypes from "../../config/entityTypes.mjs";
-import { UIContentType } from "../../config/toolbarConfiguration.mjs";
-import UIModalDialog, { DialogSize } from "../guiElements.dialog.mjs";
-import { FormGroup } from "../guiElements.mjs";
+import { dia } from 'jointjs';
+import * as $ from 'jquery';
+import { backingDataSvgRepresentation, dataAggregateSvgRepresentation, ParentRelation, PropertyContentType } from "../../config/detailsSidebarConfig";
+import EntityTypes from "../../config/entityTypes";
+import { UIContentType } from "../../config/toolbarConfiguration";
+import UIModalDialog, { DialogSize } from "../guiElements.dialog";
+import { FormGroup } from "../guiElements.js";
 
 const EditModelDialogConfig = () => {
     return {
@@ -27,10 +29,10 @@ const EditModelDialogConfig = () => {
 class BackingDataPropertiesViewer {
 
     #propertyGroupContainer = "entity";
-    #selectedBackingDataElement = {};
+    #selectedBackingDataElement: dia.Cell;
 
-    #modalDialog = {};
-    #modalDialogIncludedData = {};
+    #modalDialog: UIModalDialog;
+    #modalDialogIncludedData: UIModalDialog;
 
     #embeddedMode = false;
     #hasParent = false;
@@ -179,7 +181,9 @@ class BackingDataPropertiesViewer {
             },
             attributes: {
                 placeholder: "No family assigned",
-                provideEditButton: false // TODO only if time
+                provideEditButton: false, // TODO only if time
+                title: "",
+                value: ""
             }
 
         },
@@ -247,7 +251,7 @@ class BackingDataPropertiesViewer {
         }
     }
 
-    constructor(selectedBackingDataElement, appendToPropertyGroup = "") {
+    constructor(selectedBackingDataElement: dia.Cell, appendToPropertyGroup = "") {
         this.#propertyGroupContainer = appendToPropertyGroup;
         this.#selectedBackingDataElement = selectedBackingDataElement;
         this.#hasParent = this.#selectedBackingDataElement?.parent() ? true : false;
@@ -417,9 +421,9 @@ class BackingDataPropertiesViewer {
 
     saveFamilyConfig(actionParentObject) {
         const includedBackingDataElements = $("#backingData-familyConfig-table input[data-entity-property=backingData-familyConfig-included]:checked").get();
-        const newIncludedBackingDataElements = includedBackingDataElements.map((checkbox) => { return checkbox.value });
+        const newIncludedBackingDataElements = includedBackingDataElements.map((checkbox) => { return checkbox["value"] });
         const nonIncludedBackingDataElements = $("#backingData-familyConfig-table input[data-entity-property=backingData-familyConfig-included]:not(:checked)").get();
-        const newNonIncludedBackingDataElements = nonIncludedBackingDataElements.map((checkbox) => { return checkbox.value });
+        const newNonIncludedBackingDataElements = nonIncludedBackingDataElements.map((checkbox) => { return checkbox["value"] });
 
         const currentFamilyName = actionParentObject.getSelectedBackingDataElement.attr("label/textWrap/text");
         for (const backingData of actionParentObject.getBackingDataList) {

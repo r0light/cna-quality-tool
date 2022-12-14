@@ -1,4 +1,4 @@
-import EntityTypes from "./config/entityTypes.mjs";
+import EntityTypes from "./config/entityTypes";
 
 const ErrorType = Object.freeze({
     MISSING_INFORMATION: "missing information",

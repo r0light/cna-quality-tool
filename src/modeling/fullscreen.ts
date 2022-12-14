@@ -1,3 +1,5 @@
+import * as $ from 'jquery';
+
 //TODO problem with dark mode?
 
 document.addEventListener("fullscreenchange", function() {
