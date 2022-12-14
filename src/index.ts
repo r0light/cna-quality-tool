@@ -1,5 +1,5 @@
 import * as $ from 'jquery';
-import * as bootstrap from 'bootstrap';
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import { ModelingApplication } from './modeling/modelingApp'
 import Homepage from './home';
 
