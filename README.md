@@ -52,5 +52,5 @@ The application uses:
 
 ### technical things
 
-- [ ] refactor to TypeScript
+- [x] refactor to TypeScript
 - [ ] add tests for quality calculations

@@ -1,8 +1,8 @@
-import { dia } from "jointjs";
+import { dia, util } from "jointjs";
 import EntityTypes from './config/entityTypes';
 import * as Entities from './entities';
 import ErrorMessage, { ErrorType } from './errorMessage'
-import ToscaConverter from './tosca/ToscaConverter.mjs';
+import ToscaConverter from './tosca/ToscaConverter.js';
 import { UIContentType } from './config/toolbarConfiguration';
 import UIModalDialog, { DialogSize } from './representations/guiElements.dialog';
 import { PropertyContentType } from './config/detailsSidebarConfig';
@@ -78,8 +78,8 @@ class SystemEntityManager {
         this.#checkValidityOfDataAggregates();
     }
 
-    #addEntity(graphElement) {
-        let addedEntity = "";
+    #addEntity(graphElement: dia.Element) {
+        let addedEntity = {};
         switch (graphElement.prop("entity/type")) {
             case EntityTypes.COMPONENT:
                 addedEntity = this.#createComponent(graphElement, EntityTypes.COMPONENT);
@@ -120,8 +120,8 @@ class SystemEntityManager {
         }
     }
 
-    #addConnectionEntity(graphLink) {
-        let addedEntity = "";
+    #addConnectionEntity(graphLink: dia.Link) {
+        let addedEntity = {};
         switch (graphLink.prop("entity/type")) {
             case EntityTypes.LINK:
                 addedEntity = this.#createLink(graphLink);
@@ -145,7 +145,7 @@ class SystemEntityManager {
     }
 
     #createComponent(graphElement, endpointEntityType) {
-        let groupedLinks = joint.util.groupBy(this.#currentSystemGraph.getConnectedLinks(graphElement), (element) => {
+        let groupedLinks = util.groupBy(this.#currentSystemGraph.getConnectedLinks(graphElement), (element) => {
             return element.prop("entity/type");
         });
 

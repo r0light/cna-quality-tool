@@ -1,16 +1,16 @@
 import * as yaml from 'js-yaml';
 import * as Entities from '../entities'
-import ComputeInfrastructure, { DBMSInfrastructure } from './node/compute.infrastructure.mjs';
-import ToscaDataAggregate from './node/toscaDataAggregate.mjs';
-import ToscaBackingData from './node/toscaBackingData.mjs';
-import ConnectsToLink from './relationship/connectsTo.link.mjs';
-import HostedOn from "./relationship/hostedOn.mjs"
-import ToscaServiceTemplate from "./ServiceTemplate.mjs";
-import RootComponent from './node/root.component.mjs';
-import SoftwareComponentService from './node/softwareComponent.service.mjs';
-import DatabaseStorageBackingService from './node/database.storageBackingService.mjs';
-import ToscaBackingService from './node/toscaBackingService.mjs';
-import ToscaRequestTrace from './node/toscaRequestTrace.mjs';
+import ComputeInfrastructure, { DBMSInfrastructure } from './node/compute.infrastructure';
+import ToscaDataAggregate from './node/toscaDataAggregate';
+import ToscaBackingData from './node/toscaBackingData';
+import ConnectsToLink from './relationship/connectsTo.link';
+import HostedOn from "./relationship/hostedOn"
+import ToscaServiceTemplate from "./ServiceTemplate";
+import RootComponent from './node/root.component';
+import SoftwareComponentService from './node/softwareComponent.service';
+import DatabaseStorageBackingService from './node/database.storageBackingService';
+import ToscaBackingService from './node/toscaBackingService';
+import ToscaRequestTrace from './node/toscaRequestTrace';
 
 class ToscaConverter {
 
@@ -74,7 +74,7 @@ class ToscaConverter {
                 };
                 let endpointType = entity.getProperties().find(property => property.getKey === "endpointType").value;
                 let endpointPath = entity.getProperties().find(property => property.getKey === "endpointPath").value;
-                let endpointPort = entity.getProperties().find(property => property.getKey === "endpointPath").value;
+                let endpointPort = entity.getProperties().find(property => property.getKey === "endpointPort").value;
                 
                 endpoint["protocol"] = endpointType.toLowerCase().includes("topic") ? "udp" : "http";
                 endpoint["port"] = endpointPort;
@@ -100,11 +100,11 @@ class ToscaConverter {
             let persistedData = ""; // TODO
 
             if (componentEntity instanceof Entities.Service) {
-                this.#nodeTemplates[this.#ensureNoWhiteSpace(componentEntity.getName)] = new SoftwareComponentService(componentEntity.getModelId, componentHost, endpointLinks, usesDataItems, usesBackingDataItems, endpoints, externalEndpoints, persistedData, componentEntity.position, componentEntity.size);
+                this.#nodeTemplates[this.#ensureNoWhiteSpace(componentEntity.getName)] = new SoftwareComponentService(componentEntity.getModelId, componentHost, endpointLinks, usesDataItems, usesBackingDataItems, endpoints, externalEndpoints, persistedData, componentEntity["position"], componentEntity["size"]);
             } else if (componentEntity instanceof Entities.BackingService) {
-                this.#nodeTemplates[this.#ensureNoWhiteSpace(componentEntity.getName)] = new ToscaBackingService(componentEntity.getModelId, componentHost, endpointLinks, usesDataItems, usesBackingDataItems, endpoints, externalEndpoints, persistedData, componentEntity.getProperties(), componentEntity.position, componentEntity.size);
+                this.#nodeTemplates[this.#ensureNoWhiteSpace(componentEntity.getName)] = new ToscaBackingService(componentEntity.getModelId, componentHost, endpointLinks, usesDataItems, usesBackingDataItems, endpoints, externalEndpoints, persistedData, componentEntity.getProperties(), componentEntity["position"], componentEntity["size"]);
             } else if (componentEntity instanceof Entities.StorageBackingService) {
-                this.#nodeTemplates[this.#ensureNoWhiteSpace(componentEntity.getName)] = new DatabaseStorageBackingService(componentEntity.getModelId, componentHost, endpointLinks, usesDataItems, usesBackingDataItems, endpoints, externalEndpoints, persistedData, componentEntity.getProperties(), componentEntity.position, componentEntity.size);
+                this.#nodeTemplates[this.#ensureNoWhiteSpace(componentEntity.getName)] = new DatabaseStorageBackingService(componentEntity.getModelId, componentHost, endpointLinks, usesDataItems, usesBackingDataItems, endpoints, externalEndpoints, persistedData, componentEntity.getProperties(), componentEntity["position"], componentEntity["size"]);
             } else {
                 this.#nodeTemplates[this.#ensureNoWhiteSpace(componentEntity.getName)] = new RootComponent(componentEntity.getModelId, componentHost, endpointLinks, usesDataItems, usesBackingDataItems, endpoints, externalEndpoints, persistedData, componentEntity.position, componentEntity.size);
             }
@@ -154,7 +154,9 @@ class ToscaConverter {
             let involvedLinks = requestTraceEntity.getLinkEntities.map((entity) => {
                 return this.#ensureNoWhiteSpace(this.#createLinkNameKey(entity));
             });
-            this.#nodeTemplates[this.#ensureNoWhiteSpace(key)] = new ToscaRequestTrace(requestTraceEntity.getModelId, this.#ensureNoWhiteSpace(requestTraceEntity.getExternalEndpoint.getParentName), this.#createEndpointPathName(requestTraceEntity.getExternalEndpoint), involvedLinks, requestTraceEntity.position, requestTraceEntity.size, requestTraceEntity.getName);
+            let externalEndpointType = requestTraceEntity.getExternalEndpoint.getProperties().find(property => property.getKey === "endpointType").value;
+            let externalEndpointPath = requestTraceEntity.getExternalEndpoint.getProperties().find(property => property.getKey === "endpointPath").value;
+            this.#nodeTemplates[this.#ensureNoWhiteSpace(key)] = new ToscaRequestTrace(requestTraceEntity.getModelId, this.#ensureNoWhiteSpace(requestTraceEntity.getExternalEndpoint.getParentName), this.#createEndpointPathName(externalEndpointType, externalEndpointPath), involvedLinks, requestTraceEntity.position, requestTraceEntity.size, requestTraceEntity.getName);
         }
     }
 
