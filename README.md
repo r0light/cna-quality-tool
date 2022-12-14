@@ -2,12 +2,23 @@
 
 This directory includes a prototypical implementation of a modeling application and is related to the [https://github.com/KarolinDuerr/MA-CNA-ModelingSupport](https://github.com/KarolinDuerr/MA-CNA-ModelingSupport) repository.
 
-
 ## How to start the application
 
-Start a local server using python by executing the following command in this directory: `python -m http.server 8001`
+The application can be started using [Vite](https://vitejs.dev/).
 
-Afterwards you can go to [http://localhost:8001/modelingApplication.html](http://localhost:8001/modelingApplication.html)
+To so, [Node.js](https://nodejs.org) needs to be installed. You can then set up the project using:
+
+```bash
+$ npm install
+```
+
+And run the application locally in development mode with:
+
+```bash
+$ npm run dev
+```
+
+Afterwards you can go to [http://localhost:5173](http://localhost:5173)
 
 ## Dependencies
 
