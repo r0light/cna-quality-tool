@@ -1,5 +1,15 @@
 import * as $ from 'jquery';
 import { util } from "jointjs";
+import type { buttonProperties, propertyConfig } from '../config/detailsSidebarConfig';
+
+type inputOption = {
+    optionValue: string,
+    optionText: string,
+    optionTitle?: string,
+    optionRepresentationClass?: string,
+    disabled?: boolean,
+    selected?: boolean
+}
 
 class FormGroup {
 
@@ -36,7 +46,7 @@ class FormGroup {
         return form;
     }
 
-    addDropdownElementWithLabelAndOptions(formItemLabelText, inputAttributes, inputProperties, inputOptions) {
+    addDropdownElementWithLabelAndOptions(formItemLabelText: string, inputAttributes: propertyConfig["attributes"], inputProperties: propertyConfig["properties"], inputOptions: inputOption[]) {
         this.#labelBeforeInputGroup = this.#createLabelForInputGroupElement(formItemLabelText, inputAttributes);
 
         const selectionOptions = this.#createOptionElementsForInputElement(inputOptions, inputAttributes.placeholder);
@@ -51,7 +61,7 @@ class FormGroup {
         this.#inputGroupItem = selectionBox;
     }
 
-    _addDataListElementWithLabel(formItemLabelText, inputAttributes, inputProperties) {
+    _addDataListElementWithLabel(formItemLabelText: string, inputAttributes: propertyConfig["attributes"], inputProperties: propertyConfig["properties"]) {
         this.#labelBeforeInputGroup = this.#createLabelForInputGroupElement(formItemLabelText, inputAttributes);
         const datalistProperties = this.#createInputProperties(inputProperties);
 
@@ -69,7 +79,7 @@ class FormGroup {
         this.#inputGroupItem = `${inputBox}${dataListItem}${additionalButton}`;
     }
 
-    _addButtonElementWithLabel(formItemLabelText = "", inputAttributes = {}, inputProperties = {}) {
+    _addButtonElementWithLabel(formItemLabelText: string, inputAttributes: propertyConfig["attributes"], inputProperties: propertyConfig["properties"]) {
         const label = this.#createLabelForInputGroupElement(formItemLabelText, inputAttributes);
 
         const buttonIcon = inputAttributes.buttonIconClass ? `<i id="${this.#formGroupId}-buttonIcon" class="${inputAttributes.buttonIconClass}"></i>` : "";
@@ -86,7 +96,7 @@ class FormGroup {
         this.#inputGroupItem = `${label}${button}`;
     }
 
-    addSwitchElementWithLabels(formItemLabelTexts = {}, inputAttributes = {}, inputProperties = {}) {
+    addSwitchElementWithLabels(formItemLabelTexts: propertyConfig["labels"], inputAttributes: propertyConfig["attributes"], inputProperties: propertyConfig["properties"]) {
         const isChecked = inputProperties.checked ? true : false;
         const labelLeftSide = `<label id="${this.#formGroupId}-leftLabel" class="detailsSidebar-toggle-leftLabel user-select-none ${isChecked ? 'text-muted' : ''}" for="${this.#formGroupId}">${formItemLabelTexts.leftLabel}</label>`;
 
@@ -103,7 +113,7 @@ class FormGroup {
         this.#inputGroupItem = `${labelLeftSide}${toggleGroup}`;
     }
 
-    _addTextAreaElementWithLabel(formItemLabelText = "", inputAttributes = {}, inputProperties = {}) {
+    _addTextAreaElementWithLabel(formItemLabelText: string, inputAttributes: propertyConfig["attributes"], inputProperties: propertyConfig["properties"]) {
         this.#labelBeforeInputGroup = this.#createLabelForInputGroupElement(formItemLabelText, inputAttributes);
 
         const textInputProperties = this.#createInputProperties(inputProperties);
@@ -121,7 +131,7 @@ class FormGroup {
         this.#inputGroupItem = `${textAreaElement}${additionalButton}`;
     }
 
-    addTextElementWithLabel(formItemLabelText = "", inputAttributes = {}, inputProperties = {}) {
+    addTextElementWithLabel(formItemLabelText: string, inputAttributes: propertyConfig["attributes"], inputProperties: propertyConfig["properties"]) {
         this.#labelBeforeInputGroup = this.#createLabelForInputGroupElement(formItemLabelText, inputAttributes);
 
         const textInputProperties = this.#createInputProperties(inputProperties);
@@ -140,7 +150,7 @@ class FormGroup {
         this.#inputGroupItem = `${textElement}${additionalButton}`;
     }
 
-    addTextElementWithPrependLabel(formItemLabelText = "", inputAttributes = {}, inputProperties = {}) {
+    addTextElementWithPrependLabel(formItemLabelText = "", inputAttributes: propertyConfig["attributes"], inputProperties: propertyConfig["properties"]) {
         const prependGroup = `<div class="input-group-prepend">
             <span class="input-group-text">
                 ${inputAttributes.labelIcon ? `<i class="${inputAttributes.labelIcon}"></i>`: ''}
@@ -164,7 +174,7 @@ class FormGroup {
         this.#inputGroupItem = `${prependGroup}${textElement}${additionalButton}`;
     }
 
-    addNumberElementWithLabel(formItemLabelText = "", inputAttributes = {}, inputProperties = {}) {
+    addNumberElementWithLabel(formItemLabelText: string, inputAttributes: propertyConfig["attributes"], inputProperties: propertyConfig["properties"]) {
         this.#labelBeforeInputGroup = this.#createLabelForInputGroupElement(formItemLabelText, inputAttributes);
 
         const numberInputProperties = this.#createInputProperties(inputProperties);
@@ -184,7 +194,7 @@ class FormGroup {
         this.#inputGroupItem = `${numberElement}${additionalButton}`;
     }
 
-    _addCheckboxElementWithLabel(formItemLabelText = "", inputAttributes = {}, inputProperties = {}) {
+    _addCheckboxElementWithLabel(formItemLabelText: string, inputAttributes: propertyConfig["attributes"], inputProperties: propertyConfig["properties"]) {
         const labelElement = this.#createLabelForInputGroupElement(formItemLabelText, inputAttributes, "form-check-label");
 
         const checkboxInputProperties = this.#createInputProperties(inputProperties);
@@ -228,7 +238,7 @@ class FormGroup {
         });
     }
 
-    #createLabelForInputGroupElement(labelText = "", inputAttributes = {}, labelClass="") {
+    #createLabelForInputGroupElement(labelText: string, inputAttributes: propertyConfig["attributes"], labelClass?: string) {
         return `<label id="${this.#formGroupId}-label" for="${this.#formGroupId}" ${labelClass ? `class="${labelClass}"` : ''}>
             ${inputAttributes.svgRepresentation ? `<span id="${this.#formGroupId}-svgRepresentation">${inputAttributes.svgRepresentation}</span>` : ''}
             ${inputAttributes.iconClass ? `<i id="${this.#formGroupId}-labelIcon" class="${inputAttributes.iconClass}"></i>` : ''}
@@ -236,10 +246,11 @@ class FormGroup {
         </label>`;
     }
 
-    #createInputProperties(inputProperties = {}, disabled = "", checked = "", required = "", selected = "", readonly = "") { // TODO second element with options
+    #createInputProperties(inputProperties: propertyConfig["properties"], disabled = false, checked = false, required = false, selected = false, readonly = false) { // TODO second element with options
         if (!inputProperties || !(util.isObject(inputProperties)) || (Object.keys(inputProperties).length <= 0)) {
             return '';
         }
+
         let shouldBeDisabled = inputProperties.disabled ? true : (disabled ? disabled : false);
         let shouldBeChecked = inputProperties.checked ? true : (checked ? checked : false);
         let shouldBeRequired = inputProperties.required ? true : (required ? required : false);
@@ -250,15 +261,15 @@ class FormGroup {
         return `${shouldBeDisabled ? "disabled" : ''} ${shouldBeChecked ? "checked" : ''} ${shouldBeRequired ? "required" : ''} ${shouldBeSelected ? "selected" : ''} ${shouldBeReadonly ? "readonly" : ''}`;
     }
 
-    #createHelpTextForElementIfProvided(helpText = {}) {
+    #createHelpTextForElementIfProvided(helpText: propertyConfig["attributes"]["helpText"]) {
         if (!helpText || !(util.isObject(helpText)) || (Object.keys(helpText).length <= 0)) {
             return '';
         }
         return `<small id="${this.#formGroupId}-helpText" class="form-text text-muted">${helpText.text}</small>`;
     }
 
-    #createEditButton(inputProperties = {}, provideEditButton = true) { // TODO more information?
-        if (!inputProperties || provideEditButton === false) {
+    #createEditButton(inputProperties: buttonProperties) { // TODO more information?
+        if (!inputProperties) {
             return '';
         }
 
@@ -272,7 +283,7 @@ class FormGroup {
         return editButton;
     }
 
-    #createEnterButton(inputProperties = {}, provideEnterButton = true) {
+    #createEnterButton(inputProperties: buttonProperties, provideEnterButton = true) {
         if (!inputProperties || inputProperties.disabled || provideEnterButton === false) {
             return '';
         }
@@ -313,7 +324,7 @@ class FormGroup {
         return options;
     }    
 
-    #createDataListElementsForInputElement(inputAttributes) {
+    #createDataListElementsForInputElement(inputAttributes: propertyConfig["attributes"]) {
         if (!inputAttributes || Array.isArray(inputAttributes.datalistItems) === false || inputAttributes.datalistItems.length <= 0) {
             return "";
         }
@@ -352,7 +363,7 @@ class FormGroup {
         return `<form id="${this.#formGroupId}-form" ${formClass}><div id="${this.#formGroupId}-inputGroup" ${divClass}></div></form>`;
     }
 
-    addInputRangeElementWithLabel(formItemLabelText = "", inputAttributes = {}, inputProperties = {}) {
+    addInputRangeElementWithLabel(formItemLabelText = "", inputAttributes: propertyConfig["attributes"], inputProperties: propertyConfig["properties"]) {
         this.#addLabelToFormGroup(formItemLabelText);
         let currentValue = '<span id="' + this.#formGroupId + '-currentValue" class="rangeBoxCurrentValue ml-2 align-baseline badge badge-primary badge-pill">' + inputAttributes.defaultValue + ' px</span>';
         $("#" + this.#formGroupId + "-label").append(currentValue);
@@ -461,7 +472,7 @@ class FormGroup {
         $("#" + this.#formGroupId + "-form").prepend(label);
     }
 
-    #setInputProperties(inputProperties = {}, elementId = this.#formGroupId) {
+    #setInputProperties(inputProperties: propertyConfig["properties"], elementId = this.#formGroupId) {
         if (!inputProperties || !(util.isObject(inputProperties)) || (Object.keys(inputProperties).length <= 0)) {
             return;
         }
@@ -473,7 +484,7 @@ class FormGroup {
         });
     }
 
-    #addHelpTextForElementIfProvided(helpText = {}) {
+    #addHelpTextForElementIfProvided(helpText: propertyConfig["attributes"]["helpText"]) {
         if (!helpText || !(util.isObject(helpText)) || (Object.keys(helpText).length <= 0)) {
             return;
         }
@@ -483,7 +494,7 @@ class FormGroup {
         $("#" + this.#formGroupId + "-form").append(helpTextInfo);
     }
 
-    #addEnterButton(inputProperties = {}, provideEnterButton = true) {
+    #addEnterButton(inputProperties: propertyConfig["properties"], provideEnterButton: boolean = true) {
         if (!inputProperties || inputProperties.disabled || provideEnterButton === false) {
             return;
         }

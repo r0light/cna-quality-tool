@@ -1,9 +1,75 @@
 import EntityTypes from "./entityTypes";
 import { getComponentProperties, getBackingServiceProperties, getStorageBackingServiceProperties, getEndpointProperties, getInfrastructureProperties } from "../entities";
 
+export type datalistItem = {
+    value: string,
+    text: string
+}
+
+export type buttonProperties = {
+    disabled: boolean,
+    required: boolean,
+    checked?: boolean,
+    selected?: boolean,
+    readonly?: boolean,
+    additionalButton?: buttonProperties
+}
+
+export type propertyConfig = {
+    providedFeature: string,
+    label: string,
+    labels?: {
+        headLabel: string,
+        leftLabel: string,
+        rightLabel: string
+    }
+    properties: buttonProperties,
+    attributes: {
+        placeholder?: string,
+        helpText?: {
+            text: string
+        },
+        maxlength?: number,
+        datalistItems?: datalistItem[]
+        size?: number,
+        multiple?: string,
+        provideEditButton?: boolean,
+        provideEnterButton?: boolean,
+        buttonIconClass?: string,
+        iconClass?: string,
+        buttonText?: string,
+        rows?: string,
+        value?: string,
+        defaultValue?: string,
+        title?: string,
+        pattern?: string,
+        labelIcon?: string,
+        min?: string,
+        max?: string,
+        step?: string,
+        svgRepresentation?: string
+
+    },
+    contentType: PropertyContentType
+}
+
 function parseProperties(properties) {
     return properties.map(property => {
-        var propertyConfig = {
+
+        let contentType = ((datatype) => {switch(datatype) {
+            case "boolean":
+                return PropertyContentType.CHECKBOX;
+            case "number":
+                return PropertyContentType.INPUT_NUMBERBOX;
+            case "list":
+                return PropertyContentType.INPUT_LIST;
+            case "text":
+            default:
+                 return PropertyContentType.INPUT_TEXTBOX;
+        }})(property.getDataType);
+
+
+        var propertyConfig: propertyConfig = {
             providedFeature: property.getKey,
             label: property.getName,
             properties: {
@@ -15,30 +81,17 @@ function parseProperties(properties) {
                 helpText: {
                     text: property.getDescription
                 },
-                maxlength: Number.MAX_VALUE,
-                datalistItems: []
+                maxlength: contentType === "number" ? property.getMaxLength : Number.MAX_VALUE,
+                datalistItems: contentType === "list" ? property.getOptions : []
             },
-            contentType: {}
+            contentType: contentType
         }
-        switch(property.getDataType) {
-            case "boolean":
-                propertyConfig.contentType = PropertyContentType.CHECKBOX;
-                break;
-            case "number":
-                propertyConfig.contentType = PropertyContentType.INPUT_NUMBERBOX;
-                propertyConfig.attributes.maxlength = property.getMaxLength;
-                break;
-            case "list":
-                propertyConfig.contentType = PropertyContentType.INPUT_LIST;
-                propertyConfig.attributes.datalistItems = property.getOptions;
-                break;
-            case "text":
-            default:
-                propertyConfig.contentType = PropertyContentType.INPUT_TEXTBOX;
-        }
+
         return propertyConfig;
     })
 }
+
+export type PropertyContentType = "button" | "checkbox" | "checkbox-without-label" | "text" | "text-label-prepend" | "number" | "range" | "textarea" | "info" | "select" | "list" | "table-dialog" | "table" | "toggle" | "formgroup";
 
 const PropertyContentType = Object.freeze({
     BUTTON: "button",

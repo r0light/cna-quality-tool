@@ -2,7 +2,7 @@ import * as $ from 'jquery';
 import * as bootstrap from "bootstrap";
 import { dia } from 'jointjs'
 import ModelingApplicationFrame from './representations/guiElements.appFrame'
-import SystemEntityManager from './systemEntityManager.mjs';
+import SystemEntityManager from './systemEntityManager';
 import ModelingAppMainView from './views/modelingAppMainView'
 
 class ModelingApplication {
