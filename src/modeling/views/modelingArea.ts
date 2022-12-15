@@ -14,9 +14,8 @@ const ModelingArea = mvc.View.extend({
 
     _paper: null,
 
-    _currentSelection: "",
+    _currentSelection: undefined,
     _currentRequestTraceViewSelection: "",
-    _currentKeypressHandler: new function() {},
 
     _hiddenEntities: new Set(),
 
@@ -100,6 +99,7 @@ const ModelingArea = mvc.View.extend({
         this.options.paper = paper;
         this._paper = paper;
         this.configureHandlingPaperEvents();
+        this.configureKeyPressEvents();
     },
 
     _createModelingArea() {
@@ -116,6 +116,10 @@ const ModelingArea = mvc.View.extend({
     render() {
         this._paper.render();
         return this;
+    },
+
+    setCurrentSelection(cell: dia.CellView | dia.LinkView | undefined) {
+        this._currentSelection = cell;
     },
 
     validateLinks(cellViewS, magnetS, cellViewT, magnetT, end, linkView) {
@@ -323,17 +327,12 @@ const ModelingArea = mvc.View.extend({
 
     configureHandlingPaperEvents() {
 
-        function onKeyPressedWithElementHighlighted(keydownEvent) {
-            if (keydownEvent.code === "Delete") {
-                this.model.remove();
-                document.removeEventListener("keydown", this. _currentKeypressHandler, false);
-            }
-        }
+        // use this handle, because otherwise setCurrentSelection would not be accessible later, this needs to be bound so that this._currentSelection can be accessed.
+        let setSelectionHandle = this.setCurrentSelection.bind(this);
 
         this._paper.on({
-            'element:pointerdown': function (cellView, evt, x, y) {
+            'element:pointerdown': function (cellView: dia.CellView, evt, x, y) {
                 this.hideTools();
-                document.removeEventListener("keydown", this. _currentKeypressHandler, false);
                 let currentPaper = this;
                 this.model.getLinks().forEach(function (link) {
                     highlighters.stroke.remove(link.findView(currentPaper));
@@ -342,13 +341,12 @@ const ModelingArea = mvc.View.extend({
                 // if (cellView.paper.options.interactive == false) {
                 //     return;
                 // }
-                this._currentKeypressHandler = onKeyPressedWithElementHighlighted.bind(cellView);
-                document.addEventListener("keydown", this._currentKeypressHandler, false);
+                setSelectionHandle(cellView);
                 cellView.showTools();
             },
             'blank:pointerdown': function (evt, x, y) {
                 this.hideTools();
-                document.removeEventListener("keydown", this. _currentKeypressHandler, false);
+                setSelectionHandle(undefined);
                 let currentPaper = this;
                 this.model.getLinks().forEach(function (link) {
                     highlighters.stroke.remove(link.findView(currentPaper));
@@ -357,7 +355,7 @@ const ModelingArea = mvc.View.extend({
             'element:contextmenu': function (cellView, evt, x, y) {
                 cellView.showTools();
             },
-            "link:pointerclick": function (linkView, evt) {
+            "link:pointerclick": function (linkView: dia.LinkView, evt) {
                 linkView.unhighlight();
 
                 if (linkView.hasTools()) {
@@ -366,6 +364,7 @@ const ModelingArea = mvc.View.extend({
                     return;
                 }
 
+                setSelectionHandle(linkView);
                 linkView.highlight();
                 let toolsView = new ConnectionSelectionTools();
                 linkView.addTools(toolsView);
@@ -476,6 +475,18 @@ const ModelingArea = mvc.View.extend({
         for (const entity of allSystemEntities) {
             entity.attr("root/visibility", "visible", { isolate: true });
         }
+    },
+
+    configureKeyPressEvents() {
+        function onKeyPressed(keydownEvent) {
+            if (keydownEvent.code === "Delete") {
+                // check if Element is selected
+                if (this._currentSelection) {
+                    this._currentSelection.model.remove();
+                }
+            }
+        }
+        document.addEventListener("keydown", onKeyPressed.bind(this), false);
     },
 
     configureLink(linkView, evt, elementViewConnected, magnet, arrowhead) {

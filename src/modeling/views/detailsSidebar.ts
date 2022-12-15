@@ -265,7 +265,6 @@ const DetailsSidebar = mvc.View.extend({
     },
 
     renderEntitySpecificProperties() {
-        console.log("rendering")
         this._emptyEntitySpecificProperties();
         switch (this._currentEntitySelection.prop("entity/type")) {
             case EntityTypes.REQUEST_TRACE:
