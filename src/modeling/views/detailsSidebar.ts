@@ -1,6 +1,6 @@
 import * as $ from 'jquery';
 import { dia, mvc, util } from "jointjs";
-import { ColourConfig, EntityDetailsConfig, EntityGeneralProperties, PropertyContentType } from "../config/detailsSidebarConfig";
+import { ColourConfig, EntityDetailsConfig, EntityGeneralProperties, propertyConfig, PropertyContentType } from "../config/detailsSidebarConfig";
 import EntityTypes from "../config/entityTypes";
 import { FormGroup } from "../representations/guiElements";
 import AccordionCollapse from "../representations/guiElements.AccordionCollapse";
@@ -153,7 +153,7 @@ const DetailsSidebar = mvc.View.extend({
         this._propertyDetailsContainer.addContentToAccordionGroup(appendToPropertyGroup, info);
     },
 
-    renderPropertyForm(appendToPropertyGroup = "", providedFeature = "", labelText = "", contentType = "", inputAttributes = {}, inputProperties = {}) {
+    renderPropertyForm(appendToPropertyGroup = "", providedFeature = "", labelText = "", contentType = "", inputAttributes: propertyConfig["attributes"], inputProperties: propertyConfig["properties"]) {
         const preparedPropertyFormTemplate = new FormGroup(providedFeature, appendToPropertyGroup);
 
         switch (contentType) {
