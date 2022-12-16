@@ -1,4 +1,4 @@
-import * as $ from 'jquery';
+import $ from 'jquery';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import { ModelingApplication } from './modeling/modelingApp'
 import Homepage from './home';

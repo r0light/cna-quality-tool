@@ -1,4 +1,4 @@
-import * as $ from 'jquery';
+import $ from 'jquery';
 import { dia, mvc, shapes } from "jointjs";
 import EntityTypes from "../config/entityTypes";
 import ConnectionSelectionTools from "./tools/connectionSelectionTools";

@@ -1,4 +1,4 @@
-import * as $ from 'jquery';
+import $ from 'jquery';
 import { util } from "jointjs";
 import type { buttonProperties, propertyConfig } from '../config/detailsSidebarConfig';
 

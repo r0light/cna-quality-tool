@@ -53,4 +53,4 @@ The application uses:
 ### technical things
 
 - [x] refactor to TypeScript
-- [ ] add tests for quality calculations
+- [ ] add tests for quality calculations (using https://github.com/avajs/ava)

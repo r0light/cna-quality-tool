@@ -1,4 +1,4 @@
-import * as $ from 'jquery';
+import $ from 'jquery';
 import { dia, mvc, util } from "jointjs";
 import { ColourConfig, EntityDetailsConfig, EntityGeneralProperties, propertyConfig, PropertyContentType } from "../config/detailsSidebarConfig";
 import EntityTypes from "../config/entityTypes";

@@ -10,6 +10,9 @@
 node_modules
 dist
 
+## ts
+built
+
 ## Editors:
 # WinEdt
 *.bak

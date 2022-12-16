@@ -1,4 +1,4 @@
-import * as $ from 'jquery';
+import $ from 'jquery';
 import * as Backbone from 'backbone';
 import { dia, mvc, util, highlighters } from "jointjs";
 import { ApplicationSettingsDialogConfig } from "../config/actionDialogConfig";
@@ -279,7 +279,6 @@ class Toolbar extends mvc.View<Backbone.Model, Element> {
             return;
         }
 
-        console.log("tooltop should be hidden again");
         $('[data-toggle="tooltip"]').tooltip("hide");
         $('[data-tooltip-toggle="tooltip"]').tooltip("hide");
         (document.activeElement as HTMLElement).blur();

@@ -2,7 +2,17 @@
   "compilerOptions": {
     "outDir": "./built",
     "allowJs": true,
-    "target": "es6"
+    "target": "es6",
+    "moduleResolution": "node",
+    "module": "ESNext",
+    "strict": false,
+    "esModuleInterop": true,
+    "skipLibCheck": true, 
+    "forceConsistentCasingInFileNames": true
   },
-  "include": ["./src/**"]
+  "ts-node": {
+    // Tell ts-node CLI to install the --loader automatically
+    "esm": true
+  },
+  "include": ["./src/**/*"]
 }

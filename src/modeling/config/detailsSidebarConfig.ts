@@ -232,7 +232,8 @@ const DetailsSidebarConfig = {
                     properties: {
                         disabled: true,
                         checked: true
-                    }
+                    },
+                    attributes: {}
                 }
             ]
         },

@@ -1,5 +1,5 @@
 import { dia } from 'jointjs';
-import * as $ from 'jquery';
+import $ from 'jquery';
 import { backingDataSvgRepresentation, dataAggregateSvgRepresentation, ParentRelation, PropertyContentType } from "../../config/detailsSidebarConfig";
 import EntityTypes from "../../config/entityTypes";
 import { UIContentType } from "../../config/toolbarConfiguration";

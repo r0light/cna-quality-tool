@@ -1,4 +1,4 @@
-import * as $ from 'jquery';
+import $ from 'jquery';
 import { dia, mvc , routers, shapes, highlighters } from "jointjs";
 import { DeploymentMapping, Link } from "../config/entityShapes";
 import EntityTypes from "../config/entityTypes";

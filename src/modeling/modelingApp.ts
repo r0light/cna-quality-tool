@@ -1,4 +1,4 @@
-import * as $ from 'jquery';
+import $ from 'jquery';
 import * as bootstrap from "bootstrap";
 import { dia } from 'jointjs'
 import ModelingApplicationFrame from './representations/guiElements.appFrame'
