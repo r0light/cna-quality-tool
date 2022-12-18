@@ -100,6 +100,23 @@ const ToolbarConfig = {
                             additionalCssClass: ""
                         }
                     ]
+                },
+                {
+                    providedFeature: "loadModeledSystemEntity",
+                    tooltipText: "Import modeled System",
+                    text: "",
+                    iconClass: "fa-solid fa-upload",
+                    additionalCssClass: "",
+                    buttonType: ToolbarElementType.BUTTON_DROPDOWN,
+                    dropdownButtons: [
+                        {
+                            providedFeature: "loadModeledSystemEntityFromJson",
+                            tooltipText: "Import modeled System from JSON",
+                            text: "Import from JSON",
+                            iconClass: "bi bi-filetype-json",
+                            additionalCssClass: ""
+                        }
+                    ]
                 }
             ]
         },

@@ -32,15 +32,8 @@ let CloneButton = elementTools.Button.extend({
             let clonedElement = cellView.model.clone(); // TODO deep clone?
             clonedElement.position(cellView.model.position().x + 20, cellView.model.position().y + 20);
             cellView.model.graph.addCell(clonedElement);
-
-            let connectableEntity = (clonedElement.prop("entity/type") === EntityTypes.COMPONENT || clonedElement.prop("entity/type") === EntityTypes.SERVICE || 
-            clonedElement.prop("entity/type") === EntityTypes.BACKING_SERVICE || clonedElement.prop("entity/type") === EntityTypes.STORAGE_BACKING_SERVICE || 
-            clonedElement.prop("entity/type") === EntityTypes.INFRASTRUCTURE) ? true : false;
-
-            let toolToAdd = new EntitySelectionTools(connectableEntity);
-            var elementView = clonedElement.findView(cellView.paper);
-            elementView.addTools(toolToAdd);
-            elementView.hideTools();
+            
+            addSelectionToolToEntity(clonedElement, cellView.paper);
         }
     }
 });
@@ -236,4 +229,17 @@ class EntitySelectionTools extends dia.ToolsView {
 
 }
 
-export default EntitySelectionTools;
+function addSelectionToolToEntity(addedElement: dia.Element, currentPaper: dia.Paper) {
+    if (addedElement.isLink()) {
+        return;
+    }
+
+    let connectableEntity = (addedElement.prop("entity/type") === EntityTypes.COMPONENT || addedElement.prop("entity/type") === EntityTypes.SERVICE || addedElement.prop("entity/type") === EntityTypes.BACKING_SERVICE || addedElement.prop("entity/type") === EntityTypes.STORAGE_BACKING_SERVICE || addedElement.prop("entity/type") === EntityTypes.INFRASTRUCTURE) ? true : false;
+    let collapsableEntity = (addedElement.prop("entity/type") === EntityTypes.REQUEST_TRACE || connectableEntity) ? true : false;
+    let toolToAdd = new EntitySelectionTools(connectableEntity, collapsableEntity);
+    var elementView = addedElement.findView(currentPaper);
+    elementView.addTools(toolToAdd);
+    elementView.hideTools();
+}
+
+export { EntitySelectionTools, addSelectionToolToEntity };

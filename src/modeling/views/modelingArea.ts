@@ -331,7 +331,7 @@ const ModelingArea = mvc.View.extend({
         let setSelectionHandle = this.setCurrentSelection.bind(this);
 
         this._paper.on({
-            'element:pointerdown': function (cellView: dia.CellView, evt, x, y) {
+            'element:pointerdown': function (cellView: dia.ElementView, evt, x, y) {
                 this.hideTools();
                 let currentPaper = this;
                 this.model.getLinks().forEach(function (link) {

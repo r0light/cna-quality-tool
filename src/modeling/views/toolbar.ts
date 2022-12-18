@@ -7,6 +7,7 @@ import ToolbarConfig from "../config/toolbarConfiguration";
 import ModalDialog from "./modalDialog";
 import UIModalDialog from "../representations/guiElements.dialog";
 import ToolbarTools from "../representations/guiElements.toolbarTools";
+import { addSelectionToolToEntity } from "./tools/entitySelectionTools";
 
 
 class Toolbar extends mvc.View<Backbone.Model, Element> {
@@ -72,6 +73,8 @@ class Toolbar extends mvc.View<Backbone.Model, Element> {
                 // Collapsible elements
                 "click #convertModeledSystemEntityToJson-dropdownItemButton": "convertToJson",
                 "click #convertModeledSystemEntityToTosca-dropdownItemButton": "convertToTosca",
+                "click #loadModeledSystemEntityFromJson-dropdownItemButton": "loadFromJson",
+
                 "click #changeGrid-button": "changeGrid",
 
                 'click input[type="checkbox"]': "toggleEntityVisibility",
@@ -265,6 +268,39 @@ class Toolbar extends mvc.View<Backbone.Model, Element> {
             modalDialog.configureSaveButtonAction(() => { this.graph.trigger("startToscaTransformation"); });
             modalDialog.show();
         }
+    }
+
+    loadFromJson() {
+
+        function replaceWithUpload(fileReader: ProgressEvent<FileReader>) {
+            let stringifiedJson: string = fileReader.target.result.toString();
+            try {
+                let jsonGraph: any = JSON.parse(stringifiedJson);
+                this.graph.clear();
+                this.graph.fromJSON(jsonGraph);
+                let elements: dia.Element[] = this.graph.getCells();
+                for (let element of elements) {
+                    addSelectionToolToEntity(element, this.paper)
+                }
+                // call hideTools in Timeout, because it does not work when called directly...
+                setTimeout(() => {this.paper.hideTools()}, 100);
+            } catch(e) {
+                // TODO provide error message to user
+                console.log(e)
+            }
+        }
+
+        let fr = new FileReader();
+        fr.onload = replaceWithUpload.bind(this);
+
+        let uploadElement = document.createElement("input");
+        uploadElement.setAttribute("type", "file");
+        uploadElement.setAttribute("accept", ".json");
+        uploadElement.onchange = () => {
+            // only one file should be selected
+            fr.readAsText(uploadElement.files[0]);
+        }
+        uploadElement.click();
     }
 
     removeFocusFromSelection(event) {

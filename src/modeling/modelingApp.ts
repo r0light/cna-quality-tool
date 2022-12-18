@@ -1,6 +1,6 @@
 import $ from 'jquery';
 import * as bootstrap from "bootstrap";
-import { dia } from 'jointjs'
+import { dia, shapes } from 'jointjs'
 import ModelingApplicationFrame from './representations/guiElements.appFrame'
 import SystemEntityManager from './systemEntityManager';
 import ModelingAppMainView from './views/modelingAppMainView'
@@ -17,7 +17,7 @@ class ModelingApplication {
     #systemEntityManager = null;
 
     constructor() {
-        this.#currentSystemGraph = new dia.Graph;
+        this.#currentSystemGraph = new dia.Graph({}, {cellNamespace: shapes});
         this.#systemEntityManager = new SystemEntityManager(this.#currentSystemGraph);
     }
 

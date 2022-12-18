@@ -988,6 +988,15 @@ const BackingData = dia.Element.define("qualityModel.BackingData", {
 });
 
 
+Object.assign(shapes, {
+    qualityModel: {
+        Component, Service, BackingService, StorageBackingService,
+        Endpoint, ExternalEndpoint, Link,
+        Infrastructure, DeploymentMapping,
+        RequestTrace, DataAggregate, BackingData
+    }
+});
+
 export {
     Component, Service, BackingService, StorageBackingService,
     Endpoint, ExternalEndpoint, Link,

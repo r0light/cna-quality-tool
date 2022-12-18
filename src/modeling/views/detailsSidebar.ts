@@ -430,8 +430,6 @@ const DetailsSidebar = mvc.View.extend({
                         const defaultEntitySize = this._currentEntitySelection.prop("defaults/size");
                         const aspectRatio = defaultEntitySize.height / defaultEntitySize.width;
                         height = Number((aspectRatio * width).toFixed(2));
-                        console.log(this._currentEntitySelection.prop("defaults/size"));
-                        console.log(width + " " + height);
                     }
                     this._currentEntitySelection.resize(width, height, { deep: true });
                 default:

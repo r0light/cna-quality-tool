@@ -2,7 +2,7 @@ import $ from 'jquery';
 import { dia, mvc, shapes } from "jointjs";
 import EntityTypes from "../config/entityTypes";
 import ConnectionSelectionTools from "./tools/connectionSelectionTools";
-import EntitySelectionTools from "./tools/entitySelectionTools";
+import { addSelectionToolToEntity } from "./tools/entitySelectionTools";
 
 const EntitySidebar = mvc.View.extend({
 
@@ -193,16 +193,7 @@ const EntitySidebar = mvc.View.extend({
     },
 
     addToolToEntity(addedElement) {
-        if (addedElement.isLink()) {
-            return;
-        }
-
-        let connectableEntity = (addedElement.prop("entity/type") === EntityTypes.COMPONENT || addedElement.prop("entity/type") === EntityTypes.SERVICE || addedElement.prop("entity/type") === EntityTypes.BACKING_SERVICE || addedElement.prop("entity/type") === EntityTypes.STORAGE_BACKING_SERVICE || addedElement.prop("entity/type") === EntityTypes.INFRASTRUCTURE) ? true : false;
-        let collapsableEntity = (addedElement.prop("entity/type") === EntityTypes.REQUEST_TRACE || connectableEntity) ? true : false;
-        let toolToAdd = new EntitySelectionTools(connectableEntity, collapsableEntity);
-        var elementView = addedElement.findView(this.options.paper);
-        elementView.addTools(toolToAdd);
-        elementView.hideTools();
+        addSelectionToolToEntity(addedElement, this.options.paper);
     },
 
     highlightEntity(cellView) {
