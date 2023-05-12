@@ -6,7 +6,7 @@ This directory includes a prototypical implementation of a modeling application 
 
 The application can be started using [Vite](https://vitejs.dev/).
 
-To so, [Node.js](https://nodejs.org) needs to be installed. You can then set up the project using:
+To do so, [Node.js](https://nodejs.org) needs to be installed. You can then set up the project using:
 
 ```bash
 $ npm install
