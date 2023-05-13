@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="utf8" />
+  <head>
+    <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="CNA Modeling Web App"
         content="CNA Modeling is a web application that allows modeling cloud-native application architectures for evaluation purposes based on the quality model entities proposed by Lichtenthäler and Wirtz">
@@ -29,38 +28,8 @@
     <link rel="stylesheet" type="text/css" href="styles/modelingApplication.css" />
     <link rel="stylesheet" type="text/css" href="styles/modelingArea.css" />
 </head>
-
-<body class="h-100">
-
-    <!-- Header -->
-    <header>
-        <nav class="navbar navbar-expand navbar-light bg-dark text-white">
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <div class="navbar-header">
-                    <a class="navbar-brand text-muted"><i class="fa-solid fa-cube"></i> CNA Modeling</a>
-                </div>
-                <ul class="navbar-nav mr-auto">
-                    <li class="nav-item">
-                        <a id="homeMenuItem" class="nav-link text-white" href="index.html"
-                            data-entry-module="src/home" data-menu-index="1"><i class="fa fa-fw fa-home"></i> Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a id="modelingApplicationMenuItem" class="nav-link text-white" href="index.html"
-                            data-entry-module="src/modeling/modelingApp" data-menu-index="2"><i class="fa-solid fa-pencil"></i> Modeling
-                            Application</a>
-                    </li>
-                </ul>
-            </div>
-        </nav>
-    </header>
-
-    <!-- Content -->
-    <main role="main" class="flex-grow-1">
-        <!-- The content to load goes here -->
-    </main>
-
-    <!-- Application code -->
-    <script type="module" src="src/index.ts"></script>
-</body>
-
+  <body class="h-100">
+    <div id="vapp" class="h-100"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
 </html>

@@ -1,13 +1,24 @@
 {
-  "name": "cna-quality-app",
-  "private": true,
+  "name": "cna-quality-tool-vue",
   "version": "0.1.0",
+  "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "ghpages": "vite build --base=/",
     "preview": "vite preview"
+  },
+  "dependencies": {
+    "backbone": "^1.4.1",
+    "bootstrap": "^4.6.2",
+    "core-js": "^3.8.3",
+    "jointjs": "^3.6.4",
+    "jquery": "^3.6.0",
+    "js-yaml": "^4.1.0",
+    "lodash": "^4.17.21",
+    "vue": "^3.2.38",
+    "vue-class-component": "^8.0.0-0"
   },
   "devDependencies": {
     "@types/backbone": "^1.4.15",
@@ -16,15 +27,14 @@
     "@types/js-yaml": "^4.0.5",
     "@types/lodash": "^4.14.191",
     "@types/node": "^18.11.15",
+    "@vitejs/plugin-vue": "^3.2.0",
+    "@vue/tsconfig": "^0.1.3",
+    "jsdom": "^20.0.0",
+    "sass": "^1.32.7",
+    "sass-loader": "^12.0.0",
     "typescript": "^4.9.4",
-    "vite": "^3.1.0"
-  },
-  "dependencies": {
-    "backbone": "^1.4.1",
-    "bootstrap": "^4.6.2",
-    "jointjs": "^3.6.4",
-    "jquery": "^3.6.0",
-    "js-yaml": "^4.1.0",
-    "lodash": "^4.17.21"
+    "vite": "^3.1.0",
+    "vitest": "^0.21.0",
+    "vue-tsc": "^0.40.7"
   }
 }
