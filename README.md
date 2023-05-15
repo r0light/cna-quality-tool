@@ -39,7 +39,7 @@ The application uses:
   - [ ] Edit evaluations (relation between )
   - [ ] Edit product factors
   - [ ] Edit quality aspects
-- [ ] Import JSON model
+- [x] Import JSON model
 - [ ] Import TOSCA model
 - [ ] More specific show/hide features (all backing services, all infrastructure and deployment mappings, )
 

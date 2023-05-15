@@ -81,7 +81,7 @@ function parseProperties(properties) {
                 helpText: {
                     text: property.getDescription
                 },
-                maxlength: contentType === "number" ? property.getMaxLength : Number.MAX_VALUE,
+                maxlength: contentType === "number" ? property.getMaxLength : Number.MAX_SAFE_INTEGER,
                 datalistItems: contentType === "list" ? property.getOptions : []
             },
             contentType: contentType
