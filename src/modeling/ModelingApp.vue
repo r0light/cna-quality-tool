@@ -61,8 +61,8 @@ import SystemEntityManager from './systemEntityManager';
 import ModelingAppMainView from './views/modelingAppMainView'
 
 const currentSystemName = ref("");
-//const currentSystemGraph = ref<dia.Graph>(new dia.Graph({}, { cellNamespace: shapes }));
-//const systemEntityManager = ref(new SystemEntityManager(currentSystemGraph.value));
+const currentSystemGraph = ref<dia.Graph>(new dia.Graph({}, { cellNamespace: shapes }));
+const systemEntityManager = ref(new SystemEntityManager(currentSystemGraph.value));
 
 const showInitOverlay = ref(true);
 const showStartModelingForm = ref(false);
@@ -116,8 +116,7 @@ onMounted(() => {
 
     var mainView = new ModelingAppMainView({
         el: '#app',
-        //modelingAreaGraph: currentSystemGraph.value,
-        modelingAreaGraph: new dia.Graph({}, { cellNamespace: shapes }),
+        modelingAreaGraph: currentSystemGraph.value,
         currentSystemName: currentSystemName.value
     });
     $("#appToolbarContainer button").attr("disabled", "");
