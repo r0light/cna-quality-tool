@@ -14,7 +14,8 @@ const linkSvgRepresentation = () => {
 
 class RequestTracePropertiesViewer {
 
-    #propertyGroupContainer = "entity";
+    #propertyGroupContainer: JQuery<HTMLElement>;
+    #propertyGroupContainerName = "entity";
     #selectedRequestTraceElement: dia.Cell;
 
     #modalDialog: UIModalDialog;
@@ -104,24 +105,25 @@ class RequestTracePropertiesViewer {
         }
     }
 
-    constructor(selectedRequestTraceElement, appendToPropertyGroup = "") {
-        this.#propertyGroupContainer = appendToPropertyGroup;
+    constructor(selectedRequestTraceElement, appendToPropertyGroup: JQuery<HTMLElement>, propertyGroup: string) {
+        this.#propertyGroupContainer = appendToPropertyGroup
+        this.#propertyGroupContainerName = propertyGroup;
         this.#selectedRequestTraceElement = selectedRequestTraceElement;
     }
 
     renderProperties(propertyDetailsContainer) {
         const templatedReferredEndpoints = this.#createReferredEndpoint();
-        propertyDetailsContainer.addContentToAccordionGroup(this.#propertyGroupContainer, templatedReferredEndpoints);
+        propertyDetailsContainer.addContentToAccordionGroup(this.#propertyGroupContainer, this.#propertyGroupContainerName, templatedReferredEndpoints);
 
         const templatedInvolvedLinks = this.#createInvolvedLinks();
-        propertyDetailsContainer.addContentToAccordionGroup(this.#propertyGroupContainer, templatedInvolvedLinks);
+        propertyDetailsContainer.addContentToAccordionGroup(this.#propertyGroupContainer, this.#propertyGroupContainerName, templatedInvolvedLinks);
 
         $("#" + this.specificProperties["involvedLinks"].providedFeature).click(() => { this.#modalDialog.show(); });
     }
 
     #createReferredEndpoint() {
         const specificProperty = this.specificProperties["referredEndpoint"];
-        const propertyForm = new FormGroup(specificProperty.providedFeature, this.#propertyGroupContainer);
+        const propertyForm = new FormGroup(specificProperty.providedFeature, this.#propertyGroupContainerName);
 
         const groupedElements = util.groupBy(this.#selectedRequestTraceElement.graph.getElements(), (element) => {
             return element.prop("entity/type");
@@ -162,7 +164,7 @@ class RequestTracePropertiesViewer {
     #createInvolvedLinks() {
         const specificProperty = this.specificProperties["involvedLinks"];
         // Create Button element
-        const propertyForm = new FormGroup(specificProperty.providedFeature, this.#propertyGroupContainer);
+        const propertyForm = new FormGroup(specificProperty.providedFeature, this.#propertyGroupContainerName);
         propertyForm._addButtonElementWithLabel(specificProperty.label, specificProperty.attributes, specificProperty.properties);
         const involvedLinksForm = propertyForm.getCreatedFormTemplate(true);
 

@@ -46,7 +46,8 @@ const EditModelDialogConfig = () => {
 
 class DataAggregatePropertiesViewer {
 
-    #propertyGroupContainer = "entity";
+    #propertyGroupContainer: JQuery<HTMLElement>;
+    #propertyGroupContainerName = "entity";
     #selectedDataAggregateElement: dia.Cell;
 
     #modalDialog: UIModalDialog;
@@ -190,8 +191,9 @@ class DataAggregatePropertiesViewer {
         }
     }
 
-    constructor(selectedDataAggregateElement, appendToPropertyGroup = "") {
+    constructor(selectedDataAggregateElement, appendToPropertyGroup: JQuery<HTMLElement>, propertyGroup: string) {
         this.#propertyGroupContainer = appendToPropertyGroup;
+        this.#propertyGroupContainerName = propertyGroup;
         this.#selectedDataAggregateElement = selectedDataAggregateElement;
         this.#hasParent = this.#selectedDataAggregateElement?.parent() ? true : false;
         this.#currentParentId = this.#selectedDataAggregateElement?.parent();
@@ -202,16 +204,16 @@ class DataAggregatePropertiesViewer {
 
     renderProperties(propertyDetailsContainer) {
         const templatedChooseEditMode = this.#createChooseEditMode();
-        propertyDetailsContainer.addContentToAccordionGroup(this.#propertyGroupContainer, templatedChooseEditMode);
+        propertyDetailsContainer.addContentToAccordionGroup(this.#propertyGroupContainer, this.#propertyGroupContainerName, templatedChooseEditMode);
 
         const templatedParentRelation = this.#createParentRelation();
         const templatedAssignedFamily = this.#createAssignedFamily();
         const templatedFamilyConfig = this.#createFamilyConfig();
 
-        const templatedEmbeddedProperties = `<div id="dataAggregate-embeddedProps" data-group-context="${this.#propertyGroupContainer}">${templatedParentRelation}${templatedAssignedFamily}</div>`;
-        const templatedOriginalProperties = `<div id="dataAggregate-originalProps" data-group-context="${this.#propertyGroupContainer}">${templatedFamilyConfig}</div>`;
-        propertyDetailsContainer.addContentToAccordionGroup(this.#propertyGroupContainer, `${templatedEmbeddedProperties}`);
-        propertyDetailsContainer.addContentToAccordionGroup(this.#propertyGroupContainer, `${templatedOriginalProperties}`);
+        const templatedEmbeddedProperties = `<div id="dataAggregate-embeddedProps" data-group-context="${this.#propertyGroupContainerName}">${templatedParentRelation}${templatedAssignedFamily}</div>`;
+        const templatedOriginalProperties = `<div id="dataAggregate-originalProps" data-group-context="${this.#propertyGroupContainerName}">${templatedFamilyConfig}</div>`;
+        propertyDetailsContainer.addContentToAccordionGroup(this.#propertyGroupContainer, this.#propertyGroupContainerName, `${templatedEmbeddedProperties}`);
+        propertyDetailsContainer.addContentToAccordionGroup(this.#propertyGroupContainer, this.#propertyGroupContainerName, `${templatedOriginalProperties}`);
 
 
         if (!this.#hasParent || !this.#embeddedMode) {
@@ -229,7 +231,7 @@ class DataAggregatePropertiesViewer {
 
     #createChooseEditMode() {
         const specificProperty = this.specificProperties["chooseEditMode"];
-        const propertyForm = new FormGroup(specificProperty.providedFeature, this.#propertyGroupContainer);
+        const propertyForm = new FormGroup(specificProperty.providedFeature, this.#propertyGroupContainerName);
 
         specificProperty.properties.checked = this.#hasParent;
         propertyForm.addSwitchElementWithLabels(specificProperty.labels, specificProperty.attributes, specificProperty.properties);
@@ -238,7 +240,7 @@ class DataAggregatePropertiesViewer {
 
     #createParentRelation() {
         const specificProperty = this.specificProperties["dataAggregate-parentRelation"];
-        const propertyForm = new FormGroup(specificProperty.providedFeature, this.#propertyGroupContainer);
+        const propertyForm = new FormGroup(specificProperty.providedFeature, this.#propertyGroupContainerName);
 
         // load saved values
         if (this.#hasParent) {
@@ -266,7 +268,7 @@ class DataAggregatePropertiesViewer {
 
     #createAssignedFamily() {
         const specificProperty = this.specificProperties["dataAggregate-assignedFamily"];
-        const propertyForm = new FormGroup(specificProperty.providedFeature, this.#propertyGroupContainer);
+        const propertyForm = new FormGroup(specificProperty.providedFeature, this.#propertyGroupContainerName);
 
         const savedAssignedFamily = this.#selectedDataAggregateElement.prop("entity/properties/assignedFamily");
         specificProperty.attributes.value = savedAssignedFamily ?? "";
@@ -278,7 +280,7 @@ class DataAggregatePropertiesViewer {
     #createFamilyConfig() {
         const specificProperty = this.specificProperties["dataAggregate-familyConfig"];
         // Create Button element
-        const propertyForm = new FormGroup(specificProperty.providedFeature, this.#propertyGroupContainer);
+        const propertyForm = new FormGroup(specificProperty.providedFeature, this.#propertyGroupContainerName);
         propertyForm._addButtonElementWithLabel(specificProperty.label, specificProperty.attributes, specificProperty.properties);
 
         // Prepare Table and Dialog Content

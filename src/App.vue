@@ -21,9 +21,11 @@
   </header>
 
   <!-- Content -->
-  <Home v-if="currentPage === 1"></Home>
+  
   <main role="main" ref="mainSection" class="flex-grow-1">
     <!-- The content to load goes here -->
+    <Home v-if="currentPage === 1"></Home>
+    <ModelingApp v-if="currentPage === 2"></ModelingApp>
   </main>
 </template>
 
@@ -31,8 +33,10 @@
 import $ from 'jquery';
 import { ref } from "vue";
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
-import { ModelingApplication } from './modeling/modelingApp'
 import Home from './Home.vue';
+import ModelingApp from './modeling/ModelingApp.vue';
+import { ModelingApplication } from './modeling/modelingApp';
+
 
 const currentPage = ref(1);
 
@@ -41,10 +45,10 @@ window.onload = () => {
 
 
   // get element to which the content is supposed to be added
-  const mainSection = document.querySelector("main");
+  //const mainSection = document.querySelector("main");
 
   // create the Modeling Application Object
-  const modelingApp = new ModelingApplication();
+  //const modelingApp = new ModelingApplication();
 
   // render required content dynamically and only if needed
   const menuItems = document.querySelectorAll("a[data-entry-module]");
@@ -59,10 +63,8 @@ window.onload = () => {
       activeElement?.classList.remove("active");
       menuItem.parentNode["classList"].add("active");
 
-      mainSection.innerHTML = "";
       document.title = "CNA Modeling:";
       if (menuItem["dataset"].entryModule.includes("modeling")) {
-        modelingApp.renderInto(mainSection);
         currentPage.value = 2;
         sessionStorage.setItem("currentMenuSelectionIndex", menuItem["dataset"].menuIndex);
         triggerModelingApplicationFirstLoad();
@@ -90,12 +92,12 @@ window.onload = () => {
     case "2":
       navbarItems.get("2")?.classList.add("active");
       currentPage.value = 2;
-      modelingApp.renderInto(mainSection);
+      //modelingApp.renderInto(mainSection);
       document.title += " Modeling Application";
       sessionStorage.setItem("currentMenuSelectionIndex", "2");
       // TODO
-      const overlayEvent = new Event("openModelingApplicationOverlay");
-      document.getElementById("app")?.dispatchEvent(overlayEvent);
+      //const overlayEvent = new Event("openModelingApplicationOverlay");
+      //document.getElementById("app")?.dispatchEvent(overlayEvent);
       break;
     default:
       navbarItems.get("1")?.classList.add("active");
@@ -110,8 +112,8 @@ window.onload = () => {
 const triggerModelingApplicationFirstLoad = () => {
   if (!(sessionStorage.getItem("reloadModelingApplication"))) {
     // trigger modeling app overlay
-    const overlayEvent = new Event("openModelingApplicationOverlay");
-    document.getElementById("app")?.dispatchEvent(overlayEvent);
+    //const overlayEvent = new Event("openModelingApplicationOverlay");
+    //document.getElementById("app")?.dispatchEvent(overlayEvent);
     sessionStorage.setItem("reloadModelingApplication", "true");
   }
 }

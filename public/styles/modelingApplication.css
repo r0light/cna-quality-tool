@@ -8,7 +8,7 @@
 /* Configuring overlay items*/
 .init-overlay {
     position: fixed;
-    display: none;
+    display: block;
     width: 100%;
     height: 100%;
     top: 0;
@@ -35,7 +35,7 @@
 }
 
 #startModelingForm {
-    display: none;
+    display: block;
 }
 
 #createNewDiagramBtn,

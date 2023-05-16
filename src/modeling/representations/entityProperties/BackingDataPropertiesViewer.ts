@@ -28,7 +28,8 @@ const EditModelDialogConfig = () => {
 
 class BackingDataPropertiesViewer {
 
-    #propertyGroupContainer = "entity";
+    #propertyGroupContainer = {};
+    #propertyGroupContainerName = "entity";
     #selectedBackingDataElement: dia.Cell;
 
     #modalDialog: UIModalDialog;
@@ -251,8 +252,9 @@ class BackingDataPropertiesViewer {
         }
     }
 
-    constructor(selectedBackingDataElement: dia.Cell, appendToPropertyGroup = "") {
+    constructor(selectedBackingDataElement: dia.Cell, appendToPropertyGroup: JQuery<HTMLElement>, propertyGroupName: string) {
         this.#propertyGroupContainer = appendToPropertyGroup;
+        this.#propertyGroupContainerName = propertyGroupName;
         this.#selectedBackingDataElement = selectedBackingDataElement;
         this.#hasParent = this.#selectedBackingDataElement?.parent() ? true : false;
         this.#currentParentId = this.#selectedBackingDataElement?.parent();
@@ -263,16 +265,16 @@ class BackingDataPropertiesViewer {
 
     renderProperties(propertyDetailsContainer) {
         const templatedChooseEditMode = this.#createChooseEditMode();
-        propertyDetailsContainer.addContentToAccordionGroup(this.#propertyGroupContainer, templatedChooseEditMode);
+        propertyDetailsContainer.addContentToAccordionGroup(this.#propertyGroupContainer, this.#propertyGroupContainerName, templatedChooseEditMode);
 
         const templatedIncludedData = this.#createIncludedData();
         const templatedAssignedFamily = this.#createAssignedFamily();
         const templatedFamilyConfig = this.#createFamilyConfig();
 
-        const templatedEmbeddedProperties = `<div id="backingData-embeddedProps" data-group-context="${this.#propertyGroupContainer}">${templatedIncludedData}${templatedAssignedFamily}</div>`;
-        const templatedOriginalProperties = `<div id="backingData-originalProps" data-group-context="${this.#propertyGroupContainer}">${templatedFamilyConfig}</div>`;
-        propertyDetailsContainer.addContentToAccordionGroup(this.#propertyGroupContainer, `${templatedEmbeddedProperties}`);
-        propertyDetailsContainer.addContentToAccordionGroup(this.#propertyGroupContainer, `${templatedOriginalProperties}`);
+        const templatedEmbeddedProperties = `<div id="backingData-embeddedProps" data-group-context="${this.#propertyGroupContainerName}">${templatedIncludedData}${templatedAssignedFamily}</div>`;
+        const templatedOriginalProperties = `<div id="backingData-originalProps" data-group-context="${this.#propertyGroupContainerName}">${templatedFamilyConfig}</div>`;
+        propertyDetailsContainer.addContentToAccordionGroup(this.#propertyGroupContainer, this.#propertyGroupContainerName, `${templatedEmbeddedProperties}`);
+        propertyDetailsContainer.addContentToAccordionGroup(this.#propertyGroupContainer, this.#propertyGroupContainerName, `${templatedOriginalProperties}`);
 
 
         if (!this.#hasParent || !this.#embeddedMode) {
@@ -292,7 +294,7 @@ class BackingDataPropertiesViewer {
 
     #createChooseEditMode() {
         const specificProperty = this.specificProperties["chooseEditMode"];
-        const propertyForm = new FormGroup(specificProperty.providedFeature, this.#propertyGroupContainer);
+        const propertyForm = new FormGroup(specificProperty.providedFeature, this.#propertyGroupContainerName);
 
         specificProperty.properties.checked = this.#hasParent;
         propertyForm.addSwitchElementWithLabels(specificProperty.labels, specificProperty.attributes, specificProperty.properties);
@@ -302,7 +304,7 @@ class BackingDataPropertiesViewer {
     #createIncludedData() {
         const specificProperty = this.specificProperties["backingData-includedData"];
         // Create Button element
-        const propertyForm = new FormGroup(specificProperty.providedFeature, this.#propertyGroupContainer);
+        const propertyForm = new FormGroup(specificProperty.providedFeature, this.#propertyGroupContainerName);
         propertyForm._addButtonElementWithLabel(specificProperty.label, specificProperty.attributes, specificProperty.properties);
 
         // Prepare Table and Dialog Content
@@ -340,7 +342,7 @@ class BackingDataPropertiesViewer {
 
     #createAssignedFamily() {
         const specificProperty = this.specificProperties["backingData-assignedFamily"];
-        const propertyForm = new FormGroup(specificProperty.providedFeature, this.#propertyGroupContainer);
+        const propertyForm = new FormGroup(specificProperty.providedFeature, this.#propertyGroupContainerName);
 
         const savedAssignedFamily = this.#selectedBackingDataElement.prop("entity/properties/assignedFamily");
         specificProperty.attributes.value = savedAssignedFamily ?? "";
@@ -352,7 +354,7 @@ class BackingDataPropertiesViewer {
     #createFamilyConfig() {
         const specificProperty = this.specificProperties["backingData-familyConfig"];
         // Create Button element
-        const propertyForm = new FormGroup(specificProperty.providedFeature, this.#propertyGroupContainer);
+        const propertyForm = new FormGroup(specificProperty.providedFeature, this.#propertyGroupContainerName);
         propertyForm._addButtonElementWithLabel(specificProperty.label, specificProperty.attributes, specificProperty.properties);
 
         // Prepare Table and Dialog Content

@@ -19,6 +19,8 @@ const DetailsSidebar = mvc.View.extend({
     _currentEntitySelection: {},
     _propertyDetailsContainer: {},
 
+    _featureGroups: {},
+
     options: {
         paper: null,
         graph: null,
@@ -67,6 +69,7 @@ const DetailsSidebar = mvc.View.extend({
     },
 
     renderEntitySelectionProperties(cell: dia.Cell) {
+
         if (this._currentEntitySelection === cell) {
             // ignore multiple clicks while selection didn't change
             return;
@@ -135,33 +138,35 @@ const DetailsSidebar = mvc.View.extend({
     },
 
     renderPropertyGroups(providedFeatureGroup = "", iconClass = "", headline = "") {
-        this._propertyDetailsContainer.addCollapsibleAccordionGroup(providedFeatureGroup, iconClass, headline);
+        let divFeatureGroup: JQuery<HTMLElement> = this._propertyDetailsContainer.addCollapsibleAccordionGroup(providedFeatureGroup, iconClass, headline);
+        // save jquery elements to add stuff later
+        this._featureGroups[providedFeatureGroup] = divFeatureGroup;
 
         for (const option of this.options.detailsSidebarConfig.GeneralProperties[providedFeatureGroup].options) {
             if (option.contentType === PropertyContentType.INFO) {
-                this.renderPropertyInformation(providedFeatureGroup, option.providedFeature, option.content);
+                this.renderPropertyInformation(divFeatureGroup, providedFeatureGroup, option.providedFeature, option.content);
                 continue;
             }
 
-            this.renderPropertyForm(providedFeatureGroup, option.providedFeature, option.label, option.contentType, option.attributes, option.properties);
+            this.renderPropertyForm(divFeatureGroup,providedFeatureGroup, option.providedFeature, option.label, option.contentType, option.attributes, option.properties);
         }
     },
 
-    renderPropertyInformation(appendToPropertyGroup = "", providedFeature = "", infoContent: any = "") {
+    renderPropertyInformation(appendToPropertyGroup, groupId, providedFeature = "", infoContent: any = "") {
         let textIcon = infoContent.iconClass ? '<i class="' + infoContent.iconClass + '" style="margin-right: 10px;"></i>' : '';
         let info = '<p id="' + providedFeature + '" class="text-muted">' + textIcon + infoContent.text + '</p>';
-        this._propertyDetailsContainer.addContentToAccordionGroup(appendToPropertyGroup, info);
+        this._propertyDetailsContainer.addContentToAccordionGroup(appendToPropertyGroup, groupId, info);
     },
 
-    renderPropertyForm(appendToPropertyGroup = "", providedFeature = "", labelText = "", contentType = "", inputAttributes: propertyConfig["attributes"], inputProperties: propertyConfig["properties"]) {
-        const preparedPropertyFormTemplate = new FormGroup(providedFeature, appendToPropertyGroup);
+    renderPropertyForm(appendToPropertyGroup, groupId, providedFeature = "", labelText = "", contentType = "", inputAttributes: propertyConfig["attributes"], inputProperties: propertyConfig["properties"]) {
+        const preparedPropertyFormTemplate = new FormGroup(providedFeature, groupId);
 
         switch (contentType) {
             case PropertyContentType.TEXTAREA:
                 preparedPropertyFormTemplate._addTextAreaElementWithLabel(labelText, inputAttributes, inputProperties);
                 preparedPropertyFormTemplate._addFormFeedbackSection("Reset: Invalid input provided", "Successfully changed.");
                 const textAreaForm = preparedPropertyFormTemplate.getCreatedFormTemplate(true);
-                this._propertyDetailsContainer.addContentToAccordionGroup(appendToPropertyGroup, textAreaForm);
+                this._propertyDetailsContainer.addContentToAccordionGroup(appendToPropertyGroup,groupId, textAreaForm);
                 preparedPropertyFormTemplate.configureEnterButtonBehaviour();
                 // TODO remove
                 return;
@@ -170,7 +175,7 @@ const DetailsSidebar = mvc.View.extend({
                 preparedPropertyFormTemplate.addNumberElementWithLabel(labelText, inputAttributes, inputProperties);
                 preparedPropertyFormTemplate._addFormFeedbackSection("Reset: Invalid input provided", "Successfully changed.");
                 const numberForm = preparedPropertyFormTemplate.getCreatedFormTemplate(true);
-                this._propertyDetailsContainer.addContentToAccordionGroup(appendToPropertyGroup, numberForm);
+                this._propertyDetailsContainer.addContentToAccordionGroup(appendToPropertyGroup,groupId, numberForm);
                 preparedPropertyFormTemplate.configureEnterButtonBehaviour();
                 // TODO remove
                 return;
@@ -179,7 +184,7 @@ const DetailsSidebar = mvc.View.extend({
                 preparedPropertyFormTemplate.addTextElementWithLabel(labelText, inputAttributes, inputProperties);
                 preparedPropertyFormTemplate._addFormFeedbackSection("Reset: Invalid input provided", "Successfully changed.");
                 const textForm = preparedPropertyFormTemplate.getCreatedFormTemplate(true);
-                this._propertyDetailsContainer.addContentToAccordionGroup(appendToPropertyGroup, textForm);
+                this._propertyDetailsContainer.addContentToAccordionGroup(appendToPropertyGroup,groupId, textForm);
                 preparedPropertyFormTemplate.configureEnterButtonBehaviour();
                 // TODO remove
                 return;
@@ -188,7 +193,7 @@ const DetailsSidebar = mvc.View.extend({
                 preparedPropertyFormTemplate._addCheckboxElementWithLabel(labelText, inputAttributes, inputProperties);
                 preparedPropertyFormTemplate._addFormFeedbackSection("Reset: Invalid input provided", "Successfully changed.");
                 const checkboxForm = preparedPropertyFormTemplate.getCreatedFormTemplate(true, "", true);
-                this._propertyDetailsContainer.addContentToAccordionGroup(appendToPropertyGroup, checkboxForm);
+                this._propertyDetailsContainer.addContentToAccordionGroup(appendToPropertyGroup,groupId, checkboxForm);
                 preparedPropertyFormTemplate.configureEnterButtonBehaviour();
                 // TODO remove
                 return;
@@ -197,7 +202,7 @@ const DetailsSidebar = mvc.View.extend({
                 preparedPropertyFormTemplate.addDropdownElementWithLabelAndOptions(labelText, inputAttributes, inputProperties, new Array());
                 preparedPropertyFormTemplate._addFormFeedbackSection("Reset: Invalid input provided", "Successfully changed.");
                 const dropdownForm = preparedPropertyFormTemplate.getCreatedFormTemplate(true);
-                this._propertyDetailsContainer.addContentToAccordionGroup(appendToPropertyGroup, dropdownForm);
+                this._propertyDetailsContainer.addContentToAccordionGroup(appendToPropertyGroup, groupId, dropdownForm);
                 preparedPropertyFormTemplate.configureEnterButtonBehaviour();
                 // TODO remove
                 return;
@@ -206,7 +211,7 @@ const DetailsSidebar = mvc.View.extend({
                 preparedPropertyFormTemplate._addDataListElementWithLabel(labelText, inputAttributes, inputProperties);
                 preparedPropertyFormTemplate._addFormFeedbackSection("Reset: Invalid input provided", "Successfully changed.");
                 const datalistForm = preparedPropertyFormTemplate.getCreatedFormTemplate(true);
-                this._propertyDetailsContainer.addContentToAccordionGroup(appendToPropertyGroup, datalistForm);
+                this._propertyDetailsContainer.addContentToAccordionGroup(appendToPropertyGroup,groupId, datalistForm);
                 preparedPropertyFormTemplate.configureEnterButtonBehaviour();
                 // TODO remove
                 return;
@@ -216,9 +221,9 @@ const DetailsSidebar = mvc.View.extend({
         }
 
         
-        let propertyForm = new FormGroup(providedFeature, appendToPropertyGroup);
+        let propertyForm = new FormGroup(providedFeature, groupId);
         let propertyString = propertyForm.create(true);
-        this._propertyDetailsContainer.addContentToAccordionGroup(appendToPropertyGroup, propertyString);
+        this._propertyDetailsContainer.addContentToAccordionGroup(appendToPropertyGroup, groupId, propertyString);
 
         switch (contentType) {
             case PropertyContentType.INPUT_RANGE:
@@ -268,7 +273,7 @@ const DetailsSidebar = mvc.View.extend({
         this._emptyEntitySpecificProperties();
         switch (this._currentEntitySelection.prop("entity/type")) {
             case EntityTypes.REQUEST_TRACE:
-                const requestTracePropertiesViewer = new RequestTracePropertiesViewer(this._currentEntitySelection, "entity");
+                const requestTracePropertiesViewer = new RequestTracePropertiesViewer(this._currentEntitySelection, this._featureGroups["entity"], "entity");
                 requestTracePropertiesViewer.renderProperties(this._propertyDetailsContainer);
                 const savedExternalEndpointID = this._currentEntitySelection.prop("entity/properties/referredEndpoint");
                 if (savedExternalEndpointID) {
@@ -277,12 +282,12 @@ const DetailsSidebar = mvc.View.extend({
                 this._propertyDetailsContainer.changeCollapsibleGroupVisibility("entity", true);
                 return;
             case EntityTypes.DATA_AGGREGATE:
-                const dataAggregatePropertiesViewer = new DataAggregatePropertiesViewer(this._currentEntitySelection, "entity");
+                const dataAggregatePropertiesViewer = new DataAggregatePropertiesViewer(this._currentEntitySelection, this._featureGroups["entity"], "entity");
                 dataAggregatePropertiesViewer.renderProperties(this._propertyDetailsContainer);
                 this._propertyDetailsContainer.changeCollapsibleGroupVisibility("entity", true);
                 return;
             case EntityTypes.BACKING_DATA:
-                const backingDataPropertiesViewer = new BackingDataPropertiesViewer(this._currentEntitySelection, "entity");
+                const backingDataPropertiesViewer = new BackingDataPropertiesViewer(this._currentEntitySelection, this._featureGroups["entity"],"entity");
                 backingDataPropertiesViewer.renderProperties(this._propertyDetailsContainer);
                 this._propertyDetailsContainer.changeCollapsibleGroupVisibility("entity", true);
                 return;
@@ -299,7 +304,7 @@ const DetailsSidebar = mvc.View.extend({
                 }
 
                 for (const specificProperty of currentEntityProperty.specificProperties) {
-                    this.renderPropertyForm("entity", specificProperty.providedFeature, specificProperty.label, specificProperty.contentType, specificProperty.attributes, specificProperty.properties);
+                    this.renderPropertyForm(this._featureGroups["entity"], "entity", specificProperty.providedFeature, specificProperty.label, specificProperty.contentType, specificProperty.attributes, specificProperty.properties);
 
                     // TODO group options?
                     let valueToSet = this._currentEntitySelection.prop("entity/properties/" + specificProperty.providedFeature);

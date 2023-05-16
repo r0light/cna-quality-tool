@@ -255,6 +255,8 @@ class Toolbar extends mvc.View<Backbone.Model, Element> {
         // download created yaml taken from https://stackoverflow.com/a/22347908
         let downloadElement = document.createElement("a");
         downloadElement.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify(jsonSerlializedGraph)));
+        // TODO fix properly, as a workaround get the current name from the field
+        this.currentSystemName = $("#appNameTitle").val() as string;
         downloadElement.setAttribute('download', `${this.currentSystemName}.json`);
         downloadElement.click();
     }
@@ -404,7 +406,7 @@ class Toolbar extends mvc.View<Backbone.Model, Element> {
             return;
         }
 
-        this.#updateEntityCounter(cell.attributes.entity.type, "add");
+        this.updateEntityCounter(cell.attributes.entity.type, "add");
     }
 
     entityRemoved(cell) {
@@ -413,7 +415,7 @@ class Toolbar extends mvc.View<Backbone.Model, Element> {
             return;
         }
 
-        this.#updateEntityCounter(cell.attributes.entity.type, "remove");
+        this.updateEntityCounter(cell.attributes.entity.type, "remove");
     }
 
     entityTypeChanged(previousType, newType) {
@@ -427,8 +429,8 @@ class Toolbar extends mvc.View<Backbone.Model, Element> {
             return;
         }
 
-        this.#updateEntityCounter(previousType, "remove");
-        this.#updateEntityCounter(newType, "add");
+        this.updateEntityCounter(previousType, "remove");
+        this.updateEntityCounter(newType, "add");
     }
 
     updateEntityEventListener(event) {
@@ -474,7 +476,7 @@ class Toolbar extends mvc.View<Backbone.Model, Element> {
         }
     }
 
-    #updateEntityCounter(dataEntityType, updateType) {
+    updateEntityCounter(dataEntityType, updateType) {
         let counterElement = $('.numberOfEntities[data-entity-type="' + dataEntityType + '"]');
         let oldValue = counterElement.text();
 

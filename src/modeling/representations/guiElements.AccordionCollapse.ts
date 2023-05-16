@@ -1,34 +1,35 @@
-import jquery, * as $ from 'jquery';
+import $ from 'jquery';
 
 class AccordionCollapse {
 
-    #context = "";
+    context = "";
 
-    #accordionContainerElement = "";
-    #containerId = "";
+    accordionContainerElementName = "";
+    accordionContainerElement: JQuery<HTMLElement>;
+    containerId = "";
 
-    #overallHeadline = "";
+    overallHeadline = "";
 
-    #collapsibleGroups = [];
+    collapsibleGroups = [];
 
-    #hiddenCollapsibleGroups = new Set();
+    hiddenCollapsibleGroups = new Set();
 
-    #visible = true;
+    isVisible = true;
 
     /**
      * Creates a Bootstrap-based Accordion Collapse element (see {@link https://getbootstrap.com/docs/4.6/components/collapse/} 
      * for more information).
      * 
-     * @param {string} accordionContainerElement The document element to add this Accordion Collapse element.
+     * @param {string} accordionContainerElementName The document element to add this Accordion Collapse element.
      * @param {string} context The context to use as pre-string for unique classes.
      * @param {string} containerId The ID for this entire Accordion Collapse element.
      * @param {string} overallHeadline The headline for this Accordion Collapse element. 
      */
-    constructor(accordionContainerElement, context, containerId, overallHeadline) {
-        this.#context = context;
-        this.#accordionContainerElement = accordionContainerElement;
-        this.#containerId = containerId;
-        this.#overallHeadline = overallHeadline;
+    constructor(accordionContainerElementName, context, containerId, overallHeadline) {
+        this.context = context;
+        this.accordionContainerElementName = accordionContainerElementName;
+        this.containerId = containerId;
+        this.overallHeadline = overallHeadline;
     }
 
     /**
@@ -37,12 +38,12 @@ class AccordionCollapse {
      * @param {string} headlineId ID for the overall headline in order to be able to set individual CSS properties. 
      */
     create(headlineId = "") {
-        let accordionDiv = '<div class="accordion" id="' + this.#containerId + '"></div>';
-        $(this.#accordionContainerElement).append(accordionDiv);
-        $("#" + this.#containerId).append('<div id="' + headlineId + '"><h6>' + this.#overallHeadline + '</h6></div>');
+        this.accordionContainerElement = $('<div class="accordion" id="' + this.containerId + '"></div>');
+        $(this.accordionContainerElementName).append(this.accordionContainerElement);
+        this.accordionContainerElement.append('<div id="' + headlineId + '"><h6>' + this.overallHeadline + '</h6></div>');
 
         this.changeVisibility(false);
-        $("#" + this.#containerId).keydown((event) => { this.#handleEnterKey(event); });
+        this.accordionContainerElement.keydown((event) => { this.handleEnterKey(event); });
     }
 
     /**
@@ -52,37 +53,41 @@ class AccordionCollapse {
      * @param {string} headlineIconClass Icont font class to add an Icon infront of the group headline text .
      * @param {string} headlineText The group headline text of the collapsible group.
      */
-    addCollapsibleAccordionGroup(collapsibleGroup = "", headlineIconClass = "", headlineText = "") {
-        this.#collapsibleGroups.push(collapsibleGroup);
-        let cardDiv = '<div id="' + collapsibleGroup + '-card" class="' + this.#context + ' card"></div>';
-        $("#" + this.#containerId).append(cardDiv);
-        let cardHeader = '<div class="card-header" id="' + collapsibleGroup + '-header"></div>';
-        $("#" + collapsibleGroup + "-card").append(cardHeader);
-        let headerButton = '<button id="' + collapsibleGroup + '-button" class="' + this.#context + '-headlineButton btn btn-link btn-block text-left collapsed" type="button"><i class="' + this.#context + '-iconHeadline '
-            + headlineIconClass + '"></i> ' + headlineText + '</button>';
-        let h = '<h2 class="mb-0">' + headerButton + '</h2>';
-        $("#" + collapsibleGroup + "-header").append(h);
+    addCollapsibleAccordionGroup(collapsibleGroup = "", headlineIconClass = "", headlineText = ""): JQuery<HTMLElement> {
+        this.collapsibleGroups.push(collapsibleGroup);
+        let cardDiv = $('<div id="' + collapsibleGroup + '-card" class="' + this.context + ' card"></div>');
+        let currentGroup = this.accordionContainerElement.append(cardDiv);
+        let cardHeader = $('<div class="card-header" id="' + collapsibleGroup + '-header"></div>');
+        cardDiv.append(cardHeader);
+        let headerButton = $('<button id="' + collapsibleGroup + '-button" class="' + this.context + '-headlineButton btn btn-link btn-block text-left collapsed" type="button"><i class="' + this.context + '-iconHeadline '
+            + headlineIconClass + '"></i> ' + headlineText + '</button>');
+        let h = $('<h2 class="mb-0"></h2>');
+        
+        cardHeader.append(h);
+        h.append(headerButton);
 
-        $("#" + collapsibleGroup + "-button").attr({
+        headerButton.attr({
             "data-toggle": "collapse",
             "data-target": "#collapse-" + collapsibleGroup,
             "aria-expanded": "false",
             "aria-controls": "collapse-" + collapsibleGroup
         })
 
-        let divContentContainer = '<div id="collapse-' + collapsibleGroup + '" class="collapse" aria-labelledby="' + collapsibleGroup + '-header" data-parent="#' + this.#containerId + '"></div>';
-        let divContent = '<div id="' + collapsibleGroup + '-card-body" class="card-body"></div>';
-        $("#" + collapsibleGroup + "-card").append(divContentContainer);
-        $("#collapse-" + collapsibleGroup).append(divContent);
+        let divContentContainer = $('<div id="collapse-' + collapsibleGroup + '" class="collapse" aria-labelledby="' + collapsibleGroup + '-header" data-parent="#' + this.containerId + '"></div>');
+        let divContent = $('<div id="' + collapsibleGroup + '-card-body" class="card-body"></div>');
+        cardDiv.append(divContentContainer);
+        divContentContainer.append(divContent);
 
-        $("#" + collapsibleGroup + "-button").on("click", () => { $(':focus').blur(); });
+        headerButton.on("click", () => { $(':focus').blur(); });
+
+        return divContent;
 
         // TODO add highlighting?
-        // $("#" + collapsibleGroup + "-card").on("show.bs.collapse", () => {
-        //     $("#" + collapsibleGroup + "-card").addClass("accordionCard-highlighted");
+        // $("" + collapsibleGroup + "-card").on("show.bs.collapse", () => {
+        //     $("" + collapsibleGroup + "-card").addClass("accordionCard-highlighted");
         // });
-        // $("#" + collapsibleGroup + "-card").on("hide.bs.collapse", () => {
-        //     $("#" + collapsibleGroup + "-card").removeClass("accordionCard-highlighted");
+        // $("" + collapsibleGroup + "-card").on("hide.bs.collapse", () => {
+        //     $("" + collapsibleGroup + "-card").removeClass("accordionCard-highlighted");
         // });
     }
 
@@ -92,11 +97,12 @@ class AccordionCollapse {
      * @param {string} collapsibleGroupIdToAppendTo The ID of the collapsible group the html item is supposed to be added.
      * @param {string} contentToAdd The html content supposed to be added to the identified collapsible group.
      */
-    addContentToAccordionGroup(collapsibleGroupIdToAppendTo = "", contentToAdd = "") {
-        $("#" + collapsibleGroupIdToAppendTo + "-card-body").append(contentToAdd);
-        $("#" + collapsibleGroupIdToAppendTo + "-card-body").children().last().attr({
-            "data-group-context": collapsibleGroupIdToAppendTo,
-            "data-group-id": collapsibleGroupIdToAppendTo + "-card-body"
+    addContentToAccordionGroup(collapsibleGroupIdToAppendTo: JQuery<HTMLElement>, collapsibleGroupId: string, contentToAdd = "") {
+
+        collapsibleGroupIdToAppendTo.append(contentToAdd);
+        collapsibleGroupIdToAppendTo.children().last().attr({
+            "data-group-context": collapsibleGroupId,
+            "data-group-id": collapsibleGroupId + "-card-body"
         })
     }
 
@@ -121,13 +127,13 @@ class AccordionCollapse {
      * @param {boolean} visible Decide whether the element should be visible or not. Default is true.
      */
     changeVisibility(visible = true) {
-        this.#visible = visible;
+        this.isVisible = visible;
         if (visible) {
-            $("#" + this.#containerId).show();
+            this.accordionContainerElement.show();
             return;
         }
 
-        $("#" + this.#containerId).hide();
+        this.accordionContainerElement.hide();
     }
 
     /**
@@ -140,14 +146,14 @@ class AccordionCollapse {
      */
     changeCollapsibleGroupVisibility(collapsibleGroupId, visible = true) {
         if (visible) {
-            $("#" + collapsibleGroupId + "-card").show();
-            this.#hiddenCollapsibleGroups.delete(collapsibleGroupId);
+            $("" + collapsibleGroupId + "-card").show();
+            this.hiddenCollapsibleGroups.delete(collapsibleGroupId);
         } else {
-            $("#" + collapsibleGroupId + "-card").hide();
-            this.#hiddenCollapsibleGroups.add(collapsibleGroupId);
+            $("" + collapsibleGroupId + "-card").hide();
+            this.hiddenCollapsibleGroups.add(collapsibleGroupId);
         }
 
-        this.#checkForVisibleGroups();
+        this.checkForVisibleGroups();
     }
 
     /**
@@ -160,37 +166,37 @@ class AccordionCollapse {
      */
     changeVisibilityExceptGroupId(ignoreCollapsibleGroupId, visible = true) {
         if (visible) {
-            this.#collapsibleGroups.forEach((groupId) => {
+            this.collapsibleGroups.forEach((groupId) => {
                 if (ignoreCollapsibleGroupId === groupId) {
                     return;
                 }
-                $("#" + groupId + "-card").show();
-                this.#hiddenCollapsibleGroups.delete(groupId);
+                $("" + groupId + "-card").show();
+                this.hiddenCollapsibleGroups.delete(groupId);
             });
         } else {
 
-            this.#collapsibleGroups.forEach((groupId) => {
+            this.collapsibleGroups.forEach((groupId) => {
                 if (ignoreCollapsibleGroupId === groupId) {
                     return;
                 }
-                $("#" + groupId + "-card").hide();
-                this.#hiddenCollapsibleGroups.add(groupId);
+                $("" + groupId + "-card").hide();
+                this.hiddenCollapsibleGroups.add(groupId);
             });
         }
 
-        this.#checkForVisibleGroups();
+        this.checkForVisibleGroups();
     }
 
     /**
      * Change for all included collapsible group elements their visibility such that they are all shown.
      */
     showAllCollapsibleGroups() {
-        this.#collapsibleGroups.forEach((groupId) => {
-            $("#" + groupId + "-card").show();
-            this.#hiddenCollapsibleGroups.delete(groupId);
+        this.collapsibleGroups.forEach((groupId) => {
+            $("" + groupId + "-card").show();
+            this.hiddenCollapsibleGroups.delete(groupId);
         });
 
-        this.#checkForVisibleGroups();
+        this.checkForVisibleGroups();
     }
 
     /**
@@ -198,8 +204,8 @@ class AccordionCollapse {
      * be hidden if somewhere within this Accordion element the user clicks. 
      */
     // handleFormFeedback() {
-    //     $("#" + this.#containerId).click((event) => {
-    //         this.#hideFeedbackElements();
+    //     $("" + this.containerId).click((event) => {
+    //         this.hideFeedbackElements();
     //     });
     // }
 
@@ -207,11 +213,11 @@ class AccordionCollapse {
      * In case all collapsible groups of this Accordion Collapse element are hidden, the entire element 
      * will be hidden too.
      */
-    #checkForVisibleGroups() {
-        if (this.#hiddenCollapsibleGroups.size === this.#collapsibleGroups.length) {
+    checkForVisibleGroups() {
+        if (this.hiddenCollapsibleGroups.size === this.collapsibleGroups.length) {
             // all included elements are hidden --> hide entire element
             this.changeVisibility(false);
-        } else if (this.#visible === false) {
+        } else if (this.isVisible === false) {
             this.changeVisibility(true);
         }
     }
@@ -221,13 +227,13 @@ class AccordionCollapse {
      * 
      * @param {event} event The triggered keydown event. 
      */
-    #handleEnterKey(event) {
+    handleEnterKey(event) {
         if (event.which == 13) {
-            this.#hideFeedbackElements();
+            this.hideFeedbackElements();
 
             if (event.target.type === "button") {
                 let groupContext = event.target.id.replace("-button", "");
-                if (this.#collapsibleGroups.includes(groupContext)) {
+                if (this.collapsibleGroups.includes(groupContext)) {
                     // Collapsible Property Group was collapsed/opened using enter 
                     return;
                 }
@@ -238,7 +244,7 @@ class AccordionCollapse {
             }
 
             if (event.target.getAttribute("data-property-type") === "entity") {
-                $("#" + this.#containerId).trigger(
+                this.accordionContainerElement.trigger(
                     $.Event(
                         "entitySpecificPropertyChanged",
                         {
@@ -248,7 +254,7 @@ class AccordionCollapse {
                         }
                     ));
             } else {
-                $("#" + this.#containerId).trigger(
+                this.accordionContainerElement.trigger(
                     $.Event("entityPropertyChanged",
                         {
                             propertyId: event.target.id,
@@ -266,12 +272,12 @@ class AccordionCollapse {
     /**
      * Hide visible validation feedback and remove valid classes from elements.
      */
-    #hideFeedbackElements() {
+    hideFeedbackElements() {
         // TODO more efficient possible?
-        $("#" + this.#containerId + " .valid-feedback:visible").hide();
-        $("#" + this.#containerId + " .invalid-feedback:visible").hide();
-        $("#" + this.#containerId + " .is-valid").removeClass("is-valid");
-        $("#" + this.#containerId + " .is-invalid").removeClass("is-invalid");
+        $("" + this.containerId + " .valid-feedback:visible").hide();
+        $("" + this.containerId + " .invalid-feedback:visible").hide();
+        $("" + this.containerId + " .is-valid").removeClass("is-valid");
+        $("" + this.containerId + " .is-invalid").removeClass("is-invalid");
     }
 }
 
