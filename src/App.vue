@@ -35,20 +35,12 @@ import { ref } from "vue";
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import Home from './Home.vue';
 import ModelingApp from './modeling/ModelingApp.vue';
-import { ModelingApplication } from './modeling/modelingApp';
 
 
 const currentPage = ref(1);
 
 // TODO reload resets modeling application => name disappears --> overlay or save
 window.onload = () => {
-
-
-  // get element to which the content is supposed to be added
-  //const mainSection = document.querySelector("main");
-
-  // create the Modeling Application Object
-  //const modelingApp = new ModelingApplication();
 
   // render required content dynamically and only if needed
   const menuItems = document.querySelectorAll("a[data-entry-module]");
@@ -70,7 +62,6 @@ window.onload = () => {
         triggerModelingApplicationFirstLoad();
         document.title += " Modeling Application";
       } else {
-        //homepage.renderInto(mainSection);
         currentPage.value = 1;
         sessionStorage.setItem("currentMenuSelectionIndex", menuItem["dataset"].menuIndex);
         document.title += " Home";
@@ -84,7 +75,6 @@ window.onload = () => {
   switch (sessionStorage.getItem("currentMenuSelectionIndex")) {
     case "1":
       navbarItems.get("1")?.classList.add("active");;
-      //homepage.renderInto(mainSection);
       currentPage.value = 1;
       document.title += " Home";
       sessionStorage.setItem("currentMenuSelectionIndex", "1");
@@ -92,7 +82,6 @@ window.onload = () => {
     case "2":
       navbarItems.get("2")?.classList.add("active");
       currentPage.value = 2;
-      //modelingApp.renderInto(mainSection);
       document.title += " Modeling Application";
       sessionStorage.setItem("currentMenuSelectionIndex", "2");
       // TODO
@@ -102,7 +91,6 @@ window.onload = () => {
     default:
       navbarItems.get("1")?.classList.add("active");
       currentPage.value = 1;
-      //homepage.renderInto(mainSection);
       document.title += " Home";
       sessionStorage.setItem("currentMenuSelectionIndex", "1");
       break;
@@ -117,23 +105,6 @@ const triggerModelingApplicationFirstLoad = () => {
     sessionStorage.setItem("reloadModelingApplication", "true");
   }
 }
-/*
-// todo remove from here
-document.querySelector("a.navbar-brand").addEventListener("click", (event) => {
-    console.log(modelingApp.getModeledSystemEntity());
-});
-*/
-/*
-import { Options, Vue } from 'vue-class-component';
-import HelloWorld from './components/HelloWorld.vue';
-
-@Options({
-  components: {
-    HelloWorld,
-  },
-})
-export default class App extends Vue {}
-*/
 </script>
 
 <style lang="scss">
