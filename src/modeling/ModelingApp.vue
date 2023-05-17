@@ -58,7 +58,15 @@ import $ from 'jquery';
 import { ref, onMounted } from 'vue'
 import { dia, shapes } from 'jointjs'
 import SystemEntityManager from './systemEntityManager';
-import ModelingAppMainView from './views/modelingAppMainView'
+
+import ModelingArea from './views/modelingArea';
+import Toolbar from './views/toolbar.js';
+import EntitySidebar from './views/entitySidebar';
+import DetailsSidebar from './views/detailsSidebar';
+
+import ToolbarConfig from "./config/toolbarConfiguration";
+import SidebarEntityShapes from './config/entitySidebarShape.config';
+import { DetailsSidebarConfig } from './config/detailsSidebarConfig';
 
 const currentSystemName = ref("");
 const currentSystemGraph = ref<dia.Graph>(new dia.Graph({}, { cellNamespace: shapes }));
@@ -114,11 +122,49 @@ onMounted(() => {
         }
     });
 
-    var mainView = new ModelingAppMainView({
-        el: '#app',
-        modelingAreaGraph: currentSystemGraph.value,
-        currentSystemName: currentSystemName.value
-    });
+    // modelingArea includes the interactive Paper view
+    var modelingArea = new ModelingArea({
+            graph: currentSystemGraph.value
+        });
+        modelingArea.render();
+    var mainPaper: dia.Paper = modelingArea.getPaper();
+
+    // Create and initialize the Toolbar View, which provides additional tooling for the main modeling area.
+    var toolbar = new Toolbar($(".app-header").get(0), mainPaper, ToolbarConfig, currentSystemName.value);
+    toolbar.render();
+
+    // Create and initialize the Entity Sidebar view, which includes the template shapes for the entities. 
+    var entitySidebar = new EntitySidebar({
+            paper: mainPaper,
+            documentElement: $(".entityShapes-sidebar-container"),
+            sidebarEntityConfig: SidebarEntityShapes
+        });
+    entitySidebar.render();
+
+    /**
+     * Create and initialize the Details Sidebar view. 
+     * Additionally, it defines when the sidebar should be generally displayed.
+    */
+    var detailsSidebar = new DetailsSidebar({
+            el: $(".details-container"),
+            paper: mainPaper,
+            detailsSidebarConfig: DetailsSidebarConfig
+        });
+        detailsSidebar.render();
+
+    mainPaper.on("cell:pointerdown", (cellView: dia.CellView) => {
+            detailsSidebar.renderEntitySelectionProperties(cellView.model);
+        });
+
+    mainPaper.on("blank:pointerdown", () => {
+            detailsSidebar.hideEntitySelectionProperties();
+        });
+
+    mainPaper.on("blank:contextmenu", () => {
+            detailsSidebar.hideEntitySelectionProperties();
+        });
+
+    
     $("#appToolbarContainer button").attr("disabled", "");
 
     if (currentSystemName.value) {
@@ -131,8 +177,4 @@ onMounted(() => {
         }
     });
 })
-
-
-
-
 </script>
