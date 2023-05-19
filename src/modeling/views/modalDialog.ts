@@ -13,6 +13,9 @@ class ModalDialog {
     #standardTitleIcon = "fa-solid fa-info";
 
     constructor() {
+        // fix: clear previously created modal
+        $("#staticModal").remove();
+
         let staticModal = '<div class="modal" id="staticModal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true"></div>';
         $("#app").append(staticModal);
         // let modalDialog = '<div class="modal-dialog modal-dialog-centered"><div class="modal-content"></div></div>';
@@ -204,7 +207,6 @@ class ModalDialog {
 
     show() {        
         $("#staticModal button").on("click", () => { $(':focus').blur(); });
-        console.log("show called in modelDialog: fix this in code")
         $("#staticModal").modal("show");
     }
 

@@ -260,7 +260,7 @@ const secondAdditionalTools = computed(() => {
 
 
 // TODO Fix Settings modal
-const applicationModalDialog = new ModalDialog();
+//const applicationModalDialog = new ModalDialog();
 
 props.graph.on("add", (cell: dia.Cell) => updateEntityCounter(cell.attributes.entity.type, "add"));
 props.graph.on("remove", (cell: dia.Cell) => updateEntityCounter(cell.attributes.entity.type, "remove"));
@@ -618,6 +618,7 @@ function editApplicationSettings() {
     // TODO fix access
     ApplicationSettingsDialogConfig.content.Grid.sectionContent.Thickness.defaultValue = props.paper["_gridSettings"][0].thickness;
     // create dialog with information
+    let applicationModalDialog = new ModalDialog();
     applicationModalDialog.renderActionDialog(ApplicationSettingsDialogConfig.title, ApplicationSettingsDialogConfig.content, ApplicationSettingsDialogConfig.cancelButton.text, ApplicationSettingsDialogConfig.saveButton);
 
     applicationModalDialog.show();
