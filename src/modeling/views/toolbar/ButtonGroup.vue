@@ -39,7 +39,6 @@ import { ToolbarButton } from '../Toolbar.vue';
 const props = defineProps<{
     buttonGroupId: string;
     buttons: ToolbarButton[];
-    hideButtonClass: string;
 }>()
 
 const emit = defineEmits<{

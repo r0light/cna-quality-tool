@@ -38,13 +38,13 @@
             <div class="app-toolbar">
                 <div v-for="buttonGroup in generalTools" class="app-toolbar-tools">
                     <ButtonGroup :buttonGroupId="buttonGroup.buttonGroupId" :buttons="buttonGroup.buttons"
-                        :hideButtonClass="buttonGroup.hideButtonClass" @toolbarButtonClicked="onToolbarButtonClick">
+                        @toolbarButtonClicked="onToolbarButtonClick">
                     </ButtonGroup>
-                    <div class="group-divider" :class="buttonGroup.hideButtonClass"></div>
+                    <div class="group-divider" ></div>
                 </div>
                 <div class="button-group" data-group="first-row-config-button">
                     <ButtonGroup v-for="tool of firstAdditionalTools" :buttonGroupId="tool.buttonGroupId"
-                        :buttons="tool.buttons" :hideButtonClass="tool.hideButtonClass"
+                        :buttons="tool.buttons"
                         @toolbarButtonClicked="onToolbarButtonClick"></ButtonGroup>
                 </div>
             </div>
@@ -68,14 +68,14 @@
                         </label>
 
                     </div>
-                    <div class="group-divider" :class="entityTool.hideButtonClass"></div>
+                    <div class="group-divider" ></div>
                 </div>
 
             </div>
         </div>
         <div v-for="tool of secondAdditionalTools" class="second-row-tools" data-group="second-row-config-tools">
-            <div class="group-divider" :class="tool.hideButtonClass"></div>
-            <ButtonGroup :buttonGroupId="tool.buttonGroupId" :buttons="tool.buttons" :hideButtonClass="tool.hideButtonClass"
+            <div class="group-divider" ></div>
+            <ButtonGroup :buttonGroupId="tool.buttonGroupId" :buttons="tool.buttons"
                 @toolbarButtonClicked="onToolbarButtonClick"></ButtonGroup>
         </div>
     </div>
@@ -102,16 +102,20 @@ export type ToolbarButton = {
     iconClass: string,
     additionalCssClass: string,
     show: boolean,
-    // in case of Dropdown buttons
+    // in case of Dropdown buttons:
     providedFeatureGroup?: string,
     dropdownButtons?: ToolbarButton[]
+}
+
+export type ToolbarButtonGroup = {
+    buttonGroupId: string,
+    buttons: ToolbarButton[]
 }
 
 const props = defineProps<{
     systemName: string;
     paper: dia.Paper;
     graph: dia.Graph;
-    toolbarConfig: any; //TODO proper type
 }>();
 
 const emit = defineEmits<{
@@ -120,20 +124,13 @@ const emit = defineEmits<{
 
 const currentSystemName = ref<string>(props.systemName);
 const nameEditMode = ref<"none" | "editing">("none");
-//const screenMode = ref<"fullScreen" | "normalScreen">("normalScreen");
 
-const generalTools = ref((() => {
-    let preparedTools = [];
-    for (const buttonGroup of props.toolbarConfig.Tools) {
-        let hideButtonClass = "";
-        if (buttonGroup.content?.length <= 1) { //TODO change this?
-            hideButtonClass = "buttonInitialHide";
-        }
-
+function configureToolbarButtons(config: any[]): ToolbarButtonGroup[] {
+    let toolbarGroups: ToolbarButtonGroup[] = [];
+    for (const buttonGroup of config) {
         let buttons = [];
         for (const groupItem of buttonGroup.content) {
             if (groupItem.buttonType === 'button-dropdown') {
-
                 let dropdownItems = [];
                 for (const dropdownItem of groupItem.dropdownButtons) {
                     dropdownItems.push({
@@ -142,7 +139,6 @@ const generalTools = ref((() => {
                         iconClass: dropdownItem.iconClass,
                         text: dropdownItem.text,
                         show: true,
-
                     })
                 }
                 buttons.push({
@@ -156,7 +152,6 @@ const generalTools = ref((() => {
                     providedFeatureGroup: groupItem.providedFeature + "-buttonDropDownGroup",
                     dropdownButtons: dropdownItems,
                 })
-
             } else {
                 buttons.push({
                     buttonType: groupItem.buttonType,
@@ -169,17 +164,19 @@ const generalTools = ref((() => {
                 })
             }
         }
-        preparedTools.push({
+        toolbarGroups.push({
             buttonGroupId: buttonGroup.buttonGroupId,
-            buttons: buttons,
-            hideButtonClass: hideButtonClass
+            buttons: buttons
         })
     }
-    return preparedTools;
+    return toolbarGroups;
+}
+
+const generalTools = ref((() => {
+    return configureToolbarButtons(ToolbarConfig.Tools)
 })());
 
 const entityTools = ref((() => {
-
     let toolEntries = [];
     for (const entityElement of ToolbarConfig.EntityConfig) {
         toolEntries.push({
@@ -197,70 +194,12 @@ const entityTools = ref((() => {
 })())
 
 const firstAdditionalTools = computed(() => {
-    let firstTools = [];
-    for (const additionalRowTool of ToolbarConfig.ToolbarRowConfig) {
-        if (additionalRowTool.rowIndex === 1) {
-            let firstToolItems = [];
-            for (const toolItem of additionalRowTool.tools) {
-
-                let buttons = [];
-                for (const groupItem of toolItem.content) {
-                    buttons.push({
-                        buttonType: groupItem.buttonType,
-                        providedFeature: groupItem.providedFeature + "-button",
-                        tooltipText: groupItem.tooltipText,
-                        text: groupItem.text,
-                        iconClass: groupItem.iconClass,
-                        additionalCssClass: groupItem.additionalCssClass,
-                        show: true,
-                    })
-                }
-                firstToolItems.push({
-                    buttonGroupId: toolItem.groupId,
-                    buttons: buttons
-                })
-
-            }
-            firstTools.push(...firstToolItems);
-        }
-    }
-    return firstTools;
+    return configureToolbarButtons(ToolbarConfig.ToolbarRowConfig.find(element => element.rowIndex === 1).tools)
 })
 
 const secondAdditionalTools = computed(() => {
-    let secondTools = [];
-    for (const additionalRowTool of ToolbarConfig.ToolbarRowConfig) {
-        if (additionalRowTool.rowIndex === 2) {
-            let secondToolItems = [];
-            for (const toolItem of additionalRowTool.tools) {
-
-                let buttons = [];
-                for (const groupItem of toolItem.content) {
-                    buttons.push({
-                        buttonType: groupItem.buttonType,
-                        providedFeature: groupItem.providedFeature + "-button",
-                        tooltipText: groupItem.tooltipText,
-                        text: groupItem.text,
-                        iconClass: groupItem.iconClass,
-                        additionalCssClass: groupItem.additionalCssClass,
-                        show: true,
-                    })
-                }
-                secondToolItems.push({
-                    buttonGroupId: toolItem.groupId,
-                    buttons: buttons
-                })
-
-            }
-            secondTools.push(...secondToolItems);
-        }
-    }
-    return secondTools;
+    return configureToolbarButtons(ToolbarConfig.ToolbarRowConfig.find(element => element.rowIndex === 2).tools)
 })
-
-
-// TODO Fix Settings modal
-//const applicationModalDialog = new ModalDialog();
 
 props.graph.on("add", (cell: dia.Cell) => updateEntityCounter(cell.attributes.entity.type, "add"));
 props.graph.on("remove", (cell: dia.Cell) => updateEntityCounter(cell.attributes.entity.type, "remove"));
@@ -349,11 +288,14 @@ function onEntitySelection(buttonId: string, event) {
 
 onMounted(() => {
 
-    $(".buttonInitialHide").hide();
-
     generalTools.value.find(element => element.buttonGroupId === "general-paper-actions")
         .buttons
         .find(element => element.providedFeature === "closefullScreen-button")
+        .show = false;
+
+    generalTools.value.find(element => element.buttonGroupId === "requestTraceView")
+        .buttons
+        .find(element => element.providedFeature === "exitRequestTraceView-button")
         .show = false;
 
 

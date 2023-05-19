@@ -431,6 +431,7 @@ const ModelingArea = mvc.View.extend({
         elementView.model.attr("body/fill", "gold");
 
         // provide exit button
+        // TODO: Fix in Toolbar if necessary
         $("#exitRequestTraceView-button").show();
         $("#exitRequestTraceView-button").click((event) => { this.onExitRequestTraceView(event) });
         this._currentRequestTraceViewSelection = elementView.model;

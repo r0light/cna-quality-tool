@@ -42,7 +42,7 @@
 
     <div id="app">
         <!--<div id="appToolbarContainer" class="app-header d-print-none"></div>-->
-        <Toolbar :system-name="currentSystemName" :key="currentSystemName" :paper="mainPaper" :graph="currentSystemGraph as dia.Graph" :toolbar-config="ToolbarConfig" @systemNameUpdated="setCurrentSystemName"></Toolbar>
+        <Toolbar :system-name="currentSystemName" :key="currentSystemName" :paper="mainPaper" :graph="currentSystemGraph as dia.Graph" @systemNameUpdated="setCurrentSystemName"></Toolbar>
         <div class="app-body">
             <div class="entityShapes-sidebar-container d-print-none"></div>
             <div class="visible-modeling-area"></div>
@@ -66,7 +66,6 @@ import Toolbar from './views/Toolbar.vue';
 import EntitySidebar from './views/entitySidebar';
 import DetailsSidebar from './views/detailsSidebar/detailsSidebar';
 
-import ToolbarConfig from "./config/toolbarConfiguration";
 import SidebarEntityShapes from './config/entitySidebarShape.config';
 import { DetailsSidebarConfig } from './config/detailsSidebarConfig';
 
