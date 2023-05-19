@@ -193,13 +193,13 @@ const entityTools = ref((() => {
     return toolEntries;
 })())
 
-const firstAdditionalTools = computed(() => {
+const firstAdditionalTools = ref((() => {
     return configureToolbarButtons(ToolbarConfig.ToolbarRowConfig.find(element => element.rowIndex === 1).tools)
-})
+})());
 
-const secondAdditionalTools = computed(() => {
+const secondAdditionalTools = ref((() => {
     return configureToolbarButtons(ToolbarConfig.ToolbarRowConfig.find(element => element.rowIndex === 2).tools)
-})
+})());
 
 props.graph.on("add", (cell: dia.Cell) => updateEntityCounter(cell.attributes.entity.type, "add"));
 props.graph.on("remove", (cell: dia.Cell) => updateEntityCounter(cell.attributes.entity.type, "remove"));
@@ -298,6 +298,10 @@ onMounted(() => {
         .find(element => element.providedFeature === "exitRequestTraceView-button")
         .show = false;
 
+    firstAdditionalTools.value.find(element => element.buttonGroupId === "additionalToolbar")
+        .buttons
+        .find(element => element.providedFeature === "showEntityToolbarRow-button")
+        .show = false;
 
     //TODO on mouseup -> remove focus
 

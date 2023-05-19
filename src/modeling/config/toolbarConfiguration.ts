@@ -276,7 +276,7 @@ const ToolbarConfig = {
             rowIndex: 1,
             tools: [
                 {
-                    groupId: "settings",
+                    buttonGroupId: "settings",
                     content: [
                         {
                             buttonType: ItemType.BUTTON,
@@ -289,7 +289,7 @@ const ToolbarConfig = {
                     ]
                 },
                 {
-                    groupId: "additionalToolbar",
+                    buttonGroupId: "additionalToolbar",
                     content: [
                         {
                             buttonType: ItemType.BUTTON,
@@ -307,7 +307,7 @@ const ToolbarConfig = {
             rowIndex: 2,
             tools: [
                 {
-                    groupId: "entireToolbarSecondRow",
+                    buttonGroupId: "entireToolbarSecondRow",
                     content: [
                         {
                             buttonType: ItemType.BUTTON,
