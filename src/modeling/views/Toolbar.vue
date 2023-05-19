@@ -37,75 +37,13 @@
         <div id="modelAppToolbar" class="toolbar-container">
             <div class="app-toolbar">
                 <div v-for="buttonGroup in generalTools" class="app-toolbar-tools">
-                    <div class="button-group" :data-group="buttonGroup.buttonGroupId">
-                        <div v-for="button in buttonGroup.buttons">
-                            <button v-if="button.buttonType === 'button'" :id="button.providedFeature"
-                                @click="onToolbarButtonClick(button.providedFeature, $event)" v-show="button.show"
-                                class="toolbarButton btn" :class="button.additionalCssClass" type="button"
-                                :title="button.tooltipText" data-toggle="tooltip" data-placement="bottom">
-                                <i :class="button.iconClass"></i>{{ button.text }}
-                            </button>
-                            <div v-if="button.buttonType === 'button-dropdown'" :id="button.providedFeatureGroup"
-                                class="buttonDropDownGroup dropdown">
-                                <button :id="button.providedFeature" class="toolbarDropdownButton btn dropdown-toggle"
-                                    :class="button.additionalCssClass" type="button" :title="button.tooltipText"
-                                    data-toggle="dropdown" data-tooltip-toggle="tooltip" data-placement="bottom"
-                                    aria-expanded="false">
-                                    <i :class="button.iconClass"></i>{{ button.text }}
-                                </button>
-
-                                <div :id="button.providedFeatureItemsGroup" class="dropdown-menu"
-                                    :aria-labelledby="button.providedFeature">
-                                    <div v-for="dropdownItem of button.dropdownButtons">
-                                        <button :id="dropdownItem.providedFeatureItemButton"
-                                            @click="onToolbarButtonClick(dropdownItem.providedFeatureItemButton, $event)"
-                                            class="toolbarDropdownButtonItem btn dropdown-item"
-                                            :class="dropdownItem.additionalCssClass" type="button">
-                                            <i :class="dropdownItem.iconClass" style="font-size: 1.1em"></i>
-                                            <span> {{ dropdownItem.text }}</span>
-                                        </button>
-                                    </div>
-                                </div>
-
-                            </div>
-
-                        </div>
-                    </div>
+                    <ButtonGroup :buttonGroupId="buttonGroup.buttonGroupId" :buttons="buttonGroup.buttons"
+                        :hideButtonClass="buttonGroup.hideButtonClass" @toolbarButtonClicked="onToolbarButtonClick"></ButtonGroup>
                     <div class="group-divider" :class="buttonGroup.hideButtonClass"></div>
                 </div>
                 <div class="button-group" data-group="first-row-config-button">
-                    <div v-for="tool of firstAdditionalTools" class="button-group" :data-group="tool.buttonGroupId">
-                        <div v-for="button in tool.buttons" class="button-group">
-                            <button v-if="button.buttonType === 'button'" :id="button.providedFeature"
-                                @click="onToolbarButtonClick(button.providedFeature, $event)" class="toolbarButton btn"
-                                :class="button.additionalCssClass" type="button" :title="button.tooltipText"
-                                data-toggle="tooltip" data-placement="bottom">
-                                <i :class="button.iconClass"></i>{{ button.text }}
-                            </button>
-                            <div v-if="button.buttonType === 'button-dropdown'" :id="button.providedFeatureGroup"
-                                class="buttonDropDownGroup dropdown">
-                                <button :id="button.providedFeature" class="toolbarDropdownButton btn dropdown-toggle"
-                                    :class="button.additionalCssClass" type="button" :title="button.tooltipText"
-                                    data-toggle="dropdown" data-tooltip-toggle="tooltip" data-placement="bottom"
-                                    aria-expanded="false">
-                                    <i :class="button.iconClass"></i>{{ button.text }}
-                                </button>
-
-                                <div :id="button.providedFeatureItemsGroup" class="dropdown-menu"
-                                    :aria-labelledby="button.providedFeature">
-                                    <div v-for="dropdownItem of button.dropdownButtons">
-                                        <button :id="dropdownItem.providedFeatureItemButton"
-                                            @click="onToolbarButtonClick(dropdownItem.providedFeatureItemButton, $event)"
-                                            class="toolbarDropdownButtonItem btn dropdown-item"
-                                            :class="dropdownItem.additionalCssClass" type="button">
-                                            <i :class="dropdownItem.iconClass" style="font-size: 1.1em"></i>
-                                            <span> {{ dropdownItem.text }}</span>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <ButtonGroup v-for="tool of firstAdditionalTools" :buttonGroupId="tool.buttonGroupId"
+                        :buttons="tool.buttons" :hideButtonClass="tool.hideButtonClass" @toolbarButtonClicked="onToolbarButtonClick"></ButtonGroup>
                 </div>
             </div>
         </div>
@@ -135,40 +73,8 @@
         </div>
         <div v-for="tool of secondAdditionalTools" class="second-row-tools" data-group="second-row-config-tools">
             <div class="group-divider" :class="tool.hideButtonClass"></div>
-            <div class="button-group" :data-group="tool.buttonGroupId">
-                <div v-for="button in tool.buttons">
-                    <button v-if="button.buttonType === 'button'" :id="button.providedFeature"
-                        @click="onToolbarButtonClick(button.providedFeature, $event)" class="toolbarButton btn"
-                        :class="button.additionalCssClass" type="button" :title="button.tooltipText" data-toggle="tooltip"
-                        data-placement="bottom">
-                        <i :class="button.iconClass"></i>{{ button.text }}
-                    </button>
-                    <div v-if="button.buttonType === 'button-dropdown'" :id="button.providedFeatureGroup"
-                        class="buttonDropDownGroup dropdown">
-                        <button :id="button.providedFeature" class="toolbarDropdownButton btn dropdown-toggle"
-                            :class="button.additionalCssClass" type="button" :title="button.tooltipText"
-                            data-toggle="dropdown" data-tooltip-toggle="tooltip" data-placement="bottom"
-                            aria-expanded="false">
-                            <i :class="button.iconClass"></i>{{ button.text }}
-                        </button>
-
-                        <div :id="button.providedFeatureItemsGroup" class="dropdown-menu"
-                            :aria-labelledby="button.providedFeature">
-                            <div v-for="dropdownItem of button.dropdownButtons">
-                                <button :id="dropdownItem.providedFeatureItemButton"
-                                    @click="onToolbarButtonClick(dropdownItem.providedFeatureItemButton, $event)"
-                                    class="toolbarDropdownButtonItem btn dropdown-item"
-                                    :class="dropdownItem.additionalCssClass" type="button">
-                                    <i :class="dropdownItem.iconClass" style="font-size: 1.1em"></i>
-                                    <span> {{ dropdownItem.text }}</span>
-                                </button>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-
+            <ButtonGroup :buttonGroupId="tool.buttonGroupId" :buttons="tool.buttons"
+                        :hideButtonClass="tool.hideButtonClass" @toolbarButtonClicked="onToolbarButtonClick"></ButtonGroup>
         </div>
     </div>
 </template>
@@ -184,7 +90,20 @@ import ToolbarConfig from "../config/toolbarConfiguration";
 import ModalDialog from "./modalDialog";
 import UIModalDialog from "../representations/guiElements.dialog";
 import { addSelectionToolToEntity } from "./tools/entitySelectionTools";
-import { update } from 'lodash';
+import ButtonGroup from './toolbar/ButtonGroup.vue';
+
+export type ToolbarButton = {
+    buttonType: string,
+    providedFeature: string,
+    tooltipText: string,
+    text: string,
+    iconClass: string,
+    additionalCssClass: string,
+    show: boolean,
+    // in case of Dropdown buttons
+    providedFeatureGroup?: string,
+    dropdownButtons?: ToolbarButton[]
+}
 
 const props = defineProps<{
     systemName: string;
@@ -216,7 +135,7 @@ const generalTools = ref((() => {
                 let dropdownItems = [];
                 for (const dropdownItem of groupItem.dropdownButtons) {
                     dropdownItems.push({
-                        providedFeatureItemButton: dropdownItem.providedFeature + '-dropdownItemButton',
+                        providedFeature: dropdownItem.providedFeature + '-dropdownItemButton',
                         additionalCssClass: dropdownItem.additionalCssClass,
                         iconClass: dropdownItem.iconClass,
                         text: dropdownItem.text,
@@ -226,15 +145,14 @@ const generalTools = ref((() => {
                 }
                 buttons.push({
                     buttonType: groupItem.buttonType,
-                    providedFeatureGroup: groupItem.providedFeature + "-buttonDropDownGroup",
                     providedFeature: groupItem.providedFeature + "-buttonDropDown",
-                    providedFeatureItemsGroup: groupItem.providedFeature + "-dropdownItemsGroup",
                     tooltipText: groupItem.tooltipText,
                     text: groupItem.text,
                     iconClass: groupItem.iconClass,
                     additionalCssClass: groupItem.additionalCssClass,
-                    dropdownButtons: dropdownItems,
                     show: true,
+                    providedFeatureGroup: groupItem.providedFeature + "-buttonDropDownGroup",
+                    dropdownButtons: dropdownItems,
                 })
 
             } else {
@@ -245,7 +163,6 @@ const generalTools = ref((() => {
                     text: groupItem.text,
                     iconClass: groupItem.iconClass,
                     additionalCssClass: groupItem.additionalCssClass,
-                    dropdownButtons: groupItem.dropdownButtons,
                     show: true,
                 })
             }
@@ -293,6 +210,7 @@ const firstAdditionalTools = computed(() => {
                         text: groupItem.text,
                         iconClass: groupItem.iconClass,
                         additionalCssClass: groupItem.additionalCssClass,
+                        show: true,
                     })
                 }
                 firstToolItems.push({
@@ -323,6 +241,7 @@ const secondAdditionalTools = computed(() => {
                         text: groupItem.text,
                         iconClass: groupItem.iconClass,
                         additionalCssClass: groupItem.additionalCssClass,
+                        show: true,
                     })
                 }
                 secondToolItems.push({
@@ -584,7 +503,7 @@ function loadFromJson() {
             // call hideTools in Timeout, because it does not work when called directly...
             setTimeout(() => { props.paper.hideTools() }, 100);
 
-            for (const [key, value] of Object.entries( EntityTypes)) {
+            for (const [key, value] of Object.entries(EntityTypes)) {
                 updateEntityCounter(value, "add");
             }
         } catch (e) {
