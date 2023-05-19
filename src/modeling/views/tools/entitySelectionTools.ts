@@ -229,7 +229,7 @@ class EntitySelectionTools extends dia.ToolsView {
 
 }
 
-function addSelectionToolToEntity(addedElement: dia.Element, currentPaper: dia.Paper) {
+function addSelectionToolToEntity(addedElement: dia.Cell, currentPaper: dia.Paper) {
     if (addedElement.isLink()) {
         return;
     }

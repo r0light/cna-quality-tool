@@ -37,11 +37,12 @@
                     </div>
                 </form>
             </div>
-        </div>
+        </div>  
     </div>
 
     <div id="app">
-        <div id="appToolbarContainer" class="app-header d-print-none"></div>
+        <!--<div id="appToolbarContainer" class="app-header d-print-none"></div>-->
+        <Toolbar :system-name="currentSystemName" :key="currentSystemName" :paper="mainPaper" :graph="currentSystemGraph as dia.Graph" :toolbar-config="ToolbarConfig" @systemNameUpdated="setCurrentSystemName"></Toolbar>
         <div class="app-body">
             <div class="entityShapes-sidebar-container d-print-none"></div>
             <div class="visible-modeling-area"></div>
@@ -60,7 +61,8 @@ import { dia, shapes } from 'jointjs'
 import SystemEntityManager from './systemEntityManager';
 
 import ModelingArea from './views/modelingArea';
-import Toolbar from './views/toolbar.js';
+//import Toolbar from './views/toolbar.js';
+import Toolbar from './views/Toolbar.vue';
 import EntitySidebar from './views/entitySidebar';
 import DetailsSidebar from './views/detailsSidebar';
 
@@ -69,8 +71,10 @@ import SidebarEntityShapes from './config/entitySidebarShape.config';
 import { DetailsSidebarConfig } from './config/detailsSidebarConfig';
 
 const currentSystemName = ref("");
-const currentSystemGraph = ref<dia.Graph>(new dia.Graph({}, { cellNamespace: shapes }));
+const currentSystemGraph = ref(new dia.Graph({}, { cellNamespace: shapes }));
 const systemEntityManager = ref(new SystemEntityManager(currentSystemGraph.value));
+
+const mainPaper = ref<dia.Paper>();
 
 const showInitOverlay = ref(true);
 const showStartModelingForm = ref(false);
@@ -90,8 +94,7 @@ function onNameEntered() {
         return;
     }
 
-    $("#appNameTitle").val(currentSystemName.value);
-    setCurrentSystemName(currentSystemName.value)
+    //setCurrentSystemName(currentSystemName.value)
     showInitOverlay.value = false;
     $("#appToolbarContainer button").attr("disabled", null);
 
@@ -101,15 +104,7 @@ function setCurrentSystemName(systemName: string) {
     if (!systemName) {
         return;
     }
-
-    if (!currentSystemName.value) {
-        $("#appNameTitle").trigger($.Event("initialSystemName",
-            { systemName: systemName }
-        ));
-        //currentSystemGraph.value.trigger($.Event("initialSystemName", { systemName: systemName }));
-    }
-
-    //currentSystemName.value = systemName;
+    currentSystemName.value = systemName;
     // TODO sessionStorage ?
 }
 
@@ -127,15 +122,15 @@ onMounted(() => {
             graph: currentSystemGraph.value
         });
         modelingArea.render();
-    var mainPaper: dia.Paper = modelingArea.getPaper();
+    mainPaper.value = modelingArea.getPaper();
 
     // Create and initialize the Toolbar View, which provides additional tooling for the main modeling area.
-    var toolbar = new Toolbar($(".app-header").get(0), mainPaper, ToolbarConfig, currentSystemName.value);
-    toolbar.render();
+    //var toolbar = new Toolbar($(".app-header").get(0), mainPaper, ToolbarConfig, currentSystemName.value);
+    //toolbar.render();
 
     // Create and initialize the Entity Sidebar view, which includes the template shapes for the entities. 
     var entitySidebar = new EntitySidebar({
-            paper: mainPaper,
+            paper: mainPaper.value,
             documentElement: $(".entityShapes-sidebar-container"),
             sidebarEntityConfig: SidebarEntityShapes
         });
@@ -147,34 +142,24 @@ onMounted(() => {
     */
     var detailsSidebar = new DetailsSidebar({
             el: $(".details-container"),
-            paper: mainPaper,
+            paper: mainPaper.value,
             detailsSidebarConfig: DetailsSidebarConfig
         });
         detailsSidebar.render();
 
-    mainPaper.on("cell:pointerdown", (cellView: dia.CellView) => {
+    mainPaper.value.on("cell:pointerdown", (cellView: dia.CellView) => {
             detailsSidebar.renderEntitySelectionProperties(cellView.model);
         });
 
-    mainPaper.on("blank:pointerdown", () => {
+    mainPaper.value.on("blank:pointerdown", () => {
             detailsSidebar.hideEntitySelectionProperties();
         });
 
-    mainPaper.on("blank:contextmenu", () => {
+    mainPaper.value.on("blank:contextmenu", () => {
             detailsSidebar.hideEntitySelectionProperties();
         });
 
     
     $("#appToolbarContainer button").attr("disabled", "");
-
-    if (currentSystemName.value) {
-        $("#appNameTitle").val(currentSystemName.value);
-    }
-    $("#appNameTitle").on("systemNameChanged", (event) => {
-        // this.#currentSystemGraph.on("systemNameChanged", (event) => {
-        if (event.data && event.data["updatedSystemName"]) {
-            setCurrentSystemName(event.data["updatedSystemName"]);
-        }
-    });
 })
 </script>

@@ -5,6 +5,8 @@
     --app-frame: 5px solid var(--menu-background-colour);
 }
 
+
+
 /* Configuring overlay items*/
 .init-overlay {
     position: fixed;
@@ -71,9 +73,6 @@
     font-weight: bold;
 }
 
-.submitEditApplicationNameBtnGroup {
-    display: none;
-}
 
 /* Modal Dialog */
 .modalTitleIcon {

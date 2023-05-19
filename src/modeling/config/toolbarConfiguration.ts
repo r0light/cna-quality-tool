@@ -1,5 +1,9 @@
-import { ToolbarElementType } from "../representations/guiElements.toolbarTools";
 import EntityTypes from "./entityTypes";
+
+const ToolbarElementType = Object.freeze({
+    BUTTON: "button",
+    BUTTON_DROPDOWN: "button-dropdown"
+})
 
 const ItemType = Object.freeze({
     BUTTON: "button",
@@ -29,7 +33,7 @@ const ToolbarConfig = {
                     tooltipText: "Close fullscreen",
                     text: "",
                     iconClass: "fa-solid fa-compress",
-                    additionalCssClass: "buttonInitialHide",
+                    additionalCssClass: "",
                     buttonType: ToolbarElementType.BUTTON
                 },
                 {
@@ -129,7 +133,7 @@ const ToolbarConfig = {
                     text: "",
                     iconClass: "fa-solid fa-magnifying-glass-minus",
                     additionalCssClass: "",
-                    buttonType: "range-label-buttons"
+                    buttonType: ToolbarElementType.BUTTON
                 },
                 {
                     providedFeature: "zoomInPaper",
@@ -137,7 +141,7 @@ const ToolbarConfig = {
                     text: "",
                     iconClass: "fa-solid fa-magnifying-glass-plus",
                     additionalCssClass: "",
-                    buttonType: "range-label-buttons"
+                    buttonType: ToolbarElementType.BUTTON
                 }
             ]
         },

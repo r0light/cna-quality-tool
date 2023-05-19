@@ -113,4 +113,8 @@ const triggerModelingApplicationFirstLoad = () => {
   flex-direction: column;
   min-height: 100vh;
 }
+
+.hide {
+  display: none;
+}
 </style>
