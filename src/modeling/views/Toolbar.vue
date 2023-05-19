@@ -38,12 +38,14 @@
             <div class="app-toolbar">
                 <div v-for="buttonGroup in generalTools" class="app-toolbar-tools">
                     <ButtonGroup :buttonGroupId="buttonGroup.buttonGroupId" :buttons="buttonGroup.buttons"
-                        :hideButtonClass="buttonGroup.hideButtonClass" @toolbarButtonClicked="onToolbarButtonClick"></ButtonGroup>
+                        :hideButtonClass="buttonGroup.hideButtonClass" @toolbarButtonClicked="onToolbarButtonClick">
+                    </ButtonGroup>
                     <div class="group-divider" :class="buttonGroup.hideButtonClass"></div>
                 </div>
                 <div class="button-group" data-group="first-row-config-button">
                     <ButtonGroup v-for="tool of firstAdditionalTools" :buttonGroupId="tool.buttonGroupId"
-                        :buttons="tool.buttons" :hideButtonClass="tool.hideButtonClass" @toolbarButtonClicked="onToolbarButtonClick"></ButtonGroup>
+                        :buttons="tool.buttons" :hideButtonClass="tool.hideButtonClass"
+                        @toolbarButtonClicked="onToolbarButtonClick"></ButtonGroup>
                 </div>
             </div>
         </div>
@@ -73,8 +75,8 @@
         </div>
         <div v-for="tool of secondAdditionalTools" class="second-row-tools" data-group="second-row-config-tools">
             <div class="group-divider" :class="tool.hideButtonClass"></div>
-            <ButtonGroup :buttonGroupId="tool.buttonGroupId" :buttons="tool.buttons"
-                        :hideButtonClass="tool.hideButtonClass" @toolbarButtonClicked="onToolbarButtonClick"></ButtonGroup>
+            <ButtonGroup :buttonGroupId="tool.buttonGroupId" :buttons="tool.buttons" :hideButtonClass="tool.hideButtonClass"
+                @toolbarButtonClicked="onToolbarButtonClick"></ButtonGroup>
         </div>
     </div>
 </template>

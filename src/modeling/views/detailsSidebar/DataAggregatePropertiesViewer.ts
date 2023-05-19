@@ -2,8 +2,8 @@ import $ from 'jquery';
 import { dataAggregateSvgRepresentation, ParentRelation, PropertyContentType } from "../../config/detailsSidebarConfig";
 import EntityTypes from "../../config/entityTypes";
 import { UIContentType } from "../../config/toolbarConfiguration";
-import UIModalDialog, { DialogSize } from "../guiElements.dialog";
-import { FormGroup } from "../guiElements";
+import UIModalDialog, { DialogSize } from "../../representations/guiElements.dialog";
+import { FormGroup } from "../../representations/guiElements";
 import { dia } from 'jointjs';
 
 const componentSvgRepresentation = () => {

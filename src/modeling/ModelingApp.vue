@@ -64,7 +64,7 @@ import ModelingArea from './views/modelingArea';
 //import Toolbar from './views/toolbar.js';
 import Toolbar from './views/Toolbar.vue';
 import EntitySidebar from './views/entitySidebar';
-import DetailsSidebar from './views/detailsSidebar';
+import DetailsSidebar from './views/detailsSidebar/detailsSidebar';
 
 import ToolbarConfig from "./config/toolbarConfiguration";
 import SidebarEntityShapes from './config/entitySidebarShape.config';

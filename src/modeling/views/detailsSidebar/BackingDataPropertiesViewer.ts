@@ -3,8 +3,8 @@ import $ from 'jquery';
 import { backingDataSvgRepresentation, dataAggregateSvgRepresentation, ParentRelation, PropertyContentType } from "../../config/detailsSidebarConfig";
 import EntityTypes from "../../config/entityTypes";
 import { UIContentType } from "../../config/toolbarConfiguration";
-import UIModalDialog, { DialogSize } from "../guiElements.dialog";
-import { FormGroup } from "../guiElements.js";
+import UIModalDialog, { DialogSize } from "../../representations/guiElements.dialog";
+import { FormGroup } from "../../representations/guiElements.js";
 
 const EditModelDialogConfig = () => {
     return {

@@ -1,12 +1,12 @@
 import $ from 'jquery';
 import { dia, mvc, util } from "jointjs";
-import { ColourConfig, EntityDetailsConfig, EntityGeneralProperties, propertyConfig, PropertyContentType } from "../config/detailsSidebarConfig";
-import EntityTypes from "../config/entityTypes";
-import { FormGroup } from "../representations/guiElements";
-import AccordionCollapse from "../representations/guiElements.AccordionCollapse";
-import RequestTracePropertiesViewer from "../representations/entityProperties/RequestTracePropertiesViewer";
-import DataAggregatePropertiesViewer from "../representations/entityProperties/DataAggregatePropertiesViewer";
-import BackingDataPropertiesViewer from "../representations/entityProperties/BackingDataPropertiesViewer";
+import { ColourConfig, EntityDetailsConfig, EntityGeneralProperties, propertyConfig, PropertyContentType } from "../../config/detailsSidebarConfig";
+import EntityTypes from "../../config/entityTypes";
+import { FormGroup } from "../../representations/guiElements";
+import AccordionCollapse from "../../representations/guiElements.AccordionCollapse";
+import RequestTracePropertiesViewer from "./RequestTracePropertiesViewer";
+import DataAggregatePropertiesViewer from "./DataAggregatePropertiesViewer";
+import BackingDataPropertiesViewer from "./BackingDataPropertiesViewer";
 
 const DetailsSidebar = mvc.View.extend({
 

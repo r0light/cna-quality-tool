@@ -3,8 +3,8 @@ import { dia, util } from "jointjs";
 import { PropertyContentType } from "../../config/detailsSidebarConfig";
 import EntityTypes from "../../config/entityTypes";
 import { UIContentType } from "../../config/toolbarConfiguration";
-import UIModalDialog, { DialogSize } from "../guiElements.dialog";
-import { FormGroup } from "../guiElements";
+import UIModalDialog, { DialogSize } from "../../representations/guiElements.dialog";
+import { FormGroup } from "../../representations/guiElements";
 
 const linkSvgRepresentation = () => {
     let marker = '<defs><marker id="arrowHead" orient="auto" overflow="visible" markerUnits="userSpaceOnUse"><path id="v-66" stroke="black" fill="black" transform="rotate(180)" d="M 8 -4.5 0 0 8 4.5 z"></path></marker></defs>';
