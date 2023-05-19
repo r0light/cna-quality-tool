@@ -3,7 +3,7 @@ import { dia, mvc, util } from "jointjs";
 import { ColourConfig, EntityDetailsConfig, EntityGeneralProperties, propertyConfig, PropertyContentType } from "../../config/detailsSidebarConfig";
 import EntityTypes from "../../config/entityTypes";
 import { FormGroup } from "../../representations/guiElements";
-import AccordionCollapse from "../../representations/guiElements.AccordionCollapse";
+import AccordionCollapse from "./guiElements.AccordionCollapse";
 import RequestTracePropertiesViewer from "./RequestTracePropertiesViewer";
 import DataAggregatePropertiesViewer from "./DataAggregatePropertiesViewer";
 import BackingDataPropertiesViewer from "./BackingDataPropertiesViewer";

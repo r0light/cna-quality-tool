@@ -554,12 +554,13 @@ function fitAllElementsToEmbedded() {
 
         element.fitEmbeds({
             deep: true,
-            padding: 10
+            padding: 10,
+            expandOnly: true
             // padding: { //TODO useful values
-            // top: 40,
-            // bottom: 10,
-            // left: 10,
-            // right: 10
+            //top: 40,
+            //bottom: 10,
+            //left: 10,
+            //right: 10
             // }
         });
     }
