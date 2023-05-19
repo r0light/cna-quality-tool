@@ -5,7 +5,9 @@
     --app-frame: 5px solid var(--menu-background-colour);
 }
 
-
+:fullscreen, ::backdrop {
+    background-color: rgba(255,255,255,0);
+}
 
 /* Configuring overlay items*/
 .init-overlay {
