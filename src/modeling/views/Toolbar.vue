@@ -40,12 +40,11 @@
                     <ButtonGroup :buttonGroupId="buttonGroup.buttonGroupId" :buttons="buttonGroup.buttons"
                         @toolbarButtonClicked="onToolbarButtonClick">
                     </ButtonGroup>
-                    <div class="group-divider" ></div>
+                    <div class="group-divider"></div>
                 </div>
                 <div class="button-group" data-group="first-row-config-button">
                     <ButtonGroup v-for="tool of firstAdditionalTools" :buttonGroupId="tool.buttonGroupId"
-                        :buttons="tool.buttons"
-                        @toolbarButtonClicked="onToolbarButtonClick"></ButtonGroup>
+                        :buttons="tool.buttons" @toolbarButtonClicked="onToolbarButtonClick"></ButtonGroup>
                 </div>
             </div>
         </div>
@@ -68,13 +67,13 @@
                         </label>
 
                     </div>
-                    <div class="group-divider" ></div>
+                    <div class="group-divider"></div>
                 </div>
 
             </div>
         </div>
         <div v-for="tool of secondAdditionalTools" class="second-row-tools" data-group="second-row-config-tools">
-            <div class="group-divider" ></div>
+            <div class="group-divider"></div>
             <ButtonGroup :buttonGroupId="tool.buttonGroupId" :buttons="tool.buttons"
                 @toolbarButtonClicked="onToolbarButtonClick"></ButtonGroup>
         </div>
@@ -84,7 +83,7 @@
 
 <script lang="ts" setup>
 import $, { data } from 'jquery';
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, onUpdated, watch, reactive } from "vue";
 import { dia, util, highlighters } from "jointjs";
 import { ApplicationSettingsDialogConfig } from "../config/actionDialogConfig";
 import EntityTypes from "../config/entityTypes";
@@ -116,10 +115,12 @@ const props = defineProps<{
     systemName: string;
     paper: dia.Paper;
     graph: dia.Graph;
+    selectedRequestTrace: dia.Element
 }>();
 
 const emit = defineEmits<{
-    (e: "systemNameUpdated", newName: string): void;
+    (e: "update:SystemName", newName: string): void;
+    (e: "click:exitRequestTraceView"): void;
 }>();
 
 const currentSystemName = ref<string>(props.systemName);
@@ -240,6 +241,9 @@ function onToolbarButtonClick(buttonId: string, event) {
         case "zoomInPaper-button":
             zoomInPaper();
             break;
+        case "exitRequestTraceView-button":
+            emit("click:exitRequestTraceView");
+            break;
         case "expandAll-button":
             toggleEntityExpansion(event);
             break;
@@ -277,7 +281,7 @@ function onNameEditSubmit() {
     if (!currentSystemName.value) {
         currentSystemName.value = props.systemName;
     } else {
-        emit("systemNameUpdated", currentSystemName.value);
+        emit("update:SystemName", currentSystemName.value);
     }
     nameEditMode.value = "none";
 }
@@ -307,6 +311,20 @@ onMounted(() => {
 
     return this;
 })
+
+onUpdated(() => {
+    if (props.selectedRequestTrace) {
+        generalTools.value.find(element => element.buttonGroupId === "requestTraceView")
+            .buttons
+            .find(element => element.providedFeature === "exitRequestTraceView-button")
+            .show = true;
+    } else {
+        generalTools.value.find(element => element.buttonGroupId === "requestTraceView")
+            .buttons
+            .find(element => element.providedFeature === "exitRequestTraceView-button")
+            .show = false;
+    }
+});
 
 
 function enterFullScreen() {
