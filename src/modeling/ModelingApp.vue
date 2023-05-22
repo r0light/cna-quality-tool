@@ -43,17 +43,19 @@
     <div id="app">
         <Toolbar :system-name="currentSystemName" :key="currentSystemName" :paper="mainPaper as dia.Paper"
             :graph="currentSystemGraph as dia.Graph" :selectedRequestTrace="currentRequestTraceViewSelection"
-            @update:systemName="setCurrentSystemName" @click:exit-request-trace-view="onRequestTraceDeselect"></Toolbar>
+            @update:systemName="setCurrentSystemName" @click:exit-request-trace-view="onRequestTraceDeselect"
+            @click:print-active-paper="onPrintRequested"></Toolbar>
         <div class="app-body">
             <div class="entityShapes-sidebar-container d-print-none"></div>
             <div class="visible-modeling-area">
-            <ModelingArea :graph="currentSystemGraph as dia.Graph" v-model:paper="mainPaper" :currentElementSelection="currentSelection"
-                :currentRequestTraceSelection="currentRequestTraceViewSelection"
-                @select:Element="(element: dia.CellView | dia.LinkView) => currentSelection = element"
-                @select:RequestTrace="onSelectRequestTrace"
-                @deselect:Element="currentSelection = null" @deselectRequestTrage="onRequestTraceDeselect">
-            </ModelingArea>
-        </div>
+                <ModelingArea :graph="currentSystemGraph as dia.Graph" v-model:paper="mainPaper"
+                    :currentElementSelection="currentSelection"
+                    :currentRequestTraceSelection="currentRequestTraceViewSelection" :printing="printing"
+                    @select:Element="(element: dia.CellView | dia.LinkView) => currentSelection = element"
+                    @select:RequestTrace="onSelectRequestTrace" @deselect:Element="currentSelection = null"
+                    @deselectRequestTrage="onRequestTraceDeselect">
+                </ModelingArea>
+            </div>
             <div class="details-container d-print-none"></div>
         </div>
         <div id="modals" class="d-print-none"></div>
@@ -62,7 +64,7 @@
 
 <script lang="ts" setup>
 import $ from 'jquery';
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import { dia, shapes } from "jointjs";
 import SystemEntityManager from './systemEntityManager';
 
@@ -77,6 +79,7 @@ import { DetailsSidebarConfig } from './config/detailsSidebarConfig';
 const currentSystemName = ref("");
 const showInitOverlay = ref(true);
 const showStartModelingForm = ref(false);
+
 
 function startModelingForm() {
     showStartModelingForm.value = true;
@@ -112,6 +115,7 @@ const mainPaper = ref<dia.Paper>();
 
 const currentSelection = ref<dia.CellView | dia.LinkView>();
 const currentRequestTraceViewSelection = ref<dia.Element>();
+const printing = ref(false);
 
 onMounted(() => {
 
@@ -121,7 +125,7 @@ onMounted(() => {
             onNameEntered();
         }
     });
-    
+
     // Create and initialize the Entity Sidebar view, which includes the template shapes for the entities. 
     var entitySidebar = new EntitySidebar({
         paper: mainPaper.value,
@@ -129,27 +133,27 @@ onMounted(() => {
         sidebarEntityConfig: SidebarEntityShapes
     });
     entitySidebar.render();
-    
+
     /**
      * Create and initialize the Details Sidebar view. 
      * Additionally, it defines when the sidebar should be generally displayed.
     */
-    
+
     var detailsSidebar = new DetailsSidebar({
         el: $(".details-container"),
         paper: mainPaper.value,
         detailsSidebarConfig: DetailsSidebarConfig
     });
     detailsSidebar.render();
-    
+
     mainPaper.value.on("cell:pointerdown", (cellView: dia.CellView) => {
         detailsSidebar.renderEntitySelectionProperties(cellView.model);
     });
-    
+
     mainPaper.value.on("blank:pointerdown", () => {
         detailsSidebar.hideEntitySelectionProperties();
     });
-    
+
     mainPaper.value.on("blank:contextmenu", () => {
         detailsSidebar.hideEntitySelectionProperties();
     });
@@ -166,9 +170,9 @@ onMounted(() => {
             }
         }
     }, false);
-    
+
     $("#appToolbarContainer button").attr("disabled", "");
-    
+
 })
 
 
@@ -220,6 +224,15 @@ function onRequestTraceDeselect() {
     for (const entity of allSystemEntities) {
         entity.attr("root/visibility", "visible", { isolate: true });
     }
+}
+
+function onPrintRequested() {
+    printing.value = true;
+    nextTick(function () {
+        // DOM updated
+        window.print();
+        printing.value = false;
+    });
 }
 
 </script>

@@ -168,3 +168,24 @@ i[data-type=error] {
     right: 260px;
     border-top: var(--app-frame);
 }
+
+
+@media print {
+    #vapp {
+        display: none !important;
+    }
+
+    @page {size: landscape}
+
+    #print-section {
+        display: flex !important;
+        visibility: visible !important;
+        width: 100%;
+        height: 100%;
+    }
+
+    .joint-layers {
+        width: fit-content;
+        height: fit-content;
+    }
+  }

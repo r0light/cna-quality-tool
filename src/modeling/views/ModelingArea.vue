@@ -1,11 +1,13 @@
 <template>
-    <div class="system-container" data-cursor=grab>
+    <Teleport :disabled="!printing" to="body">
+    <div id="print-section" class="system-container printable" data-cursor=grab>
         <div class="system-container-modeling-area">
             <div class="paperArea">
                 <div id="jointPaper"></div>
             </div>
         </div>
     </div>
+    </Teleport>
 </template>
 
 <script lang="ts" setup>
@@ -25,6 +27,7 @@ const props = defineProps<{
     paper: dia.Paper,
     currentElementSelection: dia.CellView | null,
     currentRequestTraceSelection: dia.Element | null
+    printing: boolean,
 }>()
 
 const emit = defineEmits<{
@@ -107,7 +110,6 @@ onMounted(() => {
 
     paper.on({
         'element:pointerdown': function (cellView: dia.ElementView, evt, x, y) {
-            console.log(this)
             this.hideTools();
             let currentPaper = this;
             this.model.getLinks().forEach(function (link) {

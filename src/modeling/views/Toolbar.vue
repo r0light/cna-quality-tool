@@ -49,7 +49,7 @@
             </div>
         </div>
     </div>
-    <div class="app-header-second-row">
+    <div class="app-header-second-row" v-show="showEntityBar">
         <div class="entity-tools">
             <div class="entity-overall-group" data-group="entity-overall-group">
                 <div v-for="entityTool of entityTools">
@@ -83,7 +83,7 @@
 
 <script lang="ts" setup>
 import $, { data } from 'jquery';
-import { ref, computed, onMounted, onUpdated, watch, reactive } from "vue";
+import { ref, computed, onMounted, onUpdated, watch, reactive, Ref, ComputedRef } from "vue";
 import { dia, util, highlighters } from "jointjs";
 import { ApplicationSettingsDialogConfig } from "../config/actionDialogConfig";
 import EntityTypes from "../config/entityTypes";
@@ -100,7 +100,7 @@ export type ToolbarButton = {
     text: string,
     iconClass: string,
     additionalCssClass: string,
-    show: boolean,
+    show: boolean | ComputedRef<boolean>,
     // in case of Dropdown buttons:
     providedFeatureGroup?: string,
     dropdownButtons?: ToolbarButton[]
@@ -121,10 +121,13 @@ const props = defineProps<{
 const emit = defineEmits<{
     (e: "update:SystemName", newName: string): void;
     (e: "click:exitRequestTraceView"): void;
+    (e: "click:printActivePaper"): void;
 }>();
 
 const currentSystemName = ref<string>(props.systemName);
 const nameEditMode = ref<"none" | "editing">("none");
+const showEntityBar = ref<boolean>(true);
+const isFullScreen = ref<boolean>(false);
 
 function configureToolbarButtons(config: any[]): ToolbarButtonGroup[] {
     let toolbarGroups: ToolbarButtonGroup[] = [];
@@ -173,7 +176,7 @@ function configureToolbarButtons(config: any[]): ToolbarButtonGroup[] {
     return toolbarGroups;
 }
 
-const generalTools = ref((() => {
+const generalTools: Ref<ToolbarButtonGroup[]> = ref((() => {
     return configureToolbarButtons(ToolbarConfig.Tools)
 })());
 
@@ -194,11 +197,11 @@ const entityTools = ref((() => {
     return toolEntries;
 })())
 
-const firstAdditionalTools = ref((() => {
+const firstAdditionalTools: Ref<ToolbarButtonGroup[]> = ref((() => {
     return configureToolbarButtons(ToolbarConfig.ToolbarRowConfig.find(element => element.rowIndex === 1).tools)
 })());
 
-const secondAdditionalTools = ref((() => {
+const secondAdditionalTools: Ref<ToolbarButtonGroup[]> = ref((() => {
     return configureToolbarButtons(ToolbarConfig.ToolbarRowConfig.find(element => element.rowIndex === 2).tools)
 })());
 
@@ -233,7 +236,7 @@ function onToolbarButtonClick(buttonId: string, event) {
             clearActivePaper();
             break;
         case "printActivePaper-button":
-            printActivePaper();
+            emit("click:printActivePaper");
             break;
         case "zoomOutPaper-button":
             zoomOutPaper();
@@ -254,10 +257,10 @@ function onToolbarButtonClick(buttonId: string, event) {
             editApplicationSettings();
             break;
         case "showEntityToolbarRow-button":
-            toggleEntityOptionsBar();
+            showEntityBar.value = true;
             break;
         case "hideEntityToolbarRow-button":
-            toggleEntityOptionsBar();
+            showEntityBar.value = false;
             break;
         case "convertModeledSystemEntityToJson-dropdownItemButton":
             convertToJson();
@@ -294,37 +297,31 @@ onMounted(() => {
 
     generalTools.value.find(element => element.buttonGroupId === "general-paper-actions")
         .buttons
+        .find(element => element.providedFeature === "fullScreen-button")
+        .show = computed(() => !isFullScreen.value);
+
+    generalTools.value.find(element => element.buttonGroupId === "general-paper-actions")
+        .buttons
         .find(element => element.providedFeature === "closefullScreen-button")
-        .show = false;
+        .show = computed(() => isFullScreen.value);
 
     generalTools.value.find(element => element.buttonGroupId === "requestTraceView")
         .buttons
         .find(element => element.providedFeature === "exitRequestTraceView-button")
-        .show = false;
+        .show = computed(() => !!props.selectedRequestTrace);
 
     firstAdditionalTools.value.find(element => element.buttonGroupId === "additionalToolbar")
         .buttons
         .find(element => element.providedFeature === "showEntityToolbarRow-button")
-        .show = false;
+        .show = computed(() => !showEntityBar.value);
 
-    //TODO on mouseup -> remove focus
+    secondAdditionalTools.value.find(element => element.buttonGroupId === "entireToolbarSecondRow")
+        .buttons
+        .find(element => element.providedFeature === "hideEntityToolbarRow-button")
+        .show = computed(() => showEntityBar.value);
 
     return this;
 })
-
-onUpdated(() => {
-    if (props.selectedRequestTrace) {
-        generalTools.value.find(element => element.buttonGroupId === "requestTraceView")
-            .buttons
-            .find(element => element.providedFeature === "exitRequestTraceView-button")
-            .show = true;
-    } else {
-        generalTools.value.find(element => element.buttonGroupId === "requestTraceView")
-            .buttons
-            .find(element => element.providedFeature === "exitRequestTraceView-button")
-            .show = false;
-    }
-});
 
 
 function enterFullScreen() {
@@ -333,28 +330,14 @@ function enterFullScreen() {
     // decide what should be toggled --> Fix design and scrolling
     // joint.util.toggleFullScreen(document.getElementById("app"));
     util.toggleFullScreen();
-    generalTools.value.find(element => element.buttonGroupId === "general-paper-actions")
-        .buttons
-        .find(element => element.providedFeature === "fullScreen-button")
-        .show = false;
-    generalTools.value.find(element => element.buttonGroupId === "general-paper-actions")
-        .buttons
-        .find(element => element.providedFeature === "closefullScreen-button")
-        .show = true;
+    isFullScreen.value = true;
 }
 
 function exitFullScreen() {
     // decide what should be toggled --> Fix design and scrolling
     // joint.util.toggleFullScreen(document.getElementById("app"));
     util.toggleFullScreen();
-    generalTools.value.find(element => element.buttonGroupId === "general-paper-actions")
-        .buttons
-        .find(element => element.providedFeature === "fullScreen-button")
-        .show = true;
-    generalTools.value.find(element => element.buttonGroupId === "general-paper-actions")
-        .buttons
-        .find(element => element.providedFeature === "closefullScreen-button")
-        .show = false;
+    isFullScreen.value = false;
 }
 
 function fitActivePaperToContent() {
@@ -397,11 +380,6 @@ function clearActivePaper() {
 function changeGrid() {
     // TODO for options
     props.paper.clearGrid();
-}
-
-function printActivePaper() {
-    // TODO Fixme that only paper is printed
-    window.print();
 }
 
 function zoomInPaper() {
@@ -491,23 +469,6 @@ function loadFromJson() {
     uploadElement.click();
 }
 
-function removeFocusFromSelection(event) {
-
-    if (event.button === 2) {
-        // ignore right click
-        return;
-    }
-
-    if (event.target.id === "appNameTitle") {
-        // keep focus if text box input field is focused
-        return;
-    }
-
-    $('[data-toggle="tooltip"]').tooltip("hide");
-    $('[data-tooltip-toggle="tooltip"]').tooltip("hide");
-    (document.activeElement as HTMLElement).blur();
-}
-
 function fitAllElementsToEmbedded() {
     let elements = props.graph.getElements();
 
@@ -554,13 +515,6 @@ function toggleEntityExpansion(event) {
             embeddedElement.prop("parentCollapsed", ("hidden".localeCompare(toggledVisibility) === 0 ? false : true));
         });
     });
-}
-
-function toggleEntityOptionsBar() {
-    $("#showEntityToolbarRow-button").toggle();
-    $("#hideEntityToolbarRow-button").toggle();
-    $("#additionalToolbar-groupDivider").toggle();
-    $(".app-header-second-row").toggle();
 }
 
 function editApplicationSettings() {
@@ -758,7 +712,7 @@ function updateEntityCounter(dataEntityType: string, updateType: string) {
 .toolbarDropdownButton:focus,
 .toolbarButton:focus,
 .toolbarButton.focus {
-    box-shadow: 0 0 0 0.2rem var(--button-focus-colour);
+    box-shadow: 0 0 0 0 !important;
 }
 
 /* Entity Checkboxes */
