@@ -224,6 +224,9 @@ function onShowRequestTraceIncludedEntities(elementView, evt) {
 }
 
 function configureLink(linkView, evt, elementViewConnected, magnet, arrowhead) {
+
+    console.log(this)
+
     let linkSource = linkView.model.attributes.source;
     let linkTarget = linkView.model.attributes.target;
 
@@ -257,7 +260,7 @@ function configureLink(linkView, evt, elementViewConnected, magnet, arrowhead) {
         return;
     }
 
-    this.checkIfStorageBackingServiceConnected(linkView, elementViewConnected);
+    checkIfStorageBackingServiceConnected(linkView, elementViewConnected);
 }
 
 function checkIfStorageBackingServiceConnected(linkView, elementViewConnected) {
@@ -285,7 +288,7 @@ function checkIfStorageBackingServiceConnected(linkView, elementViewConnected) {
     });
 
     if (storageBackingServiceConnected && includesComponentTypesInDepoyment) {
-        this.provideConnectionWarningDialog();
+        provideConnectionWarningDialog();
     }
 }
 

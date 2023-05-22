@@ -96,7 +96,6 @@ function onNameEntered() {
         return;
     }
     showInitOverlay.value = false;
-    $("#appToolbarContainer button").attr("disabled", null);
 
 }
 
@@ -170,8 +169,6 @@ onMounted(() => {
             }
         }
     }, false);
-
-    $("#appToolbarContainer button").attr("disabled", "");
 
 })
 
