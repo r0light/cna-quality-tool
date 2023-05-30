@@ -1,6 +1,6 @@
 import $ from 'jquery';
 import { util } from "jointjs";
-import type { buttonProperties, propertyConfig } from '../config/detailsSidebarConfig';
+import type { InputProperties, PropertyConfig } from '../config/detailsSidebarConfig';
 
 type inputOption = {
     optionValue: string,
@@ -46,7 +46,7 @@ class FormGroup {
         return form;
     }
 
-    addDropdownElementWithLabelAndOptions(formItemLabelText: string, inputAttributes: propertyConfig["attributes"], inputProperties: propertyConfig["properties"], inputOptions: inputOption[]) {
+    addDropdownElementWithLabelAndOptions(formItemLabelText: string, inputAttributes, inputProperties, inputOptions: inputOption[]) {
         this.#labelBeforeInputGroup = this.#createLabelForInputGroupElement(formItemLabelText, inputAttributes);
 
         const selectionOptions = this.#createOptionElementsForInputElement(inputOptions, inputAttributes.placeholder);
@@ -61,7 +61,7 @@ class FormGroup {
         this.#inputGroupItem = selectionBox;
     }
 
-    _addDataListElementWithLabel(formItemLabelText: string, inputAttributes: propertyConfig["attributes"], inputProperties: propertyConfig["properties"]) {
+    _addDataListElementWithLabel(formItemLabelText: string, inputAttributes, inputProperties) {
         this.#labelBeforeInputGroup = this.#createLabelForInputGroupElement(formItemLabelText, inputAttributes);
         const datalistProperties = this.#createInputProperties(inputProperties);
 
@@ -79,7 +79,7 @@ class FormGroup {
         this.#inputGroupItem = `${inputBox}${dataListItem}${additionalButton}`;
     }
 
-    _addButtonElementWithLabel(formItemLabelText: string, inputAttributes: propertyConfig["attributes"], inputProperties: propertyConfig["properties"]) {
+    _addButtonElementWithLabel(formItemLabelText: string, inputAttributes, inputProperties) {
         const label = this.#createLabelForInputGroupElement(formItemLabelText, inputAttributes);
 
         const buttonIcon = inputAttributes.buttonIconClass ? `<i id="${this.#formGroupId}-buttonIcon" class="${inputAttributes.buttonIconClass}"></i>` : "";
@@ -96,7 +96,7 @@ class FormGroup {
         this.#inputGroupItem = `${label}${button}`;
     }
 
-    addSwitchElementWithLabels(formItemLabelTexts: propertyConfig["labels"], inputAttributes: propertyConfig["attributes"], inputProperties: propertyConfig["properties"]) {
+    addSwitchElementWithLabels(formItemLabelTexts, inputAttributes, inputProperties) {
         const isChecked = inputProperties.checked ? true : false;
         const labelLeftSide = `<label id="${this.#formGroupId}-leftLabel" class="detailsSidebar-toggle-leftLabel user-select-none ${isChecked ? 'text-muted' : ''}" for="${this.#formGroupId}">${formItemLabelTexts.leftLabel}</label>`;
 
@@ -113,7 +113,7 @@ class FormGroup {
         this.#inputGroupItem = `${labelLeftSide}${toggleGroup}`;
     }
 
-    _addTextAreaElementWithLabel(formItemLabelText: string, inputAttributes: propertyConfig["attributes"], inputProperties: propertyConfig["properties"]) {
+    _addTextAreaElementWithLabel(formItemLabelText: string, inputAttributes, inputProperties) {
         this.#labelBeforeInputGroup = this.#createLabelForInputGroupElement(formItemLabelText, inputAttributes);
 
         const textInputProperties = this.#createInputProperties(inputProperties);
@@ -131,7 +131,7 @@ class FormGroup {
         this.#inputGroupItem = `${textAreaElement}${additionalButton}`;
     }
 
-    addTextElementWithLabel(formItemLabelText: string, inputAttributes: propertyConfig["attributes"], inputProperties: propertyConfig["properties"]) {
+    addTextElementWithLabel(formItemLabelText: string, inputAttributes, inputProperties) {
         this.#labelBeforeInputGroup = this.#createLabelForInputGroupElement(formItemLabelText, inputAttributes);
 
         const textInputProperties = this.#createInputProperties(inputProperties);
@@ -150,7 +150,7 @@ class FormGroup {
         this.#inputGroupItem = `${textElement}${additionalButton}`;
     }
 
-    addTextElementWithPrependLabel(formItemLabelText = "", inputAttributes: propertyConfig["attributes"], inputProperties: propertyConfig["properties"]) {
+    addTextElementWithPrependLabel(formItemLabelText = "", inputAttributes, inputProperties) {
         const prependGroup = `<div class="input-group-prepend">
             <span class="input-group-text">
                 ${inputAttributes.labelIcon ? `<i class="${inputAttributes.labelIcon}"></i>`: ''}
@@ -174,7 +174,7 @@ class FormGroup {
         this.#inputGroupItem = `${prependGroup}${textElement}${additionalButton}`;
     }
 
-    addNumberElementWithLabel(formItemLabelText: string, inputAttributes: propertyConfig["attributes"], inputProperties: propertyConfig["properties"]) {
+    addNumberElementWithLabel(formItemLabelText: string, inputAttributes, inputProperties) {
         this.#labelBeforeInputGroup = this.#createLabelForInputGroupElement(formItemLabelText, inputAttributes);
 
         const numberInputProperties = this.#createInputProperties(inputProperties);
@@ -194,7 +194,7 @@ class FormGroup {
         this.#inputGroupItem = `${numberElement}${additionalButton}`;
     }
 
-    _addCheckboxElementWithLabel(formItemLabelText: string, inputAttributes: propertyConfig["attributes"], inputProperties: propertyConfig["properties"]) {
+    _addCheckboxElementWithLabel(formItemLabelText: string, inputAttributes, inputProperties) {
         const labelElement = this.#createLabelForInputGroupElement(formItemLabelText, inputAttributes, "form-check-label");
 
         const checkboxInputProperties = this.#createInputProperties(inputProperties);
@@ -238,7 +238,7 @@ class FormGroup {
         });
     }
 
-    #createLabelForInputGroupElement(labelText: string, inputAttributes: propertyConfig["attributes"], labelClass?: string) {
+    #createLabelForInputGroupElement(labelText: string, inputAttributes, labelClass?: string) {
         return `<label id="${this.#formGroupId}-label" for="${this.#formGroupId}" ${labelClass ? `class="${labelClass}"` : ''}>
             ${inputAttributes.svgRepresentation ? `<span id="${this.#formGroupId}-svgRepresentation">${inputAttributes.svgRepresentation}</span>` : ''}
             ${inputAttributes.iconClass ? `<i id="${this.#formGroupId}-labelIcon" class="${inputAttributes.iconClass}"></i>` : ''}
@@ -246,7 +246,7 @@ class FormGroup {
         </label>`;
     }
 
-    #createInputProperties(inputProperties: propertyConfig["properties"], disabled = false, checked = false, required = false, selected = false, readonly = false) { // TODO second element with options
+    #createInputProperties(inputProperties, disabled = false, checked = false, required = false, selected = false, readonly = false) { // TODO second element with options
         if (!inputProperties || !(util.isObject(inputProperties)) || (Object.keys(inputProperties).length <= 0)) {
             return '';
         }
@@ -261,14 +261,14 @@ class FormGroup {
         return `${shouldBeDisabled ? "disabled" : ''} ${shouldBeChecked ? "checked" : ''} ${shouldBeRequired ? "required" : ''} ${shouldBeSelected ? "selected" : ''} ${shouldBeReadonly ? "readonly" : ''}`;
     }
 
-    #createHelpTextForElementIfProvided(helpText: propertyConfig["attributes"]["helpText"]) {
+    #createHelpTextForElementIfProvided(helpText) {
         if (!helpText || !(util.isObject(helpText)) || (Object.keys(helpText).length <= 0)) {
             return '';
         }
         return `<small id="${this.#formGroupId}-helpText" class="form-text text-muted">${helpText.text}</small>`;
     }
 
-    #createEditButton(inputProperties: buttonProperties) { // TODO more information?
+    #createEditButton(inputProperties: InputProperties) { // TODO more information?
         if (!inputProperties) {
             return '';
         }
@@ -283,7 +283,7 @@ class FormGroup {
         return editButton;
     }
 
-    #createEnterButton(inputProperties: buttonProperties, provideEnterButton = true) {
+    #createEnterButton(inputProperties: InputProperties, provideEnterButton = true) {
         if (!inputProperties || inputProperties.disabled || provideEnterButton === false) {
             return '';
         }
@@ -324,7 +324,7 @@ class FormGroup {
         return options;
     }    
 
-    #createDataListElementsForInputElement(inputAttributes: propertyConfig["attributes"]) {
+    #createDataListElementsForInputElement(inputAttributes) {
         if (!inputAttributes || Array.isArray(inputAttributes.datalistItems) === false || inputAttributes.datalistItems.length <= 0) {
             return "";
         }
@@ -363,7 +363,7 @@ class FormGroup {
         return `<form id="${this.#formGroupId}-form" ${formClass}><div id="${this.#formGroupId}-inputGroup" ${divClass}></div></form>`;
     }
 
-    addInputRangeElementWithLabel(formItemLabelText = "", inputAttributes: propertyConfig["attributes"], inputProperties: propertyConfig["properties"]) {
+    addInputRangeElementWithLabel(formItemLabelText = "", inputAttributes, inputProperties) {
         this.#addLabelToFormGroup(formItemLabelText);
         let currentValue = '<span id="' + this.#formGroupId + '-currentValue" class="rangeBoxCurrentValue ml-2 align-baseline badge badge-primary badge-pill">' + inputAttributes.defaultValue + ' px</span>';
         $("#" + this.#formGroupId + "-label").append(currentValue);
@@ -472,7 +472,7 @@ class FormGroup {
         $("#" + this.#formGroupId + "-form").prepend(label);
     }
 
-    #setInputProperties(inputProperties: propertyConfig["properties"], elementId = this.#formGroupId) {
+    #setInputProperties(inputProperties, elementId = this.#formGroupId) {
         if (!inputProperties || !(util.isObject(inputProperties)) || (Object.keys(inputProperties).length <= 0)) {
             return;
         }
@@ -484,7 +484,7 @@ class FormGroup {
         });
     }
 
-    #addHelpTextForElementIfProvided(helpText: propertyConfig["attributes"]["helpText"]) {
+    #addHelpTextForElementIfProvided(helpText) {
         if (!helpText || !(util.isObject(helpText)) || (Object.keys(helpText).length <= 0)) {
             return;
         }
@@ -494,7 +494,7 @@ class FormGroup {
         $("#" + this.#formGroupId + "-form").append(helpTextInfo);
     }
 
-    #addEnterButton(inputProperties: propertyConfig["properties"], provideEnterButton: boolean = true) {
+    #addEnterButton(inputProperties, provideEnterButton: boolean = true) {
         if (!inputProperties || inputProperties.disabled || provideEnterButton === false) {
             return;
         }

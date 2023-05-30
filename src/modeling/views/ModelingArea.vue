@@ -1,12 +1,12 @@
 <template>
     <Teleport :disabled="!printing" to="body">
-    <div id="print-section" class="system-container printable" data-cursor=grab>
-        <div class="system-container-modeling-area">
-            <div class="paperArea">
-                <div id="jointPaper"></div>
+        <div id="print-section" class="system-container printable" data-cursor=grab>
+            <div class="system-container-modeling-area">
+                <div class="paperArea">
+                    <div id="jointPaper"></div>
+                </div>
             </div>
         </div>
-    </div>
     </Teleport>
 </template>
 
@@ -137,17 +137,17 @@ onMounted(() => {
         "link:pointerclick": function (linkView: dia.LinkView, evt) {
             linkView.unhighlight();
 
-            if (linkView.hasTools()) {
-                linkView.highlight();
-                linkView.showTools();
-                return;
-            }
-
-            //setSelectionHandle(linkView);
             setCurrentSelection(linkView);
+
             linkView.highlight();
-            let toolsView = new ConnectionSelectionTools();
-            linkView.addTools(toolsView);
+
+            if (!linkView.hasTools()) {
+                let toolsView = new ConnectionSelectionTools();
+                linkView.addTools(toolsView);
+            }
+            linkView.showTools();
+            return;
+
         },
         "cell:highlight": function (cellView, node, options) {
             if (cellView.model.isLink()) {
@@ -224,8 +224,6 @@ function onShowRequestTraceIncludedEntities(elementView, evt) {
 }
 
 function configureLink(linkView, evt, elementViewConnected, magnet, arrowhead) {
-
-    console.log(this)
 
     let linkSource = linkView.model.attributes.source;
     let linkTarget = linkView.model.attributes.target;

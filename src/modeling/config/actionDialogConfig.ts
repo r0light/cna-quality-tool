@@ -1,3 +1,10 @@
+const DialogSize = Object.freeze({
+    SMALL: "modal-sm",
+    DEFAULT: "",
+    LARGE: "modal-lg",
+    EXTRA_LARGE: "modal-xl"
+})
+
 const SectionContentType = Object.freeze({
     BUTTON: "button",
     CHECKBOX: "checkbox",
@@ -97,4 +104,4 @@ const ApplicationSettingsDialogConfig = {
     }
 };
 
-export { ApplicationSettingsDialogConfig, SectionContentType };
+export { ApplicationSettingsDialogConfig, DialogSize, SectionContentType };

@@ -1,6 +1,6 @@
 import $ from 'jquery';
 import { dia, mvc, util } from "jointjs";
-import { ColourConfig, EntityDetailsConfig, EntityGeneralProperties, propertyConfig, PropertyContentType } from "../../config/detailsSidebarConfig";
+import { CheckboxPropertyConfig, ColourConfig, DropdownPropertyConfig, EntityDetailsConfig, ListPropertyConfig, NumberPropertyConfig, PropertyConfig, PropertyContentType, TextAreaPropertyConfig, TextPropertyConfig } from "../../config/detailsSidebarConfig";
 import EntityTypes from "../../config/entityTypes";
 import { FormGroup } from "../../representations/guiElements";
 import AccordionCollapse from "./guiElements.AccordionCollapse";
@@ -143,10 +143,12 @@ const DetailsSidebar = mvc.View.extend({
         this._featureGroups[providedFeatureGroup] = divFeatureGroup;
 
         for (const option of this.options.detailsSidebarConfig.GeneralProperties[providedFeatureGroup].options) {
+            /*
             if (option.contentType === PropertyContentType.INFO) {
                 this.renderPropertyInformation(divFeatureGroup, providedFeatureGroup, option.providedFeature, option.content);
                 continue;
             }
+            */
 
             this.renderPropertyForm(divFeatureGroup,providedFeatureGroup, option.providedFeature, option.label, option.contentType, option.attributes, option.properties);
         }
@@ -158,7 +160,7 @@ const DetailsSidebar = mvc.View.extend({
         this._propertyDetailsContainer.addContentToAccordionGroup(appendToPropertyGroup, groupId, info);
     },
 
-    renderPropertyForm(appendToPropertyGroup, groupId, providedFeature = "", labelText = "", contentType = "", inputAttributes: propertyConfig["attributes"], inputProperties: propertyConfig["properties"]) {
+    renderPropertyForm(appendToPropertyGroup, groupId, providedFeature = "", labelText = "", contentType = "", inputAttributes: TextAreaPropertyConfig["attributes"] | NumberPropertyConfig["attributes"] | TextPropertyConfig["attributes"] | CheckboxPropertyConfig["attributes"] | DropdownPropertyConfig["attributes"] | ListPropertyConfig["attributes"], inputProperties: TextAreaPropertyConfig["inputProperties"] | NumberPropertyConfig["inputProperties"] | TextPropertyConfig["inputProperties"] | CheckboxPropertyConfig["inputProperties"] | DropdownPropertyConfig["inputProperties"] | ListPropertyConfig["inputProperties"]) {
         const preparedPropertyFormTemplate = new FormGroup(providedFeature, groupId);
 
         switch (contentType) {
@@ -253,6 +255,7 @@ const DetailsSidebar = mvc.View.extend({
         }
     },
 
+    /*
     setGeneralPropertiesValues() {
         Object.keys(EntityGeneralProperties).forEach((property) => {
             let currentPropertyElement = EntityGeneralProperties[property];
@@ -268,7 +271,9 @@ const DetailsSidebar = mvc.View.extend({
             $("#" + property).trigger("change");
         });
     },
+    */
 
+    /*
     renderEntitySpecificProperties() {
         this._emptyEntitySpecificProperties();
         switch (this._currentEntitySelection.prop("entity/type")) {
@@ -317,6 +322,8 @@ const DetailsSidebar = mvc.View.extend({
         };
     },
 
+    */
+   
     _emptyEntitySpecificProperties() {
         let sectionIdsToKeep = [];
         this.options.detailsSidebarConfig.GeneralProperties.entity.options.forEach((option) => { sectionIdsToKeep.push(option.providedFeature) });
@@ -392,6 +399,7 @@ const DetailsSidebar = mvc.View.extend({
         }
     },
 
+    /*
     handlePropertyChanged(event) {
         let $inputElement = $("#" + event.propertyId);
         let newValue = $inputElement.val();
@@ -466,6 +474,7 @@ const DetailsSidebar = mvc.View.extend({
         $("#" + event.originalTarget.parentElement.parentElement.id + " .valid-feedback").show();
         $inputElement.addClass("is-valid");
     },
+    */
 
     handleEntityPropertyChanged(event) {
         let newValue = $("#" + event.propertyId).val();

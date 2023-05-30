@@ -56,7 +56,8 @@
                     @deselectRequestTrage="onRequestTraceDeselect">
                 </ModelingArea>
             </div>
-            <div class="details-container d-print-none"></div>
+            <DetailsSidebar2 :paper="mainPaper" :graph="currentSystemGraph as dia.Graph" :selectedEntity="currentSelection" :selectedDataAggregate="currentDataAggregateHighlight" :selectedBackingData="currentBackingDataHightlight"></DetailsSidebar2>
+            <!--<div class="details-container d-print-none"></div>-->
         </div>
         <div id="modals" class="d-print-none"></div>
     </div>
@@ -70,11 +71,10 @@ import SystemEntityManager from './systemEntityManager';
 
 import Toolbar from './views/Toolbar.vue';
 import ModelingArea from './views/ModelingArea.vue';
+import DetailsSidebar2 from './views/detailsSidebar/DetailsSidebar.vue';
 import EntitySidebar from './views/entitySidebar';
-import DetailsSidebar from './views/detailsSidebar/detailsSidebar';
 
 import SidebarEntityShapes from './config/entitySidebarShape.config';
-import { DetailsSidebarConfig } from './config/detailsSidebarConfig';
 
 const currentSystemName = ref("");
 const showInitOverlay = ref(true);
@@ -115,6 +115,8 @@ const mainPaper = ref<dia.Paper>();
 const currentSelection = ref<dia.CellView | dia.LinkView>();
 const currentRequestTraceViewSelection = ref<dia.Element>();
 const printing = ref(false);
+const currentDataAggregateHighlight = ref<string>("");
+const currentBackingDataHightlight = ref<string>("");
 
 onMounted(() => {
 
@@ -138,25 +140,6 @@ onMounted(() => {
      * Additionally, it defines when the sidebar should be generally displayed.
     */
 
-    var detailsSidebar = new DetailsSidebar({
-        el: $(".details-container"),
-        paper: mainPaper.value,
-        detailsSidebarConfig: DetailsSidebarConfig
-    });
-    detailsSidebar.render();
-
-    mainPaper.value.on("cell:pointerdown", (cellView: dia.CellView) => {
-        detailsSidebar.renderEntitySelectionProperties(cellView.model);
-    });
-
-    mainPaper.value.on("blank:pointerdown", () => {
-        detailsSidebar.hideEntitySelectionProperties();
-    });
-
-    mainPaper.value.on("blank:contextmenu", () => {
-        detailsSidebar.hideEntitySelectionProperties();
-    });
-
     currentSystemGraph.value.on("add", (cell) => {
         currentSelection.value = mainPaper.value.findViewByModel(cell);
     })
@@ -166,6 +149,7 @@ onMounted(() => {
             // check if Element is selected
             if (currentSelection.value) {
                 currentSelection.value.model.remove();
+                currentSelection.value = null;
             }
         }
     }, false);
