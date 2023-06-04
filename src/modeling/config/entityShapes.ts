@@ -448,7 +448,7 @@ const Endpoint = shapes.standard.Circle.define("qualityModel.Endpoint", {
     parentCollapsed: false,
     entity: {
         type: EntityTypes.ENDPOINT,
-        isEmbedded: false,
+        embedded: "",
         /*properties: {
             endpointType: "",
             endpointPath: "",
@@ -525,7 +525,7 @@ const ExternalEndpoint = shapes.standard.Circle.define("qualityModel.ExternalEnd
     parentCollapsed: false,
     entity: {
         type: EntityTypes.EXTERNAL_ENDPOINT,
-        isEmbedded: false,
+        embedded: "",
         properties: parseProperties(getEndpointProperties())
     }
 }, {
@@ -880,17 +880,13 @@ const DataAggregate = dia.Element.define("qualityModel.DataAggregate", {
     parentCollapsed: false,
     entity: {
         type: EntityTypes.DATA_AGGREGATE,
-        isEmbedded: false,
+        embedded: "", // id of the element in which this entity is embedded
         properties: {
             /**
              * Identifies whether the Data Aggregate is contained 
              * in multiple entities and which ones belong together 
              */
-            assignedFamily: "",
-            embedded : {
-                parentId: "",
-                parentRelation: ""
-            }
+            assignedFamily: ""
         }
     }
 }, {
@@ -967,7 +963,8 @@ const BackingData = dia.Element.define("qualityModel.BackingData", {
     parentCollapsed: false,
     entity: {
         type: EntityTypes.BACKING_DATA,
-        isEmbedded: false,
+        /*isEmbedded: false,*/
+        embedded: "",
         properties: {
             includedData: [],
             /**

@@ -1,7 +1,7 @@
 import EntityTypes from "./entityTypes";
 import { getComponentProperties, getBackingServiceProperties, getStorageBackingServiceProperties, getEndpointProperties, getInfrastructureProperties } from "../entities";
 import { UIContentType } from "./toolbarConfiguration";
-import { DialogSize } from "./actionDialogConfig";
+import { DialogConfig, DialogSize } from "./actionDialogConfig";
 
 export type DatalistItem = {
     value: string,
@@ -32,7 +32,7 @@ export type BasicPropertyConfig = {
     label: string,
     inputProperties: InputProperties,
     helpText: string,
-    hidden: boolean,
+    show: boolean,
     provideEnterButton: boolean,
     jointJsConfig: JointJsConfig
 }
@@ -68,7 +68,7 @@ export type TextLabelPrependPropertyConfig = BasicPropertyConfig & {
     contentType: "text-label-prepend",
     attributes: {
         labelIcon: string,
-        defaultValue: string,
+        placeholder: string,
         provideEditButton: boolean,
         provideEnterButton: boolean
     }
@@ -145,38 +145,7 @@ export type TableDialogPropertyConfig = BasicPropertyConfig & {
         buttonText: string,
         buttonIconClass: string
     },
-    buttonActionContent: {
-        dialogSize: string,
-        dialogContent: {
-            header: {
-                svgRepresentation: string,
-                text: string,
-                closeButton: boolean
-            },
-            footer: {
-                cancelButtonText: string,
-                saveButtonIconClass: string,
-                saveButtonText: string
-            },
-            content: {
-                contentType: string,
-                groups: TablePropertyConfig[]
-            }
-        }
-    }
-}
-
-export type TablePropertyConfig = {
-    id: string,
-    contentType: "table",
-    headline: string,
-    text: string,
-    tableColumnHeaders: TableColumnHeaderConfig[]
-    tableRows: any[] //TODO more specific?
-}
-
-export type TableColumnHeaderConfig = {
-    text: string
+    buttonActionContent: DialogConfig
 }
 
 export type TogglePropertyConfig = BasicPropertyConfig & {
@@ -188,15 +157,8 @@ export type TogglePropertyConfig = BasicPropertyConfig & {
     }
 }
 
-export type FormGroupPropertyConfig = BasicPropertyConfig & {
-    id: string,
-    contentType: "formgroup",
-    headline: string,
-    contentItems: PropertyConfig[]
-}
 
-
-export type PropertyConfig = ButtonPropertyConfig | TextPropertyConfig | TextAreaPropertyConfig | TextLabelPrependPropertyConfig | NumberPropertyConfig | NumberRangePropertyConfig | CheckboxPropertyConfig | CheckboxWithoutLabelPropertyConfig | DropdownPropertyConfig | ListPropertyConfig | TableDialogPropertyConfig | TogglePropertyConfig | FormGroupPropertyConfig;
+export type PropertyConfig = ButtonPropertyConfig | TextPropertyConfig | TextAreaPropertyConfig | TextLabelPrependPropertyConfig | NumberPropertyConfig | NumberRangePropertyConfig | CheckboxPropertyConfig | CheckboxWithoutLabelPropertyConfig | DropdownPropertyConfig | ListPropertyConfig | TableDialogPropertyConfig | TogglePropertyConfig;
 
 function parseProperties(properties): PropertyConfig[] {
     return properties.map(property => {
@@ -212,7 +174,7 @@ function parseProperties(properties): PropertyConfig[] {
                 readonly: false
             },
             helpText: property.getDescription,
-            hidden: false,
+            show: true,
             provideEnterButton: false,
             jointJsConfig: { //TODO add values 
                 isProperty: false,
@@ -369,7 +331,7 @@ const DetailsSidebarConfig: {
                         provideEnterButton: false
                     },
                     helpText: "Use enter key to submit change.",
-                    hidden: false,
+                    show: true,
                     provideEnterButton: false,
                     jointJsConfig: {
                         isProperty: false,
@@ -400,7 +362,7 @@ const DetailsSidebarConfig: {
                         provideEnterButton: false
                     },
                     helpText: "Use enter key to submit change.",
-                    hidden: false,
+                    show: true,
                     provideEnterButton: false,
                     jointJsConfig: {
                         isProperty: false,
@@ -435,7 +397,7 @@ const DetailsSidebarConfig: {
                         maxLength: 5,
                     },
                     helpText: "The entity width",
-                    hidden: false,
+                    show: true,
                     provideEnterButton: true,
                     jointJsConfig: {
                         isProperty: true,
@@ -464,7 +426,7 @@ const DetailsSidebarConfig: {
                         maxLength: 5,
                     },
                     helpText: "The value will be calculated based on the given width to preserve the aspect ratio of the entity shape",
-                    hidden: false,
+                    show: true,
                     provideEnterButton: true,
                     jointJsConfig: {
                         isProperty: true,
@@ -490,7 +452,7 @@ const DetailsSidebarConfig: {
                         defaultValue: true,
                     },
                     helpText: "If aspect ratio is preserved, width and height change simultaneously.",
-                    hidden: false,
+                    show: true,
                     provideEnterButton: false,
                     jointJsConfig: {
                         isProperty: false,
@@ -518,7 +480,7 @@ const DetailsSidebarConfig: {
                         svgRepresentation: ""
                     },
                     helpText: "The value will be calculated based on the given width to preserve the aspect ratio of the entity shape",
-                    hidden: true,
+                    show: false,
                     provideEnterButton: false,
                     jointJsConfig: {
                         isProperty: true,
@@ -558,7 +520,7 @@ const DetailsSidebarConfig: {
                         maxLength: Number.MAX_SAFE_INTEGER,
                     },
                     helpText: "X Coordinate for the entity placement",
-                    hidden: false,
+                    show: true,
                     provideEnterButton: true,
                     jointJsConfig: {
                         isProperty: true,
@@ -587,7 +549,7 @@ const DetailsSidebarConfig: {
                         maxLength: Number.MAX_SAFE_INTEGER,
                     },
                     helpText: "Y Coordinate for the entity placement",
-                    hidden: false,
+                    show: true,
                     provideEnterButton: true,
                     jointJsConfig: {
                         isProperty: true,
@@ -602,59 +564,6 @@ const DetailsSidebarConfig: {
         }
     }
 };
-
-/*
-const EntityGeneralProperties = {
-    "entity-text": {
-        // to identify whether to use element.attr() or element.prop() later
-        isProperty: false,
-        modelPath: "label/textWrap/text",
-        defaultPropPath: "",
-        min: ""
-    },
-    "entity-font-size": {
-        isProperty: false,
-        modelPath: "label/fontSize",
-        defaultPropPath: "defaults/fontSize",
-        min: "6"
-    },
-    "entity-width": {
-        isProperty: true,
-        hasProvidedMethod: true,
-        modelPath: "size/width",
-        defaultPropPath: "defaults/size/width",
-        minPath: "defaults/size/width"
-    },
-    "entity-height": {
-        isProperty: true,
-        hasProvidedMethod: true,
-        modelPath: "size/height",
-        defaultPropPath: "defaults/size/height",
-        minPath: "defaults/size/height"
-    },
-    "entity-aspect-ratio": {
-        isProperty: true,
-        modelPath: "defaults/size",
-        defaultPropPath: "",
-        helpText: "The value will be calculated based on the given width to preserve the aspect ratio of the entity shape",
-        min: ""
-    },
-    "entity-x-position": {
-        isProperty: true,
-        hasProvidedMethod: true,
-        modelPath: "position/x",
-        defaultPropPath: "",
-        min: "21"
-    },
-    "entity-y-position": {
-        isProperty: true,
-        hasProvidedMethod: true,
-        modelPath: "position/y",
-        defaultPropPath: "",
-        min: "21"
-    }
-};
-*/
 
 const linkSvgRepresentation = () => {
     // let marker = '<defs><marker id="arrowHead" orient="auto" overflow="visible" markerUnits="userSpaceOnUse"><path id="v-66" stroke="black" fill="black" transform="rotate(180)" d="M 10 -5 0 0 10 5 z"></path></marker></defs>';
@@ -713,7 +622,7 @@ const EntityDetailsConfig: {
                     svgRepresentation: ""
                 },
                 helpText: "Type of relation",
-                hidden: false,
+                show: true,
                 provideEnterButton: true,
                 jointJsConfig: {
                     isProperty: false,
@@ -754,11 +663,39 @@ const EntityDetailsConfig: {
             },
             helpText: "Choose whether you want to modify the embedded element or the actual Data Aggregate entity.",
             provideEnterButton: false,
-            hidden: false,
+            show: true,
             jointJsConfig: {
                 isProperty: false,
                 hasProvidedMethod: false,
                 modelPath: "",
+                defaultPropPath: "",
+                minPath: "",
+                min: ""
+            }
+        },
+        {
+            providedFeature: "embedded",
+            contentType: PropertyContentType.INPUT_TEXTBOX,
+            label: "Parent",
+            helpText: "The parent of the data aggregate if it is embedded",
+            inputProperties: {
+                disabled: true,
+                required: true,
+                checked: false,
+                selected: false,
+                readonly: false
+            },
+            attributes: {
+                placeholder: "",
+                defaultValue: "",
+                svgRepresentation: ""
+            },
+            provideEnterButton: false,
+            show: false,
+            jointJsConfig: {
+                isProperty: true,
+                hasProvidedMethod: false,
+                modelPath: "entity/embedded",
                 defaultPropPath: "",
                 minPath: "",
                 min: ""
@@ -794,7 +731,7 @@ const EntityDetailsConfig: {
                 }
             ],
             provideEnterButton: false,
-            hidden: false,
+            show: true,
             jointJsConfig: {
                 isProperty: false,
                 hasProvidedMethod: false,
@@ -822,16 +759,16 @@ const EntityDetailsConfig: {
                 svgRepresentation: '<svg width="30" height="20"><ellipse cx="13" cy="9" rx="12" ry="6" stroke="black" fill="white" opacity="1"/></svg>'
             },
             provideEnterButton: false,
-            hidden: false,
+            show: true,
             jointJsConfig: {
-                isProperty: false,
+                isProperty: true,
                 hasProvidedMethod: false,
-                modelPath: "entity/properties/dataAggregate-parentRelation",
+                modelPath: "entity/properties/assignedFamily",
                 defaultPropPath: "",
                 minPath: "",
                 min: ""
             }
-        },{
+        }, {
             providedFeature: "dataAggregate-familyConfig",
             contentType: PropertyContentType.TABLE_DIALOG,
             label: "– Family:",
@@ -848,7 +785,7 @@ const EntityDetailsConfig: {
                 buttonText: "Edit Family",
                 buttonIconClass: "fa-solid fa-pencil"
             },
-            hidden: false,
+            show: true,
             provideEnterButton: false,
             jointJsConfig: {
                 isProperty: false,
@@ -892,10 +829,10 @@ const EntityDetailsConfig: {
                                     },
                                     {
                                         text: "Parent"
-                                    },
+                                    },/*
                                     {
                                         text: "Formerly Included"
-                                    },
+                                    },*/
                                     {
                                         text: "Include"
                                     }
@@ -912,6 +849,324 @@ const EntityDetailsConfig: {
     BackingData: {
         type: EntityTypes.BACKING_DATA,
         specificProperties: [
+            {
+                providedFeature: "backingData-chooseEditMode",
+                contentType: PropertyContentType.TOGGLE,
+                label: "Edit Mode:",
+                labels: {
+                    headLabel: "<U>Edit Mode:</U>",
+                    leftLabel: "Original",
+                    rightLabel: "Embedded"
+                },
+                inputProperties: {
+                    disabled: false,
+                    required: false,
+                    checked: true,
+                    selected: false,
+                    readonly: false
+                },
+                helpText: "Choose whether you want to modify the embedded element or the actual Backing Data entity.",
+                provideEnterButton: false,
+                show: true,
+                jointJsConfig: {
+                    isProperty: false,
+                    hasProvidedMethod: false,
+                    modelPath: "",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                }
+            },
+            {
+                providedFeature: "embedded",
+                contentType: PropertyContentType.INPUT_TEXTBOX,
+                label: "Parent",
+                helpText: "The parent of the backing data if it is embedded",
+                inputProperties: {
+                    disabled: true,
+                    required: true,
+                    checked: false,
+                    selected: false,
+                    readonly: false
+                },
+                attributes: {
+                    placeholder: "",
+                    defaultValue: "",
+                    svgRepresentation: ""
+                },
+                provideEnterButton: false,
+                show: false,
+                jointJsConfig: {
+                    isProperty: true,
+                    hasProvidedMethod: false,
+                    modelPath: "entity/embedded",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                }
+            },
+            {
+                providedFeature: "backingData-includedData",
+                contentType: PropertyContentType.TABLE_DIALOG,
+                label: "Included Data:",
+                helpText: "",
+                inputProperties: {
+                    disabled: false,
+                    required: false,
+                    checked: false,
+                    selected: false,
+                    readonly: false
+                },
+                attributes: {
+                    svgRepresentation: `<svg width="30" height="20">${backingDataSvgRepresentation()}</svg>`,
+                    buttonText: "Edit Included Data",
+                    buttonIconClass: "fa-solid fa-pencil"
+                },
+                provideEnterButton: false,
+                show: false,
+                jointJsConfig: {
+                    isProperty: true,
+                    hasProvidedMethod: false,
+                    modelPath: "entity/properties/includedData",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
+                buttonActionContent: {
+                    // contentType: PropertyContentType // TODO modalDialog,
+                    dialogSize: DialogSize.LARGE,
+                    dialogContent: {
+                        header: {
+                            svgRepresentation: `<svg width="30" height="20">${backingDataSvgRepresentation()}</svg>`,
+                            text: "Backing Data Included Data: ",
+                            closeButton: false
+                        },
+                        footer: {
+                            cancelButtonText: "Cancel",
+                            saveButtonIconClass: "fa-regular fa-floppy-disk",
+                            saveButtonText: "Save"
+                        },
+                        content: {
+                            contentType: UIContentType.GROUP_FORMS,
+                            groups: [
+                                {
+                                    id: "backingData-includedData-table",
+                                    contentType: PropertyContentType.TABLE,
+                                    headline: "Included Backing Data entities" + '  ( <svg width="30" height="20">' + backingDataSvgRepresentation() + '</svg>)',
+                                    text: `The following table shows all data elements included in this Backing Data entity. In case you want to add a new entry, the following section provides two text element boxes you can use to 
+                                    provide the information and then add it using the plus button. However, your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all 
+                                    your changes will be lost. While you keep the selection of this Backing Data entity, your changes will be remembered.`,
+                                    tableColumnHeaders: [
+                                        {
+                                            text: "Key"
+                                        },
+                                        {
+                                            text: "Value"
+                                        }
+                                    ],
+                                    tableRows: []
+                                },
+                                {
+                                    id: "backingData-includedData-form",
+                                    contentType: PropertyContentType.FORMGROUP,
+                                    headline: "Add New Data Item",
+                                    contentItems: [
+                                        {
+                                            providedFeature: "includedData-key",
+                                            contentType: PropertyContentType.INPUT_TEXTBOX_LABEL_PREPEND,
+                                            label: "Key",
+                                            inputProperties: {
+                                                disabled: false,
+                                                required: true,
+                                                checked: false,
+                                                selected: false,
+                                                readonly: false
+                                            },
+                                            helpText: "The key that identifies the following value item.",
+                                            attributes: {
+                                                labelIcon: "fa-solid fa-key",
+                                                placeholder: "e.g. My_SQL_Password",
+                                                provideEditButton: false,
+                                                provideEnterButton: false
+                                            },
+                                            provideEnterButton: false,
+                                            show: true,
+                                            jointJsConfig: {
+                                                isProperty: false,
+                                                hasProvidedMethod: false,
+                                                modelPath: "",
+                                                defaultPropPath: "",
+                                                minPath: "",
+                                                min: ""
+                                            }
+                                        },
+                                        {
+                                            providedFeature: "includedData-value",
+                                            contentType: PropertyContentType.INPUT_TEXTBOX_LABEL_PREPEND,
+                                            label: "Value",
+                                            inputProperties: {
+                                                disabled: false,
+                                                required: true,
+                                                checked: false,
+                                                selected: false,
+                                                readonly: false
+                                            },
+                                            helpText: "The value of this data item.",
+                                            attributes: {
+                                                labelIcon: "bi bi-chat-square-text-fill",
+                                                placeholder: "e.g. mysqlpw",
+                                                provideEditButton: false,
+                                                provideEnterButton: false
+                                            },
+                                            provideEnterButton: false,
+                                            show: true,
+                                            jointJsConfig: {
+                                                isProperty: false,
+                                                hasProvidedMethod: false,
+                                                modelPath: "",
+                                                defaultPropPath: "",
+                                                minPath: "",
+                                                min: ""
+                                            }
+                                        },
+                                        {
+                                            providedFeature: "includedData-submit",
+                                            contentType: PropertyContentType.BUTTON,
+                                            label: "Submit",
+                                            inputProperties: {
+                                                disabled: false,
+                                                required: true,
+                                                checked: false,
+                                                selected: false,
+                                                readonly: false
+                                            },
+                                            helpText: "",
+                                            attributes: {
+                                                labelIcon: "fa-solid fa-plus",
+                                            },
+                                            provideEnterButton: false,
+                                            show: true,
+                                            jointJsConfig: {
+                                                isProperty: false,
+                                                hasProvidedMethod: false,
+                                                modelPath: "",
+                                                defaultPropPath: "",
+                                                minPath: "",
+                                                min: ""
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            {
+                providedFeature: "backingData-assignedFamily",
+                contentType: PropertyContentType.INPUT_TEXTBOX,
+                label: `– Family assigned:`,
+                inputProperties: {
+                    disabled: true,
+                    required: true,
+                    checked: false,
+                    selected: false,
+                    readonly: false
+                },
+                helpText: "The family of the Backing Data",
+                attributes: {
+                    placeholder: "No family assigned",
+                    defaultValue: "",
+                    svgRepresentation: `<span><svg width="30" height="20">${backingDataSvgRepresentation()}</svg></span>`
+                },
+                provideEnterButton: false,
+                show: true,
+                jointJsConfig: {
+                    isProperty: true,
+                    hasProvidedMethod: false,
+                    modelPath: "entity/properties/assignedFamily",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                }
+
+            },
+            {
+                providedFeature: "backingData-familyConfig",
+                contentType: PropertyContentType.TABLE_DIALOG,
+                label: "– Family:",
+                helpText: "",
+                inputProperties: {
+                    disabled: false,
+                    required: false,
+                    checked: false,
+                    selected: false,
+                    readonly: false,
+                },
+                attributes: {
+                    svgRepresentation: `<svg width="30" height="20">${backingDataSvgRepresentation()}</svg>`,
+                    buttonText: "Edit Family",
+                    buttonIconClass: "fa-solid fa-pencil"
+                },
+                show: true,
+                provideEnterButton: false,
+                jointJsConfig: {
+                    isProperty: false,
+                    hasProvidedMethod: false,
+                    modelPath: "",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
+                buttonActionContent: {
+                    // contentType: PropertyContentType // TODO modalDialog,
+                    dialogSize: DialogSize.LARGE,
+                    dialogContent: {
+                        header: {
+                            svgRepresentation: `<svg width="30" height="20">${backingDataSvgRepresentation()}</svg>`,
+                            text: "Backing Data Family: ",
+                            closeButton: false
+                        },
+                        footer: {
+                            cancelButtonText: "Cancel",
+                            saveButtonIconClass: "fa-regular fa-floppy-disk",
+                            saveButtonText: "Save"
+                        },
+                        content: {
+                            contentType: UIContentType.GROUP_FORMS,
+                            groups: [
+                                {
+                                    id: "backingData-familyConfig-table",
+                                    contentType: PropertyContentType.TABLE,
+                                    headline: "Included Data",
+                                    text: `The following table shows all existing Backing Data entities within this System. You can select which ones of the following Backing Data entities you want to include in this
+                                    family. Note that if you select a Backing Data and save your changes, the labels of the selected Backing Data entities might change since they have to be equal to the family name.
+                                    Additionally, if you deselect entities that have previously been part of this family, their label will be reset to "Backing Data". However, your changes won't be adopted until you 
+                                    clicked "Save". In case you cancel and change your entity selection, all your changes will be lost. While you keep the selection of this Backing Data entity, your changes will be remembered.`,
+                                    tableColumnHeaders: [
+                                        {
+                                            text: "Name"
+                                        },
+                                        {
+                                            text: "Family Name"
+                                        },
+                                        {
+                                            text: "Parent"
+                                        },
+                                        {
+                                            text: "Formerly Included"
+                                        },
+                                        {
+                                            text: "Include"
+                                        }
+                                    ],
+                                    tableRows: []
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
 
         ]
     }

@@ -10,8 +10,10 @@
                         <label :for="highlightOption.entityType"><span v-html="highlightOption.svgRepresentation"></span>{{
                             highlightOption.labelText }}</label>
                         <select class="entityHighlightingOption custom-select" :id="highlightOption.selectId"
-                            :disabled="highlightOption.options.length == 1">
-                            <option v-for="option of highlightOption.options" :value="option">{{ option }}</option>
+                            :disabled="highlightOption.options.length == 1" v-model="highlightOption.selectedOption"
+                            @change="onSelectHighlighOption(highlightOption)">
+                            <option v-for="option of highlightOption.options" :value="option.optionValue">{{
+                                option.optionText }}</option>
                         </select>
                     </div>
 
@@ -44,7 +46,7 @@
                                 information, which is especially relevant for a TOSCA transformation.
                             </p>
                             <div v-for="option of propertyGroup.options" :data-group-context="propertyGroup.groupId"
-                                :data-group-id="propertyGroup.cardBodyId" v-show="!option.hidden">
+                                :data-group-id="propertyGroup.cardBodyId" v-show="option.show">
                                 <form :id="option.providedFeature" class="form-group"
                                     :class="[{ 'needs-validation': option.includeFormCheck }, { 'form-check': (option.contentType === PropertyContentType.CHECKBOX) }, { 'novalidate': option.includeFormCheck }]">
                                     <!--TODO separation line?-->
@@ -52,8 +54,7 @@
                                         :class="{ 'form-check-label': option.contentType === PropertyContentType.CHECKBOX }">
                                         <span v-if="option.attributes.svgRepresentation"
                                             v-html="option.attributes.svgRepresentation"></span>
-                                        <i v-if="option.attributes.iconClass"
-                                            :class="option.attributes.iconClass"></i>
+                                        <i v-if="option.attributes.iconClass" :class="option.attributes.iconClass"></i>
                                         {{ option.label }}
                                         <span v-if="option.contentType === PropertyContentType.INPUT_RANGE"
                                             class="rangeBoxCurrentValue ml-2 align-baseline badge badge-primary badge-pill">{{
@@ -106,9 +107,10 @@
                                             :class="option.validationState" :disabled="option.inputProperties.disabled"
                                             :required="option.inputProperties.required" :size="option.attributes.size"
                                             :multiple="option.attributes.multiple"
-                                            :data-property-type="propertyGroup.groupId">
+                                            :data-property-type="propertyGroup.groupId" v-model="option.value"
+                                            @change="onEnterProperty(option)">
                                             <option v-for="selectOption of option.dropdownOptions"
-                                                :value="selectOption.optionValue"
+                                                :value="selectOption.optionValue" :key="selectOption.optionValue"
                                                 :placeholder="option.attributes.placeholder"
                                                 :title="selectOption.optionTitle" :selected="selectOption.selected">
                                                 {{ selectOption.optionText }}
@@ -142,6 +144,15 @@
                                                 <i :class="option.attributes.buttonIconClass"></i>
                                                 {{ option.attributes.buttonText }}
                                             </button>
+
+                                            <Teleport to="#modals" v-show="option.showDialog">
+                                                <ModalEditDialog :context="'entity'" :isStatic="false"
+                                                    :titleId="option.providedFeature" :header-data-type="'normal'"
+                                                    :dialog-config="option.buttonActionContent" :show="option.showDialog"
+                                                    @close:Modal="option.showDialog = false"
+                                                    @save:Modal="onEnterProperty(option)">
+                                                </ModalEditDialog>
+                                            </Teleport>
                                         </div>
 
                                         <!-- TODO in leftLabel ${isChecked ? 'text-muted' : ''}"-->
@@ -175,12 +186,15 @@
 
 
 <script lang="ts" setup>
-import { CheckboxPropertyConfig, DetailsSidebarConfig, DropdownOptionConfig, DropdownPropertyConfig, EntityDetailsConfig, InputProperties, JointJsConfig, ListPropertyConfig, NumberPropertyConfig, NumberRangePropertyConfig, PropertyConfig, PropertyContentType, TextAreaPropertyConfig, TextPropertyConfig, TogglePropertyConfig } from '../../config/detailsSidebarConfig';
+import { CheckboxPropertyConfig, DetailsSidebarConfig, DropdownOptionConfig, DropdownPropertyConfig, EntityDetailsConfig, InputProperties, JointJsConfig, ListPropertyConfig, NumberPropertyConfig, NumberRangePropertyConfig, PropertyConfig, TextAreaPropertyConfig, TextPropertyConfig, TogglePropertyConfig } from '../../config/detailsSidebarConfig';
 import { dia } from 'jointjs';
-import { ref, computed, onUpdated } from 'vue';
+import { ref, computed, onUpdated, onMounted, nextTick } from 'vue';
 import type { ComputedRef, Ref } from 'vue';
 import EntityTypes from '@/modeling/config/entityTypes';
 import { TableDialogPropertyConfig } from '../../config/detailsSidebarConfig';
+import ModalEditDialog from '../components/ModalEditDialog.vue';
+import { DialogConfig, FormContentConfig, TablePropertyConfig } from '@/modeling/config/actionDialogConfig';
+import { PropertyContentType } from '../../config/detailsSidebarConfig';
 
 const props = defineProps<{
     graph: dia.Graph;
@@ -211,7 +225,7 @@ type EditPropertySection = {
     label: string,
     inputProperties: InputProperties,
     helpText: string,
-    hidden: boolean | ComputedRef<boolean>,
+    show: boolean | ComputedRef<boolean>,
     provideEnterButton: boolean,
     jointJsConfig: JointJsConfig
     includeFormCheck: boolean,
@@ -220,7 +234,8 @@ type EditPropertySection = {
     dropdownOptions?: any[]
     value: string | number,
     checked?: boolean,
-    buttonActionContent?: any
+    buttonActionContent?: DialogConfig,
+    showDialog?: boolean
 }
 
 
@@ -236,11 +251,47 @@ const entityHighlighting = ref((() => {
             svgRepresentation: entityType.svgRepresentation,
             labelText: entityType.labelText,
             highlightColour: entityType.highlightColour,
-            options: ["Choose existing entity..."]
+            options: [{ optionValue: "none", optionText: "Choose existing entity..." }],
+            selectedOption: ""
         })
     }
     return highlightOptions;
 })());
+
+
+function refreshHighlightOptions() {
+    for (let highlightOption of entityHighlighting.value) {
+        let updatedOptions = [{ optionValue: "none", optionText: "Choose existing entity..." }];
+        let considerableEntites = props.graph.getElements().filter(element => element.prop("entity/type") === highlightOption.selectId);
+        for (const entity of considerableEntites) {
+            let familyName = entity.prop("entity/properties/assignedFamily")
+            if (familyName) {
+                if (updatedOptions.filter(selectableOption => selectableOption.optionValue === familyName).length === 0) {
+                    updatedOptions.push({ optionValue: familyName, optionText: familyName });
+                }
+            } else {
+                updatedOptions.push({
+                    optionValue: entity.id.toString(),
+                    optionText: entity.attr("label/textWrap/text")
+                });
+            }
+        }
+        highlightOption.options = updatedOptions;
+        // TODO reset selectedOption if not available anymore
+    }
+}
+
+function onSelectHighlighOption(highlightOption) {
+    let considerableEntites = props.graph.getElements().filter(element => element.prop("entity/type") === highlightOption.selectId);
+    for (const entity of considerableEntites) {
+        if (entity.id.toString() === highlightOption.selectedOption || entity.prop("entity/properties/assignedFamily") === highlightOption.selectedOption) {
+            entity.attr("body/fill", highlightOption.highlightColour);
+        } else {
+            // reset highlighting of all other elements
+            entity.attr("body/fill", "white");
+        }
+    }
+}
 
 function preparePropertyGroupSections(exclude: string[]): PropertyGroupSection[] {
     let propertyGroups: PropertyGroupSection[] = [];
@@ -277,7 +328,7 @@ function toPropertySections(propertyConfigs: PropertyConfig[]): EditPropertySect
             label: option.label,
             inputProperties: option.inputProperties,
             helpText: option.helpText,
-            hidden: option.hidden,
+            show: option.show,
             provideEnterButton: option.provideEnterButton,
             jointJsConfig: option.jointJsConfig,
             includeFormCheck: true,
@@ -368,7 +419,8 @@ function toPropertySections(propertyConfigs: PropertyConfig[]): EditPropertySect
                 options.push({
                     ...preparedProperty, ...{
                         attributes: tableDialogOption.attributes,
-                        buttonActionContent: tableDialogOption.buttonActionContent
+                        buttonActionContent: tableDialogOption.buttonActionContent,
+                        showDialog: false
                     }
                 } as EditPropertySection)
                 break;
@@ -377,79 +429,162 @@ function toPropertySections(propertyConfigs: PropertyConfig[]): EditPropertySect
     return options;
 }
 
+onMounted(() => {
+    refreshHighlightOptions();
+
+    // TODO maybe add context and deregister before new registration?
+    props.graph.on("change", (cell) => {
+        refreshHighlightOptions();
+    })
+
+})
+
 onUpdated(() => {
 
-    // only set values if the selected entity has changed
-    if (props.selectedEntity) {
-        if (props.selectedEntity.model.id.toString() !== selectedEntityId.value) {
-            selectedEntityId.value = props.selectedEntity.model.id.toString();
+    // if no entity is selected / an entity was deselected, clear the current values
+    if (!props.selectedEntity) {
+        selectedEntityId.value = "";
+        selectedEntityPropertyGroups.value.length = 0;
+        return;
+    }
+    // if the selection has stayed the same, do nothing
+    if (props.selectedEntity.model.id.toString() === selectedEntityId.value) {
+        return;
+    }
 
-            // clear current property sections
-            selectedEntityPropertyGroups.value.length = 0;
+    //console.log(props.selectedEntity.model.id);
+    // selected entity has changed! only now update the values
+    selectedEntityId.value = props.selectedEntity.model.id.toString();
 
-            let excludePropertySections = [];
-            if (props.selectedEntity.model.prop("entity/type") === EntityTypes.LINK || props.selectedEntity.model.prop("entity/type") === EntityTypes.DEPLOYMENT_MAPPING) {
-                // exclude sections if the entity is a link or a deployment mapping
-                excludePropertySections.push(...["label", "size", "position"]);
+    // clear current property sections
+    selectedEntityPropertyGroups.value.length = 0;
+
+    let excludePropertySections = [];
+    if (props.selectedEntity.model.prop("entity/type") === EntityTypes.LINK || props.selectedEntity.model.prop("entity/type") === EntityTypes.DEPLOYMENT_MAPPING) {
+        // exclude sections if the entity is a link or a deployment mapping
+        excludePropertySections.push(...["label", "size", "position"]);
+    }
+    // fill property sections
+    const currentSections: PropertyGroupSection[] = selectedEntityPropertyGroups.value
+    currentSections.push(...preparePropertyGroupSections(excludePropertySections));
+
+    // clear current entity-specific properties
+    //selectedEntityPropertyGroups.value.find(propertyGroup => propertyGroup.groupId === "entity").options.length = 0;
+
+    //add entity specific properties for current entity
+    const entityConfig: { type: string, specificProperties: PropertyConfig[] } = Object.entries(EntityDetailsConfig).find(entry => {
+        return entry[1].type === props.selectedEntity.model.prop("entity/type")
+    }
+    )[1];
+    const currentOptions: EditPropertySection[] = selectedEntityPropertyGroups.value.find(propertyGroup => propertyGroup.groupId === "entity").options;
+    currentOptions.push(...toPropertySections(entityConfig.specificProperties))
+
+    for (let propertyGroup of selectedEntityPropertyGroups.value) {
+        for (let option of propertyGroup.options) {
+
+            let valueToSet = option.jointJsConfig.isProperty ? props.selectedEntity.model.prop(option.jointJsConfig.modelPath) : props.selectedEntity.model.attr(option.jointJsConfig.modelPath);
+
+            if (option.providedFeature === "entity-aspect-ratio" && valueToSet) {
+                valueToSet = "(h ~ " + (valueToSet.height / valueToSet.width).toFixed(2) + " * w)";
             }
-            // fill property sections
-            const currentSections: PropertyGroupSection[] = selectedEntityPropertyGroups.value
-            currentSections.push(...preparePropertyGroupSections(excludePropertySections));
 
-            // clear current entity-specific properties
-            //selectedEntityPropertyGroups.value.find(propertyGroup => propertyGroup.groupId === "entity").options.length = 0;
+            option.value = valueToSet;
+            option.validationState = "";
+        }
+    }
 
-            //add entity specific properties for current entity
-            const entityConfig: { type: string, specificProperties: PropertyConfig[] } = Object.entries(EntityDetailsConfig).find(entry => {
-                return entry[1].type === props.selectedEntity.model.prop("entity/type")
-            }
-            )[1];
-            const currentOptions: EditPropertySection[] = selectedEntityPropertyGroups.value.find(propertyGroup => propertyGroup.groupId === "entity").options;
-            currentOptions.push(...toPropertySections(entityConfig.specificProperties))
-
-            for (let propertyGroup of selectedEntityPropertyGroups.value) {
-                for (let option of propertyGroup.options) {
-                    let valueToSet = option.jointJsConfig.isProperty ? props.selectedEntity.model.prop(option.jointJsConfig.modelPath) : props.selectedEntity.model.attr(option.jointJsConfig.modelPath);
-
-                    if (option.providedFeature === "entity-aspect-ratio" && valueToSet) {
-                        valueToSet = "(h ~ " + (valueToSet.height / valueToSet.width).toFixed(2) + " * w)";
-                    }
-                    option.value = valueToSet;
-                    option.validationState = "";
+    switch (props.selectedEntity.model.prop("entity/type")) {
+        case EntityTypes.DATA_AGGREGATE:
+            let parentRelationOption: EditPropertySection = selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "dataAggregate-parentRelation");
+            parentRelationOption.show = computed(() => selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "embedded").value !== "" && selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "dataAggregate-chooseEditMode").checked);
+            let chooseEditModeOption: EditPropertySection = selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "dataAggregate-chooseEditMode");
+            chooseEditModeOption.show = computed(() => selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "embedded").value !== "");
+            let familyConfigOption: EditPropertySection = selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "dataAggregate-familyConfig");
+            familyConfigOption.includeFormCheck = false;
+            familyConfigOption.show = computed(() => {
+                if (selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "embedded").value !== "") {
+                    return !selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "dataAggregate-chooseEditMode").checked
+                } else {
+                    return true;
                 }
-            }
-
-            switch (props.selectedEntity.model.prop("entity/type")) {
-                case EntityTypes.DATA_AGGREGATE:
-                    let parentRelationOption: EditPropertySection = selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "dataAggregate-parentRelation");
-                    parentRelationOption.hidden = computed(() => !selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "dataAggregate-chooseEditMode").checked);
-                    let familyConfigOption: EditPropertySection = selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "dataAggregate-familyConfig");
-                    familyConfigOption.hidden = computed(() => selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "dataAggregate-chooseEditMode").checked);
-                    let assignedFamilyOption: EditPropertySection = selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "dataAggregate-assignedFamily");
-                    assignedFamilyOption.hidden = computed(() => !selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "dataAggregate-chooseEditMode").checked);
-                    //TODO change parent svg representation dynamically
-                    break;
-
-            }
-
-            // update position properties when entity is moved
-            props.selectedEntity.model.on("change:position", () => {
-                let xOption = selectedEntityPropertyGroups.value.find(propertyGroup => propertyGroup.groupId === "position").options.find(propertyOption => propertyOption.providedFeature === "entity-x-position");
-                xOption.value = props.selectedEntity.model.prop(xOption.jointJsConfig.modelPath);
-                let yOption = selectedEntityPropertyGroups.value.find(propertyGroup => propertyGroup.groupId === "position").options.find(propertyOption => propertyOption.providedFeature === "entity-y-position");
-                yOption.value = props.selectedEntity.model.prop(yOption.jointJsConfig.modelPath);
+            });
+            let familyTableConfig: TablePropertyConfig = ((familyConfigOption.buttonActionContent.dialogContent.content as FormContentConfig).groups as TablePropertyConfig[])[0];
+            // clear table rows
+            familyTableConfig.tableRows.length = 0;
+            // TODO make sure this does not have to be cleared by avoiding that the original config is changed, which is currently the case
+            props.graph.getElements().filter(element => element.prop("entity/type") === EntityTypes.DATA_AGGREGATE).forEach(dataAggregate => {
+                let parent = dataAggregate.getParentCell();
+                let isValid = !!parent
+                let parentName = isValid ? parent.attr("label/textWrap/text") : "-";
+                let isSameFamily = dataAggregate.prop("entity/properties/assignedFamily").length !== 0 && dataAggregate.prop("entity/properties/assignedFamily").localeCompare(props.selectedEntity.model.prop("entity/properties/assignedFamily")) === 0;
+                familyTableConfig.tableRows.push({
+                    attributes: {
+                        isTheCurrentEntity: props.selectedEntity.model.id === dataAggregate.id,
+                        representationClass: isValid ? "validOption" : "invalidOption",
+                        disabled: !isValid
+                    },
+                    columns: {
+                        name: dataAggregate.attr("label/textWrap/text") ? dataAggregate.attr("label/textWrap/text") : "-",
+                        familyName: dataAggregate.prop("entity/properties/assignedFamily") ? dataAggregate.prop("entity/properties/assignedFamily") : "-",
+                        parent: parentName,
+                        included: {
+                            contentType: PropertyContentType.CHECKBOX_WITHOUT_LABEL,
+                            disabled: !isValid,
+                            checked: isSameFamily,
+                            id: dataAggregate.id
+                        },
+                    }
+                })
             })
 
-        }
-    } else {
-        selectedEntityId.value = "";
+            let assignedFamilyOption: EditPropertySection = selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "dataAggregate-assignedFamily");
+            assignedFamilyOption.show = computed(() => {
+                if (selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "embedded").value !== "") {
+                    return selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "dataAggregate-chooseEditMode").checked
+                } else {
+                    return false;
+                }
+            }
+            );
+
+            //TODO change parent svg representation dynamically
+            break;
+        case EntityTypes.BACKING_DATA:
+
+            
+            break;
     }
+
+    // remove previously registered event callbacks
+    props.selectedEntity.model.off(null, null, "detailsSidebar");
+
+    props.selectedEntity.model.on("change:parent", () => {
+
+        let parent: dia.Cell = props.selectedEntity.model.getParentCell();
+        let parentId: string = "";
+        if (parent) {
+            parentId = parent.id.toString();
+        }
+
+        selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "embedded").value = parentId;
+        props.selectedEntity.model.prop("entity/embedded", parentId);
+
+    }, "detailsSidebar");
+
+    // update position properties when entity is moved
+    props.selectedEntity.model.on("change:position", () => {
+        let xOption = selectedEntityPropertyGroups.value.find(propertyGroup => propertyGroup.groupId === "position").options.find(propertyOption => propertyOption.providedFeature === "entity-x-position");
+        xOption.value = props.selectedEntity.model.prop(xOption.jointJsConfig.modelPath);
+        let yOption = selectedEntityPropertyGroups.value.find(propertyGroup => propertyGroup.groupId === "position").options.find(propertyOption => propertyOption.providedFeature === "entity-y-position");
+        yOption.value = props.selectedEntity.model.prop(yOption.jointJsConfig.modelPath);
+    }, "detailsSidebar")
+
 })
 
 
 function onEnterProperty(propertyOption: EditPropertySection) {
 
-    if (!isPropertyValueValid(propertyOption)) {
+    if (propertyOption.includeFormCheck && !isPropertyValueValid(propertyOption)) {
         propertyOption.validationState = "is-invalid";
         let oldValue = propertyOption.jointJsConfig.isProperty ? props.selectedEntity.model.prop(propertyOption.jointJsConfig.modelPath) : props.selectedEntity.model.attr(propertyOption.jointJsConfig.modelPath);
         propertyOption.value = oldValue;
@@ -476,7 +611,6 @@ function onEnterProperty(propertyOption: EditPropertySection) {
                     const aspectRatio = defaultEntitySize.height / defaultEntitySize.width;
                     oldHeight = Number((aspectRatio * (newWidth as number)).toFixed(2));
                 }
-                console.log("resize with: " + (newWidth as number) + ", " + oldHeight);
                 selectedEntityElement.resize(newWidth as number, oldHeight, { deep: true });
                 break;
             case "entity-height":
@@ -490,25 +624,60 @@ function onEnterProperty(propertyOption: EditPropertySection) {
     } else if (propertyOption.jointJsConfig.isProperty) {
         selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, propertyOption.value);
     } else {
-        if ((selectedEntityElement.prop("entity/type") === EntityTypes.BACKING_DATA) && propertyOption.providedFeature === "entity-text" && selectedEntityElement.prop("entity/properties/assignedFamily")) {
-            // also change all other backing data elements of the same family
-            const relatedBackingDataEntities = props.graph.getElements().filter((entityElement) => {
-                return entityElement.prop("entity/type") === EntityTypes.BACKING_DATA && entityElement.attr(propertyOption.jointJsConfig.modelPath).localeCompare(selectedEntityElement.attr(propertyOption.jointJsConfig.modelPath)) === 0;
-            });
-            for (const relatedBackingDataEntity of relatedBackingDataEntities) {
-                relatedBackingDataEntity.attr(propertyOption.jointJsConfig.modelPath, propertyOption.value);
-            }
-        } else if ((selectedEntityElement.prop("entity/type") === EntityTypes.DATA_AGGREGATE) && propertyOption.providedFeature === "entity-text" && selectedEntityElement.prop("entity/properties/assignedFamily")) {
-            const relatedDataAggregateEntities = props.graph.getElements().filter((entityElement) => {
-                return entityElement.prop("entity/type") === EntityTypes.DATA_AGGREGATE && entityElement.attr(propertyOption.jointJsConfig.modelPath).localeCompare(selectedEntityElement.attr(propertyOption.jointJsConfig.modelPath)) === 0;
-            });
+        // handle special cases
+        switch (selectedEntityElement.prop("entity/type")) {
+            case EntityTypes.BACKING_DATA:
+                if (propertyOption.providedFeature === "entity-text" && selectedEntityElement.prop("entity/properties/assignedFamily")) {
 
-            for (const relatedDataAggregateEntity of relatedDataAggregateEntities) {
-                relatedDataAggregateEntity.attr(propertyOption.jointJsConfig.modelPath, propertyOption.value);
-            }
+                    selectedEntityElement.prop("entity/properties/assignedFamily", propertyOption.value);
+                    // also change all other backing data elements of the same family
+                    const relatedBackingDataEntities = props.graph.getElements().filter((entityElement) => {
+                        return entityElement.prop("entity/type") === EntityTypes.BACKING_DATA && entityElement.attr(propertyOption.jointJsConfig.modelPath).localeCompare(selectedEntityElement.attr(propertyOption.jointJsConfig.modelPath)) === 0;
+                    });
+                    for (const relatedBackingDataEntity of relatedBackingDataEntities) {
+                        relatedBackingDataEntity.attr(propertyOption.jointJsConfig.modelPath, propertyOption.value);
+                        relatedBackingDataEntity.prop("entity/properties/assignedFamily", propertyOption.value);
+                    }
+                    return;
+                }
+                break;
+            case EntityTypes.DATA_AGGREGATE:
+                if (propertyOption.providedFeature === "entity-text" && selectedEntityElement.prop("entity/properties/assignedFamily")) {
+
+                    selectedEntityElement.prop("entity/properties/assignedFamily", propertyOption.value);
+
+                    const relatedDataAggregateEntities = props.graph.getElements().filter((entityElement) => {
+                        return entityElement.prop("entity/type") === EntityTypes.DATA_AGGREGATE && entityElement.attr(propertyOption.jointJsConfig.modelPath).localeCompare(selectedEntityElement.attr(propertyOption.jointJsConfig.modelPath)) === 0;
+                    });
+
+                    for (const relatedDataAggregateEntity of relatedDataAggregateEntities) {
+                        relatedDataAggregateEntity.attr(propertyOption.jointJsConfig.modelPath, propertyOption.value);
+                        relatedDataAggregateEntity.prop("entity/properties/assignedFamily", propertyOption.value);
+                    }
+                    return;
+                }
+                if (propertyOption.providedFeature === "dataAggregate-familyConfig") {
+                    let currentFamilyName = selectedEntityElement.attr("label/textWrap/text");
+                    let familyTableConfig: TablePropertyConfig = ((propertyOption.buttonActionContent.dialogContent.content as FormContentConfig).groups as TablePropertyConfig[])[0];
+                    for (let otherBackingData of familyTableConfig.tableRows) {
+                        if (otherBackingData.columns["included"]["checked"]) {
+                            (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).attr("label/textWrap/text", currentFamilyName);
+                            (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).prop("entity/properties/assignedFamily", currentFamilyName);
+                        } else {
+                            // TODO reset name or not?
+                            (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).attr("label/textWrap/text", "Data Aggregate");
+                            (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).prop("entity/properties/assignedFamily", "");
+                        }
+                    }
+                    return;
+                }
+                break;
         }
+
+        // otherwise, it is the simplest case:
         selectedEntityElement.attr(propertyOption.jointJsConfig.modelPath, propertyOption.value);
     }
+
 }
 
 function isPropertyValueValid(option): boolean {
@@ -531,7 +700,7 @@ function isPropertyValueValid(option): boolean {
 }
 
 function onTableDialog(option: EditPropertySection) {
-    //TODO show modal
+    option.showDialog = !option.showDialog;
 }
 
 

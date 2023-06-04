@@ -1,3 +1,74 @@
+import { dia } from "jointjs"
+import { PropertyConfig } from "./detailsSidebarConfig"
+
+export type DialogConfig = {
+    dialogSize: string,
+    dialogContent: {
+        header: {
+            svgRepresentation: string,
+            text: string,
+            closeButton: boolean
+        },
+        footer: {
+            cancelButtonText: string,
+            saveButtonIconClass: string,
+            saveButtonText: string
+        },
+        content: FormContentConfig | InfoContentConfig
+    }
+}
+
+export type FormContentConfig = {
+    contentType: "groupForms",
+    groups: (TablePropertyConfig | FormGroupPropertyConfig)[]
+}
+
+export type TablePropertyConfig = {
+    id: string,
+    contentType: "table",
+    headline: string,
+    text: string,
+    tableColumnHeaders: TableColumnHeaderConfig[],
+    tableRows: TableRowConfig[]
+}
+
+export type TableRowConfig = {
+    attributes: { isTheCurrentEntity: boolean, representationClass: string, disabled: boolean },
+    columns: {
+        [key: string]: string | TableRowContentConfig
+    }
+}
+
+export type TableRowContentConfig = {
+    contentType: "checkbox-without-label",
+    disabled: boolean,
+    checked: boolean,
+    id: dia.Cell.ID
+}
+
+
+export type TableColumnHeaderConfig = {
+    text: string
+}
+
+export type InfoContentConfig = {
+    contentType: "textBlock"
+    text: string
+}
+
+export type FormGroupPropertyConfig = {
+    id: string,
+    contentType: "formgroup",
+    headline: string,
+    contentItems: PropertyConfig[]
+}
+
+const UIContentType = Object.freeze({
+    SINGLE_TEXTBLOCK: "textBlock",
+    GROUP_FORMS: "groupForms"
+})
+
+
 const DialogSize = Object.freeze({
     SMALL: "modal-sm",
     DEFAULT: "",

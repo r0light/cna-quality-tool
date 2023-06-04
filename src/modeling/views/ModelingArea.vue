@@ -182,9 +182,11 @@ onMounted(() => {
         // }
     });
 
+    /*
     props.graph.on("change:parent", (cell) => {
         cell.prop("entity/isEmbedded", true);
     });
+    */
 
 
     paper.render();

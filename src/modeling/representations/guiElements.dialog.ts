@@ -183,9 +183,9 @@ class UIModalDialog {
             groupItem = groupItem + `<div data-group-context="${this.#context}">`;
 
             switch (contentItem.contentType) {
-                case PropertyContentType.INFO:
-                    groupItem = groupItem + this.#createInfoSection(contentItem);
-                    break;
+                //case PropertyContentType.INFO:
+                //    groupItem = groupItem + this.#createInfoSection(contentItem);
+                //    break;
                 case PropertyContentType.TABLE:
                     groupItem = groupItem + this.#createTableSection(contentItem);
                     break;
