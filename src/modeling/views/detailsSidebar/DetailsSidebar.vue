@@ -547,9 +547,70 @@ onUpdated(() => {
                 }
             }
             );
-            const parentId: string = props.selectedEntity.model.prop("entity/embedded")
             break;
         case EntityTypes.BACKING_DATA:
+            let chooseBDEditModeOption: EditPropertySection = selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "backingData-chooseEditMode");
+            chooseBDEditModeOption.show = computed(() => selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "embedded").value !== "");
+
+            let includedDataOption: EditPropertySection = selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "backingData-includedData");
+            includedDataOption.show = computed(() => {
+                if (selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "embedded").value !== "") {
+                    return !selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "backingData-chooseEditMode").checked
+                } else {
+                    return true;
+                }
+            });
+
+            //TODO prepare includedDataOption
+
+
+            let bDfamilyConfigOption: EditPropertySection = selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "backingData-familyConfig");
+            bDfamilyConfigOption.includeFormCheck = false;
+            bDfamilyConfigOption.show = computed(() => {
+                if (selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "embedded").value !== "") {
+                    return !selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "backingData-chooseEditMode").checked
+                } else {
+                    return true;
+                }
+            });
+            let bDfamilyTableConfig: TablePropertyConfig = ((bDfamilyConfigOption.buttonActionContent.dialogContent.content as FormContentConfig).groups as TablePropertyConfig[])[0];
+            // clear table rows
+            bDfamilyTableConfig.tableRows.length = 0;
+            // TODO make sure this does not have to be cleared by avoiding that the original config is changed, which is currently the case
+            props.graph.getElements().filter(element => element.prop("entity/type") === EntityTypes.BACKING_DATA).forEach(backingData => {
+                let parent = backingData.getParentCell();
+                let isValid = !!parent
+                let parentName = isValid ? parent.attr("label/textWrap/text") : "-";
+                let isSameFamily = backingData.prop("entity/properties/assignedFamily").length !== 0 && backingData.prop("entity/properties/assignedFamily").localeCompare(props.selectedEntity.model.prop("entity/properties/assignedFamily")) === 0;
+                bDfamilyTableConfig.tableRows.push({
+                    attributes: {
+                        isTheCurrentEntity: props.selectedEntity.model.id === backingData.id,
+                        representationClass: isValid ? "validOption" : "invalidOption",
+                        disabled: !isValid
+                    },
+                    columns: {
+                        name: backingData.attr("label/textWrap/text") ? backingData.attr("label/textWrap/text") : "-",
+                        familyName: backingData.prop("entity/properties/assignedFamily") ? backingData.prop("entity/properties/assignedFamily") : "-",
+                        parent: parentName,
+                        included: {
+                            contentType: PropertyContentType.CHECKBOX_WITHOUT_LABEL,
+                            disabled: !isValid,
+                            checked: isSameFamily,
+                            id: backingData.id
+                        },
+                    }
+                })
+            })
+
+            let bDassignedFamilyOption: EditPropertySection = selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "backingData-assignedFamily");
+            bDassignedFamilyOption.show = computed(() => {
+                if (selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "embedded").value !== "") {
+                    return selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "backingData-chooseEditMode").checked
+                } else {
+                    return false;
+                }
+            }
+            );
             break;
     }
 
@@ -666,6 +727,21 @@ function onEnterProperty(propertyOption: EditPropertySection) {
                     for (const relatedBackingDataEntity of relatedBackingDataEntities) {
                         relatedBackingDataEntity.attr(propertyOption.jointJsConfig.modelPath, propertyOption.value);
                         relatedBackingDataEntity.prop("entity/properties/assignedFamily", propertyOption.value);
+                    }
+                    return;
+                }
+                if (propertyOption.providedFeature === "backingData-familyConfig") {
+                    let currentFamilyName = selectedEntityElement.attr("label/textWrap/text");
+                    let familyTableConfig: TablePropertyConfig = ((propertyOption.buttonActionContent.dialogContent.content as FormContentConfig).groups as TablePropertyConfig[])[0];
+                    for (let otherBackingData of familyTableConfig.tableRows) {
+                        if (otherBackingData.columns["included"]["checked"]) {
+                            (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).attr("label/textWrap/text", currentFamilyName);
+                            (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).prop("entity/properties/assignedFamily", currentFamilyName);
+                        } else {
+                            // TODO reset name or not?
+                            (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).attr("label/textWrap/text", "Backing Data");
+                            (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).prop("entity/properties/assignedFamily", "");
+                        }
                     }
                     return;
                 }

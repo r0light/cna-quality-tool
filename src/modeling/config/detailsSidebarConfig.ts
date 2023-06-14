@@ -1154,9 +1154,6 @@ const EntityDetailsConfig: {
                                             text: "Parent"
                                         },
                                         {
-                                            text: "Formerly Included"
-                                        },
-                                        {
                                             text: "Include"
                                         }
                                     ],
