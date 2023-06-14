@@ -77,7 +77,6 @@ import { UIContentType } from '@/modeling/config/toolbarConfiguration';
 import { DialogConfig } from '../../config/actionDialogConfig';
 import { PropertyContentType } from '@/modeling/config/detailsSidebarConfig';
 
-
 const props = defineProps<{
     isStatic: boolean;
     titleId: string;

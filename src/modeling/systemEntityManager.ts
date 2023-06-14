@@ -311,7 +311,7 @@ class SystemEntityManager {
         }
 
         const dataAggregate = new Entities.DataAggregate(graphElement.attr("label/textWrap/text"), graphElement.id);
-        const dataAggregateEmbeddedProperties = graphElement.prop("entity/properties/embedded");
+        const dataAggregateEmbeddedProperties = graphElement.prop("entity/embedded");
 
         let addedEntity = null;
         if ("persisted".localeCompare(dataAggregateEmbeddedProperties.parentRelation) === 0) {

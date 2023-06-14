@@ -12,7 +12,7 @@
 
 <script lang="ts" setup>
 import $ from 'jquery';
-import { onMounted, } from 'vue';
+import { onMounted, onUpdated } from 'vue';
 import { dia, routers, shapes, highlighters } from "jointjs";
 import { ModelingValidator } from '../modelingValidator';
 import ConnectionSelectionTools from "./tools/connectionSelectionTools";
@@ -192,6 +192,14 @@ onMounted(() => {
     paper.render();
     // convention to update a value in the parent (https://vuejs.org/guide/components/v-model.html#v-model-arguments)
     emit("update:paper", paper);
+})
+
+onUpdated(() => {
+    // react on changed entity selection, to make sure that only for one element the tools are shown
+    if (props.currentElementSelection) {
+        props.paper.hideTools();
+        props.currentElementSelection.showTools();
+    }
 })
 
 

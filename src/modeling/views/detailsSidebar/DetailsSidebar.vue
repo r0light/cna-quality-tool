@@ -55,7 +55,7 @@
                                         <span v-if="option.attributes.svgRepresentation"
                                             v-html="option.attributes.svgRepresentation"></span>
                                         <i v-if="option.attributes.iconClass" :class="option.attributes.iconClass"></i>
-                                        {{ option.label }}
+                                        <span v-html="option.label"></span>
                                         <span v-if="option.contentType === PropertyContentType.INPUT_RANGE"
                                             class="rangeBoxCurrentValue ml-2 align-baseline badge badge-primary badge-pill">{{
                                                 option.value }} px</span>
@@ -497,6 +497,7 @@ onUpdated(() => {
         case EntityTypes.DATA_AGGREGATE:
             let parentRelationOption: EditPropertySection = selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "dataAggregate-parentRelation");
             parentRelationOption.show = computed(() => selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "embedded").value !== "" && selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "dataAggregate-chooseEditMode").checked);
+            parentRelationOption.label = getParentRelationLabel(props.selectedEntity.model.prop("entity/embedded"));
             let chooseEditModeOption: EditPropertySection = selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "dataAggregate-chooseEditMode");
             chooseEditModeOption.show = computed(() => selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "embedded").value !== "");
             let familyConfigOption: EditPropertySection = selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "dataAggregate-familyConfig");
@@ -546,12 +547,9 @@ onUpdated(() => {
                 }
             }
             );
-
-            //TODO change parent svg representation dynamically
+            const parentId: string = props.selectedEntity.model.prop("entity/embedded")
             break;
         case EntityTypes.BACKING_DATA:
-
-            
             break;
     }
 
@@ -568,6 +566,10 @@ onUpdated(() => {
 
         selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "embedded").value = parentId;
         props.selectedEntity.model.prop("entity/embedded", parentId);
+        if (props.selectedEntity.model.prop("entity/type") === EntityTypes.DATA_AGGREGATE) {
+            let parentRelationOption: EditPropertySection = selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "dataAggregate-parentRelation");
+            parentRelationOption.label = getParentRelationLabel(props.selectedEntity.model.prop("entity/embedded"));
+        }
 
     }, "detailsSidebar");
 
@@ -580,6 +582,33 @@ onUpdated(() => {
     }, "detailsSidebar")
 
 })
+
+function getParentRelationLabel(parentId: string) {
+    if (parentId) {
+        const parentType: string = props.graph.getCell(parentId).prop("entity/type");
+        const svgRepresentation = ((entityType) => {
+            switch (parentType) {
+                case EntityTypes.COMPONENT:
+                    return `<svg width="30" height="20"><rect width="24" height="12" rx="2" ry="2" transform="translate(2.2, 2)" stroke-dasharray="0" stroke-width="2" stroke="black" fill="white"></rect></svg>`;
+                case EntityTypes.SERVICE:
+                    return `<svg width="30" height="20"><polygon points="5,0 15,0 20,8 15,16 5,16 0,8" transform="translate(7, 0.7)" stroke-dasharray="0" stroke-width="2" stroke="black" fill="white"></polygon></svg>`;
+                case EntityTypes.BACKING_SERVICE:
+                    return `<svg width="30" height="20"><polygon points="12.5,0 25,7.5 12.5,15 0,7.5" transform="translate(2, 0.8)" stroke-width="2" stroke="black" fill="white"></polygon></svg>`;
+                case EntityTypes.STORAGE_BACKING_SERVICE:
+                    return `<svg width="30" height="20">
+                                <path transform="translate(6, 0.7) scale(0.27)" d="M 0 10 L 0 50 C 0 55.51784 17.928639999999998 60 40 60 C 62.07136 60 80 55.51784 80 50 L 80 10 C 80 4.4821599999999995 62.07136 0 40 0 C 17.928639999999998 0 0 4.4821599999999995 0 10 Z" stroke-width="5" stroke="black" fill="white"></path>
+                                <ellipse transform="translate(6, 0.7) scale(0.27)" cy="10" ry="10" cx="40" rx="40" stroke-width="5" stroke="black" fill="white"></ellipse>
+                                </svg>`;
+                default:
+                    return '';
+            }
+        }
+        )(parentType);
+        return svgRepresentation + " Parent Relation:"
+    } else {
+        return "Parent Relation:"
+    }
+}
 
 
 function onEnterProperty(propertyOption: EditPropertySection) {
@@ -834,4 +863,5 @@ option.validOption {
     margin-top: .25rem;
     font-size: .875em;
     color: #dc3545;
-}</style>
+}
+</style>
