@@ -148,6 +148,11 @@ export type TableDialogPropertyConfig = BasicPropertyConfig & {
     buttonActionContent: DialogConfig
 }
 
+export type TablePropertyConfig = BasicPropertyConfig & {
+    contentType: "table",
+    tableColumnHeaders: { text: string }[]
+}
+
 export type TogglePropertyConfig = BasicPropertyConfig & {
     contentType: "toggle",
     labels: {
@@ -158,7 +163,7 @@ export type TogglePropertyConfig = BasicPropertyConfig & {
 }
 
 
-export type PropertyConfig = ButtonPropertyConfig | TextPropertyConfig | TextAreaPropertyConfig | TextLabelPrependPropertyConfig | NumberPropertyConfig | NumberRangePropertyConfig | CheckboxPropertyConfig | CheckboxWithoutLabelPropertyConfig | DropdownPropertyConfig | ListPropertyConfig | TableDialogPropertyConfig | TogglePropertyConfig;
+export type PropertyConfig = ButtonPropertyConfig | TextPropertyConfig | TextAreaPropertyConfig | TextLabelPrependPropertyConfig | NumberPropertyConfig | NumberRangePropertyConfig | CheckboxPropertyConfig | CheckboxWithoutLabelPropertyConfig | DropdownPropertyConfig | ListPropertyConfig | TableDialogPropertyConfig | TogglePropertyConfig | TablePropertyConfig;
 
 function parseProperties(properties): PropertyConfig[] {
     return properties.map(property => {
@@ -798,7 +803,7 @@ const EntityDetailsConfig: {
             buttonActionContent: {
                 // contentType: PropertyContentType // TODO modalDialog,
                 dialogSize: DialogSize.LARGE,
-                dialogContent: {
+                dialogMetaData: {
                     header: {
                         svgRepresentation: `<svg width="30" height="20">${dataAggregateSvgRepresentation()}</svg>`,
                         text: "Data Aggregate Family: ",
@@ -809,17 +814,41 @@ const EntityDetailsConfig: {
                         saveButtonIconClass: "fa-regular fa-floppy-disk",
                         saveButtonText: "Save"
                     },
-                    content: {
-                        contentType: UIContentType.GROUP_FORMS,
-                        groups: [
-                            {
+                },
+                dialogContent: {
+                    contentType: UIContentType.GROUP_FORMS,
+                    groups: [
+                        {
+                            contentGroupMetaData: {
                                 id: "dataAggregate-familyConfig-table",
-                                contentType: PropertyContentType.TABLE,
                                 headline: "Included Data Aggregate entities" + '  ( <svg width="30" height="20">' + dataAggregateSvgRepresentation() + '</svg>)',
                                 text: `The following table shows all existing Data Aggregate entities within this System. You can select which ones of the following Data Aggregate entities you want to include in this
-                                family. Note that if you select a Data Aggregate and save your changes, the labels of the selected Data Aggregate entities might change since they have to be equal to the family name.
-                                Additionally, if you deselect entities that have previously been part of this family, their label will be reset to "Data Aggregate". However, your changes won't be adopted until you 
-                                clicked "Save". In case you cancel and change your entity selection, all your changes will be lost. While you keep the selection of this Data Aggregate entity, your changes will be remembered.`,
+                                    family. Note that if you select a Data Aggregate and save your changes, the labels of the selected Data Aggregate entities might change since they have to be equal to the family name.
+                                    Additionally, if you deselect entities that have previously been part of this family, their label will be reset to "Data Aggregate". However, your changes won't be adopted until you 
+                                    clicked "Save". In case you cancel and change your entity selection, all your changes will be lost. While you keep the selection of this Data Aggregate entity, your changes will be remembered.`
+                            },
+                            contentItems: [{
+                                providedFeature: "dataAggregate-familyConfigTable",
+                                contentType: PropertyContentType.TABLE,
+                                label: "",
+                                helpText: "",
+                                inputProperties: {
+                                    disabled: false,
+                                    readonly: false,
+                                    required: false,
+                                    checked: false,
+                                    selected: false,
+                                },
+                                provideEnterButton: false,
+                                show: true,
+                                jointJsConfig: {
+                                    isProperty: false,
+                                    hasProvidedMethod: false,
+                                    modelPath: "",
+                                    defaultPropPath: "",
+                                    minPath: "",
+                                    min: ""
+                                },
                                 tableColumnHeaders: [
                                     {
                                         text: "Name"
@@ -829,18 +858,15 @@ const EntityDetailsConfig: {
                                     },
                                     {
                                         text: "Parent"
-                                    },/*
-                                    {
-                                        text: "Formerly Included"
-                                    },*/
+                                    },
                                     {
                                         text: "Include"
                                     }
-                                ],
-                                tableRows: []
+                                ]
                             }
-                        ]
-                    }
+                            ]
+                        }
+                    ]
                 }
             }
         }
@@ -935,7 +961,7 @@ const EntityDetailsConfig: {
                 buttonActionContent: {
                     // contentType: PropertyContentType // TODO modalDialog,
                     dialogSize: DialogSize.LARGE,
-                    dialogContent: {
+                    dialogMetaData: {
                         header: {
                             svgRepresentation: `<svg width="30" height="20">${backingDataSvgRepresentation()}</svg>`,
                             text: "Backing Data Included Data: ",
@@ -945,120 +971,147 @@ const EntityDetailsConfig: {
                             cancelButtonText: "Cancel",
                             saveButtonIconClass: "fa-regular fa-floppy-disk",
                             saveButtonText: "Save"
-                        },
-                        content: {
-                            contentType: UIContentType.GROUP_FORMS,
-                            groups: [
-                                {
+                        }
+                    },
+                    dialogContent: {
+                        contentType: UIContentType.GROUP_FORMS,
+                        groups: [
+                            {
+                                contentGroupMetaData: {
                                     id: "backingData-includedData-table",
-                                    contentType: PropertyContentType.TABLE,
                                     headline: "Included Backing Data entities" + '  ( <svg width="30" height="20">' + backingDataSvgRepresentation() + '</svg>)',
                                     text: `The following table shows all data elements included in this Backing Data entity. In case you want to add a new entry, the following section provides two text element boxes you can use to 
-                                    provide the information and then add it using the plus button. However, your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all 
-                                    your changes will be lost. While you keep the selection of this Backing Data entity, your changes will be remembered.`,
-                                    tableColumnHeaders: [
-                                        {
-                                            text: "Key"
-                                        },
-                                        {
-                                            text: "Value"
-                                        }
-                                    ],
-                                    tableRows: []
+                                        provide the information and then add it using the plus button. However, your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all 
+                                        your changes will be lost. While you keep the selection of this Backing Data entity, your changes will be remembered.`,
                                 },
-                                {
+                                contentItems: [
+                                    {
+                                        providedFeature: "backingData-includedDataTable",
+                                        contentType: PropertyContentType.TABLE,
+                                        label: "",
+                                        helpText: "",
+                                        inputProperties: {
+                                            disabled: false,
+                                            readonly: false,
+                                            required: false,
+                                            checked: false,
+                                            selected: false,
+                                        },
+                                        provideEnterButton: false,
+                                        show: true,
+                                        jointJsConfig: {
+                                            isProperty: false,
+                                            hasProvidedMethod: false,
+                                            modelPath: "",
+                                            defaultPropPath: "",
+                                            minPath: "",
+                                            min: ""
+                                        },
+                                        tableColumnHeaders: [
+                                            {
+                                                text: "Key"
+                                            },
+                                            {
+                                                text: "Value"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                contentGroupMetaData: {
                                     id: "backingData-includedData-form",
-                                    contentType: PropertyContentType.FORMGROUP,
                                     headline: "Add New Data Item",
-                                    contentItems: [
-                                        {
-                                            providedFeature: "includedData-key",
-                                            contentType: PropertyContentType.INPUT_TEXTBOX_LABEL_PREPEND,
-                                            label: "Key",
-                                            inputProperties: {
-                                                disabled: false,
-                                                required: true,
-                                                checked: false,
-                                                selected: false,
-                                                readonly: false
-                                            },
-                                            helpText: "The key that identifies the following value item.",
-                                            attributes: {
-                                                labelIcon: "fa-solid fa-key",
-                                                placeholder: "e.g. My_SQL_Password",
-                                                provideEditButton: false,
-                                                provideEnterButton: false
-                                            },
-                                            provideEnterButton: false,
-                                            show: true,
-                                            jointJsConfig: {
-                                                isProperty: false,
-                                                hasProvidedMethod: false,
-                                                modelPath: "",
-                                                defaultPropPath: "",
-                                                minPath: "",
-                                                min: ""
-                                            }
+                                    text: ""
+                                },
+                                contentItems: [
+                                    {
+                                        providedFeature: "includedData-key",
+                                        contentType: PropertyContentType.INPUT_TEXTBOX_LABEL_PREPEND,
+                                        label: "Key",
+                                        inputProperties: {
+                                            disabled: false,
+                                            required: true,
+                                            checked: false,
+                                            selected: false,
+                                            readonly: false
                                         },
-                                        {
-                                            providedFeature: "includedData-value",
-                                            contentType: PropertyContentType.INPUT_TEXTBOX_LABEL_PREPEND,
-                                            label: "Value",
-                                            inputProperties: {
-                                                disabled: false,
-                                                required: true,
-                                                checked: false,
-                                                selected: false,
-                                                readonly: false
-                                            },
-                                            helpText: "The value of this data item.",
-                                            attributes: {
-                                                labelIcon: "bi bi-chat-square-text-fill",
-                                                placeholder: "e.g. mysqlpw",
-                                                provideEditButton: false,
-                                                provideEnterButton: false
-                                            },
-                                            provideEnterButton: false,
-                                            show: true,
-                                            jointJsConfig: {
-                                                isProperty: false,
-                                                hasProvidedMethod: false,
-                                                modelPath: "",
-                                                defaultPropPath: "",
-                                                minPath: "",
-                                                min: ""
-                                            }
+                                        helpText: "The key that identifies the following value item.",
+                                        attributes: {
+                                            labelIcon: "fa-solid fa-key",
+                                            placeholder: "e.g. My_SQL_Password",
+                                            provideEditButton: false,
+                                            provideEnterButton: false
                                         },
-                                        {
-                                            providedFeature: "includedData-submit",
-                                            contentType: PropertyContentType.BUTTON,
-                                            label: "Submit",
-                                            inputProperties: {
-                                                disabled: false,
-                                                required: true,
-                                                checked: false,
-                                                selected: false,
-                                                readonly: false
-                                            },
-                                            helpText: "",
-                                            attributes: {
-                                                labelIcon: "fa-solid fa-plus",
-                                            },
-                                            provideEnterButton: false,
-                                            show: true,
-                                            jointJsConfig: {
-                                                isProperty: false,
-                                                hasProvidedMethod: false,
-                                                modelPath: "",
-                                                defaultPropPath: "",
-                                                minPath: "",
-                                                min: ""
-                                            }
+                                        provideEnterButton: false,
+                                        show: true,
+                                        jointJsConfig: {
+                                            isProperty: false,
+                                            hasProvidedMethod: false,
+                                            modelPath: "",
+                                            defaultPropPath: "",
+                                            minPath: "",
+                                            min: ""
                                         }
-                                    ]
-                                }
-                            ]
-                        }
+                                    },
+                                    {
+                                        providedFeature: "includedData-value",
+                                        contentType: PropertyContentType.INPUT_TEXTBOX_LABEL_PREPEND,
+                                        label: "Value",
+                                        inputProperties: {
+                                            disabled: false,
+                                            required: true,
+                                            checked: false,
+                                            selected: false,
+                                            readonly: false
+                                        },
+                                        helpText: "The value of this data item.",
+                                        attributes: {
+                                            labelIcon: "bi bi-chat-square-text-fill",
+                                            placeholder: "e.g. mysqlpw",
+                                            provideEditButton: false,
+                                            provideEnterButton: false
+                                        },
+                                        provideEnterButton: false,
+                                        show: true,
+                                        jointJsConfig: {
+                                            isProperty: false,
+                                            hasProvidedMethod: false,
+                                            modelPath: "",
+                                            defaultPropPath: "",
+                                            minPath: "",
+                                            min: ""
+                                        }
+                                    },
+                                    {
+                                        providedFeature: "includedData-submit",
+                                        contentType: PropertyContentType.BUTTON,
+                                        label: "Submit",
+                                        inputProperties: {
+                                            disabled: false,
+                                            required: true,
+                                            checked: false,
+                                            selected: false,
+                                            readonly: false
+                                        },
+                                        helpText: "",
+                                        attributes: {
+                                            labelIcon: "fa-solid fa-plus",
+                                        },
+                                        provideEnterButton: false,
+                                        show: true,
+                                        jointJsConfig: {
+                                            isProperty: false,
+                                            hasProvidedMethod: false,
+                                            modelPath: "",
+                                            defaultPropPath: "",
+                                            minPath: "",
+                                            min: ""
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
                     }
                 }
             },
@@ -1089,7 +1142,6 @@ const EntityDetailsConfig: {
                     minPath: "",
                     min: ""
                 }
-
             },
             {
                 providedFeature: "backingData-familyConfig",
@@ -1121,7 +1173,7 @@ const EntityDetailsConfig: {
                 buttonActionContent: {
                     // contentType: PropertyContentType // TODO modalDialog,
                     dialogSize: DialogSize.LARGE,
-                    dialogContent: {
+                    dialogMetaData: {
                         header: {
                             svgRepresentation: `<svg width="30" height="20">${backingDataSvgRepresentation()}</svg>`,
                             text: "Backing Data Family: ",
@@ -1131,40 +1183,64 @@ const EntityDetailsConfig: {
                             cancelButtonText: "Cancel",
                             saveButtonIconClass: "fa-regular fa-floppy-disk",
                             saveButtonText: "Save"
-                        },
-                        content: {
-                            contentType: UIContentType.GROUP_FORMS,
-                            groups: [
-                                {
+                        }
+                    },
+                    dialogContent: {
+                        contentType: UIContentType.GROUP_FORMS,
+                        groups: [
+                            {
+                                contentGroupMetaData: {
                                     id: "backingData-familyConfig-table",
-                                    contentType: PropertyContentType.TABLE,
                                     headline: "Included Data",
                                     text: `The following table shows all existing Backing Data entities within this System. You can select which ones of the following Backing Data entities you want to include in this
                                     family. Note that if you select a Backing Data and save your changes, the labels of the selected Backing Data entities might change since they have to be equal to the family name.
                                     Additionally, if you deselect entities that have previously been part of this family, their label will be reset to "Backing Data". However, your changes won't be adopted until you 
                                     clicked "Save". In case you cancel and change your entity selection, all your changes will be lost. While you keep the selection of this Backing Data entity, your changes will be remembered.`,
-                                    tableColumnHeaders: [
-                                        {
-                                            text: "Name"
+                                },
+                                contentItems: [
+                                    {
+                                        providedFeature: "backingData-includedDataTable",
+                                        contentType: PropertyContentType.TABLE,
+                                        label: "",
+                                        helpText: "",
+                                        inputProperties: {
+                                            disabled: false,
+                                            readonly: false,
+                                            required: false,
+                                            checked: false,
+                                            selected: false,
                                         },
-                                        {
-                                            text: "Family Name"
+                                        provideEnterButton: false,
+                                        show: true,
+                                        jointJsConfig: {
+                                            isProperty: false,
+                                            hasProvidedMethod: false,
+                                            modelPath: "",
+                                            defaultPropPath: "",
+                                            minPath: "",
+                                            min: ""
                                         },
-                                        {
-                                            text: "Parent"
-                                        },
-                                        {
-                                            text: "Include"
-                                        }
-                                    ],
-                                    tableRows: []
-                                }
-                            ]
-                        }
+                                        tableColumnHeaders: [
+                                            {
+                                                text: "Name"
+                                            },
+                                            {
+                                                text: "Family Name"
+                                            },
+                                            {
+                                                text: "Parent"
+                                            },
+                                            {
+                                                text: "Include"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
                     }
                 }
             }
-
         ]
     }
 };

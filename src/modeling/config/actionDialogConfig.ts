@@ -3,52 +3,21 @@ import { PropertyConfig } from "./detailsSidebarConfig"
 
 export type DialogConfig = {
     dialogSize: string,
-    dialogContent: {
-        header: {
-            svgRepresentation: string,
-            text: string,
-            closeButton: boolean
-        },
-        footer: {
-            cancelButtonText: string,
-            saveButtonIconClass: string,
-            saveButtonText: string
-        },
-        content: FormContentConfig | InfoContentConfig
+    dialogMetaData: DialogMetaData,
+    dialogContent: InfoContentConfig | FormContentConfig
+}
+
+export type DialogMetaData = {
+    header: {
+        svgRepresentation: string,
+        text: string,
+        closeButton: boolean
     }
-}
-
-export type FormContentConfig = {
-    contentType: "groupForms",
-    groups: (TablePropertyConfig | FormGroupPropertyConfig)[]
-}
-
-export type TablePropertyConfig = {
-    id: string,
-    contentType: "table",
-    headline: string,
-    text: string,
-    tableColumnHeaders: TableColumnHeaderConfig[],
-    tableRows: TableRowConfig[]
-}
-
-export type TableRowConfig = {
-    attributes: { isTheCurrentEntity: boolean, representationClass: string, disabled: boolean },
-    columns: {
-        [key: string]: string | TableRowContentConfig
+    footer: {
+        cancelButtonText: string,
+        saveButtonIconClass: string,
+        saveButtonText: string
     }
-}
-
-export type TableRowContentConfig = {
-    contentType: "checkbox-without-label",
-    disabled: boolean,
-    checked: boolean,
-    id: dia.Cell.ID
-}
-
-
-export type TableColumnHeaderConfig = {
-    text: string
 }
 
 export type InfoContentConfig = {
@@ -56,11 +25,20 @@ export type InfoContentConfig = {
     text: string
 }
 
-export type FormGroupPropertyConfig = {
-    id: string,
-    contentType: "formgroup",
-    headline: string,
+export type FormContentConfig = {
+    contentType: "groupForms", //TODO rename
+    groups: FormContentGroupConfig[]
+}
+
+export type FormContentGroupConfig = {
+    contentGroupMetaData : ContentGroupMetaData
     contentItems: PropertyConfig[]
+}
+
+export type ContentGroupMetaData = {
+    id: string,
+    headline: string,
+    text: string
 }
 
 const UIContentType = Object.freeze({
