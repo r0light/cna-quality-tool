@@ -2,6 +2,7 @@ import EntityTypes from "./entityTypes";
 import { getComponentProperties, getBackingServiceProperties, getStorageBackingServiceProperties, getEndpointProperties, getInfrastructureProperties } from "../entities";
 import { UIContentType } from "./toolbarConfiguration";
 import { DialogConfig, DialogSize } from "./actionDialogConfig";
+import { platform } from "os";
 
 export type DatalistItem = {
     value: string,
@@ -35,13 +36,6 @@ export type BasicPropertyConfig = {
     show: boolean,
     provideEnterButton: boolean,
     jointJsConfig: JointJsConfig
-}
-
-export type ButtonPropertyConfig = BasicPropertyConfig & {
-    contentType: "button",
-    attributes: {
-        labelIcon: string
-    }
 }
 
 export type TextPropertyConfig = BasicPropertyConfig & {
@@ -162,8 +156,26 @@ export type TogglePropertyConfig = BasicPropertyConfig & {
     }
 }
 
+export type DynamicListPropertyConfig = BasicPropertyConfig & {
+    contentType: "dynamic-list",
+    listElementFields: ListElementField[],
+    addElementButton: {
+        label: string,
+        labelIcon: string
+    }
 
-export type PropertyConfig = ButtonPropertyConfig | TextPropertyConfig | TextAreaPropertyConfig | TextLabelPrependPropertyConfig | NumberPropertyConfig | NumberRangePropertyConfig | CheckboxPropertyConfig | CheckboxWithoutLabelPropertyConfig | DropdownPropertyConfig | ListPropertyConfig | TableDialogPropertyConfig | TogglePropertyConfig | TablePropertyConfig;
+}
+
+export type ListElementField = {
+    key: string,
+    label: string,
+    helpText: string,
+    labelIcon: string,
+    placeholder: string
+}
+
+
+export type PropertyConfig = TextPropertyConfig | TextAreaPropertyConfig | TextLabelPrependPropertyConfig | NumberPropertyConfig | NumberRangePropertyConfig | CheckboxPropertyConfig | CheckboxWithoutLabelPropertyConfig | DropdownPropertyConfig | ListPropertyConfig | TableDialogPropertyConfig | TogglePropertyConfig | TablePropertyConfig | DynamicListPropertyConfig;
 
 function parseProperties(properties): PropertyConfig[] {
     return properties.map(property => {
@@ -243,7 +255,7 @@ function parseProperties(properties): PropertyConfig[] {
     })
 }
 
-export type PropertyContentType = "button" | "checkbox" | "checkbox-without-label" | "text" | "text-label-prepend" | "number" | "range" | "textarea" | "select" | "list" | "table-dialog" | "table" | "toggle" | "formgroup";
+export type PropertyContentType = "checkbox" | "checkbox-without-label" | "text" | "text-label-prepend" | "number" | "range" | "textarea" | "select" | "list" | "table-dialog" | "table" | "toggle" | "formgroup" | "dynamic-list";
 
 const PropertyContentType = Object.freeze({
     BUTTON: "button",
@@ -259,7 +271,8 @@ const PropertyContentType = Object.freeze({
     TABLE_DIALOG: "table-dialog",
     TABLE: "table",
     TOGGLE: "toggle",
-    FORMGROUP: "formgroup"
+    FORMGROUP: "formgroup",
+    DYNAMIC_LIST: "dynamic-list"
 });
 
 const ParentRelation = Object.freeze({
@@ -987,7 +1000,7 @@ const EntityDetailsConfig: {
                                 contentItems: [
                                     {
                                         providedFeature: "backingData-includedDataTable",
-                                        contentType: PropertyContentType.TABLE,
+                                        contentType: PropertyContentType.DYNAMIC_LIST,
                                         label: "",
                                         helpText: "",
                                         inputProperties: {
@@ -1007,110 +1020,29 @@ const EntityDetailsConfig: {
                                             minPath: "",
                                             min: ""
                                         },
-                                        tableColumnHeaders: [
-                                            {
-                                                text: "Key"
+                                        listElementFields: [
+                                            {   
+                                                key: "key",
+                                                label: "Key",
+                                                helpText: "The key that identifies the following value item.",
+                                                labelIcon: "fa-solid fa-key",
+                                                placeholder: "e.g. My_SQL_Password"
                                             },
                                             {
-                                                text: "Value"
+                                                key: "value",
+                                                label: "Value",
+                                                helpText: "The value of this data item.",
+                                                labelIcon: "bi bi-chat-square-text-fill",
+                                                placeholder: "e.g. mysqlpw"
                                             }
-                                        ]
+                                        ],
+                                        addElementButton: {
+                                            label: "Submit",
+                                            labelIcon: "fa-solid fa-plus"
+                                        }
                                     }
                                 ]
                             },
-                            {
-                                contentGroupMetaData: {
-                                    id: "backingData-includedData-form",
-                                    headline: "Add New Data Item",
-                                    text: ""
-                                },
-                                contentItems: [
-                                    {
-                                        providedFeature: "includedData-key",
-                                        contentType: PropertyContentType.INPUT_TEXTBOX_LABEL_PREPEND,
-                                        label: "Key",
-                                        inputProperties: {
-                                            disabled: false,
-                                            required: true,
-                                            checked: false,
-                                            selected: false,
-                                            readonly: false
-                                        },
-                                        helpText: "The key that identifies the following value item.",
-                                        attributes: {
-                                            labelIcon: "fa-solid fa-key",
-                                            placeholder: "e.g. My_SQL_Password",
-                                            provideEditButton: false,
-                                            provideEnterButton: false
-                                        },
-                                        provideEnterButton: false,
-                                        show: true,
-                                        jointJsConfig: {
-                                            isProperty: false,
-                                            hasProvidedMethod: false,
-                                            modelPath: "",
-                                            defaultPropPath: "",
-                                            minPath: "",
-                                            min: ""
-                                        }
-                                    },
-                                    {
-                                        providedFeature: "includedData-value",
-                                        contentType: PropertyContentType.INPUT_TEXTBOX_LABEL_PREPEND,
-                                        label: "Value",
-                                        inputProperties: {
-                                            disabled: false,
-                                            required: true,
-                                            checked: false,
-                                            selected: false,
-                                            readonly: false
-                                        },
-                                        helpText: "The value of this data item.",
-                                        attributes: {
-                                            labelIcon: "bi bi-chat-square-text-fill",
-                                            placeholder: "e.g. mysqlpw",
-                                            provideEditButton: false,
-                                            provideEnterButton: false
-                                        },
-                                        provideEnterButton: false,
-                                        show: true,
-                                        jointJsConfig: {
-                                            isProperty: false,
-                                            hasProvidedMethod: false,
-                                            modelPath: "",
-                                            defaultPropPath: "",
-                                            minPath: "",
-                                            min: ""
-                                        }
-                                    },
-                                    {
-                                        providedFeature: "includedData-submit",
-                                        contentType: PropertyContentType.BUTTON,
-                                        label: "Submit",
-                                        inputProperties: {
-                                            disabled: false,
-                                            required: true,
-                                            checked: false,
-                                            selected: false,
-                                            readonly: false
-                                        },
-                                        helpText: "",
-                                        attributes: {
-                                            labelIcon: "fa-solid fa-plus",
-                                        },
-                                        provideEnterButton: false,
-                                        show: true,
-                                        jointJsConfig: {
-                                            isProperty: false,
-                                            hasProvidedMethod: false,
-                                            modelPath: "",
-                                            defaultPropPath: "",
-                                            minPath: "",
-                                            min: ""
-                                        }
-                                    }
-                                ]
-                            }
                         ]
                     }
                 }

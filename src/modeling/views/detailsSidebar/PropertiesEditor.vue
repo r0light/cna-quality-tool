@@ -131,10 +131,45 @@
                         </tbody>
                     </table>
                 </div>
-                <button v-if="option.contentType === PropertyContentType.BUTTON" type="button" :id="option.providedFeature" class="btn btn-outline-dark" @click="onEnterProperty(option)">
-                    <i :class="option.attributes.labelIcon"></i>
-                    {{ option.label }}
-                </button>
+                <div v-if="option.contentType === PropertyContentType.DYNAMIC_LIST" class="dynamic-list-wrapper">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th v-for="elementField of option.listElementFields">
+                                        {{ elementField.label }}
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="row of option.value" class="tableRow">
+                                    <td v-for="[columnKey, columnValue] of Object.entries(row)"
+                                        :data-table-context="columnKey">
+                                        <span v-if="typeof columnValue === 'string'"> {{ columnValue }}</span>
+                                    </td>
+                                    <!-- TODO delete button-->
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <h5>Add new Item</h5>
+                    <div v-for="elementField of option.listElementFields">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">
+                                    <i :class="elementField.labelIcon"></i>
+                                    <span class="modalInputLabel">{{ elementField.label }}</span>
+                                </span>
+                            </div>
+                            <input :id="elementField.key" class="form-control" type="text"
+                                :placeholder="elementField.placeholder" v-model="option.newElementData[elementField.key]">
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-outline-dark" @click="onAddToDynamicList(option)">
+                        <i :class="option.addElementButton.labelIcon"></i>
+                        {{ option.addElementButton.label }}
+                    </button>
+                </div>
 
                 <!-- TODO in leftLabel ${isChecked ? 'text-muted' : ''}"-->
                 <!--TODO edit button? -->
@@ -161,7 +196,7 @@
 <script lang="ts">
 import type { ComputedRef, } from 'vue';
 import type { dia } from 'jointjs';
-import { PropertyContentType, CheckboxPropertyConfig, DropdownOptionConfig, DropdownPropertyConfig, InputProperties, JointJsConfig, ListPropertyConfig, NumberPropertyConfig, NumberRangePropertyConfig, PropertyConfig, TextAreaPropertyConfig, TextPropertyConfig, TogglePropertyConfig, TableDialogPropertyConfig, TablePropertyConfig, TextLabelPrependPropertyConfig, ButtonPropertyConfig } from '../../config/detailsSidebarConfig';
+import { PropertyContentType, CheckboxPropertyConfig, DropdownOptionConfig, DropdownPropertyConfig, InputProperties, JointJsConfig, ListPropertyConfig, NumberPropertyConfig, NumberRangePropertyConfig, PropertyConfig, TextAreaPropertyConfig, TextPropertyConfig, TogglePropertyConfig, TableDialogPropertyConfig, TablePropertyConfig, TextLabelPrependPropertyConfig, DynamicListPropertyConfig, ListElementField } from '../../config/detailsSidebarConfig';
 import { DialogConfig, FormContentConfig } from '@/modeling/config/actionDialogConfig';
 
 export type EditPropertySection = {
@@ -179,12 +214,15 @@ export type EditPropertySection = {
     validationState: string,
     attributes: any, //TODO better solution?
     dropdownOptions?: any[]
-    value: string | number,
+    value: string | number | any[],
     checked?: boolean,
     buttonActionContent?: ModalEditDialogData,
     showDialog?: boolean,
     tableColumnHeaders?: { text: string }[],
     tableRows?: TableRowConfig[]
+    listElementFields?: ListElementField[],
+    addElementButton?: { label: string, labelIcon: string },
+    newElementData?: object
 }
 
 export type TableRowConfig = {
@@ -327,11 +365,20 @@ export function toPropertySections(propertyConfigs: PropertyConfig[]): EditPrope
                     }
                 })
                 break;
-            case (PropertyContentType.BUTTON):
-                let buttonOption = option as ButtonPropertyConfig;
+            case (PropertyContentType.DYNAMIC_LIST):
+                let dynamicListOption = option as DynamicListPropertyConfig;
                 options.push({
                     ...preparedProperty, ...{
-                        attributes: buttonOption.attributes
+                        addElementButton: dynamicListOption.addElementButton,
+                        listElementFields: dynamicListOption.listElementFields,
+                        newElementData: (() => {
+                            let dataHolder = {};
+                            for (const elementField of dynamicListOption.listElementFields) {
+                                dataHolder[elementField.key] = ""
+                            }
+                            return dataHolder;
+                        })(),
+                        value: []
                     }
                 })
                 break;
@@ -364,4 +411,31 @@ function onOpenDialog(propertyOption: EditPropertySection) {
 }
 
 
+function onAddToDynamicList(propertyOption: EditPropertySection) {
+    // TODO validation?
+    let newElement = {};
+    for (const [key, value] of Object.entries(propertyOption.newElementData)) {
+        newElement[key] = value;
+    }
+    (propertyOption.value as any[]).push(newElement);
+    for (const key of Object.keys(propertyOption.newElementData)) {
+        propertyOption.newElementData[key] = "";
+    }
+}
+
 </script>
+
+<style>
+.dynamic-list-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    row-gap: 1em;
+    width: 100%;
+}
+
+.dynamic-list-wrapper button {
+    width: fit-content;
+}
+
+</style>

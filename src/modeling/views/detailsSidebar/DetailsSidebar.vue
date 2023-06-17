@@ -45,7 +45,9 @@
                                 Properties included here will not change any presentation details but provide additional
                                 information, which is especially relevant for a TOSCA transformation.
                             </p>
-                            <PropertiesEditor :groupId="propertyGroup.groupId" :cardBodyId="propertyGroup.cardBodyId" :propertyOptions="propertyGroup.options" @on:EnterProperty="onEnterProperty"></PropertiesEditor>
+                            <PropertiesEditor :groupId="propertyGroup.groupId" :cardBodyId="propertyGroup.cardBodyId"
+                                :propertyOptions="propertyGroup.options" @on:EnterProperty="onEnterProperty">
+                            </PropertiesEditor>
                         </div>
                     </div>
                 </div>
@@ -66,6 +68,7 @@ import PropertiesEditor from './PropertiesEditor.vue';
 import type { EditPropertySection } from './PropertiesEditor.vue';
 import { toPropertySections } from './PropertiesEditor.vue';
 import { FormContentData } from '../components/ModalEditDialog.vue';
+import { prop } from 'vue-class-component';
 
 const props = defineProps<{
     graph: dia.Graph;
@@ -90,6 +93,16 @@ type PropertyGroupSection = {
 
 const selectedEntityId = ref<string>("")
 const selectedEntityPropertyGroups = ref<PropertyGroupSection[]>([]);
+
+function findInSectionsByFeature(sections: PropertyGroupSection[], feature: string): EditPropertySection {
+    for (const section of sections) {
+        let option: EditPropertySection = section.options.find(option => option.providedFeature === feature);
+        if (option) {
+            return option;
+        }
+    }
+    return null;
+}
 
 const entityHighlighting = ref((() => {
     let highlightOptions = []
@@ -231,16 +244,16 @@ onUpdated(() => {
 
     switch (props.selectedEntity.model.prop("entity/type")) {
         case EntityTypes.DATA_AGGREGATE:
-            let parentRelationOption: EditPropertySection = selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "dataAggregate-parentRelation");
-            parentRelationOption.show = computed(() => selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "embedded").value !== "" && selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "dataAggregate-chooseEditMode").checked);
+            let parentRelationOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "dataAggregate-parentRelation");
+            parentRelationOption.show = computed(() => findInSectionsByFeature(selectedEntityPropertyGroups.value, "embedded").value !== "" && findInSectionsByFeature(selectedEntityPropertyGroups.value, "dataAggregate-chooseEditMode").checked);
             parentRelationOption.label = getParentRelationLabel(props.selectedEntity.model.prop("entity/embedded"));
-            let chooseEditModeOption: EditPropertySection = selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "dataAggregate-chooseEditMode");
-            chooseEditModeOption.show = computed(() => selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "embedded").value !== "");
-            let familyConfigOption: EditPropertySection = selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "dataAggregate-familyConfig");
+            let chooseEditModeOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "dataAggregate-chooseEditMode");
+            chooseEditModeOption.show = computed(() => findInSectionsByFeature(selectedEntityPropertyGroups.value, "embedded").value !== "");
+            let familyConfigOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "dataAggregate-familyConfig");
             familyConfigOption.includeFormCheck = false;
             familyConfigOption.show = computed(() => {
-                if (selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "embedded").value !== "") {
-                    return !selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "dataAggregate-chooseEditMode").checked
+                if (findInSectionsByFeature(selectedEntityPropertyGroups.value, "embedded").value !== "") {
+                    return !findInSectionsByFeature(selectedEntityPropertyGroups.value, "dataAggregate-chooseEditMode").checked
                 } else {
                     return true;
                 }
@@ -288,16 +301,20 @@ onUpdated(() => {
             let chooseBDEditModeOption: EditPropertySection = selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "backingData-chooseEditMode");
             chooseBDEditModeOption.show = computed(() => selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "embedded").value !== "");
 
+            //TODO included data always visible?
             let includedDataOption: EditPropertySection = selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "backingData-includedData");
+            includedDataOption.includeFormCheck = false;
             includedDataOption.show = computed(() => {
                 if (selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "embedded").value !== "") {
-                    return !selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "backingData-chooseEditMode").checked
+                    return selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "backingData-chooseEditMode").checked
                 } else {
                     return true;
                 }
             });
 
             //TODO prepare includedDataOption
+            includedDataOption.value = props.selectedEntity.model.prop("entity/properties/includedData");
+            (includedDataOption.buttonActionContent.dialogContent as FormContentData).groups[0].contentItems.find(element => element.providedFeature === "backingData-includedDataTable").value = props.selectedEntity.model.prop("entity/properties/includedData");
 
 
             let bDfamilyConfigOption: EditPropertySection = selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "backingData-familyConfig");
@@ -449,7 +466,19 @@ function onEnterProperty(propertyOption: EditPropertySection) {
                 break;
         }
     } else if (propertyOption.jointJsConfig.isProperty) {
-        selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, propertyOption.value);
+
+        //special cases 
+        if (selectedEntityElement.prop("entity/type") === EntityTypes.BACKING_DATA &&  propertyOption.providedFeature === "backingData-includedData") {
+
+            selectedEntityElement.prop((propertyOption.jointJsConfig.modelPath, propertyOption.buttonActionContent.dialogContent as FormContentData).groups[0].contentItems[0].value as any[]);
+
+
+        } else {
+            selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, propertyOption.value);
+        }
+
+
+
     } else {
         // handle special cases
         switch (selectedEntityElement.prop("entity/type")) {

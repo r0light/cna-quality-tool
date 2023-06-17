@@ -85,6 +85,19 @@ export function toDialogData(dialogConfig: DialogConfig): ModalEditDialogData {
         }
     }
 }
+
+export function findInDialogByFeature(dialogData: ModalEditDialogData, feature: string): EditPropertySection {
+    if (dialogData.dialogContent.contentType === UIContentType.GROUP_FORMS) {
+        for (const group of dialogData.dialogContent.groups) {
+            for (const option of group.contentItems) {
+                if (option.providedFeature === feature) {
+                    return option;
+                }
+            }
+        }
+    }
+    return null;
+}
 </script>
 
 <script lang="ts" setup>
