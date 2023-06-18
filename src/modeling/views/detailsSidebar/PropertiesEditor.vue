@@ -18,7 +18,7 @@
                     class="form-control" type="text" :class="option.validationState"
                     :disabled="option.inputProperties.disabled" :required="option.inputProperties.required"
                     :rows="option.attributes.rows" :maxlength="option.attributes.maxLength" v-model="option.value"
-                    :aria-describedby="option.helpTextId" :title="option.attributes.title" :data-property-type="groupId"
+                    :aria-describedby="option.helpTextId" :data-property-type="groupId"
                     v-on:keydown.enter.prevent="onEnterProperties([option])"></textarea>
                 <input v-if="option.contentType === PropertyContentType.INPUT_RANGE"
                     class="col px-md-2 form-control-range form-check" :id="option.providedFeature"
@@ -32,19 +32,12 @@
                     :disabled="option.inputProperties.disabled" :required="option.inputProperties.required"
                     :min="option.attributes.min" :max="option.attributes.max" :step="option.attributes.step"
                     :maxlength="option.attributes.maxlength" v-model="option.value" :aria-describedby="option.helpTextId"
-                    :title="option.attributes.title" :data-property-type="groupId"
+                    :data-property-type="groupId"
                     v-on:keydown.enter.prevent="onEnterProperties([option])">
-                <input v-if="option.contentType === PropertyContentType.INPUT_TEXTBOX" :id="option.providedFeature"
-                    class="form-control" type="text" :class="option.validationState"
-                    :disabled="option.inputProperties.disabled" :required="option.inputProperties.required"
-                    :placeholder="option.attributes.placeholder" :maxlength="option.attributes.maxlength"
-                    v-model="option.value" :pattern="option.attributes.pattern" :aria-describedby="option.helpTextId"
-                    :title="option.attributes.title" :data-property-type="groupId"
-                    v-on:keydown.enter.prevent="onEnterProperties([option])">
-                <div v-if="option.contentType === PropertyContentType.INPUT_TEXTBOX_LABEL_PREPEND" class="input-group">
-                    <div class="input-group-prepend">
+                <div v-if="option.contentType === PropertyContentType.INPUT_TEXTBOX" class="input-group">
+                    <div v-if="option.attributes.inputLabelIcon" class="input-group-prepend">
                         <span class="input-group-text">
-                            <i :class="option.attributes.labelIcon"></i>
+                            <i :class="option.attributes.inputLabelIcon"></i>
                             <span class="modalInputLabel">{{ option.label }}</span>
                         </span>
                     </div>
@@ -58,7 +51,7 @@
                     class="form-check-input" type="checkbox" :class="option.validationState"
                     :disabled="option.inputProperties.disabled" :required="option.inputProperties.required"
                     :checked="option.inputProperties.checked" :aria-describedby="option.helpTextId"
-                    :title="option.attributes.title" :data-property-type="groupId">
+                    :data-property-type="groupId">
                 <select v-if="option.contentType === PropertyContentType.DROPDOWN" class="custom-select"
                     :id="option.providedFeature" :class="option.validationState" :disabled="option.inputProperties.disabled"
                     :required="option.inputProperties.required" :size="option.attributes.size"
@@ -201,7 +194,7 @@
 <script lang="ts">
 import type { ComputedRef, } from 'vue';
 import type { dia } from 'jointjs';
-import { PropertyContentType, CheckboxPropertyConfig, DropdownPropertyConfig, InputProperties, JointJsConfig, ListPropertyConfig, NumberPropertyConfig, NumberRangePropertyConfig, PropertyConfig, TextAreaPropertyConfig, TextPropertyConfig, TogglePropertyConfig, TableDialogPropertyConfig, TablePropertyConfig, TextLabelPrependPropertyConfig, DynamicListPropertyConfig, ListElementField } from '../../config/detailsSidebarConfig';
+import { PropertyContentType, CheckboxPropertyConfig, DropdownPropertyConfig, InputProperties, JointJsConfig, ListPropertyConfig, NumberPropertyConfig, NumberRangePropertyConfig, PropertyConfig, TextAreaPropertyConfig, TextPropertyConfig, TogglePropertyConfig, TableDialogPropertyConfig, TablePropertyConfig, DynamicListPropertyConfig, ListElementField } from '../../config/detailsSidebarConfig';
 
 export type EditPropertySection = {
     providedFeature: string,
@@ -279,15 +272,6 @@ export function toPropertySections(propertyConfigs: PropertyConfig[]): EditPrope
                 options.push({
                     ...preparedProperty, ...{
                         attributes: textBoxOption.attributes,
-                        value: ""
-                    }
-                } as EditPropertySection)
-                break;
-            case (PropertyContentType.INPUT_TEXTBOX_LABEL_PREPEND):
-                let textPrependedLabelOption = option as TextLabelPrependPropertyConfig;
-                options.push({
-                    ...preparedProperty, ...{
-                        attributes: textPrependedLabelOption.attributes,
                         value: ""
                     }
                 } as EditPropertySection)

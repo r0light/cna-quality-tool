@@ -2,7 +2,6 @@ import EntityTypes from "./entityTypes";
 import { getComponentProperties, getBackingServiceProperties, getStorageBackingServiceProperties, getEndpointProperties, getInfrastructureProperties } from "../entities";
 import { UIContentType } from "./toolbarConfiguration";
 import { DialogConfig, DialogSize } from "./actionDialogConfig";
-import { platform } from "os";
 
 export type DatalistItem = {
     value: string,
@@ -43,7 +42,9 @@ export type TextPropertyConfig = BasicPropertyConfig & {
     attributes: {
         placeholder: string,
         defaultValue: string,
-        svgRepresentation: string
+        svgRepresentation: string,
+        inputLabelIcon: string,
+        provideEditButton: boolean,
     }
 }
 
@@ -54,16 +55,6 @@ export type TextAreaPropertyConfig = BasicPropertyConfig & {
         maxLength: number,
         placeholder: string,
         defaultValue: string,
-        provideEnterButton: boolean
-    }
-}
-
-export type TextLabelPrependPropertyConfig = BasicPropertyConfig & {
-    contentType: "text-label-prepend",
-    attributes: {
-        labelIcon: string,
-        placeholder: string,
-        provideEditButton: boolean,
         provideEnterButton: boolean
     }
 }
@@ -175,7 +166,7 @@ export type ListElementField = {
 }
 
 
-export type PropertyConfig = TextPropertyConfig | TextAreaPropertyConfig | TextLabelPrependPropertyConfig | NumberPropertyConfig | NumberRangePropertyConfig | CheckboxPropertyConfig | CheckboxWithoutLabelPropertyConfig | DropdownPropertyConfig | ListPropertyConfig | TableDialogPropertyConfig | TogglePropertyConfig | TablePropertyConfig | DynamicListPropertyConfig;
+export type PropertyConfig = TextPropertyConfig | TextAreaPropertyConfig | NumberPropertyConfig | NumberRangePropertyConfig | CheckboxPropertyConfig | CheckboxWithoutLabelPropertyConfig | DropdownPropertyConfig | ListPropertyConfig | TableDialogPropertyConfig | TogglePropertyConfig | TablePropertyConfig | DynamicListPropertyConfig;
 
 function parseProperties(properties): PropertyConfig[] {
     return properties.map(property => {
@@ -246,7 +237,9 @@ function parseProperties(properties): PropertyConfig[] {
                         attributes: {
                             placeholder: property.getExample,
                             defaultValue: "",
-                            svgRepresentation: ""
+                            svgRepresentation: "",
+                            inputLabelIcon: "",
+                            provideEditButton: false,
                         }
                     }
                 }
@@ -255,13 +248,11 @@ function parseProperties(properties): PropertyConfig[] {
     })
 }
 
-export type PropertyContentType = "checkbox" | "checkbox-without-label" | "text" | "text-label-prepend" | "number" | "range" | "textarea" | "select" | "list" | "table-dialog" | "table" | "toggle" | "formgroup" | "dynamic-list";
+export type PropertyContentType = "checkbox" | "checkbox-without-label" | "text" | "number" | "range" | "textarea" | "select" | "list" | "table-dialog" | "table" | "toggle" | "formgroup" | "dynamic-list";
 
 const PropertyContentType = Object.freeze({
-    BUTTON: "button",
     INPUT_TEXTBOX: "text",
     TEXTAREA: "textarea",
-    INPUT_TEXTBOX_LABEL_PREPEND: "text-label-prepend",
     INPUT_NUMBERBOX: "number",
     INPUT_RANGE: "range",
     CHECKBOX: "checkbox",
@@ -495,7 +486,9 @@ const DetailsSidebarConfig: {
                     attributes: {
                         placeholder: "",
                         defaultValue: "",
-                        svgRepresentation: ""
+                        svgRepresentation: "",
+                        inputLabelIcon: "",
+                        provideEditButton: false,
                     },
                     helpText: "The value will be calculated based on the given width to preserve the aspect ratio of the entity shape",
                     show: false,
@@ -637,7 +630,9 @@ const EntityDetailsConfig: {
                 attributes: {
                     placeholder: "e.g. subscribes to",
                     defaultValue: "",
-                    svgRepresentation: ""
+                    svgRepresentation: "",
+                    inputLabelIcon: "",
+                    provideEditButton: false,
                 },
                 helpText: "Type of relation",
                 show: true,
@@ -706,7 +701,9 @@ const EntityDetailsConfig: {
             attributes: {
                 placeholder: "",
                 defaultValue: "",
-                svgRepresentation: ""
+                svgRepresentation: "",
+                inputLabelIcon: "",
+                provideEditButton: false,
             },
             provideEnterButton: false,
             show: false,
@@ -774,7 +771,9 @@ const EntityDetailsConfig: {
             attributes: {
                 placeholder: "No family assigned",
                 defaultValue: "",
-                svgRepresentation: '<svg width="30" height="20"><ellipse cx="13" cy="9" rx="12" ry="6" stroke="black" fill="white" opacity="1"/></svg>'
+                svgRepresentation: '<svg width="30" height="20"><ellipse cx="13" cy="9" rx="12" ry="6" stroke="black" fill="white" opacity="1"/></svg>',
+                inputLabelIcon: "",
+                provideEditButton: false,
             },
             provideEnterButton: false,
             show: true,
@@ -931,7 +930,9 @@ const EntityDetailsConfig: {
                 attributes: {
                     placeholder: "",
                     defaultValue: "",
-                    svgRepresentation: ""
+                    svgRepresentation: "",
+                    inputLabelIcon: "",
+                    provideEditButton: false,
                 },
                 provideEnterButton: false,
                 show: false,
@@ -1062,7 +1063,9 @@ const EntityDetailsConfig: {
                 attributes: {
                     placeholder: "No family assigned",
                     defaultValue: "",
-                    svgRepresentation: `<span><svg width="30" height="20">${backingDataSvgRepresentation()}</svg></span>`
+                    svgRepresentation: `<span><svg width="30" height="20">${backingDataSvgRepresentation()}</svg></span>`,
+                    inputLabelIcon: "",
+                    provideEditButton: false,
                 },
                 provideEnterButton: false,
                 show: true,
