@@ -19,28 +19,28 @@
                     :disabled="option.inputProperties.disabled" :required="option.inputProperties.required"
                     :rows="option.attributes.rows" :maxlength="option.attributes.maxLength" v-model="option.value"
                     :aria-describedby="option.helpTextId" :title="option.attributes.title" :data-property-type="groupId"
-                    v-on:keydown.enter.prevent="onEnterProperty(option)"></textarea>
+                    v-on:keydown.enter.prevent="onEnterProperties([option])"></textarea>
                 <input v-if="option.contentType === PropertyContentType.INPUT_RANGE"
                     class="col px-md-2 form-control-range form-check" :id="option.providedFeature"
                     :class="option.validationState" :disabled="option.inputProperties.disabled"
                     :required="option.inputProperties.required" type="range" :min="option.attributes.min"
                     :max="option.attributes.max" v-model="option.value" :step="option.attributes.step"
                     :aria-describedby="option.helpTextId" :data-property-type="groupId"
-                    v-on:keydown.enter.prevent="onEnterProperty(option)">
+                    v-on:keydown.enter.prevent="onEnterProperties([option])">
                 <input v-if="option.contentType === PropertyContentType.INPUT_NUMBERBOX" :id="option.providedFeature"
                     class="form-control" type="number" :class="option.validationState"
                     :disabled="option.inputProperties.disabled" :required="option.inputProperties.required"
                     :min="option.attributes.min" :max="option.attributes.max" :step="option.attributes.step"
                     :maxlength="option.attributes.maxlength" v-model="option.value" :aria-describedby="option.helpTextId"
                     :title="option.attributes.title" :data-property-type="groupId"
-                    v-on:keydown.enter.prevent="onEnterProperty(option)">
+                    v-on:keydown.enter.prevent="onEnterProperties([option])">
                 <input v-if="option.contentType === PropertyContentType.INPUT_TEXTBOX" :id="option.providedFeature"
                     class="form-control" type="text" :class="option.validationState"
                     :disabled="option.inputProperties.disabled" :required="option.inputProperties.required"
                     :placeholder="option.attributes.placeholder" :maxlength="option.attributes.maxlength"
                     v-model="option.value" :pattern="option.attributes.pattern" :aria-describedby="option.helpTextId"
                     :title="option.attributes.title" :data-property-type="groupId"
-                    v-on:keydown.enter.prevent="onEnterProperty(option)">
+                    v-on:keydown.enter.prevent="onEnterProperties([option])">
                 <div v-if="option.contentType === PropertyContentType.INPUT_TEXTBOX_LABEL_PREPEND" class="input-group">
                     <div class="input-group-prepend">
                         <span class="input-group-text">
@@ -52,7 +52,7 @@
                         :disabled="option.inputProperties.disabled" :required="option.inputProperties.required"
                         :placeholder="option.attributes.placeholder" v-model="option.value"
                         :aria-describedby="option.helpTextId" :data-property-type="groupId"
-                        v-on:keydown.enter.prevent="onEnterProperty(option)">
+                        v-on:keydown.enter.prevent="onEnterProperties([option])">
                 </div>
                 <input v-if="option.contentType === PropertyContentType.CHECKBOX" :id="option.providedFeature"
                     class="form-check-input" type="checkbox" :class="option.validationState"
@@ -63,7 +63,7 @@
                     :id="option.providedFeature" :class="option.validationState" :disabled="option.inputProperties.disabled"
                     :required="option.inputProperties.required" :size="option.attributes.size"
                     :multiple="option.attributes.multiple" :data-property-type="groupId" v-model="option.value"
-                    @change="onEnterProperty(option)">
+                    @change="onEnterProperties([option])">
                     <option v-for="selectOption of option.dropdownOptions" :value="selectOption.optionValue"
                         :key="selectOption.optionValue" :placeholder="option.attributes.placeholder"
                         :title="selectOption.optionTitle" :selected="selectOption.selected">
@@ -99,7 +99,7 @@
                         <ModalEditDialog :context="'entity'" :isStatic="false" :titleId="option.providedFeature"
                             :header-data-type="'normal'" :dialog-config="option.buttonActionContent"
                             :show="option.showDialog" @close:Modal="option.showDialog = false"
-                            @save:Modal="onEnterProperty(option)">
+                            @save:Modal="onEnterProperties((option.buttonActionContent.dialogContent as FormContentData).groups.map(group => {return group.contentItems}).flat(1))">
                         </ModalEditDialog>
                     </Teleport>
                 </div>
@@ -139,15 +139,20 @@
                                     <th v-for="elementField of option.listElementFields">
                                         {{ elementField.label }}
                                     </th>
+                                    <th>Delete</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="row of option.value" class="tableRow">
+                                <tr v-for="[index, row] of (option.value as any[]).entries()" class="tableRow">
                                     <td v-for="[columnKey, columnValue] of Object.entries(row)"
                                         :data-table-context="columnKey">
                                         <span v-if="typeof columnValue === 'string'"> {{ columnValue }}</span>
                                     </td>
-                                    <!-- TODO delete button-->
+                                    <td>
+                                        <button type="button" class="btn btn-outline-dark" @click="onRemoveFromDynamicList(option, index)">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </button>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -176,7 +181,7 @@
                 <div v-if="option.provideEnterButton" class="input-group-append">
                     <button :id="option.enterButtonId" :disabled="option.inputProperties.disabled"
                         class="enterPropertyButton btn btn-outline-secondary" type="button"
-                        @click="onEnterProperty(option)">
+                        @click="onEnterProperties([option])">
                         <i class="enterPropertyButtonIcon fa-solid fa-check"></i>
                     </button>
                 </div>
@@ -196,8 +201,7 @@
 <script lang="ts">
 import type { ComputedRef, } from 'vue';
 import type { dia } from 'jointjs';
-import { PropertyContentType, CheckboxPropertyConfig, DropdownOptionConfig, DropdownPropertyConfig, InputProperties, JointJsConfig, ListPropertyConfig, NumberPropertyConfig, NumberRangePropertyConfig, PropertyConfig, TextAreaPropertyConfig, TextPropertyConfig, TogglePropertyConfig, TableDialogPropertyConfig, TablePropertyConfig, TextLabelPrependPropertyConfig, DynamicListPropertyConfig, ListElementField } from '../../config/detailsSidebarConfig';
-import { DialogConfig, FormContentConfig } from '@/modeling/config/actionDialogConfig';
+import { PropertyContentType, CheckboxPropertyConfig, DropdownPropertyConfig, InputProperties, JointJsConfig, ListPropertyConfig, NumberPropertyConfig, NumberRangePropertyConfig, PropertyConfig, TextAreaPropertyConfig, TextPropertyConfig, TogglePropertyConfig, TableDialogPropertyConfig, TablePropertyConfig, TextLabelPrependPropertyConfig, DynamicListPropertyConfig, ListElementField } from '../../config/detailsSidebarConfig';
 
 export type EditPropertySection = {
     providedFeature: string,
@@ -389,7 +393,7 @@ export function toPropertySections(propertyConfigs: PropertyConfig[]): EditPrope
 </script>
 
 <script lang="ts" setup>
-import ModalEditDialog, { ModalEditDialogData, toDialogData } from '../components/ModalEditDialog.vue';
+import ModalEditDialog, { FormContentData, ModalEditDialogData, toDialogData } from '../components/ModalEditDialog.vue';
 
 const props = defineProps<{
     groupId: string,
@@ -398,12 +402,12 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-    (e: "on:EnterProperty", property: EditPropertySection): void;
+    (e: "on:EnterProperty", properties: EditPropertySection[]): void;
 }>()
 
 
-function onEnterProperty(propertyOption: EditPropertySection) {
-    emit("on:EnterProperty", propertyOption);
+function onEnterProperties(propertyOptions: EditPropertySection[]) {
+    emit("on:EnterProperty", propertyOptions);
 }
 
 function onOpenDialog(propertyOption: EditPropertySection) {
@@ -421,6 +425,10 @@ function onAddToDynamicList(propertyOption: EditPropertySection) {
     for (const key of Object.keys(propertyOption.newElementData)) {
         propertyOption.newElementData[key] = "";
     }
+}
+
+function onRemoveFromDynamicList(propertyOption: EditPropertySection, listIndex: number) {
+    (propertyOption.value as any[]).splice(listIndex, 1);
 }
 
 </script>

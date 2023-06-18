@@ -63,12 +63,10 @@ import { PropertyContentType, DetailsSidebarConfig, EntityDetailsConfig, Propert
 import { dia } from 'jointjs';
 import { ref, computed, onUpdated, onMounted, nextTick } from 'vue';
 import EntityTypes from '@/modeling/config/entityTypes';
-import { FormContentConfig } from '@/modeling/config/actionDialogConfig';
 import PropertiesEditor from './PropertiesEditor.vue';
 import type { EditPropertySection } from './PropertiesEditor.vue';
 import { toPropertySections } from './PropertiesEditor.vue';
 import { FormContentData } from '../components/ModalEditDialog.vue';
-import { prop } from 'vue-class-component';
 
 const props = defineProps<{
     graph: dia.Graph;
@@ -302,7 +300,7 @@ onUpdated(() => {
             chooseBDEditModeOption.show = computed(() => selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "embedded").value !== "");
 
             //TODO included data always visible?
-            let includedDataOption: EditPropertySection = selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "backingData-includedData");
+            let includedDataOption: EditPropertySection = selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "backingData-includedData-wrapper");
             includedDataOption.includeFormCheck = false;
             includedDataOption.show = computed(() => {
                 if (selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "embedded").value !== "") {
@@ -313,8 +311,7 @@ onUpdated(() => {
             });
 
             //TODO prepare includedDataOption
-            includedDataOption.value = props.selectedEntity.model.prop("entity/properties/includedData");
-            (includedDataOption.buttonActionContent.dialogContent as FormContentData).groups[0].contentItems.find(element => element.providedFeature === "backingData-includedDataTable").value = props.selectedEntity.model.prop("entity/properties/includedData");
+            (includedDataOption.buttonActionContent.dialogContent as FormContentData).groups.find(group => group.groupMetaData.id === "backingData-includedData").contentItems.find(element => element.providedFeature === "backingData-includedData").value = props.selectedEntity.model.prop("entity/properties/includedData");
 
 
             let bDfamilyConfigOption: EditPropertySection = selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "backingData-familyConfig");
@@ -425,130 +422,118 @@ function getParentRelationLabel(parentId: string) {
 }
 
 
-function onEnterProperty(propertyOption: EditPropertySection) {
+function onEnterProperty(propertyOptions: EditPropertySection[]) {
+    for (const propertyOption of propertyOptions) {
 
-
-    if (propertyOption.includeFormCheck && !isPropertyValueValid(propertyOption)) {
-        propertyOption.validationState = "is-invalid";
-        let oldValue = propertyOption.jointJsConfig.isProperty ? props.selectedEntity.model.prop(propertyOption.jointJsConfig.modelPath) : props.selectedEntity.model.attr(propertyOption.jointJsConfig.modelPath);
-        propertyOption.value = oldValue;
-        return;
-    }
-    propertyOption.validationState = "is-valid";
-
-    const selectedEntityElement: dia.Element = props.selectedEntity.model as dia.Element;
-
-    if (propertyOption.jointJsConfig.hasProvidedMethod) {
-        switch (propertyOption.providedFeature) {
-            case "entity-x-position":
-                selectedEntityElement.position(propertyOption.value as number, selectedEntityElement.position().y, { deep: true, restrictedArea: props.paper.getArea() });
-                break;
-            case "entity-y-position":
-                selectedEntityElement.position(selectedEntityElement.position().x, propertyOption.value as number, { deep: true, restrictedArea: props.paper.getArea() });
-                break;
-            case "entity-width":
-                let newWidth = propertyOption.value;
-                let oldHeight = selectedEntityElement.size().height;
-                if (selectedEntityElement.prop("entity/type") !== EntityTypes.INFRASTRUCTURE) {
-                    // ensure aspect ratio except for infrastructure
-                    const defaultEntitySize = selectedEntityElement.prop("defaults/size");
-                    const aspectRatio = defaultEntitySize.height / defaultEntitySize.width;
-                    oldHeight = Number((aspectRatio * (newWidth as number)).toFixed(2));
-                }
-                selectedEntityElement.resize(newWidth as number, oldHeight, { deep: true });
-                break;
-            case "entity-height":
-                let newHeight = propertyOption.value;
-                let oldWidth = selectedEntityElement.size().width;
-                // TODO preserve aspect ratio? -> currently height is not modifiable
-                selectedEntityElement.resize(oldWidth, newHeight as number, { deep: true });
-            default:
-                break;
+        if (propertyOption.includeFormCheck && !isPropertyValueValid(propertyOption)) {
+            propertyOption.validationState = "is-invalid";
+            let oldValue = propertyOption.jointJsConfig.isProperty ? props.selectedEntity.model.prop(propertyOption.jointJsConfig.modelPath) : props.selectedEntity.model.attr(propertyOption.jointJsConfig.modelPath);
+            propertyOption.value = oldValue;
+            continue;
         }
-    } else if (propertyOption.jointJsConfig.isProperty) {
+        propertyOption.validationState = "is-valid";
 
-        //special cases 
-        if (selectedEntityElement.prop("entity/type") === EntityTypes.BACKING_DATA &&  propertyOption.providedFeature === "backingData-includedData") {
+        const selectedEntityElement: dia.Element = props.selectedEntity.model as dia.Element;
 
-            selectedEntityElement.prop((propertyOption.jointJsConfig.modelPath, propertyOption.buttonActionContent.dialogContent as FormContentData).groups[0].contentItems[0].value as any[]);
-
-
-        } else {
+        if (propertyOption.jointJsConfig.hasProvidedMethod) {
+            switch (propertyOption.providedFeature) {
+                case "entity-x-position":
+                    selectedEntityElement.position(propertyOption.value as number, selectedEntityElement.position().y, { deep: true, restrictedArea: props.paper.getArea() });
+                    break;
+                case "entity-y-position":
+                    selectedEntityElement.position(selectedEntityElement.position().x, propertyOption.value as number, { deep: true, restrictedArea: props.paper.getArea() });
+                    break;
+                case "entity-width":
+                    let newWidth = propertyOption.value;
+                    let oldHeight = selectedEntityElement.size().height;
+                    if (selectedEntityElement.prop("entity/type") !== EntityTypes.INFRASTRUCTURE) {
+                        // ensure aspect ratio except for infrastructure
+                        const defaultEntitySize = selectedEntityElement.prop("defaults/size");
+                        const aspectRatio = defaultEntitySize.height / defaultEntitySize.width;
+                        oldHeight = Number((aspectRatio * (newWidth as number)).toFixed(2));
+                    }
+                    selectedEntityElement.resize(newWidth as number, oldHeight, { deep: true });
+                    break;
+                case "entity-height":
+                    let newHeight = propertyOption.value;
+                    let oldWidth = selectedEntityElement.size().width;
+                    // TODO preserve aspect ratio? -> currently height is not modifiable
+                    selectedEntityElement.resize(oldWidth, newHeight as number, { deep: true });
+                default:
+                    break;
+            }
+        } else if (propertyOption.jointJsConfig.isProperty) {
             selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, propertyOption.value);
-        }
+        } else {
+            // handle special cases
+            switch (selectedEntityElement.prop("entity/type")) {
+                case EntityTypes.BACKING_DATA:
+                    if (propertyOption.providedFeature === "entity-text" && selectedEntityElement.prop("entity/properties/assignedFamily")) {
 
-
-
-    } else {
-        // handle special cases
-        switch (selectedEntityElement.prop("entity/type")) {
-            case EntityTypes.BACKING_DATA:
-                if (propertyOption.providedFeature === "entity-text" && selectedEntityElement.prop("entity/properties/assignedFamily")) {
-
-                    selectedEntityElement.prop("entity/properties/assignedFamily", propertyOption.value);
-                    // also change all other backing data elements of the same family
-                    const relatedBackingDataEntities = props.graph.getElements().filter((entityElement) => {
-                        return entityElement.prop("entity/type") === EntityTypes.BACKING_DATA && entityElement.attr(propertyOption.jointJsConfig.modelPath).localeCompare(selectedEntityElement.attr(propertyOption.jointJsConfig.modelPath)) === 0;
-                    });
-                    for (const relatedBackingDataEntity of relatedBackingDataEntities) {
-                        relatedBackingDataEntity.attr(propertyOption.jointJsConfig.modelPath, propertyOption.value);
-                        relatedBackingDataEntity.prop("entity/properties/assignedFamily", propertyOption.value);
-                    }
-                    return;
-                }
-                if (propertyOption.providedFeature === "backingData-familyConfig") {
-                    let currentFamilyName = selectedEntityElement.attr("label/textWrap/text");
-                    let familyTableConfig = (propertyOption.buttonActionContent.dialogContent as FormContentData).groups[0].contentItems[0];
-                    for (let otherBackingData of familyTableConfig.tableRows) {
-                        if (otherBackingData.columns["included"]["checked"]) {
-                            (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).attr("label/textWrap/text", currentFamilyName);
-                            (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).prop("entity/properties/assignedFamily", currentFamilyName);
-                        } else {
-                            // TODO reset name or not?
-                            (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).attr("label/textWrap/text", "Backing Data");
-                            (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).prop("entity/properties/assignedFamily", "");
+                        selectedEntityElement.prop("entity/properties/assignedFamily", propertyOption.value);
+                        // also change all other backing data elements of the same family
+                        const relatedBackingDataEntities = props.graph.getElements().filter((entityElement) => {
+                            return entityElement.prop("entity/type") === EntityTypes.BACKING_DATA && entityElement.attr(propertyOption.jointJsConfig.modelPath).localeCompare(selectedEntityElement.attr(propertyOption.jointJsConfig.modelPath)) === 0;
+                        });
+                        for (const relatedBackingDataEntity of relatedBackingDataEntities) {
+                            relatedBackingDataEntity.attr(propertyOption.jointJsConfig.modelPath, propertyOption.value);
+                            relatedBackingDataEntity.prop("entity/properties/assignedFamily", propertyOption.value);
                         }
+                        continue;
                     }
-                    return;
-                }
-                break;
-            case EntityTypes.DATA_AGGREGATE:
-                if (propertyOption.providedFeature === "entity-text" && selectedEntityElement.prop("entity/properties/assignedFamily")) {
-
-                    selectedEntityElement.prop("entity/properties/assignedFamily", propertyOption.value);
-
-                    const relatedDataAggregateEntities = props.graph.getElements().filter((entityElement) => {
-                        return entityElement.prop("entity/type") === EntityTypes.DATA_AGGREGATE && entityElement.attr(propertyOption.jointJsConfig.modelPath).localeCompare(selectedEntityElement.attr(propertyOption.jointJsConfig.modelPath)) === 0;
-                    });
-
-                    for (const relatedDataAggregateEntity of relatedDataAggregateEntities) {
-                        relatedDataAggregateEntity.attr(propertyOption.jointJsConfig.modelPath, propertyOption.value);
-                        relatedDataAggregateEntity.prop("entity/properties/assignedFamily", propertyOption.value);
-                    }
-                    return;
-                }
-                if (propertyOption.providedFeature === "dataAggregate-familyConfig") {
-                    let currentFamilyName = selectedEntityElement.attr("label/textWrap/text");
-                    let familyTableConfig = (propertyOption.buttonActionContent.dialogContent as FormContentData).groups[0].contentItems[0];
-                    for (let otherBackingData of familyTableConfig.tableRows) {
-                        if (otherBackingData.columns["included"]["checked"]) {
-                            (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).attr("label/textWrap/text", currentFamilyName);
-                            (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).prop("entity/properties/assignedFamily", currentFamilyName);
-                        } else {
-                            // TODO reset name or not?
-                            (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).attr("label/textWrap/text", "Data Aggregate");
-                            (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).prop("entity/properties/assignedFamily", "");
+                    if (propertyOption.providedFeature === "backingData-familyConfig") {
+                        let currentFamilyName = selectedEntityElement.attr("label/textWrap/text");
+                        let familyTableConfig = (propertyOption.buttonActionContent.dialogContent as FormContentData).groups[0].contentItems[0];
+                        for (let otherBackingData of familyTableConfig.tableRows) {
+                            if (otherBackingData.columns["included"]["checked"]) {
+                                (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).attr("label/textWrap/text", currentFamilyName);
+                                (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).prop("entity/properties/assignedFamily", currentFamilyName);
+                            } else {
+                                // TODO reset name or not?
+                                (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).attr("label/textWrap/text", "Backing Data");
+                                (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).prop("entity/properties/assignedFamily", "");
+                            }
                         }
+                        continue;
                     }
-                    return;
-                }
-                break;
-        }
+                    break;
+                case EntityTypes.DATA_AGGREGATE:
+                    if (propertyOption.providedFeature === "entity-text" && selectedEntityElement.prop("entity/properties/assignedFamily")) {
 
-        // otherwise, it is the simplest case:
-        selectedEntityElement.attr(propertyOption.jointJsConfig.modelPath, propertyOption.value);
+                        selectedEntityElement.prop("entity/properties/assignedFamily", propertyOption.value);
+
+                        const relatedDataAggregateEntities = props.graph.getElements().filter((entityElement) => {
+                            return entityElement.prop("entity/type") === EntityTypes.DATA_AGGREGATE && entityElement.attr(propertyOption.jointJsConfig.modelPath).localeCompare(selectedEntityElement.attr(propertyOption.jointJsConfig.modelPath)) === 0;
+                        });
+
+                        for (const relatedDataAggregateEntity of relatedDataAggregateEntities) {
+                            relatedDataAggregateEntity.attr(propertyOption.jointJsConfig.modelPath, propertyOption.value);
+                            relatedDataAggregateEntity.prop("entity/properties/assignedFamily", propertyOption.value);
+                        }
+                        continue;
+                    }
+                    if (propertyOption.providedFeature === "dataAggregate-familyConfig") {
+                        let currentFamilyName = selectedEntityElement.attr("label/textWrap/text");
+                        let familyTableConfig = (propertyOption.buttonActionContent.dialogContent as FormContentData).groups[0].contentItems[0];
+                        for (let otherBackingData of familyTableConfig.tableRows) {
+                            if (otherBackingData.columns["included"]["checked"]) {
+                                (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).attr("label/textWrap/text", currentFamilyName);
+                                (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).prop("entity/properties/assignedFamily", currentFamilyName);
+                            } else {
+                                // TODO reset name or not?
+                                (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).attr("label/textWrap/text", "Data Aggregate");
+                                (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).prop("entity/properties/assignedFamily", "");
+                            }
+                        }
+                        continue;
+                    }
+                    break;
+            }
+
+            // otherwise, it is the simplest case:
+            selectedEntityElement.attr(propertyOption.jointJsConfig.modelPath, propertyOption.value);
+        }
     }
-
 }
 
 function isPropertyValueValid(option): boolean {

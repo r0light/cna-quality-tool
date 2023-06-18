@@ -945,7 +945,7 @@ const EntityDetailsConfig: {
                 }
             },
             {
-                providedFeature: "backingData-includedData",
+                providedFeature: "backingData-includedData-wrapper",
                 contentType: PropertyContentType.TABLE_DIALOG,
                 label: "Included Data:",
                 helpText: "",
@@ -964,9 +964,9 @@ const EntityDetailsConfig: {
                 provideEnterButton: false,
                 show: false,
                 jointJsConfig: {
-                    isProperty: true,
+                    isProperty: false,
                     hasProvidedMethod: false,
-                    modelPath: "entity/properties/includedData",
+                    modelPath: "",
                     defaultPropPath: "",
                     minPath: "",
                     min: ""
@@ -991,7 +991,7 @@ const EntityDetailsConfig: {
                         groups: [
                             {
                                 contentGroupMetaData: {
-                                    id: "backingData-includedData-table",
+                                    id: "backingData-includedData",
                                     headline: "Included Backing Data entities" + '  ( <svg width="30" height="20">' + backingDataSvgRepresentation() + '</svg>)',
                                     text: `The following table shows all data elements included in this Backing Data entity. In case you want to add a new entry, the following section provides two text element boxes you can use to 
                                         provide the information and then add it using the plus button. However, your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all 
@@ -999,7 +999,7 @@ const EntityDetailsConfig: {
                                 },
                                 contentItems: [
                                     {
-                                        providedFeature: "backingData-includedDataTable",
+                                        providedFeature: "backingData-includedData",
                                         contentType: PropertyContentType.DYNAMIC_LIST,
                                         label: "",
                                         helpText: "",
@@ -1013,9 +1013,9 @@ const EntityDetailsConfig: {
                                         provideEnterButton: false,
                                         show: true,
                                         jointJsConfig: {
-                                            isProperty: false,
+                                            isProperty: true,
                                             hasProvidedMethod: false,
-                                            modelPath: "",
+                                            modelPath: "entity/properties/includedData",
                                             defaultPropPath: "",
                                             minPath: "",
                                             min: ""
