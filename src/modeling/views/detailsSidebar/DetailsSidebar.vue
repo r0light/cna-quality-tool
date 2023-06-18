@@ -285,26 +285,25 @@ onUpdated(() => {
                 })
             })
 
-            let assignedFamilyOption: EditPropertySection = selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "dataAggregate-assignedFamily");
+            let assignedFamilyOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "dataAggregate-assignedFamily");
             assignedFamilyOption.show = computed(() => {
-                if (selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "embedded").value !== "") {
-                    return selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "dataAggregate-chooseEditMode").checked
+                if (findInSectionsByFeature(selectedEntityPropertyGroups.value, "embedded").value !== "") {
+                    return findInSectionsByFeature(selectedEntityPropertyGroups.value, "dataAggregate-chooseEditMode").checked
                 } else {
                     return false;
                 }
-            }
-            );
+            });
             break;
         case EntityTypes.BACKING_DATA:
-            let chooseBDEditModeOption: EditPropertySection = selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "backingData-chooseEditMode");
-            chooseBDEditModeOption.show = computed(() => selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "embedded").value !== "");
+            let chooseBDEditModeOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "backingData-chooseEditMode");
+            chooseBDEditModeOption.show = computed(() => findInSectionsByFeature(selectedEntityPropertyGroups.value, "embedded").value !== "");
 
             //TODO included data always visible?
-            let includedDataOption: EditPropertySection = selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "backingData-includedData-wrapper");
+            let includedDataOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "backingData-includedData-wrapper");
             includedDataOption.includeFormCheck = false;
             includedDataOption.show = computed(() => {
-                if (selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "embedded").value !== "") {
-                    return selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "backingData-chooseEditMode").checked
+                if (findInSectionsByFeature(selectedEntityPropertyGroups.value, "embedded").value !== "") {
+                    return findInSectionsByFeature(selectedEntityPropertyGroups.value, "backingData-chooseEditMode").checked
                 } else {
                     return true;
                 }
@@ -314,11 +313,11 @@ onUpdated(() => {
             (includedDataOption.buttonActionContent.dialogContent as FormContentData).groups.find(group => group.groupMetaData.id === "backingData-includedData").contentItems.find(element => element.providedFeature === "backingData-includedData").value = props.selectedEntity.model.prop("entity/properties/includedData");
 
 
-            let bDfamilyConfigOption: EditPropertySection = selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "backingData-familyConfig");
+            let bDfamilyConfigOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "backingData-familyConfig");
             bDfamilyConfigOption.includeFormCheck = false;
             bDfamilyConfigOption.show = computed(() => {
-                if (selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "embedded").value !== "") {
-                    return !selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "backingData-chooseEditMode").checked
+                if (findInSectionsByFeature(selectedEntityPropertyGroups.value, "embedded").value !== "") {
+                    return !findInSectionsByFeature(selectedEntityPropertyGroups.value, "backingData-chooseEditMode").checked
                 } else {
                     return true;
                 }
@@ -352,10 +351,10 @@ onUpdated(() => {
                 })
             })
 
-            let bDassignedFamilyOption: EditPropertySection = selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "backingData-assignedFamily");
+            let bDassignedFamilyOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "backingData-assignedFamily");
             bDassignedFamilyOption.show = computed(() => {
-                if (selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "embedded").value !== "") {
-                    return selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "backingData-chooseEditMode").checked
+                if (findInSectionsByFeature(selectedEntityPropertyGroups.value, "embedded").value !== "") {
+                    return findInSectionsByFeature(selectedEntityPropertyGroups.value, "backingData-chooseEditMode").checked
                 } else {
                     return false;
                 }
@@ -375,10 +374,10 @@ onUpdated(() => {
             parentId = parent.id.toString();
         }
 
-        selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "embedded").value = parentId;
+        findInSectionsByFeature(selectedEntityPropertyGroups.value, "embedded").value = parentId;
         props.selectedEntity.model.prop("entity/embedded", parentId);
         if (props.selectedEntity.model.prop("entity/type") === EntityTypes.DATA_AGGREGATE) {
-            let parentRelationOption: EditPropertySection = selectedEntityPropertyGroups.value.find(section => section.groupId === "entity").options.find(option => option.providedFeature === "dataAggregate-parentRelation");
+            let parentRelationOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "dataAggregate-parentRelation");
             parentRelationOption.label = getParentRelationLabel(props.selectedEntity.model.prop("entity/embedded"));
         }
 
@@ -386,9 +385,9 @@ onUpdated(() => {
 
     // update position properties when entity is moved
     props.selectedEntity.model.on("change:position", () => {
-        let xOption = selectedEntityPropertyGroups.value.find(propertyGroup => propertyGroup.groupId === "position").options.find(propertyOption => propertyOption.providedFeature === "entity-x-position");
+        let xOption = findInSectionsByFeature(selectedEntityPropertyGroups.value, "entity-x-position");
         xOption.value = props.selectedEntity.model.prop(xOption.jointJsConfig.modelPath);
-        let yOption = selectedEntityPropertyGroups.value.find(propertyGroup => propertyGroup.groupId === "position").options.find(propertyOption => propertyOption.providedFeature === "entity-y-position");
+        let yOption = findInSectionsByFeature(selectedEntityPropertyGroups.value, "entity-y-position");
         yOption.value = props.selectedEntity.model.prop(yOption.jointJsConfig.modelPath);
     }, "detailsSidebar")
 
