@@ -57,9 +57,9 @@
                     :required="option.inputProperties.required" :size="option.attributes.size"
                     :multiple="option.attributes.multiple" :data-property-type="groupId" v-model="option.value"
                     @change="onEnterProperties([option])">
-                    <option v-for="selectOption of option.dropdownOptions" :value="selectOption.optionValue"
+                    <option v-for="selectOption of option.dropdownOptions" :value="selectOption.optionValue" :class="selectOption.representationClass"
                         :key="selectOption.optionValue" :placeholder="option.attributes.placeholder"
-                        :title="selectOption.optionTitle" :selected="selectOption.selected">
+                        :title="selectOption.optionTitle" :disabled="selectOption.disabled">
                         {{ selectOption.optionText }}
                     </option>
                 </select>
@@ -318,7 +318,7 @@ export function toPropertySections(propertyConfigs: PropertyConfig[]): EditPrope
                     ...preparedProperty, ...{
                         attributes: dropdownOption.attributes,
                         dropdownOptions: dropdownOption.dropdownOptions,
-                        value: ""
+                        value: dropdownOption.attributes.defaultValue
                     }
                 } as EditPropertySection)
                 break;

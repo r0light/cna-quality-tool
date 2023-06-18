@@ -182,12 +182,6 @@ onMounted(() => {
         // }
     });
 
-    /*
-    props.graph.on("change:parent", (cell) => {
-        cell.prop("entity/isEmbedded", true);
-    });
-    */
-
 
     paper.render();
     // convention to update a value in the parent (https://vuejs.org/guide/components/v-model.html#v-model-arguments)

@@ -52,7 +52,6 @@
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
 </template>
@@ -360,6 +359,41 @@ onUpdated(() => {
                 }
             }
             );
+            break;
+        case EntityTypes.REQUEST_TRACE:
+            const externalEndpoints = props.graph.getElements().filter(element => element.prop("entity/type") === EntityTypes.EXTERNAL_ENDPOINT);
+            console.log(externalEndpoints)
+            let externalEndpointOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "referredEndpoint");
+            const selectedExternalEndpoint = props.selectedEntity.model.prop(externalEndpointOption.jointJsConfig.modelPath);
+            const dropdownOptions = externalEndpoints.map((endpoint) => {
+
+                let parentName = "";
+                let representationClass = "";
+                let invalid = true;
+
+                let parent = endpoint.getParentCell();
+                if (parent) { // TODO: don't even show if not parent because then actually invalid?
+                    parentName = endpoint.getParentCell().attr("label/textWrap/text");
+                    representationClass = "validOption"
+                    invalid = false;
+                } else {
+                    invalid = true;
+                    representationClass = "invalidOption";
+                }
+
+                return {
+                    optionValue: endpoint.id,
+                    optionText: endpoint.attr("label/textWrap/text"),
+                    optionTitle: `${parentName ? `(Parent: ${parentName})` : 'no parent: invalid option'}`,
+                    optionRepresentationClass: `${representationClass ? representationClass : ''}`,
+                    disabled: invalid,
+                };
+            })
+            externalEndpointOption.dropdownOptions = dropdownOptions;
+            externalEndpointOption.value = selectedExternalEndpoint;
+
+            //TODO prepare involved links selection
+
             break;
     }
 

@@ -159,6 +159,7 @@ export class ModelingValidator {
     }
 
     validateEmbedding(childView, parentView) {
+
         switch (parentView.model.attributes.entity.type) {
             case EntityTypes.COMPONENT:
             case EntityTypes.SERVICE:

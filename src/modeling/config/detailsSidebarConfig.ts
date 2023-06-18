@@ -108,7 +108,9 @@ export type DropdownPropertyConfig = BasicPropertyConfig & {
 export type DropdownOptionConfig = {
     optionValue: string,
     optionText: string,
-    selected: boolean
+    optionTitle: string,
+    representationClass: string,
+    disabled: boolean
 }
 
 export type ListPropertyConfig = BasicPropertyConfig & {
@@ -607,11 +609,73 @@ const EntityDetailsConfig: {
     },
     Endpoint: {
         type: EntityTypes.ENDPOINT,
-        specificProperties: parseProperties(getEndpointProperties())
+        specificProperties: ([
+            {
+                providedFeature: "embedded",
+                contentType: PropertyContentType.INPUT_TEXTBOX,
+                label: "Parent",
+                helpText: "The parent of the endpoint if it is embedded",
+                inputProperties: {
+                    disabled: true,
+                    required: true,
+                    checked: false,
+                    selected: false,
+                    readonly: false
+                },
+                attributes: {
+                    placeholder: "",
+                    defaultValue: "",
+                    svgRepresentation: "",
+                    inputLabelIcon: "",
+                    provideEditButton: false,
+                },
+                provideEnterButton: false,
+                show: false,
+                jointJsConfig: {
+                    isProperty: true,
+                    hasProvidedMethod: false,
+                    modelPath: "entity/embedded",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                }
+            },
+        ] as PropertyConfig[]).concat(parseProperties(getEndpointProperties()))
     },
     ExternalEndpoint: {
         type: EntityTypes.EXTERNAL_ENDPOINT,
-        specificProperties: parseProperties(getEndpointProperties())
+        specificProperties: ([
+            {
+                providedFeature: "embedded",
+                contentType: PropertyContentType.INPUT_TEXTBOX,
+                label: "Parent",
+                helpText: "The parent of the endpoint if it is embedded",
+                inputProperties: {
+                    disabled: true,
+                    required: true,
+                    checked: false,
+                    selected: false,
+                    readonly: false
+                },
+                attributes: {
+                    placeholder: "",
+                    defaultValue: "",
+                    svgRepresentation: "",
+                    inputLabelIcon: "",
+                    provideEditButton: false,
+                },
+                provideEnterButton: false,
+                show: false,
+                jointJsConfig: {
+                    isProperty: true,
+                    hasProvidedMethod: false,
+                    modelPath: "entity/embedded",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                }
+            },
+        ] as PropertyConfig[]).concat(parseProperties(getEndpointProperties()))
     },
     Link: {
         type: EntityTypes.LINK,
@@ -737,12 +801,16 @@ const EntityDetailsConfig: {
                 {
                     optionValue: ParentRelation.USED,
                     optionText: ParentRelation.USED,
-                    selected: true
+                    optionTitle: "",
+                    representationClass: "",
+                    disabled: false
                 },
                 {
                     optionValue: ParentRelation.PERSISTED,
                     optionText: ParentRelation.PERSISTED,
-                    selected: false
+                    optionTitle: "",
+                    representationClass: "",
+                    disabled: false
                 }
             ],
             provideEnterButton: false,
@@ -1022,7 +1090,7 @@ const EntityDetailsConfig: {
                                             min: ""
                                         },
                                         listElementFields: [
-                                            {   
+                                            {
                                                 key: "key",
                                                 label: "Key",
                                                 helpText: "The key that identifies the following value item.",
@@ -1176,6 +1244,145 @@ const EntityDetailsConfig: {
                     }
                 }
             }
+        ]
+    },
+    RequestTrace: {
+        type: EntityTypes.REQUEST_TRACE,
+        specificProperties: [
+            {
+                providedFeature: "referredEndpoint",
+                contentType: PropertyContentType.DROPDOWN,
+                label: "External Endpoint:",
+                inputProperties: {
+                    disabled: false,
+                    required: true,
+                    checked: false,
+                    selected: false,
+                    readonly: false,
+                },
+                helpText: "The referred External Endpoint.",
+                show: true,
+                attributes: {
+                    placeholder: "Choose External Endpoint...",
+                    svgRepresentation: '<svg width="30" height="20"><circle id="request-trace-external-endpoint" cx="15" cy="9" r="4" stroke="black" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+                    defaultValue: ""
+
+                },
+                provideEnterButton: false,
+                jointJsConfig: {
+                    isProperty: true,
+                    hasProvidedMethod: false,
+                    modelPath: "entity/properties/referredEndpoint",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
+                dropdownOptions: []
+            },
+            {
+                providedFeature: "involvedLinks-wrapper",
+                contentType: PropertyContentType.TABLE_DIALOG,
+                label: "Involved Links:",
+                inputProperties: {
+                    disabled: false,
+                    required: true,
+                    checked: false,
+                    selected: false,
+                    readonly: false,
+                },
+                helpText: "The links involved in this request trace.",
+                show: true,
+                attributes: {
+                    svgRepresentation: '<svg width="35" height="20">' + linkSvgRepresentation() + '</svg>',
+                    buttonText: "Add Link entities",
+                    buttonIconClass: "bi bi-window-plus"
+                },
+                provideEnterButton: false,
+                jointJsConfig: {
+                    isProperty: false,
+                    hasProvidedMethod: false,
+                    modelPath: "",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
+                buttonActionContent: {
+                    // contentType: PropertyContentType // TODO modalDialog,
+                    dialogSize: DialogSize.LARGE,
+                    dialogMetaData: {
+                        header: {
+                            // iconClass: "bi bi-window-plus", // TODO decide if this or SVG
+                            svgRepresentation: '<svg width="35" height="20"><polygon points="0,0 28,0 35,7 28,14 0,14 7,7" transform="translate(0,1)" stroke-width="2" stroke="black" fill="white"></polygon></svg>',
+                            text: "Request Trace: ",
+                            closeButton: false
+                        },
+                        footer: {
+                            cancelButtonText: "Cancel",
+                            saveButtonIconClass: "fa-regular fa-floppy-disk",
+                            saveButtonText: "Save"
+                        },
+                    },
+                    dialogContent: {
+                        contentType: UIContentType.GROUP_FORMS,
+                        groups: [
+                            {
+                                contentGroupMetaData: {
+                                    id: "involved-links-table",
+                                    headline: "Involved Links" + '  ( <svg width="35" height="20">' + linkSvgRepresentation() + '</svg>)',
+                                    text: `The following table shows all Link entities that currently exist for this System. 
+                                        Invalid Links, such as non-connected ones or if they are connected to an Endpoint without
+                                        a parent entity cannot be selected and are thus deactived. By selecting the respective 
+                                        checkbox the Link entity will be added to this Request Trace. The selection at the beginning 
+                                        shows the currently saved state for this entity. Your changes won't be adopted until you 
+                                        clicked "Save". In case you cancel and change your entity selection, all your changes will be 
+                                        lost. While you keep the selection of this Request Trace entity, your changes will be remembered.`,
+                                },
+                                contentItems: [
+                                    {
+                                        providedFeature: "requestTrace-involvedLinks",
+                                        contentType: PropertyContentType.TABLE,
+                                        label: "",
+                                        helpText: "",
+                                        inputProperties: {
+                                            disabled: false,
+                                            readonly: false,
+                                            required: false,
+                                            checked: false,
+                                            selected: false,
+                                        },
+                                        provideEnterButton: false,
+                                        show: true,
+                                        jointJsConfig: {
+                                            isProperty: true,
+                                            hasProvidedMethod: false,
+                                            modelPath: "entity/properties/involvedLinks",
+                                            defaultPropPath: "",
+                                            minPath: "",
+                                            min: ""
+                                        },
+                                        tableColumnHeaders: [
+                                            {
+                                                text: "From"
+                                            },
+                                            {
+                                                text: "To Endpoint"
+                                            },
+                                            {
+                                                text: "Endpoint Parent"
+                                            },
+                                            {
+                                                text: "Include"
+                                            }
+                                        ],
+                                    }
+
+                                ]
+                            }
+                        ]
+                    }
+                }
+            }
+
         ]
     }
 };
