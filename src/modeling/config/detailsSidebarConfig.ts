@@ -1035,7 +1035,7 @@ const EntityDetailsConfig: {
                 jointJsConfig: {
                     isProperty: false,
                     hasProvidedMethod: false,
-                    modelPath: "",
+                    modelPath: "entity/properties/involvedLinks",
                     defaultPropPath: "",
                     minPath: "",
                     min: ""
@@ -1082,9 +1082,9 @@ const EntityDetailsConfig: {
                                         provideEnterButton: false,
                                         show: true,
                                         jointJsConfig: {
-                                            isProperty: true,
+                                            isProperty: false,
                                             hasProvidedMethod: false,
-                                            modelPath: "entity/properties/includedData",
+                                            modelPath: "",
                                             defaultPropPath: "",
                                             minPath: "",
                                             min: ""
@@ -1301,7 +1301,7 @@ const EntityDetailsConfig: {
                 jointJsConfig: {
                     isProperty: false,
                     hasProvidedMethod: false,
-                    modelPath: "",
+                    modelPath: "entity/properties/involvedLinks",
                     defaultPropPath: "",
                     minPath: "",
                     min: ""
@@ -1353,9 +1353,9 @@ const EntityDetailsConfig: {
                                         provideEnterButton: false,
                                         show: true,
                                         jointJsConfig: {
-                                            isProperty: true,
+                                            isProperty: false,
                                             hasProvidedMethod: false,
-                                            modelPath: "entity/properties/involvedLinks",
+                                            modelPath: "",
                                             defaultPropPath: "",
                                             minPath: "",
                                             min: ""

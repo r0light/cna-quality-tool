@@ -223,7 +223,7 @@ export type EditPropertySection = {
 }
 
 export type TableRowConfig = {
-    attributes: { isTheCurrentEntity: boolean, representationClass: string, disabled: boolean },
+    attributes: { isTheCurrentEntity?: boolean, representationClass: string, disabled: boolean },
     columns: {
         [key: string]: string | TableRowContentConfig
     }

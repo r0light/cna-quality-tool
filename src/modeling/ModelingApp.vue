@@ -168,14 +168,14 @@ function onSelectRequestTrace(element: dia.Element) {
     // get involved Links
     const involvedLinks = element.prop("entity/properties/involvedLinks");
 
-    let allInvolvedEntities = new Set(involvedLinks[0]);
+    let allInvolvedEntities = new Set(involvedLinks);
     // add Request Trace entity itself 
     allInvolvedEntities.add(element.id);
     // add referred External Endpoint
     allInvolvedEntities.add(element.prop("entity/properties/referredEndpoint"));
 
     if (involvedLinks && involvedLinks.length > 0) {
-        for (const involvedLink of involvedLinks[0]) {
+        for (const involvedLink of involvedLinks) {
             const linkEntity = currentSystemGraph.value.getCell(involvedLink) as dia.Link;
             allInvolvedEntities.add(linkEntity.getTargetElement().id);
             allInvolvedEntities.add(linkEntity.getTargetElement().parent());

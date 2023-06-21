@@ -65,7 +65,8 @@ import EntityTypes from '@/modeling/config/entityTypes';
 import PropertiesEditor from './PropertiesEditor.vue';
 import type { EditPropertySection } from './PropertiesEditor.vue';
 import { toPropertySections } from './PropertiesEditor.vue';
-import { FormContentData } from '../components/ModalEditDialog.vue';
+import { FormContentData, findInDialogByFeature } from '../components/ModalEditDialog.vue';
+import { DialogMetaData } from '@/modeling/config/actionDialogConfig';
 
 const props = defineProps<{
     graph: dia.Graph;
@@ -308,7 +309,6 @@ onUpdated(() => {
                 }
             });
 
-            //TODO prepare includedDataOption
             (includedDataOption.buttonActionContent.dialogContent as FormContentData).groups.find(group => group.groupMetaData.id === "backingData-includedData").contentItems.find(element => element.providedFeature === "backingData-includedData").value = props.selectedEntity.model.prop("entity/properties/includedData");
 
 
@@ -393,6 +393,52 @@ onUpdated(() => {
             externalEndpointOption.value = selectedExternalEndpoint;
 
             //TODO prepare involved links selection
+            const existingLinks = props.graph.getLinks().filter((link) => { return link.prop("entity/type") === EntityTypes.LINK });
+            const selectedLinks: Set<dia.Cell.ID> = new Set(props.selectedEntity.model.prop("entity/properties/involvedLinks"));
+
+            let involvedLinksWrapperConfig: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "involvedLinks-wrapper");
+            let involvedLinksConfig = findInDialogByFeature(involvedLinksWrapperConfig.buttonActionContent, "requestTrace-involvedLinks");
+            involvedLinksConfig.includeFormCheck = false;
+            // clear table rows
+            involvedLinksConfig.tableRows.length = 0;
+
+            existingLinks.forEach((link) => {
+                let isInvalid = true;
+                let targetHasParent = false;
+                let parentName = "-";
+
+                if (link.getTargetElement() && link.getTargetElement().parent()) {
+                    parentName = props.graph.getCell(link.getTargetElement().parent()).attr("label/textWrap/text");
+                    targetHasParent = true;
+                } else {
+                    targetHasParent = false;
+                }
+
+                if (link.getSourceElement() && link.getTargetElement()) {
+                    isInvalid = targetHasParent ? false : true;
+                }
+
+                const fromElement = link.getSourceElement() ? link.getSourceElement().attr("label/textWrap/text") : "-";
+                const toElement = link.getTargetElement() ? link.getTargetElement().attr("label/textWrap/text") : "-";
+
+                involvedLinksConfig.tableRows.push({
+                    columns: {
+                        from: fromElement,
+                        to: toElement,
+                        parent: parentName,
+                        included: {
+                            contentType: PropertyContentType.CHECKBOX_WITHOUT_LABEL,
+                            disabled: isInvalid,
+                            checked: selectedLinks.has(link.id),
+                            id: link.id
+                        }
+                    },
+                    attributes: {
+                        representationClass: isInvalid ? "invalidOption" : "validOption",
+                        disabled: isInvalid
+                    }
+                });
+            })
 
             break;
     }
@@ -456,7 +502,13 @@ function getParentRelationLabel(parentId: string) {
 
 
 function onEnterProperty(propertyOptions: EditPropertySection[]) {
+
+
+
+
     for (const propertyOption of propertyOptions) {
+
+        console.log(propertyOption)
 
         if (propertyOption.includeFormCheck && !isPropertyValueValid(propertyOption)) {
             propertyOption.validationState = "is-invalid";
@@ -498,6 +550,7 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
         } else if (propertyOption.jointJsConfig.isProperty) {
             selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, propertyOption.value);
         } else {
+            console.log("else")
             // handle special cases
             switch (selectedEntityElement.prop("entity/type")) {
                 case EntityTypes.BACKING_DATA:
@@ -558,6 +611,16 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                                 (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).prop("entity/properties/assignedFamily", "");
                             }
                         }
+                        continue;
+                    }
+                    break;
+                case EntityTypes.REQUEST_TRACE:
+                    if (propertyOption.providedFeature === "requestTrace-involvedLinks") {
+                        console.log(propertyOption.tableRows)
+                        let selectedLinkIDs = propertyOption.tableRows.filter(row => row.columns["included"]["checked"])
+                            .map(row => row.columns["included"]["id"]);
+                            console.log(selectedLinkIDs)
+                        selectedEntityElement.prop(findInSectionsByFeature(selectedEntityPropertyGroups.value, "involvedLinks-wrapper").jointJsConfig.modelPath, selectedLinkIDs);
                         continue;
                     }
                     break;
