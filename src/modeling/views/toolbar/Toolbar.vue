@@ -85,12 +85,12 @@
 import $, { data } from 'jquery';
 import { ref, computed, onMounted, onUpdated, watch, reactive, Ref, ComputedRef } from "vue";
 import { dia, util, highlighters } from "jointjs";
-import { ApplicationSettingsDialogConfig } from "../config/actionDialogConfig";
-import EntityTypes from "../config/entityTypes";
-import ToolbarConfig from "../config/toolbarConfiguration";
-import ModalDialog from "./modalDialog";
-import UIModalDialog from "../representations/guiElements.dialog";
-import { addSelectionToolToEntity } from "./tools/entitySelectionTools";
+import { ApplicationSettingsDialogConfig } from "../../config/actionDialogConfig";
+import EntityTypes from "../../config/entityTypes";
+import ToolbarConfig from "../../config/toolbarConfiguration";
+import ModalDialog from "../modalDialog";
+import UIModalDialog from "../../representations/guiElements.dialog";
+import { addSelectionToolToEntity } from "../tools/entitySelectionTools";
 import ButtonGroup from './toolbar/ButtonGroup.vue';
 
 export type ToolbarButton = {

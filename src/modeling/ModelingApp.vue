@@ -56,7 +56,7 @@
                     @deselectRequestTrage="onRequestTraceDeselect">
                 </ModelingArea>
             </div>
-            <DetailsSidebar2 :paper="mainPaper" :graph="currentSystemGraph as dia.Graph" :selectedEntity="currentSelection" :selectedDataAggregate="currentDataAggregateHighlight" :selectedBackingData="currentBackingDataHightlight"></DetailsSidebar2>
+            <DetailsSidebar :paper="mainPaper" :graph="currentSystemGraph as dia.Graph" :selectedEntity="currentSelection" :selectedDataAggregate="currentDataAggregateHighlight" :selectedBackingData="currentBackingDataHightlight"></DetailsSidebar>
             <!--<div class="details-container d-print-none"></div>-->
         </div>
         <div id="modals" class="d-print-none"></div>
@@ -69,9 +69,9 @@ import { ref, onMounted, nextTick } from 'vue'
 import { dia, shapes } from "jointjs";
 import SystemEntityManager from './systemEntityManager';
 
-import Toolbar from './views/Toolbar.vue';
+import Toolbar from './views/toolbar/Toolbar.vue';
 import ModelingArea from './views/ModelingArea.vue';
-import DetailsSidebar2 from './views/detailsSidebar/DetailsSidebar.vue';
+import DetailsSidebar from './views/detailsSidebar/DetailsSidebar.vue';
 import EntitySidebar from './views/entitySidebar';
 
 import SidebarEntityShapes from './config/entitySidebarShape.config';

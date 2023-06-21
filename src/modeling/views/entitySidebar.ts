@@ -1,6 +1,5 @@
 import $ from 'jquery';
 import { dia, mvc, shapes } from "jointjs";
-import EntityTypes from "../config/entityTypes";
 import ConnectionSelectionTools from "./tools/connectionSelectionTools";
 import { addSelectionToolToEntity } from "./tools/entitySelectionTools";
 
