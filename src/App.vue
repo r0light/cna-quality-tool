@@ -27,6 +27,7 @@
     <Home v-if="currentPage === 1"></Home>
     <ModelingApp v-if="currentPage === 2"></ModelingApp>
   </main>
+  <div id="modalBackground"></div>
 </template>
 
 <script lang="ts" setup>

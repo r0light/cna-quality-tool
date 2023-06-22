@@ -232,7 +232,7 @@ onUpdated(() => {
             let valueToSet: any = "";
             if (option.jointJsConfig.propertyType === "attribute") {
                 valueToSet = props.selectedEntity.model.attr(option.jointJsConfig.modelPath);
-            } else if (option.jointJsConfig.propertyType === "property") {
+            } else if (option.jointJsConfig.propertyType === "property" || option.jointJsConfig.propertyType === "providedMethod") {
                 valueToSet = props.selectedEntity.model.prop(option.jointJsConfig.modelPath);
 
                 if (option.providedFeature === "entity-aspect-ratio" && valueToSet) {
@@ -560,9 +560,8 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                     break;
             }
         } else if (propertyOption.jointJsConfig.propertyType === "attribute") {
-            selectedEntityElement.attr(propertyOption.jointJsConfig.modelPath, propertyOption.value);
 
-            // handle special cases
+            // handle special cases first
             switch (selectedEntityElement.prop("entity/type")) {
                 case EntityTypes.DATA_AGGREGATE:
                     if (propertyOption.providedFeature === "entity-text" && selectedEntityElement.prop("entity/properties/assignedFamily")) {
@@ -598,6 +597,8 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                 default:
                     break;
             }
+
+            selectedEntityElement.attr(propertyOption.jointJsConfig.modelPath, propertyOption.value);
 
         } else if (propertyOption.jointJsConfig.propertyType === "property") {
             selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, propertyOption.value);

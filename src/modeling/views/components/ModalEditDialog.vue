@@ -45,6 +45,10 @@
             </div>
         </div>
     </div>
+
+    <Teleport to="#modalBackground" v-show="show">
+        <div class="modal-backdrop modal-background-wrapper" :class="{ 'show': show }" v-show="show"></div>
+    </Teleport>
 </template>
 
 <script lang="ts">
@@ -142,5 +146,12 @@ function requestSave() {
 <style>
 .show {
     display: block !important;
+}
+
+.modal-background-wrapper {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 1040;
 }
 </style>
