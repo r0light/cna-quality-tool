@@ -868,7 +868,7 @@ const EntityDetailsConfig: {
                 dialogMetaData: {
                     header: {
                         svgRepresentation: `<svg width="30" height="20">${dataAggregateSvgRepresentation()}</svg>`,
-                        text: "Data Aggregate Family: ",
+                        text: "Data Aggregate Family Config",
                         closeButton: false
                     },
                     footer: {
@@ -1154,7 +1154,7 @@ const EntityDetailsConfig: {
                     dialogMetaData: {
                         header: {
                             svgRepresentation: `<svg width="30" height="20">${backingDataSvgRepresentation()}</svg>`,
-                            text: "Backing Data Family: ",
+                            text: "Backing Data Family Config ",
                             closeButton: false
                         },
                         footer: {
