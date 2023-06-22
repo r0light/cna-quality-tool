@@ -19,8 +19,7 @@ export type InputProperties = {
 }
 
 export type JointJsConfig = {
-    isProperty: boolean,
-    hasProvidedMethod: boolean,
+    propertyType: "attribute" | "providedMethod" | "property" | "customProperty" | "free",
     modelPath: string,
     defaultPropPath: string,
     minPath: string,
@@ -187,8 +186,7 @@ function parseProperties(properties): PropertyConfig[] {
             show: true,
             provideEnterButton: false,
             jointJsConfig: { //TODO add values 
-                isProperty: false,
-                hasProvidedMethod: false,
+                propertyType: "property",
                 modelPath: "entity/properties/" + property.getKey,
                 defaultPropPath: "",
                 minPath: "", // TODO set dynamically?
@@ -345,8 +343,7 @@ const DetailsSidebarConfig: {
                     show: true,
                     provideEnterButton: false,
                     jointJsConfig: {
-                        isProperty: false,
-                        hasProvidedMethod: false,
+                        propertyType: "attribute",
                         modelPath: "label/textWrap/text",
                         defaultPropPath: "",
                         minPath: "",
@@ -376,8 +373,7 @@ const DetailsSidebarConfig: {
                     show: true,
                     provideEnterButton: false,
                     jointJsConfig: {
-                        isProperty: false,
-                        hasProvidedMethod: false,
+                        propertyType: "attribute",
                         modelPath: "label/fontSize",
                         defaultPropPath: "defaults/fontSize",
                         minPath: "",
@@ -411,8 +407,7 @@ const DetailsSidebarConfig: {
                     show: true,
                     provideEnterButton: true,
                     jointJsConfig: {
-                        isProperty: true,
-                        hasProvidedMethod: true,
+                        propertyType: "providedMethod",
                         modelPath: "size/width",
                         defaultPropPath: "defaults/size/width",
                         minPath: "defaults/size/width",
@@ -440,8 +435,7 @@ const DetailsSidebarConfig: {
                     show: true,
                     provideEnterButton: true,
                     jointJsConfig: {
-                        isProperty: true,
-                        hasProvidedMethod: true,
+                        propertyType: "providedMethod",
                         modelPath: "size/height",
                         defaultPropPath: "defaults/size/height",
                         minPath: "defaults/size/height",
@@ -466,8 +460,7 @@ const DetailsSidebarConfig: {
                     show: true,
                     provideEnterButton: false,
                     jointJsConfig: {
-                        isProperty: false,
-                        hasProvidedMethod: false,
+                        propertyType: "free",
                         modelPath: "",
                         defaultPropPath: "",
                         minPath: "",
@@ -496,8 +489,7 @@ const DetailsSidebarConfig: {
                     show: false,
                     provideEnterButton: false,
                     jointJsConfig: {
-                        isProperty: true,
-                        hasProvidedMethod: false,
+                        propertyType: "property",
                         modelPath: "defaults/size",
                         defaultPropPath: "",
                         minPath: "",
@@ -536,8 +528,7 @@ const DetailsSidebarConfig: {
                     show: true,
                     provideEnterButton: true,
                     jointJsConfig: {
-                        isProperty: true,
-                        hasProvidedMethod: true,
+                        propertyType: "providedMethod",
                         modelPath: "position/x",
                         defaultPropPath: "",
                         minPath: "",
@@ -565,8 +556,7 @@ const DetailsSidebarConfig: {
                     show: true,
                     provideEnterButton: true,
                     jointJsConfig: {
-                        isProperty: true,
-                        hasProvidedMethod: true,
+                        propertyType: "providedMethod",
                         modelPath: "position/y",
                         defaultPropPath: "",
                         minPath: "",
@@ -632,8 +622,7 @@ const EntityDetailsConfig: {
                 provideEnterButton: false,
                 show: false,
                 jointJsConfig: {
-                    isProperty: true,
-                    hasProvidedMethod: false,
+                    propertyType: "property",
                     modelPath: "entity/embedded",
                     defaultPropPath: "",
                     minPath: "",
@@ -667,8 +656,7 @@ const EntityDetailsConfig: {
                 provideEnterButton: false,
                 show: false,
                 jointJsConfig: {
-                    isProperty: true,
-                    hasProvidedMethod: false,
+                    propertyType: "property",
                     modelPath: "entity/embedded",
                     defaultPropPath: "",
                     minPath: "",
@@ -702,8 +690,7 @@ const EntityDetailsConfig: {
                 show: true,
                 provideEnterButton: true,
                 jointJsConfig: {
-                    isProperty: false,
-                    hasProvidedMethod: false,
+                    propertyType: "property",
                     modelPath: "entity/properties/relationType",
                     defaultPropPath: "",
                     minPath: "",
@@ -742,8 +729,7 @@ const EntityDetailsConfig: {
             provideEnterButton: false,
             show: true,
             jointJsConfig: {
-                isProperty: false,
-                hasProvidedMethod: false,
+                propertyType: "free",
                 modelPath: "",
                 defaultPropPath: "",
                 minPath: "",
@@ -772,8 +758,7 @@ const EntityDetailsConfig: {
             provideEnterButton: false,
             show: false,
             jointJsConfig: {
-                isProperty: true,
-                hasProvidedMethod: false,
+                propertyType: "property",
                 modelPath: "entity/embedded",
                 defaultPropPath: "",
                 minPath: "",
@@ -816,8 +801,7 @@ const EntityDetailsConfig: {
             provideEnterButton: false,
             show: true,
             jointJsConfig: {
-                isProperty: false,
-                hasProvidedMethod: false,
+                propertyType: "property",
                 modelPath: "entity/properties/dataAggregate-parentRelation",
                 defaultPropPath: "",
                 minPath: "",
@@ -846,15 +830,14 @@ const EntityDetailsConfig: {
             provideEnterButton: false,
             show: true,
             jointJsConfig: {
-                isProperty: true,
-                hasProvidedMethod: false,
+                propertyType: "property",
                 modelPath: "entity/properties/assignedFamily",
                 defaultPropPath: "",
                 minPath: "",
                 min: ""
             }
         }, {
-            providedFeature: "dataAggregate-familyConfig",
+            providedFeature: "dataAggregate-familyConfig-wrapper",
             contentType: PropertyContentType.TABLE_DIALOG,
             label: "– Family:",
             helpText: "",
@@ -873,8 +856,7 @@ const EntityDetailsConfig: {
             show: true,
             provideEnterButton: false,
             jointJsConfig: {
-                isProperty: false,
-                hasProvidedMethod: false,
+                propertyType: "free",
                 modelPath: "",
                 defaultPropPath: "",
                 minPath: "",
@@ -908,7 +890,7 @@ const EntityDetailsConfig: {
                                     clicked "Save". In case you cancel and change your entity selection, all your changes will be lost. While you keep the selection of this Data Aggregate entity, your changes will be remembered.`
                             },
                             contentItems: [{
-                                providedFeature: "dataAggregate-familyConfigTable",
+                                providedFeature: "dataAggregate-familyConfig",
                                 contentType: PropertyContentType.TABLE,
                                 label: "",
                                 helpText: "",
@@ -922,8 +904,7 @@ const EntityDetailsConfig: {
                                 provideEnterButton: false,
                                 show: true,
                                 jointJsConfig: {
-                                    isProperty: false,
-                                    hasProvidedMethod: false,
+                                    propertyType: "customProperty",
                                     modelPath: "",
                                     defaultPropPath: "",
                                     minPath: "",
@@ -975,8 +956,7 @@ const EntityDetailsConfig: {
                 provideEnterButton: false,
                 show: true,
                 jointJsConfig: {
-                    isProperty: false,
-                    hasProvidedMethod: false,
+                    propertyType: "free",
                     modelPath: "",
                     defaultPropPath: "",
                     minPath: "",
@@ -1005,8 +985,7 @@ const EntityDetailsConfig: {
                 provideEnterButton: false,
                 show: false,
                 jointJsConfig: {
-                    isProperty: true,
-                    hasProvidedMethod: false,
+                    propertyType: "property",
                     modelPath: "entity/embedded",
                     defaultPropPath: "",
                     minPath: "",
@@ -1033,9 +1012,8 @@ const EntityDetailsConfig: {
                 provideEnterButton: false,
                 show: false,
                 jointJsConfig: {
-                    isProperty: false,
-                    hasProvidedMethod: false,
-                    modelPath: "entity/properties/involvedLinks",
+                    propertyType: "free",
+                    modelPath: "",
                     defaultPropPath: "",
                     minPath: "",
                     min: ""
@@ -1061,7 +1039,7 @@ const EntityDetailsConfig: {
                             {
                                 contentGroupMetaData: {
                                     id: "backingData-includedData",
-                                    headline: "Included Backing Data entities" + '  ( <svg width="30" height="20">' + backingDataSvgRepresentation() + '</svg>)',
+                                    headline: "Included Data",
                                     text: `The following table shows all data elements included in this Backing Data entity. In case you want to add a new entry, the following section provides two text element boxes you can use to 
                                         provide the information and then add it using the plus button. However, your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all 
                                         your changes will be lost. While you keep the selection of this Backing Data entity, your changes will be remembered.`,
@@ -1082,9 +1060,8 @@ const EntityDetailsConfig: {
                                         provideEnterButton: false,
                                         show: true,
                                         jointJsConfig: {
-                                            isProperty: false,
-                                            hasProvidedMethod: false,
-                                            modelPath: "",
+                                            propertyType: "customProperty",
+                                            modelPath: "entity/properties/includedData",
                                             defaultPropPath: "",
                                             minPath: "",
                                             min: ""
@@ -1138,8 +1115,7 @@ const EntityDetailsConfig: {
                 provideEnterButton: false,
                 show: true,
                 jointJsConfig: {
-                    isProperty: true,
-                    hasProvidedMethod: false,
+                    propertyType: "property",
                     modelPath: "entity/properties/assignedFamily",
                     defaultPropPath: "",
                     minPath: "",
@@ -1147,7 +1123,7 @@ const EntityDetailsConfig: {
                 }
             },
             {
-                providedFeature: "backingData-familyConfig",
+                providedFeature: "backingData-familyConfig-wrapper",
                 contentType: PropertyContentType.TABLE_DIALOG,
                 label: "– Family:",
                 helpText: "",
@@ -1166,8 +1142,7 @@ const EntityDetailsConfig: {
                 show: true,
                 provideEnterButton: false,
                 jointJsConfig: {
-                    isProperty: false,
-                    hasProvidedMethod: false,
+                    propertyType: "free",
                     modelPath: "",
                     defaultPropPath: "",
                     minPath: "",
@@ -1194,7 +1169,7 @@ const EntityDetailsConfig: {
                             {
                                 contentGroupMetaData: {
                                     id: "backingData-familyConfig-table",
-                                    headline: "Included Data",
+                                    headline: "Included Backing Data entities" + '  ( <svg width="30" height="20">' + backingDataSvgRepresentation() + '</svg>)',
                                     text: `The following table shows all existing Backing Data entities within this System. You can select which ones of the following Backing Data entities you want to include in this
                                     family. Note that if you select a Backing Data and save your changes, the labels of the selected Backing Data entities might change since they have to be equal to the family name.
                                     Additionally, if you deselect entities that have previously been part of this family, their label will be reset to "Backing Data". However, your changes won't be adopted until you 
@@ -1202,7 +1177,7 @@ const EntityDetailsConfig: {
                                 },
                                 contentItems: [
                                     {
-                                        providedFeature: "backingData-includedDataTable",
+                                        providedFeature: "backingData-familyConfig",
                                         contentType: PropertyContentType.TABLE,
                                         label: "",
                                         helpText: "",
@@ -1216,8 +1191,7 @@ const EntityDetailsConfig: {
                                         provideEnterButton: false,
                                         show: true,
                                         jointJsConfig: {
-                                            isProperty: false,
-                                            hasProvidedMethod: false,
+                                            propertyType: "customProperty",
                                             modelPath: "",
                                             defaultPropPath: "",
                                             minPath: "",
@@ -1270,8 +1244,7 @@ const EntityDetailsConfig: {
                 },
                 provideEnterButton: false,
                 jointJsConfig: {
-                    isProperty: true,
-                    hasProvidedMethod: false,
+                    propertyType: "property",
                     modelPath: "entity/properties/referredEndpoint",
                     defaultPropPath: "",
                     minPath: "",
@@ -1299,9 +1272,8 @@ const EntityDetailsConfig: {
                 },
                 provideEnterButton: false,
                 jointJsConfig: {
-                    isProperty: false,
-                    hasProvidedMethod: false,
-                    modelPath: "entity/properties/involvedLinks",
+                    propertyType: "free",
+                    modelPath: "",
                     defaultPropPath: "",
                     minPath: "",
                     min: ""
@@ -1353,9 +1325,8 @@ const EntityDetailsConfig: {
                                         provideEnterButton: false,
                                         show: true,
                                         jointJsConfig: {
-                                            isProperty: false,
-                                            hasProvidedMethod: false,
-                                            modelPath: "",
+                                            propertyType: "customProperty",
+                                            modelPath: "entity/properties/involvedLinks",
                                             defaultPropPath: "",
                                             minPath: "",
                                             min: ""

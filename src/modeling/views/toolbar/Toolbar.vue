@@ -91,7 +91,7 @@ import ToolbarConfig from "../../config/toolbarConfiguration";
 import ModalDialog from "../modalDialog";
 import UIModalDialog from "../../representations/guiElements.dialog";
 import { addSelectionToolToEntity } from "../tools/entitySelectionTools";
-import ButtonGroup from './toolbar/ButtonGroup.vue';
+import ButtonGroup from './ButtonGroup.vue';
 
 export type ToolbarButton = {
     buttonType: string,
