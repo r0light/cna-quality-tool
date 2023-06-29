@@ -4,6 +4,28 @@ import { TOSCA_Service_Template } from '../tosca-types/template-types';
 import { readdir } from 'node:fs/promises';
 import path from 'node:path';
 
+
+startParsingAllProfiles("../../../tosca-profiles")
+
+async function startParsingAllProfiles(profilesFolder: string) {
+    const directories = await readdir(profilesFolder);
+    for (const directory of directories) {
+        const fullDirectoryPath = path.join(profilesFolder, directory)
+        fs.lstat(fullDirectoryPath, (err, stats) => {
+            if(err) {
+                return console.error(`Error reading: ${fullDirectoryPath}: ${err}`);
+            }
+            if (stats.isDirectory) {
+                generateFromProfile(fullDirectoryPath).then(profile => {
+                    saveGeneratedProfile(directory, profile);
+                }).catch(err => {
+                    console.error("Profile parsing failed!: " + err);
+                })
+            }
+        });
+    }
+}
+
 async function generateFromProfile(profileDirectory: string) {
 
     const profile: TOSCA_Service_Template = {
@@ -29,7 +51,7 @@ async function generateFromProfile(profileDirectory: string) {
     try {
         const files = await readdir(profileDirectory);
         for (const file of files) {
-            if (!(file.endsWith(".yaml") || file.endsWith(".yml"))) {
+            if (!(file.endsWith(".yaml") || file.endsWith(".yml") || file.endsWith(".tosca"))) {
                 continue;
             }
 
@@ -38,6 +60,9 @@ async function generateFromProfile(profileDirectory: string) {
             if (profileDocument.namespace) {
                 // assume that if the file has a namespace it is the file for the whole profile
                 profile.namespace = profileDocument.namespace;
+
+                profile.tosca_definitions_version = profileDocument.tosca_definitions_version;
+
                 profile.metadata = profileDocument.metadata;
                 profile.description = profileDocument.description;
             }
@@ -119,9 +144,3 @@ async function saveGeneratedProfile(name: string, profile: TOSCA_Service_Templat
     })
 
 }
-
-let simpleProfile = generateFromProfile("../../../tosca-profiles/tosca-simple-profile-for-yaml-v1.3").then(profile => {
-    saveGeneratedProfile("tosca-simple-profile-for-yaml-v1.3", profile);
-}).catch(err => {
-    console.error("Profile parsing failed!: " + err);
-})

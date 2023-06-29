@@ -1,0 +1,21 @@
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+metadata:
+  template_name: cna-modeling-tosca-profile
+  template_author: Distributed Systems Group
+  template_version: 0.1.0
+
+description: >-
+  This TOSCA definitions document contains the CNA Modeling relationship types.
+
+relationship_types:
+
+  cna.qualityModel.entities.ConnectsTo.Link:
+    derived_from: tosca.relationships.ConnectsTo
+    description: Relationship Type to model Link entities
+    properties:
+      # Allows modeling the specific Endpoint the Link addresses, which represents the connection between the Components
+      target_endpoint:
+        type: string
+        required: true
+        description: The Endpoint to which the linked Component connects.
