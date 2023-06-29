@@ -135,6 +135,7 @@ onMounted(() => {
             cellView.showTools();
         },
         "link:pointerclick": function (linkView: dia.LinkView, evt) {
+
             linkView.unhighlight();
 
             setCurrentSelection(linkView);
@@ -188,6 +189,7 @@ onMounted(() => {
     emit("update:paper", paper);
 })
 
+/* TODO not needed?
 onUpdated(() => {
     // react on changed entity selection, to make sure that only for one element the tools are shown
     if (props.currentElementSelection) {
@@ -195,6 +197,7 @@ onUpdated(() => {
         props.currentElementSelection.showTools();
     }
 })
+*/
 
 
 function setCurrentSelection(cell: dia.ElementView | dia.LinkView) {

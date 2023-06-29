@@ -370,7 +370,6 @@ onUpdated(() => {
             break;
         case EntityTypes.REQUEST_TRACE:
             const externalEndpoints = props.graph.getElements().filter(element => element.prop("entity/type") === EntityTypes.EXTERNAL_ENDPOINT);
-            console.log(externalEndpoints)
             let externalEndpointOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "referredEndpoint");
             const selectedExternalEndpoint = props.selectedEntity.model.prop(externalEndpointOption.jointJsConfig.modelPath);
             const dropdownOptions = externalEndpoints.map((endpoint) => {
@@ -454,7 +453,12 @@ onUpdated(() => {
     // remove previously registered event callbacks
     props.selectedEntity.model.off(null, null, "detailsSidebar");
 
-    props.selectedEntity.model.on("change:parent", () => {
+    props.selectedEntity.model.on("change:parent", (cell: dia.Cell) => {
+
+        if (cell.id !== props.selectedEntity.model.id) {
+            return;
+        }
+        //update only if the cell is still selected
 
         let parent: dia.Cell = props.selectedEntity.model.getParentCell();
         let parentId: string = "";
@@ -604,8 +608,6 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
             selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, propertyOption.value);
         } else if (propertyOption.jointJsConfig.propertyType === "customProperty") {
 
-            console.log("enter ")
-
             switch (selectedEntityElement.prop("entity/type")) {
                 case EntityTypes.DATA_AGGREGATE:
                     if (propertyOption.providedFeature === "dataAggregate-familyConfig") {
@@ -641,11 +643,9 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                     break;
                 case EntityTypes.REQUEST_TRACE:
                     if (propertyOption.providedFeature === "requestTrace-involvedLinks") {
-                        console.log(propertyOption.tableRows)
                         let selectedLinkIDs = propertyOption.tableRows.filter(row => row.columns["included"]["checked"])
                             .map(row => row.columns["included"]["id"]);
-                        console.log(selectedLinkIDs)
-                        selectedEntityElement.prop(findInSectionsByFeature(selectedEntityPropertyGroups.value, "involvedLinks-wrapper").jointJsConfig.modelPath, selectedLinkIDs);
+                        selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, selectedLinkIDs);
                         continue;
                     }
                     break;
