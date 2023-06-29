@@ -67,7 +67,7 @@ ts-node profileParser.ts
 
 - [x] Delete element with delete button
 - [x] Do not let infrastructure element grow in height
-- [ ] Data Aggregate / Backing Data Family selection: // TODO handle family topic
+- [x] Data Aggregate / Backing Data Family selection: // TODO handle family topic
 - [ ] make Paper draggable with mouse (https://stackoverflow.com/questions/28431384/how-to-make-a-paper-draggable)
 - [ ] increase element size to ensure embedded elements are within the element when added
 
