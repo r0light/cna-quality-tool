@@ -1,5 +1,5 @@
-import { TOSCA_Datatype, TOSCA_Artifact, TOSCA_Attribute_Assignment, TOSCA_Import, TOSCA_Interface, TOSCA_Metadata, TOSCA_Node_Filter, TOSCA_Operation_Implementation, TOSCA_Parameter, TOSCA_Property, TOSCA_Property_Assignment, TOSCA_Repository, TOSCA_Trigger, TOSCA_Workflow_Precondition, TOSCA_Workflow_Step } from "./core-types"
-import { TOSCA_Capability, TOSCA_Interface2, TOSCA_Relationship, TOSCA_Group, TOSCA_Policy } from "./entity-types"
+import { TOSCA_Datatype, TOSCA_Attribute_Assignment, TOSCA_Import, TOSCA_Interface, TOSCA_Metadata, TOSCA_Node_Filter, TOSCA_Operation_Implementation, TOSCA_Parameter, TOSCA_Property, TOSCA_Property_Assignment, TOSCA_Repository, TOSCA_Trigger, TOSCA_Workflow_Precondition, TOSCA_Workflow_Step } from "./core-types"
+import { TOSCA_Capability, TOSCA_Artifact, TOSCA_Interface2, TOSCA_Relationship, TOSCA_Group, TOSCA_Policy, TOSCA_Node } from "./entity-types"
 
 
 // 3.8.1 Capability assignment
@@ -232,9 +232,14 @@ export type TOSCA_Service_Template = {
         [relationshipKey: string]: TOSCA_Relationship
     },
     node_types?: {
+        [grouKey: string]: TOSCA_Node
+    },
+    group_types?: {
         [grouKey: string]: TOSCA_Group
     },
-    policy_types?: TOSCA_Policy[]
+    policy_types?: {
+        [policyKey: string]: TOSCA_Policy
+    },
     topology_template?: TOSCA_Topology_Template
 }
 

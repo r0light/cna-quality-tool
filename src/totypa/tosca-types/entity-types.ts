@@ -14,31 +14,35 @@ export type TOSCA_Capability = {
     type?: string,
     description?: string,
     derived_from?: string,
-    properties?: TOSCA_Property[],
-    attributes?: TOSCA_Attribute[],
+    properties?: {
+        [propertyKey: string]: TOSCA_Property
+    }
+    attributes?: {
+        [attributeKey: string]: TOSCA_Attribute,
+    }
     valid_source_types?: string[],
-    occurrences?: number[]
+    occurrences?: (string | number)[]
 }
 
 // 3.7.3 Requirement definition / 3.7.8 Requirement Type
 export type TOSCA_Requirement = {
     capability: string,
     node?: string,
-    relationship?: string | { type: string, interfaces: { [interfaceKey: string]: TOSCA_Interface}}
-    occurrences?: string[],
+    relationship?: string | { type: string, interfaces: { [interfaceKey: string]: TOSCA_Interface } }
+    occurrences?: (string| number)[],
     description?: string
 }
 
 // 3.7.4 Artifact Type
-export type TOSCA_Artifact  = {
+export type TOSCA_Artifact = {
     derived_from?: string,
     version?: string,
     metadata?: TOSCA_Metadata,
     description?: string
     mime_type?: string,
     file_ext?: string[]
-    properties?: { 
-        [propertyKey: string] : TOSCA_Property
+    properties?: {
+        [propertyKey: string]: TOSCA_Property
     }
 }
 
@@ -52,7 +56,7 @@ export type TOSCA_Interface2 = {
     operations?: {
         [operationKey: string]: TOSCA_Operation
     }
-    notifications: {
+    notifications?: {
         [notificationKey: string]: TOSCA_Notification
     }
 }
@@ -67,12 +71,14 @@ export type TOSCA_Node = {
         [propertyKey: string]: TOSCA_Property
     },
     attributes?: {
-        [attributeKey: string]: TOSCA_Attribute 
+        [attributeKey: string]: TOSCA_Attribute
     },
-    requirements?: TOSCA_Requirement[],
+    requirements?: {
+        [requirementKey: string]: TOSCA_Requirement
+    }[],
     capabilities?: {
-        [capabilityKey: string]: TOSCA_Capability
-    }
+        [capabilityKey: string]: TOSCA_Capability | string
+    },
     interfaces?: {
         [interfaceKey: string]: TOSCA_Interface
     },
@@ -91,7 +97,7 @@ export type TOSCA_Relationship = {
         [propertyKey: string]: TOSCA_Property
     },
     attributes?: {
-        [attributeKey: string]: TOSCA_Attribute 
+        [attributeKey: string]: TOSCA_Attribute
     },
     interfaces?: {
         [interfaceKey: string]: TOSCA_Interface
@@ -109,7 +115,7 @@ export type TOSCA_Group = {
         [propertyKey: string]: TOSCA_Property
     },
     attributes?: {
-        [attributeKey: string]: TOSCA_Attribute 
+        [attributeKey: string]: TOSCA_Attribute
     },
     members?: string[]
 }

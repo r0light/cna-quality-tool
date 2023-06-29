@@ -24,6 +24,26 @@ Afterwards you can go to [http://localhost:5173](http://localhost:5173)
 
 The application uses:
 - the open-source modeling library [JointJS](https://www.jointjs.com/opensource) published under the [Open Source Mozilla Public License Version 2.0](https://www.mozilla.org/en-US/MPL/2.0/). The modeling application used the library as-is.
+- [Vue.js](https://vuejs.org/)
+
+## Generate objects from TOSCA profiles
+
+The totypa (TOSCA Typescript parser) library provides Typescript type definitions for the TOSCA standard and parsers for generating Javascript objects out of TOSCA Profile definitions so that they can be used within the app.
+
+To be able to directly run Typescript files, install `ts-node`:
+
+```sh
+npm install -g ts-node
+```
+
+*Note: this installs ts-node globally on your system, if you do not want that, look for local installation possibilites.*
+
+Then run the profileParser in the following way:
+
+```sh
+cd src/totypa/parsers
+ts-node profileParser.ts
+```
 
 ## TODO
 

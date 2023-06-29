@@ -75,7 +75,7 @@ export type TOSCA_Property_Status = "supported" | "unsupported" | "experimental"
 
 // 3.6.10 Property definition
 export type TOSCA_Property = {
-    type: string,
+    type?: string,
     description?: string,
     required?: boolean,
     default?: any,
@@ -159,13 +159,14 @@ export type TOSCA_Notification = {
 
 // 3.6.20 Interface definition
 export type TOSCA_Interface = {
+    type?: string,
     description?: string,
     derived_from?: string,
     inputs?: { [parameterKey: string]: TOSCA_Property_Schema } | { [propertyKey: string]: any },
     operations?: {
         [operationKey: string]: TOSCA_Operation
     }
-    notifications: {
+    notifications?: {
         [notificationKey: string]: TOSCA_Notification
     }
 }
@@ -209,7 +210,7 @@ export type TOSCA_Datatype_TimeInterval = {
 
 // TODO remove here? this should be generated
 const data_types: { [datatypeKey: string]: TOSCA_Datatype } = {
-    // 5.3.7 tosca.datatypes.TimeInterval
+    
     "tosca.datatypes.TimeInterval": {
         derived_from: "tosca.datatypes.Root",
         properties: {
