@@ -252,6 +252,15 @@ onUpdated(() => {
             parentRelationOption.label = getParentRelationLabel(props.selectedEntity.model.prop("entity/embedded"));
             let chooseEditModeOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "dataAggregate-chooseEditMode");
             chooseEditModeOption.show = computed(() => findInSectionsByFeature(selectedEntityPropertyGroups.value, "embedded").value !== "");
+
+            let assignedFamilyOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "dataAggregate-assignedFamily");
+            assignedFamilyOption.show = computed(() => {
+                if (findInSectionsByFeature(selectedEntityPropertyGroups.value, "embedded").value !== "") {
+                    return findInSectionsByFeature(selectedEntityPropertyGroups.value, "dataAggregate-chooseEditMode").checked
+                } else {
+                    return false;
+                }
+            });
             let familyConfigOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "dataAggregate-familyConfig-wrapper");
             familyConfigOption.includeFormCheck = false;
             familyConfigOption.show = computed(() => {
@@ -270,7 +279,7 @@ onUpdated(() => {
                 let parent = dataAggregate.getParentCell();
                 let isValid = !!parent
                 let parentName = isValid ? parent.attr("label/textWrap/text") : "-";
-                let isSameFamily = dataAggregate.prop("entity/properties/assignedFamily").length !== 0 && dataAggregate.prop("entity/properties/assignedFamily").localeCompare(props.selectedEntity.model.prop("entity/properties/assignedFamily")) === 0;
+                let isSameFamily = dataAggregate.prop(assignedFamilyOption.jointJsConfig.modelPath).length !== 0 && dataAggregate.prop(assignedFamilyOption.jointJsConfig.modelPath).localeCompare(props.selectedEntity.model.prop(assignedFamilyOption.jointJsConfig.modelPath)) === 0;
                 familyTableConfig.tableRows.push({
                     attributes: {
                         isTheCurrentEntity: props.selectedEntity.model.id === dataAggregate.id,
@@ -279,7 +288,7 @@ onUpdated(() => {
                     },
                     columns: {
                         name: dataAggregate.attr("label/textWrap/text") ? dataAggregate.attr("label/textWrap/text") : "-",
-                        familyName: dataAggregate.prop("entity/properties/assignedFamily") ? dataAggregate.prop("entity/properties/assignedFamily") : "-",
+                        familyName: dataAggregate.prop(assignedFamilyOption.jointJsConfig.modelPath) ? dataAggregate.prop(assignedFamilyOption.jointJsConfig.modelPath) : "-",
                         parent: parentName,
                         included: {
                             contentType: PropertyContentType.CHECKBOX_WITHOUT_LABEL,
@@ -291,14 +300,7 @@ onUpdated(() => {
                 })
             })
 
-            let assignedFamilyOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "dataAggregate-assignedFamily");
-            assignedFamilyOption.show = computed(() => {
-                if (findInSectionsByFeature(selectedEntityPropertyGroups.value, "embedded").value !== "") {
-                    return findInSectionsByFeature(selectedEntityPropertyGroups.value, "dataAggregate-chooseEditMode").checked
-                } else {
-                    return false;
-                }
-            });
+  
             break;
         case EntityTypes.BACKING_DATA:
             let chooseBDEditModeOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "backingData-chooseEditMode");
@@ -319,26 +321,35 @@ onUpdated(() => {
             includedDataOption.includeFormCheck = false;
             includedDataOption.value = props.selectedEntity.model.prop("entity/properties/includedData");
 
-            let bDfamilyConfigOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "backingData-familyConfig-wrapper");
-            bDfamilyConfigOption.includeFormCheck = false;
-            bDfamilyConfigOption.show = computed(() => {
+            let backingDataAssignedFamilyOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "backingData-assignedFamily");
+            backingDataAssignedFamilyOption.show = computed(() => {
+                if (findInSectionsByFeature(selectedEntityPropertyGroups.value, "embedded").value !== "") {
+                    return findInSectionsByFeature(selectedEntityPropertyGroups.value, "backingData-chooseEditMode").checked
+                } else {
+                    return false;
+                }
+            }
+            );
+            let backingDataFamilyConfigOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "backingData-familyConfig-wrapper");
+            backingDataFamilyConfigOption.includeFormCheck = false;
+            backingDataFamilyConfigOption.show = computed(() => {
                 if (findInSectionsByFeature(selectedEntityPropertyGroups.value, "embedded").value !== "") {
                     return !findInSectionsByFeature(selectedEntityPropertyGroups.value, "backingData-chooseEditMode").checked
                 } else {
                     return true;
                 }
             });
-            let bDfamilyTableConfig = (bDfamilyConfigOption.buttonActionContent.dialogContent as FormContentData).groups[0].contentItems[0];
-            bDfamilyTableConfig.includeFormCheck = false;
+            let backingDataFamilyTableConfig = (backingDataFamilyConfigOption.buttonActionContent.dialogContent as FormContentData).groups[0].contentItems[0];
+            backingDataFamilyTableConfig.includeFormCheck = false;
             // clear table rows
-            bDfamilyTableConfig.tableRows.length = 0;
+            backingDataFamilyTableConfig.tableRows.length = 0;
             // TODO make sure this does not have to be cleared by avoiding that the original config is changed, which is currently the case
             props.graph.getElements().filter(element => element.prop("entity/type") === EntityTypes.BACKING_DATA).forEach(backingData => {
                 let parent = backingData.getParentCell();
                 let isValid = !!parent
                 let parentName = isValid ? parent.attr("label/textWrap/text") : "-";
-                let isSameFamily = backingData.prop("entity/properties/assignedFamily").length !== 0 && backingData.prop("entity/properties/assignedFamily").localeCompare(props.selectedEntity.model.prop("entity/properties/assignedFamily")) === 0;
-                bDfamilyTableConfig.tableRows.push({
+                let isSameFamily = backingData.prop(backingDataAssignedFamilyOption.jointJsConfig.modelPath).length !== 0 && backingData.prop(backingDataAssignedFamilyOption.jointJsConfig.modelPath).localeCompare(props.selectedEntity.model.prop(backingDataAssignedFamilyOption.jointJsConfig.modelPath)) === 0;
+                backingDataFamilyTableConfig.tableRows.push({
                     attributes: {
                         isTheCurrentEntity: props.selectedEntity.model.id === backingData.id,
                         representationClass: isValid ? "validOption" : "invalidOption",
@@ -346,7 +357,7 @@ onUpdated(() => {
                     },
                     columns: {
                         name: backingData.attr("label/textWrap/text") ? backingData.attr("label/textWrap/text") : "-",
-                        familyName: backingData.prop("entity/properties/assignedFamily") ? backingData.prop("entity/properties/assignedFamily") : "-",
+                        familyName: backingData.prop(backingDataAssignedFamilyOption.jointJsConfig.modelPath) ? backingData.prop(backingDataAssignedFamilyOption.jointJsConfig.modelPath) : "-",
                         parent: parentName,
                         included: {
                             contentType: PropertyContentType.CHECKBOX_WITHOUT_LABEL,
@@ -358,15 +369,7 @@ onUpdated(() => {
                 })
             })
 
-            let bDassignedFamilyOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "backingData-assignedFamily");
-            bDassignedFamilyOption.show = computed(() => {
-                if (findInSectionsByFeature(selectedEntityPropertyGroups.value, "embedded").value !== "") {
-                    return findInSectionsByFeature(selectedEntityPropertyGroups.value, "backingData-chooseEditMode").checked
-                } else {
-                    return false;
-                }
-            }
-            );
+
             break;
         case EntityTypes.REQUEST_TRACE:
             const externalEndpoints = props.graph.getElements().filter(element => element.prop("entity/type") === EntityTypes.EXTERNAL_ENDPOINT);
@@ -399,16 +402,16 @@ onUpdated(() => {
             externalEndpointOption.dropdownOptions = dropdownOptions;
             externalEndpointOption.value = selectedExternalEndpoint;
 
-            //TODO prepare involved links selection
-            const existingLinks = props.graph.getLinks().filter((link) => { return link.prop("entity/type") === EntityTypes.LINK });
-            const selectedLinks: Set<dia.Cell.ID> = new Set(props.selectedEntity.model.prop("entity/properties/involvedLinks"));
-
+            // prepare involved links selection
             let involvedLinksWrapperConfig: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "involvedLinks-wrapper");
             let involvedLinksConfig = findInDialogByFeature(involvedLinksWrapperConfig.buttonActionContent, "requestTrace-involvedLinks");
             involvedLinksConfig.includeFormCheck = false;
+
+            const existingLinks = props.graph.getLinks().filter((link) => { return link.prop("entity/type") === EntityTypes.LINK });
+            const selectedLinks: Set<dia.Cell.ID> = new Set(props.selectedEntity.model.prop(involvedLinksConfig.jointJsConfig.modelPath));
+
             // clear table rows
             involvedLinksConfig.tableRows.length = 0;
-
             existingLinks.forEach((link) => {
                 let isInvalid = true;
                 let targetHasParent = false;
