@@ -8,10 +8,10 @@ type listOptions = {
     text: string
 }
 
-type propertyDatatype = "text" | "number" | "boolean" | "list"
+type propertyDatatype = "text" | "number" | "boolean" | "list" //TODO  | "map" | "range"
 
 /**
- * Class representing a Entity property
+ * Class representing an Entity property
  * @class
  */
 class EntityProperty {
@@ -28,10 +28,6 @@ class EntityProperty {
 
     #datatype: propertyDatatype; //constant text, number, boolean, list
 
-    #maxLength: number; // only needed for datatype number
-
-    #options: listOptions[]; // only needed for datatype list: objects {value: string, text: string}
-
     value: any;
 
     /**
@@ -46,15 +42,13 @@ class EntityProperty {
      * @param {options} options only for the "list" type, an array of options to choose from
      * @param {value} value the actual value of this property
      */
-    constructor(key: string, name: string, description: string, example: string, required: boolean, datatype: propertyDatatype, maxLength: number, options: listOptions[], value: any) {
+    constructor(key: string, name: string, description: string, example: string, required: boolean, datatype: propertyDatatype, value: any) {
         this.#key = key;
         this.#name = name;
         this.#description = description;
         this.#example = example;
         this.#required = required;
         this.#datatype = datatype;
-        this.#maxLength = maxLength;
-        this.#options = options;
         this.value = value;
     }
 
@@ -82,14 +76,64 @@ class EntityProperty {
         return this.#datatype;
     }
 
+
+}
+
+
+class TextEntityProperty extends EntityProperty {
+
+    #maxLength: number;
+
+    #proposedOptions: listOptions[]
+
+    constructor(key: string, name: string, description: string, example: string, required: boolean,  maxLength: number, options: listOptions[], value: string) {
+        super(key, name, description, example, required, "text", value);
+        this.#maxLength = maxLength;
+        this.#proposedOptions = options;
+    }
+
     get getMaxLength() {
         return this.#maxLength;
     }
 
     get getOptions() {
-        return this.#options;
+        return this.#proposedOptions;
     }
 
 }
 
-export { EntityProperty };
+class NumberEntityProperty extends EntityProperty {
+
+    #maximumValue: number;
+
+    #minimumValue: number;
+
+    constructor(key: string, name: string, description: string, example: string, required: boolean, maximumValue: number, minimumValue: number, value: number) {
+        super(key, name, description, example, required, "number", value);
+        this.#maximumValue = maximumValue;
+        this.#minimumValue = minimumValue;
+    }
+
+    get getMaximum() {
+        return this.#maximumValue;
+    }
+
+    get getMinimum() {
+        return this.#minimumValue;
+    }
+
+
+}
+
+
+class ListEntityProperty extends EntityProperty {
+
+    constructor(key: string, name: string, description: string, example: string, required: boolean, value: any[]) {
+        super(key, name, description, example, required, "list", value);
+    }
+
+}
+
+
+
+export { EntityProperty, TextEntityProperty, NumberEntityProperty };

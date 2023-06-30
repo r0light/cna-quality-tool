@@ -1,5 +1,5 @@
 import { Component } from './component'
-import { EntityProperty } from './entityProperty';
+import { EntityProperty, NumberEntityProperty, TextEntityProperty } from './entityProperty';
 
 /**
  * The module for aspects related to a Component quality model Entity.
@@ -8,27 +8,25 @@ import { EntityProperty } from './entityProperty';
 
 function getStorageBackingServiceProperties() {
     return [
-        new EntityProperty(
+        new TextEntityProperty(
             "databaseName",
             "Database Name:",
             "The name of the database",
             "e.g. Order",
             false,
-            "text",
             0,
             [],
             ""
         ),
-        new EntityProperty(
+        new NumberEntityProperty(
             "databasePort",
             "Port:",
             "The port of the database",
             "e.g. 3306",
             false,
-            "number",
-            4,
-            [],
-            ""
+            65535,
+            1,
+            0
         )
     ]
 }

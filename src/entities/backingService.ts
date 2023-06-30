@@ -1,4 +1,4 @@
-import { EntityProperty } from './entityProperty'
+import { EntityProperty, TextEntityProperty } from './entityProperty'
 import { Component } from './component'
 import { Infrastructure } from './infrastructure'
 
@@ -9,12 +9,11 @@ import { Infrastructure } from './infrastructure'
 
 function getBackingServiceProperties() {
     return [
-        new EntityProperty("providedFunctionality", 
+        new TextEntityProperty("providedFunctionality", 
         "Provided Functionality:", 
         "A short description of the provided functionality.",
         "e.g. Logging",
         false,
-        "text",
         0,
         [],
         "")

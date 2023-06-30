@@ -11,7 +11,6 @@ description: >-
 
 node_types:
 
-
   cna.qualityModel.entities.Root.Component:
     derived_from: tosca.nodes.Root
     description: Node Type to model Component entities

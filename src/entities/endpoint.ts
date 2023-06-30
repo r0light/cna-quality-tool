@@ -1,4 +1,4 @@
-import { EntityProperty } from "./entityProperty";
+import { EntityProperty, NumberEntityProperty, TextEntityProperty } from "./entityProperty";
 
 /**
  * The module for aspects related to a Endpoint quality model Entity.
@@ -7,13 +7,12 @@ import { EntityProperty } from "./entityProperty";
 
 function getEndpointProperties() {
     return [
-        new EntityProperty(
+        new TextEntityProperty(
             "endpointType",
             "Endpoint Type:",
             "The type of endpoint, can be REST, Topic, ...",
             "e.g. GET",
             false,
-            "list",
             0,
             [{
                 value: "GET",
@@ -33,27 +32,25 @@ function getEndpointProperties() {
             }
             ],
             ""),
-        new EntityProperty(
+        new TextEntityProperty(
             "endpointPath",
             "Endpoint Path:",
             "The path where this endpoint is reachable",
             "e.g. /orders",
             false,
-            "text",
             0,
             [],
             ""
         ),
-        new EntityProperty(
+        new NumberEntityProperty(
             "port",
             "Port:",
             "The port where this endpoint is available",
             "e.g. 3306",
             false,
-            "number",
-            4,
-            [],
-            ""
+            65535,
+            1,
+            0
         )
     ]
 }

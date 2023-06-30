@@ -45,7 +45,11 @@
                         :disabled="option.inputProperties.disabled" :required="option.inputProperties.required"
                         :placeholder="option.attributes.placeholder" v-model="option.value"
                         :aria-describedby="option.helpTextId" :data-property-type="groupId"
+                        :list="option.providedFeature + '-datalist'"
                         v-on:keydown.enter.prevent="onEnterProperties([option])">
+                        <datalist :id="option.providedFeature + '-datalist'">
+                            <option v-for="suggestOption of option.attributes.suggestedValues" :value="suggestOption.value">{{ suggestOption.text }}</option>
+                        </datalist>
                 </div>
                 <input v-if="option.contentType === PropertyContentType.CHECKBOX" :id="option.providedFeature"
                     class="form-check-input" type="checkbox" :class="option.validationState"
@@ -194,7 +198,7 @@
 <script lang="ts">
 import type { ComputedRef, } from 'vue';
 import type { dia } from 'jointjs';
-import { PropertyContentType, CheckboxPropertyConfig, DropdownPropertyConfig, InputProperties, JointJsConfig, ListPropertyConfig, NumberPropertyConfig, NumberRangePropertyConfig, PropertyConfig, TextAreaPropertyConfig, TextPropertyConfig, TogglePropertyConfig, TableDialogPropertyConfig, TablePropertyConfig, DynamicListPropertyConfig, ListElementField } from '../../config/detailsSidebarConfig';
+import { PropertyContentType, CheckboxPropertyConfig, DropdownPropertyConfig, InputProperties, JointJsConfig, NumberPropertyConfig, NumberRangePropertyConfig, PropertyConfig, TextAreaPropertyConfig, TextPropertyConfig, TogglePropertyConfig, TableDialogPropertyConfig, TablePropertyConfig, DynamicListPropertyConfig, ListElementField } from '../../config/detailsSidebarConfig';
 
 export type EditPropertySection = {
     providedFeature: string,
@@ -300,15 +304,6 @@ export function toPropertySections(propertyConfigs: PropertyConfig[]): EditPrope
                     ...preparedProperty, ...{
                         attributes: checkboxOption.attributes,
                         value: "" //TODO does this work?
-                    }
-                } as EditPropertySection)
-                break;
-            case (PropertyContentType.INPUT_LIST):
-                let listOption = option as ListPropertyConfig;
-                options.push({
-                    ...preparedProperty, ...{
-                        attributes: listOption.attributes,
-                        value: ""
                     }
                 } as EditPropertySection)
                 break;

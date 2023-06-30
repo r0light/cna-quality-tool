@@ -1,4 +1,4 @@
-import { EntityProperty } from './entityProperty'
+import { EntityProperty, TextEntityProperty } from './entityProperty'
 import { Endpoint } from './endpoint.js'
 import { ExternalEndpoint } from './externalEndpoint.js'
 import { DataAggregate } from './dataAggregate.js'
@@ -12,12 +12,11 @@ import { Infrastructure } from './infrastructure.js'
 
 function getComponentProperties(): EntityProperty[] {
     return [
-        new EntityProperty("managed",
+        new TextEntityProperty("managed",
             "Managed cloud service?",
             "A component is managed if it is operated by a cloud provider",
             "e.g. yes",
             false,
-            "text",
             0,
             [],
             "")

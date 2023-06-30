@@ -44,6 +44,7 @@ export type TextPropertyConfig = BasicPropertyConfig & {
         svgRepresentation: string,
         inputLabelIcon: string,
         provideEditButton: boolean,
+        suggestedValues: {value: string, text: string}[]
     }
 }
 
@@ -112,18 +113,6 @@ export type DropdownOptionConfig = {
     disabled: boolean
 }
 
-export type ListPropertyConfig = BasicPropertyConfig & {
-    contentType: "list",
-    attributes: {
-        datalistItems: DataListItemConfig[]
-    }
-}
-
-export type DataListItemConfig = {
-    value: string,
-    text: string
-}
-
 export type TableDialogPropertyConfig = BasicPropertyConfig & {
     contentType: "table-dialog",
     attributes: {
@@ -167,7 +156,7 @@ export type ListElementField = {
 }
 
 
-export type PropertyConfig = TextPropertyConfig | TextAreaPropertyConfig | NumberPropertyConfig | NumberRangePropertyConfig | CheckboxPropertyConfig | CheckboxWithoutLabelPropertyConfig | DropdownPropertyConfig | ListPropertyConfig | TableDialogPropertyConfig | TogglePropertyConfig | TablePropertyConfig | DynamicListPropertyConfig;
+export type PropertyConfig = TextPropertyConfig | TextAreaPropertyConfig | NumberPropertyConfig | NumberRangePropertyConfig | CheckboxPropertyConfig | CheckboxWithoutLabelPropertyConfig | DropdownPropertyConfig | TableDialogPropertyConfig | TogglePropertyConfig | TablePropertyConfig | DynamicListPropertyConfig;
 
 function parseProperties(properties): PropertyConfig[] {
     return properties.map(property => {
@@ -219,16 +208,6 @@ function parseProperties(properties): PropertyConfig[] {
                     }
                 }
                 return numberPropertyConfig as PropertyConfig;
-            case "list":
-                var listPropertyConfig: ListPropertyConfig = {
-                    ...preparedConfig, ...{
-                        contentType: "list",
-                        attributes: {
-                            datalistItems: property.getOptions
-                        }
-                    }
-                }
-                return listPropertyConfig as PropertyConfig;
             case "text":
             default:
                 var textPropertyConfig: TextPropertyConfig = {
@@ -240,6 +219,7 @@ function parseProperties(properties): PropertyConfig[] {
                             svgRepresentation: "",
                             inputLabelIcon: "",
                             provideEditButton: false,
+                            suggestedValues: property.getOptions
                         }
                     }
                 }
@@ -248,7 +228,7 @@ function parseProperties(properties): PropertyConfig[] {
     })
 }
 
-export type PropertyContentType = "checkbox" | "checkbox-without-label" | "text" | "number" | "range" | "textarea" | "select" | "list" | "table-dialog" | "table" | "toggle" | "formgroup" | "dynamic-list";
+export type PropertyContentType = "checkbox" | "checkbox-without-label" | "text" | "number" | "range" | "textarea" | "select" | "table-dialog" | "table" | "toggle" | "formgroup" | "dynamic-list";
 
 const PropertyContentType = Object.freeze({
     INPUT_TEXTBOX: "text",
@@ -258,7 +238,6 @@ const PropertyContentType = Object.freeze({
     CHECKBOX: "checkbox",
     CHECKBOX_WITHOUT_LABEL: "checkbox-without-label",
     DROPDOWN: "select",
-    INPUT_LIST: "list",
     TABLE_DIALOG: "table-dialog",
     TABLE: "table",
     TOGGLE: "toggle",
@@ -484,6 +463,7 @@ const DetailsSidebarConfig: {
                         svgRepresentation: "",
                         inputLabelIcon: "",
                         provideEditButton: false,
+                        suggestedValues: []
                     },
                     helpText: "The value will be calculated based on the given width to preserve the aspect ratio of the entity shape",
                     show: false,
@@ -685,6 +665,7 @@ const EntityDetailsConfig: {
                     svgRepresentation: "",
                     inputLabelIcon: "",
                     provideEditButton: false,
+                    suggestedValues: []
                 },
                 helpText: "Type of relation",
                 show: true,
@@ -754,6 +735,7 @@ const EntityDetailsConfig: {
                 svgRepresentation: "",
                 inputLabelIcon: "",
                 provideEditButton: false,
+                suggestedValues: []
             },
             provideEnterButton: false,
             show: false,
@@ -826,6 +808,7 @@ const EntityDetailsConfig: {
                 svgRepresentation: '<svg width="30" height="20"><ellipse cx="13" cy="9" rx="12" ry="6" stroke="black" fill="white" opacity="1"/></svg>',
                 inputLabelIcon: "",
                 provideEditButton: false,
+                suggestedValues: []
             },
             provideEnterButton: false,
             show: true,
@@ -981,6 +964,7 @@ const EntityDetailsConfig: {
                     svgRepresentation: "",
                     inputLabelIcon: "",
                     provideEditButton: false,
+                    suggestedValues: []
                 },
                 provideEnterButton: false,
                 show: false,
@@ -1111,6 +1095,7 @@ const EntityDetailsConfig: {
                     svgRepresentation: `<span><svg width="30" height="20">${backingDataSvgRepresentation()}</svg></span>`,
                     inputLabelIcon: "",
                     provideEditButton: false,
+                    suggestedValues: []
                 },
                 provideEnterButton: false,
                 show: true,
