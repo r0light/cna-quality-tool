@@ -3,12 +3,9 @@
  * @module entities/entityProperty
  */
 
-type listOptions = {
-    value: string,
-    text: string
-}
+import { TOSCA_Property } from "@/totypa/tosca-types/core-types";
 
-type propertyDatatype = "text" | "number" | "boolean" | "list" //TODO  | "map" | "range"
+type propertyDatatype = "text" | "textarea" | "number" | "boolean" | "bounded" | "list" | "map" //TODO | "timestamp" | "version"
 
 /**
  * Class representing an Entity property
@@ -60,12 +57,24 @@ class EntityProperty {
         return this.#name;
     }
 
+    set setName(name: string) {
+        this.#name = name;
+    }
+
     get getDescription() {
         return this.#description;
     }
 
+    set setDescription(description: string) {
+        this.#description = description;
+    }
+
     get getExample() {
         return this.#example;
+    }
+
+    set setExample(example: string) {
+        this.#example = example;
     }
 
     get getRequired() {
@@ -76,9 +85,13 @@ class EntityProperty {
         return this.#datatype;
     }
 
-
 }
 
+
+type listOptions = {
+    value: string,
+    text: string
+}
 
 class TextEntityProperty extends EntityProperty {
 
@@ -96,9 +109,48 @@ class TextEntityProperty extends EntityProperty {
         return this.#maxLength;
     }
 
+    set setMaxLength(maxLength: number) {
+        this.#maxLength = maxLength;
+    }
+
     get getOptions() {
         return this.#proposedOptions;
     }
+
+    set setOptions(options: listOptions[]) {
+        this.#proposedOptions = options;
+    }
+
+}
+
+class TextAreaEntityProperty extends EntityProperty {
+
+    #maxLength: number;
+
+    #rows: number;
+
+    constructor(key: string, name: string, description: string, example: string, required: boolean,  maxLength: number, rows: number, value: string) {
+        super(key, name, description, example, required, "textarea", value);
+        this.#maxLength = maxLength;
+        this.#rows = rows;
+    }
+
+    get getMaxLength() {
+        return this.#maxLength;
+    }
+
+    set setMaxLength(maxLength: number) {
+        this.#maxLength = maxLength;
+    }
+
+    get getRows() {
+        return this.#rows;
+    }
+
+    set setRows(rows: number) {
+        this.#rows = rows;
+    }
+
 
 }
 
@@ -125,6 +177,22 @@ class NumberEntityProperty extends EntityProperty {
 
 }
 
+class BooleanEntityProperty extends EntityProperty {
+
+    constructor(key: string, name: string, description: string, example: string, required: boolean, value: boolean) {
+        super(key, name, description, example, required, "boolean", value);
+    }
+
+}
+
+class BoundsEntityProperty extends EntityProperty {
+
+    constructor(key: string, name: string, description: string, example: string, required: boolean, value: (number | string)[]) {
+        super(key, name, description, example, required, "bounded", value);
+    }
+
+}
+
 
 class ListEntityProperty extends EntityProperty {
 
@@ -134,6 +202,51 @@ class ListEntityProperty extends EntityProperty {
 
 }
 
+class MapEntityProperty extends EntityProperty {
+
+    constructor(key: string, name: string, description: string, example: string, required: boolean, value: object) {
+        super(key, name, description, example, required, "map", value);
+    }
+
+}
 
 
-export { EntityProperty, TextEntityProperty, NumberEntityProperty };
+function parseProperties(properties: { [propertyKey: string]: TOSCA_Property}): EntityProperty[] {
+
+    let parsedProperties: EntityProperty[] = [];
+
+    for (const [key, property] of Object.entries(properties)) {
+        switch(property.type) {
+            case "string":
+            case "timestamp": // TODO more specific type?
+            case "version": // TODO more specific type?
+            case "scalar-unit": // TODO more specific type(s)!
+            default:
+                parsedProperties.push(new TextEntityProperty(key, key, property.description, "", property.required, 255, [], ""));
+                break;
+            case "integer":
+            case "float": // TODO more specific property?
+                parsedProperties.push(new NumberEntityProperty(key, key, property.description, "", property.required, Number.MAX_SAFE_INTEGER, Number.MIN_SAFE_INTEGER, 0));
+                break;
+            case "boolean":
+                parsedProperties.push(new BooleanEntityProperty(key, key, property.description, "", property.required, false));
+                break;
+            case "range":
+                parsedProperties.push( new BoundsEntityProperty(key, key, property.description, "", property.required, [Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER]));
+                break;
+            case "list":
+                parsedProperties.push(new ListEntityProperty(key, key, property.description, "", property.required, []))
+                break;
+            case "map":
+                parsedProperties.push(new MapEntityProperty(key, key, property.description, "", property.required, {}))
+                break;
+        }   
+    }
+
+    return parsedProperties;
+
+
+}
+
+
+export { EntityProperty, TextEntityProperty, TextAreaEntityProperty, NumberEntityProperty, BooleanEntityProperty, BoundsEntityProperty as BoundedEntityProperty, ListEntityProperty, MapEntityProperty, parseProperties };

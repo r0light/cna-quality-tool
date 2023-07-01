@@ -1,5 +1,5 @@
 import EntityTypes from "./entityTypes";
-import { getComponentProperties, getBackingServiceProperties, getStorageBackingServiceProperties, getEndpointProperties, getInfrastructureProperties } from "../entities";
+import { getComponentProperties, getBackingServiceProperties, getStorageBackingServiceProperties, getEndpointProperties, getExternalEndpointProperties, getInfrastructureProperties } from "../entities";
 import { UIContentType } from "./toolbarConfiguration";
 import { DialogConfig, DialogSize } from "./actionDialogConfig";
 
@@ -643,7 +643,7 @@ const EntityDetailsConfig: {
                     min: ""
                 }
             },
-        ] as PropertyConfig[]).concat(parseProperties(getEndpointProperties()))
+        ] as PropertyConfig[]).concat(parseProperties(getEndpointProperties()).concat(parseProperties(getExternalEndpointProperties())))
     },
     Link: {
         type: EntityTypes.LINK,

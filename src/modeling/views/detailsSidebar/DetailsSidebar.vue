@@ -300,7 +300,7 @@ onUpdated(() => {
                 })
             })
 
-  
+
             break;
         case EntityTypes.BACKING_DATA:
             let chooseBDEditModeOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "backingData-chooseEditMode");
@@ -662,21 +662,25 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
 }
 
 function isPropertyValueValid(option): boolean {
-
     let newValue = option.value;
-    if (!newValue || newValue <= 0) {
-        // TOOO: "<= 0" might be possible for some values 
+
+    //TODO adjust validation to property characteristics
+
+    if (typeof newValue === "string" && !newValue) {
         return false;
     }
 
-    if (option.jointJsConfig.minPath) {
-        let minValue = props.selectedEntity.model.prop(option.jointJsConfig.minPath);
-        return newValue >= minValue;
+    if (typeof newValue === "number") {
+        if (option.jointJsConfig.minPath) {
+            let minValue = props.selectedEntity.model.prop(option.jointJsConfig.minPath);
+            return newValue >= minValue;
+        }
+
+        if (option.attributes && option.attributes.min) {
+            return newValue >= Number(option.attributes.min);
+        }
     }
 
-    if (option.attributes && option.attributes.min) {
-        return newValue >= Number(option.attributes.min);
-    }
     return true;
 }
 

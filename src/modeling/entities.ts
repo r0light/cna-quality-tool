@@ -4,7 +4,7 @@ export { Service } from '../entities/service';
 export { BackingService, getBackingServiceProperties } from '../entities/backingService';
 export { StorageBackingService, getStorageBackingServiceProperties } from '../entities/storageBackingService';
 export { Endpoint, getEndpointProperties } from '../entities/endpoint';
-export { ExternalEndpoint } from '../entities/externalEndpoint';
+export { ExternalEndpoint, getExternalEndpointProperties } from '../entities/externalEndpoint';
 export { Link } from '../entities/link';
 export { Infrastructure, InfrastructureTypes, getInfrastructureProperties } from '../entities/infrastructure';
 export { DeploymentMapping } from '../entities/deploymentMapping';

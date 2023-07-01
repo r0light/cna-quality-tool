@@ -1,10 +1,13 @@
 import { BackingData } from "./backingData";
 import { EntityProperty } from "./entityProperty";
+import { cna_modeling_tosca_profile } from '../totypa/parsedProfiles/cna_modeling_tosca_profile'
 
 /**
  * The module for aspects related to an Infrastructure quality model entity.
  * @module entities/infrastructure
  */
+
+const INFRASTRUCTURE_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types["cna.qualityModel.entities.Compute.Infrastructure"];
 
 const InfrastructureTypes = Object.freeze({
     COMPUTE: "compute",
@@ -140,4 +143,4 @@ class Infrastructure {
     }
 }
 
-export { Infrastructure, InfrastructureTypes, getInfrastructureProperties };
+export { Infrastructure, InfrastructureTypes, INFRASTRUCTURE_TOSCA_EQUIVALENT, getInfrastructureProperties };

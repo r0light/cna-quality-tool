@@ -14,6 +14,11 @@ node_types:
   cna.qualityModel.entities.Root.Component:
     derived_from: tosca.nodes.Root
     description: Node Type to model Component entities
+    properties:
+      managed: # TODO leave it like this?
+        type: string
+        description: A component is managed if it is operated by a cloud provider.
+        required: false
     requirements:
       # Require deployment on an Infrastructure entity
       - host:
@@ -82,8 +87,9 @@ node_types:
     derived_from: tosca.nodes.Root
     description: Node Type to model Backing Service entities
     properties:
-      provided_functionality:
+      providedFunctionality:
         type: string
+        description: "A short description of the provided functionality."
         required: false
     requirements:
       # Allow the definition of Links between Components
@@ -178,6 +184,12 @@ node_types:
   cna.qualityModel.entities.DBMS.StorageService:
     derived_from: tosca.nodes.DBMS
     description: Node Type to model Storage Backing Service entities
+    properties:
+      name:
+        type: string
+        description: >-
+          the logical name of the database
+        required: true
     requirements:
       # Allow the definition of Links between Components
       - endpoint_link:

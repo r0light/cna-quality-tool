@@ -1,7 +1,12 @@
+import { cna_modeling_tosca_profile } from '../totypa/parsedProfiles/cna_modeling_tosca_profile'
+
+
 /**
  * The module for aspects related to a Data Aggregate quality model entity.
  * @module entities/dataAggregate
  */
+
+const DATA_AGGREGATE_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types["cna.qualityModel.entities.DataAggregate"];
 
 /**
  * Class representing a Data Aggregate entity.
@@ -79,4 +84,4 @@ class DataAggregate {
     }
 }
 
-export { DataAggregate };
+export { DataAggregate, DATA_AGGREGATE_TOSCA_EQUIVALENT };

@@ -1,34 +1,26 @@
 import { Component } from './component'
-import { EntityProperty, NumberEntityProperty, TextEntityProperty } from './entityProperty';
+import { parseProperties } from './entityProperty';
+import { cna_modeling_tosca_profile } from '../totypa/parsedProfiles/cna_modeling_tosca_profile'
 
 /**
  * The module for aspects related to a Component quality model Entity.
  * @module entities/storageBackingService
  */
 
+const STORAGE_BACKING_SERVICE_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types["cna.qualityModel.entities.DBMS.StorageService"];
+
 function getStorageBackingServiceProperties() {
-    return [
-        new TextEntityProperty(
-            "databaseName",
-            "Database Name:",
-            "The name of the database",
-            "e.g. Order",
-            false,
-            0,
-            [],
-            ""
-        ),
-        new NumberEntityProperty(
-            "databasePort",
-            "Port:",
-            "The port of the database",
-            "e.g. 3306",
-            false,
-            65535,
-            1,
-            0
-        )
-    ]
+    let parsed = parseProperties(STORAGE_BACKING_SERVICE_TOSCA_EQUIVALENT.properties);
+
+    for (const prop of parsed) {
+        switch (prop.getKey) {
+            case "name":
+                prop.setName = "Database Name:";
+                prop.setExample = "e.g. Order";
+                break;
+        }
+    }
+    return parsed;
 }
 
 /**
@@ -58,4 +50,4 @@ class StorageBackingService extends Component {
     }
 }
 
-export { StorageBackingService, getStorageBackingServiceProperties };
+export { StorageBackingService, STORAGE_BACKING_SERVICE_TOSCA_EQUIVALENT, getStorageBackingServiceProperties };

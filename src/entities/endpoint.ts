@@ -1,80 +1,52 @@
-import { EntityProperty, NumberEntityProperty, TextEntityProperty } from "./entityProperty";
+import { EntityProperty, NumberEntityProperty, TextEntityProperty, parseProperties } from "./entityProperty";
+import { tosca_simple_profile_for_yaml_v1_3 } from '../totypa/parsedProfiles/tosca_simple_profile_for_yaml_v1_3'
+
+const ENDPOINT_TOSCA_EQUIVALENT = tosca_simple_profile_for_yaml_v1_3.capability_types["tosca.capabilities.Endpoint"];
 
 /**
  * The module for aspects related to a Endpoint quality model Entity.
  * @module entities/endpoint
  */
 
-function getEndpointProperties() {
-    return [
-        new TextEntityProperty(
-            "endpointType",
-            "Endpoint Type:",
-            "The type of endpoint, can be REST, Topic, ...",
-            "e.g. GET",
-            false,
-            0,
-            [{
-                value: "GET",
-                text: "GET"
-            },
-            {
-                value: "POST",
-                text: "POST"
-            },
-            {
-                value: "Topic send-to",
-                text: "Topic send-to"
-            },
-            {
-                value: "Topic receive-from",
-                text: "Topic receive-from"
-            }
-            ],
-            ""),
-        new TextEntityProperty(
-            "endpointPath",
-            "Endpoint Path:",
-            "The path where this endpoint is reachable",
-            "e.g. /orders",
-            false,
-            0,
-            [],
-            ""
-        ),
-        new NumberEntityProperty(
-            "port",
-            "Port:",
-            "The port where this endpoint is available",
-            "e.g. 3306",
-            false,
-            65535,
-            1,
-            0
-        )
-    ]
+function getEndpointProperties(): EntityProperty[] {
+    let parsed = parseProperties(ENDPOINT_TOSCA_EQUIVALENT.properties);
+
+    for (const prop of parsed) {
+        switch (prop.getKey) {
+            case "protocol":
+                prop.setName = "Endpoint Type:";
+                prop.setExample = "e.g. HTTP GET";
+                (prop as TextEntityProperty).setOptions = [{
+                    value: "GET",
+                    text: "GET"
+                },
+                {
+                    value: "POST",
+                    text: "POST"
+                },
+                {
+                    value: "Topic send-to",
+                    text: "Topic send-to"
+                },
+                {
+                    value: "Topic receive-from",
+                    text: "Topic receive-from"
+                }
+                ];
+                break;
+            case "url_path":
+                prop.setName = "Endpoint Path:";
+                prop.setExample = "e.g. /orders";
+                break;
+            case "port": // TODO transform to Number type?
+                prop.setName = "Port: ";
+                prop.setExample = "e.g. 3306"
+                break;
+        }
+    }
+    return parsed;
 }
 
-/**
- * TODO: currently only used here? combine with property config
- * Enum for the possible Endpoint types. Includes asynchronous and synchronous types. 
- * @readonly
- * @enum {string}
- */
-const endpointTypes = Object.freeze({
-    /** Message broker topic: sender-side */
-    SEND_TO: "send-to",
-    /** Message broker topic: receiver-side */
-    RECEIVE_FROM: "receive-from",
-    /** HTTP GET method */
-    GET: "GET",
-    /** HTTP POST method */
-    POST: "POST",
-    /** HTTP PUT method */
-    PUT: "PUT",
-    /** HTTP DELETE method */
-    DELETE: "DELETE"
-});
 
 /**
  * Class representing an Endpoint entity.
@@ -155,6 +127,15 @@ class Endpoint {
         return this.#modelId;
     }
 
+    /**
+     * Adds additional properties to this entity, only intended for subtypes to add additional properties
+     * 
+     * @param {EntityProperty[]} entityProperties 
+     */
+    addProperties(entityProperties: EntityProperty[]) {
+        this.#properties = this.#properties.concat(entityProperties);
+    }
+
     getProperties() {
         return this.#properties;
     }
@@ -176,4 +157,4 @@ class Endpoint {
     }
 }
 
-export { Endpoint, endpointTypes, getEndpointProperties }; // TODO keep endpointType?
+export { Endpoint, ENDPOINT_TOSCA_EQUIVALENT, getEndpointProperties }; // TODO keep endpointType?

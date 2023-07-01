@@ -55,7 +55,7 @@
                     class="form-check-input" type="checkbox" :class="option.validationState"
                     :disabled="option.inputProperties.disabled" :required="option.inputProperties.required"
                     :checked="option.inputProperties.checked" :aria-describedby="option.helpTextId"
-                    :data-property-type="groupId">
+                    :data-property-type="groupId" v-model="option.value" @change="onEnterProperties([option])">
                 <select v-if="option.contentType === PropertyContentType.DROPDOWN" class="custom-select"
                     :id="option.providedFeature" :class="option.validationState" :disabled="option.inputProperties.disabled"
                     :required="option.inputProperties.required" :size="option.attributes.size"

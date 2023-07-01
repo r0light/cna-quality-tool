@@ -1,26 +1,29 @@
-import { EntityProperty, TextEntityProperty } from './entityProperty'
+import { EntityProperty, TextEntityProperty, parseProperties } from './entityProperty'
 import { Endpoint } from './endpoint.js'
 import { ExternalEndpoint } from './externalEndpoint.js'
 import { DataAggregate } from './dataAggregate.js'
 import { BackingData } from './backingData.js'
 import { Infrastructure } from './infrastructure.js'
+import { cna_modeling_tosca_profile } from '../totypa/parsedProfiles/cna_modeling_tosca_profile'
 
 /**
  * The module for aspects related to a Component quality model entity.
  * @module entities/component
  */
 
+const COMPONENT_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types["cna.qualityModel.entities.Root.Component"];
+
 function getComponentProperties(): EntityProperty[] {
-    return [
-        new TextEntityProperty("managed",
-            "Managed cloud service?",
-            "A component is managed if it is operated by a cloud provider",
-            "e.g. yes",
-            false,
-            0,
-            [],
-            "")
-        ];
+    let parsed = parseProperties(COMPONENT_TOSCA_EQUIVALENT.properties);
+    for (const prop of parsed) {
+        switch (prop.getKey) {
+            case "managed":
+                prop.setName = "Managed cloud service?";
+                prop.setExample = "e.g. yes";
+            break;
+        }
+    }
+    return parsed;
 }
 
 /**
@@ -212,4 +215,4 @@ class Component {
     }
 }
 
-export { Component, getComponentProperties };
+export { Component, COMPONENT_TOSCA_EQUIVALENT, getComponentProperties };

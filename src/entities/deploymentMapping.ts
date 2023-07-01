@@ -1,10 +1,13 @@
 import { Component } from './component'
 import { Infrastructure } from './infrastructure'
+import { tosca_simple_profile_for_yaml_v1_3 } from '../totypa/parsedProfiles/tosca_simple_profile_for_yaml_v1_3'
 
 /**
  * The module for aspects related to a Deployment Mapping quality model entity.
  * @module entities/deploymentMapping
  */
+
+const DEPLOYMENT_MAPPING_TOSCA_EQUIVALENT = tosca_simple_profile_for_yaml_v1_3.relationship_types["tosca.relationships.HostedOn"];
 
 /**
  * Class representing a Deployment Mapping entity.
@@ -127,4 +130,4 @@ class DeploymentMapping {
     }
 }
 
-export { DeploymentMapping };
+export { DeploymentMapping, DEPLOYMENT_MAPPING_TOSCA_EQUIVALENT };

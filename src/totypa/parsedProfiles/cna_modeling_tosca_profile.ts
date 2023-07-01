@@ -4,7 +4,7 @@
 
 import { TOSCA_Service_Template } from '../tosca-types/template-types';
 
-const cna_modeling_tosca_profile: TOSCA_Service_Template = {
+export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
   "tosca_definitions_version": "tosca_simple_yaml_1_3",
   "namespace": "http://docs.oasis-open.org/tosca/ns/simple/yaml/1.3",
   "metadata": {
@@ -41,6 +41,13 @@ const cna_modeling_tosca_profile: TOSCA_Service_Template = {
     "cna.qualityModel.entities.Root.Component": {
       "derived_from": "tosca.nodes.Root",
       "description": "Node Type to model Component entities",
+      "properties": {
+        "managed": {
+          "type": "string",
+          "description": "A component is managed if it is operated by a cloud provider.",
+          "required": false
+        }
+      },
       "requirements": [
         {
           "host": {
@@ -160,8 +167,9 @@ const cna_modeling_tosca_profile: TOSCA_Service_Template = {
       "derived_from": "tosca.nodes.Root",
       "description": "Node Type to model Backing Service entities",
       "properties": {
-        "provided_functionality": {
+        "providedFunctionality": {
           "type": "string",
+          "description": "A short description of the provided functionality.",
           "required": false
         }
       },
@@ -312,6 +320,13 @@ const cna_modeling_tosca_profile: TOSCA_Service_Template = {
     "cna.qualityModel.entities.DBMS.StorageService": {
       "derived_from": "tosca.nodes.DBMS",
       "description": "Node Type to model Storage Backing Service entities",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "the logical name of the database",
+          "required": true
+        }
+      },
       "requirements": [
         {
           "endpoint_link": {

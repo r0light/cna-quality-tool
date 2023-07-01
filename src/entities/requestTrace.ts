@@ -1,11 +1,15 @@
 
 import { ExternalEndpoint } from "./externalEndpoint";
 import { Link } from "./link";
+import { cna_modeling_tosca_profile } from '../totypa/parsedProfiles/cna_modeling_tosca_profile'
+
 
 /**
  * The module for aspects related to a Component quality model Entity.
  * @module entities/requestTrace
  */
+
+const REQUEST_TRACE_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types["cna.qualityModel.entities.RequestTrace"];
 
 /**
  * Class representing a Request Trace entity.
@@ -124,4 +128,4 @@ class RequestTrace {
     }
 }
 
-export { RequestTrace };
+export { RequestTrace, REQUEST_TRACE_TOSCA_EQUIVALENT };

@@ -1,7 +1,11 @@
+import { cna_modeling_tosca_profile } from '../totypa/parsedProfiles/cna_modeling_tosca_profile'
+
 /**
  * The module for aspects related to a Backing Data quality model entity.
  * @module entities/backingData
  */
+
+const BACKING_DATA_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types["cna.qualityModel.entities.BackingData"];
 
 /**
  * Class representing a Backing Data entity.
@@ -70,4 +74,4 @@ class BackingData {
     }
 }
 
-export { BackingData };
+export { BackingData, BACKING_DATA_TOSCA_EQUIVALENT };

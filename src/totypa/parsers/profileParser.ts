@@ -135,7 +135,7 @@ async function saveGeneratedProfile(name: string, profile: TOSCA_Service_Templat
 
     let hint = "/* \n   Caution!!! This code is generated!!!! Do not modify, but instead regenerate it based on the .yaml Profile descriptions \n*/\n";
 
-    let preparedData = `import { TOSCA_Service_Template } from '../tosca-types/template-types';\n\nconst ${generatedName}: TOSCA_Service_Template = ${JSON.stringify(profile, null, 2)};` 
+    let preparedData = `import { TOSCA_Service_Template } from '../tosca-types/template-types';\n\nexport const ${generatedName}: TOSCA_Service_Template = ${JSON.stringify(profile, null, 2)};` 
 
     fs.writeFile(`../parsedProfiles/${generatedName}.ts`, `${hint}\n${preparedData}`, (err) => {
         if (err) {

@@ -1,24 +1,30 @@
 import { EntityProperty, TextEntityProperty } from './entityProperty'
 import { Component } from './component'
 import { Infrastructure } from './infrastructure'
+import { parseProperties } from './entityProperty'
+import { cna_modeling_tosca_profile } from '../totypa/parsedProfiles/cna_modeling_tosca_profile'
 
 /**
  * The module for aspects related to a Backing Service quality model entity.
  * @module entities/backingService
  */
 
-function getBackingServiceProperties() {
-    return [
-        new TextEntityProperty("providedFunctionality", 
-        "Provided Functionality:", 
-        "A short description of the provided functionality.",
-        "e.g. Logging",
-        false,
-        0,
-        [],
-        "")
-    ]
+const BACKING_SERVICE_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types["cna.qualityModel.entities.BackingService"];
+
+
+function getBackingServiceProperties(): EntityProperty[] {
+    let parsed = parseProperties(BACKING_SERVICE_TOSCA_EQUIVALENT.properties);
+    for (const prop of parsed) {
+        switch (prop.getKey) {
+            case "providedFunctionality":
+                prop.setName = "Provided Functionality:";
+                prop.setExample = "e.g. Logging";
+            break;
+        }
+    }
+    return parsed;
 }
+
 
 /**
  * Class representing a Backing Service entity.
@@ -47,4 +53,4 @@ class BackingService extends Component {
     }
 }
 
-export { BackingService, getBackingServiceProperties };
+export { BackingService, BACKING_SERVICE_TOSCA_EQUIVALENT, getBackingServiceProperties };

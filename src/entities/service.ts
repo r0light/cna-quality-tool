@@ -1,10 +1,13 @@
 import { Component } from './component'
 import { Infrastructure } from './infrastructure';
+import { cna_modeling_tosca_profile } from '../totypa/parsedProfiles/cna_modeling_tosca_profile'
 
 /**
  * The module for aspects related to a Component quality model Entity.
  * @module entities/service
  */
+
+const SERVICE_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types["cna.qualityModel.entities.SoftwareComponent.Service"];
 
 /**
  * Class representing a Service entity.
@@ -32,4 +35,4 @@ class Service extends Component {
     }
 }
 
-export { Service };
+export { Service, SERVICE_TOSCA_EQUIVALENT };

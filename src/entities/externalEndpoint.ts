@@ -1,9 +1,18 @@
+import { EntityProperty, parseProperties } from "./entityProperty"
 import { Endpoint } from "./endpoint";
+import { tosca_simple_profile_for_yaml_v1_3 } from '../totypa/parsedProfiles/tosca_simple_profile_for_yaml_v1_3'
 
 /**
  * The module for aspects related to a External Endpoint quality model Entity.
  * @module entities/externalEndpoint
  */
+
+const EXTERNAL_ENDPOINT_TOSCA_EQUIVALENT = tosca_simple_profile_for_yaml_v1_3.capability_types["tosca.capabilities.Endpoint.Public"];
+
+function getExternalEndpointProperties(): EntityProperty[] {
+    let parsed = parseProperties(EXTERNAL_ENDPOINT_TOSCA_EQUIVALENT.properties);
+    return parsed;
+}
 
 /**
  * Class representing an External Endpoint entity.
@@ -21,6 +30,7 @@ class ExternalEndpoint extends Endpoint {
      */
     constructor(modelId: string, parentName: string) {
         super(modelId, parentName);
+        this.addProperties(getExternalEndpointProperties());
     }
 
     /**
@@ -32,4 +42,4 @@ class ExternalEndpoint extends Endpoint {
     }
 }
 
-export { ExternalEndpoint };
+export { ExternalEndpoint, EXTERNAL_ENDPOINT_TOSCA_EQUIVALENT, getExternalEndpointProperties };
