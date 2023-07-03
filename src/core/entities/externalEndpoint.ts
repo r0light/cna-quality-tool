@@ -1,6 +1,7 @@
 import { EntityProperty, parseProperties } from "../common/entityProperty"
 import { Endpoint } from "./endpoint";
 import { tosca_simple_profile_for_yaml_v1_3 } from '../../totypa/parsedProfiles/tosca_simple_profile_for_yaml_v1_3'
+import { MetaData } from "../common/entityDataTypes";
 
 /**
  * The module for aspects related to a External Endpoint quality model Entity.
@@ -25,11 +26,12 @@ class ExternalEndpoint extends Endpoint {
 
     /**
      * Create an External Endpoint entity.
-     * @param {modelId} modelId The ID, the respective entity representation has in the joint.dia.Graph model.
+     * @param {string} id The unique id for this entity.
+     * @param {MetaData} metaData The meta data for this entity, needed for displaying it in a diagram. 
      * @param {string} parentName The name of the parent Entity.
      */
-    constructor(modelId: string, parentName: string) {
-        super(modelId, parentName);
+    constructor(id: string, metaData: MetaData, parentName: string) {
+        super(id, metaData, parentName);
         this.addProperties(getExternalEndpointProperties());
     }
 

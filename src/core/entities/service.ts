@@ -1,6 +1,7 @@
 import { Component } from './component'
 import { Infrastructure } from './infrastructure';
 import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_modeling_tosca_profile'
+import { MetaData } from '../common/entityDataTypes';
 
 /**
  * The module for aspects related to a Component quality model Entity.
@@ -18,12 +19,13 @@ class Service extends Component {
 
     /**
      * Create a Service entity.
+     * @param {string} id The unique id for this entity.
      * @param {string} name The name of the Service entity. 
-     * @param {modelId} modelId The ID, the respective entity representation has in the joint.dia.Graph model.
+     * @param {MetaData} metaData The meta data for this entity, needed for displaying it in a diagram. 
      * @param {Infrastructure} hostingInfrastructure The {@link Infrastructure} entity that hosts this Service entity.
      */
-    constructor(name: string, modelId: string, hostingInfrastructure: Infrastructure) {
-        super(name, modelId, hostingInfrastructure)
+    constructor(id: string, name: string, metaData: MetaData, hostingInfrastructure: Infrastructure) {
+        super(id, name, metaData, hostingInfrastructure)
     }
 
     /**

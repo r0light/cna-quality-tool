@@ -1,6 +1,8 @@
 import { Component } from './component'
 import { parseProperties } from '../common/entityProperty';
 import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_modeling_tosca_profile'
+import { MetaData } from '../common/entityDataTypes';
+import { Infrastructure } from './infrastructure';
 
 /**
  * The module for aspects related to a Component quality model Entity.
@@ -32,12 +34,13 @@ class StorageBackingService extends Component {
 
     /**
      * Create a Storage Backing Service entity.
+     * @param {string} id The unique id for this entity.
      * @param {string} name The name of the Storage Backing Service entity. 
-     * @param {modelId} modelId The ID, the respective entity representation has in the joint.dia.Graph model.
+     * @param {MetaData} metaData The meta data for this entity, needed for displaying it in a diagram. 
      * @param {Infrastructure} hostingInfrastructure The {@link Infrastructure} entity that hosts this Storage Backing Service entity.
      */
-    constructor(name: string, modelId: string, hostingInfrastructure: string) {
-        super(name, modelId, hostingInfrastructure);
+    constructor(id: string, name: string, metaData: MetaData,  hostingInfrastructure: Infrastructure) {
+        super(id, name, metaData, hostingInfrastructure);
         this.addProperties(getStorageBackingServiceProperties());
     }
 

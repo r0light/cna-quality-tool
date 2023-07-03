@@ -2,6 +2,7 @@
 import { ExternalEndpoint } from "./externalEndpoint";
 import { Link } from "./link";
 import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_modeling_tosca_profile'
+import { MetaData } from "../common/entityDataTypes";
 
 
 /**
@@ -19,9 +20,9 @@ class RequestTrace {
 
     #id: string;
 
-    #modelId: string;
-
     #name: string;
+
+    #metaData: MetaData;
 
     #externalEndpoint: ExternalEndpoint;
 
@@ -29,13 +30,14 @@ class RequestTrace {
 
     /**
      * Create a Request Trace entity.
+     * @param {string} id The unique id for this entity.
      * @param {string} name The name of the Request Trace entity.
-     * @param {modelId} modelId The ID, the respective entity representation has in the joint.dia.Graph model.
+     * @param {MetaData} metaData The meta data for this entity, needed for displaying it in a diagram. 
      * @param {ExternalEndpoint} externalEndpoint The {@link ExternalEndpoint} entity for which the Request Trace is being defined.
      * @param {string} linkEntityOrEntities The Id {@link Link} entity or entities that take part in this Request Trace (1...N)
      * @throws {TypeError} If a wrong entity type is being provided
      */
-    constructor(name, modelId, externalEndpoint: ExternalEndpoint, linkEntityOrEntities: string[]) {
+    constructor(id: string, name: string, metaData: MetaData, externalEndpoint: ExternalEndpoint, linkEntityOrEntities: string[]) {
         for (const linkEntity of linkEntityOrEntities) {
             if (this.#linkEntityIds.has(linkEntity)) {
                 return;
@@ -44,8 +46,9 @@ class RequestTrace {
             this.#linkEntityIds.add(linkEntity);
         }
 
+        this.#id = id;
         this.#name = name;
-        this.#modelId = modelId;
+        this.#metaData = metaData;
         this.#externalEndpoint = externalEndpoint;
     }
 
@@ -74,19 +77,20 @@ class RequestTrace {
     }
 
     /**
-     * Returns the ID, the respective entity representation has in the joint.dia.Graph model.
-     * @returns {string}
-     */
-    get getModelId() {
-        return this.#modelId;
-    }
-
-    /**
      * Returns the name of this Request Trace entity.
      * @returns {string}
      */
     get getName() {
         return this.#name;
+    }
+
+
+    /**
+     * Return the meta data for this node entity.
+     * @returns {MetaData}
+     */
+    get getMetaData() {
+        return this.#metaData;
     }
 
     /**

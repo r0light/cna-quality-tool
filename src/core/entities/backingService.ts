@@ -3,6 +3,7 @@ import { Component } from './component'
 import { Infrastructure } from './infrastructure'
 import { parseProperties } from '../common/entityProperty'
 import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_modeling_tosca_profile'
+import { MetaData } from '../common/entityDataTypes'
 
 /**
  * The module for aspects related to a Backing Service quality model entity.
@@ -35,12 +36,13 @@ class BackingService extends Component {
 
     /**
      * Create a Backing Service entity.
+     * @param {string} id The unique id for this entity.
      * @param {string} name The name of the Backing Service entity. 
-     * @param {modelId} modelId The ID, the respective entity representation has in the joint.dia.Graph model.
+     * @param {MetaData} metaData The meta data for this entity, needed for displaying it in a diagram. 
      * @param {Infrastructure} hostingInfrastructure The {@link Infrastructure} entity that hosts this Backing Service entity.
      */
-    constructor(name: string, modelId: string, hostingInfrastructure: Infrastructure) {
-        super(name, modelId, hostingInfrastructure)
+    constructor(id: string, name: string, metaData: MetaData, hostingInfrastructure: Infrastructure) {
+        super(id, name, metaData, hostingInfrastructure)
         this.addProperties(getBackingServiceProperties());
     }
 

@@ -102,7 +102,7 @@ class System { // TODO use ID's as keys instead of name?
      */
     addComponentEntity(componentEntityToAdd: Component) {
         // this.#componentEntities.set(componentEntityToAdd.name, componentEntityToAdd);
-        this.#componentEntities.set(componentEntityToAdd.getModelId, componentEntityToAdd);
+        this.#componentEntities.set(componentEntityToAdd.getId, componentEntityToAdd);
     }
 
     /**
@@ -112,7 +112,7 @@ class System { // TODO use ID's as keys instead of name?
      */
     addLinkEntity(linkEntityToAdd: Link) {
         // this.#linkEntities.set(linkEntityToAdd.name, linkEntityToAdd);
-        this.#linkEntities.set(linkEntityToAdd.getModelId, linkEntityToAdd);
+        this.#linkEntities.set(linkEntityToAdd.getId, linkEntityToAdd);
     }
 
     /**
@@ -122,7 +122,7 @@ class System { // TODO use ID's as keys instead of name?
      */
     addInfrastructureEntity(infrastructureEntityToAdd: Infrastructure) {
         // this.#infrastructureEntities.set(infrastructureEntityToAdd.name, infrastructureEntityToAdd);
-        this.#infrastructureEntities.set(infrastructureEntityToAdd.getModelId, infrastructureEntityToAdd);
+        this.#infrastructureEntities.set(infrastructureEntityToAdd.getId, infrastructureEntityToAdd);
     }
 
     /**
@@ -133,7 +133,7 @@ class System { // TODO use ID's as keys instead of name?
     addDeploymentMappingEntity(deploymentMappingEntityToAdd: DeploymentMapping) {
 
         // this.#deploymentMappingEntities.set(deploymentMappingEntityToAdd.getId, deploymentMappingEntityToAdd);
-        this.#deploymentMappingEntities.set(deploymentMappingEntityToAdd.getModelId, deploymentMappingEntityToAdd);
+        this.#deploymentMappingEntities.set(deploymentMappingEntityToAdd.getId, deploymentMappingEntityToAdd);
     }
 
     /**
@@ -143,7 +143,7 @@ class System { // TODO use ID's as keys instead of name?
      */
     addRequestTraceEntity(requestTraceEntityToAdd: RequestTrace) {
         // this.#requestTraceEntities.set(requestTraceEntityToAdd.name, requestTraceEntityToAdd);
-        this.#requestTraceEntities.set(requestTraceEntityToAdd.getModelId, requestTraceEntityToAdd);
+        this.#requestTraceEntities.set(requestTraceEntityToAdd.getId, requestTraceEntityToAdd);
     }
 
     /**

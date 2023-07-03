@@ -19,9 +19,7 @@ const LINK_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.relationship_types["cna
  */
 class Link {
 
-    #id: string; // TODO
-    
-    #modelId: string;
+    #id: string;
 
     #sourceEntity: Component;
 
@@ -31,14 +29,14 @@ class Link {
 
     /**
      * Create a Link entity. Represents the connection between {@link Component}, {@link Service}, {@link BackingService} or {@link StorageBackingService} and an {@link Endpoint} or {@link ExternalEndpoint} entity.
-     * @param {modelId} modelId The ID, the respective entity representation has in the joint.dia.Graph model.
+     * @param {id} id The unique id for this entity.
      * @param {Component | Service | BackingService | StorageBackingService} sourceEntity The entity that links to an Endpoint of another entity.
      * @param {Endpoint | ExternalEndpoint} targetEndpoint The Endpoint the Link connects to.
      * @throws {TypeError} If a wrong entity type is being provided
      * @throws {Error} If the targeted Endpoint is included in the sourceEntity.
      */
-    constructor(modelId: string, sourceEntity: Component, targetEndpoint: Endpoint) {
-        this.#modelId = modelId;
+    constructor(id: string, sourceEntity: Component, targetEndpoint: Endpoint) {
+        this.#id = id;
         this.#sourceEntity = sourceEntity;
         this.#targetEndpoint = targetEndpoint;
 
@@ -63,14 +61,6 @@ class Link {
      */
     get getId() {
         return this.#id;
-    }
-
-    /**
-     * Returns the ID, the respective entity representation has in the joint.dia.Graph model.
-     * @returns {string}
-     */
-    get getModelId() {
-        return this.#modelId;
     }
 
     /**

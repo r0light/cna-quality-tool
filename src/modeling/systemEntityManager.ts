@@ -6,6 +6,7 @@ import ToscaConverter from '../core/tosca-adapter/ToscaConverter.js';
 import { UIContentType } from './config/toolbarConfiguration';
 import UIModalDialog, { DialogSize } from './representations/guiElements.dialog';
 import { PropertyContentType } from './config/detailsSidebarConfig';
+import { MetaData } from "@/core/common/entityDataTypes";
 
 class SystemEntityManager {
 
@@ -171,17 +172,17 @@ class SystemEntityManager {
         let componentModelEntity;
         switch(endpointEntityType) {
             case EntityTypes.SERVICE:
-                componentModelEntity = new Entities.Service(graphElement.attr("label/textWrap/text"), graphElement.id, infrastructure);
+                componentModelEntity = new Entities.Service(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement), infrastructure);
                 break;
             case EntityTypes.BACKING_SERVICE:
-                componentModelEntity = new Entities.BackingService(graphElement.attr("label/textWrap/text"), graphElement.id, infrastructure);
+                componentModelEntity = new Entities.BackingService(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement), infrastructure);
                 break;
             case EntityTypes.STORAGE_BACKING_SERVICE:
-                componentModelEntity = new Entities.StorageBackingService(graphElement.attr("label/textWrap/text"), graphElement.id, infrastructure);
+                componentModelEntity = new Entities.StorageBackingService(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement), infrastructure);
                 break;
             case EntityTypes.COMPONENT:
             default:
-                componentModelEntity = new Entities.Component(graphElement.attr("label/textWrap/text"), graphElement.id, infrastructure);
+                componentModelEntity = new Entities.Component(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement), infrastructure);
         }
         // set entity properties
         for (let property of componentModelEntity.getProperties()) {
@@ -271,9 +272,9 @@ class SystemEntityManager {
 
         if (connectedLinksForCurrentInfrastructure.length <= 1) {
             if (connectedLinksForCurrentInfrastructure[0].getTargetElement()?.prop("entity/type") !== EntityTypes.STORAGE_BACKING_SERVICE || connectedLinksForCurrentInfrastructure[0].getSourceElement()?.prop("entity/type") !== EntityTypes.STORAGE_BACKING_SERVICE) {
-                return new Entities.Infrastructure(graphElement.attr("label/textWrap/text"), graphElement.id, Entities.InfrastructureTypes.DBMS);
+                return new Entities.Infrastructure(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement), Entities.InfrastructureTypes.DBMS);
             } else {
-                return new Entities.Infrastructure(graphElement.attr("label/textWrap/text"), graphElement.id, Entities.InfrastructureTypes.COMPUTE);
+                return new Entities.Infrastructure(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement), Entities.InfrastructureTypes.COMPUTE);
             }
         }
 
@@ -296,9 +297,9 @@ class SystemEntityManager {
         if (storageBackingServiceConnected && includesComponentTypesInDepoyment) {
             return null;
         } else if (storageBackingServiceConnected && !includesComponentTypesInDepoyment) {
-            return new Entities.Infrastructure(graphElement.attr("label/textWrap/text"), graphElement.id, Entities.InfrastructureTypes.DBMS);
+            return new Entities.Infrastructure(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement),  Entities.InfrastructureTypes.DBMS);
         }
-        return new Entities.Infrastructure(graphElement.attr("label/textWrap/text"), graphElement.id, Entities.InfrastructureTypes.COMPUTE);
+        return new Entities.Infrastructure(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement),  Entities.InfrastructureTypes.COMPUTE);
     }
 
     #createDataAggregate(graphElement, returnDataAggregateAnyway = false) {
@@ -310,7 +311,7 @@ class SystemEntityManager {
             return null;
         }
 
-        const dataAggregate = new Entities.DataAggregate(graphElement.attr("label/textWrap/text"), graphElement.id);
+        const dataAggregate = new Entities.DataAggregate(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement));
         const dataAggregateEmbeddedProperties = graphElement.prop("entity/embedded");
 
         let addedEntity = null;
@@ -364,7 +365,7 @@ class SystemEntityManager {
             return null;
         }
 
-        const backingData = new Entities.BackingData(graphElement.id, graphElement.attr("label/textWrap/text"), includedData);
+        const backingData = new Entities.BackingData(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement), includedData);
         if (this.#currentSystemEntity.getBackingDataEntities.has(backingData.name)) {
             return null; // TODO check that model ensures that every Data Aggregate includes all included_data items 
         } else {
@@ -417,11 +418,11 @@ class SystemEntityManager {
         let endpointEntity;
         switch (endpointEntityType) {
             case EntityTypes.EXTERNAL_ENDPOINT:
-                endpointEntity = new Entities.ExternalEndpoint(graphElement.id, graphElement.getParentCell().attr("label/textWrap/text"));
+                endpointEntity = new Entities.ExternalEndpoint(graphElement.id, this.#parseMetaDataFromElement(graphElement), graphElement.getParentCell().attr("label/textWrap/text"));
                 break;
             case EntityTypes.ENDPOINT:
             default:
-                endpointEntity = new Entities.Endpoint(graphElement.id, graphElement.getParentCell().attr("label/textWrap/text"));
+                endpointEntity = new Entities.Endpoint(graphElement.id, this.#parseMetaDataFromElement(graphElement), graphElement.getParentCell().attr("label/textWrap/text"));
         }
         endpointEntity["position"] = graphElement.position();
         endpointEntity["size"] = graphElement.size();
@@ -457,7 +458,7 @@ class SystemEntityManager {
             return null;
         }
 
-        const requestTrace = new Entities.RequestTrace(graphElement.attr("label/textWrap/text"), graphElement.id, externalEndpoint, involvedLinkIds[0]);
+        const requestTrace = new Entities.RequestTrace(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement), externalEndpoint, involvedLinkIds[0]);
         requestTrace["position"] = graphElement.position();
         requestTrace["size"] = graphElement.size();
         return requestTrace;
@@ -587,6 +588,20 @@ class SystemEntityManager {
             });
         }
         return tableRows;
+    }
+
+    #parseMetaDataFromElement(cell: dia.Element): MetaData {
+        return {
+            fontSize: cell.attr("label/fontSize"),
+            size: {
+                width: cell.size().width,
+                height: cell.size().height
+            },
+            position: {
+                xCoord: cell.position().x,
+                yCoord: cell.position().y
+            }
+        }
     }
 }
 

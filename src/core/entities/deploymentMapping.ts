@@ -17,22 +17,20 @@ class DeploymentMapping {
 
     #id: string;
     
-    #modelId: string;
-    
     #deployedEntity: Component | Infrastructure;
 
     #underlyingInfrastructure: Infrastructure;
 
     /**
      * Create a Deployment Mapping entity. Represents the connection between either {@link Component} - {@link Infrastructure} or {@link Infrastructure} - {@link Infrastructure}. 
-     * @param {modelId} modelId The ID, the respective entity representation has in the joint.dia.Graph model.
+     * @param {string} id The unique id for this entity.
      * @param {Component|Service|BackingService|StorageBackingService|Infrastructure} deployedEntity The entity that is being deployed.
      * @param {Infrastructure} underlyingInfrastructure The Infrastructure entity, which deploys the other entity.
      * @throws {TypeError} If a wrong entity type is being provided.
      * @throws {Error} If the deployedEntity and the underylingInfrastructure are the same.
      */
-    constructor(modelId: string, deployedEntity: Component | Infrastructure, underlyingInfrastructure: Infrastructure) {
-        if (deployedEntity.toJson() === underlyingInfrastructure.toJson()) {
+    constructor(id: string, deployedEntity: Component | Infrastructure, underlyingInfrastructure: Infrastructure) {
+        if (deployedEntity.getId === underlyingInfrastructure.getId) {
             const errorMessage = "The entities for which the DeploymentMapping is defined have to be distinguishable.";
             throw new Error(errorMessage);
         }
@@ -47,10 +45,9 @@ class DeploymentMapping {
             throw new TypeError(errorMessage);
         }
 
-        this.#modelId = modelId;
+        this.#id = id;
         this.#deployedEntity = deployedEntity;
         this.#underlyingInfrastructure = underlyingInfrastructure;
-        this.#id = deployedEntity.name + "-" + underlyingInfrastructure.name; // TODO use ID instead?
     }
 
     /**
@@ -59,14 +56,6 @@ class DeploymentMapping {
      */
     get getId() {
         return this.#id;
-    }
-
-    /**
-     * Returns the ID, the respective entity representation has in the joint.dia.Graph model.
-     * @returns {string}
-     */
-    get getModelId() {
-        return this.#modelId;
     }
 
     /**

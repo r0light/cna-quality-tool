@@ -1,5 +1,6 @@
 import { EntityProperty, TextEntityProperty, parseProperties } from "../common/entityProperty";
 import { tosca_simple_profile_for_yaml_v1_3 } from '../../totypa/parsedProfiles/tosca_simple_profile_for_yaml_v1_3'
+import { MetaData } from "../common/entityDataTypes";
 
 const ENDPOINT_TOSCA_EQUIVALENT = tosca_simple_profile_for_yaml_v1_3.capability_types["tosca.capabilities.Endpoint"];
 
@@ -54,9 +55,9 @@ function getEndpointProperties(): EntityProperty[] {
  */
 class Endpoint {
 
-    #id: string; //TODO
+    #id: string;
 
-    #modelId: string;
+    #metaData: MetaData;
 
     #parentName: string; //TODO change to id
 
@@ -66,11 +67,13 @@ class Endpoint {
 
     /**
      * Create an Endpoint entity.
-     * @param {modelId} modelId The ID, the respective entity representation has in the joint.dia.Graph model.
+     * @param {string} id The unique id for this entity.
+     * @param {MetaData} metaData The meta data for this entity, needed for displaying it in a diagram. 
      * @param {string} parentName The name of the parent Entity.
      */
-    constructor(modelId: string, parentName: string) {
-        this.#modelId = modelId;
+    constructor(id: string, metaData: MetaData, parentName: string) {
+        this.#id = id;
+        this.#metaData = metaData;
         this.#parentName = parentName;
         this.#properties = getEndpointProperties();
     }
@@ -120,11 +123,11 @@ class Endpoint {
     }
 
     /**
-     * Returns the ID, the respective entity representation has in the joint.dia.Graph model.
-     * @returns {string}
+     * Return the meta data for this node entity.
+     * @returns {MetaData}
      */
-    get getModelId() {
-        return this.#modelId;
+    get getMetaData() {
+        return this.#metaData;
     }
 
     /**

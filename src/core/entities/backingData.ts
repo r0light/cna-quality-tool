@@ -1,4 +1,5 @@
 import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_modeling_tosca_profile'
+import { MetaData } from '../common/entityDataTypes';
 
 /**
  * The module for aspects related to a Backing Data quality model entity.
@@ -13,24 +14,26 @@ const BACKING_DATA_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types["cna
  */
 class BackingData {
 
-    #id: string; // TODO?
+    #id: string;
 
     name: string;
 
-    #modelId: string;
+    #metaData: MetaData;
 
-    #includedData: any[]; //TODO more specific type
+    #includedData: { key: string, value: string }[]; //TODO more specific type
 
     /**
-     * Create a Backing Data entity.
-     * @param {modelId} modelId The ID, the respective entity representation has in the joint.dia.Graph model.
-     * @param {string} name The name of the Backing Data entity. 
+     * Create a Backing Data entity.representation has in the joint.dia.Graph model.
+     * @param {string} id The unique id for this entity.
+     * @param {string} name The name of the Backing Data entity.
+     * @param {MetaData} metaData The meta data for this entity, needed for displaying it in a diagram. 
      * @param {Array} includedData The included data values with key of this Backing Data entity.
      */
-    constructor(modelId: string, name: string, includedData: any[]) {
+    constructor(id: string, name: string, metaData: MetaData, includedData: { key: string, value: string }[]) {
+        this.#id = id;
         this.name = name;
+        this.#metaData = metaData;
         this.#includedData = includedData;
-        this.#modelId = modelId;
     }
 
     /**
@@ -50,11 +53,11 @@ class BackingData {
     }
 
     /**
-     * Returns the ID, the respective entity representation has in the joint.dia.Graph model.
-     * @returns {string}
+     * Return the meta data for this node entity.
+     * @returns {MetaData}
      */
-    get getModelId() {
-        return this.#modelId;
+    get getMetaData() {
+        return this.#metaData;
     }
 
     /**

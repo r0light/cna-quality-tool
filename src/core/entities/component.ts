@@ -5,6 +5,7 @@ import { DataAggregate } from './dataAggregate.js'
 import { BackingData } from './backingData.js'
 import { Infrastructure } from './infrastructure.js'
 import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_modeling_tosca_profile'
+import { MetaData } from '../common/entityDataTypes'
 
 /**
  * The module for aspects related to a Component quality model entity.
@@ -20,7 +21,7 @@ function getComponentProperties(): EntityProperty[] {
             case "managed":
                 prop.setName = "Managed cloud service?";
                 prop.setExample = "e.g. yes";
-            break;
+                break;
         }
     }
     return parsed;
@@ -34,11 +35,11 @@ class Component {
 
     #id: string;
 
-    #modelId: string;
-
     name: string;
 
-    #hostedBy;
+    #metaData: MetaData;
+
+    #hostedBy: Infrastructure;
 
     #endpointEntities = new Array();
 
@@ -54,13 +55,15 @@ class Component {
 
     /**
      * Create a Component entity.
+     * @param {string} id The unique id for this entity.
      * @param {string} name The name of the Component entity. 
-     * @param {modelId} modelId The ID, the respective entity representation has in the joint.dia.Graph model.
+     * @param {MetaData} metaData The meta data for this entity, needed for displaying it in a diagram. 
      * @param {Infrastructure} hostingInfrastructure The {@link Infrastructure} entity that hosts this Component entity.
      */
-    constructor(name, modelId, hostingInfrastructure) {
-        this.name = name;
-        this.#modelId = modelId;
+    constructor(id: string, name: string, metaData: MetaData, hostingInfrastructure: Infrastructure) {
+        this.#id = id,
+            this.name = name;
+        this.#metaData = metaData;
         this.#hostedBy = hostingInfrastructure;
         this.#properties = getComponentProperties();
     }
@@ -122,14 +125,6 @@ class Component {
     }
 
     /**
-     * Returns the ID, the respective entity representation has in the joint.dia.Graph model.
-     * @returns {string}
-     */
-    get getModelId() {
-        return this.#modelId;
-    }
-
-    /**
      * Return the name of this Component entity.
      * @returns {string}
      */
@@ -138,81 +133,86 @@ class Component {
     }
 
     /**
+     * Return the meta data for this node entity.
+     * @returns {MetaData}
+     */
+    get getMetaData() {
+        return this.#metaData;
+    }
+
+
+    /**
      * Return the hosting {@link Infrastructure} entity of this Component entity.
      * @returns {Infrastructure}
      */
     get getHostedBy() {
-        return this.#hostedBy;
-    }
+            return this.#hostedBy;
+        }
 
     /**
      * Returns the {@link Endpoint} entities included in this Component.
      * @returns {Endpoint[]}
      */
     get getEndpointEntities() {
-        return this.#endpointEntities;
-    }
+            return this.#endpointEntities;
+        }
 
     /**
      * Returns the {@link ExternalEndpoint} entities included in this Component.
      * @returns {ExternalEndpoint[]}
      */
     get getExternalEndpointEntities() {
-        return this.#externalEndpointEntities;
-    }
+            return this.#externalEndpointEntities;
+        }
 
     /**
      * Returns the {@link DataAggregate} entities included in this Component.
      * @returns {DataAggregate[]}
      */
     get getDataAggregateEntities() {
-        return this.#dataAggregateEntities;
-    }
+            return this.#dataAggregateEntities;
+        }
 
     /**
     * Returns the {@link BackingData} entities included in this Component.
     * @returns {BackingData[]}
     */
     get getBackingDataEntities() {
-        return this.#backingDataEntities;
-    }
+            return this.#backingDataEntities;
+        }
 
     /**
     * Returns the {@link Link} entities included in this Component.
     * @returns {Link[]}
     */
     get getIncludedLinkEntities() {
-        return this.#includedLinkEntities;
-    }
+            return this.#includedLinkEntities;
+        }
 
-    /**
-     * Adds additional properties to this entity, only intended for subtypes to add additional properties
-     * 
-     * @param {EntityProperty[]} entityProperties 
-     */
-    addProperties(entityProperties: EntityProperty[]) {
-        this.#properties = this.#properties.concat(entityProperties);
-    }
+        /**
+         * Adds additional properties to this entity, only intended for subtypes to add additional properties
+         * 
+         * @param {EntityProperty[]} entityProperties 
+         */
+        addProperties(entityProperties: EntityProperty[]) {
+            this.#properties = this.#properties.concat(entityProperties);
+        }
 
-    /**
-     * Returns all properties of this entity
-     * @returns {EntityProperty[]}
-     */
-    getProperties() {
-        return this.#properties;
-    }
+        /**
+         * Returns all properties of this entity
+         * @returns {EntityProperty[]}
+         */
+        getProperties() {
+            return this.#properties;
+        }
 
-    /**
-     * Transforms the Component object into a String. 
-     * @returns {string}
-     */
-    toString() {
-        return "Component " + JSON.stringify(this);
+        /**
+         * Transforms the Component object into a String. 
+         * @returns {string}
+         */
+        toString() {
+            return "Component " + JSON.stringify(this);
+        }
     }
-
-    toJson() {
-        return JSON.stringify(this.getModelId);
-    }
-}
 
 export { Component, COMPONENT_TOSCA_EQUIVALENT, getComponentProperties };
