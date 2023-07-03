@@ -1,6 +1,6 @@
 import { BackingData } from "./backingData";
-import { EntityProperty } from "./entityProperty";
-import { cna_modeling_tosca_profile } from '../totypa/parsedProfiles/cna_modeling_tosca_profile'
+import { EntityProperty } from "../common/entityProperty";
+import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_modeling_tosca_profile'
 
 /**
  * The module for aspects related to an Infrastructure quality model entity.

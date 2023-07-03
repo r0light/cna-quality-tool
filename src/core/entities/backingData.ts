@@ -1,4 +1,4 @@
-import { cna_modeling_tosca_profile } from '../totypa/parsedProfiles/cna_modeling_tosca_profile'
+import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_modeling_tosca_profile'
 
 /**
  * The module for aspects related to a Backing Data quality model entity.

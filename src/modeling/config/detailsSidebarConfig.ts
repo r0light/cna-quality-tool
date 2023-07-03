@@ -1,5 +1,5 @@
 import EntityTypes from "./entityTypes";
-import { getComponentProperties, getBackingServiceProperties, getStorageBackingServiceProperties, getEndpointProperties, getExternalEndpointProperties, getInfrastructureProperties } from "../entities";
+import { getComponentProperties, getBackingServiceProperties, getStorageBackingServiceProperties, getEndpointProperties, getExternalEndpointProperties, getInfrastructureProperties } from "../../core/entities";
 import { UIContentType } from "./toolbarConfiguration";
 import { DialogConfig, DialogSize } from "./actionDialogConfig";
 

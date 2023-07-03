@@ -1,6 +1,6 @@
 import { Component } from './component'
 import { Infrastructure } from './infrastructure';
-import { cna_modeling_tosca_profile } from '../totypa/parsedProfiles/cna_modeling_tosca_profile'
+import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_modeling_tosca_profile'
 
 /**
  * The module for aspects related to a Component quality model Entity.

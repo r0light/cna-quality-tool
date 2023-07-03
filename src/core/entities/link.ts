@@ -4,7 +4,7 @@ import { Endpoint } from './endpoint'
 import { ExternalEndpoint } from './externalEndpoint';
 import { Service } from './service';
 import { StorageBackingService } from './storageBackingService';
-import { cna_modeling_tosca_profile } from '../totypa/parsedProfiles/cna_modeling_tosca_profile'
+import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_modeling_tosca_profile'
 
 /**
  * The module for aspects related to a Link quality model entity.

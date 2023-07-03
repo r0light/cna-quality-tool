@@ -1,8 +1,8 @@
 import { dia, util } from "jointjs";
 import EntityTypes from './config/entityTypes';
-import * as Entities from './entities';
+import * as Entities from '../core/entities';
 import ErrorMessage, { ErrorType } from './errorMessage'
-import ToscaConverter from './tosca/ToscaConverter.js';
+import ToscaConverter from '../core/tosca-adapter/ToscaConverter.js';
 import { UIContentType } from './config/toolbarConfiguration';
 import UIModalDialog, { DialogSize } from './representations/guiElements.dialog';
 import { PropertyContentType } from './config/detailsSidebarConfig';

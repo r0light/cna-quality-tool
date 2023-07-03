@@ -1,5 +1,5 @@
 import { dia, shapes } from 'jointjs'
-import { getComponentProperties, getBackingServiceProperties, getStorageBackingServiceProperties, getEndpointProperties, getInfrastructureProperties } from "../entities";
+import { getComponentProperties, getBackingServiceProperties, getStorageBackingServiceProperties, getEndpointProperties, getInfrastructureProperties } from "../../core/entities";
 import EntityTypes from "./entityTypes";
 
 // TODO section:

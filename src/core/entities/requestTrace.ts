@@ -1,7 +1,7 @@
 
 import { ExternalEndpoint } from "./externalEndpoint";
 import { Link } from "./link";
-import { cna_modeling_tosca_profile } from '../totypa/parsedProfiles/cna_modeling_tosca_profile'
+import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_modeling_tosca_profile'
 
 
 /**

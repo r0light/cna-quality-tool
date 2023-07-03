@@ -1,10 +1,10 @@
-import { EntityProperty, TextEntityProperty, parseProperties } from './entityProperty'
+import { EntityProperty, parseProperties } from '../common/entityProperty'
 import { Endpoint } from './endpoint.js'
 import { ExternalEndpoint } from './externalEndpoint.js'
 import { DataAggregate } from './dataAggregate.js'
 import { BackingData } from './backingData.js'
 import { Infrastructure } from './infrastructure.js'
-import { cna_modeling_tosca_profile } from '../totypa/parsedProfiles/cna_modeling_tosca_profile'
+import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_modeling_tosca_profile'
 
 /**
  * The module for aspects related to a Component quality model entity.

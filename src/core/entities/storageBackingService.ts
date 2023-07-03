@@ -1,6 +1,6 @@
 import { Component } from './component'
-import { parseProperties } from './entityProperty';
-import { cna_modeling_tosca_profile } from '../totypa/parsedProfiles/cna_modeling_tosca_profile'
+import { parseProperties } from '../common/entityProperty';
+import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_modeling_tosca_profile'
 
 /**
  * The module for aspects related to a Component quality model Entity.

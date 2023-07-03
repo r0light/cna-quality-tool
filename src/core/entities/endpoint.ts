@@ -1,5 +1,5 @@
-import { EntityProperty, NumberEntityProperty, TextEntityProperty, parseProperties } from "./entityProperty";
-import { tosca_simple_profile_for_yaml_v1_3 } from '../totypa/parsedProfiles/tosca_simple_profile_for_yaml_v1_3'
+import { EntityProperty, TextEntityProperty, parseProperties } from "../common/entityProperty";
+import { tosca_simple_profile_for_yaml_v1_3 } from '../../totypa/parsedProfiles/tosca_simple_profile_for_yaml_v1_3'
 
 const ENDPOINT_TOSCA_EQUIVALENT = tosca_simple_profile_for_yaml_v1_3.capability_types["tosca.capabilities.Endpoint"];
 

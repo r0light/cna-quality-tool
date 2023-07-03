@@ -1,6 +1,6 @@
-import { EntityProperty, parseProperties } from "./entityProperty"
+import { EntityProperty, parseProperties } from "../common/entityProperty"
 import { Endpoint } from "./endpoint";
-import { tosca_simple_profile_for_yaml_v1_3 } from '../totypa/parsedProfiles/tosca_simple_profile_for_yaml_v1_3'
+import { tosca_simple_profile_for_yaml_v1_3 } from '../../totypa/parsedProfiles/tosca_simple_profile_for_yaml_v1_3'
 
 /**
  * The module for aspects related to a External Endpoint quality model Entity.

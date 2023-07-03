@@ -1,8 +1,8 @@
-import { EntityProperty, TextEntityProperty } from './entityProperty'
+import { EntityProperty } from '../common/entityProperty'
 import { Component } from './component'
 import { Infrastructure } from './infrastructure'
-import { parseProperties } from './entityProperty'
-import { cna_modeling_tosca_profile } from '../totypa/parsedProfiles/cna_modeling_tosca_profile'
+import { parseProperties } from '../common/entityProperty'
+import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_modeling_tosca_profile'
 
 /**
  * The module for aspects related to a Backing Service quality model entity.
