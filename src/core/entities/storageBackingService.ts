@@ -39,8 +39,8 @@ class StorageBackingService extends Component {
      * @param {MetaData} metaData The meta data for this entity, needed for displaying it in a diagram. 
      * @param {Infrastructure} hostingInfrastructure The {@link Infrastructure} entity that hosts this Storage Backing Service entity.
      */
-    constructor(id: string, name: string, metaData: MetaData,  hostingInfrastructure: Infrastructure) {
-        super(id, name, metaData, hostingInfrastructure);
+    constructor(id: string, name: string, metaData: MetaData) {
+        super(id, name, metaData);
         this.addProperties(getStorageBackingServiceProperties());
     }
 

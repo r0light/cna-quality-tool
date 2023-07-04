@@ -26,7 +26,7 @@ class RequestTrace {
 
     #externalEndpoint: ExternalEndpoint;
 
-    #linkEntityIds: Set<string> = new Set();
+    #links = new Set<Link>();
 
     /**
      * Create a Request Trace entity.
@@ -37,35 +37,18 @@ class RequestTrace {
      * @param {string} linkEntityOrEntities The Id {@link Link} entity or entities that take part in this Request Trace (1...N)
      * @throws {TypeError} If a wrong entity type is being provided
      */
-    constructor(id: string, name: string, metaData: MetaData, externalEndpoint: ExternalEndpoint, linkEntityOrEntities: string[]) {
-        for (const linkEntity of linkEntityOrEntities) {
-            if (this.#linkEntityIds.has(linkEntity)) {
+    constructor(id: string, name: string, metaData: MetaData, externalEndpoint: ExternalEndpoint, links: Link[]) {
+        for (const linkEntity of links) {
+            if (this.#links.has(linkEntity)) {
                 return;
             }
 
-            this.#linkEntityIds.add(linkEntity);
+            this.#links.add(linkEntity);
         }
-
         this.#id = id;
         this.#name = name;
         this.#metaData = metaData;
         this.#externalEndpoint = externalEndpoint;
-    }
-
-    // TODO include constructor that allows lists?
-
-    /**
-      * Adds a {@link Link} entity to this Request Trace.
-      * @param {Link} linkEntityToAdd A {@link Link} entity that is part of this RequestTrace.
-      * @throws {TypeError} If a wrong entity type is being provided
-      */
-    addLinkEntity(linkEntityIdToAdd: string) {
-
-        if (this.#linkEntityIds.has(linkEntityIdToAdd)) {
-            return;
-        }
-
-        this.#linkEntityIds.add(linkEntityIdToAdd);
     }
 
     /**
@@ -117,10 +100,10 @@ class RequestTrace {
 
     /**
      * Returns the IDs of the {@link Link} entities involved in this RequestTrace entity.
-     * @returns {string}
+     * @returns {Link[]}
      */
-    get getLinkEntityIds() {
-        return this.#linkEntityIds;
+    get getLinks() {
+        return this.#links;
     }
 
     /**

@@ -10,18 +10,15 @@ import { MetaData } from "@/core/common/entityDataTypes";
 
 class SystemEntityManager {
 
-    #currentSystemGraph;
+    #currentSystemGraph: dia.Graph;
 
-    #currentSystemEntity;
+    #currentSystemEntity: Entities.System;
 
     #errorMessages = new Map();
 
     #includedDataAggregateEntities = new Map();
 
-    constructor(currentGraph) {
-        if (!(currentGraph instanceof dia.Graph)) {
-            throw new TypeError("SystemEntityManager: The provided graph has to be a joint.dia.Graph element");
-        }
+    constructor(currentGraph: dia.Graph) {
 
         this.#currentSystemGraph = currentGraph;
         this.#currentSystemEntity = new Entities.System("test");
@@ -30,6 +27,9 @@ class SystemEntityManager {
     }
 
     #subscribeToEvents() {
+
+        // TODO adjust to Vue Events
+
         this.#currentSystemGraph.on("initialSystemName", (event) => {
             this.#currentSystemEntity.setSystemName = event.systemName;
         });
@@ -43,13 +43,6 @@ class SystemEntityManager {
         });
     }
 
-    get getCurrentSystemEntity() { // TODO fix me
-        const copiedSystemEntity = JSON.parse(JSON.stringify(this.#currentSystemEntity));
-        console.log(copiedSystemEntity);
-        // return Object.assign(new Entities.System(), copiedSystemEntity);
-        return this.#currentSystemEntity;
-    }
-
     #createYamlDocument() {
         this.#errorMessages = new Map();
         this.#includedDataAggregateEntities = new Map();
@@ -57,6 +50,9 @@ class SystemEntityManager {
 
         this.#convertToSystemEntity();
 
+        console.log(this.#currentSystemEntity);
+
+        /* TODO trigger tosca adapter to do the transformation
         if (this.#errorMessages?.size > 0) {
             this.#provideConnectionWarningDialog();
             return;
@@ -64,65 +60,92 @@ class SystemEntityManager {
 
         const toscaConverter = new ToscaConverter(this.#currentSystemEntity);
         toscaConverter.convert();
+        */
     }
 
     #convertToSystemEntity() {
         // get first elements to ensure that all connection relate entities already exist
-        for (const graphElement of this.#currentSystemGraph.getElements()) {
+
+        let elements: dia.Element[] = this.#currentSystemGraph.getElements();
+
+        // start with Data Aggregate and Backing Data, because Components need to refer to them
+        let dataEntities = elements.filter((element) => element.prop("entity/type") === EntityTypes.DATA_AGGREGATE
+            || element.prop("entity/type") === EntityTypes.BACKING_DATA
+        );
+        for (const dataEntityElement of dataEntities) {
+            this.#addDataEntity(dataEntityElement);
+        }
+
+        // continue with entities
+        let componentEntities = elements.filter((element) => element.prop("entity/type") === EntityTypes.COMPONENT
+            || element.prop("entity/type") === EntityTypes.SERVICE
+            || element.prop("entity/type") === EntityTypes.BACKING_SERVICE
+            || element.prop("entity/type") === EntityTypes.STORAGE_BACKING_SERVICE
+            || element.prop("entity/type") === EntityTypes.INFRASTRUCTURE
+        );
+        for (const graphElement of componentEntities) {
             this.#addEntity(graphElement);
         }
 
+        // next are Links and Deployment Mappings
         for (const graphLink of this.#currentSystemGraph.getLinks()) {
             this.#addConnectionEntity(graphLink);
         }
 
+        // finally add Request Traces
+        let traceEntities = elements.filter((element) => element.prop("entity/type") === EntityTypes.REQUEST_TRACE);
+        for (const graphElement of traceEntities) {
+            this.#addTrace(graphElement);
+        }
+
+        // now, validate the created system
+        this.#validateSystemEntity();
         this.#checkValidityOfDataAggregates();
     }
 
+    #addDataEntity(graphElement: dia.Element) {
+        let addedEntity: Entities.DataAggregate | Entities.BackingData;
+        switch (graphElement.prop("entity/type")) {
+            case EntityTypes.DATA_AGGREGATE:
+                addedEntity = this.#createDataAggregate(graphElement);
+                if ([...(this.#currentSystemEntity.getDataAggregateEntities)].filter(([id, existingDataAggregate]) => existingDataAggregate.getName === addedEntity.getName).length === 0) {
+                    // only add data aggregate if a data aggregate with the same name not already exists
+                    this.#currentSystemEntity.addEntity(addedEntity);
+                }
+                break;
+            case EntityTypes.BACKING_DATA:
+                addedEntity = this.#createBackingData(graphElement);
+                if ([...(this.#currentSystemEntity.getBackingDataEntities)].filter(([id, existingBackingData]) => existingBackingData.getName === addedEntity.getName).length === 0) {
+                    // only add data aggregate if a data aggregate with the same name not already exists
+                    this.#currentSystemEntity.addEntity(addedEntity);
+                }
+                break;
+            default:
+                throw new TypeError("Unsuitable Data Element provided! No corresponding Data Entity type is known for: " + JSON.stringify(graphElement));
+        }
+    }
+
     #addEntity(graphElement: dia.Element) {
-        let addedEntity = {};
+        let addedEntity: Entities.Component | Entities.Infrastructure;
         switch (graphElement.prop("entity/type")) {
             case EntityTypes.COMPONENT:
-                addedEntity = this.#createComponent(graphElement, EntityTypes.COMPONENT);
-                break;
             case EntityTypes.SERVICE:
-                addedEntity = this.#createComponent(graphElement, EntityTypes.SERVICE);
-                break;
             case EntityTypes.BACKING_SERVICE:
-                addedEntity = this.#createComponent(graphElement, EntityTypes.BACKING_SERVICE);
-                break;
             case EntityTypes.STORAGE_BACKING_SERVICE:
-                addedEntity = this.#createComponent(graphElement, EntityTypes.STORAGE_BACKING_SERVICE);
+                addedEntity = this.#createComponent(graphElement);
                 break;
             case EntityTypes.INFRASTRUCTURE:
                 addedEntity = this.#createInfrastructureEntity(graphElement);
                 break;
-            case EntityTypes.DATA_AGGREGATE:
-                addedEntity = this.#createDataAggregate(graphElement);
-                break;
-            case EntityTypes.REQUEST_TRACE:
-                addedEntity = this.#createRequestTrace(graphElement);
-                break;
-            case EntityTypes.BACKING_DATA:
-                addedEntity = this.#createBackingData(graphElement);
-                break;
             default:
-                return; // TODO
+                throw new TypeError("Unsuitable Element provided! No corresponding Entity type is known for: " + JSON.stringify(graphElement));
         }
 
-        if (!addedEntity) {
-            return;
-        }
-
-        try {
-            this.#currentSystemEntity.addEntity(addedEntity);
-        } catch (error) {
-            console.log(error); // TODO
-        }
+        this.#currentSystemEntity.addEntity(addedEntity);
     }
 
     #addConnectionEntity(graphLink: dia.Link) {
-        let addedEntity = {};
+        let addedEntity: Entities.Link | Entities.DeploymentMapping;
         switch (graphLink.prop("entity/type")) {
             case EntityTypes.LINK:
                 addedEntity = this.#createLink(graphLink);
@@ -131,58 +154,81 @@ class SystemEntityManager {
                 addedEntity = this.#createDeploymentMapping(graphLink);
                 break;
             default:
-                break;
+                throw new TypeError("Unsuitable Link Element provided! No corresponding connection type is known for: " + JSON.stringify(graphLink));
         }
 
-        if (!addedEntity) {
-            return;
-        }
-
-        try {
-            this.#currentSystemEntity.addEntity(addedEntity);
-        } catch (error) {
-            console.log(error); // TODO
-        }
+        this.#currentSystemEntity.addEntity(addedEntity);
     }
 
-    #createComponent(graphElement, endpointEntityType) {
-        let groupedLinks = util.groupBy(this.#currentSystemGraph.getConnectedLinks(graphElement), (element) => {
-            return element.prop("entity/type");
-        });
+    #addTrace(requestTrace: dia.Element) {
+        let requestTraceEntity: Entities.RequestTrace = this.#createRequestTrace(requestTrace);
+        this.#currentSystemEntity.addEntity(requestTraceEntity);
+    }
 
-        const deploymentMappings = groupedLinks[EntityTypes.DEPLOYMENT_MAPPING];
+    #createDataAggregate(graphElement, returnDataAggregateAnyway = false) {
 
-        if (!deploymentMappings || deploymentMappings.length === 0 || deploymentMappings.length > 1) {
-            const type = endpointEntityType === EntityTypes.COMPONENT ? "Component" : (endpointEntityType === EntityTypes.SERVICE ? "Service" : (endpointEntityType === EntityTypes.BACKING_SERVICE ? "Backing Service" : "Storage Backing Service"));
-            const message = `The ${type} entity is only valid if it is hosted by exactly one Infrastructure entity. However, the ${type} "${graphElement.attr("label/textWrap/text")}" is hosted by none or several Infrastructure 
-            entities and is, therefore, invalid.`;
-            const error = new ErrorMessage(endpointEntityType ?? EntityTypes.COMPONENT, ErrorType.INVALID_MODEL_ENTIY, graphElement.attr("label/textWrap/text"), "Hosting Relation", message);
+        // TODO allow for now
+        /*
+        if (!graphElement || !(graphElement.getParentCell())) {
+            const message = `A Data Aggregate entity is only valid if it is embedded in one of the component type entities. However, the Data Aggregate "${graphElement.attr("label/textWrap/text")}" has no parent entity 
+            and is, therefore, invalid.`;
+            const error = new ErrorMessage(EntityTypes.DATA_AGGREGATE, ErrorType.INVALID_MODEL_ENTIY, graphElement.attr("label/textWrap/text"), "Embedded Relation", message);
             this.#errorMessages.set(graphElement.id, error);
             return null;
         }
+        */
 
-        const infrastructureModelEntity = deploymentMappings[0].getSourceElement().prop("entity/type") === EntityTypes.INFRASTRUCTURE ? deploymentMappings[0].getSourceElement() : deploymentMappings[0].getTargetElement();
-        const infrastructure = this.#currentSystemEntity.getInfrastructureEntities.get(infrastructureModelEntity.getModelId) ?? this.#createInfrastructureEntity(infrastructureModelEntity);
+        const dataAggregate = new Entities.DataAggregate(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement));
 
-        if (!infrastructure) {
-            // ErrorMessages already created while creating entity
+        return dataAggregate;
+    }
+
+    #createBackingData(graphElement) {
+        // TODO allow for now
+        /*
+        if (!graphElement || !(graphElement.getParentCell())) {
+            const message = `A Backing Data entity is only valid if it is embedded in one of the component type or infrastructure entities. However, the Backing Data "${graphElement.attr("label/textWrap/text")}" 
+            has no parent entity and is, therefore, invalid.`;
+            const error = new ErrorMessage(EntityTypes.BACKING_DATA, ErrorType.INVALID_MODEL_ENTIY, graphElement.attr("label/textWrap/text"), "Embedded Relation", message);
+            this.#errorMessages.set(graphElement.id, error);
             return null;
         }
+        */
 
-        let componentModelEntity;
-        switch(endpointEntityType) {
+        const includedData = graphElement.prop("entity/properties/includedData");
+
+        // TODO allow for now
+        /*
+        if (includedData.length <= 0) {
+            const message = `A Backing Data entity has to include at least one data item. However, the Backing Data "${graphElement.attr("label/textWrap/text")}" 
+            has information included and is, therefore, invalid.`;
+            const error = new ErrorMessage(EntityTypes.BACKING_DATA, ErrorType.MISSING_INFORMATION, graphElement.attr("label/textWrap/text"), "Included Data", message);
+            this.#errorMessages.set(graphElement.id, error);
+            return null;
+        }
+        */
+
+        const backingData = new Entities.BackingData(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement), includedData);
+
+        return backingData;
+    }
+
+    #createComponent(graphElement) {
+
+        let componentModelEntity: Entities.Component | Entities.Service | Entities.BackingService | Entities.StorageBackingService;
+        switch (graphElement.prop("entity/type")) {
             case EntityTypes.SERVICE:
-                componentModelEntity = new Entities.Service(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement), infrastructure);
+                componentModelEntity = new Entities.Service(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement));
                 break;
             case EntityTypes.BACKING_SERVICE:
-                componentModelEntity = new Entities.BackingService(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement), infrastructure);
+                componentModelEntity = new Entities.BackingService(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement));
                 break;
             case EntityTypes.STORAGE_BACKING_SERVICE:
-                componentModelEntity = new Entities.StorageBackingService(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement), infrastructure);
+                componentModelEntity = new Entities.StorageBackingService(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement));
                 break;
             case EntityTypes.COMPONENT:
             default:
-                componentModelEntity = new Entities.Component(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement), infrastructure);
+                componentModelEntity = new Entities.Component(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement));
         }
         // set entity properties
         for (let property of componentModelEntity.getProperties()) {
@@ -193,80 +239,63 @@ class SystemEntityManager {
         for (const embeddedCell of embeddedCells) {
             switch (embeddedCell.prop("entity/type")) {
                 case EntityTypes.ENDPOINT:
-                    const endpoint = this.#createEndpointEntity(embeddedCell, EntityTypes.ENDPOINT);
+                case EntityTypes.EXTERNAL_ENDPOINT:
+                    const endpoint = this.#createEndpointEntity(embeddedCell);
                     if (!endpoint) {
                         // ErrorMessages already created while creating entity 
                         break;
                     }
-                    componentModelEntity.addEntity(endpoint);
-                    break;
-                case EntityTypes.EXTERNAL_ENDPOINT:
-                    const externalEndpoint = this.#createEndpointEntity(embeddedCell, EntityTypes.EXTERNAL_ENDPOINT);
-                    if (!externalEndpoint) {
-                        // ErrorMessages already created while creating entity 
-                        break;
-                    }
-                    componentModelEntity.addEntity(externalEndpoint);
+                    componentModelEntity.addEndpoint(endpoint);
                     break;
                 case EntityTypes.DATA_AGGREGATE:
-                    const dataAggregate = this.#currentSystemEntity.getDataAggregateEntities.get(embeddedCell.attr("label/textWrap/text")) ?? this.#createDataAggregate(embeddedCell, true);
-                    if (!dataAggregate) {
-                        // ErrorMessages already created while creating entity 
-                        break;
+                    let dataAggregateName: string = embeddedCell.attr("label/textWrap/text");
+                    let referencedDataAggregate = [...(this.#currentSystemEntity.getDataAggregateEntities)].filter(([id, dataAggregate]) => dataAggregate.getName === dataAggregateName);
+                    if (referencedDataAggregate.length > 0) {
+                        componentModelEntity.addDataEntity(referencedDataAggregate[0][1], embeddedCell.prop("entity/properties/dataAggregate-parentRelation"));
+                    } else {
+                        throw new Error(`Data Aggregate with name ${dataAggregateName} should be there, but could not be found in ${this.#currentSystemEntity.getDataAggregateEntities}`);
                     }
-                    componentModelEntity.addEntity(dataAggregate);
                     break;
                 case EntityTypes.BACKING_DATA:
-                    const backingData = this.#currentSystemEntity.getBackingDataEntities.get(embeddedCell.attr("label/textWrap/text")) ?? this.#createBackingData(embeddedCell);
-                    if (!backingData) {
-                        // ErrorMessages already created while creating entity 
-                        break;
+                    let backingDataName: string = embeddedCell.attr("label/textWrap/text");
+                    let referencedBackingData = [...(this.#currentSystemEntity.getBackingDataEntities)].filter(([id, backingData]) => backingData.getName === backingDataName);
+                    if (referencedBackingData.length > 0) {
+                        componentModelEntity.addDataEntity(referencedBackingData[0][1]);
+                    } else {
+                        throw new Error(`Backing Data with name ${backingDataName} should be there, but could not be found in ${this.#currentSystemEntity.getBackingDataEntities}`);
                     }
-                    componentModelEntity.addEntity(backingData);
                     break;
                 default:
                     break;
             }
         }
 
-        componentModelEntity["position"] = graphElement.position();
-        componentModelEntity["size"] = graphElement.size();
         return componentModelEntity;
     }
 
-    #createInfrastructureEntity(graphElement) { // TODO hosted by Infrastructure
-
-        let infrastructureEntity = this.#checkIfStorageBackingServiceConnected(graphElement);
-        if (!infrastructureEntity) {
-            const message = `A Storage Backing Service entity cannot be deployed with Component, Service or Backing Service entities on the same Infrastructure entity. However, the Infrastructure "${graphElement.attr("label/textWrap/text")}" 
-            currently deploys a Storage Backing Service with at least one other entity type and is, therefore, invalid.`;
-            const error = new ErrorMessage(EntityTypes.INFRASTRUCTURE, ErrorType.INVALID_MODEL_ENTIY, graphElement.attr("label/textWrap/text"), "Entity Type Deployments", message);
-            this.#errorMessages.set(graphElement.id, error);
-            return null;
-        }
+    #createInfrastructureEntity(graphElement) {
+        let infrastructureEntity = new Entities.Infrastructure(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement), Entities.InfrastructureTypes.COMPUTE); // TODO differentiate infrastructure types?
 
         const backingDataEntities = graphElement.getEmbeddedCells();
-        if (backingDataEntities.length > 0) {
-            for (const backingDataEntity of backingDataEntities) {
-                switch (backingDataEntity.prop("entity/type")) {
-                    case EntityTypes.BACKING_DATA:
-                        const backingData = this.#currentSystemEntity.getBackingDataEntities.get(backingDataEntity.attr("label/textWrap/text")) ?? this.#createBackingData(backingDataEntity);
-                        if (!backingData) {
-                            // ErrorMessages already created while creating entity 
-                            return null;
-                        }
-                        infrastructureEntity.addBackingDataEntity(backingData);
-                        break;
-                    default:
-                        break;
-                }
+
+        for (const embeddedBackingData of backingDataEntities) {
+            switch (embeddedBackingData.prop("entity/type")) {
+                case EntityTypes.BACKING_DATA:
+                    let backingDataName: string = embeddedBackingData.attr("label/textWrap/text");
+                    let referencedBackingData = [...(this.#currentSystemEntity.getBackingDataEntities)].filter(([id, backingData]) => backingData.getName === backingDataName);
+                    if (referencedBackingData.length > 0) {
+                        infrastructureEntity.addBackingDataEntity(referencedBackingData[0][1]);
+                    } else {
+                        throw new Error(`Backing Data with name ${backingDataName} should be there, but could not be found in ${this.#currentSystemEntity.getBackingDataEntities}`);
+                    }
+                    break;
+                default:
+                    break;
             }
         }
-        infrastructureEntity["position"] = graphElement.position();
-        infrastructureEntity["size"] = graphElement.size();
         return infrastructureEntity;
     }
-    
+
     #checkIfStorageBackingServiceConnected(graphElement) {
         let connectedLinksForCurrentInfrastructure = this.#currentSystemGraph.getConnectedLinks(graphElement);
 
@@ -297,96 +326,56 @@ class SystemEntityManager {
         if (storageBackingServiceConnected && includesComponentTypesInDepoyment) {
             return null;
         } else if (storageBackingServiceConnected && !includesComponentTypesInDepoyment) {
-            return new Entities.Infrastructure(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement),  Entities.InfrastructureTypes.DBMS);
+            return new Entities.Infrastructure(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement), Entities.InfrastructureTypes.DBMS);
         }
-        return new Entities.Infrastructure(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement),  Entities.InfrastructureTypes.COMPUTE);
+        return new Entities.Infrastructure(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement), Entities.InfrastructureTypes.COMPUTE);
     }
 
-    #createDataAggregate(graphElement, returnDataAggregateAnyway = false) {
-        if (!graphElement || !(graphElement.getParentCell())) {
-            const message = `A Data Aggregate entity is only valid if it is embedded in one of the component type entities. However, the Data Aggregate "${graphElement.attr("label/textWrap/text")}" has no parent entity 
-            and is, therefore, invalid.`;
-            const error = new ErrorMessage(EntityTypes.DATA_AGGREGATE, ErrorType.INVALID_MODEL_ENTIY, graphElement.attr("label/textWrap/text"), "Embedded Relation", message);
+
+
+
+    #validateSystemEntity() {
+        //TODO validate Storage Service specifics 
+        /*
+        let infrastructureEntity = this.#checkIfStorageBackingServiceConnected(graphElement);
+        if (!infrastructureEntity) {
+            const message = `A Storage Backing Service entity cannot be deployed with Component, Service or Backing Service entities on the same Infrastructure entity. However, the Infrastructure "${graphElement.attr("label/textWrap/text")}" 
+            currently deploys a Storage Backing Service with at least one other entity type and is, therefore, invalid.`;
+            const error = new ErrorMessage(EntityTypes.INFRASTRUCTURE, ErrorType.INVALID_MODEL_ENTIY, graphElement.attr("label/textWrap/text"), "Entity Type Deployments", message);
+            this.#errorMessages.set(graphElement.id, error);
+            return null;
+        }
+        */
+
+
+        //TODO validate deployment mappings:
+        /*
+        let groupedLinks = util.groupBy(this.#currentSystemGraph.getConnectedLinks(graphElement), (element) => {
+            return element.prop("entity/type");
+        });
+
+        const deploymentMappings = groupedLinks[EntityTypes.DEPLOYMENT_MAPPING];
+
+        if (!deploymentMappings || deploymentMappings.length === 0 || deploymentMappings.length > 1) {
+            const type = endpointEntityType === EntityTypes.COMPONENT ? "Component" : (endpointEntityType === EntityTypes.SERVICE ? "Service" : (endpointEntityType === EntityTypes.BACKING_SERVICE ? "Backing Service" : "Storage Backing Service"));
+            const message = `The ${type} entity is only valid if it is hosted by exactly one Infrastructure entity. However, the ${type} "${graphElement.attr("label/textWrap/text")}" is hosted by none or several Infrastructure 
+            entities and is, therefore, invalid.`;
+            const error = new ErrorMessage(endpointEntityType ?? EntityTypes.COMPONENT, ErrorType.INVALID_MODEL_ENTIY, graphElement.attr("label/textWrap/text"), "Hosting Relation", message);
             this.#errorMessages.set(graphElement.id, error);
             return null;
         }
 
-        const dataAggregate = new Entities.DataAggregate(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement));
-        const dataAggregateEmbeddedProperties = graphElement.prop("entity/embedded");
+        const infrastructureModelEntity = deploymentMappings[0].getSourceElement().prop("entity/type") === EntityTypes.INFRASTRUCTURE ? deploymentMappings[0].getSourceElement() : deploymentMappings[0].getTargetElement();
+        const infrastructure = this.#currentSystemEntity.getInfrastructureEntities.get(infrastructureModelEntity.getModelId) ?? this.#createInfrastructureEntity(infrastructureModelEntity);
 
-        let addedEntity = null;
-        if ("persisted".localeCompare(dataAggregateEmbeddedProperties.parentRelation) === 0) {
-            if (this.#currentSystemEntity.getDataAggregateEntities.has(dataAggregate.name)) {
-                this.#currentSystemEntity.getDataAggregateEntities.get(dataAggregate.name).addPersistedByEntity(graphElement.getParentCell().attr("label/textWrap/text"));
-            } else {
-                dataAggregate.addPersistedByEntity(graphElement.getParentCell().attr("label/textWrap/text"));
-                addedEntity = dataAggregate;
-            }
-        } else if (returnDataAggregateAnyway) {
-            // Component entities want persisted and used Data Aggregates whereas the System should only store each Data Aggregate once therefore otherwise focus on persisted ones
-            addedEntity = dataAggregate;
-        }
-
-        if (!(this.#includedDataAggregateEntities.has(dataAggregate.name))) {
-            this.#includedDataAggregateEntities.set(dataAggregate.name, dataAggregate);
-        }
-
-        return addedEntity;
-    }
-
-    // ensure that Data Aggregate is persisted at least once by another entity
-    #checkValidityOfDataAggregates() {
-        for (const dataAggregate of this.#includedDataAggregateEntities.values()) {
-            if (!(this.#currentSystemEntity.getDataAggregateEntities.has(dataAggregate.getName))) {
-                const message = `A Data Aggregate entity has to be persisted by at least one component type entity, preferably a Storage Backing Service. However, the Data Aggreagte 
-                "${dataAggregate.getName}" is currently not persisted by any other entity and is, therefore, invalid.`;
-                const error = new ErrorMessage(EntityTypes.DATA_AGGREGATE, ErrorType.INVALID_MODEL_ENTIY, dataAggregate.getName, "Parent Relation", message);
-                this.#errorMessages.set(dataAggregate.getModelId, error);
-            }
-        }
-    }
-
-    #createBackingData(graphElement) {
-        if (!graphElement || !(graphElement.getParentCell())) {
-            const message = `A Backing Data entity is only valid if it is embedded in one of the component type or infrastructure entities. However, the Backing Data "${graphElement.attr("label/textWrap/text")}" 
-            has no parent entity and is, therefore, invalid.`;
-            const error = new ErrorMessage(EntityTypes.BACKING_DATA, ErrorType.INVALID_MODEL_ENTIY, graphElement.attr("label/textWrap/text"), "Embedded Relation", message);
-            this.#errorMessages.set(graphElement.id, error);
+        if (!infrastructure) {
+            // ErrorMessages already created while creating entity
             return null;
         }
+        */
 
-        const includedData = graphElement.prop("entity/properties/includedData");
-
-        if (includedData.length <= 0) {
-            const message = `A Backing Data entity has to include at least one data item. However, the Backing Data "${graphElement.attr("label/textWrap/text")}" 
-            has information included and is, therefore, invalid.`;
-            const error = new ErrorMessage(EntityTypes.BACKING_DATA, ErrorType.MISSING_INFORMATION, graphElement.attr("label/textWrap/text"), "Included Data", message);
-            this.#errorMessages.set(graphElement.id, error);
-            return null;
-        }
-
-        const backingData = new Entities.BackingData(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement), includedData);
-        if (this.#currentSystemEntity.getBackingDataEntities.has(backingData.name)) {
-            return null; // TODO check that model ensures that every Data Aggregate includes all included_data items 
-        } else {
-            try {
-                return backingData;
-            } catch (error) {
-                console.log(error); // TODO
-            }
-        }
-    }
-
-    #createEndpointEntity(graphElement, endpointEntityType) {
-        const type = endpointEntityType === EntityTypes.ENDPOINT ? "Endpoint" : "External Endpoint";
-        if (!graphElement || !(graphElement.getParentCell())) {
-            const message = `An ${type} entity is only valid if it is embedded in one of the component type entities. However, the ${type} "${graphElement.attr("label/textWrap/text")}" has no parent entity 
-            and is, therefore, invalid.`;
-            const error = new ErrorMessage(endpointEntityType === EntityTypes.ENDPOINT ? EntityTypes.ENDPOINT : EntityTypes.EXTERNAL_ENDPOINT, ErrorType.INVALID_MODEL_ENTIY, graphElement.attr("label/textWrap/text"), "Embedded Relation", message);
-            this.#errorMessages.set(graphElement.id, error);
-            return null;
-        }
-
+        //TODO validate endpoints
+        /*
         const endpointType = graphElement.prop("entity/properties/endpointType");
         const endpointPath = graphElement.prop("entity/properties/endpointPath");
         const port = graphElement.prop("entity/properties/port");
@@ -414,55 +403,54 @@ class SystemEntityManager {
             this.#errorMessages.set(graphElement.id, error);
             return null;
         }
+        */
+    }
 
-        let endpointEntity;
-        switch (endpointEntityType) {
+    // ensure that Data Aggregate is persisted at least once by another entity
+    #checkValidityOfDataAggregates() {
+
+        /*
+        let addedEntity = null;
+        if ("persisted".localeCompare(dataAggregateEmbeddedProperties.parentRelation) === 0) {
+            if (this.#currentSystemEntity.getDataAggregateEntities.has(dataAggregate.name)) {
+                this.#currentSystemEntity.getDataAggregateEntities.get(dataAggregate.name).addPersistedByEntity(graphElement.getParentCell().attr("label/textWrap/text"));
+            } else {
+                dataAggregate.addPersistedByEntity(graphElement.getParentCell().attr("label/textWrap/text"));
+                addedEntity = dataAggregate;
+            }
+        } else if (returnDataAggregateAnyway) {
+            // Component entities want persisted and used Data Aggregates whereas the System should only store each Data Aggregate once therefore otherwise focus on persisted ones
+            addedEntity = dataAggregate;
+        }
+        */
+
+        for (const dataAggregate of this.#includedDataAggregateEntities.values()) {
+            if (!(this.#currentSystemEntity.getDataAggregateEntities.has(dataAggregate.getName))) {
+                const message = `A Data Aggregate entity has to be persisted by at least one component type entity, preferably a Storage Backing Service. However, the Data Aggreagte 
+                "${dataAggregate.getName}" is currently not persisted by any other entity and is, therefore, invalid.`;
+                const error = new ErrorMessage(EntityTypes.DATA_AGGREGATE, ErrorType.INVALID_MODEL_ENTIY, dataAggregate.getName, "Parent Relation", message);
+                this.#errorMessages.set(dataAggregate.getModelId, error);
+            }
+        }
+    }
+
+    #createEndpointEntity(graphElement) {
+        let endpointEntity: Entities.Endpoint | Entities.ExternalEndpoint;
+        switch (graphElement.prop("entity/type")) {
             case EntityTypes.EXTERNAL_ENDPOINT:
-                endpointEntity = new Entities.ExternalEndpoint(graphElement.id, this.#parseMetaDataFromElement(graphElement), graphElement.getParentCell().attr("label/textWrap/text"));
+                endpointEntity = new Entities.ExternalEndpoint(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement));
                 break;
             case EntityTypes.ENDPOINT:
             default:
-                endpointEntity = new Entities.Endpoint(graphElement.id, this.#parseMetaDataFromElement(graphElement), graphElement.getParentCell().attr("label/textWrap/text"));
+                endpointEntity = new Entities.Endpoint(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement));
         }
-        endpointEntity["position"] = graphElement.position();
-        endpointEntity["size"] = graphElement.size();
-        endpointEntity["label"] = graphElement.attr("label/textWrap/text");
         for (let property of endpointEntity.getProperties()) {
             property.value = graphElement.prop("entity/properties/" + property.getKey);
         }
         return endpointEntity;
     }
 
-    #createRequestTrace(graphElement) {
-        const externalEndpointId = graphElement.prop("entity/properties/referredEndpoint");
-        if (!externalEndpointId || !(externalEndpointId.trim())) {
-            const message = `A Request Trace entity is only valid if it specifies its referred External Endpoint entity. However, for the Request Trace "${graphElement.attr("label/textWrap/text")}" 
-            no External Endpoint was selected and it is, therefore, invalid.`;
-            const error = new ErrorMessage(EntityTypes.REQUEST_TRACE, ErrorType.INVALID_MODEL_ENTIY, graphElement.attr("label/textWrap/text"), "External Endpoint", message);
-            this.#errorMessages.set(graphElement.id, error);
-            return null;
-        }
 
-        const involvedLinkIds = graphElement.prop("entity/properties/involvedLinks");
-        if (!involvedLinkIds || !involvedLinkIds[0] || involvedLinkIds[0].length <= 0) {
-            const message = `A Request Trace entity is only valid if it specifies its involved Link entities. However, the Request Trace "${graphElement.attr("label/textWrap/text")}" 
-            does not provide any information about its involved Links and it is, therefore, invalid.`;
-            const error = new ErrorMessage(EntityTypes.REQUEST_TRACE, ErrorType.INVALID_MODEL_ENTIY, graphElement.attr("label/textWrap/text"), "Involved Links", message);
-            this.#errorMessages.set(graphElement.id, error);
-            return null;
-        }
-
-        const externalEndpoint = this.#createEndpointEntity(this.#currentSystemGraph.getCell(externalEndpointId), EntityTypes.EXTERNAL_ENDPOINT);
-        if (!externalEndpoint) {
-            // ErrorMessages already created while creating entity
-            return null;
-        }
-
-        const requestTrace = new Entities.RequestTrace(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement), externalEndpoint, involvedLinkIds[0]);
-        requestTrace["position"] = graphElement.position();
-        requestTrace["size"] = graphElement.size();
-        return requestTrace;
-    }
 
     #createLink(graphLink) {
         const sourceElement = graphLink.getSourceElement();
@@ -488,32 +476,33 @@ class SystemEntityManager {
             return null;
         }
 
-        const relationType = graphLink.prop("entity/properties/relationType");
+
 
         const sourceEntity = this.#currentSystemEntity.getComponentEntities.get(sourceElement.id);
-        const targetEndpoint = this.#currentSystemEntity.getDataAggregateEntities.get(targetElement.attr("label/textWrap/text")) ?? this.#createEndpointEntity(targetElement, targetElement.prop("entity/type"));
 
-        if (!sourceEntity || !targetEndpoint) {
-            // ErrorMessages already created while creating entity
-            return null;
+        if (!targetElement.getParentCell()) {
+            throw new Error(`Cannot create a link to the Endpoint ${targetElement}, because it is not embedded`);
+        }
+        const targetEndpoint = this.#currentSystemEntity.getComponentEntities.get(targetElement.getParentCell().id).getEndpointEntities.filter(endpoint => endpoint.getId === targetElement.id);
+
+        if (targetEndpoint.length === 0) {
+            throw new Error(`Could not find Endpoint for: ${targetElement}`);
         }
 
-        let linkEntity = new Entities.Link(graphLink.id, sourceEntity, targetEndpoint);
+
+        let linkEntity = new Entities.Link(graphLink.id, sourceEntity, targetEndpoint[0]);
+
+        const relationType = graphLink.prop("entity/properties/relationType");
         linkEntity.addRelationType(relationType);
 
+        return linkEntity;
+
+        /* //TODO necessary?
         if (sourceEntity) {
             // add Link Connection to source entity --> needed at least for TOSCA export 
             sourceEntity.addLinkEntity(linkEntity);
         }
-
-        if (this.#currentSystemEntity.getRequestTraceEntities) {
-            for (const requestTraceEntity of this.#currentSystemEntity.getRequestTraceEntities.values()) {
-                if (requestTraceEntity.getLinkEntityIds?.has(graphLink.id)) {
-                    requestTraceEntity.addLinkEntity(linkEntity);
-                }
-            }
-        }
-        return linkEntity;
+        */
     }
 
     #createDeploymentMapping(graphLink) {
@@ -562,6 +551,39 @@ class SystemEntityManager {
 
         return new Entities.DeploymentMapping(graphLink.id, deployedEntity, underlyingInfrastructure);
     }
+
+    #createRequestTrace(graphElement) {
+        const externalEndpointId = graphElement.prop("entity/properties/referredEndpoint");
+        if (!externalEndpointId || !(externalEndpointId.trim())) {
+            const message = `A Request Trace entity is only valid if it specifies its referred External Endpoint entity. However, for the Request Trace "${graphElement.attr("label/textWrap/text")}" 
+            no External Endpoint was selected and it is, therefore, invalid.`;
+            const error = new ErrorMessage(EntityTypes.REQUEST_TRACE, ErrorType.INVALID_MODEL_ENTIY, graphElement.attr("label/textWrap/text"), "External Endpoint", message);
+            this.#errorMessages.set(graphElement.id, error);
+            return null;
+        }
+
+        const involvedLinkIds = graphElement.prop("entity/properties/involvedLinks");
+        if (!involvedLinkIds || !involvedLinkIds[0] || involvedLinkIds[0].length <= 0) {
+            const message = `A Request Trace entity is only valid if it specifies its involved Link entities. However, the Request Trace "${graphElement.attr("label/textWrap/text")}" 
+            does not provide any information about its involved Links and it is, therefore, invalid.`;
+            const error = new ErrorMessage(EntityTypes.REQUEST_TRACE, ErrorType.INVALID_MODEL_ENTIY, graphElement.attr("label/textWrap/text"), "Involved Links", message);
+            this.#errorMessages.set(graphElement.id, error);
+            return null;
+        }
+
+        const externalEndpoint = [...(this.#currentSystemEntity.getComponentEntities)].map(([id, component]) => component).flatMap(component => component.getExternalEndpointEntities).find(endpoint => endpoint.getId === externalEndpointId);
+        if (!externalEndpoint) {
+            // ErrorMessages already created while creating entity
+            throw new Error(`External Endpoint ${externalEndpointId} not found in any component`)
+        }
+
+        const involvedLinks = involvedLinkIds.map(linkId => this.#currentSystemEntity.getLinkEntities.get(linkId));
+
+        const requestTrace = new Entities.RequestTrace(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement), externalEndpoint, involvedLinks);
+        return requestTrace;
+    }
+
+
 
     #provideConnectionWarningDialog() {
         let modalDialog = new UIModalDialog("invalidToscaModelItems-error", "invalidToscaModelItems");

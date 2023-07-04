@@ -21,10 +21,6 @@ class DataAggregate {
 
     #metaData: MetaData;
 
-    #persistedBy: string[];
-
-    // TODO ref components here?
-
     /**
      * Create a Data Aggregate entity.
      * @param {string} id The unique id for this entity.
@@ -35,15 +31,6 @@ class DataAggregate {
         this.#id = id;
         this.name = name;
         this.#metaData = metaData;
-        this.#persistedBy = new Array();
-    }
-
-    /**
-     * Add name of a component type entity that persists this Data Aggregate entity.
-     * @param {string} persistedByEntity The name of a {@link Component} entity that persists this Data Aggregate.
-     */
-    addPersistedByEntity(persistedByEntity) {
-        this.#persistedBy.push(persistedByEntity);
     }
 
     /**
@@ -68,14 +55,6 @@ class DataAggregate {
      */
     get getMetaData() {
         return this.#metaData;
-    }
-
-    /**
-     * Returns the Entity names that persist this Data Aggregate entity.
-     * @returns {string}
-     */
-    get getPersistedBy() {
-        return this.#persistedBy;
     }
 
     /**

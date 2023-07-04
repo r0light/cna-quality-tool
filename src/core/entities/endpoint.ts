@@ -57,9 +57,9 @@ class Endpoint {
 
     #id: string;
 
-    #metaData: MetaData;
+    name: string;
 
-    #parentName: string; //TODO change to id
+    #metaData: MetaData;
 
     #properties: EntityProperty[];
 
@@ -68,50 +68,14 @@ class Endpoint {
     /**
      * Create an Endpoint entity.
      * @param {string} id The unique id for this entity.
+     * @param {string} name The name of the Endpoint entity. 
      * @param {MetaData} metaData The meta data for this entity, needed for displaying it in a diagram. 
-     * @param {string} parentName The name of the parent Entity.
      */
-    constructor(id: string, metaData: MetaData, parentName: string) {
+    constructor(id: string, name: string, metaData: MetaData) {
         this.#id = id;
+        this.name = name;
         this.#metaData = metaData;
-        this.#parentName = parentName;
         this.#properties = getEndpointProperties();
-    }
-
-    /**
-     * Returns the ne name ID, which is a combination of the parent Entity's name and the Endpoint URL Path (parentName-urlPath).
-     * @returns {string}
-     */
-    getNameId() {
-        let endpointDescription;
-
-        let endpointType = this.#properties.find(property => property.getKey === "endpointType").value;
-        let endpointName = this.#properties.find(property => property.getKey === "endpointPath").value;
-
-        if (endpointType?.toLowerCase().includes("topic")) {
-            endpointDescription = endpointName + "-" + endpointType.replace(/Topic/gi, "").trim();
-        } else {
-            let type = `${endpointType.slice(0, 1).toUpperCase()}${endpointType.slice(1).toLowerCase()}`;
-            let splittedPath = endpointName.split("/");
-            let name = "";
-            for (const splittedWord of splittedPath) {
-                if (splittedWord.includes("?")) {
-                    let additionalSplit = splittedWord.split("?");
-                    let remainingString = additionalSplit[1].split("="); console.log(remainingString)
-                    name += `${additionalSplit[0].slice(0, 1).toUpperCase()}${additionalSplit[0].slice(1).toLowerCase()}By${remainingString[0].slice(0, 1).toUpperCase()}${remainingString[0].slice(1).toLowerCase()}`
-                } else if (splittedWord.includes("{")) {
-                    let correctedString = splittedWord.replace("{", "").replace("}", "");
-                    name += `By${correctedString.slice(0, 1).toUpperCase()}${correctedString.slice(1).toLowerCase()}`;
-                } else if (splittedWord === "") {
-                    // ignore
-                } else {
-                    name += `${splittedWord.slice(0, 1).toUpperCase()}${splittedWord.slice(1).toLowerCase()}`;
-                }
-            }
-            endpointDescription = type + name;
-        }
-
-        return `${this.#parentName}-${endpointDescription}`;
     }
 
     /**
@@ -120,6 +84,14 @@ class Endpoint {
     */
     get getId() {
         return this.#id;
+    }
+
+    /**
+     * Return the name of this Endpoint entity.
+     * @returns {string}
+     */
+    get getName() {
+        return this.name;
     }
 
     /**
@@ -141,14 +113,6 @@ class Endpoint {
 
     getProperties() {
         return this.#properties;
-    }
-
-    /**
-     * Return the name of the parent entity where this Endpoint is available.
-     * @returns {string}
-     */
-    get getParentName() {
-        return this.#parentName;
     }
 
     /**

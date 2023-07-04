@@ -68,103 +68,31 @@ class System { // TODO use ID's as keys instead of name?
             case Service:
             case BackingService:
             case StorageBackingService:
-                this.addComponentEntity(<Component> entityToAdd);
+                this.#componentEntities.set(entityToAdd.getId, entityToAdd as Component);
                 break;
             case Link:
-                this.addLinkEntity(<Link> entityToAdd);
+                this.#linkEntities.set(entityToAdd.getId, entityToAdd as Link);
                 break;
             case Infrastructure:
-                this.addInfrastructureEntity(<Infrastructure> entityToAdd);
+                this.#infrastructureEntities.set(entityToAdd.getId, entityToAdd as Infrastructure);
                 break;
             case DeploymentMapping:
-                this.addDeploymentMappingEntity(<DeploymentMapping> entityToAdd);
+                this.#deploymentMappingEntities.set(entityToAdd.getId, entityToAdd as DeploymentMapping);
                 break;
             case RequestTrace:
-                this.addRequestTraceEntity(<RequestTrace> entityToAdd);
+                this.#requestTraceEntities.set(entityToAdd.getId, entityToAdd as RequestTrace);
                 break;
             case DataAggregate:
-                this.addDataAggregateEntity(<DataAggregate> entityToAdd);
+                this.#dataAggregateEntities.set(entityToAdd.getId, entityToAdd as DataAggregate);
                 break;
             case BackingData:
-                this.addBackingDataEntity(<BackingData> entityToAdd);
+                this.#backingDataEntities.set(entityToAdd.getId, entityToAdd as BackingData);
                 break;
             default:
                 const errorMessage = "Wrong entity type provided. The provided entity was: " + Object.getPrototypeOf(entityToAdd) + JSON.stringify(entityToAdd);
                 throw new TypeError(errorMessage);
 
         }
-    }
-
-    /**
-     * Add a {@link Component}, {@link Service}, {@link BackingService} or {@link StorageBackingService} entity. 
-     * @param {Component|Service|BackingService|StorageBackingService} componentEntityToAdd The entity that is part of this System entity.
-     * @throws {TypeError} If a wrong entity type is being provided. 
-     */
-    addComponentEntity(componentEntityToAdd: Component) {
-        // this.#componentEntities.set(componentEntityToAdd.name, componentEntityToAdd);
-        this.#componentEntities.set(componentEntityToAdd.getId, componentEntityToAdd);
-    }
-
-    /**
-     * Add a {@link Link} entity. 
-     * @param {Link} linkEntityToAdd The Link entity that is part of this System entity.
-     * @throws {TypeError} If a wrong entity type is being provided. 
-     */
-    addLinkEntity(linkEntityToAdd: Link) {
-        // this.#linkEntities.set(linkEntityToAdd.name, linkEntityToAdd);
-        this.#linkEntities.set(linkEntityToAdd.getId, linkEntityToAdd);
-    }
-
-    /**
-     * Add a {@link Infrastructure} entity. 
-     * @param {Infrastructure} infrastructureEntityToAdd The entity that is part of this System entity.
-     * @throws {TypeError} If a wrong entity type is being provided. 
-     */
-    addInfrastructureEntity(infrastructureEntityToAdd: Infrastructure) {
-        // this.#infrastructureEntities.set(infrastructureEntityToAdd.name, infrastructureEntityToAdd);
-        this.#infrastructureEntities.set(infrastructureEntityToAdd.getId, infrastructureEntityToAdd);
-    }
-
-    /**
-     * Add a {@link DeploymentMapping} entity. 
-     * @param {DeploymentMapping} deploymentMappingEntityToAdd The entity that is part of this System entity.
-     * @throws {TypeError} If a wrong entity type is being provided. 
-     */
-    addDeploymentMappingEntity(deploymentMappingEntityToAdd: DeploymentMapping) {
-
-        // this.#deploymentMappingEntities.set(deploymentMappingEntityToAdd.getId, deploymentMappingEntityToAdd);
-        this.#deploymentMappingEntities.set(deploymentMappingEntityToAdd.getId, deploymentMappingEntityToAdd);
-    }
-
-    /**
-     * Add a {@link RequestTrace} entity. 
-     * @param {RequestTrace} requestTraceEntityToAdd The entity that is part of this System entity.
-     * @throws {TypeError} If a wrong entity type is being provided. 
-     */
-    addRequestTraceEntity(requestTraceEntityToAdd: RequestTrace) {
-        // this.#requestTraceEntities.set(requestTraceEntityToAdd.name, requestTraceEntityToAdd);
-        this.#requestTraceEntities.set(requestTraceEntityToAdd.getId, requestTraceEntityToAdd);
-    }
-
-    /**
-     * Add a {@link DataAggregate} entity. 
-     * @param {DataAggregate} dataAggregateEntityToAdd The entity that is part of this System entity.
-     * @throws {TypeError} If a wrong entity type is being provided. 
-     */
-    addDataAggregateEntity(dataAggregateEntityToAdd: DataAggregate) {
-        // Names are unique therefore used as ID --> ensures that Set includes each one only once
-        this.#dataAggregateEntities.set(dataAggregateEntityToAdd.getName, dataAggregateEntityToAdd);
-    }
-
-    /**
-     * Add a {@link BackingData} entity. 
-     * @param {BackingData} componentEntityToAdd The entity that is part of this System entity.
-     * @throws {TypeError} If a wrong entity type is being provided. 
-     */
-    addBackingDataEntity(backingDataEntityToAdd: BackingData) {
-
-        // Names are unique therefore used as ID --> ensures that Set includes each one only once
-        this.#backingDataEntities.set(backingDataEntityToAdd.getName, backingDataEntityToAdd);
     }
 
     resetAllIncludedSystemEntities() {

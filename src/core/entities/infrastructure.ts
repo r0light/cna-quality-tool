@@ -35,9 +35,7 @@ class Infrastructure {
 
     #infrastructureType: infrastructureType;
 
-    #hostedBy: Infrastructure;
-
-    #backingDataEntities: BackingData[] = new Array();
+    #backingDataEntities = new Array<BackingData>();
 
     #properties: EntityProperty[];
 
@@ -67,14 +65,6 @@ class Infrastructure {
         const errorMessage = "The provided entity cannot be added. Only BackingData entities are allowed. However, the object to add was: " + Object.getPrototypeOf(backingDataEntity) + JSON.stringify(backingDataEntity);
         throw new TypeError(errorMessage);
         */
-    }
-
-    /**
-     * Add the name of the hosting {@link Infrastructure} entity for this {@link Infrastructure} entity.
-     * @param {Infrastructure} infrastructureName The name of the hosting {@link Infrastructure} entity.
-     */
-    addHostingEntity(infrastructure: Infrastructure) {
-        this.#hostedBy = infrastructure;
     }
 
     /**
@@ -115,14 +105,6 @@ class Infrastructure {
      */
     get getBackingDataEntities() {
         return this.#backingDataEntities;
-    }
-
-    /**
-     * Return the name of the {@link Infrastructure} entity that hosts this Infrastructure entity.
-     * @returns {String}
-     */
-    get getHostedBy() {
-        return this.#hostedBy;
     }
 
     /**

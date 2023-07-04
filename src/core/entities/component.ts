@@ -5,7 +5,7 @@ import { DataAggregate } from './dataAggregate.js'
 import { BackingData } from './backingData.js'
 import { Infrastructure } from './infrastructure.js'
 import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_modeling_tosca_profile'
-import { MetaData } from '../common/entityDataTypes'
+import { DataUsageRelation, MetaData } from '../common/entityDataTypes'
 
 /**
  * The module for aspects related to a Component quality model entity.
@@ -39,15 +39,13 @@ class Component {
 
     #metaData: MetaData;
 
-    #hostedBy: Infrastructure;
+    #endpointEntities = new Array<Endpoint>();
 
-    #endpointEntities = new Array();
+    #externalEndpointEntities = new Array<ExternalEndpoint>();
 
-    #externalEndpointEntities = new Array();
+    #backingDataEntities = new Array<BackingData>();
 
-    #backingDataEntities = new Array();
-
-    #dataAggregateEntities = new Array();
+    #dataAggregateEntities = new Array<{ data: DataAggregate, relation: DataUsageRelation }>();
 
     #includedLinkEntities = new Array();
 
@@ -58,13 +56,11 @@ class Component {
      * @param {string} id The unique id for this entity.
      * @param {string} name The name of the Component entity. 
      * @param {MetaData} metaData The meta data for this entity, needed for displaying it in a diagram. 
-     * @param {Infrastructure} hostingInfrastructure The {@link Infrastructure} entity that hosts this Component entity.
      */
-    constructor(id: string, name: string, metaData: MetaData, hostingInfrastructure: Infrastructure) {
+    constructor(id: string, name: string, metaData: MetaData) {
         this.#id = id,
-            this.name = name;
+        this.name = name;
         this.#metaData = metaData;
-        this.#hostedBy = hostingInfrastructure;
         this.#properties = getComponentProperties();
     }
 
@@ -74,8 +70,9 @@ class Component {
      * @param {Endpoint|ExternalEndpoint|DataAggregate|BackingData} entityToAdd The quality Model entity that should be added.
      * @throws {TypeError} If the provided parameter is neither an instance of External Endpoint, Endpoint, Data Aggregate or Backing Data.  
      */
-    addEntity(entityToAdd) {
+    addEndpoint(endpointToAdd: Endpoint | ExternalEndpoint) {
 
+        // TODO necessary?
         let endpointAlreadyIncluded = (endpointToAdd) => {
             if (this.getEndpointEntities.some(endpoint => JSON.stringify(endpoint) === JSON.stringify(endpointToAdd))) {
                 return true;
@@ -85,31 +82,28 @@ class Component {
             return false;
         }
 
-        if (entityToAdd instanceof ExternalEndpoint) {
-            if (endpointAlreadyIncluded(entityToAdd)) {
+        if (endpointToAdd instanceof ExternalEndpoint) {
+            if (endpointAlreadyIncluded(endpointToAdd)) {
                 return;
             }
-
-            this.#externalEndpointEntities.push(entityToAdd);
-            return;
-        } else if (entityToAdd instanceof Endpoint) {
-            if (endpointAlreadyIncluded(entityToAdd)) {
+            this.#externalEndpointEntities.push(endpointToAdd);
+        } else if (endpointToAdd instanceof Endpoint) {
+            if (endpointAlreadyIncluded(endpointToAdd)) {
                 return;
             }
-
-            this.#endpointEntities.push(entityToAdd);
-            return;
-        } else if (entityToAdd instanceof DataAggregate) {
-            this.#dataAggregateEntities.push(entityToAdd);
-            return;
-        } else if (entityToAdd instanceof BackingData) {
-            this.#backingDataEntities.push(entityToAdd);
-            return;
+            this.#endpointEntities.push(endpointToAdd);
         }
 
-        const errorMessage = "The provided entity cannot be added. Only Endpoint, ExternalEndpoint, DataAggregate or BackingData entities are allowed. However, the object to add was: " + Object.getPrototypeOf(entityToAdd) + JSON.stringify(entityToAdd);
-        throw new TypeError(errorMessage);
+
     };
+
+    addDataEntity(dataEntityToAdd: DataAggregate | BackingData, usageRelation?: DataUsageRelation) {
+        if (dataEntityToAdd instanceof DataAggregate) {
+            this.#dataAggregateEntities.push({ data: dataEntityToAdd, relation: usageRelation });
+        } else if (dataEntityToAdd instanceof BackingData) {
+            this.#backingDataEntities.push(dataEntityToAdd);
+        }
+    }
 
     addLinkEntity(linkEntity) {
         // TODO add check
@@ -140,79 +134,70 @@ class Component {
         return this.#metaData;
     }
 
-
-    /**
-     * Return the hosting {@link Infrastructure} entity of this Component entity.
-     * @returns {Infrastructure}
-     */
-    get getHostedBy() {
-            return this.#hostedBy;
-        }
-
     /**
      * Returns the {@link Endpoint} entities included in this Component.
      * @returns {Endpoint[]}
      */
     get getEndpointEntities() {
-            return this.#endpointEntities;
-        }
+        return this.#endpointEntities;
+    }
 
     /**
      * Returns the {@link ExternalEndpoint} entities included in this Component.
      * @returns {ExternalEndpoint[]}
      */
     get getExternalEndpointEntities() {
-            return this.#externalEndpointEntities;
-        }
+        return this.#externalEndpointEntities;
+    }
 
     /**
      * Returns the {@link DataAggregate} entities included in this Component.
      * @returns {DataAggregate[]}
      */
     get getDataAggregateEntities() {
-            return this.#dataAggregateEntities;
-        }
+        return this.#dataAggregateEntities;
+    }
 
     /**
     * Returns the {@link BackingData} entities included in this Component.
     * @returns {BackingData[]}
     */
     get getBackingDataEntities() {
-            return this.#backingDataEntities;
-        }
+        return this.#backingDataEntities;
+    }
 
     /**
     * Returns the {@link Link} entities included in this Component.
     * @returns {Link[]}
     */
     get getIncludedLinkEntities() {
-            return this.#includedLinkEntities;
-        }
-
-        /**
-         * Adds additional properties to this entity, only intended for subtypes to add additional properties
-         * 
-         * @param {EntityProperty[]} entityProperties 
-         */
-        addProperties(entityProperties: EntityProperty[]) {
-            this.#properties = this.#properties.concat(entityProperties);
-        }
-
-        /**
-         * Returns all properties of this entity
-         * @returns {EntityProperty[]}
-         */
-        getProperties() {
-            return this.#properties;
-        }
-
-        /**
-         * Transforms the Component object into a String. 
-         * @returns {string}
-         */
-        toString() {
-            return "Component " + JSON.stringify(this);
-        }
+        return this.#includedLinkEntities;
     }
+
+    /**
+     * Adds additional properties to this entity, only intended for subtypes to add additional properties
+     * 
+     * @param {EntityProperty[]} entityProperties 
+     */
+    addProperties(entityProperties: EntityProperty[]) {
+        this.#properties = this.#properties.concat(entityProperties);
+    }
+
+    /**
+     * Returns all properties of this entity
+     * @returns {EntityProperty[]}
+     */
+    getProperties() {
+        return this.#properties;
+    }
+
+    /**
+     * Transforms the Component object into a String. 
+     * @returns {string}
+     */
+    toString() {
+        return "Component " + JSON.stringify(this);
+    }
+}
 
 export { Component, COMPONENT_TOSCA_EQUIVALENT, getComponentProperties };

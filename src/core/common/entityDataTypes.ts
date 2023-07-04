@@ -1,3 +1,5 @@
+import { DataAggregate } from "../entities"
+
 export type MetaData = {
     fontSize: number,
     size: {
@@ -9,3 +11,5 @@ export type MetaData = {
         yCoord: number
     }
 }
+
+export type DataUsageRelation = "uses" | "persists";

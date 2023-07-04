@@ -108,7 +108,7 @@ function setCurrentSystemName(systemName: string) {
 }
 
 const currentSystemGraph = ref<dia.Graph>(new dia.Graph({}, { cellNamespace: shapes }));
-const systemEntityManager = ref(new SystemEntityManager(currentSystemGraph.value));
+const systemEntityManager = ref(new SystemEntityManager(currentSystemGraph.value as dia.Graph));
 
 const mainPaper = ref<dia.Paper>();
 

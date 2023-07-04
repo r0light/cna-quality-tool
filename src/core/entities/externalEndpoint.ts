@@ -27,11 +27,11 @@ class ExternalEndpoint extends Endpoint {
     /**
      * Create an External Endpoint entity.
      * @param {string} id The unique id for this entity.
+     * @param {string} name The name of the Endpoint entity. 
      * @param {MetaData} metaData The meta data for this entity, needed for displaying it in a diagram. 
-     * @param {string} parentName The name of the parent Entity.
      */
-    constructor(id: string, metaData: MetaData, parentName: string) {
-        super(id, metaData, parentName);
+    constructor(id: string, name: string, metaData: MetaData) {
+        super(id, name, metaData);
         this.addProperties(getExternalEndpointProperties());
     }
 
