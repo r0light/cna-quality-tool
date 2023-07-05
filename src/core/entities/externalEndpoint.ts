@@ -7,8 +7,8 @@ import { MetaData } from "../common/entityDataTypes";
  * The module for aspects related to a External Endpoint quality model Entity.
  * @module entities/externalEndpoint
  */
-
-const EXTERNAL_ENDPOINT_TOSCA_EQUIVALENT = tosca_simple_profile_for_yaml_v1_3.capability_types["tosca.capabilities.Endpoint.Public"];
+const EXTERNAL_ENDPOINT_TOSCA_KEY = "tosca.capabilities.Endpoint.Public";
+const EXTERNAL_ENDPOINT_TOSCA_EQUIVALENT = tosca_simple_profile_for_yaml_v1_3.capability_types[EXTERNAL_ENDPOINT_TOSCA_KEY];
 
 function getExternalEndpointProperties(): EntityProperty[] {
     let parsed = parseProperties(EXTERNAL_ENDPOINT_TOSCA_EQUIVALENT.properties);
@@ -44,4 +44,4 @@ class ExternalEndpoint extends Endpoint {
     }
 }
 
-export { ExternalEndpoint, EXTERNAL_ENDPOINT_TOSCA_EQUIVALENT, getExternalEndpointProperties };
+export { ExternalEndpoint, EXTERNAL_ENDPOINT_TOSCA_KEY, getExternalEndpointProperties };

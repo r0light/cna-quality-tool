@@ -10,7 +10,7 @@ export type TOSCA_Capability_Assignment = {
     attributes?: {
         [attributeKey: string]: TOSCA_Attribute_Assignment
     }
-    occurrences?: number[]
+    occurrences?: (number | string)[]
 }
 
 // 3.8.2 Requirement assignment
@@ -27,7 +27,7 @@ export type TOSCA_Requirement_Assignment = {
         }
     }
     node_filer?: TOSCA_Node_Filter,
-    occurrences: number[]
+    occurrences: (number | string)[]
 }
 
 // 3.8.3 Node Template
@@ -35,9 +35,9 @@ export type TOSCA_Node_Template = {
     type: string,
     description?: string,
     metadata?: TOSCA_Metadata,
-    directives: string[],
+    directives?: string[],
     properties?: {
-        [propertyKey: string]: TOSCA_Property_Assignment
+        [propertyKey: string]: TOSCA_Property_Assignment | string
     },
     attributes?: {
         [attributeKey: string]: TOSCA_Attribute_Assignment

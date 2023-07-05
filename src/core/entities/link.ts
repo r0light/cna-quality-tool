@@ -6,12 +6,14 @@ import { Service } from './service';
 import { StorageBackingService } from './storageBackingService';
 import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_modeling_tosca_profile'
 
+
 /**
  * The module for aspects related to a Link quality model entity.
  * @module entities/link
  */
 
-const LINK_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.relationship_types["cna.qualityModel.entities.ConnectsTo.Link"];
+const LINK_TOSCA_KEY = "cna.qualityModel.entities.ConnectsTo.Link";
+const LINK_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.relationship_types[LINK_TOSCA_KEY];
 
 /**
  * Class representing a Link entity.
@@ -136,4 +138,4 @@ class Link {
     }
 }
 
-export { Link, LINK_TOSCA_EQUIVALENT };
+export { Link, LINK_TOSCA_KEY };

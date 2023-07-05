@@ -10,7 +10,8 @@ import { MetaData } from '../common/entityDataTypes'
  * @module entities/backingService
  */
 
-const BACKING_SERVICE_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types["cna.qualityModel.entities.BackingService"];
+const BACKING_SERVICE_TOSCA_KEY = "cna.qualityModel.entities.BackingService";
+const BACKING_SERVICE_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types[BACKING_SERVICE_TOSCA_KEY];
 
 
 function getBackingServiceProperties(): EntityProperty[] {
@@ -55,4 +56,4 @@ class BackingService extends Component {
     }
 }
 
-export { BackingService, BACKING_SERVICE_TOSCA_EQUIVALENT, getBackingServiceProperties };
+export { BackingService, BACKING_SERVICE_TOSCA_KEY, getBackingServiceProperties };

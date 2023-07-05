@@ -1,4 +1,5 @@
 import { dia, util } from "jointjs";
+import * as yaml from 'js-yaml';
 import EntityTypes from './config/entityTypes';
 import * as Entities from '../core/entities';
 import ErrorMessage, { ErrorType } from './errorMessage'
@@ -7,6 +8,7 @@ import { UIContentType } from './config/toolbarConfiguration';
 import UIModalDialog, { DialogSize } from './representations/guiElements.dialog';
 import { PropertyContentType } from './config/detailsSidebarConfig';
 import { MetaData } from "@/core/common/entityDataTypes";
+import { convertToServiceTemplate } from "@/core/tosca-adapter/ToscaAdapter";
 
 class SystemEntityManager {
 
@@ -52,15 +54,28 @@ class SystemEntityManager {
 
         console.log(this.#currentSystemEntity);
 
+
         /* TODO trigger tosca adapter to do the transformation
         if (this.#errorMessages?.size > 0) {
             this.#provideConnectionWarningDialog();
             return;
         }
-
-        const toscaConverter = new ToscaConverter(this.#currentSystemEntity);
-        toscaConverter.convert();
         */
+
+        let serviceTemplate = convertToServiceTemplate(this.#currentSystemEntity);
+
+        const asYaml = yaml.dump(serviceTemplate, {
+            styles: {
+                '!!null': 'empty'
+            }
+        });
+
+
+        // download created yaml taken from https://stackoverflow.com/a/22347908
+        let downloadElement = document.createElement("a");
+        downloadElement.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(asYaml));
+        downloadElement.setAttribute('download', `${this.#currentSystemEntity.getSystemName}.yaml`);
+        downloadElement.click();
     }
 
     #convertToSystemEntity() {

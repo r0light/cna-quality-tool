@@ -7,12 +7,13 @@ import { Infrastructure } from './infrastructure.js'
 import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_modeling_tosca_profile'
 import { DataUsageRelation, MetaData } from '../common/entityDataTypes'
 
+
 /**
  * The module for aspects related to a Component quality model entity.
  * @module entities/component
  */
-
-const COMPONENT_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types["cna.qualityModel.entities.Root.Component"];
+const COMPONENT_TOSCA_KEY = "cna.qualityModel.entities.Root.Component"
+const COMPONENT_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types[COMPONENT_TOSCA_KEY];
 
 function getComponentProperties(): EntityProperty[] {
     let parsed = parseProperties(COMPONENT_TOSCA_EQUIVALENT.properties);
@@ -200,4 +201,4 @@ class Component {
     }
 }
 
-export { Component, COMPONENT_TOSCA_EQUIVALENT, getComponentProperties };
+export { Component, COMPONENT_TOSCA_KEY, getComponentProperties };

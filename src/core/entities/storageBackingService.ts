@@ -4,12 +4,13 @@ import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_mode
 import { MetaData } from '../common/entityDataTypes';
 import { Infrastructure } from './infrastructure';
 
+
 /**
  * The module for aspects related to a Component quality model Entity.
  * @module entities/storageBackingService
  */
-
-const STORAGE_BACKING_SERVICE_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types["cna.qualityModel.entities.DBMS.StorageService"];
+const STORAGE_BACKING_SERVICE_TOSCA_KEY = "cna.qualityModel.entities.DBMS.StorageService";
+const STORAGE_BACKING_SERVICE_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types[STORAGE_BACKING_SERVICE_TOSCA_KEY];
 
 function getStorageBackingServiceProperties() {
     let parsed = parseProperties(STORAGE_BACKING_SERVICE_TOSCA_EQUIVALENT.properties);
@@ -53,4 +54,4 @@ class StorageBackingService extends Component {
     }
 }
 
-export { StorageBackingService, STORAGE_BACKING_SERVICE_TOSCA_EQUIVALENT, getStorageBackingServiceProperties };
+export { StorageBackingService, STORAGE_BACKING_SERVICE_TOSCA_KEY, getStorageBackingServiceProperties };

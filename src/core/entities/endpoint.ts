@@ -2,7 +2,9 @@ import { EntityProperty, TextEntityProperty, parseProperties } from "../common/e
 import { tosca_simple_profile_for_yaml_v1_3 } from '../../totypa/parsedProfiles/tosca_simple_profile_for_yaml_v1_3'
 import { MetaData } from "../common/entityDataTypes";
 
-const ENDPOINT_TOSCA_EQUIVALENT = tosca_simple_profile_for_yaml_v1_3.capability_types["tosca.capabilities.Endpoint"];
+
+const ENDPOINT_TOSCA_KEY = "tosca.capabilities.Endpoint";
+const ENDPOINT_TOSCA_EQUIVALENT = tosca_simple_profile_for_yaml_v1_3.capability_types[ENDPOINT_TOSCA_KEY];
 
 /**
  * The module for aspects related to a Endpoint quality model Entity.
@@ -124,4 +126,4 @@ class Endpoint {
     }
 }
 
-export { Endpoint, ENDPOINT_TOSCA_EQUIVALENT, getEndpointProperties }; // TODO keep endpointType?
+export { Endpoint, ENDPOINT_TOSCA_KEY, getEndpointProperties }; // TODO keep endpointType?

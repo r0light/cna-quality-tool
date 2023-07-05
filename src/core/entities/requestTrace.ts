@@ -5,12 +5,14 @@ import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_mode
 import { MetaData } from "../common/entityDataTypes";
 
 
+
 /**
  * The module for aspects related to a Component quality model Entity.
  * @module entities/requestTrace
  */
 
-const REQUEST_TRACE_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types["cna.qualityModel.entities.RequestTrace"];
+const REQUEST_TRACE_TOSCA_KEY = "cna.qualityModel.entities.RequestTrace";
+const REQUEST_TRACE_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types[REQUEST_TRACE_TOSCA_KEY];
 
 /**
  * Class representing a Request Trace entity.
@@ -115,4 +117,4 @@ class RequestTrace {
     }
 }
 
-export { RequestTrace, REQUEST_TRACE_TOSCA_EQUIVALENT };
+export { RequestTrace, REQUEST_TRACE_TOSCA_KEY };

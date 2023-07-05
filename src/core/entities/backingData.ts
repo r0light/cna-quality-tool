@@ -6,7 +6,8 @@ import { MetaData } from '../common/entityDataTypes';
  * @module entities/backingData
  */
 
-const BACKING_DATA_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types["cna.qualityModel.entities.BackingData"];
+const BACKING_DATA_TOSCA_KEY = "cna.qualityModel.entities.BackingData";
+const BACKING_DATA_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types[BACKING_DATA_TOSCA_KEY];
 
 /**
  * Class representing a Backing Data entity.
@@ -77,4 +78,4 @@ class BackingData {
     }
 }
 
-export { BackingData, BACKING_DATA_TOSCA_EQUIVALENT };
+export { BackingData, BACKING_DATA_TOSCA_KEY };
