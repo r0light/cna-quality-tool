@@ -16,6 +16,10 @@ import { UniqueKeyManager } from './UniqueKeyManager';
 import { BACKING_DATA_TOSCA_KEY } from '../entities/backingData';
 import { flatMetaData } from '../common/entityDataTypes';
 import { DATA_AGGREGATE_TOSCA_KEY } from '../entities/dataAggregate';
+import { INFRASTRUCTURE_TOSCA_KEY } from '../entities/infrastructure';
+import { EntityProperty } from '../common/entityProperty';
+import { TOSCA_Property_Assignment } from '@/totypa/tosca-types/core-types';
+import { TwoWayKeyIdMap } from './TwoWayKeyIdMap';
 
 const TOSCA_DEFINITIONS_VERSION = "tosca_simple_yaml_1_3"
 
@@ -27,7 +31,7 @@ const MATCH_MULTIPLE_UNDERSCORES = new RegExp(/_+/g);
 export function convertToServiceTemplate(systemEntity: Entities.System): TOSCA_Service_Template {
 
     const uniqueKeyManager = new UniqueKeyManager();
-    const keyToIdMapping = new Map<string, string>();
+    const keyIdMap = new TwoWayKeyIdMap();
 
     let serviceTemplate: TOSCA_Service_Template = {
         tosca_definitions_version: TOSCA_DEFINITIONS_VERSION,
@@ -47,15 +51,31 @@ export function convertToServiceTemplate(systemEntity: Entities.System): TOSCA_S
     for (const [id, dataAggregate] of systemEntity.getDataAggregateEntities.entries()) {
         let nodeKey: string = uniqueKeyManager.ensureUniqueness(transformToYamlKey(dataAggregate.getName));
         let node = dataAggregateToTemplate(dataAggregate);
-        keyToIdMapping.set(nodeKey, id);
+        keyIdMap.add(nodeKey, id);
         topologyTemplate.node_templates[nodeKey] = node;
     }
 
     for (const [id, backingData] of systemEntity.getBackingDataEntities.entries()) {
         let nodeKey: string = uniqueKeyManager.ensureUniqueness(transformToYamlKey(backingData.getName));
         let node = backingDataToTemplate(backingData);
-        keyToIdMapping.set(nodeKey, id);
+        keyIdMap.add(nodeKey, id);
         topologyTemplate.node_templates[nodeKey] = node;
+    }
+
+    for (const [id, infrastructure] of systemEntity.getInfrastructureEntities.entries()) {
+        let nodeKey: string = uniqueKeyManager.ensureUniqueness(transformToYamlKey(infrastructure.getName));
+        let node = infrastructureToTemplate(infrastructure);
+
+        if (infrastructure.getBackingDataEntities.length > 0) {
+            node.requirements = [];
+            for (const usedBackingData of infrastructure.getBackingDataEntities) {
+                node.requirements.push( {"uses_backing_data": keyIdMap.getKey(usedBackingData.getId)});
+            }
+        }
+
+        keyIdMap.add(nodeKey, infrastructure.getId);
+        topologyTemplate.node_templates[nodeKey] = node;
+
     }
 
 
@@ -77,6 +97,14 @@ function transformToYamlKey(name: string) {
         .replace(MATCH_UNWANTED_CHARACTERS, "_")
         .replace(MATCH_MULTIPLE_UNDERSCORES, "_")
         .toLocaleLowerCase();
+}
+
+function parsePropertiesForYaml(properties: EntityProperty[]): { [propertyKey: string]: TOSCA_Property_Assignment | string} {
+    let yamlProperties: { [propertyKey: string]: TOSCA_Property_Assignment | string} = {};
+    for (const property of properties) {
+        yamlProperties[property.getKey] = property.value
+    }
+    return yamlProperties;
 }
 
 
@@ -106,6 +134,14 @@ function backingDataToTemplate(backingData: Entities.BackingData): TOSCA_Node_Te
     }
 
     return template;
+}
+
+function infrastructureToTemplate(infrastructure: Entities.Infrastructure): TOSCA_Node_Template {
+    return {
+        type: INFRASTRUCTURE_TOSCA_KEY,
+        metadata: flatMetaData(infrastructure.getMetaData),
+        properties: parsePropertiesForYaml(infrastructure.getProperties()),
+    }
 }
 
 

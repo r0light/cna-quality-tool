@@ -629,6 +629,7 @@ class SystemEntityManager {
 
     #parseMetaDataFromElement(cell: dia.Element): MetaData {
         return {
+            label: cell.attr("label/textWrap/text"),
             fontSize: cell.attr("label/fontSize"),
             size: {
                 width: cell.size().width,

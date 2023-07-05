@@ -42,7 +42,9 @@ export type TOSCA_Node_Template = {
     attributes?: {
         [attributeKey: string]: TOSCA_Attribute_Assignment
     },
-    requirements?: TOSCA_Requirement_Assignment[],
+    requirements?: {
+        [requirementKey: string]: TOSCA_Requirement_Assignment | string 
+    }[],
     capabilities?: {
         [capabilityKey: string]: TOSCA_Capability_Assignment
     },
