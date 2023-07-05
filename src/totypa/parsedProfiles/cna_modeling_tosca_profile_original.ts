@@ -4,7 +4,7 @@
 
 import { TOSCA_Service_Template } from '../tosca-types/template-types';
 
-export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
+export const cna_modeling_tosca_profile_original: TOSCA_Service_Template = {
   "tosca_definitions_version": "tosca_simple_yaml_1_3",
   "namespace": "http://docs.oasis-open.org/tosca/ns/simple/yaml/1.3",
   "metadata": {
@@ -35,14 +35,6 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
           "description": "The Endpoint to which the linked Component connects."
         }
       }
-    },
-    "cna.qualityModel.relationships.Provides.Endpoint": {
-      "derived_from": "tosca.relationships.Root",
-      "description": "Relationship Type to connect Endpoints to the Components which provide them",
-      "valid_target_types": [
-        "cna.qualityModel.entities.Endpoint",
-        "cna.qualityModel.entities.Endpoint.External"
-      ]
     }
   },
   "node_types": {
@@ -68,26 +60,6 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
           }
         },
         {
-          "provides_endpoint": {
-            "capability": "tosca.capabilities.Endpoint",
-            "relationship": "cna.qualityModel.relationships.Provides.Endpoint",
-            "occurrences": [
-              0,
-              "UNBOUNDED"
-            ]
-          }
-        },
-        {
-          "provides_external_endpoint": {
-            "capability": "tosca.capabilities.Endpoint.Public",
-            "relationship": "cna.qualityModel.relationships.Provides.Endpoint",
-            "occurrences": [
-              0,
-              "UNBOUNDED"
-            ]
-          }
-        },
-        {
           "endpoint_link": {
             "capability": "tosca.capabilities.Endpoint",
             "relationship": "cna.qualityModel.relationships.ConnectsTo.Link",
@@ -119,33 +91,29 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
             ]
           }
         }
-      ]
+      ],
+      "capabilities": {
+        "endpoint": {
+          "type": "tosca.capabilities.Endpoint",
+          "occurrences": [
+            0,
+            "UNBOUNDED"
+          ]
+        },
+        "external_endpoint": {
+          "type": "tosca.capabilities.Endpoint.Public",
+          "occurrences": [
+            0,
+            "UNBOUNDED"
+          ]
+        }
+      }
     },
     "cna.qualityModel.entities.SoftwareComponent.Service": {
       "derived_from": "tosca.nodes.SoftwareComponent",
       "description": "Node Type to model Service entities",
       "requirements": [
         {
-          "provides_endpoint": {
-            "capability": "tosca.capabilities.Endpoint",
-            "relationship": "cna.qualityModel.relationships.Provides.Endpoint",
-            "occurrences": [
-              0,
-              "UNBOUNDED"
-            ]
-          }
-        },
-        {
-          "provides_external_endpoint": {
-            "capability": "tosca.capabilities.Endpoint.Public",
-            "relationship": "cna.qualityModel.relationships.Provides.Endpoint",
-            "occurrences": [
-              0,
-              "UNBOUNDED"
-            ]
-          }
-        },
-        {
           "endpoint_link": {
             "capability": "tosca.capabilities.Endpoint",
             "relationship": "cna.qualityModel.relationships.ConnectsTo.Link",
@@ -177,7 +145,23 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
             ]
           }
         }
-      ]
+      ],
+      "capabilities": {
+        "endpoint": {
+          "type": "tosca.capabilities.Endpoint",
+          "occurrences": [
+            0,
+            "UNBOUNDED"
+          ]
+        },
+        "external_endpoint": {
+          "type": "tosca.capabilities.Endpoint.Public",
+          "occurrences": [
+            0,
+            "UNBOUNDED"
+          ]
+        }
+      }
     },
     "cna.qualityModel.entities.BackingService": {
       "derived_from": "tosca.nodes.Root",
@@ -191,26 +175,6 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
       },
       "requirements": [
         {
-          "provides_endpoint": {
-            "capability": "tosca.capabilities.Endpoint",
-            "relationship": "cna.qualityModel.relationships.Provides.Endpoint",
-            "occurrences": [
-              0,
-              "UNBOUNDED"
-            ]
-          }
-        },
-        {
-          "provides_external_endpoint": {
-            "capability": "tosca.capabilities.Endpoint.Public",
-            "relationship": "cna.qualityModel.relationships.Provides.Endpoint",
-            "occurrences": [
-              0,
-              "UNBOUNDED"
-            ]
-          }
-        },
-        {
           "endpoint_link": {
             "capability": "tosca.capabilities.Endpoint",
             "relationship": "cna.qualityModel.relationships.ConnectsTo.Link",
@@ -242,30 +206,20 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
             ]
           }
         }
-      ]
-    },
-    "cna.qualityModel.entities.Endpoint": {
-      "derived_from": "tosca.nodes.Root",
-      "description": "Endpoint type to explicitly model endpoints as entities",
+      ],
       "capabilities": {
         "endpoint": {
           "type": "tosca.capabilities.Endpoint",
           "occurrences": [
-            1,
-            1
+            0,
+            "UNBOUNDED"
           ]
-        }
-      }
-    },
-    "cna.qualityModel.entities.Endpoint.External": {
-      "derived_from": "tosca.nodes.Root",
-      "description": "Endpoint type to explicitly model endpoints as entities",
-      "capabilities": {
+        },
         "external_endpoint": {
           "type": "tosca.capabilities.Endpoint.Public",
           "occurrences": [
-            1,
-            1
+            0,
+            "UNBOUNDED"
           ]
         }
       }

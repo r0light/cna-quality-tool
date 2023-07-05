@@ -11,7 +11,7 @@ import SoftwareComponentService from './node/softwareComponent.service';
 import DatabaseStorageBackingService from './node/database.storageBackingService';
 import ToscaBackingService from './node/toscaBackingService';
 import ToscaRequestTrace from './node/toscaRequestTrace';
-import { TOSCA_Node_Template, TOSCA_Service_Template, TOSCA_Topology_Template } from '@/totypa/tosca-types/template-types';
+import { TOSCA_Capability_Assignment, TOSCA_Node_Template, TOSCA_Relationship_Template, TOSCA_Requirement_Assignment, TOSCA_Service_Template, TOSCA_Topology_Template } from '@/totypa/tosca-types/template-types';
 import { UniqueKeyManager } from './UniqueKeyManager';
 import { BACKING_DATA_TOSCA_KEY } from '../entities/backingData';
 import { flatMetaData } from '../common/entityDataTypes';
@@ -20,6 +20,12 @@ import { INFRASTRUCTURE_TOSCA_KEY } from '../entities/infrastructure';
 import { EntityProperty } from '../common/entityProperty';
 import { TOSCA_Property_Assignment } from '@/totypa/tosca-types/core-types';
 import { TwoWayKeyIdMap } from './TwoWayKeyIdMap';
+import { SERVICE_TOSCA_KEY } from '../entities/service';
+import { BACKING_SERVICE_TOSCA_KEY } from '../entities/backingService';
+import { STORAGE_BACKING_SERVICE_TOSCA_KEY } from '../entities/storageBackingService';
+import { COMPONENT_TOSCA_KEY } from '../entities/component';
+import { ENDPOINT_TOSCA_KEY } from '../entities/endpoint';
+import { EXTERNAL_ENDPOINT_TOSCA_KEY } from '../entities/externalEndpoint';
 
 const TOSCA_DEFINITIONS_VERSION = "tosca_simple_yaml_1_3"
 
@@ -50,34 +56,100 @@ export function convertToServiceTemplate(systemEntity: Entities.System): TOSCA_S
 
     for (const [id, dataAggregate] of systemEntity.getDataAggregateEntities.entries()) {
         let nodeKey: string = uniqueKeyManager.ensureUniqueness(transformToYamlKey(dataAggregate.getName));
-        let node = dataAggregateToTemplate(dataAggregate);
+        let node = createDataAggregateTemplate(dataAggregate);
         keyIdMap.add(nodeKey, id);
         topologyTemplate.node_templates[nodeKey] = node;
     }
 
     for (const [id, backingData] of systemEntity.getBackingDataEntities.entries()) {
         let nodeKey: string = uniqueKeyManager.ensureUniqueness(transformToYamlKey(backingData.getName));
-        let node = backingDataToTemplate(backingData);
+        let node = createBackingDataTemplate(backingData);
         keyIdMap.add(nodeKey, id);
         topologyTemplate.node_templates[nodeKey] = node;
     }
 
     for (const [id, infrastructure] of systemEntity.getInfrastructureEntities.entries()) {
         let nodeKey: string = uniqueKeyManager.ensureUniqueness(transformToYamlKey(infrastructure.getName));
-        let node = infrastructureToTemplate(infrastructure);
-
+        let node = createInfrastructureTemplate(infrastructure);
         if (infrastructure.getBackingDataEntities.length > 0) {
             node.requirements = [];
             for (const usedBackingData of infrastructure.getBackingDataEntities) {
-                node.requirements.push( {"uses_backing_data": keyIdMap.getKey(usedBackingData.getId)});
+                node.requirements.push({ "uses_backing_data": keyIdMap.getKey(usedBackingData.getId) });
+            }
+        }
+        keyIdMap.add(nodeKey, id);
+        topologyTemplate.node_templates[nodeKey] = node;
+    }
+
+
+    for (const [id, component] of systemEntity.getComponentEntities.entries()) {
+        let nodeKey: string = uniqueKeyManager.ensureUniqueness(transformToYamlKey(component.getName));
+        let node = createComponentTemplate(component);
+
+        if (component.getEndpointEntities.length > 0) {
+            node.requirements = [];
+            for (const endpoint of component.getEndpointEntities) {
+                let endpointNodeKey = uniqueKeyManager.ensureUniqueness(transformToYamlKey(endpoint.getName))
+                let endpointNode = createEndpointTemplate(endpoint);
+
+                keyIdMap.add(endpointNodeKey, endpoint.getId);
+                topologyTemplate.node_templates[endpointNodeKey] = endpointNode;
+                node.requirements.push({
+                    "provides_endpoint": {
+                        capability: "tosca.capabilities.Endpoint",
+                        node: endpointNodeKey,
+                        relationship: {
+                            type: "cna.qualityModel.relationships.Provides.Endpoint",
+                        }
+                    } as TOSCA_Requirement_Assignment
+                });
             }
         }
 
-        keyIdMap.add(nodeKey, infrastructure.getId);
+        if (component.getExternalEndpointEntities.length > 0) {
+            if (!node.requirements) {
+                node.requirements = [];
+            }
+            for (const externalEndpoint of component.getExternalEndpointEntities) {
+                let endpointNodeKey = uniqueKeyManager.ensureUniqueness(transformToYamlKey(externalEndpoint.getName))
+                let endpointNode = createExternalEndpointTemplate(externalEndpoint);
+
+                keyIdMap.add(endpointNodeKey, externalEndpoint.getId);
+                topologyTemplate.node_templates[endpointNodeKey] = endpointNode;
+                node.requirements.push({
+                    "provides_external_endpoint": {
+                        capability: "tosca.capabilities.Endpoint.Public",
+                        node: endpointNodeKey,
+                        relationship: {
+                            type: "cna.qualityModel.relationships.Provides.Endpoint",
+                        }
+                    } as TOSCA_Requirement_Assignment
+                });
+            }
+        }
+
+        if (component.getDataAggregateEntities.length > 0) {
+            if (!node.requirements) {
+                node.requirements = [];
+            }
+            for (const usedDataAggregate of component.getDataAggregateEntities) {
+                // TODO save data usage relation
+                node.requirements.push({ "uses_data": keyIdMap.getKey(usedDataAggregate.data.getId) });
+            }
+        }
+
+        if (component.getBackingDataEntities.length > 0) {
+            if (!node.requirements) {
+                node.requirements = [];
+            }
+            for (const usedBackingData of component.getBackingDataEntities) {
+                node.requirements.push({ "uses_backing_data": keyIdMap.getKey(usedBackingData.getId) });
+            }
+        }
+
+        keyIdMap.add(nodeKey, id);
         topologyTemplate.node_templates[nodeKey] = node;
-
     }
-
 
     // TODO all other entities
 
@@ -99,8 +171,8 @@ function transformToYamlKey(name: string) {
         .toLocaleLowerCase();
 }
 
-function parsePropertiesForYaml(properties: EntityProperty[]): { [propertyKey: string]: TOSCA_Property_Assignment | string} {
-    let yamlProperties: { [propertyKey: string]: TOSCA_Property_Assignment | string} = {};
+function parsePropertiesForYaml(properties: EntityProperty[]): { [propertyKey: string]: TOSCA_Property_Assignment | string } {
+    let yamlProperties: { [propertyKey: string]: TOSCA_Property_Assignment | string } = {};
     for (const property of properties) {
         yamlProperties[property.getKey] = property.value
     }
@@ -108,7 +180,7 @@ function parsePropertiesForYaml(properties: EntityProperty[]): { [propertyKey: s
 }
 
 
-function dataAggregateToTemplate(dataAggregate: Entities.DataAggregate): TOSCA_Node_Template {
+function createDataAggregateTemplate(dataAggregate: Entities.DataAggregate): TOSCA_Node_Template {
     return {
         type: DATA_AGGREGATE_TOSCA_KEY,
         metadata: flatMetaData(dataAggregate.getMetaData),
@@ -116,14 +188,14 @@ function dataAggregateToTemplate(dataAggregate: Entities.DataAggregate): TOSCA_N
 }
 
 
-function backingDataToTemplate(backingData: Entities.BackingData): TOSCA_Node_Template {
+function createBackingDataTemplate(backingData: Entities.BackingData): TOSCA_Node_Template {
 
     let template: TOSCA_Node_Template = {
         type: BACKING_DATA_TOSCA_KEY,
         metadata: flatMetaData(backingData.getMetaData),
     }
 
-    if (backingData.getIncludedData) {
+    if (backingData.getIncludedData.length > 0) {
         let includedData = {};
         for (const data of backingData.getIncludedData) {
             includedData[data.key] = data.value;
@@ -136,14 +208,76 @@ function backingDataToTemplate(backingData: Entities.BackingData): TOSCA_Node_Te
     return template;
 }
 
-function infrastructureToTemplate(infrastructure: Entities.Infrastructure): TOSCA_Node_Template {
-    return {
+function createInfrastructureTemplate(infrastructure: Entities.Infrastructure): TOSCA_Node_Template {
+
+    let template: TOSCA_Node_Template = {
         type: INFRASTRUCTURE_TOSCA_KEY,
         metadata: flatMetaData(infrastructure.getMetaData),
-        properties: parsePropertiesForYaml(infrastructure.getProperties()),
     }
+
+    if (infrastructure.getProperties().length > 0) {
+        template.properties = parsePropertiesForYaml(infrastructure.getProperties());
+    }
+
+    return template;
 }
 
+function createComponentTemplate(component: Entities.Component): TOSCA_Node_Template {
+
+    let typeKey = (() => {
+        switch (component.constructor) {
+            case Entities.Service:
+                return SERVICE_TOSCA_KEY;
+            case Entities.BackingService:
+                return BACKING_SERVICE_TOSCA_KEY;
+            case Entities.StorageBackingService:
+                return STORAGE_BACKING_SERVICE_TOSCA_KEY;
+            case Entities.Component:
+            default:
+                return COMPONENT_TOSCA_KEY;
+        }
+    })();
+
+    let template: TOSCA_Node_Template = {
+        type: typeKey,
+        metadata: flatMetaData(component.getMetaData),
+    }
+
+    if (component.getProperties().length > 0) {
+        template.properties = parsePropertiesForYaml(component.getProperties());
+    }
+
+    return template;
+}
+
+
+function createEndpointTemplate(endpoint: Entities.Endpoint): TOSCA_Node_Template {
+    let template: TOSCA_Node_Template = {
+        type: ENDPOINT_TOSCA_KEY,
+        metadata: flatMetaData(endpoint.getMetaData),
+    };
+
+    template.capabilities = {
+        "endpoint": {
+            properties: parsePropertiesForYaml(endpoint.getProperties())
+        }
+    }
+    return template;
+}
+
+function createExternalEndpointTemplate(endpoint: Entities.ExternalEndpoint): TOSCA_Node_Template {
+    let template: TOSCA_Node_Template = {
+        type: EXTERNAL_ENDPOINT_TOSCA_KEY,
+        metadata: flatMetaData(endpoint.getMetaData),
+    };
+
+    template.capabilities = {
+        "external_endpoint": {
+            properties: parsePropertiesForYaml(endpoint.getProperties())
+        }
+    }
+    return template;
+}
 
 
 

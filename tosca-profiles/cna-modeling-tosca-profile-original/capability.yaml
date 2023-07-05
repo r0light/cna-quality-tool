@@ -1,0 +1,15 @@
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+metadata:
+  template_name: cna-modeling-tosca-profile
+  template_author: Distributed Systems Group
+  template_version: 0.1.0
+
+description: >-
+  This TOSCA definitions document contains the CNA Modeling capability types.
+
+capability_types:
+
+  cna.qualityModel.capabilities.DataStorage:
+    derived_from: tosca.capabilities.Root
+    description: When included, the Node is able to store Data Aggregate entities

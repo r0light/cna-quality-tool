@@ -19,8 +19,3 @@ relationship_types:
         type: string
         required: true
         description: The Endpoint to which the linked Component connects.
-
-  cna.qualityModel.relationships.Provides.Endpoint:
-    derived_from: tosca.relationships.Root
-    description: Relationship Type to connect Endpoints to the Components which provide them
-    valid_target_types: [ cna.qualityModel.entities.Endpoint, cna.qualityModel.entities.Endpoint.External]

@@ -1,10 +1,13 @@
 import { EntityProperty, TextEntityProperty, parseProperties } from "../common/entityProperty";
 import { tosca_simple_profile_for_yaml_v1_3 } from '../../totypa/parsedProfiles/tosca_simple_profile_for_yaml_v1_3'
 import { MetaData } from "../common/entityDataTypes";
+import { cna_modeling_tosca_profile } from "@/totypa/parsedProfiles/cna_modeling_tosca_profile";
 
+const ENDPOINT_TOSCA_KEY = "cna.qualityModel.entities.Endpoint";
+const ENDPOINT_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types[ENDPOINT_TOSCA_KEY];
 
-const ENDPOINT_TOSCA_KEY = "tosca.capabilities.Endpoint";
-const ENDPOINT_TOSCA_EQUIVALENT = tosca_simple_profile_for_yaml_v1_3.capability_types[ENDPOINT_TOSCA_KEY];
+const ENDPOINT_CAPABILITY_KEY = "tosca.capabilities.Endpoint";
+const ENDPOINT_CAPABILITY_EQUIVALENT = tosca_simple_profile_for_yaml_v1_3.capability_types[ENDPOINT_CAPABILITY_KEY];
 
 /**
  * The module for aspects related to a Endpoint quality model Entity.
@@ -12,7 +15,7 @@ const ENDPOINT_TOSCA_EQUIVALENT = tosca_simple_profile_for_yaml_v1_3.capability_
  */
 
 function getEndpointProperties(): EntityProperty[] {
-    let parsed = parseProperties(ENDPOINT_TOSCA_EQUIVALENT.properties);
+    let parsed = parseProperties(ENDPOINT_CAPABILITY_EQUIVALENT.properties);
 
     for (const prop of parsed) {
         switch (prop.getKey) {

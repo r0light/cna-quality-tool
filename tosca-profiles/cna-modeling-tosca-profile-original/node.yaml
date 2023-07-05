@@ -8,6 +8,7 @@ metadata:
 description: >-
   This TOSCA definitions document contains the CNA Modeling node types.
 
+
 node_types:
 
   cna.qualityModel.entities.Root.Component:
@@ -24,16 +25,6 @@ node_types:
           capability: tosca.capabilities.Compute
           relationship: tosca.relationships.HostedOn
           occurrences: [1, 1]
-      # Allow the definition of endpoints provided by this Component
-      - provides_endpoint:
-          capability: tosca.capabilities.Endpoint
-          relationship: cna.qualityModel.relationships.Provides.Endpoint
-          occurrences: [0, UNBOUNDED]
-      # Allow the definition of endpoints provided by this Component
-      - provides_external_endpoint:
-          capability: tosca.capabilities.Endpoint.Public
-          relationship: cna.qualityModel.relationships.Provides.Endpoint
-          occurrences: [0, UNBOUNDED]
       # Allow the definition of Links between Components
       - endpoint_link:
           capability: tosca.capabilities.Endpoint
@@ -51,21 +42,20 @@ node_types:
           node: cna.qualityModel.entities.BackingData
           relationship: cna.qualityModel.relationships.AttachesTo.Data
           occurrences: [0, UNBOUNDED]
+    capabilities:
+      # Allow assigning Endpoint entities
+      endpoint:
+        type: tosca.capabilities.Endpoint
+        occurrences: [0, UNBOUNDED]
+      # Allow assigning External Endpoint entities
+      external_endpoint:
+        type: tosca.capabilities.Endpoint.Public
+        occurrences: [0, UNBOUNDED]
 
   cna.qualityModel.entities.SoftwareComponent.Service:
     derived_from: tosca.nodes.SoftwareComponent
     description: Node Type to model Service entities
     requirements:
-      # Allow the definition of endpoints provided by this Component
-      - provides_endpoint:
-          capability: tosca.capabilities.Endpoint
-          relationship: cna.qualityModel.relationships.Provides.Endpoint
-          occurrences: [0, UNBOUNDED]
-      # Allow the definition of endpoints provided by this Component
-      - provides_external_endpoint:
-          capability: tosca.capabilities.Endpoint.Public
-          relationship: cna.qualityModel.relationships.Provides.Endpoint
-          occurrences: [0, UNBOUNDED]
       # Allow the definition of Links between Components
       - endpoint_link:
           capability: tosca.capabilities.Endpoint
@@ -83,7 +73,16 @@ node_types:
           node: cna.qualityModel.entities.BackingData
           relationship: cna.qualityModel.relationships.AttachesTo.Data
           occurrences: [0, UNBOUNDED]
-
+    capabilities:
+      # Allow assigning Endpoint entities
+      endpoint:
+        type: tosca.capabilities.Endpoint
+        occurrences: [0, UNBOUNDED]
+      # Allow assigning External Endpoint entities
+      external_endpoint:
+        type: tosca.capabilities.Endpoint.Public
+        occurrences: [0, UNBOUNDED]
+  
   cna.qualityModel.entities.BackingService:
     derived_from: tosca.nodes.Root
     description: Node Type to model Backing Service entities
@@ -93,16 +92,6 @@ node_types:
         description: "A short description of the provided functionality."
         required: false
     requirements:
-      # Allow the definition of endpoints provided by this Component
-      - provides_endpoint:
-          capability: tosca.capabilities.Endpoint
-          relationship: cna.qualityModel.relationships.Provides.Endpoint
-          occurrences: [0, UNBOUNDED]
-      # Allow the definition of endpoints provided by this Component
-      - provides_external_endpoint:
-          capability: tosca.capabilities.Endpoint.Public
-          relationship: cna.qualityModel.relationships.Provides.Endpoint
-          occurrences: [0, UNBOUNDED]
       # Allow the definition of Links between Components
       - endpoint_link:
           capability: tosca.capabilities.Endpoint
@@ -120,24 +109,15 @@ node_types:
           node: cna.qualityModel.entities.BackingData
           relationship: cna.qualityModel.relationships.AttachesTo.Data
           occurrences: [0, UNBOUNDED]
-
-  cna.qualityModel.entities.Endpoint:
-    derived_from: tosca.nodes.Root
-    description: Endpoint type to explicitly model endpoints as entities
     capabilities:
-      # Allow assigning exactly one Endpoint Capability
+      # Allow assigning Endpoint entities
       endpoint:
         type: tosca.capabilities.Endpoint
-        occurrences: [1, 1]
-
-  cna.qualityModel.entities.Endpoint.External:
-    derived_from: tosca.nodes.Root
-    description: Endpoint type to explicitly model endpoints as entities
-    capabilities:
-      # Allow assigning exactly one External Endpoint Capability
+        occurrences: [0, UNBOUNDED]
+      # Allow assigning External Endpoint entities
       external_endpoint:
         type: tosca.capabilities.Endpoint.Public
-        occurrences: [1, 1]
+        occurrences: [0, UNBOUNDED]
 
   cna.qualityModel.entities.Compute.Infrastructure:
     derived_from: tosca.nodes.Compute

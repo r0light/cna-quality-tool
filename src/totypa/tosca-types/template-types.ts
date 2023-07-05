@@ -27,7 +27,7 @@ export type TOSCA_Requirement_Assignment = {
         }
     }
     node_filer?: TOSCA_Node_Filter,
-    occurrences: (number | string)[]
+    occurrences?: (number | string)[]
 }
 
 // 3.8.3 Node Template
