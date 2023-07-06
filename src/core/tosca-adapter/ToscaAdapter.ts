@@ -1,3 +1,4 @@
+import $ from 'jquery';
 import * as Entities from '../entities'
 import { TOSCA_Node_Template, TOSCA_Relationship_Template, TOSCA_Requirement_Assignment, TOSCA_Service_Template, TOSCA_Topology_Template } from '@/totypa/tosca-types/template-types';
 import { UniqueKeyManager } from './UniqueKeyManager';
@@ -17,6 +18,7 @@ import { EXTERNAL_ENDPOINT_TOSCA_KEY } from '../entities/externalEndpoint';
 import { DEPLOYMENT_MAPPING_TOSCA_KEY } from '../entities/deploymentMapping';
 import { LINK_TOSCA_KEY } from '../entities/link';
 import { REQUEST_TRACE_TOSCA_KEY } from '../entities/requestTrace';
+import { prop } from 'vue-class-component';
 
 const TOSCA_DEFINITIONS_VERSION = "tosca_simple_yaml_1_3"
 
@@ -291,8 +293,9 @@ function createComponentTemplate(component: Entities.Component): TOSCA_Node_Temp
         metadata: flatMetaData(component.getMetaData),
     }
 
-    if (component.getProperties().length > 0) {
-        template.properties = parsePropertiesForYaml(component.getProperties());
+    let properties = parsePropertiesForYaml(component.getProperties());
+    if (isNonEmpty(properties)) {
+        template.properties = properties;
     }
 
     return template;
@@ -328,7 +331,7 @@ function createExternalEndpointTemplate(endpoint: Entities.ExternalEndpoint): TO
 }
 
 function createRequestTraceTemplate(requestTrace: Entities.RequestTrace, systemEntity: Entities.System, keyIdMap: TwoWayKeyIdMap) {
-    
+
     let template: TOSCA_Node_Template = {
         type: REQUEST_TRACE_TOSCA_KEY,
         metadata: flatMetaData(requestTrace.getMetaData),
@@ -352,4 +355,14 @@ function createRequestTraceTemplate(requestTrace: Entities.RequestTrace, systemE
     template.properties.external_endpoint = keyIdMap.getKey(requestTrace.getExternalEndpoint.getId)
 
     return template;
+}
+
+
+function isNonEmpty(obj) {
+    for (const prop in obj) {
+        if (Object.hasOwn(obj, prop) && obj[prop]) {
+            return true;
+        }
+    }
+    return false;
 }
