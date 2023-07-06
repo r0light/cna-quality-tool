@@ -173,6 +173,15 @@ class System { // TODO use ID's as keys instead of name?
         return this.#backingDataEntities;
     }
 
+
+    searchComponentOfEndpoint(endpointId: string): Component | undefined {
+        return Array.from(this.#componentEntities.values()).find(component => {
+            return !!component.getEndpointEntities.find(endpoint => {
+                endpoint.getId === endpointId;
+            })
+        })
+    }
+
     /**
      * Transforms the System object into a String. 
      * @returns {string}

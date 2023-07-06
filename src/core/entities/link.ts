@@ -42,8 +42,7 @@ class Link {
         this.#sourceEntity = sourceEntity;
         this.#targetEndpoint = targetEndpoint;
 
-        // if (sourceEntity.getEndpointEntities.includes(targetEndpoint) || sourceEntity.getExternalEndpointsEntities.includes(targetEndpoint)) { // TODO remove when decided if deep compare
-        if (this.endpointAlreadyIncluded(targetEndpoint)) {
+        if(sourceEntity.getEndpointEntities.find(endpoint => endpoint.getId === targetEndpoint.getId)) {
             const errorMessage = "A Link cannot be created from an entity to its own included Endpoint.";
             throw new Error(errorMessage);
         }
@@ -80,8 +79,8 @@ class Link {
       * @throws {Error} If the targeted Endpoint is included in the newSourceEntity.
       */
     set setSourceEntity(newSourceEntity: Component) {
-        if (this.endpointAlreadyIncluded(this.#targetEndpoint)) {
-            const errorMessage = "A Link cannot connect an entity to its own included Endpoint.";
+        if(newSourceEntity.getEndpointEntities.find(endpoint => endpoint.getId === this.#targetEndpoint.getId)) {
+            const errorMessage = "A Link cannot be created from an entity to its own included Endpoint.";
             throw new Error(errorMessage);
         }
 
@@ -92,7 +91,7 @@ class Link {
      * Returns the {@link Endpoint} or {@link ExternalEndpoint} this Link connects to.
      * @returns {Endpoint|ExternalEndpoint}
      */
-    get getTargetEntity() {
+    get getTargetEndpoint() {
         return this.#targetEndpoint
     }
 
@@ -102,13 +101,11 @@ class Link {
       * @throws {TypeError} If a wrong entity type is being provided
       * @throws {Error} If the targeted Endpoint is included in the sourceEntity.
       */
-    set setTargetEntity(newTargetEndpoint: Endpoint) {
-
-        if (this.endpointAlreadyIncluded(this.#targetEndpoint)) {
-            const errorMessage = "A Link cannot connect an entity to its own included Endpoint.";
+    set setTargetEndpoint(newTargetEndpoint: Endpoint) {
+        if(this.#sourceEntity.getEndpointEntities.find(endpoint => endpoint.getId === newTargetEndpoint.getId)) {
+            const errorMessage = "A Link cannot be created from an entity to its own included Endpoint.";
             throw new Error(errorMessage);
         }
-
         this.#targetEndpoint = newTargetEndpoint;
     }
 
@@ -118,15 +115,6 @@ class Link {
      */
     get getRelationType() {
         return this.#relationType
-    }
-
-    endpointAlreadyIncluded(newTargetEndpoint: Endpoint) {
-        if (this.#sourceEntity.getEndpointEntities.some(endpoint => JSON.stringify(endpoint) === JSON.stringify(newTargetEndpoint))) {
-            return true;
-        } else if (this.#sourceEntity.getExternalEndpointEntities.some(externalEndpoint => JSON.stringify(externalEndpoint) === JSON.stringify(newTargetEndpoint))) {
-            return true;
-        }
-        return false;
     }
 
     /**

@@ -93,6 +93,10 @@ node_types:
         description: "A short description of the provided functionality."
         required: false
     requirements:
+      - host:
+        capability: tosca.capabilities.Compute
+        relationship: tosca.relationships.HostedOn
+        occurrences: [1, 1]
       # Allow the definition of endpoints provided by this Component
       - provides_endpoint:
           capability: tosca.capabilities.Endpoint

@@ -3,7 +3,6 @@ import * as yaml from 'js-yaml';
 import EntityTypes from './config/entityTypes';
 import * as Entities from '../core/entities';
 import ErrorMessage, { ErrorType } from './errorMessage'
-import ToscaConverter from '../core/tosca-adapter/ToscaConverter.js';
 import { UIContentType } from './config/toolbarConfiguration';
 import UIModalDialog, { DialogSize } from './representations/guiElements.dialog';
 import { PropertyContentType } from './config/detailsSidebarConfig';
@@ -52,10 +51,8 @@ class SystemEntityManager {
 
         this.#convertToSystemEntity();
 
-        console.log(this.#currentSystemEntity);
 
-
-        /* TODO trigger tosca adapter to do the transformation
+        /* TODO check for errors?
         if (this.#errorMessages?.size > 0) {
             this.#provideConnectionWarningDialog();
             return;
@@ -63,13 +60,11 @@ class SystemEntityManager {
         */
 
         let serviceTemplate = convertToServiceTemplate(this.#currentSystemEntity);
-
         const asYaml = yaml.dump(serviceTemplate, {
             styles: {
                 '!!null': 'empty'
             }
         });
-
 
         // download created yaml taken from https://stackoverflow.com/a/22347908
         let downloadElement = document.createElement("a");
