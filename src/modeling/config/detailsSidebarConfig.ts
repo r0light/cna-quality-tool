@@ -1,5 +1,5 @@
 import EntityTypes from "./entityTypes";
-import { getComponentProperties, getBackingServiceProperties, getStorageBackingServiceProperties, getEndpointProperties, getExternalEndpointProperties, getInfrastructureProperties } from "../../core/entities";
+import { getComponentProperties, getBackingServiceProperties, getStorageBackingServiceProperties, getEndpointProperties, getExternalEndpointProperties, getInfrastructureProperties, getRequestTraceProperties } from "../../core/entities";
 import { UIContentType } from "./toolbarConfiguration";
 import { DialogConfig, DialogSize } from "./actionDialogConfig";
 
@@ -1207,7 +1207,7 @@ const EntityDetailsConfig: {
     },
     RequestTrace: {
         type: EntityTypes.REQUEST_TRACE,
-        specificProperties: [
+        specificProperties: ([
             {
                 providedFeature: "referredEndpoint",
                 contentType: PropertyContentType.DROPDOWN,
@@ -1339,7 +1339,7 @@ const EntityDetailsConfig: {
                 }
             }
 
-        ]
+        ] as PropertyConfig[]).concat(parseProperties(getRequestTraceProperties()))
     }
 };
 

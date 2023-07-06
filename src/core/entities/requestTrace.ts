@@ -3,6 +3,7 @@ import { ExternalEndpoint } from "./externalEndpoint";
 import { Link } from "./link";
 import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_modeling_tosca_profile'
 import { MetaData } from "../common/entityDataTypes";
+import { EntityProperty, parseProperties } from "../common/entityProperty";
 
 
 
@@ -13,6 +14,16 @@ import { MetaData } from "../common/entityDataTypes";
 
 const REQUEST_TRACE_TOSCA_KEY = "cna.qualityModel.entities.RequestTrace";
 const REQUEST_TRACE_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types[REQUEST_TRACE_TOSCA_KEY];
+
+function getRequestTraceProperties(): EntityProperty[] {
+    let parsed = parseProperties(REQUEST_TRACE_TOSCA_EQUIVALENT.properties);
+
+    // ignore the following properties, because they are handled customly
+    parsed = parsed.filter(prop => prop.getKey !== "endpoint"
+        && prop.getKey !== "nodes" && prop.getKey !== "links")
+
+    return parsed;
+}
 
 /**
  * Class representing a Request Trace entity.
@@ -29,6 +40,8 @@ class RequestTrace {
     #externalEndpoint: ExternalEndpoint;
 
     #links = new Set<Link>();
+
+    #properties: EntityProperty[] = new Array();
 
     /**
      * Create a Request Trace entity.
@@ -51,6 +64,7 @@ class RequestTrace {
         this.#name = name;
         this.#metaData = metaData;
         this.#externalEndpoint = externalEndpoint;
+        this.#properties = getRequestTraceProperties();
     }
 
     /**
@@ -109,6 +123,14 @@ class RequestTrace {
     }
 
     /**
+     * Returns all properties of this entity
+     * @returns {EntityProperty[]}
+     */
+    getProperties() {
+        return this.#properties;
+    }
+
+    /**
      * Transforms the RequestTrace object into a String. 
      * @returns {string}
      */
@@ -117,4 +139,4 @@ class RequestTrace {
     }
 }
 
-export { RequestTrace, REQUEST_TRACE_TOSCA_KEY };
+export { RequestTrace, REQUEST_TRACE_TOSCA_KEY, getRequestTraceProperties };
