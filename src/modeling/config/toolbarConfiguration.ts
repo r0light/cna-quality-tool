@@ -119,6 +119,13 @@ const ToolbarConfig = {
                             text: "Import from JSON",
                             iconClass: "bi bi-filetype-json",
                             additionalCssClass: ""
+                        },
+                        {
+                            providedFeature: "loadModeledSystemEntityFromTosca",
+                            tooltipText: "Import modeled System from TOSCA",
+                            text: "Import from TOSCA",
+                            iconClass: "bi bi-filetype-yml",
+                            additionalCssClass: ""
                         }
                     ]
                 }

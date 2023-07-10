@@ -92,6 +92,7 @@ import ModalDialog from "../modalDialog";
 import UIModalDialog from "../../representations/guiElements.dialog";
 import { addSelectionToolToEntity } from "../tools/entitySelectionTools";
 import ButtonGroup from './ButtonGroup.vue';
+import { importFromServiceTemplate } from '@/core/tosca-adapter/ToscaAdapter';
 
 export type ToolbarButton = {
     buttonType: string,
@@ -270,6 +271,9 @@ function onToolbarButtonClick(buttonId: string, event) {
             break;
         case "loadModeledSystemEntityFromJson-dropdownItemButton":
             loadFromJson();
+            break;
+        case "loadModeledSystemEntityFromTosca-dropdownItemButton":
+            loadFromTosca();
             break;
         case "changeGrid-button":
             changeGrid();
@@ -467,6 +471,39 @@ function loadFromJson() {
         fr.readAsText(uploadElement.files[0]);
     }
     uploadElement.click();
+}
+
+function loadFromTosca() {
+
+    let name = "";
+
+    function loadFromUpload(fileReader: ProgressEvent<FileReader>) {
+        let stringified: string = fileReader.target.result.toString();
+
+        // TODO remove file ending from name
+
+        let system = importFromServiceTemplate(name, stringified);
+
+
+        // TODO convert to jointJs graph
+        console.log(system);
+    }
+
+    let uploadElement = document.createElement("input");
+    uploadElement.setAttribute("type", "file");
+    uploadElement.setAttribute("accept", ".yaml");
+
+    let fr = new FileReader();
+    fr.onload = loadFromUpload.bind(this);
+
+    uploadElement.onchange = () => {
+        // only one file should be selected
+        console.log(uploadElement);
+        name = uploadElement.files[0].name;
+        fr.readAsText(uploadElement.files[0]);
+    }
+    uploadElement.click();
+
 }
 
 function fitAllElementsToEmbedded() {

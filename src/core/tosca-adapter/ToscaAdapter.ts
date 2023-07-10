@@ -18,7 +18,6 @@ import { EXTERNAL_ENDPOINT_TOSCA_KEY } from '../entities/externalEndpoint';
 import { DEPLOYMENT_MAPPING_TOSCA_KEY } from '../entities/deploymentMapping';
 import { LINK_TOSCA_KEY } from '../entities/link';
 import { REQUEST_TRACE_TOSCA_KEY } from '../entities/requestTrace';
-import { prop } from 'vue-class-component';
 
 const TOSCA_DEFINITIONS_VERSION = "tosca_simple_yaml_1_3"
 
@@ -365,4 +364,14 @@ function isNonEmpty(obj) {
         }
     }
     return false;
+}
+
+export function importFromServiceTemplate(templateName: string, stringifiedServiceTemplate: string): Entities.System {
+
+    let importedSystem = new Entities.System(templateName);
+
+    //TODO set all attributes
+
+
+    return importedSystem;
 }
