@@ -116,6 +116,16 @@ class Endpoint {
         this.#properties = this.#properties.concat(entityProperties);
     }
 
+    setPropertyValue(propertyKey: string, propertyValue: any) {
+        let propertyToSet = (this.#properties.find(property => property.getKey === propertyKey))
+        if (propertyToSet) {
+            propertyToSet.value = propertyValue
+        } else {
+            throw new Error(`Property with key ${propertyKey} not found in ${this.constructor}`)
+        }
+    }
+
+
     getProperties() {
         return this.#properties;
     }

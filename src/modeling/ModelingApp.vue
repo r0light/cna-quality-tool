@@ -53,7 +53,7 @@
                     :currentRequestTraceSelection="currentRequestTraceViewSelection" :printing="printing"
                     @select:Element="(element: dia.CellView | dia.LinkView) => currentSelection = element"
                     @select:RequestTrace="onSelectRequestTrace" @deselect:Element="currentSelection = null"
-                    @deselectRequestTrage="onRequestTraceDeselect">
+                    @deselect:RequestTrace="onRequestTraceDeselect">
                 </ModelingArea>
             </div>
             <DetailsSidebar :paper="mainPaper" :graph="currentSystemGraph as dia.Graph" :selectedEntity="currentSelection" :selectedDataAggregate="currentDataAggregateHighlight" :selectedBackingData="currentBackingDataHightlight"></DetailsSidebar>

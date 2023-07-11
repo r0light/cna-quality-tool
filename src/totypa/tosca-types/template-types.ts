@@ -234,7 +234,7 @@ export type TOSCA_Service_Template = {
         [relationshipKey: string]: TOSCA_Relationship
     },
     node_types?: {
-        [grouKey: string]: TOSCA_Node
+        [nodeKey: string]: TOSCA_Node
     },
     group_types?: {
         [grouKey: string]: TOSCA_Group

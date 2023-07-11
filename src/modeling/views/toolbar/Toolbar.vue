@@ -475,14 +475,14 @@ function loadFromJson() {
 
 function loadFromTosca() {
 
-    let name = "";
+    let fileName = "";
 
     function loadFromUpload(fileReader: ProgressEvent<FileReader>) {
         let stringified: string = fileReader.target.result.toString();
 
         // TODO remove file ending from name
 
-        let system = importFromServiceTemplate(name, stringified);
+        let system = importFromServiceTemplate(fileName, stringified);
 
 
         // TODO convert to jointJs graph
@@ -499,7 +499,7 @@ function loadFromTosca() {
     uploadElement.onchange = () => {
         // only one file should be selected
         console.log(uploadElement);
-        name = uploadElement.files[0].name;
+        fileName = uploadElement.files[0].name;
         fr.readAsText(uploadElement.files[0]);
     }
     uploadElement.click();

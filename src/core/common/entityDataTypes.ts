@@ -1,3 +1,4 @@
+import { TOSCA_Metadata } from "@/totypa/tosca-types/core-types"
 import { DataAggregate } from "../entities"
 
 export type MetaData = {
@@ -46,6 +47,22 @@ export function readMetaData(metaData: FlatMetaData): MetaData {
             yCoord: Number.parseFloat(metaData.position_yCoord)
         }
     }
+}
+
+export function readToscaMetaData(toscaMetaData: TOSCA_Metadata): MetaData {
+
+    return {
+        label: toscaMetaData.label ? toscaMetaData.label : "",
+        fontSize: toscaMetaData.fontSize ? Number.parseFloat(toscaMetaData.fontSize) : -1,
+        size: {
+            width: toscaMetaData.size_width ? Number.parseFloat(toscaMetaData.size_width) : -1,
+            height: toscaMetaData.size_height ? Number.parseFloat(toscaMetaData.size_height) : -1
+        },
+        position: {
+            xCoord: toscaMetaData.position_xCoord ? Number.parseFloat(toscaMetaData.position_xCoord) : -1,
+            yCoord: toscaMetaData.position_yCoord ? Number.parseFloat(toscaMetaData.position_yCoord) : -1
+        }
+    };
 }
 
 export type DataUsageRelation = "uses" | "persists";

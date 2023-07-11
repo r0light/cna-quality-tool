@@ -1,9 +1,10 @@
-import $ from 'jquery';
+import { v4 as uuidv4 } from 'uuid';
+import * as yaml from 'js-yaml';
 import * as Entities from '../entities'
 import { TOSCA_Node_Template, TOSCA_Relationship_Template, TOSCA_Requirement_Assignment, TOSCA_Service_Template, TOSCA_Topology_Template } from '@/totypa/tosca-types/template-types';
 import { UniqueKeyManager } from './UniqueKeyManager';
 import { BACKING_DATA_TOSCA_KEY } from '../entities/backingData';
-import { flatMetaData } from '../common/entityDataTypes';
+import { flatMetaData, readMetaData, readToscaMetaData } from '../common/entityDataTypes';
 import { DATA_AGGREGATE_TOSCA_KEY } from '../entities/dataAggregate';
 import { INFRASTRUCTURE_TOSCA_KEY } from '../entities/infrastructure';
 import { EntityProperty } from '../common/entityProperty';
@@ -23,7 +24,10 @@ const TOSCA_DEFINITIONS_VERSION = "tosca_simple_yaml_1_3"
 
 const MATCH_WHITESPACES = new RegExp(/\s/g);
 const MATCH_UNWANTED_CHARACTERS = new RegExp(/[#>\-\.]/g);
+const MATCH_UNDERSCORE = new RegExp(/_/g);
 const MATCH_MULTIPLE_UNDERSCORES = new RegExp(/_+/g);
+const MATCH_FIRST_CHARACTER = new RegExp(/^./g);
+const MATCH_CHARACTER_AFTER_SPACE = new RegExp(/(\s)(.)/g);
 
 export function convertToServiceTemplate(systemEntity: Entities.System): TOSCA_Service_Template {
 
@@ -366,12 +370,255 @@ function isNonEmpty(obj) {
     return false;
 }
 
-export function importFromServiceTemplate(templateName: string, stringifiedServiceTemplate: string): Entities.System {
+export function importFromServiceTemplate(fileName: string, stringifiedServiceTemplate: string): Entities.System {
 
-    let importedSystem = new Entities.System(templateName);
+    const serviceTemplate: TOSCA_Service_Template = yaml.load(stringifiedServiceTemplate) as TOSCA_Service_Template;
+    const topologyTemplate = serviceTemplate.topology_template;
 
-    //TODO set all attributes
+    let systemName = fileName.replace(/\..*$/g, "");
+    let importedSystem = new Entities.System(systemName);
 
+    let keyIdMap = new TwoWayKeyIdMap();
+
+
+    // start with DataAggregates and BackingData
+    for (const [key, node] of Object.entries(topologyTemplate.node_templates)) {
+        if (node.type === DATA_AGGREGATE_TOSCA_KEY) {
+            let uuid = uuidv4();
+            let dataAggregate = new Entities.DataAggregate(uuid, transformYamlKeyToLabel(key), readToscaMetaData(node.metadata))
+            importedSystem.addEntity(dataAggregate);
+            keyIdMap.add(key, uuid);
+        } else if (node.type === BACKING_DATA_TOSCA_KEY) {
+            let uuid = uuidv4();
+
+            let includedData = [];
+            if (node.properties && node.properties["includedData"]) {
+                for (const [key, value] of Object.entries(node.properties["includedData"])) {
+                    includedData.push({ key: key, value: value });
+                }
+            }
+            let backingData = new Entities.BackingData(uuid, transformYamlKeyToLabel(key), readToscaMetaData(node.metadata), includedData)
+            importedSystem.addEntity(backingData);
+            keyIdMap.add(key, uuid);
+        }
+    }
+
+    // continue with Infrastructure
+    for (const [key, node] of Object.entries(topologyTemplate.node_templates)) {
+        if (node.type === INFRASTRUCTURE_TOSCA_KEY) {
+            let uuid = uuidv4();
+            let infrastructure = new Entities.Infrastructure(uuid, transformYamlKeyToLabel(key), readToscaMetaData(node.metadata), "compute"); // TODO: what to do with infrastructure type?
+
+            if (node.requirements) {
+                for (const requirementAssignment of node.requirements) {
+                    for (const [requirementKey, requirement] of Object.entries(requirementAssignment)) {
+                        if (requirementKey === "uses_backing_data") { // TODO no hard coded Key
+                            if (typeof requirement === "string") {
+                                infrastructure.addBackingDataEntity(importedSystem.getBackingDataEntities.get(keyIdMap.getId(requirement)));
+                            } else {
+                                // TODO requirement is of type TOSCA_Requirement_Assignment
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (node.properties) {
+                for (const [key, value] of Object.entries(node.properties)) {
+                    infrastructure.setPropertyValue(key, value);
+                }
+            }
+
+            importedSystem.addEntity(infrastructure);
+            keyIdMap.add(key, uuid);
+        }
+
+    }
+
+
+    let endpoints: Map<string, Entities.Endpoint> = new Map();
+    // continue with Endpoints
+    for (const [key, node] of Object.entries(topologyTemplate.node_templates)) {
+        if (node.type === ENDPOINT_TOSCA_KEY) {
+            let uuid = uuidv4();
+            let endpoint = new Entities.Endpoint(uuid, transformYamlKeyToLabel(key), readToscaMetaData(node.metadata));
+            if (node.properties) {
+                for (const [key, value] of Object.entries(node.properties)) {
+                    endpoint.setPropertyValue(key, value);
+                }
+            }
+            if (node.capabilities && node.capabilities["endpoint"] && node.capabilities["endpoint"].properties) {
+                for (const [key, value] of Object.entries(node.capabilities["endpoint"].properties)) {
+                    endpoint.setPropertyValue(key, value);
+                }
+            }
+            endpoints.set(uuid, endpoint);
+            keyIdMap.add(key, uuid);
+        } else if (node.type === EXTERNAL_ENDPOINT_TOSCA_KEY) {
+            let uuid = uuidv4();
+            let externalEndpoint = new Entities.ExternalEndpoint(uuid, transformYamlKeyToLabel(key), readToscaMetaData(node.metadata));
+            if (node.properties) {
+                for (const [key, value] of Object.entries(node.properties)) {
+                    externalEndpoint.setPropertyValue(key, value);
+                }
+            }
+            if (node.capabilities && node.capabilities["external_endpoint"] && node.capabilities["external_endpoint"].properties) {
+                for (const [key, value] of Object.entries(node.capabilities["external_endpoint"].properties)) {
+                    externalEndpoint.setPropertyValue(key, value);
+                }
+            }
+            endpoints.set(uuid, externalEndpoint);
+            keyIdMap.add(key, uuid);
+        }
+    }
+
+    // continue with components
+    for (const [key, node] of Object.entries(topologyTemplate.node_templates)) {
+        if (node.type === SERVICE_TOSCA_KEY) {
+            let uuid = uuidv4();
+            let service = new Entities.Service(uuid, transformYamlKeyToLabel(key), readToscaMetaData(node.metadata));
+
+            parseRequirements(node, service, importedSystem, endpoints, keyIdMap);
+
+            if (node.properties) {
+                for (const [key, value] of Object.entries(node.properties)) {
+                    service.setPropertyValue(key, value);
+                }
+            }
+
+            keyIdMap.add(key, uuid);
+            importedSystem.addEntity(service);
+        } else if (node.type === BACKING_SERVICE_TOSCA_KEY) {
+            let uuid = uuidv4();
+            let backingService = new Entities.BackingService(uuid, transformYamlKeyToLabel(key), readToscaMetaData(node.metadata));
+
+            parseRequirements(node, backingService, importedSystem, endpoints, keyIdMap);
+
+            if (node.properties) {
+                for (const [key, value] of Object.entries(node.properties)) {
+                    backingService.setPropertyValue(key, value);
+                }
+            }
+
+            keyIdMap.add(key, uuid);
+            importedSystem.addEntity(backingService);
+        } else if (node.type === STORAGE_BACKING_SERVICE_TOSCA_KEY) {
+            let uuid = uuidv4();
+            let storageBackingService = new Entities.StorageBackingService(uuid, transformYamlKeyToLabel(key), readToscaMetaData(node.metadata));
+
+            parseRequirements(node, storageBackingService, importedSystem, endpoints, keyIdMap);
+
+            if (node.properties) {
+                for (const [key, value] of Object.entries(node.properties)) {
+                    storageBackingService.setPropertyValue(key, value);
+                }
+            }
+
+            keyIdMap.add(key, uuid);
+            importedSystem.addEntity(storageBackingService);
+        } else if (node.type === COMPONENT_TOSCA_KEY) {
+            let uuid = uuidv4();
+            let component = new Entities.Component(uuid, transformYamlKeyToLabel(key), readToscaMetaData(node.metadata));
+
+            parseRequirements(node, component, importedSystem, endpoints, keyIdMap);
+
+            if (node.properties) {
+                for (const [key, value] of Object.entries(node.properties)) {
+                    component.setPropertyValue(key, value);
+                }
+            }
+
+            keyIdMap.add(key, uuid);
+            importedSystem.addEntity(component);
+        }
+    }
+
+    // finally add request traces
+    for (const [key, node] of Object.entries(topologyTemplate.node_templates)) {
+        if (node.type === REQUEST_TRACE_TOSCA_KEY) {
+            let uuid = uuidv4();
+
+            let externalEndpoint = node.properties && node.properties["external_endpoint"] ? endpoints.get(keyIdMap.getId(node.properties["external_endpoint"])) : null; // TODO something better than null?
+            let links = node.properties && node.properties["links"] ? node.properties["links"].map(linkKey => importedSystem.getLinkEntities.get(keyIdMap.getId(linkKey))) : [];
+
+            let requestTrace = new Entities.RequestTrace(uuid, transformYamlKeyToLabel(key), readToscaMetaData(node.metadata), externalEndpoint, links);
+
+            // TODO handle additional properties
+
+            keyIdMap.add(key, uuid);
+            importedSystem.addEntity(requestTrace);
+        }
+    }
 
     return importedSystem;
+}
+
+function transformYamlKeyToLabel(key: string) {
+
+    // 1. replace underscore with whitespace
+    // 2. make first character uppercase
+    // 3. make all characters after a space uppercase
+
+    return key.replace(MATCH_UNDERSCORE, " ").replace(MATCH_FIRST_CHARACTER, (match) => match.toUpperCase()).replace(MATCH_CHARACTER_AFTER_SPACE, (match, p1, p2) => `${p1}${p2.toUpperCase()}`)
+}
+
+
+function parseRequirements(node: TOSCA_Node_Template, component: Entities.Component, importedSystem: Entities.System, endpoints: Map<string, Entities.Endpoint>, keyIdMap: TwoWayKeyIdMap) {
+    if (node.requirements) {
+        for (const requirementAssignment of node.requirements) {
+            for (const [requirementKey, requirement] of Object.entries(requirementAssignment)) {
+                switch (requirementKey) {
+                    case "uses_data":
+                        if (typeof requirement === "string") {
+                            component.addDataEntity(importedSystem.getDataAggregateEntities.get(keyIdMap.getId(requirement))); //TODO handle usageRelation
+                        } else {
+                            // TODO requirement is of type TOSCA_Requirement_Assignment
+                        }
+                        break;
+                    case "uses_backing_data":
+                        if (typeof requirement === "string") {
+                            component.addDataEntity(importedSystem.getBackingDataEntities.get(keyIdMap.getId(requirement)));
+                        } else {
+                            // TODO requirement is of type TOSCA_Requirement_Assignment
+                        }
+                        break;
+                    case "provides_endpoint":
+                        if (typeof requirement === "string") {
+                            // TODO requirement is of type string
+                        } else {
+                            component.addEndpoint(endpoints.get(keyIdMap.getId(requirement.node)));
+                        }
+                        break;
+                    case "provides_external_endpoint":
+                        if (typeof requirement === "string") {
+                            // TODO requirement is of type string
+                        } else {
+                            component.addEndpoint(endpoints.get(keyIdMap.getId(requirement.node)));
+                        }
+                        break;
+                    case "host":
+                        if (typeof requirement === "string") {
+                            // TODO requirement is of type string
+                        } else {
+                            let linkId = uuidv4();
+                            let deploymentMapping = new Entities.DeploymentMapping(linkId, component, importedSystem.getInfrastructureEntities.get(keyIdMap.getId(requirement.node)));
+                            keyIdMap.add(requirement.relationship as string, linkId) // TODO requirement.relationship is object
+                            importedSystem.addEntity(deploymentMapping);
+                        }
+                        break;
+                    case "endpoint_link":
+                        if (typeof requirement === "string") {
+                            // TODO requirement is of type string
+                        } else {
+                            let linkId = uuidv4();
+                            let link = new Entities.Link(linkId, component, endpoints.get(keyIdMap.getId(requirement.node)));
+                            keyIdMap.add(requirement.relationship as string, linkId) // TODO requirement.relationship is object
+                            importedSystem.addEntity(link);
+                            // TODO add to Component (includedLinks?)
+                        }
+                        break;
+                }
+            }
+        }
+    }
 }

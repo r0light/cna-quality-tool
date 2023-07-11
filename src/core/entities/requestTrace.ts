@@ -130,6 +130,15 @@ class RequestTrace {
         return this.#properties;
     }
 
+    setPropertyValue(propertyKey: string, propertyValue: any) {
+        let propertyToSet = (this.#properties.find(property => property.getKey === propertyKey))
+        if (propertyToSet) {
+            propertyToSet.value = propertyValue
+        } else {
+            throw new Error(`Property with key ${propertyKey} not found in ${this.constructor}`)
+        }
+    }
+
     /**
      * Transforms the RequestTrace object into a String. 
      * @returns {string}
