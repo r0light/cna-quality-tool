@@ -34,7 +34,7 @@
 
 
 <script lang="ts" setup>
-import { ToolbarButton } from '../Toolbar.vue';
+import { ToolbarButton } from './Toolbar.vue';
 
 const props = defineProps<{
     buttonGroupId: string;

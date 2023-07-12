@@ -83,16 +83,15 @@
 
 <script lang="ts" setup>
 import $, { data } from 'jquery';
-import { ref, computed, onMounted, onUpdated, watch, reactive, Ref, ComputedRef } from "vue";
+import { ref, computed, onMounted, onUpdated, watch, reactive, Ref, ComputedRef, nextTick } from "vue";
 import { dia, util, highlighters } from "jointjs";
 import { ApplicationSettingsDialogConfig } from "../../config/actionDialogConfig";
 import EntityTypes from "../../config/entityTypes";
 import ToolbarConfig from "../../config/toolbarConfiguration";
 import ModalDialog from "../modalDialog";
 import UIModalDialog from "../../representations/guiElements.dialog";
-import { addSelectionToolToEntity } from "../tools/entitySelectionTools";
+import { EntitySelectionTools, addSelectionToolToEntity } from "../tools/entitySelectionTools";
 import ButtonGroup from './ButtonGroup.vue';
-import { importFromServiceTemplate } from '@/core/tosca-adapter/ToscaAdapter';
 
 export type ToolbarButton = {
     buttonType: string,
@@ -123,6 +122,7 @@ const emit = defineEmits<{
     (e: "update:SystemName", newName: string): void;
     (e: "click:exitRequestTraceView"): void;
     (e: "click:printActivePaper"): void;
+    (e: "load:fromTosca", stringifiedYaml: string, fileName: string);
 }>();
 
 const currentSystemName = ref<string>(props.systemName);
@@ -480,13 +480,7 @@ function loadFromTosca() {
     function loadFromUpload(fileReader: ProgressEvent<FileReader>) {
         let stringified: string = fileReader.target.result.toString();
 
-        // TODO remove file ending from name
-
-        let system = importFromServiceTemplate(fileName, stringified);
-
-
-        // TODO convert to jointJs graph
-        console.log(system);
+        emit("load:fromTosca", stringified, fileName);
     }
 
     let uploadElement = document.createElement("input");
@@ -498,7 +492,6 @@ function loadFromTosca() {
 
     uploadElement.onchange = () => {
         // only one file should be selected
-        console.log(uploadElement);
         fileName = uploadElement.files[0].name;
         fr.readAsText(uploadElement.files[0]);
     }

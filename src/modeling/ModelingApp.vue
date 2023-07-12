@@ -44,7 +44,7 @@
         <Toolbar :system-name="currentSystemName" :key="currentSystemName" :paper="mainPaper as dia.Paper"
             :graph="currentSystemGraph as dia.Graph" :selectedRequestTrace="currentRequestTraceViewSelection"
             @update:systemName="setCurrentSystemName" @click:exit-request-trace-view="onRequestTraceDeselect"
-            @click:print-active-paper="onPrintRequested"></Toolbar>
+            @click:print-active-paper="onPrintRequested" @load:fromTosca="loadFromTosca"></Toolbar>
         <div class="app-body">
             <div class="entityShapes-sidebar-container d-print-none"></div>
             <div class="visible-modeling-area">
@@ -56,7 +56,9 @@
                     @deselect:RequestTrace="onRequestTraceDeselect">
                 </ModelingArea>
             </div>
-            <DetailsSidebar :paper="mainPaper" :graph="currentSystemGraph as dia.Graph" :selectedEntity="currentSelection" :selectedDataAggregate="currentDataAggregateHighlight" :selectedBackingData="currentBackingDataHightlight"></DetailsSidebar>
+            <DetailsSidebar :paper="mainPaper" :graph="currentSystemGraph as dia.Graph" :selectedEntity="currentSelection"
+                :selectedDataAggregate="currentDataAggregateHighlight" :selectedBackingData="currentBackingDataHightlight">
+            </DetailsSidebar>
             <!--<div class="details-container d-print-none"></div>-->
         </div>
         <div id="modals" class="d-print-none"></div>
@@ -75,6 +77,16 @@ import DetailsSidebar from './views/detailsSidebar/DetailsSidebar.vue';
 import EntitySidebar from './views/entitySidebar';
 
 import SidebarEntityShapes from './config/entitySidebarShape.config';
+import { importFromServiceTemplate } from '@/core/tosca-adapter/ToscaAdapter';
+
+import { EntityDetailsConfig } from '@/modeling/config/detailsSidebarConfig';
+import {
+    Component as ComponentElement, Service as ServiceElement, BackingService as BackingServiceElement, StorageBackingService as StorageBackingServiceElement,
+    Endpoint as EndpointElement, ExternalEndpoint as ExternalEndpointElement, Link as LinkElement,
+    Infrastructure as InfrastructureElement, DeploymentMapping as DeploymentMappingElement,
+    RequestTrace as RequestTraceElement, DataAggregate as DataAggregateElement, BackingData as BackingDataElement
+} from './config/entityShapes'
+import { addSelectionToolToEntity } from './views/tools/entitySelectionTools';
 
 const currentSystemName = ref("");
 const showInitOverlay = ref(true);
@@ -155,6 +167,49 @@ onMounted(() => {
     }, false);
 
 })
+
+function loadFromTosca(yamlString: string, fileName: string) {
+    let system = importFromServiceTemplate(fileName, yamlString);
+
+
+    // TODO convert to jointJs graph
+
+    currentSystemGraph.value.clear();
+    for (const [id, component] of system.getComponentEntities) {
+        if (component.constructor.name === "Service") {
+            let newService: dia.Element = new ServiceElement({
+                id: id,
+                position: { x: component.getMetaData.position.xCoord, y: component.getMetaData.position.yCoord },
+                size: component.getMetaData.size,
+                attrs: {
+                    root: {
+                        title: "cna.qualityModel.Service"
+                    },
+                    body: {
+                        class: "entityHighlighting"
+                    },
+                    label: {
+                        fontSize: component.getMetaData.fontSize,
+                        textWrap: {
+                            text: component.getName
+                        }
+                    }
+                }
+            })
+            for (const property of EntityDetailsConfig.Service.specificProperties) {
+                if (property.jointJsConfig.modelPath) {
+                    newService.prop(property.jointJsConfig.modelPath, component.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
+                }
+            }
+            currentSystemGraph.value.addCell(newService);
+            addSelectionToolToEntity(newService, mainPaper.value);
+
+            setTimeout(() => {
+                mainPaper.value.hideTools();
+            }, 100)
+        }
+    }
+}
 
 
 function onSelectRequestTrace(element: dia.Element) {
