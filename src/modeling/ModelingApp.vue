@@ -79,13 +79,6 @@ import EntitySidebar from './views/entitySidebar';
 import SidebarEntityShapes from './config/entitySidebarShape.config';
 import { importFromServiceTemplate } from '@/core/tosca-adapter/ToscaAdapter';
 
-import { EntityDetailsConfig } from '@/modeling/config/detailsSidebarConfig';
-import {
-    Component as ComponentElement, Service as ServiceElement, BackingService as BackingServiceElement, StorageBackingService as StorageBackingServiceElement,
-    Endpoint as EndpointElement, ExternalEndpoint as ExternalEndpointElement, Link as LinkElement,
-    Infrastructure as InfrastructureElement, DeploymentMapping as DeploymentMappingElement,
-    RequestTrace as RequestTraceElement, DataAggregate as DataAggregateElement, BackingData as BackingDataElement
-} from './config/entityShapes'
 import { addSelectionToolToEntity } from './views/tools/entitySelectionTools';
 
 const currentSystemName = ref("");
@@ -170,45 +163,18 @@ onMounted(() => {
 
 function loadFromTosca(yamlString: string, fileName: string) {
     let system = importFromServiceTemplate(fileName, yamlString);
+    systemEntityManager.value.overwriteSystemEntity(system);
+    let createdCells = systemEntityManager.value.convertToGraph();
 
-
-    // TODO convert to jointJs graph
-
-    currentSystemGraph.value.clear();
-    for (const [id, component] of system.getComponentEntities) {
-        if (component.constructor.name === "Service") {
-            let newService: dia.Element = new ServiceElement({
-                id: id,
-                position: { x: component.getMetaData.position.xCoord, y: component.getMetaData.position.yCoord },
-                size: component.getMetaData.size,
-                attrs: {
-                    root: {
-                        title: "cna.qualityModel.Service"
-                    },
-                    body: {
-                        class: "entityHighlighting"
-                    },
-                    label: {
-                        fontSize: component.getMetaData.fontSize,
-                        textWrap: {
-                            text: component.getName
-                        }
-                    }
-                }
-            })
-            for (const property of EntityDetailsConfig.Service.specificProperties) {
-                if (property.jointJsConfig.modelPath) {
-                    newService.prop(property.jointJsConfig.modelPath, component.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
-                }
-            }
-            currentSystemGraph.value.addCell(newService);
-            addSelectionToolToEntity(newService, mainPaper.value);
-
-            setTimeout(() => {
-                mainPaper.value.hideTools();
-            }, 100)
-        }
+    for (const cell of createdCells) {
+        addSelectionToolToEntity(cell, mainPaper.value);
     }
+
+    setCurrentSystemName(system.getSystemName);
+
+    setTimeout(() => {
+        mainPaper.value.hideTools();
+    }, 100)
 }
 
 

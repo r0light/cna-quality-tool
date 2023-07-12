@@ -5,9 +5,16 @@ import * as Entities from '../core/entities';
 import ErrorMessage, { ErrorType } from './errorMessage'
 import { UIContentType } from './config/toolbarConfiguration';
 import UIModalDialog, { DialogSize } from './representations/guiElements.dialog';
-import { PropertyContentType } from './config/detailsSidebarConfig';
+import { EntityDetailsConfig, PropertyContentType } from './config/detailsSidebarConfig';
 import { MetaData } from "@/core/common/entityDataTypes";
 import { convertToServiceTemplate } from "@/core/tosca-adapter/ToscaAdapter";
+import {
+    Component as ComponentElement, Service as ServiceElement, BackingService as BackingServiceElement, StorageBackingService as StorageBackingServiceElement,
+    Endpoint as EndpointElement, ExternalEndpoint as ExternalEndpointElement, Link as LinkElement,
+    Infrastructure as InfrastructureElement, DeploymentMapping as DeploymentMappingElement,
+    RequestTrace as RequestTraceElement, DataAggregate as DataAggregateElement, BackingData as BackingDataElement
+} from './config/entityShapes'
+import { addSelectionToolToEntity } from "./views/tools/entitySelectionTools";
 
 class SystemEntityManager {
 
@@ -25,6 +32,10 @@ class SystemEntityManager {
         this.#currentSystemEntity = new Entities.System("test");
 
         this.#subscribeToEvents();
+
+        // needed because javascript (https://stackoverflow.com/questions/67416881/es6-proxied-class-access-private-property-cannot-read-private-member-hidden-f)
+        this.overwriteSystemEntity = this.overwriteSystemEntity.bind(this);
+        this.convertToGraph = this.convertToGraph.bind(this);
     }
 
     #subscribeToEvents() {
@@ -223,22 +234,22 @@ class SystemEntityManager {
         return backingData;
     }
 
-    #createComponent(graphElement) {
+    #createComponent(graphElement: dia.Element) {
 
         let componentModelEntity: Entities.Component | Entities.Service | Entities.BackingService | Entities.StorageBackingService;
         switch (graphElement.prop("entity/type")) {
             case EntityTypes.SERVICE:
-                componentModelEntity = new Entities.Service(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement));
+                componentModelEntity = new Entities.Service(graphElement.id.toString(), graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement));
                 break;
             case EntityTypes.BACKING_SERVICE:
-                componentModelEntity = new Entities.BackingService(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement));
+                componentModelEntity = new Entities.BackingService(graphElement.id.toString(), graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement));
                 break;
             case EntityTypes.STORAGE_BACKING_SERVICE:
-                componentModelEntity = new Entities.StorageBackingService(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement));
+                componentModelEntity = new Entities.StorageBackingService(graphElement.id.toString(), graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement));
                 break;
             case EntityTypes.COMPONENT:
             default:
-                componentModelEntity = new Entities.Component(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement));
+                componentModelEntity = new Entities.Component(graphElement.id.toString(), graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement));
         }
         // set entity properties
         for (let property of componentModelEntity.getProperties()) {
@@ -636,6 +647,133 @@ class SystemEntityManager {
             }
         }
     }
+
+    overwriteSystemEntity(newSystemEntity: Entities.System) {
+
+        this.#currentSystemEntity.setSystemName = newSystemEntity.getSystemName;
+
+        this.#currentSystemEntity.resetAllIncludedSystemEntities();
+        this.#currentSystemEntity.addEntities(Array.from(newSystemEntity.getDataAggregateEntities.values()));
+        this.#currentSystemEntity.addEntities(Array.from(newSystemEntity.getBackingDataEntities.values()));
+        this.#currentSystemEntity.addEntities(Array.from(newSystemEntity.getInfrastructureEntities.values()));
+        this.#currentSystemEntity.addEntities(Array.from(newSystemEntity.getComponentEntities.values()));
+        this.#currentSystemEntity.addEntities(Array.from(newSystemEntity.getDeploymentMappingEntities.values()));
+        this.#currentSystemEntity.addEntities(Array.from(newSystemEntity.getLinkEntities.values()));
+        this.#currentSystemEntity.addEntities(Array.from(newSystemEntity.getRequestTraceEntities.values()));
+    }
+
+    convertToGraph(): dia.Cell[] {
+
+        this.#currentSystemGraph.clear();
+
+        let createdCells = [];
+
+        for (const [id, infrastructure] of this.#currentSystemEntity.getInfrastructureEntities) {
+            let newInfrastructure = this.#createInfrasctructureCell(infrastructure);
+            this.#currentSystemGraph.addCell(newInfrastructure);
+            createdCells.push(newInfrastructure);
+        }
+
+        for (const [id, component] of this.#currentSystemEntity.getComponentEntities) {
+            if (component.constructor.name === "Service") {
+                let newService = this.#createServiceCell(component);
+                this.#currentSystemGraph.addCell(newService);
+                createdCells.push(newService);
+            } else if (component.constructor.name === "BackingService") {
+                let newBackingService = this.#createBackingServiceCell(component);
+                this.#currentSystemGraph.addCell(newBackingService);
+                createdCells.push(newBackingService);
+            }
+        }
+
+        return createdCells;
+    }
+
+    #createInfrasctructureCell(infrastructure: Entities.Infrastructure) {
+        let newInfrastructure: dia.Element = new InfrastructureElement({
+            id: infrastructure.getId,
+            position: { x: infrastructure.getMetaData.position.xCoord, y: infrastructure.getMetaData.position.yCoord },
+            size: infrastructure.getMetaData.size,
+            attrs: {
+                root: {
+                    title: "cna.qualityModel.Infrastructure"
+                },
+                body: {
+                    class: "entityHighlighting"
+                },
+                label: {
+                    fontSize: infrastructure.getMetaData.fontSize,
+                    textWrap: {
+                        text: infrastructure.getName
+                    }
+                }
+            }
+        });
+        for (const property of EntityDetailsConfig.Infrastructure.specificProperties) {
+            if (property.jointJsConfig.modelPath) {
+                newInfrastructure.prop(property.jointJsConfig.modelPath, infrastructure.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
+            }
+        }
+        return newInfrastructure;
+    }
+    
+
+    #createServiceCell(service: Entities.Service) {
+        let newService: dia.Element = new ServiceElement({
+            id: service.getId,
+            position: { x: service.getMetaData.position.xCoord, y: service.getMetaData.position.yCoord },
+            size: service.getMetaData.size,
+            attrs: {
+                root: {
+                    title: "cna.qualityModel.Service"
+                },
+                body: {
+                    class: "entityHighlighting"
+                },
+                label: {
+                    fontSize: service.getMetaData.fontSize,
+                    textWrap: {
+                        text: service.getName
+                    }
+                }
+            }
+        })
+        for (const property of EntityDetailsConfig.Service.specificProperties) {
+            if (property.jointJsConfig.modelPath) {
+                newService.prop(property.jointJsConfig.modelPath, service.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
+            }
+        }
+        return newService;
+    }
+
+    #createBackingServiceCell(backingService: Entities.BackingService) {
+        let newBackingService: dia.Element = new BackingServiceElement({
+            id: backingService.getId,
+            position: { x: backingService.getMetaData.position.xCoord, y: backingService.getMetaData.position.yCoord },
+            size: backingService.getMetaData.size,
+            attrs: {
+                root: {
+                    title: "cna.qualityModel.BackingService"
+                },
+                body: {
+                    class: "entityHighlighting"
+                },
+                label: {
+                    fontSize: backingService.getMetaData.fontSize,
+                    textWrap: {
+                        text: backingService.getName
+                    }
+                }
+            }
+        })
+        for (const property of EntityDetailsConfig.BackingService.specificProperties) {
+            if (property.jointJsConfig.modelPath) {
+                newBackingService.prop(property.jointJsConfig.modelPath, backingService.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
+            }
+        }
+        return newBackingService;
+    }
+    
 }
 
 // TODO keep here? --> currently shown every time new problematic connection is added
