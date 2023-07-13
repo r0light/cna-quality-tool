@@ -673,9 +673,10 @@ class SystemEntityManager {
         this.#currentSystemGraph.clear();
 
         let createdCells = [];
+        let createdEdges = [];
 
         for (const [id, infrastructure] of this.#currentSystemEntity.getInfrastructureEntities) {
-            let newInfrastructure = this.#createInfrasctructureCell(infrastructure);
+            let newInfrastructure = this.#createInfrastructureCell(infrastructure);
             this.#currentSystemGraph.addCell(newInfrastructure);
             createdCells.push(newInfrastructure);
         }
@@ -731,18 +732,39 @@ class SystemEntityManager {
         }
 
         for (const [id, deploymentMapping] of this.#currentSystemEntity.getDeploymentMappingEntities) {
-            let newDeploymentMapping = new DeploymentMappingElement({
-                id: id
-            })
+            let newDeploymentMapping = new DeploymentMappingElement({ id: id })
             newDeploymentMapping.source(createdCells.find(cell => cell.id.toString() === deploymentMapping.getDeployedEntity.getId));
             newDeploymentMapping.target(createdCells.find(cell => cell.id.toString() === deploymentMapping.getUnderlyingInfrastructure.getId));
             newDeploymentMapping.addTo(this.#currentSystemGraph);
+            createdEdges.push(newDeploymentMapping);
+        }
+
+        for (const [id, link] of this.#currentSystemEntity.getLinkEntities) {
+
+            let newLink = new LinkElement({ id: id })
+            newLink.source(createdCells.find(cell => cell.id.toString() === link.getSourceEntity.getId));
+            newLink.target(createdCells.find(cell => cell.id.toString() === link.getTargetEndpoint.getId));
+
+            for (const property of EntityDetailsConfig.Link.specificProperties) {
+                if (property.providedFeature === "relationType") {
+                    newLink.prop(property.jointJsConfig.modelPath, link.getRelationType)
+                }
+            }
+
+            newLink.addTo(this.#currentSystemGraph);
+            createdEdges.push(newLink);
+        }
+
+        for (const [id, requestTrace] of this.#currentSystemEntity.getRequestTraceEntities) {
+            let newRequestTrace = this.#createRequestTraceCell(requestTrace, createdCells, createdEdges);
+            this.#currentSystemGraph.addCell(newRequestTrace);
+            createdCells.push(newRequestTrace);
         }
 
         return createdCells;
     }
 
-    #createInfrasctructureCell(infrastructure: Entities.Infrastructure) {
+    #createInfrastructureCell(infrastructure: Entities.Infrastructure) {
         let newInfrastructure: dia.Element = new InfrastructureElement({
             id: infrastructure.getId,
             position: { x: infrastructure.getMetaData.position.xCoord, y: infrastructure.getMetaData.position.yCoord },
@@ -981,6 +1003,7 @@ class SystemEntityManager {
 
     #createEndpointCell(endpoint: Entities.Endpoint, parent: dia.Element) {
         let newEndpoint = new EndpointElement({
+            id: endpoint.getId,
             position: { x: endpoint.getMetaData.position.xCoord, y: endpoint.getMetaData.position.yCoord },
             size: { width: endpoint.getMetaData.size.width, height: endpoint.getMetaData.size.height },
             attrs: {
@@ -993,7 +1016,7 @@ class SystemEntityManager {
                 label: {
                     fontSize: endpoint.getMetaData.fontSize,
                     textWrap: {
-                        text: endpoint.getMetaData.label,
+                        text: endpoint.getName
                     }
                 }
             }
@@ -1016,6 +1039,7 @@ class SystemEntityManager {
 
     #createExternalEndpointCell(externalEndpoint: Entities.ExternalEndpoint, parent: dia.Element) {
         let newExternalEndpoint = new ExternalEndpointElement({
+            id: externalEndpoint.getId,
             position: { x: externalEndpoint.getMetaData.position.xCoord, y: externalEndpoint.getMetaData.position.yCoord },
             size: { width: externalEndpoint.getMetaData.size.width, height: externalEndpoint.getMetaData.size.height },
             attrs: {
@@ -1028,7 +1052,7 @@ class SystemEntityManager {
                 label: {
                     fontSize: externalEndpoint.getMetaData.fontSize,
                     textWrap: {
-                        text: externalEndpoint.getMetaData.label,
+                        text: externalEndpoint.getName
                     }
                 }
             }
@@ -1046,6 +1070,41 @@ class SystemEntityManager {
             }
         }
         return newExternalEndpoint;
+    }
+
+    #createRequestTraceCell(requestTrace: Entities.RequestTrace, elements: dia.Element[], edges: dia.Link[]) {
+        let newRequestTrace = new RequestTraceElement({
+            position: { x: requestTrace.getMetaData.position.xCoord, y: requestTrace.getMetaData.position.yCoord },
+            size: { width: requestTrace.getMetaData.size.width, height: requestTrace.getMetaData.size.height },
+            attrs: {
+                root: {
+                    title: "cna.qualityModel.RequestTrace"
+                },
+                body: {
+                    class: "entityHighlighting"
+                },
+                label: {
+                    fontSize: requestTrace.getMetaData.fontSize,
+                    textWrap: {
+                        text: requestTrace.getName,
+                    }
+                }
+            }
+        })
+
+        for (const property of EntityDetailsConfig.RequestTrace.specificProperties) {
+            switch(property.providedFeature) {
+                case "referredEndpoint":
+                    newRequestTrace.prop(property.jointJsConfig.modelPath, requestTrace.getExternalEndpoint.getId);
+                    break;
+                case "involvedLinks-wrapper":
+                    let tmp = (property as TableDialogPropertyConfig).buttonActionContent.dialogContent as FormContentConfig;
+                    let actualProperty = tmp.groups[0].contentItems[0];
+                    newRequestTrace.prop(actualProperty.jointJsConfig.modelPath, Array.from(requestTrace.getLinks).map(link => link.getId));
+                    break;
+            }
+        }
+        return newRequestTrace;
     }
 
 }
