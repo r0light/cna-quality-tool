@@ -679,6 +679,14 @@ class SystemEntityManager {
             let newInfrastructure = this.#createInfrastructureCell(infrastructure);
             this.#currentSystemGraph.addCell(newInfrastructure);
             createdCells.push(newInfrastructure);
+
+            let index = 0;
+            for (const usedBackingData of infrastructure.getBackingDataEntities) {
+                let newBackingData = this.#createBackingDataCell(usedBackingData, newInfrastructure, index);
+                index++;
+                this.#currentSystemGraph.addCell(newBackingData);
+                createdCells.push(newBackingData);
+            }
         }
 
         for (const [id, component] of this.#currentSystemEntity.getComponentEntities) {
@@ -946,7 +954,7 @@ class SystemEntityManager {
                 // TODO handle additional attributes?    
                 /*
                   if (property.jointJsConfig.modelPath) {
-                    newDataAggregate.prop(property.jointJsConfig.modelPath, newDataAggregate.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
+                    newDataAggregate.prop(property.jointJsConfig.modelPath, dataAggregate.data.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
                   }
                   break;
                 */
@@ -1102,6 +1110,11 @@ class SystemEntityManager {
                     let actualProperty = tmp.groups[0].contentItems[0];
                     newRequestTrace.prop(actualProperty.jointJsConfig.modelPath, Array.from(requestTrace.getLinks).map(link => link.getId));
                     break;
+                default:
+                    if (property.jointJsConfig.modelPath) {
+                        newRequestTrace.prop(property.jointJsConfig.modelPath, requestTrace.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
+                      }
+                      break;
             }
         }
         return newRequestTrace;
