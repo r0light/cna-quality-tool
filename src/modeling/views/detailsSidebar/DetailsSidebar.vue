@@ -458,6 +458,10 @@ onUpdated(() => {
 
     props.selectedEntity.model.on("change:parent", (cell: dia.Cell) => {
 
+        if (!props.selectedEntity) {
+            return;
+        }
+
         if (cell.id !== props.selectedEntity.model.id) {
             return;
         }

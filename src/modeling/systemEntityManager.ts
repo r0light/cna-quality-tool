@@ -5,8 +5,8 @@ import * as Entities from '../core/entities';
 import ErrorMessage, { ErrorType } from './errorMessage'
 import { UIContentType } from './config/toolbarConfiguration';
 import UIModalDialog, { DialogSize } from './representations/guiElements.dialog';
-import { EntityDetailsConfig, PropertyContentType } from './config/detailsSidebarConfig';
-import { MetaData } from "@/core/common/entityDataTypes";
+import { EntityDetailsConfig, PropertyContentType, TableDialogPropertyConfig } from './config/detailsSidebarConfig';
+import { DataUsageRelation, MetaData } from "@/core/common/entityDataTypes";
 import { convertToServiceTemplate } from "@/core/tosca-adapter/ToscaAdapter";
 import {
     Component as ComponentElement, Service as ServiceElement, BackingService as BackingServiceElement, StorageBackingService as StorageBackingServiceElement,
@@ -15,6 +15,12 @@ import {
     RequestTrace as RequestTraceElement, DataAggregate as DataAggregateElement, BackingData as BackingDataElement
 } from './config/entityShapes'
 import { addSelectionToolToEntity } from "./views/tools/entitySelectionTools";
+import { DataAggregate } from "../core/entities";
+import { data } from "jquery";
+import { FormContentConfig } from "./config/actionDialogConfig";
+import { create } from "lodash";
+import { prop } from "vue-class-component";
+import ConnectionSelectionTools from "./views/tools/connectionSelectionTools";
 
 class SystemEntityManager {
 
@@ -675,15 +681,62 @@ class SystemEntityManager {
         }
 
         for (const [id, component] of this.#currentSystemEntity.getComponentEntities) {
+
+            let newComponent: dia.Element;
             if (component.constructor.name === "Service") {
-                let newService = this.#createServiceCell(component);
-                this.#currentSystemGraph.addCell(newService);
-                createdCells.push(newService);
+                newComponent = this.#createServiceCell(component);
+                this.#currentSystemGraph.addCell(newComponent);
+                createdCells.push(newComponent);
             } else if (component.constructor.name === "BackingService") {
-                let newBackingService = this.#createBackingServiceCell(component);
-                this.#currentSystemGraph.addCell(newBackingService);
-                createdCells.push(newBackingService);
+                newComponent = this.#createBackingServiceCell(component);
+                this.#currentSystemGraph.addCell(newComponent);
+                createdCells.push(newComponent);
+            } else if (component.constructor.name === "StorageBackingService") {
+                newComponent = this.#createStorageBackingServiceCell(component);
+                this.#currentSystemGraph.addCell(newComponent);
+                createdCells.push(newComponent);
+            } else if (component.constructor.name === "Component") {
+                newComponent = this.#createComponentCell(component);
+                this.#currentSystemGraph.addCell(newComponent);
+                createdCells.push(newComponent);
             }
+
+            let index = 0;
+            for (const usedDataAggregate of component.getDataAggregateEntities) {
+                let newDataAggregate = this.#createDataAggregateCell(usedDataAggregate, newComponent, index);
+                index++;
+                this.#currentSystemGraph.addCell(newDataAggregate);
+                createdCells.push(newDataAggregate);
+            }
+
+            index = 0;
+            for (const usedBackingData of component.getBackingDataEntities) {
+                let newBackingData = this.#createBackingDataCell(usedBackingData, newComponent, index);
+                index++;
+                this.#currentSystemGraph.addCell(newBackingData);
+                createdCells.push(newBackingData);
+            }
+
+            for (const providedEndpoint of component.getEndpointEntities) {
+                let newEndpoint = this.#createEndpointCell(providedEndpoint, newComponent);
+                this.#currentSystemGraph.addCell(newEndpoint);
+                createdCells.push(newEndpoint);
+            }
+
+            for (const providedExternalEndpoint of component.getExternalEndpointEntities) {
+                let newExternalEndpoint = this.#createExternalEndpointCell(providedExternalEndpoint, newComponent);
+                this.#currentSystemGraph.addCell(newExternalEndpoint);
+                createdCells.push(newExternalEndpoint);
+            }
+        }
+
+        for (const [id, deploymentMapping] of this.#currentSystemEntity.getDeploymentMappingEntities) {
+            let newDeploymentMapping = new DeploymentMappingElement({
+                id: id
+            })
+            newDeploymentMapping.source(createdCells.find(cell => cell.id.toString() === deploymentMapping.getDeployedEntity.getId));
+            newDeploymentMapping.target(createdCells.find(cell => cell.id.toString() === deploymentMapping.getUnderlyingInfrastructure.getId));
+            newDeploymentMapping.addTo(this.#currentSystemGraph);
         }
 
         return createdCells;
@@ -716,7 +769,7 @@ class SystemEntityManager {
         }
         return newInfrastructure;
     }
-    
+
 
     #createServiceCell(service: Entities.Service) {
         let newService: dia.Element = new ServiceElement({
@@ -773,7 +826,228 @@ class SystemEntityManager {
         }
         return newBackingService;
     }
-    
+
+    #createStorageBackingServiceCell(storageBackingService: Entities.StorageBackingService) {
+        let newStorageBackingService: dia.Element = new StorageBackingServiceElement({
+            id: storageBackingService.getId,
+            position: { x: storageBackingService.getMetaData.position.xCoord, y: storageBackingService.getMetaData.position.yCoord },
+            size: storageBackingService.getMetaData.size,
+            attrs: {
+                root: {
+                    title: "cna.qualityModel.BackingService"
+                },
+                body: {
+                    class: "entityHighlighting"
+                },
+                label: {
+                    fontSize: storageBackingService.getMetaData.fontSize,
+                    textWrap: {
+                        text: storageBackingService.getName
+                    }
+                }
+            }
+        })
+        for (const property of EntityDetailsConfig.StorageBackingService.specificProperties) {
+            if (property.jointJsConfig.modelPath) {
+                newStorageBackingService.prop(property.jointJsConfig.modelPath, storageBackingService.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
+            }
+        }
+        return newStorageBackingService;
+    }
+
+    #createComponentCell(component: Entities.Component) {
+        let newComponent: dia.Element = new ComponentElement({
+            id: component.getId,
+            position: { x: component.getMetaData.position.xCoord, y: component.getMetaData.position.yCoord },
+            size: component.getMetaData.size,
+            attrs: {
+                root: {
+                    title: "cna.qualityModel.Component"
+                },
+                body: {
+                    class: "entityHighlighting"
+                },
+                label: {
+                    fontSize: component.getMetaData.fontSize,
+                    textWrap: {
+                        text: component.getName
+                    }
+                }
+            }
+        })
+        for (const property of EntityDetailsConfig.Component.specificProperties) {
+            if (property.jointJsConfig.modelPath) {
+                newComponent.prop(property.jointJsConfig.modelPath, component.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
+            }
+        }
+        return newComponent;
+    }
+
+
+    #createDataAggregateCell(dataAggregate: { data: DataAggregate, relation: DataUsageRelation }, parent: dia.Element, index: number) {
+        let xPosition = parent.position().x + Math.floor(parent.size().width / 3) + dataAggregate.data.getMetaData.size.width * index;
+        let yPosition = parent.position().y + Math.floor(parent.size().height / 3) + dataAggregate.data.getMetaData.size.height * index;
+
+        let newDataAggregate = new DataAggregateElement({
+            position: { x: xPosition, y: yPosition }, // TODO good approach for positioning?
+            size: { width: dataAggregate.data.getMetaData.size.width, height: dataAggregate.data.getMetaData.size.height },
+            attrs: {
+                root: {
+                    title: "cna.qualityModel.DataAggregate"
+                },
+                body: {
+                    class: "entityHighlighting"
+                },
+                label: {
+                    fontSize: dataAggregate.data.getMetaData.fontSize,
+                    textWrap: {
+                        text: dataAggregate.data.getName,
+                    }
+                }
+            }
+        });
+
+        parent.embed(newDataAggregate);
+
+        for (const property of EntityDetailsConfig.DataAggregate.specificProperties) {
+            switch (property.providedFeature) {
+                case "embedded":
+                    newDataAggregate.prop(property.jointJsConfig.modelPath, parent.id.toString());
+                    break;
+                case "dataAggregate-parentRelation":
+                    newDataAggregate.prop(property.jointJsConfig.modelPath, dataAggregate.relation);
+                    break;
+                case "dataAggregate-assignedFamily":
+                    newDataAggregate.prop(property.jointJsConfig.modelPath, dataAggregate.data.getName);
+                    break;
+                default:
+                // TODO handle additional attributes?    
+                /*
+                  if (property.jointJsConfig.modelPath) {
+                    newDataAggregate.prop(property.jointJsConfig.modelPath, newDataAggregate.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
+                  }
+                  break;
+                */
+            }
+        }
+        return newDataAggregate;
+    }
+
+
+    #createBackingDataCell(backingData: Entities.BackingData, parent: dia.Element, index: number) {
+        let xPosition = parent.position().x + Math.floor(parent.size().width / 3) + backingData.getMetaData.size.width * index;
+        let yPosition = parent.position().y + Math.floor(parent.size().height / 3) + backingData.getMetaData.size.height * index;
+
+        let newBackingData = new BackingDataElement({
+            position: { x: xPosition, y: yPosition }, // TODO good approach for positioning?
+            size: { width: backingData.getMetaData.size.width, height: backingData.getMetaData.size.height },
+            attrs: {
+                root: {
+                    title: "cna.qualityModel.BackingData"
+                },
+                body: {
+                    class: "entityHighlighting"
+                },
+                label: {
+                    fontSize: backingData.getMetaData.fontSize,
+                    textWrap: {
+                        text: backingData.getName,
+                    }
+                }
+            }
+        });
+
+        parent.embed(newBackingData);
+
+        for (const property of EntityDetailsConfig.BackingData.specificProperties) {
+            switch (property.providedFeature) {
+                case "embedded":
+                    newBackingData.prop(property.jointJsConfig.modelPath, parent.id.toString());
+                    break;
+                case "dataAggregate-assignedFamily":
+                    newBackingData.prop(property.jointJsConfig.modelPath, backingData.getName);
+                    break;
+                case "backingData-includedData-wrapper":
+                    let tmp = (property as TableDialogPropertyConfig).buttonActionContent.dialogContent as FormContentConfig;
+                    let actualProperty = tmp.groups[0].contentItems[0];
+                    newBackingData.prop(actualProperty.jointJsConfig.modelPath, backingData.getIncludedData);
+                    break;
+                default:
+                //TODO default case
+            }
+        }
+        return newBackingData;
+    }
+
+    #createEndpointCell(endpoint: Entities.Endpoint, parent: dia.Element) {
+        let newEndpoint = new EndpointElement({
+            position: { x: endpoint.getMetaData.position.xCoord, y: endpoint.getMetaData.position.yCoord },
+            size: { width: endpoint.getMetaData.size.width, height: endpoint.getMetaData.size.height },
+            attrs: {
+                root: {
+                    title: "cna.qualityModel.Endpoint"
+                },
+                body: {
+                    class: "entityHighlighting"
+                },
+                label: {
+                    fontSize: endpoint.getMetaData.fontSize,
+                    textWrap: {
+                        text: endpoint.getMetaData.label,
+                    }
+                }
+            }
+        });
+
+        parent.embed(newEndpoint);
+
+        for (const property of EntityDetailsConfig.Endpoint.specificProperties) {
+            if (property.jointJsConfig.modelPath) {
+                if (property.providedFeature === "embedded") {
+                    newEndpoint.prop(property.jointJsConfig.modelPath, parent.id.toString());
+                } else {
+                    newEndpoint.prop(property.jointJsConfig.modelPath, endpoint.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
+                }
+            }
+        }
+        return newEndpoint;
+    }
+
+
+    #createExternalEndpointCell(externalEndpoint: Entities.ExternalEndpoint, parent: dia.Element) {
+        let newExternalEndpoint = new ExternalEndpointElement({
+            position: { x: externalEndpoint.getMetaData.position.xCoord, y: externalEndpoint.getMetaData.position.yCoord },
+            size: { width: externalEndpoint.getMetaData.size.width, height: externalEndpoint.getMetaData.size.height },
+            attrs: {
+                root: {
+                    title: "cna.qualityModel.ExternalEndpoint"
+                },
+                body: {
+                    class: "entityHighlighting"
+                },
+                label: {
+                    fontSize: externalEndpoint.getMetaData.fontSize,
+                    textWrap: {
+                        text: externalEndpoint.getMetaData.label,
+                    }
+                }
+            }
+        });
+
+        parent.embed(newExternalEndpoint);
+
+        for (const property of EntityDetailsConfig.ExternalEndpoint.specificProperties) {
+            if (property.jointJsConfig.modelPath) {
+                if (property.providedFeature === "embedded") {
+                    newExternalEndpoint.prop(property.jointJsConfig.modelPath, parent.id.toString());
+                } else {
+                    newExternalEndpoint.prop(property.jointJsConfig.modelPath, externalEndpoint.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
+                }
+            }
+        }
+        return newExternalEndpoint;
+    }
+
 }
 
 // TODO keep here? --> currently shown every time new problematic connection is added

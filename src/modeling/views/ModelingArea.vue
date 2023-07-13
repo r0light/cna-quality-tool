@@ -136,6 +136,8 @@ onMounted(() => {
         },
         "link:pointerclick": function (linkView: dia.LinkView, evt) {
 
+            console.log(linkView);
+
             linkView.unhighlight();
 
             setCurrentSelection(linkView);
@@ -148,7 +150,6 @@ onMounted(() => {
             }
             linkView.showTools();
             return;
-
         },
         "cell:highlight": function (cellView, node, options) {
             if (cellView.model.isLink()) {

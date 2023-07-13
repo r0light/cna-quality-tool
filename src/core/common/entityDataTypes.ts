@@ -65,4 +65,4 @@ export function readToscaMetaData(toscaMetaData: TOSCA_Metadata): MetaData {
     };
 }
 
-export type DataUsageRelation = "uses" | "persists";
+export type DataUsageRelation = "used" | "persisted";
