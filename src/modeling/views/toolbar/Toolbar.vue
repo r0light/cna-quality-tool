@@ -119,7 +119,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-    (e: "update:SystemName", newName: string): void;
+    (e: "update:systemName", newName: string): void;
     (e: "click:exitRequestTraceView"): void;
     (e: "click:printActivePaper"): void;
     (e: "load:fromTosca", stringifiedYaml: string, fileName: string);
@@ -288,7 +288,7 @@ function onNameEditSubmit() {
     if (!currentSystemName.value) {
         currentSystemName.value = props.systemName;
     } else {
-        emit("update:SystemName", currentSystemName.value);
+        emit("update:systemName", currentSystemName.value);
     }
     nameEditMode.value = "none";
 }

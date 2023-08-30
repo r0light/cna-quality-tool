@@ -6,14 +6,16 @@
           <a class="navbar-brand text-muted"><i class="fa-solid fa-cube"></i> CNA Modeling</a>
         </div>
         <ul class="navbar-nav mr-auto">
-          <li class="nav-item">
-            <a id="homeMenuItem" class="nav-link text-white" href="index.html" data-entry-module="src/home"
-              data-menu-index="1"><i class="fa fa-fw fa-home"></i> Home</a>
+          <li v-for="page of pages" class="nav-item" :class="{ active: page.active }">
+            <a class="nav-link text-white" @click="selectPage(page.index)">
+              <i :class="page.iconClass"></i>
+              {{ page.name }}
+            </a>
           </li>
           <li class="nav-item">
-            <a id="modelingApplicationMenuItem" class="nav-link text-white" href="index.html"
-              data-entry-module="src/modeling/modelingApp" data-menu-index="2"><i class="fa-solid fa-pencil"></i> Modeling
-              Application</a>
+            <a id="newModelingApp" class="nav-link text-white" @click="startModelingForm">
+              <i class="fa-solid fa-plus"></i>
+              New Application Model</a>
           </li>
         </ul>
       </div>
@@ -21,94 +23,190 @@
   </header>
 
   <!-- Content -->
-  
+
   <main role="main" ref="mainSection" class="flex-grow-1">
-    <!-- The content to load goes here -->
-    <Home v-if="currentPage === 1"></Home>
-    <ModelingApp v-if="currentPage === 2"></ModelingApp>
+    <div id="init-overlay" class="init-overlay" v-show="showInitOverlay">
+      <div class="init-overlay-content">
+        <h2 class="user-select-none text-center">Welcome to the CNA Modeling Application!</h2>
+        <div id="init-firstInformation" v-show="!showStartModelingForm">
+          <p class="user-select-none">The modeling application allows you to model cloud-native application (CNA)
+            architectures using thirteen different entities. It is based on the CNA quality model
+            as introduced here:
+            https://github.com/r0light/cna-quality-model/tree/9058f6236e8e0b1cceee9abf67a96e927140d0fa. In addition,
+            the application supports exporting the graphical model into an
+            extended version of the TOSCA architecture description language. The extended TOSCA version is being
+            introduced here: https://github.com/KarolinDuerr/MA-CNA-ModelingSupport/tree/main/TOSCA_Extension.</p>
+          <button id="createNewDiagramBtn" type="button" class="btn btn-outline-dark btn-light"
+            @click="startCreatingModel"> <i class="fa-solid fa-pencil"></i> Create new diagram </button>
+        </div>
+        <div id="startModelingForm" v-show="showStartModelingForm">
+          <p class="user-select-none">Please type the application name of the System entity you want to model
+            in the following form. Afterwards, you can start modeling your application's architecture.</p>
+          <form class="needs-validation" novalidate>
+            <div class="form-row">
+              <div class="input-group has-validation">
+                <div class="input-group-prepend">
+                  <span class="user-select-none input-group-text">Application Name</span>
+                </div>
+                <input name="systemName" type="text" class="form-control" id="applicationNameInputField"
+                  placeholder="Application name of your System" v-model="newSystemName" required>
+                <div class="validationError invalid-feedback">
+                  Please provide an application name.
+                </div>
+              </div>
+              <div class="startModelingBtnArea form-group row">
+                <div class="col-auto">
+                  <button id="startModelingBtn" type="button" class="btn btn-outline-dark" @click="onNameEntered"><i
+                      class="fa-solid fa-pencil"></i> Start modeling</button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="pagesContainer">
+      <div v-for="pageContent of pages">
+        <Home v-if="pageContent.pageType === 'home' && currentPage === pageContent.index"></Home>
+        <ModelingApp v-if="pageContent.pageType === 'modeling' && currentPage === pageContent.index" :systemName="pageContent.name" :pageData="pageContent.pageData" @store:pageData="(dataKey, dataValue) => storePageData(dataKey, dataValue, pageContent.index)" @update:systemName="event => updatePageName(event, pageContent.index)"></ModelingApp>
+      </div>
+    </div>
   </main>
   <div id="modalBackground"></div>
 </template>
 
 <script lang="ts" setup>
 import $ from 'jquery';
-import { ref } from "vue";
+import { ref, onMounted } from 'vue'
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import Home from './Home.vue';
 import ModelingApp from './modeling/ModelingApp.vue';
 
+type Page = {
+  index: number;
+  active: boolean;
+  pageType: "home" | "modeling"
+  iconClass: string;
+  name: string;
+  pageData: Map<string,object>;
+}
 
-const currentPage = ref(1);
+const pages = ref<Page[]>([
+  {
+    index: 0,
+    active: false,
+    pageType: "home",
+    iconClass: "fa fa-fw fa-home",
+    name: "Home",
+    pageData: new Map<string,object>()
+  }
+])
 
-// TODO reload resets modeling application => name disappears --> overlay or save
-window.onload = () => {
+function storePageData(dataKey, dataValue, index) {
+  for (const page of pages.value) {
+    if (page.index === index) {
+      page.pageData.set(dataKey, dataValue);
+    }
+  }
+}
 
-  // render required content dynamically and only if needed
-  const menuItems = document.querySelectorAll("a[data-entry-module]");
-  const navbarItems = new Map();
-  for (const menuItem of menuItems) {
-    navbarItems.set(menuItem["dataset"].menuIndex, menuItem.parentNode);
-    menuItem.addEventListener("click", async (event) => {
-      // prevent loading href since it is dynamically rendered
+const currentPage = ref(0);
+
+const showInitOverlay = ref(false);
+const showStartModelingForm = ref(false);
+const newSystemName = ref<string>("");
+
+function startModelingForm() {
+  showInitOverlay.value = true;
+  //showStartModelingForm.value = true;
+}
+
+function startCreatingModel() {
+  showStartModelingForm.value = true;
+}
+
+function onNameEntered() {
+  let forms = $("#init-overlay .needs-validation");
+
+  for (const form of forms) {
+    form.classList.add('was-validated');
+  }
+
+  if (!newSystemName.value) {
+    return;
+  }
+  showInitOverlay.value = false;
+  showStartModelingForm.value = false;
+  addNewModelingPage(newSystemName.value);
+  newSystemName.value = "";
+}
+
+onMounted(() => {
+
+  for (const page of pages.value) {
+    page.active = page.index === currentPage.value ? true : false;
+  }
+
+  document.getElementById("applicationNameInputField").addEventListener("keydown", (event) => {
+    if (event.key?.localeCompare("Enter") === 0) {
       event.preventDefault();
+      onNameEntered();
+    }
+  });
+});
 
-      const activeElement = document.querySelector("li.active");
-      activeElement?.classList.remove("active");
-      menuItem.parentNode["classList"].add("active");
+function selectPage(index: number) {
+  currentPage.value = index;
 
-      document.title = "CNA Modeling:";
-      if (menuItem["dataset"].entryModule.includes("modeling")) {
-        currentPage.value = 2;
-        sessionStorage.setItem("currentMenuSelectionIndex", menuItem["dataset"].menuIndex);
-        triggerModelingApplicationFirstLoad();
-        document.title += " Modeling Application";
-      } else {
-        currentPage.value = 1;
-        sessionStorage.setItem("currentMenuSelectionIndex", menuItem["dataset"].menuIndex);
-        document.title += " Home";
-      }
-    });
-  }
-
-  document.title = "CNA Modeling:";
-
-  // handle rendering on page loading
-  switch (sessionStorage.getItem("currentMenuSelectionIndex")) {
-    case "1":
-      navbarItems.get("1")?.classList.add("active");;
-      currentPage.value = 1;
-      document.title += " Home";
-      sessionStorage.setItem("currentMenuSelectionIndex", "1");
-      break;
-    case "2":
-      navbarItems.get("2")?.classList.add("active");
-      currentPage.value = 2;
-      document.title += " Modeling Application";
-      sessionStorage.setItem("currentMenuSelectionIndex", "2");
-      // TODO
-      //const overlayEvent = new Event("openModelingApplicationOverlay");
-      //document.getElementById("app")?.dispatchEvent(overlayEvent);
-      break;
-    default:
-      navbarItems.get("1")?.classList.add("active");
-      currentPage.value = 1;
-      document.title += " Home";
-      sessionStorage.setItem("currentMenuSelectionIndex", "1");
-      break;
+  // set current page active
+  for (const page of pages.value) {
+    page.active = page.index === currentPage.value ? true : false;
+    switch(page.pageType) {
+      case "home":
+        document.title = "Home";
+        break;
+      case "modeling":
+        document.title = `CNA Modeling ${page.name}`;
+        break;
+      default:
+        document.title = "Home";
+    }
   }
 }
 
-const triggerModelingApplicationFirstLoad = () => {
-  if (!(sessionStorage.getItem("reloadModelingApplication"))) {
-    // trigger modeling app overlay
-    //const overlayEvent = new Event("openModelingApplicationOverlay");
-    //document.getElementById("app")?.dispatchEvent(overlayEvent);
-    sessionStorage.setItem("reloadModelingApplication", "true");
+function addNewModelingPage(name: string) {
+
+  const newIndex = pages.value.length
+
+  pages.value.push({
+    index: newIndex,
+    active: true,
+    pageType: "modeling",
+    iconClass: "fa-solid fa-pencil",
+    name: name,
+    pageData: new Map<string,object>()
+  })
+
+  selectPage(newIndex);
+}
+
+function updatePageName(newName: string, index: number) {
+  for (const page of pages.value) {
+    if (page.index === index) {
+      page.name = newName;
+      document.title += `CNA Modeling: ${newName}`;
+    }
   }
 }
+
 </script>
 
 <style lang="scss">
+.pagesContainer {
+  display: flex;
+  height: 100%;
+}
+
 #vapp {
   display: flex;
   flex-direction: column;
