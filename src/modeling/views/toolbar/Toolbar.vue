@@ -417,10 +417,10 @@ function zoomOutPaper() {
 }
 
 function convertToJson() {
-    let jsonSerlializedGraph = props.graph.toJSON();
+    let jsonSerializedGraph = props.graph.toJSON();
     // download created yaml taken from https://stackoverflow.com/a/22347908
     let downloadElement = document.createElement("a");
-    downloadElement.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify(jsonSerlializedGraph)));
+    downloadElement.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify(jsonSerializedGraph)));
     downloadElement.setAttribute('download', `${currentSystemName.value}.json`);
     downloadElement.click();
 }
