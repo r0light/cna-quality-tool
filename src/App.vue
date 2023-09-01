@@ -67,8 +67,8 @@
     </div>
     <div class="pagesContainer">
       <div v-for="pageContent of pages" class="pageWrapper">
-        <Home v-if="pageContent.pageType === 'home' && currentPage === pageContent.index"></Home>
-        <ModelingApp v-if="pageContent.pageType === 'modeling' && currentPage === pageContent.index" :systemName="pageContent.name" :pageIndex="pageContent.index" :pageData="pageContent.pageData" @store:pageData="(dataKey, dataValue) => storePageData(dataKey, dataValue, pageContent.index)" @update:systemName="event => updatePageName(event, pageContent.index)"></ModelingApp>
+        <Home v-show="pageContent.pageType === 'home' && currentPage === pageContent.index"></Home>
+        <ModelingApp v-show="pageContent.pageType === 'modeling' && currentPage === pageContent.index" :systemName="pageContent.name" :pageIndex="pageContent.index" :pageData="pageContent.pageData" @store:pageData="(dataKey, dataValue) => storePageData(dataKey, dataValue, pageContent.index)" @update:systemName="event => updatePageName(event, pageContent.index)"></ModelingApp>
       </div>
     </div>
   </main>
