@@ -1,13 +1,12 @@
 <template>
     <div id="app">
-        <Toolbar :system-name="currentSystemName" :key="currentSystemName" :paper="mainPaper as dia.Paper"
-            :graph="currentSystemGraph as dia.Graph" :selectedRequestTrace="currentRequestTraceViewSelection"
+        <Toolbar :system-name="currentSystemName" :key="currentSystemName" :paper="(mainPaper as dia.Paper)" :graph="(currentSystemGraph as dia.Graph)" :selectedRequestTrace="currentRequestTraceViewSelection"
             @update:systemName="setCurrentSystemName" @click:exit-request-trace-view="onRequestTraceDeselect"
             @click:print-active-paper="onPrintRequested" @load:fromTosca="loadFromTosca"></Toolbar>
         <div class="app-body">
             <div class="entityShapes-sidebar-container d-print-none"></div>
             <div class="visible-modeling-area">
-                <ModelingArea :graph="currentSystemGraph as dia.Graph" v-model:paper="mainPaper"
+                <ModelingArea :pageId="`model${pageIndex}`" :graph="(currentSystemGraph as dia.Graph)" v-model:paper="mainPaper"
                     :currentElementSelection="currentSelection"
                     :currentRequestTraceSelection="currentRequestTraceViewSelection" :printing="printing"
                     @select:Element="(element: dia.CellView | dia.LinkView) => currentSelection = element"
@@ -15,10 +14,9 @@
                     @deselect:RequestTrace="onRequestTraceDeselect">
                 </ModelingArea>
             </div>
-            <DetailsSidebar :paper="mainPaper" :graph="currentSystemGraph as dia.Graph" :selectedEntity="currentSelection"
+            <DetailsSidebar :paper="mainPaper" :graph="(currentSystemGraph as dia.Graph)" :selectedEntity="currentSelection"
                 :selectedDataAggregate="currentDataAggregateHighlight" :selectedBackingData="currentBackingDataHightlight">
             </DetailsSidebar>
-            <!--<div class="details-container d-print-none"></div>-->
         </div>
         <div id="modals" class="d-print-none"></div>
     </div>
@@ -39,6 +37,7 @@ import { addSelectionToolToEntity } from './views/tools/entitySelectionTools';
 
 const props = defineProps<{
     systemName: string,
+    pageIndex: number,
     pageData: Map<string,object>
 }>()
 

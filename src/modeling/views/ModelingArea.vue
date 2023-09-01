@@ -3,7 +3,7 @@
         <div id="print-section" class="system-container printable" data-cursor=grab>
             <div class="system-container-modeling-area">
                 <div class="paperArea">
-                    <div id="jointPaper"></div>
+                    <div :id="pageId"></div>
                 </div>
             </div>
         </div>
@@ -23,6 +23,7 @@ import UIModalDialog from "../representations/guiElements.dialog";
 
 
 const props = defineProps<{
+    pageId: string,
     graph: dia.Graph,
     paper: dia.Paper,
     currentElementSelection: dia.CellView | null,
@@ -42,7 +43,7 @@ onMounted(() => {
 
     var modelingValidator = new ModelingValidator(props.graph);
     var paper = new dia.Paper({
-        el: $("#jointPaper"),
+        el: $(`#${props.pageId}`),
         width: 3000,
         height: 3000,
         gridSize: 10,

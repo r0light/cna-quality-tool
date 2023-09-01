@@ -68,7 +68,7 @@
     <div class="pagesContainer">
       <div v-for="pageContent of pages" class="pageWrapper">
         <Home v-if="pageContent.pageType === 'home' && currentPage === pageContent.index"></Home>
-        <ModelingApp v-if="pageContent.pageType === 'modeling' && currentPage === pageContent.index" :systemName="pageContent.name" :pageData="pageContent.pageData" @store:pageData="(dataKey, dataValue) => storePageData(dataKey, dataValue, pageContent.index)" @update:systemName="event => updatePageName(event, pageContent.index)"></ModelingApp>
+        <ModelingApp v-if="pageContent.pageType === 'modeling' && currentPage === pageContent.index" :systemName="pageContent.name" :pageIndex="pageContent.index" :pageData="pageContent.pageData" @store:pageData="(dataKey, dataValue) => storePageData(dataKey, dataValue, pageContent.index)" @update:systemName="event => updatePageName(event, pageContent.index)"></ModelingApp>
       </div>
     </div>
   </main>
@@ -176,7 +176,8 @@ function selectPage(index: number) {
 
 function addNewModelingPage(name: string) {
 
-  const newIndex = pages.value.length
+  // increment currently highest index by one to get a new index
+  const newIndex = Math.max(...pages.value.map(page => page.index)) + 1;
 
   pages.value.push({
     index: newIndex,
