@@ -4,7 +4,9 @@
             @update:systemName="setCurrentSystemName" @click:exit-request-trace-view="onRequestTraceDeselect"
             @click:print-active-paper="onPrintRequested" @load:fromTosca="loadFromTosca"></Toolbar>
         <div class="app-body">
-            <div class="entityShapes-sidebar-container d-print-none"></div>
+            <div class="entityShapes-sidebar-container d-print-none">
+                <EntitySidebar :paper="mainPaper" :pageId="`model${pageIndex}`"></EntitySidebar>
+            </div>
             <div class="visible-modeling-area">
                 <ModelingArea :pageId="`model${pageIndex}`" :graph="(currentSystemGraph as dia.Graph)" v-model:paper="mainPaper"
                     :currentElementSelection="currentSelection"
@@ -30,8 +32,7 @@ import SystemEntityManager from './systemEntityManager';
 import Toolbar from './views/toolbar/Toolbar.vue';
 import ModelingArea from './views/ModelingArea.vue';
 import DetailsSidebar from './views/detailsSidebar/DetailsSidebar.vue';
-import EntitySidebar from './views/entitySidebar';
-import SidebarEntityShapes from './config/entitySidebarShape.config';
+import EntitySidebar from './views/EntitySidebar.vue';
 import { importFromServiceTemplate } from '@/core/tosca-adapter/ToscaAdapter';
 import { addSelectionToolToEntity } from './views/tools/entitySelectionTools';
 
@@ -80,15 +81,6 @@ const currentDataAggregateHighlight = ref<string>("");
 const currentBackingDataHightlight = ref<string>("");
 
 onMounted(() => {
-
-
-    // Create and initialize the Entity Sidebar view, which includes the template shapes for the entities. 
-    var entitySidebar = new EntitySidebar({
-        paper: mainPaper.value,
-        documentElement: $(".entityShapes-sidebar-container"),
-        sidebarEntityConfig: SidebarEntityShapes
-    });
-    entitySidebar.render();
 
     /**
      * Create and initialize the Details Sidebar view. 
