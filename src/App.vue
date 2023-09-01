@@ -67,8 +67,12 @@
     </div>
     <div class="pagesContainer">
       <div v-for="pageContent of pages" class="pageWrapper">
-        <Home v-show="pageContent.pageType === 'home' && currentPage === pageContent.index"></Home>
-        <ModelingApp v-show="pageContent.pageType === 'modeling' && currentPage === pageContent.index" :systemName="pageContent.name" :pageIndex="pageContent.index" :pageData="pageContent.pageData" @store:pageData="(dataKey, dataValue) => storePageData(dataKey, dataValue, pageContent.index)" @update:systemName="event => updatePageName(event, pageContent.index)"></ModelingApp>
+        <Home v-if="pageContent.pageType === 'home'" v-show="currentPage === pageContent.index"></Home>
+        <QualityModelApp v-if="pageContent.pageType === 'qualityModel'" v-show="currentPage === pageContent.index"></QualityModelApp>
+        <ModelingApp v-if="pageContent.pageType === 'modeling'" v-show="pageContent.pageType === 'modeling' && currentPage === pageContent.index"
+          :systemName="pageContent.name" :pageIndex="pageContent.index" :pageData="pageContent.pageData"
+          @store:pageData="(dataKey, dataValue) => storePageData(dataKey, dataValue, pageContent.index)"
+          @update:systemName="event => updatePageName(event, pageContent.index)"></ModelingApp>
       </div>
     </div>
   </main>
@@ -81,14 +85,15 @@ import { ref, onMounted } from 'vue'
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import Home from './Home.vue';
 import ModelingApp from './modeling/ModelingApp.vue';
+import QualityModelApp from './qualitymodel/QualityModelApp.vue';
 
 type Page = {
   index: number;
   active: boolean;
-  pageType: "home" | "modeling"
+  pageType: "home" | "qualityModel" | "modeling"
   iconClass: string;
   name: string;
-  pageData: Map<string,object>;
+  pageData: Map<string, object>;
 }
 
 const pages = ref<Page[]>([
@@ -98,7 +103,15 @@ const pages = ref<Page[]>([
     pageType: "home",
     iconClass: "fa fa-fw fa-home",
     name: "Home",
-    pageData: new Map<string,object>()
+    pageData: new Map<string, object>()
+  },
+  {
+    index: 1,
+    active: false,
+    pageType: "qualityModel",
+    iconClass: "fa-solid fa-sitemap",
+    name: "Quality Model",
+    pageData: new Map<string, object>()
   }
 ])
 
@@ -161,7 +174,7 @@ function selectPage(index: number) {
   // set current page active
   for (const page of pages.value) {
     page.active = page.index === currentPage.value ? true : false;
-    switch(page.pageType) {
+    switch (page.pageType) {
       case "home":
         document.title = "Home";
         break;
@@ -185,7 +198,7 @@ function addNewModelingPage(name: string) {
     pageType: "modeling",
     iconClass: "fa-solid fa-pencil",
     name: name,
-    pageData: new Map<string,object>()
+    pageData: new Map<string, object>()
   })
 
   selectPage(newIndex);
