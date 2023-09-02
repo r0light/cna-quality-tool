@@ -1,7 +1,7 @@
 <template>
-    <div class="qualitymodel-container">
+    <div class="qualitymodel-container" ref="qmContainer">
 
-        <div id="qualityModel">
+        <div id="qualityModel" ref="qmPaper">
 
 
         </div>
@@ -12,10 +12,11 @@
 
 <script lang="ts" setup>
 import $ from 'jquery';
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, onMounted } from 'vue';
 import { dia, shapes, util } from "jointjs";
+import { QualityAspect } from './config/elementShapes';
 
-
+const qmContainer = ref(null);
 
 onMounted(() => {
 
@@ -25,11 +26,13 @@ onMounted(() => {
 
     const graph = new dia.Graph({}, { cellNamespace: namespace });
 
+    console.log(qmContainer);
+
     var paper = new dia.Paper({
         el: $('#qualityModel'),
         model: graph,
-        width: 600,
-        height: 300, // height had to be increased
+        width: 1000,
+        height: 1500,
         gridSize: 10,
         drawGrid: true,
         background: {
@@ -56,29 +59,29 @@ onMounted(() => {
     });
     rect.addTo(graph);
 
-    var rect2 = new shapes.standard.Rectangle();
-    rect2.position(400, 30);
-    rect2.resize(100, 40);
-    rect2.attr({
-        body: {
-            fill: 'grey',
-            rx: 5,
-            ry: 5,
-            strokeWidth: 2
-        },
-        label: {
-            text: 'Installability',
-            fill: 'black',
-            fontSize: 18,
-            fontWeight: 'bold',
-            fontVariant: 'small-caps'
+
+    var qa = new QualityAspect({
+        position: { x: 400, y: 30 },
+        attrs: {
+            root: {
+                title: "cna.quamoco.QualityAspect"
+            },
+            body: {
+                class: "entityHighlighting"
+            },
+            label: {
+                textWrap: {
+                    text: "Installability",
+                }
+            }
         }
-    });
-    rect2.addTo(graph);
+    })
+
+    qa.addTo(graph);
 
     var link = new shapes.standard.Link();
     link.source(rect);
-    link.target(rect2);
+    link.target(qa);
     link.appendLabel({
         attrs: {
             text: {
@@ -100,4 +103,10 @@ onMounted(() => {
 </script>
 
 
-<style></style>
+<style>
+
+.qualitymodel-container {
+    width: 100%;
+    height: 100%;
+}
+</style>
