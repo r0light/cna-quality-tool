@@ -6,7 +6,7 @@ const QualityAspect = dia.Element.define("quamoco.QualityAspect", {
     defaults: {
         size: {
             width: 150,
-            height: 70
+            height: 40
         },
         fontSize: 15,
         fill: "#cccccc",
@@ -15,9 +15,12 @@ const QualityAspect = dia.Element.define("quamoco.QualityAspect", {
     },
     size: {
         width: 150,
-        height: 70
+        height: 40
     },
     attrs: {
+        root: {
+            title: "cna.quamoco.QualityAspect"
+        },
         body: {
             width: "calc(w)",
             height: "calc(h)",
@@ -46,7 +49,7 @@ const QualityAspect = dia.Element.define("quamoco.QualityAspect", {
     markup: [{
         tagName: "rect",
         selector: "body"
-    },{
+    }, {
         tagName: "text",
         selector: "label"
     }]
