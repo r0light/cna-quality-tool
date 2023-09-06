@@ -15,31 +15,25 @@ import $ from 'jquery';
 import { ref, onMounted } from 'vue';
 import { dia, shapes, util } from "jointjs";
 import { QualityAspect } from './config/elementShapes';
-import { qualityModel } from '@/core/qualitymodel/qualitymodel';
+import { getQualityModel } from '@/core/qualitymodel/QualityModelInstance';
 
 const qmContainer = ref(null);
 
-const qualityAspects = Object.assign({}, ...Object.entries(qualityModel.qualityAspects).map(entry => entry[1].aspects));
-
-const productFactors = qualityModel.productFactors;
-
-const impacts = qualityModel.impacts;
+const qualityModel = getQualityModel();
 
 onMounted(() => {
-
-    console.log("mount?")
 
     const namespace = shapes;
 
     const graph = new dia.Graph({}, { cellNamespace: namespace });
 
-    console.log(qmContainer);
+    //console.log(qmContainer);
 
 
     var paper = new dia.Paper({
         el: $('#qualityModel'),
         model: graph,
-        width: 1000,
+        width: 2000,
         height: 1500,
         gridSize: 10,
         drawGrid: true,
@@ -53,10 +47,10 @@ onMounted(() => {
 
     let posX = 410;
     let posY = 40;
-    for (const qualityAspect of Object.entries(qualityAspects)) {
+    for (const qualityAspect of qualityModel.qualityAspects) {
 
         var qa = new QualityAspect({
-            id: qualityAspect[0],
+            id: qualityAspect.getId,
             position: { x: posX, y: posY },
             attrs: {
                 body: {
@@ -64,7 +58,7 @@ onMounted(() => {
                 },
                 label: {
                     textWrap: {
-                        text: qualityAspect[1]["name"],
+                        text: qualityAspect.getName
                     }
                 }
             }
@@ -79,9 +73,9 @@ onMounted(() => {
     let pfPosX = 100;
     let pfPosY = 100
 
-    for (const productFactor of Object.entries(productFactors)) {
+    for (const productFactor of qualityModel.productFactors) {
 
-        var rect = new shapes.standard.Rectangle({ id: productFactor[0] });
+        var rect = new shapes.standard.Rectangle({ id: productFactor.getId });
         rect.position(pfPosX, pfPosY);
         rect.resize(150, 60);
         rect.attr({
@@ -89,7 +83,7 @@ onMounted(() => {
                 fill: 'white'
             },
             label: {
-                text: util.breakText(productFactor[1]["name"], { width: 150 }),
+                text: util.breakText(productFactor.getName, { width: 150 }),
                 fill: 'black'
             }
         });
@@ -100,26 +94,16 @@ onMounted(() => {
     }
 
 
-    for (const impact of impacts) {
+    for (const impact of qualityModel.impacts) {
 
-        let impactLabel = (() => {
-            switch(impact.impactType) {
-                case "positive":
-                    return "+";
-                case "negative":
-                    return "-";
-                default:
-                    return "o";
-            }
-        })();
 
         var link = new shapes.standard.Link();
-        link.source(graph.getCell(impact.sourceFactor));
-        link.target(graph.getCell(impact.impactedFactor));
+        link.source(graph.getCell(impact.getSourceFactor.getId));
+        link.target(graph.getCell(impact.getImpactedFactor.getId));
         link.appendLabel({
             attrs: {
                 text: {
-                    text: impactLabel,
+                    text: impact.getImpactType,
                     fill: '#000000',
                     fontSize: 14,
                     textAnchor: 'middle',

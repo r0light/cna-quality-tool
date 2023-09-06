@@ -28,4 +28,4 @@ class Impact {
     }
 }
 
-export { Impact }
+export { ImpactType, Impact }

@@ -8,7 +8,7 @@ const QualityAspect = dia.Element.define("quamoco.QualityAspect", {
             width: 150,
             height: 40
         },
-        fontSize: 15,
+        fontSize: 14,
         fill: "#cccccc",
         stroke: "black",
         strokeWidth: 2
@@ -33,7 +33,7 @@ const QualityAspect = dia.Element.define("quamoco.QualityAspect", {
             fill: "black",
             fontFamily: defaultTextFont,
             fontWeight: "Normal",
-            fontSize: 15,
+            fontSize: 14,
             strokeWidth: 0,
             textAnchor: "middle",
             textVerticalAnchor: "middle",
