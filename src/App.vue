@@ -68,7 +68,7 @@
     <div class="pagesContainer">
       <div v-for="pageContent of pages" class="pageWrapper">
         <Home v-if="pageContent.pageType === 'home'" v-show="currentPage === pageContent.index"></Home>
-        <QualityModelApp v-if="pageContent.pageType === 'qualityModel'" v-show="currentPage === pageContent.index"></QualityModelApp>
+        <QualityModelApp v-if="pageContent.pageType === 'qualityModel'" v-show="currentPage === pageContent.index" :inView="currentPage === pageContent.index"></QualityModelApp>
         <ModelingApp v-if="pageContent.pageType === 'modeling'" v-show="pageContent.pageType === 'modeling' && currentPage === pageContent.index"
           :systemName="pageContent.name" :pageIndex="pageContent.index" :pageData="pageContent.pageData"
           @store:pageData="(dataKey, dataValue) => storePageData(dataKey, dataValue, pageContent.index)"
