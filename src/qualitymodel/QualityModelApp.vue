@@ -37,14 +37,14 @@ const impactElements = [];
 
 onMounted(() => {
 
-    console.log("inView: " + props.inView);
-    console.log(qmContainer.value.clientWidth);
+    //console.log("inView: " + props.inView);
+    //console.log(qmContainer.value.clientWidth);
 
     paperRef.value = new dia.Paper({
         el: $('#qualityModel'),
         model: graph,
-        width: 1800,
-        height: 1300,
+        width: 1600,
+        height: 1400,
         gridSize: 10,
         drawGrid: true,
         background: {
@@ -133,34 +133,118 @@ onMounted(() => {
 
 })
 
-/*
-onUpdated(() => {
-
-    console.log("on update")
-    paperRef.value.render();
-});
-*/
-
 
 onUpdated(() => {
 
     console.log("inView: " + props.inView);
     //console.log(qmContainer);
-    console.log(qmPaper.value.clientWidth);
 
-    //TODO include some padding?
-    let paperPerimeter = qmPaper.value.clientWidth * 2 + qmPaper.value.clientHeight * 2;
+    if (!props.inView) {
+        return;
+    }
+
+    let availableWidth = qmPaper.value.clientWidth - 20;
+    let availableHeight = qmPaper.value.clientHeight - 20;
 
     let qa = new QualityAspect();
     let elementWidth = 150; // TODO read from shape
     let elementHeight = 40; // TODO read from shape
-    let spaceBetween = (paperPerimeter - (qualityAspectElements.length * elementWidth)) / (qualityAspectElements.length - 1);
 
-    let currentX = qmPaper.value.clientWidth / 2;
+    let maxElementsOnWidth = Math.floor(availableWidth / (elementWidth + 10));
+    let maxElementsOnHeight = Math.floor(availableHeight / (elementHeight + 10));
+
+    // [top,right,bottom,left]; Decrease maximum for right and left because of corner elements
+    let paperSideDistribution = [
+        { side: "top", sideLength: availableWidth, elementLength: elementWidth, elements: 0, maximum: maxElementsOnWidth, maximumReached: false, spaceBetween: 0 },
+        { side: "right", sideLength: availableHeight, elementLength: elementHeight, elements: 0, maximum: maxElementsOnHeight - 2, maximumReached: false, spaceBetween: 0 },
+        { side: "bottom", sideLength: availableWidth, elementLength: elementWidth, elements: 0, maximum: maxElementsOnWidth, maximumReached: false, spaceBetween: 0 },
+        { side: "left", sideLength: availableHeight, elementLength: elementHeight, elements: 0, maximum: maxElementsOnHeight - 2, maximumReached: false, spaceBetween: 0 }
+    ];
+
+    // distribute elements equally over the four sides
+    let elementsToDistribute = qualityAspectElements.length;
+    let currentSide = 0;
+    while (elementsToDistribute > 0 && (paperSideDistribution.some(side => !side.maximumReached))) {
+        let currentSideDistribution = paperSideDistribution[currentSide];
+        if (currentSideDistribution.elements < currentSideDistribution.maximum) {
+            currentSideDistribution.elements = currentSideDistribution.elements + 1;
+            elementsToDistribute = elementsToDistribute - 1;
+        } else {
+            currentSideDistribution.maximumReached = true;
+        }
+        currentSide = currentSide === 3 ? 0 : currentSide + 1;
+    }
+    if (elementsToDistribute > 0) {
+        throw Error("Not enough space for all quality aspects");
+    }
+
+    // calculate maximum space between elements based on number of elements per side
+    for (const paperSide of paperSideDistribution) {
+        switch (paperSide.side) {
+            case "top":
+            case "bottom":
+                paperSide.spaceBetween = Math.floor((paperSide.sideLength - (paperSide.elements * paperSide.elementLength)) / (paperSide.elements - 1));
+                break;
+            case "right":
+            case "left":
+                paperSide.spaceBetween = Math.floor((paperSide.sideLength - ((paperSide.elements + 2) * paperSide.elementLength)) / (paperSide.elements + 1));
+                break;
+        }
+
+    }
+
+    // start positioning in the left top corner;
+    let currentX = 10 
     let currentY = 10;
     let phase = 0; //phase should describe the phases when walking along the perimeter
+    let sides = [0, 0, 0, 0];
 
+    for (const qualityAspect of qualityAspectElements) {
 
+        if (phase === 4) {
+            throw new Error("There is no space left to place elements")
+        }
+
+        //(graph.getCell(qualityAspect.id) as dia.Element).position(currentX, currentY);
+        qualityAspect.position(currentX, currentY);
+        sides[phase] = sides[phase] + 1;
+
+        if (phase === 0) {
+
+            if (sides[phase] < paperSideDistribution[phase].elements) {
+                currentX = currentX + paperSideDistribution[phase].elementLength + paperSideDistribution[phase].spaceBetween;
+            } else {
+                phase = phase + 1;
+            }
+        }
+        if (phase === 1) {
+
+            if (sides[phase] < paperSideDistribution[phase].elements) {
+                currentY = currentY + paperSideDistribution[phase].elementLength + paperSideDistribution[phase].spaceBetween;
+            } else {
+                // at the end of the right side, go one step further down for the first element of the bottom row, and continue here so that we don't move to the left yet
+                currentY = currentY + paperSideDistribution[phase].elementLength + paperSideDistribution[phase].spaceBetween;
+                phase = phase + 1;
+                continue;
+            }
+        }
+        if (phase === 2) {
+            if (sides[phase] < paperSideDistribution[phase].elements) {
+                currentX = currentX - paperSideDistribution[phase].elementLength - paperSideDistribution[phase].spaceBetween;
+            } else {
+                phase = phase + 1;
+            }
+        }
+        if (phase === 3) {
+            if (sides[phase] < paperSideDistribution[phase].elements) {
+                currentY = currentY - paperSideDistribution[phase].elementLength - paperSideDistribution[phase].spaceBetween;
+            } else {
+                phase = phase + 1;
+            }
+        }
+    }
+
+    /*
     for (const qualityAspect of qualityAspectElements) {
 
         console.log("phase: " + phase);
@@ -171,6 +255,7 @@ onUpdated(() => {
         qualityAspect.position(currentX, currentY);
 
         if (phase === 0) {
+
             if (qmPaper.value.clientWidth - currentX - (elementWidth / 2) - spaceBetween - elementWidth > 0) {
                 // there is space to the right
                 currentX = currentX + spaceBetween + (elementWidth / 2);
@@ -217,6 +302,7 @@ onUpdated(() => {
 
         
     }
+    */
 })
 
 </script>
