@@ -236,7 +236,7 @@ export const qualityModel = {
             "description": "Individual components or groups of components are separated through gateways. That means communication is proxied and controlled at specific gateway components. It also abstracts one part of a system from another so that it can be reused by different components without needing direct links to components that actually provide the needed functionality. This way, communication can also be redirected when component endpoints change without changing the gateway endpoint. Also incoming communication from outside of a system can be directed at external endpoints of a central component (the gateway).",
             "relevantEntities": ["system", "component", "endpoint"],
             "sources": [{ "key": "Davis2019", "section": "10.2" },
-            { "key": "Richardson2019", "section": "8.2" },{ "key": "Bastani2017", "section": "8 Edge Services: Filtering and Proxying with Netflix Zuul" },{ "key": "Indrasiri2021", "section": "7 API Gateway Pattern" },{ "key": "Indrasiri2021", "section": "7 API Microgateway Pattern (Smaller API microgateways to avoid having a monolithic API gateway)" },{ "key": "Goniwada2021", "section": "4 “Mediator” (Use a mediator pattern between clients and servers)" }],
+            { "key": "Richardson2019", "section": "8.2" }, { "key": "Bastani2017", "section": "8 Edge Services: Filtering and Proxying with Netflix Zuul" }, { "key": "Indrasiri2021", "section": "7 API Gateway Pattern" }, { "key": "Indrasiri2021", "section": "7 API Microgateway Pattern (Smaller API microgateways to avoid having a monolithic API gateway)" }, { "key": "Goniwada2021", "section": "4 “Mediator” (Use a mediator pattern between clients and servers)" }],
             "measures": []
         },
         "seamlessUpgrades": {
@@ -246,22 +246,46 @@ export const qualityModel = {
             "sources": [],
             "measures": []
         },
+        "isolatedState": {
+            "name": "Isolated state",
+            "description": "In cloud-native applications services should be structured by clearly separating stateless and stateful services. Stateful services should be reduced to a minimum.",
+            "relevantEntities": ["system", "component", "storage backing service"],
+            "sources": [{ "key": "Goniwada2021", "section": "3 Coupling (Services should be as loosely coupled as possible)" }],
+            "measures": []
+        },
         "mostlyStatelessServices": {
             "name": "Mostly stateless services",
             "description": "Most services in a system are kept stateless, that means not requiring durable disk space on the infrastructure that they run on. Stateless services can be replaced, updated or replicated at any time. Stateful services are reduced to a minimum.",
-            "sources": [],
+            "relevantEntities": ["component"],
+            "sources": [{ "key": "Davis2019", "section": "5.4" }, { "key": "Scholl2019", "section": "6 “Design Stateless Services That Scale Out" }, { "key": "Goniwada2021", "section": "3 Be Smart with State Principle, 5 Stateless Services" }],
             "measures": []
         },
         "specializedStatefulServices": {
             "name": "Specialized stateful services",
             "description": "For stateful components, that means components that do require durable disk space on the infrastructure that they run on, specialized software or frameworks are used that can handle distributed state by replicating it over several components or component instances while still ensuring consistency requirements for that state.",
+            "relevantEntities": ["component", "storage backing service"],
+            "sources": [{ "key": "Davis2019", "section": "5.4" }, { "key": "Ibryam2020", "section": "11 “Stateful Service”" }],
+            "measures": []
+        },
+        "looseCoupling": {
+            "name": "Loose coupling",
+            "description": "In cloud-native applications links between components should be loosely coupled in time, location, and language to achieve independence.",
+            "relevantEntities": ["system", "component", "link"],
             "sources": [],
             "measures": []
         },
         "asynchronousCommunication": {
             "name": "Asynchronous communication",
             "description": "Asynchronous links (e.g. based on messaging backing services) are preferred for the communication between components. That way, components are decoupled in time meaning that not all linked components need to be available at the same time for a successful communication. Additionally, callers do not await a response.",
-            "sources": [],
+            "relevantEntities": ["link"],
+            "sources": [{ "key": "Davis2019", "section": "4.2" }, { "key": "Scholl2019", "section": "6 Prefer Asynchronous Communication" }, { "key": "Richardson2019", "section": "3.3.2, 3.4 Using asynchronous messaging to improve availability" }, { "key": "Indrasiri2021", "section": "3 Service Choreography Pattern" }, { "key": "Ruecker2021", "section": "9 Asynchronous Request/Response (Use asynchronous communication to make services more robust)" }, { "key": "Goniwada2021", "section": "4 Asynchronous Nonblocking I/O" }],
+            "measures": []
+        },
+        "communicationPartnerAbstraction": {
+            "name": "Communication partner abstraction",
+            "description": "Communication via links is not based on specific communication partners (specific components) but abstracted based on the content of communication. An example is event-driven communication where events are published to channels without the publisher knowing which components receive events and events can therefore also be received by components which are created later in time.",
+            "relevantEntities": ["link", "backing service"],
+            "sources": [{ "key": "Richardson2019", "section": "6 Event-driven communication" }, { "key": "Ruecker2021", "section": "8: Event-driven systems “event chains emerge over time and therefore lack visibility." }],
             "measures": []
         },
         "persistentCommunication": {
@@ -468,12 +492,7 @@ export const qualityModel = {
             "sources": [],
             "measures": []
         },
-        "communicationPartnerAbstraction": {
-            "name": "Communication partner abstraction",
-            "description": "Communication via links is not based on specific communication partners (specific components) but abstracted based on the content of communication. An example is event-driven communication where events are published to channels without the publisher knowing which components receive events and events can therefore also be received by components which are created later in time.",
-            "sources": [],
-            "measures": []
-        }
+
     },
     "impacts": [
         { "impactedFactor": "secretsManagement", "sourceFactor": "secretsStoredInSpecializedServices", "impactType": "positive" },
@@ -494,6 +513,16 @@ export const qualityModel = {
         { "impactedFactor": "serviceOrientation", "sourceFactor": "separationByGateways", "impactType": "positive" },
         { "impactedFactor": "seamlessUpgrades", "sourceFactor": "separationByGateways", "impactType": "positive" },
         { "impactedFactor": "availability", "sourceFactor": "seamlessUpgrades", "impactType": "positive" },
+        { "impactedFactor": "modularity", "sourceFactor": "isolatedState", "impactType": "positive" },
+        { "impactedFactor": "replaceability", "sourceFactor": "isolatedState", "impactType": "positive" },
+        { "impactedFactor": "elasticity", "sourceFactor": "isolatedState", "impactType": "positive" },
+        { "impactedFactor": "isolatedState", "sourceFactor": "mostlyStatelessServices", "impactType": "positive" },
+        { "impactedFactor": "testability", "sourceFactor": "mostlyStatelessServices", "impactType": "positive" },
+        { "impactedFactor": "isolatedState", "sourceFactor": "specializedStatefulServices", "impactType": "positive" },
+        { "impactedFactor": "modularity", "sourceFactor": "looseCoupling", "impactType": "positive" },
+        { "impactedFactor": "looseCoupling", "sourceFactor": "asynchronousCommunication", "impactType": "positive" },
+        { "impactedFactor": "looseCoupling", "sourceFactor": "communicationPartnerAbstraction", "impactType": "positive" },
+        { "impactedFactor": "analyzability", "sourceFactor": "communicationPartnerAbstraction", "impactType": "negative" },
     ],
     "measures": {
         "ratioOfEndpointsSupportingSSL": {
