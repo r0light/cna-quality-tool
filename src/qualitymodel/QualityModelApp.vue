@@ -14,7 +14,7 @@
 import $ from 'jquery';
 import { ref, onMounted, onUpdated } from 'vue';
 import { dia, shapes, util } from "jointjs";
-import { QualityAspect } from './config/elementShapes';
+import { QualityAspect, ProductFactor } from './config/elementShapes';
 import { getQualityModel } from '@/core/qualitymodel/QualityModelInstance';
 
 const props = defineProps<{
@@ -59,7 +59,7 @@ onMounted(() => {
     let posY = 40;
     for (const qualityAspect of qualityModel.qualityAspects) {
 
-        var qa = new QualityAspect({
+        var qualityAspectElement = new QualityAspect({
             id: qualityAspect.getId,
             position: { x: posX, y: posY },
             attrs: {
@@ -68,14 +68,14 @@ onMounted(() => {
                 },
                 label: {
                     textWrap: {
-                        text: qualityAspect.getName
+                        text: util.breakText(qualityAspect.getName, { width: 150 }),
                     }
                 }
             }
         })
 
-        qa.addTo(graph);
-        qualityAspectElements.push(qa);
+        qualityAspectElement.addTo(graph);
+        qualityAspectElements.push(qualityAspectElement);
 
         posX = posX + 10;
         posY = posY + 10;
@@ -86,20 +86,23 @@ onMounted(() => {
 
     for (const productFactor of qualityModel.productFactors) {
 
-        var rect = new shapes.standard.Rectangle({ id: productFactor.getId });
-        rect.position(pfPosX, pfPosY);
-        rect.resize(150, 60);
-        rect.attr({
-            body: {
-                fill: 'white'
-            },
-            label: {
-                text: util.breakText(productFactor.getName, { width: 150 }),
-                fill: 'black'
+        var productFactorElement = new ProductFactor({
+            id: productFactor.getId,
+            position: { x: pfPosX, y: pfPosY },
+            attrs: {
+                body: {
+                    class: "entityHighlighting"
+                },
+                label: {
+                    textWrap: {
+                        text: util.breakText(productFactor.getName, { width: 120 }),
+                    }
+                }
             }
-        });
-        rect.addTo(graph);
-        productFactorElements.push(rect);
+        })
+
+        productFactorElement.addTo(graph);
+        productFactorElements.push(productFactorElement);
 
         pfPosX = pfPosX + 10;
         pfPosY = pfPosY + 10;
@@ -143,12 +146,25 @@ onUpdated(() => {
         return;
     }
 
+    // TODO sort Quality Aspects by their relatedness (based on high level aspect and connected product factors)
+
+    placeQualityAspects();
+
+    //TODO place product factors
+
+    placeProductFactors();
+   
+})
+
+
+function placeQualityAspects() {
+
     let availableWidth = qmPaper.value.clientWidth - 20;
     let availableHeight = qmPaper.value.clientHeight - 20;
 
     let qa = new QualityAspect();
-    let elementWidth = 150; // TODO read from shape
-    let elementHeight = 40; // TODO read from shape
+    let elementWidth = qa.prop("defaults/size/width");
+    let elementHeight = qa.prop("defaults/size/height");
 
     let maxElementsOnWidth = Math.floor(availableWidth / (elementWidth + 10));
     let maxElementsOnHeight = Math.floor(availableHeight / (elementHeight + 10));
@@ -206,7 +222,7 @@ onUpdated(() => {
         }
 
         //(graph.getCell(qualityAspect.id) as dia.Element).position(currentX, currentY);
-        qualityAspect.position(currentX, currentY);
+        qualityAspect.translate(currentX - qualityAspect.position().x, currentY - qualityAspect.position().y); //TODO animation?
         sides[phase] = sides[phase] + 1;
 
         if (phase === 0) {
@@ -244,66 +260,13 @@ onUpdated(() => {
         }
     }
 
-    /*
-    for (const qualityAspect of qualityAspectElements) {
+}
 
-        console.log("phase: " + phase);
-        console.log("currentX: " + currentX);
-        console.log("currentY: " + currentY);
-
-        //(graph.getCell(qualityAspect.id) as dia.Element).position(currentX, currentY);
-        qualityAspect.position(currentX, currentY);
-
-        if (phase === 0) {
-
-            if (qmPaper.value.clientWidth - currentX - (elementWidth / 2) - spaceBetween - elementWidth > 0) {
-                // there is space to the right
-                currentX = currentX + spaceBetween + (elementWidth / 2);
-            } else {
-                phase = phase + 1;
-            }
-        }
-        if (phase === 1) {
-            if (qmPaper.value.clientHeight - currentY - (elementHeight / 2) - spaceBetween - elementWidth > 0) {
-               // there is space down
-               currentY = currentY + spaceBetween;
-            } else {
-                phase = phase + 1;
-            }
-        }
-        if (phase === 2) {
-            if (currentX - spaceBetween - elementWidth > 0) {
-                // there is space to the left
-                currentX = currentX - spaceBetween - (elementWidth / 2);
-            } else {
-                phase = phase + 1;
-            }
-        }
-        if (phase === 3) {
-            if (currentY - spaceBetween - elementWidth > 0) {
-                // there is space to the top
-                currentY = currentY - spaceBetween;
-            } else {
-                phase = phase + 1
-            }
-        }
-        if (phase === 4) {
-            if (qmPaper.value.clientWidth - currentX - (elementWidth / 2) - spaceBetween - elementWidth > (qmPaper.value.clientWidth / 2)) {
-                // there is space to the right
-                currentX = currentX + spaceBetween + (elementWidth / 2);
-            } else {
-                phase = phase + 1;
-            }
-        }
-        if (phase === 5) {
-            throw new Error("There is no space left to place elements")
-        }
+function placeProductFactors() {
 
 
-        
-    }
-    */
-})
+
+}
 
 </script>
 

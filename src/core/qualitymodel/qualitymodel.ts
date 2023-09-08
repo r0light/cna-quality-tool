@@ -131,36 +131,69 @@ export const qualityModel = {
         "dataEncryptionInTransit": {
             "name": "Data encryption in transit",
             "description": "Data which is sent through a link from one component to another should be encrypted so that even when an attacker has access to the network layer, the data remains confidential.",
+            "relevantEntities": ["link, endpoint"],
             "sources": [
                 { "key": "Scholl2019", "section": "6 Encrypt Data in Transit" },
                 { "key": "Indrasiri2021", "section": "2 Security (Use TLS for synchronous communications)" }
             ],
             "measures": ["ratioOfEndpointsSupportingSSL", "ratioOfSecuredLinks"]
         },
+        "secretsManagement": {
+            "name": "Secrets management",
+            "description": "Secrets (e.g. passwords, access tokens, encryption keys) which allow access to other components or data should be managed specifically to make sure they stay confidential and only authorized components or persons can access them.", 
+            "relevantEntities": ["component"],
+            "sources": [],
+            "measures": []
+        },
+        "isolatedSecrets": {
+            "name": "Isolated secrets",
+            "description": "Secrets (e.g. passwords, access tokens, encryption keys) should not be stored by in component artifacts (e.g. binaries, images). Instead, components should be given access at runtime only to those secrets which they actually need and only when they need it.", 
+            "relevantEntities": "Component, Backing Data",
+            "sources": [{"key": "Scholl2019", "section":"6 Never Store Secrets or Configuration Inside an Image"}, {"key": "Adkins2019", "section": "14 Don't Check In Secrets"}],
+            "measures": []
+        },
         "secretsStoredInSpecializedServices": {
             "name": "Secrets stored in specialized services",
             "description": "A dedicated backing service to host secrets (e.g. passwords, access tokens, encryption keys) exists. All secrets required by a system are hosted in this backing service where they can also be managed (for example they can be revoked or replaced with updated secrets). Components fetch secrets from this backing services in a controlled way when they need them.",
+            "relevantEntities": ["Service", "Backing Service", "Backing Data"],
             "sources": [{ "key": "Scholl2019", "section": "6 Securely Store All Secrets" },
             { "key": "Arundel2019", "section": "10 Kubernetes Secrets" }
             ],
             "measures": []
         },
+        "accessRestriction": {
+            "name": "Access restriction",
+            "description": "Access to components should be restricted to those who actually need it. Also within a system access controls should be put in place to have multiple layers of defense. A dedicated component to manage access policies can be used.", 
+            "relevantEntities": ["component", "endpoint"],
+            "sources": [],
+            "measures": []
+        },
+        "leastPrivilegedAccess": {
+            "name": "Least-privileged access",
+            "description": "Access to endpoints should be given as restrictive as possible so that only components who really need it can access an endpoint.", 
+            "relevantEntities": ["component", "endpoint"],
+            "sources": [{ "key": "Scholl2019", "section": "6 Grant Least-Privileged Access"}, { "key": "Arundel2019", "section": "11 Access Control and Permissions"}],
+            "measures": []
+        },
         "accessControlManagementConsistency": {
             "name": "Access control management consistency",
             "description": "Access control for endpoints is managed in a consistent way, that means for example always the same format is used for access control lists or a single account directory in a dedicated backing service exists for all components. Access control configurations can then be made always in the same known style and only in a dedicated place. Based on such a consistent access control configuration, also verifications can be performed to ensure that access restrictions are implemented correctly.",
-            "sources": [],
-            "measures": []
+            "relevantEntities": ["component"],
+            "sources": [{"key": "Adkins2019", "section": "6 Access Control (Access control managed by framework)"}, {"key": "Goniwada2021", "section": "9 Policy as Code (consistently describe your security policies in form of code)"}],
+            "measures": ["RatioOfEndpointsThatSupportTokenBasedAuthentication"]
         },
         "accountSeparation": {
             "name": "Account separation",
             "description": "Components are separated by assigning them different accounts. Ideally each component has an individual account. Through this, it is possible to trace which component performed which actions and it is possible to restrict access to other components on a fine-grained level, so that for example in the case of an attack, compromised components can be isolated based on their account.",
-            "sources": [],
+            "relevantEntities": ["component"],
+            "sources": [{"key": "Scholl2019", "section": "6 Use Separate Accounts/Subscriptions/Tenants”"}, {"key": "Adkins2019", "section": "8 Role separation”(let different services run with different roles to restrict access)"}, {"key": "Adkins2019", "section": "8 “Location separation (use different roles for a service in different locations to limit attack impacts)"}],
             "measures": []
         },
         "authenticationDelegation": {
             "name": "Authentication delegation",
             "description": "The verification of an entity for authenticity, for example upon a request, is delegated to a dedicated backing service. This concern is therefore removed from individual components so that their focus can remain on business functionalities while for example different authentication options can be managed in one place only.",
-            "sources": [],
+            "relevantEntities": ["system, backing service"],
+            "sources": [{"key": "Scholl2019", "section": "6 Use Federated Identity Management"}, {"key": "Goniwada2021", "section": "9 Decentralized Identity"}],
             "measures": []
         },
         "limitedDataScope": {
@@ -411,8 +444,15 @@ export const qualityModel = {
         }
     },
     "impacts": [
-        { "impactedFactor": "confidentiality", "sourceFactor": "secretsStoredInSpecializedServices", "impactType": "positive" },
-        { "impactedFactor": "confidentiality", "sourceFactor": "dataEncryptionInTransit", "impactType": "positive" }
+        { "impactedFactor": "secretsManagement", "sourceFactor": "secretsStoredInSpecializedServices", "impactType": "positive" },
+        { "impactedFactor": "confidentiality", "sourceFactor": "dataEncryptionInTransit", "impactType": "positive" },
+        { "impactedFactor": "confidentiality", "sourceFactor": "secretsManagement", "impactType": "positive" },
+        { "impactedFactor": "secretsManagement", "sourceFactor": "isolatedSecrets", "impactType": "positive" },
+        { "impactedFactor": "integrity", "sourceFactor": "accessRestriction", "impactType": "positive" },
+        { "impactedFactor": "accessRestriction", "sourceFactor": "leastPrivilegedAccess", "impactType": "positive" },
+        { "impactedFactor": "accessRestriction", "sourceFactor": "accessControlManagementConsistency", "impactType": "positive" },
+        { "impactedFactor": "accountability", "sourceFactor": "accountSeparation", "impactType": "positive" },
+        { "impactedFactor": "authenticity", "sourceFactor": "authenticationDelegation", "impactType": "positive" },
     ],
     "measures": {
         "ratioOfEndpointsSupportingSSL": {
@@ -424,6 +464,11 @@ export const qualityModel = {
             "name": "Ratio of secured links",
             "calculation": "Links secured by SSL / All links",
             "sources": ["Zdun2023"]
-        }
+        },
+        "RatioOfEndpointsThatSupportTokenBasedAuthentication": {
+            "name": "Ratio of endpoints that support token-based authentication ",
+            "calculation": "Endpoints supportin tokens / All endpoints",
+            "sources": ["Ntentos2022", "Zdun2023"]
+        },
     }
 }
