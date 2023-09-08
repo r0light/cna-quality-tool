@@ -148,13 +148,63 @@ onUpdated(() => {
 
     // TODO sort Quality Aspects by their relatedness (based on high level aspect and connected product factors)
 
+    orderQualityAspects();
+
     placeQualityAspects();
 
     //TODO place product factors
 
     placeProductFactors();
-   
+
 })
+
+function orderQualityAspects() {
+    let qualityAspectProximity: number[][] = Array.from({length: qualityModel.qualityAspects.length}, e => Array(qualityModel.qualityAspects.length).fill(0));
+
+    console.log(qualityAspectProximity);
+
+    let i = 0;
+    for (const qualityAspectI of qualityModel.qualityAspects) {
+        console.log("i: " + i + " qualityAspect: " + qualityAspectI.getId);
+        let j = 0;
+        for (const qualityAspectJ of qualityModel.qualityAspects) {
+            //console.log("j: " + j + " qualityAspect: " + qualityAspectJ.getId);
+            if (j < i) {
+                j = j + 1;
+                continue; // skip cells that have already been compared
+            }
+            if (i === j) {
+                qualityAspectProximity[i][j] = 1;
+                j = j + 1;
+                continue;
+            } 
+            // else: calculate proximity
+            let sameHighlevelAspect = qualityAspectI.getHighLevelAspectKey === qualityAspectJ.getHighLevelAspectKey;
+            let sharedHighlevelAspect = sameHighlevelAspect ? 0.5 : 0;
+
+            let impactingFactorsI = qualityAspectI.getImpactingFactors().map(factor => factor.getId);
+            let impactingFactorsJ = qualityAspectJ.getImpactingFactors().map(factor => factor.getId);
+
+            let allFactors = [...new Set([...impactingFactorsI, ...impactingFactorsJ])];
+            let commonFactors = impactingFactorsI.filter(factor => impactingFactorsJ.includes(factor));
+
+            let sharedFactors = allFactors.length === 0 ? 0 : commonFactors.length / allFactors.length;
+
+            let proximity = (sharedHighlevelAspect * 0.4 + sharedFactors * 0.6);
+
+            console.log("proximity between " + qualityAspectI.getId + " and " + qualityAspectJ.getId + ": " + proximity);
+
+            qualityAspectProximity[i][j] = proximity;
+            qualityAspectProximity[j][i] = proximity;
+
+            j = j + 1;
+        }
+        i = i + 1;
+        
+    }
+
+
+}
 
 
 function placeQualityAspects() {
@@ -210,7 +260,7 @@ function placeQualityAspects() {
     }
 
     // start positioning in the left top corner;
-    let currentX = 10 
+    let currentX = 10
     let currentY = 10;
     let phase = 0; //phase should describe the phases when walking along the perimeter
     let sides = [0, 0, 0, 0];
