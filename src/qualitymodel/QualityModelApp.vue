@@ -146,8 +146,6 @@ onUpdated(() => {
         return;
     }
 
-    // TODO sort Quality Aspects by their relatedness (based on high level aspect and connected product factors)
-
     orderQualityAspects();
 
     placeQualityAspects();
@@ -159,16 +157,15 @@ onUpdated(() => {
 })
 
 function orderQualityAspects() {
-    let qualityAspectProximity: number[][] = Array.from({length: qualityModel.qualityAspects.length}, e => Array(qualityModel.qualityAspects.length).fill(0));
 
-    console.log(qualityAspectProximity);
+    const noOfQualityAspects = qualityModel.qualityAspects.length;
 
+    // calculate pair-wise proximity
+    let qualityAspectProximity: number[][] = Array.from({length: noOfQualityAspects}, e => Array(noOfQualityAspects).fill(0));
     let i = 0;
     for (const qualityAspectI of qualityModel.qualityAspects) {
-        console.log("i: " + i + " qualityAspect: " + qualityAspectI.getId);
         let j = 0;
         for (const qualityAspectJ of qualityModel.qualityAspects) {
-            //console.log("j: " + j + " qualityAspect: " + qualityAspectJ.getId);
             if (j < i) {
                 j = j + 1;
                 continue; // skip cells that have already been compared
@@ -192,18 +189,39 @@ function orderQualityAspects() {
 
             let proximity = (sharedHighlevelAspect * 0.4 + sharedFactors * 0.6);
 
-            console.log("proximity between " + qualityAspectI.getId + " and " + qualityAspectJ.getId + ": " + proximity);
-
             qualityAspectProximity[i][j] = proximity;
             qualityAspectProximity[j][i] = proximity;
 
             j = j + 1;
         }
         i = i + 1;
-        
     }
 
+    // determine order based on proximity
+    let ordered = [];
+    let toOrder = Array.from(Array(noOfQualityAspects).keys());
+    while (toOrder.length > 0) {
+        if (ordered.length === 0) {
+            ordered.push(toOrder[0]);
+            toOrder.splice(0, 1);
+        } else {
+            let last = ordered[ordered.length - 1];
+            let highestProximity = Math.max(...qualityAspectProximity[last].filter((proximity, index) => index !== last && !ordered.includes(index)))
+            let next = qualityAspectProximity[last].findIndex((proximity, index) => proximity === highestProximity && index !== last && !ordered.includes(index));
+            ordered.push(next);
+            toOrder.splice(toOrder.findIndex(value => value === next), 1);
+        }
+    }
 
+    // order elements
+    for (let k = 0; k < noOfQualityAspects; k = k + 1) {
+        let expected = qualityModel.qualityAspects[ordered[k]].getId;
+        let currentPosition = qualityAspectElements.findIndex(element => element.id === expected);
+        if (currentPosition !== k) {
+            // swap element positions
+            qualityAspectElements[k] = qualityAspectElements.splice(currentPosition, 1, qualityAspectElements[k])[0];
+        }
+    }
 }
 
 
