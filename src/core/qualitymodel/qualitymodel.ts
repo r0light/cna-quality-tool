@@ -140,16 +140,16 @@ export const qualityModel = {
         },
         "secretsManagement": {
             "name": "Secrets management",
-            "description": "Secrets (e.g. passwords, access tokens, encryption keys) which allow access to other components or data should be managed specifically to make sure they stay confidential and only authorized components or persons can access them.", 
+            "description": "Secrets (e.g. passwords, access tokens, encryption keys) which allow access to other components or data should be managed specifically to make sure they stay confidential and only authorized components or persons can access them.",
             "relevantEntities": ["component"],
             "sources": [],
             "measures": []
         },
         "isolatedSecrets": {
             "name": "Isolated secrets",
-            "description": "Secrets (e.g. passwords, access tokens, encryption keys) should not be stored by in component artifacts (e.g. binaries, images). Instead, components should be given access at runtime only to those secrets which they actually need and only when they need it.", 
+            "description": "Secrets (e.g. passwords, access tokens, encryption keys) should not be stored by in component artifacts (e.g. binaries, images). Instead, components should be given access at runtime only to those secrets which they actually need and only when they need it.",
             "relevantEntities": "Component, Backing Data",
-            "sources": [{"key": "Scholl2019", "section":"6 Never Store Secrets or Configuration Inside an Image"}, {"key": "Adkins2019", "section": "14 Don't Check In Secrets"}],
+            "sources": [{ "key": "Scholl2019", "section": "6 Never Store Secrets or Configuration Inside an Image" }, { "key": "Adkins2019", "section": "14 Don't Check In Secrets" }],
             "measures": []
         },
         "secretsStoredInSpecializedServices": {
@@ -163,48 +163,86 @@ export const qualityModel = {
         },
         "accessRestriction": {
             "name": "Access restriction",
-            "description": "Access to components should be restricted to those who actually need it. Also within a system access controls should be put in place to have multiple layers of defense. A dedicated component to manage access policies can be used.", 
+            "description": "Access to components should be restricted to those who actually need it. Also within a system access controls should be put in place to have multiple layers of defense. A dedicated component to manage access policies can be used.",
             "relevantEntities": ["component", "endpoint"],
             "sources": [],
             "measures": []
         },
         "leastPrivilegedAccess": {
             "name": "Least-privileged access",
-            "description": "Access to endpoints should be given as restrictive as possible so that only components who really need it can access an endpoint.", 
+            "description": "Access to endpoints should be given as restrictive as possible so that only components who really need it can access an endpoint.",
             "relevantEntities": ["component", "endpoint"],
-            "sources": [{ "key": "Scholl2019", "section": "6 Grant Least-Privileged Access"}, { "key": "Arundel2019", "section": "11 Access Control and Permissions"}],
+            "sources": [{ "key": "Scholl2019", "section": "6 Grant Least-Privileged Access" }, { "key": "Arundel2019", "section": "11 Access Control and Permissions" }],
             "measures": []
         },
         "accessControlManagementConsistency": {
             "name": "Access control management consistency",
             "description": "Access control for endpoints is managed in a consistent way, that means for example always the same format is used for access control lists or a single account directory in a dedicated backing service exists for all components. Access control configurations can then be made always in the same known style and only in a dedicated place. Based on such a consistent access control configuration, also verifications can be performed to ensure that access restrictions are implemented correctly.",
             "relevantEntities": ["component"],
-            "sources": [{"key": "Adkins2019", "section": "6 Access Control (Access control managed by framework)"}, {"key": "Goniwada2021", "section": "9 Policy as Code (consistently describe your security policies in form of code)"}],
+            "sources": [{ "key": "Adkins2019", "section": "6 Access Control (Access control managed by framework)" }, { "key": "Goniwada2021", "section": "9 Policy as Code (consistently describe your security policies in form of code)" }],
             "measures": ["RatioOfEndpointsThatSupportTokenBasedAuthentication"]
         },
         "accountSeparation": {
             "name": "Account separation",
             "description": "Components are separated by assigning them different accounts. Ideally each component has an individual account. Through this, it is possible to trace which component performed which actions and it is possible to restrict access to other components on a fine-grained level, so that for example in the case of an attack, compromised components can be isolated based on their account.",
             "relevantEntities": ["component"],
-            "sources": [{"key": "Scholl2019", "section": "6 Use Separate Accounts/Subscriptions/Tenants”"}, {"key": "Adkins2019", "section": "8 Role separation”(let different services run with different roles to restrict access)"}, {"key": "Adkins2019", "section": "8 “Location separation (use different roles for a service in different locations to limit attack impacts)"}],
+            "sources": [{ "key": "Scholl2019", "section": "6 Use Separate Accounts/Subscriptions/Tenants”" }, { "key": "Adkins2019", "section": "8 Role separation”(let different services run with different roles to restrict access)" }, { "key": "Adkins2019", "section": "8 “Location separation (use different roles for a service in different locations to limit attack impacts)" }],
             "measures": []
         },
         "authenticationDelegation": {
             "name": "Authentication delegation",
             "description": "The verification of an entity for authenticity, for example upon a request, is delegated to a dedicated backing service. This concern is therefore removed from individual components so that their focus can remain on business functionalities while for example different authentication options can be managed in one place only.",
             "relevantEntities": ["system, backing service"],
-            "sources": [{"key": "Scholl2019", "section": "6 Use Federated Identity Management"}, {"key": "Goniwada2021", "section": "9 Decentralized Identity"}],
+            "sources": [{ "key": "Scholl2019", "section": "6 Use Federated Identity Management" }, { "key": "Goniwada2021", "section": "9 Decentralized Identity" }],
+            "measures": []
+        },
+        "serviceOrientation": {
+            "name": "Service-orientation",
+            "description": "Cloud-native applications should realize modularity by being service-oriented, that means the system should be decomposed into services described by interfaces following the microservices architectural style.",
+            "relevantEntities": ["system", "service"],
+            "sources": [],
+            "measures": []
+        },
+        "limitedFunctionalScope": {
+            "name": "Limited functional scope",
+            "description": "Each service should cover only a limited, but cohesive functional scope to keep service manageable.",
+            "relevantEntities": ["service", "endpoint"],
+            "sources": [{ "key": "Reznik2019", "section": "9 Microservices Architecture" }, { "key": "Adkins2019", "section": "7 Use Microservices" }, { "key": "Goniwada2021", "section": "3 Polylithic Architecture Principle (Build separate services for different business functionalitites) " }],
             "measures": []
         },
         "limitedDataScope": {
             "name": "Limited data scope",
             "description": "The number of data aggregates that are processed in a service is limited to those which need to be administrated together, for example to fulfill data consistency requirements. The aim is to keep the functional scope of a service cohesive. Data aggregates for which consistency requirements can be relaxed might be distributed over separate services.",
+            "relevantEntities": ["service", "data aggregate"],
             "sources": [],
+            "measures": []
+        },
+        "limitedEndpointScope": {
+            "name": "Limited endpoint scope",
+            "description": "To keep the functional scope of services limited, the number of endpoints of a service should be limited to a coveshive set of endpoints that provide related operations.",
+            "relevantEntities": ["service", "endpoint"],
+            "sources": [{ "key": "", "section": "" }],
             "measures": []
         },
         "commandQueryResponsibilitySegregation": {
             "name": "Command Query Responsibility Segregation",
             "description": "Endpoints for read (query) and write (command) operations on the same data aggregate are separated into different services. Changes to these operations can then be made independently and also different representations for data aggregates can be used. That way operations on data aggregates can be adjusted to differing usage patterns, different format requirements, or if they are changed for different reasons.",
+            "relevantEntities": ["service", "endpoint"],
+            "sources": [{ "key": "Davis2019", "section": "4.4" }, { "key": "Richardson2019", "section": "7.2 Using the CQRS pattern" }, { "key": "Bastani2017", "section": "12 CQRS (Command Query Responsibility Segregation)" }, { "key": "Indrasiri2021", "section": "4 Command and Query Responsibility Segregation Pattern" }, { "key": "Goniwada2021", "section": "4 Command and Query Responsibility Segregation Pattern" }],
+            "measures": []
+        },
+        "separationByGateways": {
+            "name": "Separation by gateways",
+            "description": "Individual components or groups of components are separated through gateways. That means communication is proxied and controlled at specific gateway components. It also abstracts one part of a system from another so that it can be reused by different components without needing direct links to components that actually provide the needed functionality. This way, communication can also be redirected when component endpoints change without changing the gateway endpoint. Also incoming communication from outside of a system can be directed at external endpoints of a central component (the gateway).",
+            "relevantEntities": ["system", "component", "endpoint"],
+            "sources": [{ "key": "Davis2019", "section": "10.2" },
+            { "key": "Richardson2019", "section": "8.2" },{ "key": "Bastani2017", "section": "8 Edge Services: Filtering and Proxying with Netflix Zuul" },{ "key": "Indrasiri2021", "section": "7 API Gateway Pattern" },{ "key": "Indrasiri2021", "section": "7 API Microgateway Pattern (Smaller API microgateways to avoid having a monolithic API gateway)" },{ "key": "Goniwada2021", "section": "4 “Mediator” (Use a mediator pattern between clients and servers)" }],
+            "measures": []
+        },
+        "seamlessUpgrades": {
+            "name": "Seamless upgrades",
+            "description": "Upgrades of services should not interfere with availability. There are different strategies, like rolling upgrades, to achieve this which should be provided as a capability by the infrastructure.",
+            "relevantEntities": ["component"],
             "sources": [],
             "measures": []
         },
@@ -235,12 +273,6 @@ export const qualityModel = {
         "usageOfExistingSolutionsForNon-CoreCapabilities": {
             "name": "Usage of existing solutions for non-core capabilities",
             "description": "For non-core capabilities readily available solutions are used. This means solutions which are based on a standard or a specification, are widely adopted and ideally open source so that their well-functioning is ensured by a broader community. Non-core capabilities include interface technologies or protocols for endpoints, infrastructure technologies (for example container orchestration engines), and software for backing services. That way capabilities don't need to self-implemented and existing integration options can be used.",
-            "sources": [],
-            "measures": []
-        },
-        "separationByGateways": {
-            "name": "Separation by gateways",
-            "description": "Individual components or groups of components are separated through gateways. That means communication is proxied and controlled at specific gateway components. It also abstracts one part of a system from another so that it can be reused by different components without needing direct links to components that actually provide the needed functionality. This way, communication can also be redirected when component endpoints change without changing the gateway endpoint. Also incoming communication from outside of a system can be directed at external endpoints of a central component (the gateway).",
             "sources": [],
             "measures": []
         },
@@ -453,6 +485,15 @@ export const qualityModel = {
         { "impactedFactor": "accessRestriction", "sourceFactor": "accessControlManagementConsistency", "impactType": "positive" },
         { "impactedFactor": "accountability", "sourceFactor": "accountSeparation", "impactType": "positive" },
         { "impactedFactor": "authenticity", "sourceFactor": "authenticationDelegation", "impactType": "positive" },
+        { "impactedFactor": "modularity", "sourceFactor": "serviceOrientation", "impactType": "positive" },
+        { "impactedFactor": "serviceOrientation", "sourceFactor": "limitedFunctionalScope", "impactType": "positive" },
+        { "impactedFactor": "limitedFunctionalScope", "sourceFactor": "limitedDataScope", "impactType": "positive" },
+        { "impactedFactor": "limitedFunctionalScope", "sourceFactor": "limitedEndpointScope", "impactType": "positive" },
+        { "impactedFactor": "limitedFunctionalScope", "sourceFactor": "commandQueryResponsibilitySegregation", "impactType": "positive" },
+        { "impactedFactor": "simplicity", "sourceFactor": "commandQueryResponsibilitySegregation", "impactType": "negative" },
+        { "impactedFactor": "serviceOrientation", "sourceFactor": "separationByGateways", "impactType": "positive" },
+        { "impactedFactor": "seamlessUpgrades", "sourceFactor": "separationByGateways", "impactType": "positive" },
+        { "impactedFactor": "availability", "sourceFactor": "seamlessUpgrades", "impactType": "positive" },
     ],
     "measures": {
         "ratioOfEndpointsSupportingSSL": {
