@@ -291,49 +291,78 @@ export const qualityModel = {
         "persistentCommunication": {
             "name": "Persistent communication",
             "description": "Links persist messages which have been sent (e.g. based on messaging backing services). That way, components are decoupled, because components need not yet exist at the time a message is sent, but can still receive a message. Communication can also be repeated, because persisted messages can be retrieved again.",
-            "sources": [],
+            "relevantEntities": ["link"],
+            "sources": [{ "key": "Indrasiri2021", "section": "5 Event Sourcing Pattern: Log-based message brokers" }],
             "measures": []
         },
         "usageOfExistingSolutionsForNon-CoreCapabilities": {
             "name": "Usage of existing solutions for non-core capabilities",
-            "description": "For non-core capabilities readily available solutions are used. This means solutions which are based on a standard or a specification, are widely adopted and ideally open source so that their well-functioning is ensured by a broader community. Non-core capabilities include interface technologies or protocols for endpoints, infrastructure technologies (for example container orchestration engines), and software for backing services. That way capabilities don't need to self-implemented and existing integration options can be used.",
-            "sources": [],
+            "description": "By using readily available standardized, open source solutions for non-core capabilities, the development effort is reduced and the software quality can be increased, because a broader community ensures the well-functioning of a software solution.",
+            "relevantEntities": ["component", "backing service"],
+            "sources": [{ "key": "Reznik2019", "section": "9 Avoid Reinventing the Wheel" },{ "key": "Adkins2019", "section": "12 Frameworks to Enforce Security and Reliability" }],
+            "measures": []
+        },
+        "standardization": {
+            "name": "Standardization",
+            "description": "By using standardized technologies within components, for interfaces, and especially for the infrastructure, backing services and other non-business concerns, reusability can be increased and the effort to develop additional functionality which integrates with existing components can be reduced.",
+            "relevantEntities": ["system", "component", "link"],
+            "sources": [{ "key": "", "section": "" }],
+            "measures": []
+        },
+        "componentSimilarity": {
+            "name": "Component similarity",
+            "description": "The more similar components are, the higher the reusability is and the easier it is for developers to work on an unfamiliar component. Furthermore, similar components can be more easily integrated and maintainted in the same way. Similarity considers mainly the libraries and technologies used for implementing and deploying services.",
+            "relevantEntities": ["component"],
+            "sources": [{ "key": "Reznik2019", "section": "9 Reference Architecture" }],
+            "measures": []
+        },
+        "automatedMonitoring": {
+            "name": "Cloud-native applications should enable monitoring at various levels (business functionalities in services, backing-service funtionalities, infrastructure) in an automated fashion to enable observable and autononmous reactions to changing system conditions.",
+            "description": "",
+            "relevantEntities": ["service", "link", "infrastructure"],
+            "sources": [{ "key": "Goniwada2021", "section": "3 High Observability Principle" }],
             "measures": []
         },
         "consistentCentralizedLogging": {
             "name": "Consistent centralized logging",
             "description": "Logging functionality, specifically the automated collection of logs, is concentrated in a centralized backing service which combines and stores logs from the components of a system. The logs are kept consistent regarding their format and level of granularity. In the backing service also log analysis functionalities are provided, for example by also enabling a correlation of logs from different components.",
-            "sources": [],
+            "relevantEntities": ["service", "backing service"],
+            "sources": [{ "key": "Davis2019", "section": "11.1" },{ "key": "Scholl2019", "section": "6 Use a Unified Logging System" },{ "key": "Scholl2019", "section": "6 Common and Structured Logging Format" },{ "key": "Richardson2019", "section": "11.3.2 Applying the Log aggregation pattern" },{ "key": "Reznik2019", "section": "10 Observability" },{ "key": "Garrison2017", "section": "7 Monitoring and Logging" },{ "key": "Adkins2019", "section": "15 Design your logging to be immutable" },{ "key": "Arundel2019", "section": "15 Logging" },{ "key": "Winn2017", "section": "2 Aggregated Streaming of Logs and Metrics" },{ "key": "Bastani2017", "section": "13 Application Logging" },{ "key": "Bastani2017", "section": "13 Audit Events (capture events for audits, like failed logins etc)" },{ "key": "Ruecker2021", "section": "11 Custom Centralized Monitoring" },{ "key": "Goniwada2021", "section": "19 One Source of Truth" }],
             "measures": []
         },
         "consistentCentralizedMetrics": {
             "name": "Consistent centralized metrics",
             "description": "Metrics gathering and calculation functionality for monitoring purposes is concentrated in a centralized component which combines, aggregates and stores metrics from the components of a system. The metrics are kept consistent regarding their format and support multiple levels of granularity. In the backing service also metric analysis functionalities are provided, for example by also enabling correlations of metrics.",
-            "sources": [],
+            "relevantEntities": ["service", "backing service"],
+            "sources": [{ "key": "Davis2019", "section": "11.2" },{ "key": "Scholl2019", "section": "6 Tag Your Metrics Appropriately" },{ "key": "Richardson2019", "section": "11.3.4 Applying the Applications metrics pattern" },{ "key": "Garrison2017", "section": "7 Monitoring and Logging, Metrics Aggregation" },{ "key": "Reznik2019", "section": "10 Observability" },{ "key": "Arundel2019", "section": "15 Metrics help predict problems" },{ "key": "Winn2017", "section": "2 Aggregated Streaming of Logs and Metrics" },{ "key": "Arundel2019", "section": "15 Logging" },{ "key": "Winn2017", "section": "2 Aggregated Streaming of Logs and Metrics" },{ "key": "Bastani2017", "section": "13 Metrics" },{ "key": "Arundel2019", "section": "16 The RED Pattern (common metrics you should have for services" },{ "key": "Arundel2019", "section": "16 The USE Pattern (common metrics for resources" },{ "key": "Goniwada2021", "section": "19 One Source of Truth" }],
             "measures": []
         },
         "distributedTracingOfInvocations": {
             "name": "Distributed tracing of invocations",
             "description": "For request traces that span multiple components in a system, distributed tracing is enabled so that traces based on correlation IDs are captured automatically and stored in a backing service where they can be analyzed and problems within request traces can be clearly attributed to single components.",
-            "sources": [],
+            "relevantEntities": ["service", "link", "request trace"],
+            "sources": [{ "key": "Davis2019", "section": "11.3" },{ "key": "Scholl2019", "section": "6 Use Correlation IDs" },{ "key": "Richardson2019", "section": "11.3.3 AUsing the Distributed tracing pattern" },{ "key": "Garrison2017", "section": "7 Debugging and Tracing" },{ "key": "Reznik2019", "section": "10 Observability" },{ "key": "Arundel2019", "section": "15 Tracing" },{ "key": "Bastani2017", "section": "13 Distributed Tracing" },{ "key": "Ruecker2021", "section": "11 Observability and Distributed Tracing Tools (Use Distributed Tracing)" },{ "key": "Goniwada2021", "section": "19 One Source of Truth" }],
             "measures": []
         },
         "healthAndReadinessChecks": {
             "name": "Health and readiness Checks",
             "description": "All components in a system offer health and readiness checks so that unhealthy components can be identified and communication can be restricted to happen only between healthy and ready components. Health and readiness checks can for example be dedicated endpoints of components which can be called regularly to check a component. That way, also an up-to-date holistic overview of the health of a system is enabled.",
-            "sources": [],
+            "relevantEntities": ["service"],
+            "sources": [{ "key": "Scholl2019", "section": "6 Implement Health Checks and Readiness Checks" },{ "key": "Ibryam2020", "section": "4 Health Probe" },{ "key": "Richardson2019", "section": "11.3.1 Using the Health check API pattern" },{ "key": "Garrison2017", "section": "7 State Management" },{ "key": "Arundel2019", "section": "5 Liveness Probes" },{ "key": "Arundel2019", "section": "5 Readiness Probes" },{ "key": "Bastani2017", "section": "13 Health Checks" },{ "key": "Indrasiri2021", "section": "1 Why container orchestration?, Health monitoring" },{ "key": "Goniwada2021", "section": "4 Fail Fast, 16 Health Probe" }],
             "measures": []
         },
-        "automatedInfrastructure": {
-            "name": "Automated infrastructure",
-            "description": "Infrastructure provisioning and management is automated as much as possible and manual tasks are reduced. That means infrastructure is created automatically when needed, kept up-to-date automatically while in use, and removed automatically once not needed anymore. Ideally it is combined with components deployments so that no manual infrastructure management is needed for a component deployment.",
-            "sources": [],
+        "automatedInfrastructureProvisioning": {
+            "name": "Automated infrastructure Provisioning",
+            "description": "Infrastructure provisioning should be automated based on component requirements which are either stated explicitly or inferred from the component which should be deployed. The infrastructure and tools used should require only minimal manual effort. Ideally it should be combined with continuous delivery processes so that no further interaction is needed for a component deployment.",
+            "relevantEntities": ["infrastructure"],
+            "sources": [{ "key": "Reznik2019", "section": "10 Automated Infrastructure" },{ "key": "Goniwada2021", "section": "5 Automation" }],
             "measures": []
         },
         "useInfrastructureAsCode": {
             "name": "Use infrastructure as code",
-            "description": "The infrastructure requirements and constraints of a system are defined (coded) independently of the actual runtime in a storable format. That way a defined infrastructure can be automatically provisioned repeatedly and ideally also on different underlying infrastructures (cloud providers) based on the stored infrastructure definition. Infrastructure provisioning and configuration operations are not performed manually via an interface of a cloud provider.",
-            "sources": [],
+            "description": "To avoid manual infrastructure operation and configuration, the infrastructure requirements and constraints should be defined (coded) independently of the actual runtime. That way a defined infrastructure can be automatically provisioned repeatedly and ideally on different underlying infrastructures (cloud providers).",
+            "relevantEntities": ["infrastructure"],
+            "sources": [{ "key": "Scholl2019", "section": "6 Describe Infrastructure Using Code" }, { "key": "Goniwada2021", "section": "16 Declarative Deployment, 17 What Is Infrastructure as Code?" }],
             "measures": []
         },
         "dynamicScheduling": {
@@ -342,34 +371,88 @@ export const qualityModel = {
             "sources": [],
             "measures": []
         },
+        "serviceIndependence": {
+            "name": "Service independence",
+            "description": "In a cloud-native application services should be as independent as possible throughout their lifecycle, that means development, operation, and evolution. Changes to one services should not impact other services.",
+            "relevantEntities": ["service", "link"],
+            "sources": [{ "key": "Goniwada2021", "section": "3 Decentralize Everything Principle (Decentralize deployment, governance)" }],
+            "measures": []
+        },  
+        "lowCoupling": {
+            "name": "Low coupling",
+            "description": "In a cloud-native application coupling shoud be low in terms of links between components. Each link represents a dependency and therefore decreases service independent",
+            "relevantEntities": ["service", "link"],
+            "sources": [],
+            "measures": []
+        },     
+        "functionalDecentralization": {
+            "name": "Functional decentralization",
+            "description": "Business functionality should be decentralized over the system as a whole to make components more independent.",
+            "relevantEntities": ["system", "service", "link"],
+            "sources": [],
+            "measures": []
+        },
         "limitedRequestTraceScope": {
             "name": "Limited request trace scope",
-            "description": "A request that requires the collaboration of several services is still limited to as few services as possible. Otherwise, the more services are part of a request trace the more dependent they are on each other.",
+            "description": "A request that requires the collaboration of several services should still be limited to as few services as possible, because otherwise services are less independent the more they need to collaborate to handle requests.",
+            "relevantEntities": ["request trace"],
             "sources": [],
             "measures": []
         },
         "logicalGrouping": {
             "name": "Logical grouping",
-            "description": "Services are logically grouped so that services which are related (for example by having many links or processing the same data aggregates) are in the same group, but services which are more independent are separated in different groups. That way a separation can also be achieved on the network and infrastructure level by separating service groups more strictly, such as having different subnets for such logical groups or not letting different groups run on the same infrastructure. Potential impacts of a compromised or misbehaving service can therefore be reduced to the group to which it belongs but other groups are ideally unaffected.",
-            "sources": [],
+            "description": "To increase the independence of services, services should also be grouped so that services which are related are in the same group, but services which are independent are separated further. That way a separation can also be achieved on the network and infrastructure level by separating independent component groups more strictly. Potential impacts of a compromised or misbehaving service can therefore be reduced to the group to which it belongs but other groups are unaffected.",
+            "relevantEntities": ["system", "service"],
+            "sources": [{ "key": "Scholl2019", "section": "6 Use Namespaces to Organize Services in Kubernetes" },{ "key": "Arundel2019", "section": "5 Using Namespaces" },{ "key": "Indrasiri2021", "section": "1 Why container orchestration?; Componentization and isolation" }],
             "measures": []
         },
         "backingServiceDecentralization": {
             "name": "Backing service decentralization",
-            "description": "Different backing services are assigned to different components. That way, a decentralization is achieved. For example, instead of one message broker for a whole system, several message brokers can be used, each for a group of components that are interrelated. A problem in one messaging broker has an impact on only those components using it, but not on components having separate message brokers.",
+            "description": "By assigning different backing services to different components a decentralization can be achieved which makes components more independent. For example, instead of one message broker for a whole system, several message brokers can be used, each for a group of components that are interrelated. A problem in one messaging broker has an impact on only those components using it, but not on components having separate message brokers.",
+            "relevantEntities": ["service", "backing service"],
+            "sources": [{ "key": "Indrasiri2021", "section": "4 Decentralized Data Management (decentralized data leads to higher service independence while centralized data leads to higher consistency.)" },{ "key": "Indrasiri2021", "section": "4 Data Service Pattern (As having a negative impact because multiple services should not access the same data);" },{ "key": "Ruecker2021", "section": "2 Different Workflow Engines for different services" },{ "key": "Goniwada2021", "section": "5 Distributed State, Decentralized Data"}],
+            "measures": []
+        },
+        "addressingAbstraction": {
+            "name": "Addressing abstraction",
+            "description": "By abstracting from specific addresses for reaching other components, address changes can be handled automatically without impacting the link between components. This can be achieved for example through service discovery where components are addressed through abstract service names and specific addresses are resolved through service discovery.",
+            "relevantEntities": ["link", "backing service"],
+            "sources": [{ "key": "Davis2019", "section": "8.3" },{ "key": "Ibryam2020", "section": "12 Service Discovery" },{ "key": "Richardson2019", "section": "Using service discovery" },{ "key": "Garrison2017", "section": "7 Service Discovery" },{ "key": "Indrasiri2021", "section": "3 Service Registry and Discovery Pattern" },{ "key": "Bastani2017", "section": "7 Routing (Use service discovery with support for health checks and respect varying workloads)" },{ "key": "Indrasiri2021", "section": "3 Service Abstraction Pattern (Use an abstraction layer in front of services (for example Kubernetes Service))" },{ "key": "Goniwada2021", "section": "4 Service Discovery" }],
+            "measures": []
+        },
+        "sparcity": {
+            "name": "Sparsity",
+            "description": "The more sparse a system is, that means the less components there are, the more simple it is in general",
+            "relevantEntities": ["system", "component", "infrastructure"],
             "sources": [],
+            "measures": []
+        },
+        "operationOutsourcing": {
+            "name": "Operation outsourcing",
+            "description": "By outsourcing the operation of infrastructure and components to a cloud provider or other vendor, the operation is simplified because responsibility is transferred. Furthermore, costs can be made more flexible because providers and vendors can provide a usage-based pricing.",
+            "relevantEntities": ["backing service", "infrastructure"],
+            "sources": [],
+            "measures": []
+        },
+        "": {
+            "name": "",
+            "description": "",
+            "relevantEntities": [],
+            "sources": [{ "key": "", "section": "" }],
             "measures": []
         },
         "managedInfrastructure": {
             "name": "Managed infrastructure",
-            "description": "Infrastructure such as basic computing, storage or network resources, but potentially also software infrastructure (for example a container orchestration engine) is managed by a cloud provider who is responsible for a stable functioning and up-to-date functionalities. The more infrastructure is managed, the more operational responsibility is transferred. This will also be reflected in the costs which are then calculated more on usage-based pricing schemes.",
+            "description": "Infrastructure such as basic computing, storage or network resources can be managed by vendors to ensure a stable functioning and up-to-date functionalities. Furthermore, it reduces the operational overhead.",
+            "relevantEntities": ["infrastructure"],
             "sources": [],
             "measures": []
         },
         "managedBackingServices": {
             "name": "Managed backing services",
-            "description": "Backing services that provide non-business functionality are operated and managed by vendors who are responsible for a stable functioning and up-to-date functionalities. Operational responsibility is transferred which is also reflected in the costs which are then calculated more on usage-based pricing schemes.",
-            "sources": [],
+            "description": "Especially backing services that provide non-business functionality can be managed by vendors to ensure a stable functioning and up-to-date functionalities. Furthermore, it reduces the operational overhead.",
+            "relevantEntities": ["backing service"],
+            "sources": [{ "key": "Scholl2019", "section": "6 Use Managed Databases and Analytics Services" },{ "key": "Arundel2019", "section": "15 Don't build your own monitoring infrastructure (Use an external monitoring service)" },{ "key": "Bastani2017", "section": "10 managed and automated messaging system (operating your own messaging system increases operational overhead, better use a system managed by a platform)" }],
             "measures": []
         },
         "serviceReplication": {
@@ -486,12 +569,7 @@ export const qualityModel = {
             "sources": [],
             "measures": []
         },
-        "addressingAbstraction": {
-            "name": "Addressing abstraction",
-            "description": "In a link from one component to another the specific addresses for reaching the other component is not used, but instead an abstract address is used. That way, the specific addresses of components can be changed without impacting the link between components. This can be achieved for example through service discovery where components are addressed through abstract service names and specific addresses are resolved through service discovery which can be implemented in the infrastructure or a backing service.",
-            "sources": [],
-            "measures": []
-        },
+
 
     },
     "impacts": [
@@ -523,6 +601,39 @@ export const qualityModel = {
         { "impactedFactor": "looseCoupling", "sourceFactor": "asynchronousCommunication", "impactType": "positive" },
         { "impactedFactor": "looseCoupling", "sourceFactor": "communicationPartnerAbstraction", "impactType": "positive" },
         { "impactedFactor": "analyzability", "sourceFactor": "communicationPartnerAbstraction", "impactType": "negative" },
+        { "impactedFactor": "faultTolerance", "sourceFactor": "persistentCommunication", "impactType": "positive" },
+        { "impactedFactor": "simplicity", "sourceFactor": "usageOfExistingSolutionsForNon-CoreCapabilities", "impactType": "positive" },
+        { "impactedFactor": "reusability", "sourceFactor": "standardization", "impactType": "positive" },
+        { "impactedFactor": "standardization", "sourceFactor": "componentSimilarity", "impactType": "positive" },
+        { "impactedFactor": "analyzability", "sourceFactor": "automatedMonitoring", "impactType": "positive" },
+        { "impactedFactor": "automatedMonitoring", "sourceFactor": "consistentCentralizedLogging", "impactType": "positive" },
+        { "impactedFactor": "accountability", "sourceFactor": "consistentCentralizedLogging", "impactType": "positive" },
+        { "impactedFactor": "automatedMonitoring", "sourceFactor": "consistentCentralizedMetrics", "impactType": "positive" },
+        { "impactedFactor": "automatedMonitoring", "sourceFactor": "distributedTracingOfInvocations", "impactType": "positive" },
+        { "impactedFactor": "automatedMonitoring", "sourceFactor": "healthAndReadinessChecks", "impactType": "positive" },
+        { "impactedFactor": "automatedRestarts", "sourceFactor": "healthAndReadinessChecks", "impactType": "positive" },
+        { "impactedFactor": "availability", "sourceFactor": "healthAndReadinessChecks", "impactType": "positive" },
+        { "impactedFactor": "modifiability", "sourceFactor": "automatedInfrastructureProvisioning", "impactType": "positive" },
+        { "impactedFactor": "installability", "sourceFactor": "automatedInfrastructureProvisioning", "impactType": "positive" },
+        { "impactedFactor": "modifiability", "sourceFactor": "useInfrastructureAsCode", "impactType": "positive" },
+        { "impactedFactor": "adaptability", "sourceFactor": "useInfrastructureAsCode", "impactType": "positive" },
+        { "impactedFactor": "reusability", "sourceFactor": "useInfrastructureAsCode", "impactType": "positive" },
+        { "impactedFactor": "recoverability", "sourceFactor": "useInfrastructureAsCode", "impactType": "positive" },
+        { "impactedFactor": "modifiability", "sourceFactor": "serviceIndependence", "impactType": "positive" },
+        { "impactedFactor": "serviceIndependence", "sourceFactor": "lowCoupling", "impactType": "positive" },
+        { "impactedFactor": "serviceIndependence", "sourceFactor": "functionalDecentralization", "impactType": "positive" },
+        { "impactedFactor": "serviceIndependence", "sourceFactor": "limitedRequestTraceScope", "impactType": "positive" },
+        { "impactedFactor": "serviceIndependence", "sourceFactor": "logicalGrouping", "impactType": "positive" },
+        { "impactedFactor": "serviceIndependence", "sourceFactor": "backingServiceDecentralization", "impactType": "positive" },
+        { "impactedFactor": "modifiability", "sourceFactor": "addressingAbstraction", "impactType": "positive" },
+        { "impactedFactor": "replaceability", "sourceFactor": "addressingAbstraction", "impactType": "positive" },
+        { "impactedFactor": "simplicity", "sourceFactor": "sparcity", "impactType": "positive" },
+        { "impactedFactor": "simplicity", "sourceFactor": "operationOutsourcing", "impactType": "positive" },
+        { "impactedFactor": "costVariability", "sourceFactor": "operationOutsourcing", "impactType": "positive" },
+        { "impactedFactor": "operationOutsourcing", "sourceFactor": "managedBackingServices", "impactType": "positive" },
+        { "impactedFactor": "operationOutsourcing", "sourceFactor": "managedBackingServices", "impactType": "positive" },
+
+        { "impactedFactor": "", "sourceFactor": "", "impactType": "positive" },
     ],
     "measures": {
         "ratioOfEndpointsSupportingSSL": {
