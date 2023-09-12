@@ -239,13 +239,6 @@ export const qualityModel = {
             { "key": "Richardson2019", "section": "8.2" }, { "key": "Bastani2017", "section": "8 Edge Services: Filtering and Proxying with Netflix Zuul" }, { "key": "Indrasiri2021", "section": "7 API Gateway Pattern" }, { "key": "Indrasiri2021", "section": "7 API Microgateway Pattern (Smaller API microgateways to avoid having a monolithic API gateway)" }, { "key": "Goniwada2021", "section": "4 “Mediator” (Use a mediator pattern between clients and servers)" }],
             "measures": []
         },
-        "seamlessUpgrades": {
-            "name": "Seamless upgrades",
-            "description": "Upgrades of services should not interfere with availability. There are different strategies, like rolling upgrades, to achieve this which should be provided as a capability by the infrastructure.",
-            "relevantEntities": ["component"],
-            "sources": [],
-            "measures": []
-        },
         "isolatedState": {
             "name": "Isolated state",
             "description": "In cloud-native applications services should be structured by clearly separating stateless and stateful services. Stateful services should be reduced to a minimum.",
@@ -299,7 +292,7 @@ export const qualityModel = {
             "name": "Usage of existing solutions for non-core capabilities",
             "description": "By using readily available standardized, open source solutions for non-core capabilities, the development effort is reduced and the software quality can be increased, because a broader community ensures the well-functioning of a software solution.",
             "relevantEntities": ["component", "backing service"],
-            "sources": [{ "key": "Reznik2019", "section": "9 Avoid Reinventing the Wheel" },{ "key": "Adkins2019", "section": "12 Frameworks to Enforce Security and Reliability" }],
+            "sources": [{ "key": "Reznik2019", "section": "9 Avoid Reinventing the Wheel" }, { "key": "Adkins2019", "section": "12 Frameworks to Enforce Security and Reliability" }],
             "measures": []
         },
         "standardization": {
@@ -317,8 +310,8 @@ export const qualityModel = {
             "measures": []
         },
         "automatedMonitoring": {
-            "name": "Cloud-native applications should enable monitoring at various levels (business functionalities in services, backing-service funtionalities, infrastructure) in an automated fashion to enable observable and autononmous reactions to changing system conditions.",
-            "description": "",
+            "name": "Automated Monitoring",
+            "description": "Cloud-native applications should enable monitoring at various levels (business functionalities in services, backing-service funtionalities, infrastructure) in an automated fashion to enable observable and autononmous reactions to changing system conditions.",
             "relevantEntities": ["service", "link", "infrastructure"],
             "sources": [{ "key": "Goniwada2021", "section": "3 High Observability Principle" }],
             "measures": []
@@ -327,35 +320,35 @@ export const qualityModel = {
             "name": "Consistent centralized logging",
             "description": "Logging functionality, specifically the automated collection of logs, is concentrated in a centralized backing service which combines and stores logs from the components of a system. The logs are kept consistent regarding their format and level of granularity. In the backing service also log analysis functionalities are provided, for example by also enabling a correlation of logs from different components.",
             "relevantEntities": ["service", "backing service"],
-            "sources": [{ "key": "Davis2019", "section": "11.1" },{ "key": "Scholl2019", "section": "6 Use a Unified Logging System" },{ "key": "Scholl2019", "section": "6 Common and Structured Logging Format" },{ "key": "Richardson2019", "section": "11.3.2 Applying the Log aggregation pattern" },{ "key": "Reznik2019", "section": "10 Observability" },{ "key": "Garrison2017", "section": "7 Monitoring and Logging" },{ "key": "Adkins2019", "section": "15 Design your logging to be immutable" },{ "key": "Arundel2019", "section": "15 Logging" },{ "key": "Winn2017", "section": "2 Aggregated Streaming of Logs and Metrics" },{ "key": "Bastani2017", "section": "13 Application Logging" },{ "key": "Bastani2017", "section": "13 Audit Events (capture events for audits, like failed logins etc)" },{ "key": "Ruecker2021", "section": "11 Custom Centralized Monitoring" },{ "key": "Goniwada2021", "section": "19 One Source of Truth" }],
+            "sources": [{ "key": "Davis2019", "section": "11.1" }, { "key": "Scholl2019", "section": "6 Use a Unified Logging System" }, { "key": "Scholl2019", "section": "6 Common and Structured Logging Format" }, { "key": "Richardson2019", "section": "11.3.2 Applying the Log aggregation pattern" }, { "key": "Reznik2019", "section": "10 Observability" }, { "key": "Garrison2017", "section": "7 Monitoring and Logging" }, { "key": "Adkins2019", "section": "15 Design your logging to be immutable" }, { "key": "Arundel2019", "section": "15 Logging" }, { "key": "Winn2017", "section": "2 Aggregated Streaming of Logs and Metrics" }, { "key": "Bastani2017", "section": "13 Application Logging" }, { "key": "Bastani2017", "section": "13 Audit Events (capture events for audits, like failed logins etc)" }, { "key": "Ruecker2021", "section": "11 Custom Centralized Monitoring" }, { "key": "Goniwada2021", "section": "19 One Source of Truth" }],
             "measures": []
         },
         "consistentCentralizedMetrics": {
             "name": "Consistent centralized metrics",
             "description": "Metrics gathering and calculation functionality for monitoring purposes is concentrated in a centralized component which combines, aggregates and stores metrics from the components of a system. The metrics are kept consistent regarding their format and support multiple levels of granularity. In the backing service also metric analysis functionalities are provided, for example by also enabling correlations of metrics.",
             "relevantEntities": ["service", "backing service"],
-            "sources": [{ "key": "Davis2019", "section": "11.2" },{ "key": "Scholl2019", "section": "6 Tag Your Metrics Appropriately" },{ "key": "Richardson2019", "section": "11.3.4 Applying the Applications metrics pattern" },{ "key": "Garrison2017", "section": "7 Monitoring and Logging, Metrics Aggregation" },{ "key": "Reznik2019", "section": "10 Observability" },{ "key": "Arundel2019", "section": "15 Metrics help predict problems" },{ "key": "Winn2017", "section": "2 Aggregated Streaming of Logs and Metrics" },{ "key": "Arundel2019", "section": "15 Logging" },{ "key": "Winn2017", "section": "2 Aggregated Streaming of Logs and Metrics" },{ "key": "Bastani2017", "section": "13 Metrics" },{ "key": "Arundel2019", "section": "16 The RED Pattern (common metrics you should have for services" },{ "key": "Arundel2019", "section": "16 The USE Pattern (common metrics for resources" },{ "key": "Goniwada2021", "section": "19 One Source of Truth" }],
+            "sources": [{ "key": "Davis2019", "section": "11.2" }, { "key": "Scholl2019", "section": "6 Tag Your Metrics Appropriately" }, { "key": "Richardson2019", "section": "11.3.4 Applying the Applications metrics pattern" }, { "key": "Garrison2017", "section": "7 Monitoring and Logging, Metrics Aggregation" }, { "key": "Reznik2019", "section": "10 Observability" }, { "key": "Arundel2019", "section": "15 Metrics help predict problems" }, { "key": "Winn2017", "section": "2 Aggregated Streaming of Logs and Metrics" }, { "key": "Arundel2019", "section": "15 Logging" }, { "key": "Winn2017", "section": "2 Aggregated Streaming of Logs and Metrics" }, { "key": "Bastani2017", "section": "13 Metrics" }, { "key": "Arundel2019", "section": "16 The RED Pattern (common metrics you should have for services" }, { "key": "Arundel2019", "section": "16 The USE Pattern (common metrics for resources" }, { "key": "Goniwada2021", "section": "19 One Source of Truth" }],
             "measures": []
         },
         "distributedTracingOfInvocations": {
             "name": "Distributed tracing of invocations",
             "description": "For request traces that span multiple components in a system, distributed tracing is enabled so that traces based on correlation IDs are captured automatically and stored in a backing service where they can be analyzed and problems within request traces can be clearly attributed to single components.",
             "relevantEntities": ["service", "link", "request trace"],
-            "sources": [{ "key": "Davis2019", "section": "11.3" },{ "key": "Scholl2019", "section": "6 Use Correlation IDs" },{ "key": "Richardson2019", "section": "11.3.3 AUsing the Distributed tracing pattern" },{ "key": "Garrison2017", "section": "7 Debugging and Tracing" },{ "key": "Reznik2019", "section": "10 Observability" },{ "key": "Arundel2019", "section": "15 Tracing" },{ "key": "Bastani2017", "section": "13 Distributed Tracing" },{ "key": "Ruecker2021", "section": "11 Observability and Distributed Tracing Tools (Use Distributed Tracing)" },{ "key": "Goniwada2021", "section": "19 One Source of Truth" }],
+            "sources": [{ "key": "Davis2019", "section": "11.3" }, { "key": "Scholl2019", "section": "6 Use Correlation IDs" }, { "key": "Richardson2019", "section": "11.3.3 AUsing the Distributed tracing pattern" }, { "key": "Garrison2017", "section": "7 Debugging and Tracing" }, { "key": "Reznik2019", "section": "10 Observability" }, { "key": "Arundel2019", "section": "15 Tracing" }, { "key": "Bastani2017", "section": "13 Distributed Tracing" }, { "key": "Ruecker2021", "section": "11 Observability and Distributed Tracing Tools (Use Distributed Tracing)" }, { "key": "Goniwada2021", "section": "19 One Source of Truth" }],
             "measures": []
         },
         "healthAndReadinessChecks": {
             "name": "Health and readiness Checks",
             "description": "All components in a system offer health and readiness checks so that unhealthy components can be identified and communication can be restricted to happen only between healthy and ready components. Health and readiness checks can for example be dedicated endpoints of components which can be called regularly to check a component. That way, also an up-to-date holistic overview of the health of a system is enabled.",
             "relevantEntities": ["service"],
-            "sources": [{ "key": "Scholl2019", "section": "6 Implement Health Checks and Readiness Checks" },{ "key": "Ibryam2020", "section": "4 Health Probe" },{ "key": "Richardson2019", "section": "11.3.1 Using the Health check API pattern" },{ "key": "Garrison2017", "section": "7 State Management" },{ "key": "Arundel2019", "section": "5 Liveness Probes" },{ "key": "Arundel2019", "section": "5 Readiness Probes" },{ "key": "Bastani2017", "section": "13 Health Checks" },{ "key": "Indrasiri2021", "section": "1 Why container orchestration?, Health monitoring" },{ "key": "Goniwada2021", "section": "4 Fail Fast, 16 Health Probe" }],
+            "sources": [{ "key": "Scholl2019", "section": "6 Implement Health Checks and Readiness Checks" }, { "key": "Ibryam2020", "section": "4 Health Probe" }, { "key": "Richardson2019", "section": "11.3.1 Using the Health check API pattern" }, { "key": "Garrison2017", "section": "7 State Management" }, { "key": "Arundel2019", "section": "5 Liveness Probes" }, { "key": "Arundel2019", "section": "5 Readiness Probes" }, { "key": "Bastani2017", "section": "13 Health Checks" }, { "key": "Indrasiri2021", "section": "1 Why container orchestration?, Health monitoring" }, { "key": "Goniwada2021", "section": "4 Fail Fast, 16 Health Probe" }],
             "measures": []
         },
         "automatedInfrastructureProvisioning": {
             "name": "Automated infrastructure Provisioning",
             "description": "Infrastructure provisioning should be automated based on component requirements which are either stated explicitly or inferred from the component which should be deployed. The infrastructure and tools used should require only minimal manual effort. Ideally it should be combined with continuous delivery processes so that no further interaction is needed for a component deployment.",
             "relevantEntities": ["infrastructure"],
-            "sources": [{ "key": "Reznik2019", "section": "10 Automated Infrastructure" },{ "key": "Goniwada2021", "section": "5 Automation" }],
+            "sources": [{ "key": "Reznik2019", "section": "10 Automated Infrastructure" }, { "key": "Goniwada2021", "section": "5 Automation" }],
             "measures": []
         },
         "useInfrastructureAsCode": {
@@ -367,8 +360,9 @@ export const qualityModel = {
         },
         "dynamicScheduling": {
             "name": "Dynamic scheduling",
-            "description": "Resource provisioning to deployed components is dynamic and automated so that every component is ensured to have the resources it needs and only that many resources are provisioned wich are really needed at the same time. This requires dynamic adjustments to resources to adapt to changing environments. This capability is part of the used infrastructure.",
-            "sources": [],
+            "description": "Resource provisioning to deployed components should be dynamic and automated so that every component is ensured to have the resources it needs and only that many resources are provisioned wich are really needed at the same time. This requires dynamic adjustments to resources to adapt to changing environments. This capability should be part of the used infrastructure.",
+            "relevantEntities": ["infrastructure"],
+            "sources": [{ "key": "Reznik2019", "section": "10 Dynamic Scheduling" }, { "key": "Garrison2017", "section": "7 Resource Allocation and Scheduling" }, { "key": "Ibryam2020", "section": "6 Automated Placement" }, { "key": "Indrasiri2021", "section": "1 Why container orchestration?; Resource Management" }, { "key": "Indrasiri2021", "section": "1 Why container orchestration?; Automatic provisioning" }, { "key": "Goniwada2021", "section": "16 Automated Placement" }],
             "measures": []
         },
         "serviceIndependence": {
@@ -377,14 +371,14 @@ export const qualityModel = {
             "relevantEntities": ["service", "link"],
             "sources": [{ "key": "Goniwada2021", "section": "3 Decentralize Everything Principle (Decentralize deployment, governance)" }],
             "measures": []
-        },  
+        },
         "lowCoupling": {
             "name": "Low coupling",
             "description": "In a cloud-native application coupling shoud be low in terms of links between components. Each link represents a dependency and therefore decreases service independent",
             "relevantEntities": ["service", "link"],
             "sources": [],
             "measures": []
-        },     
+        },
         "functionalDecentralization": {
             "name": "Functional decentralization",
             "description": "Business functionality should be decentralized over the system as a whole to make components more independent.",
@@ -403,21 +397,21 @@ export const qualityModel = {
             "name": "Logical grouping",
             "description": "To increase the independence of services, services should also be grouped so that services which are related are in the same group, but services which are independent are separated further. That way a separation can also be achieved on the network and infrastructure level by separating independent component groups more strictly. Potential impacts of a compromised or misbehaving service can therefore be reduced to the group to which it belongs but other groups are unaffected.",
             "relevantEntities": ["system", "service"],
-            "sources": [{ "key": "Scholl2019", "section": "6 Use Namespaces to Organize Services in Kubernetes" },{ "key": "Arundel2019", "section": "5 Using Namespaces" },{ "key": "Indrasiri2021", "section": "1 Why container orchestration?; Componentization and isolation" }],
+            "sources": [{ "key": "Scholl2019", "section": "6 Use Namespaces to Organize Services in Kubernetes" }, { "key": "Arundel2019", "section": "5 Using Namespaces" }, { "key": "Indrasiri2021", "section": "1 Why container orchestration?; Componentization and isolation" }],
             "measures": []
         },
         "backingServiceDecentralization": {
             "name": "Backing service decentralization",
             "description": "By assigning different backing services to different components a decentralization can be achieved which makes components more independent. For example, instead of one message broker for a whole system, several message brokers can be used, each for a group of components that are interrelated. A problem in one messaging broker has an impact on only those components using it, but not on components having separate message brokers.",
             "relevantEntities": ["service", "backing service"],
-            "sources": [{ "key": "Indrasiri2021", "section": "4 Decentralized Data Management (decentralized data leads to higher service independence while centralized data leads to higher consistency.)" },{ "key": "Indrasiri2021", "section": "4 Data Service Pattern (As having a negative impact because multiple services should not access the same data);" },{ "key": "Ruecker2021", "section": "2 Different Workflow Engines for different services" },{ "key": "Goniwada2021", "section": "5 Distributed State, Decentralized Data"}],
+            "sources": [{ "key": "Indrasiri2021", "section": "4 Decentralized Data Management (decentralized data leads to higher service independence while centralized data leads to higher consistency.)" }, { "key": "Indrasiri2021", "section": "4 Data Service Pattern (As having a negative impact because multiple services should not access the same data);" }, { "key": "Ruecker2021", "section": "2 Different Workflow Engines for different services" }, { "key": "Goniwada2021", "section": "5 Distributed State, Decentralized Data" }],
             "measures": []
         },
         "addressingAbstraction": {
             "name": "Addressing abstraction",
             "description": "By abstracting from specific addresses for reaching other components, address changes can be handled automatically without impacting the link between components. This can be achieved for example through service discovery where components are addressed through abstract service names and specific addresses are resolved through service discovery.",
             "relevantEntities": ["link", "backing service"],
-            "sources": [{ "key": "Davis2019", "section": "8.3" },{ "key": "Ibryam2020", "section": "12 Service Discovery" },{ "key": "Richardson2019", "section": "Using service discovery" },{ "key": "Garrison2017", "section": "7 Service Discovery" },{ "key": "Indrasiri2021", "section": "3 Service Registry and Discovery Pattern" },{ "key": "Bastani2017", "section": "7 Routing (Use service discovery with support for health checks and respect varying workloads)" },{ "key": "Indrasiri2021", "section": "3 Service Abstraction Pattern (Use an abstraction layer in front of services (for example Kubernetes Service))" },{ "key": "Goniwada2021", "section": "4 Service Discovery" }],
+            "sources": [{ "key": "Davis2019", "section": "8.3" }, { "key": "Ibryam2020", "section": "12 Service Discovery" }, { "key": "Richardson2019", "section": "Using service discovery" }, { "key": "Garrison2017", "section": "7 Service Discovery" }, { "key": "Indrasiri2021", "section": "3 Service Registry and Discovery Pattern" }, { "key": "Bastani2017", "section": "7 Routing (Use service discovery with support for health checks and respect varying workloads)" }, { "key": "Indrasiri2021", "section": "3 Service Abstraction Pattern (Use an abstraction layer in front of services (for example Kubernetes Service))" }, { "key": "Goniwada2021", "section": "4 Service Discovery" }],
             "measures": []
         },
         "sparcity": {
@@ -434,13 +428,6 @@ export const qualityModel = {
             "sources": [],
             "measures": []
         },
-        "": {
-            "name": "",
-            "description": "",
-            "relevantEntities": [],
-            "sources": [{ "key": "", "section": "" }],
-            "measures": []
-        },
         "managedInfrastructure": {
             "name": "Managed infrastructure",
             "description": "Infrastructure such as basic computing, storage or network resources can be managed by vendors to ensure a stable functioning and up-to-date functionalities. Furthermore, it reduces the operational overhead.",
@@ -452,125 +439,212 @@ export const qualityModel = {
             "name": "Managed backing services",
             "description": "Especially backing services that provide non-business functionality can be managed by vendors to ensure a stable functioning and up-to-date functionalities. Furthermore, it reduces the operational overhead.",
             "relevantEntities": ["backing service"],
-            "sources": [{ "key": "Scholl2019", "section": "6 Use Managed Databases and Analytics Services" },{ "key": "Arundel2019", "section": "15 Don't build your own monitoring infrastructure (Use an external monitoring service)" },{ "key": "Bastani2017", "section": "10 managed and automated messaging system (operating your own messaging system increases operational overhead, better use a system managed by a platform)" }],
+            "sources": [{ "key": "Scholl2019", "section": "6 Use Managed Databases and Analytics Services" }, { "key": "Arundel2019", "section": "15 Don't build your own monitoring infrastructure (Use an external monitoring service)" }, { "key": "Bastani2017", "section": "10 managed and automated messaging system (operating your own messaging system increases operational overhead, better use a system managed by a platform)" }],
+            "measures": []
+        },
+        "replication": {
+            "name": "Replication",
+            "description": "In a cloud-native application business logic and needed data should be replicated at various points in a system so that latencies can be minimized and requests can be distributed for fast request handling.",
+            "relevantEntities": ["system", "component"],
+            "sources": [],
             "measures": []
         },
         "serviceReplication": {
             "name": "Service replication",
-            "description": "Services and therefore their provided functionalities are replicated across different locations so that the latency for accesses from different locations is minimized and the incoming load can be distributed among replicas.",
+            "description": "In a cloud-native application services and therefore their provided functionalities should be replicated across different locations so that the latency for accesses from different locations is minimized and the incoming load can be distributed among replicas.",
+            "relevantEntities": ["service"],
             "sources": [],
             "measures": []
         },
         "horizontalDataReplication": {
             "name": "Horizontal data replication",
-            "description": "Data is replicated horizontally, that means duplicated across several instances of a storage backing service so that a higher load can be handled and replicas closer to the service where data is needed can be used to reduce latency.",
-            "sources": [],
+            "description": "Data should be replicated horizontally, that means duplicated across several data storage components so that higher load can be handled and replicas closer to the service where data is needed can be used to reduce latency.",
+            "relevantEntities": ["storage backing service", "data aggregate"],
+            "sources": [{ "key": "Scholl2019", "section": "6 Use Data Partitioning and Replication for Scale" }, { "key": "Goniwada2021", "section": "4 Data Replication" }],
             "measures": []
         },
         "verticalDataReplication": {
             "name": "Vertical data replication",
-            "description": "Data is replicated vertically, that means across a request trace so that it is available closer to where a request initially comes in. Typically caching is used for vertical data replication.",
-            "sources": [],
+            "description": "Data should be replicated vertically, that means across a request trace so that it is available closer to where a request initially comes in. Typically caching is used for vertical data replication.",
+            "relevantEntities": ["service", "data aggregate"],
+            "sources": [{ "key": "Scholl2019", "section": "6 Use Caching" }, { "key": "Bastani2017", "section": "9 Caching (Use an In-Memory cache for queries to relieve datastore from traffic; replication into faster data storage)" }, { "key": "Indrasiri2021", "section": "4 Caching Pattern" }],
             "measures": []
         },
         "shardedDataStoreReplication": {
             "name": "Sharded data store replication",
-            "description": "Data storage is sharded, that means data is split into several storage backing service instances by a certain strategy so that requests can be distributed across shards to increase performance. One example strategy could be to shard data geographically, that means user data from one location is stored in one shard while user data from another location is stored in a different shard. One storage backing service instance is then less likely to be overloaded with requests, because the number of potential requests is limited by the amount of data in that instance.",
-            "sources": [],
+            "description": "Data should be sharded, that means split into several storage components by a reasonable strategy so that requests can be distributed across shards to increase performance, because one storage component is not as easily overloaded with requests.",
+            "relevantEntities": ["storage backing service", "data aggregate"],
+            "sources": [{ "key": "Indrasiri2014", "section": "4 Data Sharding Pattern" }, { "key": "Goniwada2021", "section": "4 Data Partitioning Pattern" }],
             "measures": []
         },
-        "resourceLimits": {
-            "name": "Resource limits",
-            "description": "For all components the maximum amount of resources a component can consume is limited based on its predicted needs so that resources are provisioned efficiently. That means a component gets the resources that it needs, but not more than necessary. By making the resource requirements explicit, for example in a configuration file, these limits can be enforced by the infrastructure.",
-            "sources": [],
+        "enforcementOfAppropriateResourceBoundaries": {
+            "name": "Enforcement of appropriate resource boundaries",
+            "description": "In cloud-native applications, the resources required by a component should be predictable as precisely as possible and specified accordingly for each component in terms of lower and upper boundaries. Resources include CPU, memory, GPU, or Network requirements. This information should be used by the infrastructure to enforce these resource boundaries. Thereby it is ensured that a component has the resources available that it needs to function properly, that the infrastructure can optimize the amount of allocated resource, and that components are not negatively impacted by defective components which excessively consume resources.",
+            "relevantEntities": ["component"],
+            "sources": [{ "key": "Scholl2019", "section": "6 Define CPU and Memory Limits for Your Containers" },{ "key": "Arundel2019", "section": "5 Resource Limits" },{ "key": "Ibryam2020", "section": "2 Defined Resource requirements" },{ "key": "Arundel2019", "section": "5 Resource Quotas (limit maximum resources for a namespace)" },{ "key": "Goniwada2021", "section": "3 Runtime Confinement Principle, 6 Predictable Demands" }],
             "measures": []
         },
         "built-InAutoscaling": {
             "name": "Built-in autoscaling",
-            "description": "Horizontal up- and down-scaling of components is automated and built into the infrastructure on which components run. Horizontal scaling means that component instances are replicated when the load increases and components instances are removed when load decreases. This autoscaling is based on rules which can be configured according to system needs.",
-            "sources": [],
+            "description": "In a cloud-native application, autoscaling of components should be automated and ideally built-in into the infrastructure to reduce the operational effort for scaling. Autoscaling should be based on appropriate rules so that resurce utilization is optimized. The automated scaling also has to account for a services’ dependencies.",
+            "relevantEntities": ["component", "infrastructure"],
+            "sources": [{ "key": "Scholl2019", "section": "6 Use Platform Autoscaling Features" },{ "key": "Ibryam2020", "section": "24 Elastic Scale" },{ "key": "Bastani2017", "section": "13 Autoscaling" },{ "key": "Indrasiri2021", "section": "1 Why container orchestration?; Scaling" },{ "key": "Goniwada2021", "section": "5 Elasticity in Microservices" }],
             "measures": []
         },
         "infrastructureAbstraction": {
             "name": "Infrastructure abstraction",
-            "description": "The used infrastructure such as physical hardware, virtual hardware, or software platform is abstracted by clear boundaries to enable a clear differentiation of responsibilities for operating and managing infrastructure. For example, when a managed container orchestration system is used, the system is operable on that level of abstraction meaning that the API of the orchestration system is the boundary. Problems with underlying hardware or VMs are handled transparently by the provider.",
-            "sources": [],
+            "description": "In a cloud-native application the used infrastructure should be abstracted by clear boundaries to decouple the system from physical hardware or also virtual hardware to minimize the effort and risk involved with managing infrastructure.",
+            "relevantEntities": ["service", "infrastructure"],
+            "sources": [{ "key": "Bastani2017", "section": "14 Service Brokers (make use of service brokers as an additional level of abstraction to automatically add or remove backing services)" },{ "key": "Goniwada2021", "section": "3 Location-Independent Principle" }],
             "measures": []
         },
         "cloudVendorAbstraction": {
             "name": "Cloud vendor abstraction",
-            "description": "The managed infrastructure and backing services used by a system and provided by a cloud vendor are based on unified or standardized interfaces so that vendor specifics are abstracted and a system could potentially be transferred to a another cloud vendor offering the same unified or standardized interfaces.",
+            "description": "In a cloud-native application the infrastructure and services offered by a cloud provider should be abstracted with a unifying boundary to enable portability across different cloud vendors.",
+            "relevantEntities": ["service", "infrastructure"],
+            "sources": [{ "key": "Wimm2017", "section": "3 Infrastructure and the Cloud Provider Interface" },{ "key": "Indrasiri2021", "section": "1 Dynamic Management; Multicloud support" }],
+            "measures": []
+        },
+        "configurationManagement": {
+            "name": "Configuration management",
+            "description": "Configuration values which are specific to an environment should be managed separately in a consistent way. Through this, components are more portable across environments and configuration can change independently from components.",
+            "relevantEntities": ["component", "backing data"],
             "sources": [],
+            "measures": []
+        },
+        "isolatedConfiguration": {
+            "name": "Isolated configuration",
+            "description": "Following DevOps principles, environment-specific configurations should be separated from component artifacts (e.g. deployment units) and provided by the environment in which a cloud-native application runs. This enables adaptability across environments (also across testing and production environments)",
+            "relevantEntities": ["service", "backing data"],
+            "sources": [{ "key": "Davis2019", "section": "6.2 The app's configuration layer" },{ "key": "Ibryam2020", "section": "18" },{ "key": "Scholl2019", "section": "6 Never Store Secrets or Configuration Inside an Image" },{ "key": "Adkins2019", "section": "14 Treat Configuration as Code" },{ "key": "Indrasiri2021", "section": " Decoupled Configurations" }],
             "measures": []
         },
         "configurationStoredInSpecializedServices": {
             "name": "Configuration stored in specialized services",
             "description": "Configuration values are stored in specialized backing services and not only environment variables for example. That way, changing configurations at runtime is facilitated and can be enabled by connecting components to such specialized backing services and checking for updated configurations at runtime. Additionally, configurations can be stored once, but accessed by different components.",
-            "sources": [],
+            "relevantEntities": ["service", "backing data", "backing service"],
+            "sources": [{ "key": "Ibryam2020", "section": "19 Configuration Resource" },{ "key": "Richardson2019", "section": "11.2 “Designing configurable services" },{ "key": "Arundel2019", "section": "10 ConfigMaps" },{ "key": "Bastani2017", "section": "2 Centralized, Journaled Configuration" },{ "key": "Bastani2017", "section": "2 Refreshable Configuration" }],
+            "measures": []
+        },
+        "contract-BasedLinks": {
+            "name": "Contract-based links",
+            "description": "Contracts are defined for the communication via links so that changes to endpoints can be evaluated by their impact on the contract and delayed when a contract would be broken. That way consumers of endpoints can adapt to changes when necessary without suddenly breaking communication via a link due to a changed endpoint.",
+            "relevantEntities": ["service", "endpoint", "link"],
+            "sources": [{ "key": "Bastani2017", "section": "4 Consumer-Driven Contract Testing (Use contracts for APIs to test against)" }],
+            "measures": []
+        },
+        "standardizedSelf-containedDeploymentUnit": {
+            "name": "Standardized self-contained deployment unit",
+            "description": "The components of a cloud-native applications should be deployed as standardized self-contained units so that the same artifact can reliably be installed and run in different environments and on different infrastructure.",
+            "relevantEntities": ["component"],
+            "sources": [{ "key": "Reznik2019", "section": "10 Containerized Apps" },{ "key": "Adkins2019", "section": "7 Use Containers (smaller deployments, separated operating system, portable);" },{ "key": "Indrasiri2021", "section": "1 Use Containerization and Container Orchestration" },{ "key": "Garrison2017", "section": "7 Application Runtime and Isolation" },{ "key": "Goniwada2021", "section": "3 Deploy Independently Principle (deploy services in independent containers), Self-Containment Principle, 5 Containerization" }],
             "measures": []
         },
         "immutableArtifacts": {
             "name": "Immutable artifacts",
             "description": "Infrastructure and components of a system are defined and described in its entirety at development time so that artifacts are immutable at runtime. This means upgrades are introduced at runtime through replacement of components instead of modification. Furthermore components do not differ across environments and in case of replication all replicas are identical to avoid unexpected behavior.",
+            "relevantEntities": ["service", "infrastructure"],
+            "sources": [{ "key": "Scholl2019", "section": "6 Don't Modify Deployed Infrastructure" },{ "key": "Indrasiri2021", "section": "1 Containerization" },{ "key": "Goniwada2021", "section": "3 Process Disposability Principle, Image Immutability Principle" }],
+            "measures": []
+        },
+        "guardedIngress": {
+            "name": "Guarded ingress",
+            "description": "Ingress communication, that means communication coming from the outside of a system, needs to be guarded. It should be ensured that access is controlled and that a system is not maliciously overwhelmed.",
+            "relevantEntities": ["service", "endpoint"],
+            "sources": [{ "key": "Scholl2019", "section": "6 Implement Rate Limiting and Throttling" },{ "key": "Adkins2019", "section": "8 Throttling (Delaying processing or responding to remain functional and decrease traffic from individual clients) (should be automated, part of graceful degradation)" },{ "key": "Adkins2019", "section": "8 Load shedding (In case of traffic spike, deny low priority requests to remain functional) (should be automated, part of graceful degradation)" },{ "key": "Goniwada2021", "section": "5 Throttling " }],
+            "measures": []
+        },
+        "distribution": {
+            "name": "Distribution",
+            "description": "In cloud-native applications components should be distributed across locations and data centers for availability, reliability, and performance.",
+            "relevantEntities": ["service", "infrastructure"],
             "sources": [],
             "measures": []
         },
         "physicalDataDistribution": {
             "name": "Physical data distribution",
             "description": "Storage Backing Service instances where Data aggregates are persisted are distributed across physical locations (e.g. availability zones of a cloud vendor) so that even in the case of a failure of one physical location, another physical location is still useable.",
-            "sources": [],
+            "relevantEntities": ["storage backing service", "infrastructure"],
+            "sources": [{ "key": "Scholl2019", "section": "6 Keep Data in Multiple Regions or Zones" },{ "key": "Indrasiri2021", "section": "4 Data Sharding Pattern: Geographically distribute data" }],
             "measures": []
         },
         "physicalServiceDistribution": {
             "name": "Physical service distribution",
             "description": "Components are distributed through replication across physical locations (e.g. availability zones of a cloud vendor) so that even in the case of a failure of one physical location, another physical location is still useable.",
+            "relevantEntities": ["component", "infrastructure"],
+            "sources": [{ "key": "Winn2017", "section": "2 Resiliency Through Availability Zones" }],
+            "measures": []
+        },
+        "seamlessUpgrades": {
+            "name": "Seamless upgrades",
+            "description": "Upgrades of services should not interfere with availability. There are different strategies, like rolling upgrades, to achieve this which should be provided as a capability by the infrastructure.",
+            "relevantEntities": ["component"],
             "sources": [],
             "measures": []
         },
         "rollingUpgradesEnabled": {
             "name": "Rolling upgrades enabled",
             "description": "The infrastructure on which components are deployed provides the ability for rolling upgrades. That means upgrades of components can be performed seamlessly in an automated manner. Seamlessly means that upgrades of components do not necessitate planned downtime.",
+            "relevantEntities": ["component", "infrastructure"],
+            "sources": [{ "key": "Davis2019", "section": "7.2" },{ "key": "Scholl2019", "section": "6 Use Zero-Downtime Releases" },{ "key": "Ibryam2020", "section": "3 Declarative Deployment" },{ "key": "Reznik2019", "section": "10 Risk-Reducing Deployment Strategies" },{ "key": "Arundel2019", "section": "13 Rolling Updates" },{ "key": "Indrasiri2021", "section": "1 Why container orchestration?; Rolling upgrades" }],
+            "measures": []
+        },
+        "automatedInfrastructureMaintenance": {
+            "name": "Automated infrastructure maintenance",
+            "description": "The used infrastructure should automate regular maintenance tasks as much as possible in a way that the operation of components is not impacted by these tasks. Such tasks include updates of operating systems, standard libraries, and middleware managed by the infrastructure, but also certificate regeneration.",
+            "relevantEntities": ["infrastructure"],
+            "sources": [{ "key": "Reznik2019", "section": "10 Automated Infrastructure" },{ "key": "Goniwada2021", "section": "5 Automation" }],
+            "measures": []
+        },
+        "autonomousFaultHandling": {
+            "name": "Autonomous fault handling ",
+            "description": "In cloud-native applications services should expect faults at different levels and either handle them or minimize their impact by relying on the capabilities of cloud environments.",
+            "relevantEntities": ["service", "link", "infrastructure"],
             "sources": [],
+            "measures": []
+        },
+        "invocationTimeouts": {
+            "name": "Invocation timeouts",
+            "description": "For links between components, timeouts should be defined to avoid infinite waiting on a service that is unavailable and a timely handling of problems.",
+            "relevantEntities": ["link"],
+            "sources": [{ "key": "Indrasiri2021", "section": "3 Resilient Connectivity Pattern: Time-out" },{ "key": "Richardson2019", "section": "3.2.3 Handling partial failures using the Circuit Breaker pattern" },{ "key": "Goniwada2021", "section": "5 Timeout" }],
             "measures": []
         },
         "retriesForSafeInvocations": {
             "name": "Retries for safe invocations",
             "description": "Links that are safe to invoke multiple times without leading to unintended state changes, are automatically retried in case of errors to transparently handle transient faults in communication. That way faults can be prevented from being propagated higher up in a request trace.",
-            "sources": [],
+            "relevantEntities": ["link"],
+            "sources": [{ "key": "Davis2019", "section": "9.1" },{ "key": "Scholl2019", "section": "6 Handle Transient Failures with Retries" },{ "key": "Scholl2019", "section": "6 Use a Finite Number of Retries" },{ "key": "Bastani2017", "section": "12 Isolating Failures and Graceful Degradation: Use retries" },{ "key": "Indrasiri2021", "section": "3 Resilient Connectivity Pattern: Retry" },{ "key": "Ruecker2021", "section": "9 Synchronous Request/Response (Use retries in synchronous communications)" },{ "key": "Ruecker2021", "section": "9 The Importance of Idempotency (Communication which is retried needs idempotency)" },{ "key": "Goniwada2021", "section": "Idempotent Service Operation, Retry, 5 Retry " }],
             "measures": []
         },
         "circuitBreakedCommunication": {
             "name": "Circuit breaked communication",
             "description": "For links a circuit breaker implementation is used which avoids unnecessary communication and therefore waiting time if a communication is known to fail. Instead the circuit breaker immediately returns an error response of a default response, is possible, while periodically retrying communication in the background",
-            "sources": [],
+            "relevantEntities": ["link"],
+            "sources": [{ "key": "Davis2019", "section": "10.1" },{ "key": "Scholl2019", "section": "6 Use Circuit Breakers for Nontransient Failures" },{ "key": "Richardson2019", "section": "3.2.3 Handling partial failures using the Circuit Breaker pattern" },{ "key": "Bastani2017", "section": "12 Isolating Failures and Graceful Degradation: circuit breaker" },{ "key": "Indrasiri2021", "section": "3 Resilient Connectivity Pattern: Circuit breaker" },{ "key": " Goniwada2021", "section": "4 Circuit Breaker" }],
             "measures": []
         },
         "automatedRestarts": {
             "name": "Automated restarts",
             "description": "When a component is found to be unhealthy, that means not functioning as expected, it is directly and automatically restarted. Ideally this capability is provided by the infrastructure on which a component is running.",
-            "sources": [],
+            "relevantEntities": ["component"],
+            "sources": [{ "key": "Winn2017", "section": "2 Self-Healing Processes; Self-Healing VMs" },{ "key": "Bastani2017", "section": "13 automatic remediation" },{ "key": "Indrasiri2021", "section": "1 Why container orchestration?; High availability" },{ "key": "Goniwada2021", "section": "5 Self-Healing" }],
             "measures": []
         },
         "api-BasedCommunication": {
             "name": "API-based communication",
             "description": "All endpoints that are offered by a service are part of a well-defined and documented API. That means, the APIs are based on common principles, are declarative instead of imperative, and are documented in a standardized or specified format (such as the OpenAPI specification). Communication only happens via endpoints that are part of such APIs and can be both synchronous or asynchronous.",
-            "sources": [],
-            "measures": []
-        },
-        "contract-BasedLinks": {
-            "name": "Contract-based links",
-            "description": "Contracts are defined for the communication via links so that changes to endpoints can be evaluated by their impact on the contract and delayed when a contract would be broken. That way consumers of endpoints can adapt to changes when necessary without suddenly breaking communication via a link due to a changed endpoint.",
-            "sources": [],
+            "relevantEntities": ["service", "endpoint", "link"],
+            "sources": [{ "key": "Reznik2019", "section": "9 Communicate Through APIs" },{ "key": "Adkins2019", "section": "6 Understandable Interface Specifications (Use Interface specifications for understandability" },{ "key": "Bastani2017", "section": "6 Everything is an API (Services are integrated via APIs)" },{ "key": "Indrasiri2021", "section": "2 Service Definitions in Synchronous Communication (Use a service definition for each service);" },{ "key": "Indrasiri2021", "section": "2 Service Definition in Asynchronous Communication (Use schemas to define message formats);" },{ "key": "Goniwada2021", "section": "3 API First Principle" }],
             "measures": []
         },
         "mediatedCommunication": {
             "name": "Mediated communication",
             "description": "Communication from one component via a link is mediated through additional components so that there is no direct dependence on the other communication partner and additional operations can be performed to manage the communication, also in a centrally and consistently configurable way. Such operations can for example be access control, load balancing, retries, or monitoring.",
-            "sources": [],
+            "relevantEntities": ["component", "link"],
+            "sources": [{ "key": "Indrasiri2021", "section": "3 Sidecar Pattern, Service Mesh Pattern, Service Abstraction Pattern (Proxy communication with services to include service discovery and load balancing)" },{ "key": "Davis2019", "section": "10.3" },{ "key": "Richardson2019", "section": "11.4.2" }],
             "measures": []
         },
-
-
     },
     "impacts": [
         { "impactedFactor": "secretsManagement", "sourceFactor": "secretsStoredInSpecializedServices", "impactType": "positive" },
@@ -629,11 +703,45 @@ export const qualityModel = {
         { "impactedFactor": "replaceability", "sourceFactor": "addressingAbstraction", "impactType": "positive" },
         { "impactedFactor": "simplicity", "sourceFactor": "sparcity", "impactType": "positive" },
         { "impactedFactor": "simplicity", "sourceFactor": "operationOutsourcing", "impactType": "positive" },
-        { "impactedFactor": "costVariability", "sourceFactor": "operationOutsourcing", "impactType": "positive" },
         { "impactedFactor": "operationOutsourcing", "sourceFactor": "managedBackingServices", "impactType": "positive" },
         { "impactedFactor": "operationOutsourcing", "sourceFactor": "managedBackingServices", "impactType": "positive" },
-
-        { "impactedFactor": "", "sourceFactor": "", "impactType": "positive" },
+        { "impactedFactor": "resourceUtilization", "sourceFactor": "dynamicScheduling", "impactType": "positive" },
+        { "impactedFactor": "timeBehaviour", "sourceFactor": "replication", "impactType": "positive" },
+        { "impactedFactor": "replication", "sourceFactor": "horizontalDataReplication", "impactType": "positive" },
+        { "impactedFactor": "replication", "sourceFactor": "verticalDataReplication", "impactType": "positive" },
+        { "impactedFactor": "analyzability", "sourceFactor": "verticalDataReplication", "impactType": "negative" },
+        { "impactedFactor": "availability", "sourceFactor": "verticalDataReplication", "impactType": "positive" },
+        { "impactedFactor": "replication", "sourceFactor": "shardedDataStoreReplication", "impactType": "positive" },
+        { "impactedFactor": "resourceUtilization", "sourceFactor": "enforcementOfAppropriateResourceBoundaries", "impactType": "positive" },
+        { "impactedFactor": "availability", "sourceFactor": "enforcementOfAppropriateResourceBoundaries", "impactType": "positive" },
+        { "impactedFactor": "availability", "sourceFactor": "built-InAutoscaling", "impactType": "positive" },
+        { "impactedFactor": "elasticity", "sourceFactor": "built-InAutoscaling", "impactType": "positive" },
+        { "impactedFactor": "adaptability", "sourceFactor": "infrastructureAbstraction", "impactType": "positive" },
+        { "impactedFactor": "adaptability", "sourceFactor": "cloudVendorAbstraction", "impactType": "positive" },
+        { "impactedFactor": "reusability", "sourceFactor": "cloudVendorAbstraction", "impactType": "positive" },
+        { "impactedFactor": "adaptability", "sourceFactor": "configurationManagement", "impactType": "positive" },
+        { "impactedFactor": "configurationManagement", "sourceFactor": "isolatedConfiguration", "impactType": "positive" },
+        { "impactedFactor": "configurationManagement", "sourceFactor": "configurationStoredInSpecializedServices", "impactType": "positive" },
+        { "impactedFactor": "adaptability", "sourceFactor": "contract-BasedLinks", "impactType": "positive" },
+        { "impactedFactor": "installability", "sourceFactor": "standardizedSelf-containedDeploymentUnit", "impactType": "positive" },
+        { "impactedFactor": "replaceability", "sourceFactor": "immutableArtifacts", "impactType": "positive" },
+        { "impactedFactor": "availability", "sourceFactor": "guardedIngress", "impactType": "positive" },
+        { "impactedFactor": "availability", "sourceFactor": "distribution", "impactType": "positive" },
+        { "impactedFactor": "distribution", "sourceFactor": "physicalDataDistribution", "impactType": "positive" },
+        { "impactedFactor": "distribution", "sourceFactor": "physicalServiceDistribution", "impactType": "positive" },
+        { "impactedFactor": "seamlessUpgrades", "sourceFactor": "rollingUpgradesEnabled", "impactType": "positive" },
+        { "impactedFactor": "availability", "sourceFactor": "automatedInfrastructureMaintenance", "impactType": "positive" },
+        { "impactedFactor": "recoverability", "sourceFactor": "automatedInfrastructureMaintenance", "impactType": "positive" },
+        { "impactedFactor": "faultTolerance", "sourceFactor": "autonomousFaultHandling", "impactType": "positive" },
+        { "impactedFactor": "autonomousFaultHandling", "sourceFactor": "invocationTimeouts", "impactType": "positive" },
+        { "impactedFactor": "autonomousFaultHandling", "sourceFactor": "retriesForSafeInvocations", "impactType": "positive" },
+        { "impactedFactor": "autonomousFaultHandling", "sourceFactor": "circuitBreakedCommunication", "impactType": "positive" },
+        { "impactedFactor": "recoverability", "sourceFactor": "automatedRestarts", "impactType": "positive" },
+        { "impactedFactor": "interoperability", "sourceFactor": "api-BasedCommunication", "impactType": "positive" },
+        { "impactedFactor": "testability", "sourceFactor": "api-BasedCommunication", "impactType": "positive" },
+        { "impactedFactor": "interoperability", "sourceFactor": "mediatedCommunication", "impactType": "positive" },
+        { "impactedFactor": "timeBehaviour", "sourceFactor": "mediatedCommunication", "impactType": "positive" },
+        { "impactedFactor": "analyzability", "sourceFactor": "mediatedCommunication", "impactType": "positive" }
     ],
     "measures": {
         "ratioOfEndpointsSupportingSSL": {
