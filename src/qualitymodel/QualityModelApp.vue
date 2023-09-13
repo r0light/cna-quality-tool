@@ -16,6 +16,7 @@ import { ref, onMounted, onUpdated } from 'vue';
 import { dia, shapes, util } from "jointjs";
 import { QualityAspect, ProductFactor } from './config/elementShapes';
 import { getQualityModel } from '@/core/qualitymodel/QualityModelInstance';
+import { first } from 'lodash';
 
 const props = defineProps<{
     inView: boolean,
@@ -31,9 +32,9 @@ const paperRef = ref(null);
 
 const qualityModel = getQualityModel();
 
-const qualityAspectElements = [];
-const productFactorElements = [];
-const impactElements = [];
+const qualityAspectElements: dia.Element[] = [];
+const productFactorElements: dia.Element[] = [];
+const impactElements: dia.Link[] = [];
 
 onMounted(() => {
 
@@ -111,7 +112,6 @@ onMounted(() => {
 
     for (const impact of qualityModel.impacts) {
 
-
         var link = new shapes.standard.Link();
         link.source(graph.getCell(impact.getSourceFactor.getId));
         link.target(graph.getCell(impact.getImpactedFactor.getId));
@@ -149,8 +149,6 @@ onUpdated(() => {
     orderQualityAspects();
 
     placeQualityAspects();
-
-    //TODO place product factors
 
     placeProductFactors();
 
@@ -332,6 +330,49 @@ function placeQualityAspects() {
 
 function placeProductFactors() {
 
+    let centerX = qmPaper.value.clientWidth / 2;
+    let centerY = qmPaper.value.clientHeight / 2;
+
+    let toBePlaced = productFactorElements.map(element => element.id);
+
+    //console.log(toBePlaced);
+
+    let firstLayerFactors = qualityModel.qualityAspects.map(qualityAspect => qualityAspect.getImpactingFactors()).flat();
+
+    //console.log(firstLayerFactors);
+
+    for (const firstLayerFactor of firstLayerFactors) {
+        //console.log(firstLayerFactor.getImpactedFactors());
+        let impactedElements = firstLayerFactor.getImpactedFactors().map(qualityAspect => qualityAspectElements.find(element => element.id === qualityAspect.getId)).filter(element => element !== undefined);
+
+
+        let averageX = impactedElements.map(element => element.position().x).reduce(function(a, b){ return a + b;}) / impactedElements.length;
+        let averageY = impactedElements.map(element => element.position().y).reduce(function(a, b){ return a + b;}) / impactedElements.length;
+
+        // calculate parameters of line between impacted elements and center
+        let slope = (averageY - centerY) / (averageX - centerX);
+        let axisDistance = averageY - (slope * averageX);
+
+        // TODO find a good formula to calculate new position
+        let newX = 0;
+        if (averageX > centerX) {
+            newX = averageX - 50;
+        } else {
+            newX = averageX + 50;
+        }
+        //let newX = (averageX * 2 + centerX) / 2
+        let newY = newX * slope + axisDistance;
+
+        //console.log("move to X: " + newX + " Y: " + newY);
+
+        let currentFactorElement = productFactorElements.find(element => element.id === firstLayerFactor.getId);
+        currentFactorElement.translate(newX - currentFactorElement.position().x, newY - currentFactorElement.position().y);
+
+        // TODO ensure elements do not overlap
+
+    }
+
+    // TODO continue for other elements
 
 
 }
