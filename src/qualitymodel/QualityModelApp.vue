@@ -127,6 +127,7 @@ onMounted(() => {
                 }
             }
         });
+        link.router('metro');
 
         link.addTo(graph);
         impactElements.push(link);
@@ -185,7 +186,7 @@ function orderQualityAspects() {
 
             let sharedFactors = allFactors.length === 0 ? 0 : commonFactors.length / allFactors.length;
 
-            let proximity = (sharedHighlevelAspect * 0.4 + sharedFactors * 0.6);
+            let proximity = (sharedHighlevelAspect * 0.3 + sharedFactors * 0.7);
 
             qualityAspectProximity[i][j] = proximity;
             qualityAspectProximity[j][i] = proximity;
@@ -334,23 +335,43 @@ function placeProductFactors() {
     let centerY = qmPaper.value.clientHeight / 2;
 
     let toBePlaced = productFactorElements.map(element => element.id);
-
-    let firstLayerFactors = qualityModel.qualityAspects.map(qualityAspect => qualityAspect.getImpactingFactors()).flat();
+    let placed = qualityAspectElements.map(element => element.id);
 
     //console.log(firstLayerFactors);
 
     // TODO iterate based on elements that are already drawn in the sense that in each round only elements are drawn for which all impacted factors are already drawn
     // TODO draw factors which impact only one other factor in a circle around the impacted factor
 
-    for (const firstLayerFactor of firstLayerFactors) {
-        //console.log(firstLayerFactor.getImpactedFactors());
-        let impactedElements = firstLayerFactor.getImpactedFactors().map(qualityAspect => qualityAspectElements.find(element => element.id === qualityAspect.getId)).filter(element => element !== undefined);
+    outerLoop: while (toBePlaced.length > 0) {
+
+        let nextElementId = toBePlaced[0];
+        let nextElement = productFactorElements.find(element => element.id === nextElementId);
+
+        let impactedFactors = qualityModel.findProductFactor(nextElement.id.toString()).getImpactedFactors();
+
+        // check if all impacted factors are already placed
+        for (const factor of impactedFactors) {
+            if (!placed.includes(factor.getId)) {
+                // if an impacted factor is not yet placed, put element and the end again
+                toBePlaced.push(toBePlaced.splice(0,1)[0]);
+                // continue with next element
+                continue outerLoop;
+            }
+        }
+
+        let impactedElements = impactedFactors.map(impactedFactor => {
+            let element = qualityAspectElements.find(element => element.id === impactedFactor.getId);
+            if (!element) {
+                element = productFactorElements.find(element => element.id === impactedFactor.getId);
+            }
+            return element;
+        });
 
         // middle point between impacted factors
         let averageX = impactedElements.map(element => element.position().x).reduce(function(a, b){ return a + b;}) / impactedElements.length;
         let averageY = impactedElements.map(element => element.position().y).reduce(function(a, b){ return a + b;}) / impactedElements.length;
 
-        console.log("for " + firstLayerFactor.getId + ": averageX: " + averageX + ", averageY: " + averageY);
+        //console.log("for " + nextElementId + ": averageX: " + averageX + ", averageY: " + averageY);
 
         // calculate parameters of line between middle point and center
         let slope = (averageY - centerY) / (averageX - centerX);
@@ -369,16 +390,37 @@ function placeProductFactors() {
 
         //console.log("for " + firstLayerFactor.getId + ": newX: "  + newX + ", newY:" + newY);
 
+        nextElement.translate(newX - nextElement.position().x, newY - nextElement.position().y);
 
-        let currentFactorElement = productFactorElements.find(element => element.id === firstLayerFactor.getId);
-        currentFactorElement.translate(newX - currentFactorElement.position().x, newY - currentFactorElement.position().y);
+        //TODO differentiate between elements that impact only one element and elements that impact multiple elements
 
-        // TODO ensure elements do not overlap (see https://stackoverflow.com/questions/57056432/how-can-i-prevent-elements-from-touching-colliding-in-jointjs)
+        /*
+        const elementsUnder = graph.findModelsInArea(nextElement.getBBox()).filter(el => el !== nextElement);
+        if (elementsUnder.length > 0) {
+            // an overlap found, change the position
 
+            // calculate angle of current position 
+            let normalizedX = newX - averageX;
+            let normalizedY = newY - averageY;
+            let radius = distanceToCenter*oneStep;
+
+            let angle = Math.asin(normalizedX / radius);
+            //let angle = Math.acos(normalizedY / radius);
+
+            let newAngle = angle + 10;
+
+            let updatedX = (radius*Math.sin(newAngle)) + averageX;
+            let updatedY = (radius*Math.cos(newAngle)) + averageY;
+
+            nextElement.translate(updatedX - nextElement.position().x, updatedY - nextElement.position().y);
+        }
+        */
+        
+
+        // TODO ensure elements do not overlap (see https://stackoverflow.com/questions/57056432/how-can-i-prevent-elements-from-touching-colliding-in-jointjs); https://math.stackexchange.com/questions/260096/find-the-coordinates-of-a-point-on-a-circle
+
+        placed.push(toBePlaced.splice(0,1)[0]);
     }
-
-    // TODO continue for other elements
-
 
 }
 

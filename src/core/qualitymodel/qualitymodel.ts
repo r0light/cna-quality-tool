@@ -703,6 +703,7 @@ export const qualityModel = {
         { "impactedFactor": "replaceability", "sourceFactor": "addressingAbstraction", "impactType": "positive" },
         { "impactedFactor": "simplicity", "sourceFactor": "sparcity", "impactType": "positive" },
         { "impactedFactor": "simplicity", "sourceFactor": "operationOutsourcing", "impactType": "positive" },
+        { "impactedFactor": "operationOutsourcing", "sourceFactor": "managedInfrastructure", "impactType": "positive" },
         { "impactedFactor": "operationOutsourcing", "sourceFactor": "managedBackingServices", "impactType": "positive" },
         { "impactedFactor": "operationOutsourcing", "sourceFactor": "managedBackingServices", "impactType": "positive" },
         { "impactedFactor": "resourceUtilization", "sourceFactor": "dynamicScheduling", "impactType": "positive" },
