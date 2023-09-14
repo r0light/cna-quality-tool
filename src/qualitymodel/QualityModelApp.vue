@@ -335,40 +335,45 @@ function placeProductFactors() {
 
     let toBePlaced = productFactorElements.map(element => element.id);
 
-    //console.log(toBePlaced);
-
     let firstLayerFactors = qualityModel.qualityAspects.map(qualityAspect => qualityAspect.getImpactingFactors()).flat();
 
     //console.log(firstLayerFactors);
+
+    // TODO iterate based on elements that are already drawn in the sense that in each round only elements are drawn for which all impacted factors are already drawn
+    // TODO draw factors which impact only one other factor in a circle around the impacted factor
 
     for (const firstLayerFactor of firstLayerFactors) {
         //console.log(firstLayerFactor.getImpactedFactors());
         let impactedElements = firstLayerFactor.getImpactedFactors().map(qualityAspect => qualityAspectElements.find(element => element.id === qualityAspect.getId)).filter(element => element !== undefined);
 
-
+        // middle point between impacted factors
         let averageX = impactedElements.map(element => element.position().x).reduce(function(a, b){ return a + b;}) / impactedElements.length;
         let averageY = impactedElements.map(element => element.position().y).reduce(function(a, b){ return a + b;}) / impactedElements.length;
 
-        // calculate parameters of line between impacted elements and center
+        console.log("for " + firstLayerFactor.getId + ": averageX: " + averageX + ", averageY: " + averageY);
+
+        // calculate parameters of line between middle point and center
         let slope = (averageY - centerY) / (averageX - centerX);
         let axisDistance = averageY - (slope * averageX);
 
-        // TODO find a good formula to calculate new position
-        let newX = 0;
-        if (averageX > centerX) {
-            newX = averageX - 50;
-        } else {
-            newX = averageX + 50;
-        }
-        //let newX = (averageX * 2 + centerX) / 2
-        let newY = newX * slope + axisDistance;
+        // calculate distance between middle point and center
+        let distanceToCenter = Math.sqrt(Math.pow((centerX - averageX), 2) + Math.pow((centerY - averageY), 2));
 
-        //console.log("move to X: " + newX + " Y: " + newY);
+        //console.log("for " + firstLayerFactor.getId + ": distanceToCenter: "  + distanceToCenter);
+
+        let oneStep = 1 / 5
+
+        let newX = (1 - oneStep)*averageX + oneStep*centerX;
+        let newY = (1 - oneStep)*averageY + oneStep*centerY;
+
+
+        //console.log("for " + firstLayerFactor.getId + ": newX: "  + newX + ", newY:" + newY);
+
 
         let currentFactorElement = productFactorElements.find(element => element.id === firstLayerFactor.getId);
         currentFactorElement.translate(newX - currentFactorElement.position().x, newY - currentFactorElement.position().y);
 
-        // TODO ensure elements do not overlap
+        // TODO ensure elements do not overlap (see https://stackoverflow.com/questions/57056432/how-can-i-prevent-elements-from-touching-colliding-in-jointjs)
 
     }
 
