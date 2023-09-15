@@ -127,7 +127,7 @@ onMounted(() => {
                 }
             }
         });
-        link.router('metro');
+        link.router('normal');
 
         link.addTo(graph);
         impactElements.push(link);
@@ -160,7 +160,7 @@ function orderQualityAspects() {
     const noOfQualityAspects = qualityModel.qualityAspects.length;
 
     // calculate pair-wise proximity
-    let qualityAspectProximity: number[][] = Array.from({length: noOfQualityAspects}, e => Array(noOfQualityAspects).fill(0));
+    let qualityAspectProximity: number[][] = Array.from({ length: noOfQualityAspects }, e => Array(noOfQualityAspects).fill(0));
     let i = 0;
     for (const qualityAspectI of qualityModel.qualityAspects) {
         let j = 0;
@@ -173,7 +173,7 @@ function orderQualityAspects() {
                 qualityAspectProximity[i][j] = 1;
                 j = j + 1;
                 continue;
-            } 
+            }
             // else: calculate proximity
             let sameHighlevelAspect = qualityAspectI.getHighLevelAspectKey === qualityAspectJ.getHighLevelAspectKey;
             let sharedHighlevelAspect = sameHighlevelAspect ? 0.5 : 0;
@@ -353,7 +353,7 @@ function placeProductFactors() {
         for (const factor of impactedFactors) {
             if (!placed.includes(factor.getId)) {
                 // if an impacted factor is not yet placed, put element and the end again
-                toBePlaced.push(toBePlaced.splice(0,1)[0]);
+                toBePlaced.push(toBePlaced.splice(0, 1)[0]);
                 // continue with next element
                 continue outerLoop;
             }
@@ -368,8 +368,8 @@ function placeProductFactors() {
         });
 
         // middle point between impacted factors
-        let averageX = impactedElements.map(element => element.position().x).reduce(function(a, b){ return a + b;}) / impactedElements.length;
-        let averageY = impactedElements.map(element => element.position().y).reduce(function(a, b){ return a + b;}) / impactedElements.length;
+        let averageX = impactedElements.map(element => element.position().x).reduce(function (a, b) { return a + b; }) / impactedElements.length;
+        let averageY = impactedElements.map(element => element.position().y).reduce(function (a, b) { return a + b; }) / impactedElements.length;
 
         //console.log("for " + nextElementId + ": averageX: " + averageX + ", averageY: " + averageY);
 
@@ -382,44 +382,68 @@ function placeProductFactors() {
 
         //console.log("for " + firstLayerFactor.getId + ": distanceToCenter: "  + distanceToCenter);
 
-        let oneStep = 1 / 5
 
-        let newX = (1 - oneStep)*averageX + oneStep*centerX;
-        let newY = (1 - oneStep)*averageY + oneStep*centerY;
+        // parameters:
+        let oneStep = 1 / 6
+        let angleMovement = 10;
+        let radiusIncrease = 10;
 
+        let newX = (1 - oneStep) * averageX + oneStep * centerX;
+        let newY = (1 - oneStep) * averageY + oneStep * centerY;
 
         //console.log("for " + firstLayerFactor.getId + ": newX: "  + newX + ", newY:" + newY);
 
         nextElement.translate(newX - nextElement.position().x, newY - nextElement.position().y);
 
-        //TODO differentiate between elements that impact only one element and elements that impact multiple elements
+        let elementOverlapping = graph.findModelsInArea(nextElement.getBBox()).filter(el => el !== nextElement).length > 0;
+        let elementOutsidePaper =
+            (nextElement.position().x - nextElement.size().width / 2) < 0
+            || (nextElement.position().x + nextElement.size().width / 2) > qmPaper.value.clientWidth 
+            || (nextElement.position().y - nextElement.size().height / 2) < 0 
+            || (nextElement.position().y + nextElement.size().height / 2) > qmPaper.value.clientHeight;
 
-        /*
-        const elementsUnder = graph.findModelsInArea(nextElement.getBBox()).filter(el => el !== nextElement);
-        if (elementsUnder.length > 0) {
-            // an overlap found, change the position
+        let tries = 1;
+        while ((elementOverlapping || elementOutsidePaper) && tries < 50) {
 
-            // calculate angle of current position 
-            let normalizedX = newX - averageX;
-            let normalizedY = newY - averageY;
-            let radius = distanceToCenter*oneStep;
+            if (impactedElements.length > 1) {
+                // current element impacts multiple
+                let steps = (tries / 2) * oneStep;
+                newX = (1 - steps) * averageX + steps * centerX;
+                newY = (1 - steps) * averageY + steps * centerY;
+                nextElement.translate(newX - nextElement.position().x, newY - nextElement.position().y);
+                tries = tries + 1;
+            } else {
+                // current element impacts only one element
 
-            let angle = Math.asin(normalizedX / radius);
-            //let angle = Math.acos(normalizedY / radius);
+                // calculate angle of current position 
+                let normalizedX = newX - averageX;
+                let normalizedY = newY - averageY;
+                let radius = distanceToCenter * oneStep * (Math.floor(tries / radiusIncrease) + 1);
 
-            let newAngle = angle + 10;
+                let angle = Math.max(Math.acos(normalizedY / radius), Math.asin(normalizedX / radius));
 
-            let updatedX = (radius*Math.sin(newAngle)) + averageX;
-            let updatedY = (radius*Math.cos(newAngle)) + averageY;
+                let newAngle = angle + (tries * angleMovement);
 
-            nextElement.translate(updatedX - nextElement.position().x, updatedY - nextElement.position().y);
+                let updatedX = (radius * Math.sin(newAngle)) + averageX;
+                let updatedY = (radius * Math.cos(newAngle)) + averageY;
+
+                nextElement.translate(updatedX - nextElement.position().x, updatedY - nextElement.position().y);
+                tries = tries + 1;
+            }
+
+            elementOverlapping = graph.findModelsInArea(nextElement.getBBox()).filter(el => el !== nextElement).length > 0;
+            elementOutsidePaper =
+            (nextElement.position().x - nextElement.size().width / 2) < 0
+            || (nextElement.position().x + nextElement.size().width/2) > qmPaper.value.clientWidth 
+            || (nextElement.position().y - nextElement.size().height/2) < 0 
+            || (nextElement.position().y + nextElement.size().height/2) > qmPaper.value.clientHeight;
+
         }
-        */
-        
+
 
         // TODO ensure elements do not overlap (see https://stackoverflow.com/questions/57056432/how-can-i-prevent-elements-from-touching-colliding-in-jointjs); https://math.stackexchange.com/questions/260096/find-the-coordinates-of-a-point-on-a-circle
 
-        placed.push(toBePlaced.splice(0,1)[0]);
+        placed.push(toBePlaced.splice(0, 1)[0]);
     }
 
 }
