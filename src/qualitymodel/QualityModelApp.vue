@@ -384,12 +384,13 @@ function placeProductFactors() {
 
 
         // parameters:
-        let oneStep = 1 / 6
+        let oneStep = 50
+        let centerDistanceRatio = oneStep / distanceToCenter;
         let angleMovement = 10;
-        let radiusIncrease = 10;
+        let radiusIncrease = 20;
 
-        let newX = (1 - oneStep) * averageX + oneStep * centerX;
-        let newY = (1 - oneStep) * averageY + oneStep * centerY;
+        let newX = (1 - centerDistanceRatio) * averageX + centerDistanceRatio * centerX;
+        let newY = (1 - centerDistanceRatio) * averageY + centerDistanceRatio * centerY;
 
         //console.log("for " + firstLayerFactor.getId + ": newX: "  + newX + ", newY:" + newY);
 
@@ -403,13 +404,14 @@ function placeProductFactors() {
             || (nextElement.position().y + nextElement.size().height / 2) > qmPaper.value.clientHeight;
 
         let tries = 1;
-        while ((elementOverlapping || elementOutsidePaper) && tries < 50) {
+        while ((elementOverlapping || elementOutsidePaper) && tries < 1000) {
 
             if (impactedElements.length > 1) {
                 // current element impacts multiple
-                let steps = (tries / 2) * oneStep;
-                newX = (1 - steps) * averageX + steps * centerX;
-                newY = (1 - steps) * averageY + steps * centerY;
+                //let steps = (tries / 2) * oneStep;
+                let largerRatio = tries * centerDistanceRatio;
+                newX = (1 - largerRatio) * averageX + largerRatio * centerX;
+                newY = (1 - largerRatio) * averageY + largerRatio * centerY;
                 nextElement.translate(newX - nextElement.position().x, newY - nextElement.position().y);
                 tries = tries + 1;
             } else {
@@ -418,7 +420,7 @@ function placeProductFactors() {
                 // calculate angle of current position 
                 let normalizedX = newX - averageX;
                 let normalizedY = newY - averageY;
-                let radius = distanceToCenter * oneStep * (Math.floor(tries / radiusIncrease) + 1);
+                let radius = (oneStep * 0.25) * (Math.floor(tries / radiusIncrease) + 1);
 
                 let angle = Math.max(Math.acos(normalizedY / radius), Math.asin(normalizedX / radius));
 
