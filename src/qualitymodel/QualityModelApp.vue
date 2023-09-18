@@ -384,10 +384,10 @@ function placeProductFactors() {
 
 
         // parameters:
-        let oneStep = 50
+        let oneStep = 20
         let centerDistanceRatio = oneStep / distanceToCenter;
         let angleMovement = 10;
-        let radiusIncrease = 20;
+        let radiusIncrease = 30;
 
         let newX = (1 - centerDistanceRatio) * averageX + centerDistanceRatio * centerX;
         let newY = (1 - centerDistanceRatio) * averageY + centerDistanceRatio * centerY;
@@ -420,9 +420,12 @@ function placeProductFactors() {
                 // calculate angle of current position 
                 let normalizedX = newX - averageX;
                 let normalizedY = newY - averageY;
-                let radius = (oneStep * 0.25) * (Math.floor(tries / radiusIncrease) + 1);
+                let radius = oneStep * (Math.floor(tries / radiusIncrease) + 1);
 
-                let angle = Math.max(Math.acos(normalizedY / radius), Math.asin(normalizedX / radius));
+                let angle = calcAngleDegrees(normalizedX, normalizedY);
+                if (angle < 0) {
+                    angle = angle + 360;
+                }
 
                 let newAngle = angle + (tries * angleMovement);
 
@@ -448,6 +451,10 @@ function placeProductFactors() {
         placed.push(toBePlaced.splice(0, 1)[0]);
     }
 
+}
+
+function calcAngleDegrees(x, y) {
+  return (Math.atan2(y, x) * 180) / Math.PI;
 }
 
 </script>
