@@ -56,8 +56,8 @@ onMounted(() => {
 
     paperRef.value.render();
 
-    let posX = 410;
-    let posY = 40;
+    let posX = -10;
+    let posY = -10;
     for (const qualityAspect of qualityModel.qualityAspects) {
 
         var qualityAspectElement = new QualityAspect({
@@ -78,12 +78,10 @@ onMounted(() => {
         qualityAspectElement.addTo(graph);
         qualityAspectElements.push(qualityAspectElement);
 
-        posX = posX + 10;
-        posY = posY + 10;
     }
 
-    let pfPosX = 100;
-    let pfPosY = 100
+    let pfPosX = -10;
+    let pfPosY = -10;
 
     for (const productFactor of qualityModel.productFactors) {
 
@@ -105,8 +103,6 @@ onMounted(() => {
         productFactorElement.addTo(graph);
         productFactorElements.push(productFactorElement);
 
-        pfPosX = pfPosX + 10;
-        pfPosY = pfPosY + 10;
     }
 
 
@@ -133,14 +129,12 @@ onMounted(() => {
         impactElements.push(link);
     }
 
-
-
 })
 
 
 onUpdated(() => {
 
-    console.log("inView: " + props.inView);
+    //console.log("inView: " + props.inView);
     //console.log(qmContainer);
 
     if (!props.inView) {
@@ -337,15 +331,12 @@ function placeProductFactors() {
     let toBePlaced = productFactorElements.map(element => element.id);
     let placed = qualityAspectElements.map(element => element.id);
 
-    //console.log(firstLayerFactors);
-
-    // TODO iterate based on elements that are already drawn in the sense that in each round only elements are drawn for which all impacted factors are already drawn
-    // TODO draw factors which impact only one other factor in a circle around the impacted factor
-
     outerLoop: while (toBePlaced.length > 0) {
 
         let nextElementId = toBePlaced[0];
         let nextElement = productFactorElements.find(element => element.id === nextElementId);
+        let horizontalCenter = nextElement.size().width / 2;
+        let verticalCenter = nextElement.size().height / 2;
 
         let impactedFactors = qualityModel.findProductFactor(nextElement.id.toString()).getImpactedFactors();
 
@@ -368,10 +359,12 @@ function placeProductFactors() {
         });
 
         // middle point between impacted factors
-        let averageX = impactedElements.map(element => element.position().x).reduce(function (a, b) { return a + b; }) / impactedElements.length;
-        let averageY = impactedElements.map(element => element.position().y).reduce(function (a, b) { return a + b; }) / impactedElements.length;
-
-        //console.log("for " + nextElementId + ": averageX: " + averageX + ", averageY: " + averageY);
+        let averageX = impactedElements.map(element => {
+            return element.position().x + horizontalCenter // calculate center of element
+        }).reduce(function (a, b) { return a + b; }) / impactedElements.length;
+        let averageY = impactedElements.map(element => {
+            return element.position().y + verticalCenter // calculate center of element
+        }).reduce(function (a, b) { return a + b; }) / impactedElements.length;
 
         // calculate parameters of line between middle point and center
         let slope = (averageY - centerY) / (averageX - centerX);
@@ -380,47 +373,64 @@ function placeProductFactors() {
         // calculate distance between middle point and center
         let distanceToCenter = Math.sqrt(Math.pow((centerX - averageX), 2) + Math.pow((centerY - averageY), 2));
 
-        //console.log("for " + firstLayerFactor.getId + ": distanceToCenter: "  + distanceToCenter);
 
-
-        // parameters:
-        let oneStep = 20
+        // placement algorithm parameters:
+        let oneStep = 120;
         let centerDistanceRatio = oneStep / distanceToCenter;
-        let angleMovement = 10;
-        let radiusIncrease = 30;
+        let angleMovement = 15;
+        let radiusIncrease = Math.ceil(360 / angleMovement);
 
-        let newX = (1 - centerDistanceRatio) * averageX + centerDistanceRatio * centerX;
-        let newY = (1 - centerDistanceRatio) * averageY + centerDistanceRatio * centerY;
+        let newX = ((1 - centerDistanceRatio) * averageX + centerDistanceRatio * centerX) - horizontalCenter;
+        let newY = ((1 - centerDistanceRatio) * averageY + centerDistanceRatio * centerY) - verticalCenter;
 
-        //console.log("for " + firstLayerFactor.getId + ": newX: "  + newX + ", newY:" + newY);
+        /*
+        console.log({
+            "name": nextElementId,
+            "impactedFactors": impactedElements,
+            "averageX": averageX,
+            "averageY": averageY,
+            "newX": newX,
+            "newY": newY,
+            "element-bbox": nextElement.getBBox(),
+        });
+        */
 
         nextElement.translate(newX - nextElement.position().x, newY - nextElement.position().y);
 
         let elementOverlapping = graph.findModelsInArea(nextElement.getBBox()).filter(el => el !== nextElement).length > 0;
         let elementOutsidePaper =
             (nextElement.position().x - nextElement.size().width / 2) < 0
-            || (nextElement.position().x + nextElement.size().width / 2) > qmPaper.value.clientWidth 
-            || (nextElement.position().y - nextElement.size().height / 2) < 0 
+            || (nextElement.position().x + nextElement.size().width / 2) > qmPaper.value.clientWidth
+            || (nextElement.position().y - nextElement.size().height / 2) < 0
             || (nextElement.position().y + nextElement.size().height / 2) > qmPaper.value.clientHeight;
 
         let tries = 1;
         while ((elementOverlapping || elementOutsidePaper) && tries < 1000) {
 
             if (impactedElements.length > 1) {
-                // current element impacts multiple
-                //let steps = (tries / 2) * oneStep;
+                // current element impacts multiple elements
                 let largerRatio = tries * centerDistanceRatio;
-                newX = (1 - largerRatio) * averageX + largerRatio * centerX;
-                newY = (1 - largerRatio) * averageY + largerRatio * centerY;
+                newX = ((1 - largerRatio) * averageX + largerRatio * centerX) - horizontalCenter;
+                newY = ((1 - largerRatio) * averageY + largerRatio * centerY) - verticalCenter;
                 nextElement.translate(newX - nextElement.position().x, newY - nextElement.position().y);
                 tries = tries + 1;
+                /*
+                console.log({
+                    "name": nextElementId,
+                    "type": "more than one impacted element",
+                    "try": tries,
+                    "averageX": averageX,
+                    "averageY": averageY,
+                    "newX": newX,
+                    "newY": newY
+                });*/
             } else {
                 // current element impacts only one element
 
-                // calculate angle of current position 
+                // calculate angle of initial position 
                 let normalizedX = newX - averageX;
                 let normalizedY = newY - averageY;
-                let radius = oneStep * (Math.floor(tries / radiusIncrease) + 1);
+                let radius = oneStep  * (Math.floor(tries / radiusIncrease) + 1);
 
                 let angle = calcAngleDegrees(normalizedX, normalizedY);
                 if (angle < 0) {
@@ -429,24 +439,40 @@ function placeProductFactors() {
 
                 let newAngle = angle + (tries * angleMovement);
 
-                let updatedX = (radius * Math.sin(newAngle)) + averageX;
-                let updatedY = (radius * Math.cos(newAngle)) + averageY;
+                let updatedX = ((radius * Math.cos(newAngle * (Math.PI / 180))) + averageX) - horizontalCenter;
+                let updatedY = ((radius * Math.sin(newAngle * (Math.PI / 180))) + averageY) - verticalCenter;
 
                 nextElement.translate(updatedX - nextElement.position().x, updatedY - nextElement.position().y);
                 tries = tries + 1;
+
+                /*console.log({
+                    "name": nextElementId,
+                    "type": "one impacted element",
+                    "try": tries,
+                    "normalizedX": normalizedX,
+                    "normalizedY": normalizedY,
+                    "angle": angle,
+                    "averageX": averageX,
+                    "averageY": averageY,
+                    "radius": radius,
+                    "newAngle": newAngle,
+                    "updatedX": updatedX,
+                    "updatedY": updatedY,
+                    "element-bbox": nextElement.getBBox(),
+                    "elementView-bbox": nextElement.findView(paperRef.value).getBBox(),
+                    "overlapping": graph.findModelsInArea(nextElement.getBBox()).filter(el => el !== nextElement),
+                    "position-x": nextElement.position().x,
+                    "position-y": nextElement.position().y,
+                });*/
             }
 
             elementOverlapping = graph.findModelsInArea(nextElement.getBBox()).filter(el => el !== nextElement).length > 0;
             elementOutsidePaper =
-            (nextElement.position().x - nextElement.size().width / 2) < 0
-            || (nextElement.position().x + nextElement.size().width/2) > qmPaper.value.clientWidth 
-            || (nextElement.position().y - nextElement.size().height/2) < 0 
-            || (nextElement.position().y + nextElement.size().height/2) > qmPaper.value.clientHeight;
-
-        }
-
-
-        // TODO ensure elements do not overlap (see https://stackoverflow.com/questions/57056432/how-can-i-prevent-elements-from-touching-colliding-in-jointjs); https://math.stackexchange.com/questions/260096/find-the-coordinates-of-a-point-on-a-circle
+                (nextElement.position().x - nextElement.size().width / 2) < 0
+                || (nextElement.position().x + nextElement.size().width / 2) > qmPaper.value.clientWidth
+                || (nextElement.position().y - nextElement.size().height / 2) < 0
+                || (nextElement.position().y + nextElement.size().height / 2) > qmPaper.value.clientHeight;
+        }    
 
         placed.push(toBePlaced.splice(0, 1)[0]);
     }
@@ -454,7 +480,7 @@ function placeProductFactors() {
 }
 
 function calcAngleDegrees(x, y) {
-  return (Math.atan2(y, x) * 180) / Math.PI;
+    return (Math.atan2(y, x) * 180) / Math.PI;
 }
 
 </script>
