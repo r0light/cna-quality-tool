@@ -348,6 +348,7 @@ function placeProductFactors() {
     let toBePlaced = productFactorElements.map(element => element.id);
     let placed = qualityAspectElements.map(element => element.id);
     let allTries = [];
+    const maximumTries = 1000;
 
     outerLoop: while (toBePlaced.length > 0) {
 
@@ -389,29 +390,16 @@ function placeProductFactors() {
         let axisDistance = averageY - (slope * averageX);
 
         // calculate distance between middle point and center
-        let distanceToCenter = Math.sqrt(Math.pow((centerX - averageX), 2) + Math.pow((centerY - averageY), 2));
-
+        const distanceToCenter = Math.sqrt(Math.pow((centerX - averageX), 2) + Math.pow((centerY - averageY), 2));
 
         // placement algorithm parameters:
-        let oneStep = 120;
-        let centerDistanceRatio = oneStep / distanceToCenter;
-        let angleMovement = 15;
-        let radiusIncrease = Math.ceil(360 / angleMovement);
+        const oneStep = 120;
+        const centerDistanceRatio = oneStep / distanceToCenter;
+        const angleMovement = 15;
+        const radiusIncrease = Math.ceil(360 / angleMovement);
 
         let newX = ((1 - centerDistanceRatio) * averageX + centerDistanceRatio * centerX) - horizontalCenter;
         let newY = ((1 - centerDistanceRatio) * averageY + centerDistanceRatio * centerY) - verticalCenter;
-
-        /*
-        console.log({
-            "name": nextElementId,
-            "impactedFactors": impactedElements,
-            "averageX": averageX,
-            "averageY": averageY,
-            "newX": newX,
-            "newY": newY,
-            "element-bbox": nextElement.getBBox(),
-        });
-        */
 
         nextElement.translate(newX - nextElement.position().x, newY - nextElement.position().y);
 
@@ -423,32 +411,23 @@ function placeProductFactors() {
             || (nextElement.position().y + nextElement.size().height) > qmPaper.value.clientHeight;
 
         let tries = 1;
-        while ((elementOverlapping || elementOutsidePaper) && tries < 1000) {
+        while ((elementOverlapping || elementOutsidePaper) && tries < maximumTries) {
 
-            if (impactedElements.length > 1) {
+            let largerRatio = tries * centerDistanceRatio;
+
+            if (impactedElements.length > 1 && largerRatio < 0) {
                 // current element impacts multiple elements
-                let largerRatio = tries * centerDistanceRatio;
+                // (largerRatio < 0) is the edge case that an element is already quite in the middle of the paper and cannot move any further towards the center
                 newX = ((1 - largerRatio) * averageX + largerRatio * centerX) - horizontalCenter;
                 newY = ((1 - largerRatio) * averageY + largerRatio * centerY) - verticalCenter;
                 nextElement.translate(newX - nextElement.position().x, newY - nextElement.position().y);
                 tries = tries + 1;
-                /*
-                console.log({
-                    "name": nextElementId,
-                    "type": "more than one impacted element",
-                    "try": tries,
-                    "averageX": averageX,
-                    "averageY": averageY,
-                    "newX": newX,
-                    "newY": newY
-                });*/
             } else {
                 // current element impacts only one element
 
                 // calculate angle of initial position 
                 let normalizedX = newX - averageX;
                 let normalizedY = newY - averageY;
-                //let radius = (oneStep / Math.log10(tries + 9))  * (Math.floor(tries / radiusIncrease) + 1);
                 let radius = oneStep * (Math.floor(tries / radiusIncrease) + 1);
 
                 let angle = calcAngleDegrees(normalizedX, normalizedY);
@@ -471,26 +450,6 @@ function placeProductFactors() {
 
                 nextElement.translate(updatedX - nextElement.position().x, updatedY - nextElement.position().y);
                 tries = tries + 1;
-
-                /*console.log({
-                    "name": nextElementId,
-                    "type": "one impacted element",
-                    "try": tries,
-                    "normalizedX": normalizedX,
-                    "normalizedY": normalizedY,
-                    "angle": angle,
-                    "averageX": averageX,
-                    "averageY": averageY,
-                    "radius": radius,
-                    "newAngle": newAngle,
-                    "updatedX": updatedX,
-                    "updatedY": updatedY,
-                    "element-bbox": nextElement.getBBox(),
-                    "elementView-bbox": nextElement.findView(paperRef.value).getBBox(),
-                    "overlapping": graph.findModelsInArea(nextElement.getBBox()).filter(el => el !== nextElement),
-                    "position-x": nextElement.position().x,
-                    "position-y": nextElement.position().y,
-                });*/
             }
 
             elementOverlapping = graph.findModelsInArea(nextElement.getBBox()).filter(el => el !== nextElement).length > 0;
@@ -501,23 +460,25 @@ function placeProductFactors() {
                 || (nextElement.position().y + nextElement.size().height) > qmPaper.value.clientHeight;
         }
 
+        /*
         console.log({
             "name": nextElementId,
-            "type": "one impacted element",
+            "impactedElements": impactedElements,
             "try": tries,
             "elementOutsidePaper": elementOutsidePaper,
             "overlapping": graph.findModelsInArea(nextElement.getBBox()).filter(el => el !== nextElement),
             "position-x": nextElement.position().x,
             "position-y": nextElement.position().y,
         })
+        */
 
         placed.push(toBePlaced.splice(0, 1)[0]);
         allTries.push(tries);
     }
 
-    const average = arr => arr.reduce((p, c) => p + c, 0) / arr.length;
-    console.log("average tries: " + average(allTries));
-    console.log("unplaceable: " + allTries.filter(value => value === 1000).length);
+    //const average = arr => arr.reduce((p, c) => p + c, 0) / arr.length;
+    //console.log("average tries: " + average(allTries));
+    //console.log("unplaceable: " + allTries.filter(value => value === maximumTries).length);
 }
 
 function calcAngleDegrees(x, y) {
