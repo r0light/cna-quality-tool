@@ -106,8 +106,28 @@ onMounted(() => {
     for (const impact of qualityModel.impacts) {
 
         var link = new shapes.standard.Link();
-        link.source(graph.getCell(impact.getSourceFactor.getId));
-        link.target(graph.getCell(impact.getImpactedFactor.getId));
+        link.source(graph.getCell(impact.getSourceFactor.getId), {
+            anchor: {
+                name: 'modelCenter'
+            },
+            connectionPoint: {
+                name: 'boundary',
+                args: {
+                    sticky: true
+                }
+            }
+        });
+        link.target(graph.getCell(impact.getImpactedFactor.getId), {
+            anchor: {
+                name: 'modelCenter'
+            },
+            connectionPoint: {
+                name: 'boundary',
+                args: {
+                    sticky: true
+                }
+            }
+        });
         link.appendLabel({
             attrs: {
                 text: {
@@ -479,23 +499,23 @@ function placeProductFactors() {
                 || (nextElement.position().x + nextElement.size().width) > qmPaper.value.clientWidth
                 || nextElement.position().y < 0
                 || (nextElement.position().y + nextElement.size().height) > qmPaper.value.clientHeight;
-        }    
+        }
 
         console.log({
-                    "name": nextElementId,
-                    "type": "one impacted element",
-                    "try": tries,
-                    "elementOutsidePaper": elementOutsidePaper,
-                    "overlapping": graph.findModelsInArea(nextElement.getBBox()).filter(el => el !== nextElement),
-                    "position-x": nextElement.position().x,
-                    "position-y": nextElement.position().y,
-                })
+            "name": nextElementId,
+            "type": "one impacted element",
+            "try": tries,
+            "elementOutsidePaper": elementOutsidePaper,
+            "overlapping": graph.findModelsInArea(nextElement.getBBox()).filter(el => el !== nextElement),
+            "position-x": nextElement.position().x,
+            "position-y": nextElement.position().y,
+        })
 
         placed.push(toBePlaced.splice(0, 1)[0]);
         allTries.push(tries);
     }
 
-    const average = arr => arr.reduce( ( p, c ) => p + c, 0 ) / arr.length;
+    const average = arr => arr.reduce((p, c) => p + c, 0) / arr.length;
     console.log("average tries: " + average(allTries));
     console.log("unplaceable: " + allTries.filter(value => value === 1000).length);
 }
@@ -503,6 +523,7 @@ function placeProductFactors() {
 function calcAngleDegrees(x, y) {
     return (Math.atan2(y, x) * 180) / Math.PI;
 }
+
 
 </script>
 
