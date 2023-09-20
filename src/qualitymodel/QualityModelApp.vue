@@ -1,9 +1,22 @@
 <template>
     <div class="qualitymodel-container" ref="qmContainer">
-
+        <div class="qualityModelToolbar">
+        <div class="qualityModelTool">
+            <span>Filter by High-level aspect:</span>
+            <select class="highLevel-select"
+                    v-model="highLevelFilterSelection"
+                    @change="onHighLevelFilterSelected()">
+                    <option value="all" key="all">All</option>
+                    <option v-for="highLevelAspectKey of [...new Set(Object.entries(qualityModel.qualityAspects).map(qualityAspect => qualityAspect[1].getHighLevelAspectKey))]" 
+                    :value="highLevelAspectKey" 
+                        :key="highLevelAspectKey">
+                        {{ highLevelAspectKey}}
+                    </option>
+                </select>
+        </div>
+    </div>
         <div id="qualityModel" ref="qmPaper">
         </div>
-
     </div>
 </template>
 
@@ -14,6 +27,7 @@ import { dia, shapes, util } from "jointjs";
 import { QualityAspect, ProductFactor } from './config/elementShapes';
 import { getQualityModel } from '@/core/qualitymodel/QualityModelInstance';
 import { first } from 'lodash';
+import { UniqueKeyManager } from '@/core/tosca-adapter/UniqueKeyManager';
 
 const props = defineProps<{
     inView: boolean,
@@ -32,6 +46,8 @@ const qualityModel = getQualityModel();
 const qualityAspectElements: dia.Element[] = [];
 const productFactorElements: dia.Element[] = [];
 const impactElements: dia.Link[] = [];
+
+const highLevelFilterSelection = ref<string>("all");
 
 onMounted(() => {
 
@@ -122,7 +138,7 @@ onMounted(() => {
             connectionPoint: {
                 name: 'boundary',
                 args: {
-                    sticky: true
+                    sticky: false
                 }
             }
         });
@@ -133,7 +149,7 @@ onMounted(() => {
             connectionPoint: {
                 name: 'boundary',
                 args: {
-                    sticky: true
+                    sticky: false
                 }
             }
         });
@@ -151,22 +167,27 @@ onMounted(() => {
         });
         link.connector({ "name": 'rounded' });
         
+        
         link.router({
             name: "normal",
         });
-    
+        
         /*
         link.router({
             name: "metro",
             args: {
-                maximumLoops: 3000,
-                padding: 20,
+                maximumLoops: 2000,
+                padding: {
+                    horizontal: 75,
+                    vertical: 20
+                },
                 startDirection: ['left', 'right', 'top', 'bottom'],
                 endDirection: ['left', 'right', 'top', 'bottom']
                 //isPointObstacle: (point: dia.Point) => { return graph.findModelsFromPoint(point).length > 0}
             }
         });
         */
+        
 
         link.addTo(graph);
         impactElements.push(link);
@@ -521,11 +542,40 @@ function updateLinkRoutes() {
 }
 
 
+function onHighLevelFilterSelected() {
+    console.log(highLevelFilterSelection.value);
+}
+
 </script>
 
 
 <style>
+.qualityModelToolbar {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    align-items: start;
+    padding: 5px;   
+    border-bottom: 1px solid black; 
+}
+.qualityModelTool {
+    display: flex;
+    flex-direction: row;
+    flex-grow: 1;
+}
+
+.qualityModelTool * {
+    margin-left: 5px;
+}
+
+.highLevel-select {
+    width: 300px;
+}
+
 .qualitymodel-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     width: 100%;
     height: 100%;
 }
