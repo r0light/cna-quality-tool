@@ -57,23 +57,27 @@ onMounted(() => {
     let posY = -10;
     for (const qualityAspect of qualityModel.qualityAspects) {
 
-        var qualityAspectElement = new QualityAspect({
-            id: qualityAspect.getId,
-            position: { x: posX, y: posY },
-            attrs: {
-                body: {
-                    class: "entityHighlighting"
-                },
-                label: {
-                    textWrap: {
-                        text: util.breakText(qualityAspect.getName, { width: 150 }),
+        // only include quality aspects for which impacts are defined
+        if (qualityAspect.getImpactingFactors().length > 0) {
+
+            var qualityAspectElement = new QualityAspect({
+                id: qualityAspect.getId,
+                position: { x: posX, y: posY },
+                attrs: {
+                    body: {
+                        class: "entityHighlighting"
+                    },
+                    label: {
+                        textWrap: {
+                            text: util.breakText(qualityAspect.getName, { width: 150 }),
+                        }
                     }
                 }
-            }
-        })
+            })
 
-        qualityAspectElement.addTo(graph);
-        qualityAspectElements.push(qualityAspectElement);
+            qualityAspectElement.addTo(graph);
+            qualityAspectElements.push(qualityAspectElement);
+        }
 
     }
 
@@ -106,6 +110,11 @@ onMounted(() => {
     for (const impact of qualityModel.impacts) {
 
         var link = new shapes.standard.Link();
+        link.attr({
+            line: {
+                strokeDasharray: '4 4',
+            }
+        })
         link.source(graph.getCell(impact.getSourceFactor.getId), {
             anchor: {
                 name: 'modelCenter'
@@ -140,7 +149,24 @@ onMounted(() => {
                 }
             }
         });
-        link.router('normal');
+        link.connector({ "name": 'rounded' });
+        
+        link.router({
+            name: "normal",
+        });
+    
+        /*
+        link.router({
+            name: "metro",
+            args: {
+                maximumLoops: 3000,
+                padding: 20,
+                startDirection: ['left', 'right', 'top', 'bottom'],
+                endDirection: ['left', 'right', 'top', 'bottom']
+                //isPointObstacle: (point: dia.Point) => { return graph.findModelsFromPoint(point).length > 0}
+            }
+        });
+        */
 
         link.addTo(graph);
         impactElements.push(link);
@@ -164,18 +190,21 @@ onUpdated(() => {
 
     placeProductFactors();
 
+    updateLinkRoutes();
+
 })
 
 function orderQualityAspects() {
 
-    const noOfQualityAspects = qualityModel.qualityAspects.length;
+    const relevantQualityAspects = qualityModel.qualityAspects.filter(qualityAspect => qualityAspect.getImpactingFactors.length > 0);
+    const noOfQualityAspects = relevantQualityAspects.length;
 
     // calculate pair-wise proximity
     let qualityAspectProximity: number[][] = Array.from({ length: noOfQualityAspects }, e => Array(noOfQualityAspects).fill(0));
     let i = 0;
-    for (const qualityAspectI of qualityModel.qualityAspects) {
+    for (const qualityAspectI of relevantQualityAspects) {
         let j = 0;
-        for (const qualityAspectJ of qualityModel.qualityAspects) {
+        for (const qualityAspectJ of relevantQualityAspects) {
             if (j < i) {
                 j = j + 1;
                 continue; // skip cells that have already been compared
@@ -225,7 +254,7 @@ function orderQualityAspects() {
 
     // order elements
     for (let k = 0; k < noOfQualityAspects; k = k + 1) {
-        let expected = qualityModel.qualityAspects[ordered[k]].getId;
+        let expected = relevantQualityAspects[ordered[k]].getId;
         let currentPosition = qualityAspectElements.findIndex(element => element.id === expected);
         if (currentPosition !== k) {
             // swap element positions
@@ -393,7 +422,7 @@ function placeProductFactors() {
         const distanceToCenter = Math.sqrt(Math.pow((centerX - averageX), 2) + Math.pow((centerY - averageY), 2));
 
         // placement algorithm parameters:
-        const oneStep = 120;
+        const oneStep = 150;
         const centerDistanceRatio = oneStep / distanceToCenter;
         const angleMovement = 15;
         const radiusIncrease = Math.ceil(360 / angleMovement);
@@ -483,6 +512,12 @@ function placeProductFactors() {
 
 function calcAngleDegrees(x, y) {
     return (Math.atan2(y, x) * 180) / Math.PI;
+}
+
+function updateLinkRoutes() {
+    for (const impactElement of impactElements) {
+        (impactElement.findView(paperRef.value) as dia.LinkView).requestConnectionUpdate();
+    }
 }
 
 
