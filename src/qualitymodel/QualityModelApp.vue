@@ -2,10 +2,7 @@
     <div class="qualitymodel-container" ref="qmContainer">
 
         <div id="qualityModel" ref="qmPaper">
-
-
         </div>
-
 
     </div>
 </template>
@@ -330,6 +327,7 @@ function placeProductFactors() {
 
     let toBePlaced = productFactorElements.map(element => element.id);
     let placed = qualityAspectElements.map(element => element.id);
+    let allTries = [];
 
     outerLoop: while (toBePlaced.length > 0) {
 
@@ -399,10 +397,10 @@ function placeProductFactors() {
 
         let elementOverlapping = graph.findModelsInArea(nextElement.getBBox()).filter(el => el !== nextElement).length > 0;
         let elementOutsidePaper =
-            (nextElement.position().x - nextElement.size().width / 2) < 0
-            || (nextElement.position().x + nextElement.size().width / 2) > qmPaper.value.clientWidth
-            || (nextElement.position().y - nextElement.size().height / 2) < 0
-            || (nextElement.position().y + nextElement.size().height / 2) > qmPaper.value.clientHeight;
+            nextElement.position().x < 0
+            || (nextElement.position().x + nextElement.size().width) > qmPaper.value.clientWidth
+            || nextElement.position().y < 0
+            || (nextElement.position().y + nextElement.size().height) > qmPaper.value.clientHeight;
 
         let tries = 1;
         while ((elementOverlapping || elementOutsidePaper) && tries < 1000) {
@@ -430,14 +428,23 @@ function placeProductFactors() {
                 // calculate angle of initial position 
                 let normalizedX = newX - averageX;
                 let normalizedY = newY - averageY;
-                let radius = oneStep  * (Math.floor(tries / radiusIncrease) + 1);
+                //let radius = (oneStep / Math.log10(tries + 9))  * (Math.floor(tries / radiusIncrease) + 1);
+                let radius = oneStep * (Math.floor(tries / radiusIncrease) + 1);
 
                 let angle = calcAngleDegrees(normalizedX, normalizedY);
                 if (angle < 0) {
                     angle = angle + 360;
                 }
 
-                let newAngle = angle + (tries * angleMovement);
+                let newAngle = (() => {
+                    // calculate new angle by increasing or decreasing angle by the same value, that means:
+                    // +angleMovement, -angleMovement, +2*angleMovement, -2*angleMovement, +3*angleMovement, -3*angleMovement, ...
+                    if (tries % 2 === 0) {
+                        return angle - ((tries / 2) * angleMovement);
+                    } else {
+                        return angle + ((tries - ((tries - 1) / 2)) * angleMovement);
+                    }
+                })();
 
                 let updatedX = ((radius * Math.cos(newAngle * (Math.PI / 180))) + averageX) - horizontalCenter;
                 let updatedY = ((radius * Math.sin(newAngle * (Math.PI / 180))) + averageY) - verticalCenter;
@@ -468,15 +475,29 @@ function placeProductFactors() {
 
             elementOverlapping = graph.findModelsInArea(nextElement.getBBox()).filter(el => el !== nextElement).length > 0;
             elementOutsidePaper =
-                (nextElement.position().x - nextElement.size().width / 2) < 0
-                || (nextElement.position().x + nextElement.size().width / 2) > qmPaper.value.clientWidth
-                || (nextElement.position().y - nextElement.size().height / 2) < 0
-                || (nextElement.position().y + nextElement.size().height / 2) > qmPaper.value.clientHeight;
+                nextElement.position().x < 0
+                || (nextElement.position().x + nextElement.size().width) > qmPaper.value.clientWidth
+                || nextElement.position().y < 0
+                || (nextElement.position().y + nextElement.size().height) > qmPaper.value.clientHeight;
         }    
 
+        console.log({
+                    "name": nextElementId,
+                    "type": "one impacted element",
+                    "try": tries,
+                    "elementOutsidePaper": elementOutsidePaper,
+                    "overlapping": graph.findModelsInArea(nextElement.getBBox()).filter(el => el !== nextElement),
+                    "position-x": nextElement.position().x,
+                    "position-y": nextElement.position().y,
+                })
+
         placed.push(toBePlaced.splice(0, 1)[0]);
+        allTries.push(tries);
     }
 
+    const average = arr => arr.reduce( ( p, c ) => p + c, 0 ) / arr.length;
+    console.log("average tries: " + average(allTries));
+    console.log("unplaceable: " + allTries.filter(value => value === 1000).length);
 }
 
 function calcAngleDegrees(x, y) {
