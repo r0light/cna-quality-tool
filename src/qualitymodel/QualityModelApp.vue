@@ -1,20 +1,18 @@
 <template>
     <div class="qualitymodel-container" ref="qmContainer">
         <div class="qualityModelToolbar">
-        <div class="qualityModelTool">
-            <span>Filter by High-level aspect:</span>
-            <select class="highLevel-select"
-                    v-model="highLevelFilterSelection"
-                    @change="onHighLevelFilterSelected()">
+            <div class="qualityModelTool">
+                <span>Filter by High-level aspect:</span>
+                <select class="highLevel-select" v-model="highLevelFilterSelection" @change="onHighLevelFilterSelected()">
                     <option value="all" key="all">All</option>
-                    <option v-for="highLevelAspectKey of [...new Set(Object.entries(qualityModel.qualityAspects).map(qualityAspect => qualityAspect[1].getHighLevelAspectKey))]" 
-                    :value="highLevelAspectKey" 
-                        :key="highLevelAspectKey">
-                        {{ highLevelAspectKey}}
+                    <option
+                        v-for="highLevelAspectKey of [...new Set(Object.entries(qualityModel.qualityAspects).map(qualityAspect => qualityAspect[1].getHighLevelAspectKey))]"
+                        :value="highLevelAspectKey" :key="highLevelAspectKey">
+                        {{ highLevelAspectKey }}
                     </option>
                 </select>
+            </div>
         </div>
-    </div>
         <div id="qualityModel" ref="qmPaper">
         </div>
     </div>
@@ -24,10 +22,10 @@
 import $ from 'jquery';
 import { ref, onMounted, onUpdated } from 'vue';
 import { dia, shapes, util } from "jointjs";
-import { QualityAspect, ProductFactor } from './config/elementShapes';
+import { QualityAspectElement, ProductFactorElement } from './config/elementShapes';
 import { getQualityModel } from '@/core/qualitymodel/QualityModelInstance';
-import { first } from 'lodash';
-import { UniqueKeyManager } from '@/core/tosca-adapter/UniqueKeyManager';
+import { ProductFactor } from '@/core/qualitymodel/ProductFactor';
+import { QualityAspect } from '@/core/qualitymodel/QualityAspect';
 
 const props = defineProps<{
     inView: boolean,
@@ -51,9 +49,6 @@ const highLevelFilterSelection = ref<string>("all");
 
 onMounted(() => {
 
-    //console.log("inView: " + props.inView);
-    //console.log(qmContainer.value.clientWidth);
-
     paperRef.value = new dia.Paper({
         el: $('#qualityModel'),
         model: graph,
@@ -69,42 +64,91 @@ onMounted(() => {
 
     paperRef.value.render();
 
-    let posX = -10;
-    let posY = -10;
-    for (const qualityAspect of qualityModel.qualityAspects) {
+    drawQualityModelElements(highLevelFilterSelection.value, "");
 
-        // only include quality aspects for which impacts are defined
-        if (qualityAspect.getImpactingFactors().length > 0) {
+})
 
-            var qualityAspectElement = new QualityAspect({
-                id: qualityAspect.getId,
-                position: { x: posX, y: posY },
-                attrs: {
-                    body: {
-                        class: "entityHighlighting"
-                    },
-                    label: {
-                        textWrap: {
-                            text: util.breakText(qualityAspect.getName, { width: 150 }),
-                        }
-                    }
-                }
-            })
+onUpdated(() => {
 
-            qualityAspectElement.addTo(graph);
-            qualityAspectElements.push(qualityAspectElement);
-        }
-
+    if (!props.inView) {
+        return;
     }
 
-    let pfPosX = -10;
-    let pfPosY = -10;
+    arrangeQualityModelElements();
 
+})
+
+function drawQualityModelElements(highLevelFilter: string, productFactorFilter: string) {
+
+    // clear existing elements
+    graph.clear();
+    qualityAspectElements.length = 0;
+    productFactorElements.length = 0;
+    impactElements.length = 0;
+
+    let initialPositionX = -50;
+    let initialPositionY = -50;
+    for (const qualityAspect of qualityModel.qualityAspects) {
+
+        // Filters
+
+        // 1. ignore quality aspects for which no impacts are defined
+        if (qualityAspect.getImpactingFactors().length === 0) {
+            continue;
+        }
+        // 2. filter based on high level quality aspect
+        if (highLevelFilter !== "all" && qualityAspect.getHighLevelAspectKey !== highLevelFilter) {
+            continue;
+        }
+
+        // draw quality aspect
+        var qualityAspectElement = new QualityAspectElement({
+            id: qualityAspect.getId,
+            position: { x: initialPositionX, y: initialPositionY },
+            attrs: {
+                body: {
+                    class: "entityHighlighting"
+                },
+                label: {
+                    textWrap: {
+                        text: util.breakText(qualityAspect.getName, { width: 150 }),
+                    }
+                }
+            }
+        })
+
+        qualityAspectElement.addTo(graph);
+        qualityAspectElements.push(qualityAspectElement);
+    }
+
+    let drawnQualityAspects = qualityAspectElements.map(element => element.id);
     for (const productFactor of qualityModel.productFactors) {
 
-        var productFactorElement = new ProductFactor({
+        let existingImpactedQualityAspect = false;
+        let factorsToCheck: (ProductFactor | QualityAspect)[] = [];
+        factorsToCheck.push(...productFactor.getImpactedFactors());
+        let i = 0;
+
+        while (i < factorsToCheck.length) {
+            let toCheck = factorsToCheck[i];
+
+            if (toCheck.constructor.name === "QualityAspect") {
+                if (drawnQualityAspects.includes(toCheck.getId)) {
+                    existingImpactedQualityAspect = true;
+                }
+            } else {
+                factorsToCheck.push(...(toCheck as ProductFactor).getImpactedFactors());
+            }
+            i = i + 1;
+        }
+        // ignore factors for which impacted factors are not drawn
+        if (!existingImpactedQualityAspect) {
+            continue;
+        }
+
+        var productFactorElement = new ProductFactorElement({
             id: productFactor.getId,
-            position: { x: pfPosX, y: pfPosY },
+            position: { x: initialPositionX, y: initialPositionY },
             attrs: {
                 body: {
                     class: "entityHighlighting"
@@ -119,11 +163,15 @@ onMounted(() => {
 
         productFactorElement.addTo(graph);
         productFactorElements.push(productFactorElement);
-
     }
 
-
+    let drawnProductFactors = productFactorElements.map(element => element.id);
     for (const impact of qualityModel.impacts) {
+
+        // ignore impacts for which not both connected elements are drawn
+        if ((!drawnQualityAspects.includes(impact.getImpactedFactor.getId) && !drawnProductFactors.includes(impact.getImpactedFactor.getId)) && !drawnProductFactors.includes(impact.getSourceFactor.getId)) {
+            continue;
+        }
 
         var link = new shapes.standard.Link();
         link.attr({
@@ -166,12 +214,12 @@ onMounted(() => {
             }
         });
         link.connector({ "name": 'rounded' });
-        
-        
+
+
         link.router({
             name: "normal",
         });
-        
+
         /*
         link.router({
             name: "metro",
@@ -187,23 +235,14 @@ onMounted(() => {
             }
         });
         */
-        
 
         link.addTo(graph);
         impactElements.push(link);
     }
 
-})
+}
 
-
-onUpdated(() => {
-
-    //console.log("inView: " + props.inView);
-    //console.log(qmContainer);
-
-    if (!props.inView) {
-        return;
-    }
+function arrangeQualityModelElements() {
 
     orderQualityAspects();
 
@@ -212,12 +251,13 @@ onUpdated(() => {
     placeProductFactors();
 
     updateLinkRoutes();
+}
 
-})
 
 function orderQualityAspects() {
 
-    const relevantQualityAspects = qualityModel.qualityAspects.filter(qualityAspect => qualityAspect.getImpactingFactors.length > 0);
+    let drawnQualityAspects = qualityAspectElements.map(element => element.id);
+    const relevantQualityAspects = qualityModel.qualityAspects.filter(qualityAspect => drawnQualityAspects.includes(qualityAspect.getId));
     const noOfQualityAspects = relevantQualityAspects.length;
 
     // calculate pair-wise proximity
@@ -290,7 +330,7 @@ function placeQualityAspects() {
     let availableWidth = qmPaper.value.clientWidth - 20;
     let availableHeight = qmPaper.value.clientHeight - 20;
 
-    let qa = new QualityAspect();
+    let qa = new QualityAspectElement();
     let elementWidth = qa.prop("defaults/size/width");
     let elementHeight = qa.prop("defaults/size/height");
 
@@ -395,6 +435,9 @@ function placeProductFactors() {
     let centerX = qmPaper.value.clientWidth / 2;
     let centerY = qmPaper.value.clientHeight / 2;
 
+    let drawnQualityAspects = qualityAspectElements.map(element => element.id);
+    let drawnProductFactors = productFactorElements.map(element => element.id);
+
     let toBePlaced = productFactorElements.map(element => element.id);
     let placed = qualityAspectElements.map(element => element.id);
     let allTries = [];
@@ -410,7 +453,11 @@ function placeProductFactors() {
         let impactedFactors = qualityModel.findProductFactor(nextElement.id.toString()).getImpactedFactors();
 
         // check if all impacted factors are already placed
-        for (const factor of impactedFactors) {
+        innerLoop: for (const factor of impactedFactors) {
+            if (!drawnQualityAspects.includes(factor.getId) && !drawnProductFactors.includes(factor.getId)) {
+                // ignore factors which are not drawn;
+                continue innerLoop;
+            }
             if (!placed.includes(factor.getId)) {
                 // if an impacted factor is not yet placed, put element and the end again
                 toBePlaced.push(toBePlaced.splice(0, 1)[0]);
@@ -425,7 +472,7 @@ function placeProductFactors() {
                 element = productFactorElements.find(element => element.id === impactedFactor.getId);
             }
             return element;
-        });
+        }).filter(element => element !== undefined);
 
         // middle point between impacted factors
         let averageX = impactedElements.map(element => {
@@ -544,6 +591,10 @@ function updateLinkRoutes() {
 
 function onHighLevelFilterSelected() {
     console.log(highLevelFilterSelection.value);
+
+    drawQualityModelElements(highLevelFilterSelection.value, "");
+    arrangeQualityModelElements();
+
 }
 
 </script>
@@ -555,9 +606,10 @@ function onHighLevelFilterSelected() {
     flex-direction: row;
     width: 100%;
     align-items: start;
-    padding: 5px;   
-    border-bottom: 1px solid black; 
+    padding: 5px;
+    border-bottom: 1px solid black;
 }
+
 .qualityModelTool {
     display: flex;
     flex-direction: row;

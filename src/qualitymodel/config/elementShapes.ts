@@ -2,7 +2,7 @@ import { dia, shapes } from 'jointjs'
 
 const defaultTextFont = "sans-serif";
 
-const QualityAspect = dia.Element.define("quamoco.QualityAspect", {
+const QualityAspectElement = dia.Element.define("quamoco.QualityAspect", {
     defaults: {
         size: {
             width: 150,
@@ -55,7 +55,7 @@ const QualityAspect = dia.Element.define("quamoco.QualityAspect", {
     }]
 });
 
-const ProductFactor = dia.Element.define("quamoco.ProductFactor", {
+const ProductFactorElement = dia.Element.define("quamoco.ProductFactor", {
     defaults: {
         size: {
             width: 120,
@@ -112,10 +112,10 @@ const ProductFactor = dia.Element.define("quamoco.ProductFactor", {
 
 Object.assign(shapes, {
     quamoco: {
-        QualityAspect, ProductFactor
+        QualityAspectElement, ProductFactorElement
     }
 });
 
 export {
-    QualityAspect, ProductFactor
+    QualityAspectElement, ProductFactorElement
 };
