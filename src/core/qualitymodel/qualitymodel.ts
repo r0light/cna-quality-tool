@@ -743,7 +743,7 @@ export const qualityModel = {
         { "impactedFactor": "interoperability", "sourceFactor": "api-BasedCommunication", "impactType": "positive" },
         { "impactedFactor": "testability", "sourceFactor": "api-BasedCommunication", "impactType": "positive" },
         { "impactedFactor": "interoperability", "sourceFactor": "mediatedCommunication", "impactType": "positive" },
-        { "impactedFactor": "timeBehaviour", "sourceFactor": "mediatedCommunication", "impactType": "positive" },
+        { "impactedFactor": "timeBehaviour", "sourceFactor": "mediatedCommunication", "impactType": "negative" },
         { "impactedFactor": "analyzability", "sourceFactor": "mediatedCommunication", "impactType": "positive" }
     ],
     "measures": {

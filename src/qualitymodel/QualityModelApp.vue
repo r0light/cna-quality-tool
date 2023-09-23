@@ -169,7 +169,7 @@ function drawQualityModelElements(highLevelFilter: string, productFactorFilter: 
     for (const impact of qualityModel.impacts) {
 
         // ignore impacts for which not both connected elements are drawn
-        if ((!drawnQualityAspects.includes(impact.getImpactedFactor.getId) && !drawnProductFactors.includes(impact.getImpactedFactor.getId)) && !drawnProductFactors.includes(impact.getSourceFactor.getId)) {
+        if ((!drawnQualityAspects.includes(impact.getImpactedFactor.getId) && !drawnProductFactors.includes(impact.getImpactedFactor.getId)) || !drawnProductFactors.includes(impact.getSourceFactor.getId)) {
             continue;
         }
 
@@ -364,14 +364,23 @@ function placeQualityAspects() {
 
     // calculate maximum space between elements based on number of elements per side
     for (const paperSide of paperSideDistribution) {
+
         switch (paperSide.side) {
             case "top":
             case "bottom":
-                paperSide.spaceBetween = Math.floor((paperSide.sideLength - (paperSide.elements * paperSide.elementLength)) / (paperSide.elements - 1));
+                let horizontalSpaceForElements = paperSide.elements * paperSide.elementLength;
+                let horizontalRemainingSpace = paperSide.sideLength - horizontalSpaceForElements;
+                if (paperSide.elements <= 1) {
+                    paperSide.spaceBetween = horizontalRemainingSpace;
+                } else {
+                    paperSide.spaceBetween = Math.floor(horizontalRemainingSpace / (paperSide.elements - 1));
+                }
                 break;
             case "right":
             case "left":
-                paperSide.spaceBetween = Math.floor((paperSide.sideLength - ((paperSide.elements + 2) * paperSide.elementLength)) / (paperSide.elements + 1));
+                let verticalSpaceForElements = (paperSide.elements + 2) * paperSide.elementLength;
+                let verticalRemainingSpace = paperSide.sideLength - verticalSpaceForElements;
+                paperSide.spaceBetween = Math.floor(verticalRemainingSpace / (paperSide.elements + 1));
                 break;
         }
 
@@ -398,6 +407,8 @@ function placeQualityAspects() {
             if (sides[phase] < paperSideDistribution[phase].elements) {
                 currentX = currentX + paperSideDistribution[phase].elementLength + paperSideDistribution[phase].spaceBetween;
             } else {
+                // at the end of phase 0, move furthest to the right to ensure also the edge case when only one element is placed top
+                currentX = paperSideDistribution[phase].sideLength - paperSideDistribution[phase].elementLength + 10;
                 phase = phase + 1;
             }
         }
@@ -590,11 +601,8 @@ function updateLinkRoutes() {
 
 
 function onHighLevelFilterSelected() {
-    console.log(highLevelFilterSelection.value);
-
     drawQualityModelElements(highLevelFilterSelection.value, "");
     arrangeQualityModelElements();
-
 }
 
 </script>
