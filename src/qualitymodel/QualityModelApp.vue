@@ -3,17 +3,21 @@
         <div class="qualityModelToolbar">
             <div class="qualityModelTool">
                 <span>Filter by High-level aspect:</span>
-                <select class="highLevel-select" v-model="highLevelFilterSelection" @change="onHighLevelFilterSelected()">
-                    <option value="all" key="all">All</option>
-                    <option
-                        v-for="highLevelAspectKey of [...new Set(Object.entries(qualityModel.qualityAspects).map(qualityAspect => qualityAspect[1].getHighLevelAspectKey))]"
-                        :value="highLevelAspectKey" :key="highLevelAspectKey">
+                <div v-for="[highLevelAspectKey, status] of Object.entries(highLevelAspectFilter)">
+                    <input :id="`${highLevelAspectKey}-filter`" @input="onHighLevelFilterSelected()"
+                        v-model="status.checked" class="filterCheckbox" type="checkbox" :value="highLevelAspectKey">
+                    <label class="" :for="`${highLevelAspectKey}-filter`">
                         {{ highLevelAspectKey }}
-                    </option>
-                </select>
+                    </label>
+                </div>
             </div>
         </div>
-        <div id="qualityModel" ref="qmPaper">
+        <div class="qualityModelView">
+            <div id="qualityModel" ref="qmPaper">
+            </div>
+            <div class="qualityModelDetails">
+                show the Details here...
+            </div>
         </div>
     </div>
 </template>
@@ -26,6 +30,7 @@ import { QualityAspectElement, ProductFactorElement } from './config/elementShap
 import { getQualityModel } from '@/core/qualitymodel/QualityModelInstance';
 import { ProductFactor } from '@/core/qualitymodel/ProductFactor';
 import { QualityAspect } from '@/core/qualitymodel/QualityAspect';
+import { values } from 'lodash';
 
 const props = defineProps<{
     inView: boolean,
@@ -41,11 +46,24 @@ const paperRef = ref(null);
 
 const qualityModel = getQualityModel();
 
+const highLevelAspectFilter: { [key: string]: { key: string, checked: boolean } } = (() => {
+    let filter = {};
+    for (const highLevelAspectKey of [...new Set(Object.entries(qualityModel.qualityAspects).map(qualityAspect => qualityAspect[1].getHighLevelAspectKey))]) {
+        filter[highLevelAspectKey] = {
+            key: highLevelAspectKey,
+            checked: true
+        }
+    }
+    return filter;
+})();
+
+function getActiveHighLevelAspects() {
+    return Object.entries(highLevelAspectFilter).filter(aspect => aspect[1].checked).map(aspect => aspect[1].key);
+}
+
 const qualityAspectElements: dia.Element[] = [];
 const productFactorElements: dia.Element[] = [];
 const impactElements: dia.Link[] = [];
-
-const highLevelFilterSelection = ref<string>("all");
 
 onMounted(() => {
 
@@ -64,7 +82,7 @@ onMounted(() => {
 
     paperRef.value.render();
 
-    drawQualityModelElements(highLevelFilterSelection.value, "");
+    drawQualityModelElements(getActiveHighLevelAspects(), "");
 
 })
 
@@ -78,7 +96,7 @@ onUpdated(() => {
 
 })
 
-function drawQualityModelElements(highLevelFilter: string, productFactorFilter: string) {
+function drawQualityModelElements(highLevelFilter: string[], productFactorFilter: string) {
 
     // clear existing elements
     graph.clear();
@@ -97,7 +115,7 @@ function drawQualityModelElements(highLevelFilter: string, productFactorFilter: 
             continue;
         }
         // 2. filter based on high level quality aspect
-        if (highLevelFilter !== "all" && qualityAspect.getHighLevelAspectKey !== highLevelFilter) {
+        if (!highLevelFilter.includes(qualityAspect.getHighLevelAspectKey)) {
             continue;
         }
 
@@ -599,10 +617,12 @@ function updateLinkRoutes() {
     }
 }
 
-
 function onHighLevelFilterSelected() {
-    drawQualityModelElements(highLevelFilterSelection.value, "");
-    arrangeQualityModelElements();
+    // use setTimeout as a workaround to wait for highLevelAspectFilter to be properly updated so that the filter is applied
+    setTimeout(() => {
+        drawQualityModelElements(getActiveHighLevelAspects(), "");
+        arrangeQualityModelElements();
+    }, 50);
 }
 
 </script>
@@ -615,7 +635,7 @@ function onHighLevelFilterSelected() {
     width: 100%;
     align-items: start;
     padding: 5px;
-    border-bottom: 1px solid black;
+    border-bottom: 5px solid var(--menu-background-colour);
 }
 
 .qualityModelTool {
@@ -632,11 +652,27 @@ function onHighLevelFilterSelected() {
     width: 300px;
 }
 
+.qualityModelView {
+    display: flex;
+    flex-direction: row;
+    flex-grow: 1;
+}
+
+.qualityModelDetails {
+    display: flex;
+    min-width: 300px;
+}
+
 .qualitymodel-container {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    width: 100%;
+    /*align-items: center;*/
+    width: fit-content;
     height: 100%;
+    overflow: scroll;
+}
+
+.filterCheckbox {
+    accent-color: #343a40;
 }
 </style>
