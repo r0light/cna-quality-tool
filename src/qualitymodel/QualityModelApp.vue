@@ -7,7 +7,7 @@
                     <input :id="`${highLevelAspectKey}-filter`" @input="onHighLevelFilterSelected()"
                         v-model="status.checked" class="filterCheckbox" type="checkbox" :value="highLevelAspectKey">
                     <label class="" :for="`${highLevelAspectKey}-filter`">
-                        {{ highLevelAspectKey }}
+                        {{ status.name }}
                     </label>
                 </div>
             </div>
@@ -50,11 +50,12 @@ const paperRef = ref(null);
 
 const qualityModel = getQualityModel();
 
-const highLevelAspectFilter: { [key: string]: { key: string, checked: boolean } } = (() => {
+const highLevelAspectFilter: { [key: string]: { key: string, name: string, checked: boolean } } = (() => {
     let filter = {};
     for (const highLevelAspectKey of [...new Set(Object.entries(qualityModel.qualityAspects).map(qualityAspect => qualityAspect[1].getHighLevelAspectKey))]) {
         filter[highLevelAspectKey] = {
             key: highLevelAspectKey,
+            name: qualityModel.highLevelAspects.find(aspect => aspect.getId === highLevelAspectKey).getName,
             checked: true
         }
     }
@@ -83,6 +84,8 @@ const selectedFactor: ComputedRef<ProductFactor | QualityAspect> = computed(() =
 });
 
 onMounted(() => {
+
+    console.log(highLevelAspectFilter);
 
     paperRef.value = new dia.Paper({
         el: $('#qmPaper'),

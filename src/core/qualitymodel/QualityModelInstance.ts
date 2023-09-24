@@ -1,3 +1,5 @@
+import { h } from "vue";
+import { HighLevelAspect } from "./HighLevelAspect";
 import { Impact, ImpactType } from "./Impact";
 import { Measure } from "./Measure";
 import { ProductFactor } from "./ProductFactor";
@@ -9,8 +11,11 @@ function getQualityModel(): QualityModelInstance {
 
     const newQualityModel = new QualityModelInstance();
 
-    // add all Quality Aspects
+
+    // add all HighLevel Aspects and Quality Aspects
     for (const [highLevelQualityAspectKey, highLevelQualityAspect] of Object.entries(qualityModel.qualityAspects)) {
+        let highLevelAspect = new HighLevelAspect(highLevelQualityAspectKey, highLevelQualityAspect.name);
+        newQualityModel.highLevelAspects.push(highLevelAspect);
         for (const [qualityAspectKey, qualityAspect] of Object.entries(highLevelQualityAspect.aspects)) {
             let newQualityAspect = new QualityAspect(qualityAspectKey, qualityAspect.name, highLevelQualityAspectKey, qualityAspect.description);
             newQualityModel.qualityAspects.push(newQualityAspect);
@@ -85,6 +90,8 @@ function getQualityModel(): QualityModelInstance {
 
 class QualityModelInstance {
 
+    highLevelAspects: HighLevelAspect[];
+
     qualityAspects: QualityAspect[];
 
     productFactors: ProductFactor[];
@@ -92,6 +99,7 @@ class QualityModelInstance {
     impacts: Impact[];
 
     constructor() {
+        this.highLevelAspects = [];
         this.qualityAspects = [];
         this.productFactors = [];
         this.impacts = [];
