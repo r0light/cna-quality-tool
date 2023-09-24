@@ -108,14 +108,62 @@ const ProductFactorElement = dia.Element.define("quamoco.ProductFactor", {
     }]
 });
 
+const ImpactElement = shapes.standard.Link.define("quamoco.Impact", {
+    attrs: {
+        root: {
+            title: "Link"
+        },
+        line: {
+            stroke: "black",
+            strokeDasharray: "4 4",
+            strokeWidth: 2,
+            strokeLineJoin: "round",
+            targetMarker: {
+                type: "path",
+                d: "M 10 -5 0 0 10 5 z"
+            }
+        }
+    },
+    defaultLabel: {
+        markup: [
+            {
+                tagName: 'rect',
+                selector: 'body'
+            }, {
+                tagName: 'text',
+                selector: 'label'
+            }
+        ],
+        // no `size` object provided = calc() operations need `ref` property
+        attrs: {
+            label: {
+                fill: '#000000',
+                fontSize: 14,
+                textAnchor: 'middle',
+                yAlignment: 'middle',
+                pointerEvents: 'none'
+            },
+            body: {
+                // calc() is responsive to size of 'label':
+                ref: 'label', // subelement identified by 'label' selector
+                fill: 'white',
+                width: 'calc(1.2*w)',
+                height: 'calc(1.2*h)',
+                x: 'calc(x-calc(0.1*w))',
+                y: 'calc(y-calc(0.1*h))'
+            }
+        },
+    }
+});
+
 
 
 Object.assign(shapes, {
     quamoco: {
-        QualityAspectElement, ProductFactorElement
+        QualityAspectElement, ProductFactorElement, ImpactElement
     }
 });
 
 export {
-    QualityAspectElement, ProductFactorElement
+    QualityAspectElement, ProductFactorElement, ImpactElement
 };

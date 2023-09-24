@@ -31,7 +31,7 @@
 import $ from 'jquery';
 import { ref, onMounted, onUpdated, Ref, ComputedRef, computed } from 'vue';
 import { dia, shapes, util, highlighters } from "jointjs";
-import { QualityAspectElement, ProductFactorElement } from './config/elementShapes';
+import { QualityAspectElement, ProductFactorElement, ImpactElement } from './config/elementShapes';
 import { getQualityModel } from '@/core/qualitymodel/QualityModelInstance';
 import { ProductFactor } from '@/core/qualitymodel/ProductFactor';
 import { QualityAspect } from '@/core/qualitymodel/QualityAspect';
@@ -124,7 +124,6 @@ onMounted(() => {
         },
         'blank:pointerdown': function (evt, x, y) {
             selectedElement.value = null;
-            let currentPaper = this;
             this.model.getLinks().forEach(function (link) {
                 highlighters.stroke.remove(link.findView(paperRef.value));
             });
@@ -211,8 +210,6 @@ async function drawQualityModelElements(highLevelFilter: string[], productFactor
             continue;
         }
 
-
-
         var productFactorElement = new ProductFactorElement({
             id: productFactor.getId,
             position: { x: initialPositionX, y: initialPositionY },
@@ -228,7 +225,6 @@ async function drawQualityModelElements(highLevelFilter: string[], productFactor
             }
         })
 
-
         productFactorElement.addTo(graph);
         productFactorElements.push(productFactorElement);
     }
@@ -241,12 +237,7 @@ async function drawQualityModelElements(highLevelFilter: string[], productFactor
             continue;
         }
 
-        var link = new shapes.standard.Link();
-        link.attr({
-            line: {
-                strokeDasharray: '4 4',
-            }
-        })
+        var link = new ImpactElement();
         link.source(graph.getCell(impact.getSourceFactor.getId), {
             anchor: {
                 name: 'modelCenter'
@@ -273,23 +264,14 @@ async function drawQualityModelElements(highLevelFilter: string[], productFactor
             attrs: {
                 text: {
                     text: impact.getImpactType,
-                    fill: '#000000',
-                    fontSize: 14,
-                    textAnchor: 'middle',
-                    yAlignment: 'middle',
-                    pointerEvents: 'none'
                 }
             }
         });
         link.connector({ "name": 'rounded' });
 
-
-
         link.router({
             name: "normal",
         });
-
-
         /*
         link.router({
             name: "metro",
@@ -305,7 +287,6 @@ async function drawQualityModelElements(highLevelFilter: string[], productFactor
             }
         });
         */
-
 
         link.addTo(graph);
         link.toBack();
