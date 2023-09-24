@@ -13,7 +13,8 @@
             </div>
         </div>
         <div class="qualityModelView">
-            <div id="qualityModel" ref="qmPaper">
+            <div class="paperContainer">
+                <div id="qmPaper" ref="qmPaper" ></div>
             </div>
             <div class="qualityModelDetails">
                 show the Details here...
@@ -30,7 +31,6 @@ import { QualityAspectElement, ProductFactorElement } from './config/elementShap
 import { getQualityModel } from '@/core/qualitymodel/QualityModelInstance';
 import { ProductFactor } from '@/core/qualitymodel/ProductFactor';
 import { QualityAspect } from '@/core/qualitymodel/QualityAspect';
-import { values } from 'lodash';
 
 const props = defineProps<{
     inView: boolean,
@@ -68,7 +68,7 @@ const impactElements: dia.Link[] = [];
 onMounted(() => {
 
     paperRef.value = new dia.Paper({
-        el: $('#qualityModel'),
+        el: $('#qmPaper'),
         model: graph,
         width: 1600,
         height: 1400,
@@ -629,6 +629,13 @@ function onHighLevelFilterSelected() {
 
 
 <style>
+.qualitymodel-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+}
+
 .qualityModelToolbar {
     display: flex;
     flex-direction: row;
@@ -648,6 +655,10 @@ function onHighLevelFilterSelected() {
     margin-left: 5px;
 }
 
+.filterCheckbox {
+    accent-color: #343a40;
+}
+
 .highLevel-select {
     width: 300px;
 }
@@ -655,24 +666,24 @@ function onHighLevelFilterSelected() {
 .qualityModelView {
     display: flex;
     flex-direction: row;
-    flex-grow: 1;
+    padding: 5px;
+}
+
+.paperContainer {
+    display: flex;
+    overflow: scroll;
+}
+
+#qmPaper {
+    min-width: 1600px;
+    min-height: 1400px;
 }
 
 .qualityModelDetails {
     display: flex;
+    flex-grow: 1;
     min-width: 300px;
 }
 
-.qualitymodel-container {
-    display: flex;
-    flex-direction: column;
-    /*align-items: center;*/
-    width: fit-content;
-    height: 100%;
-    overflow: scroll;
-}
 
-.filterCheckbox {
-    accent-color: #343a40;
-}
 </style>
