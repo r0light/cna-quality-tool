@@ -85,8 +85,6 @@ const selectedFactor: ComputedRef<ProductFactor | QualityAspect> = computed(() =
 
 onMounted(() => {
 
-    console.log(highLevelAspectFilter);
-
     paperRef.value = new dia.Paper({
         el: $('#qmPaper'),
         model: graph,
@@ -94,6 +92,7 @@ onMounted(() => {
         height: 1400,
         gridSize: 10,
         drawGrid: true,
+        async: true,
         background: {
             color: 'rgba(230, 230, 230, 0.3)'
         },
@@ -117,7 +116,7 @@ onMounted(() => {
                     layer: 'back',
                     attrs: {
                         'stroke': '#feb663',
-                        'stroke-width': 5,   
+                        'stroke-width': 5,
                     }
                 });
                 //link.toFront();
@@ -144,7 +143,7 @@ onUpdated(() => {
 
 })
 
-function drawQualityModelElements(highLevelFilter: string[], productFactorFilter: string) {
+async function drawQualityModelElements(highLevelFilter: string[], productFactorFilter: string) {
 
     // clear existing elements
     graph.clear();
@@ -551,11 +550,11 @@ function placeProductFactors() {
         }
 
         let impactedElements = impactedFactors.map(impactedFactor => {
-            let element = qualityAspectElements.find(element => element.id === impactedFactor.getId);
-            if (!element) {
-                element = productFactorElements.find(element => element.id === impactedFactor.getId);
+            if (impactedFactor.constructor.name === "QualityAspect") {
+                return qualityAspectElements.find(element => element.id === impactedFactor.getId);
+            } else {
+                return productFactorElements.find(element => element.id === impactedFactor.getId);
             }
-            return element;
         }).filter(element => element !== undefined);
 
         // middle point between impacted factors
@@ -565,10 +564,6 @@ function placeProductFactors() {
         let averageY = impactedElements.map(element => {
             return element.position().y + verticalCenter // calculate center of element
         }).reduce(function (a, b) { return a + b; }) / impactedElements.length;
-
-        // calculate parameters of line between middle point and center
-        let slope = (averageY - centerY) / (averageX - centerX);
-        let axisDistance = averageY - (slope * averageX);
 
         // calculate distance between middle point and center
         const distanceToCenter = Math.sqrt(Math.pow((centerX - averageX), 2) + Math.pow((centerY - averageY), 2));
@@ -650,9 +645,11 @@ function placeProductFactors() {
         allTries.push(tries);
     }
 
-    //const average = arr => arr.reduce((p, c) => p + c, 0) / arr.length;
-    //console.log("average tries: " + average(allTries));
-    //console.log("unplaceable: " + allTries.filter(value => value === maximumTries).length);
+    /*
+    const average = arr => arr.reduce((p, c) => p + c, 0) / arr.length;
+    console.log("average tries: " + average(allTries));
+    console.log("unplaceable: " + allTries.filter(value => value === maximumTries).length);
+    */
 }
 
 function calcAngleDegrees(x, y) {
