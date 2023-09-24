@@ -14,10 +14,14 @@
         </div>
         <div class="qualityModelView">
             <div class="paperContainer">
-                <div id="qmPaper" ref="qmPaper" ></div>
+                <div id="qmPaper" ref="qmPaper"></div>
             </div>
             <div class="qualityModelDetails">
-                show the Details here...
+                <div v-if="!!selectedFactor">
+                    <h2>{{ selectedFactor.getName }}</h2>
+                    <p>{{ selectedFactor.getDescription }}</p>
+                </div>
+                <div v-if="!selectedFactor">No Factor selected</div>
             </div>
         </div>
     </div>
@@ -25,8 +29,8 @@
 
 <script lang="ts" setup>
 import $ from 'jquery';
-import { ref, onMounted, onUpdated } from 'vue';
-import { dia, shapes, util } from "jointjs";
+import { ref, onMounted, onUpdated, Ref, ComputedRef, computed } from 'vue';
+import { dia, shapes, util, highlighters } from "jointjs";
 import { QualityAspectElement, ProductFactorElement } from './config/elementShapes';
 import { getQualityModel } from '@/core/qualitymodel/QualityModelInstance';
 import { ProductFactor } from '@/core/qualitymodel/ProductFactor';
@@ -65,6 +69,19 @@ const qualityAspectElements: dia.Element[] = [];
 const productFactorElements: dia.Element[] = [];
 const impactElements: dia.Link[] = [];
 
+const selectedElement: Ref<dia.ElementView> = ref(null);
+const selectedFactor: ComputedRef<ProductFactor | QualityAspect> = computed(() => {
+    if (!selectedElement.value) {
+        return null;
+    }
+    let factor = qualityModel.findQualityAspect(selectedElement.value.model.id.toString());
+    if (factor) {
+        return factor;
+    } else {
+        return qualityModel.findProductFactor(selectedElement.value.model.id.toString());
+    }
+});
+
 onMounted(() => {
 
     paperRef.value = new dia.Paper({
@@ -84,7 +101,35 @@ onMounted(() => {
 
     drawQualityModelElements(getActiveHighLevelAspects(), "");
 
-})
+    paperRef.value.on({
+        'element:pointerdown': function (cellView: dia.ElementView, evt, x, y) {
+            selectedElement.value = cellView;
+            //let currentPaper = this;
+            this.model.getLinks().forEach(function (link) {
+                highlighters.stroke.remove(link.findView(paperRef.value));
+                //link.toBack();
+            });
+            graph.getConnectedLinks(cellView.model).forEach(link => {
+                highlighters.stroke.add(link.findView(paperRef.value), { selector: 'line' }, 'my-element-highlight', {
+                    layer: 'back',
+                    attrs: {
+                        'stroke': '#feb663',
+                        'stroke-width': 5,   
+                    }
+                });
+                //link.toFront();
+            });
+        },
+        'blank:pointerdown': function (evt, x, y) {
+            selectedElement.value = null;
+            let currentPaper = this;
+            this.model.getLinks().forEach(function (link) {
+                highlighters.stroke.remove(link.findView(paperRef.value));
+            });
+        },
+
+    });
+});
 
 onUpdated(() => {
 
@@ -164,6 +209,8 @@ function drawQualityModelElements(highLevelFilter: string[], productFactorFilter
             continue;
         }
 
+
+
         var productFactorElement = new ProductFactorElement({
             id: productFactor.getId,
             position: { x: initialPositionX, y: initialPositionY },
@@ -178,6 +225,7 @@ function drawQualityModelElements(highLevelFilter: string[], productFactorFilter
                 }
             }
         })
+
 
         productFactorElement.addTo(graph);
         productFactorElements.push(productFactorElement);
@@ -234,9 +282,11 @@ function drawQualityModelElements(highLevelFilter: string[], productFactorFilter
         link.connector({ "name": 'rounded' });
 
 
+
         link.router({
             name: "normal",
         });
+
 
         /*
         link.router({
@@ -254,7 +304,9 @@ function drawQualityModelElements(highLevelFilter: string[], productFactorFilter
         });
         */
 
+
         link.addTo(graph);
+        link.toBack();
         impactElements.push(link);
     }
 
@@ -547,6 +599,11 @@ function placeProductFactors() {
                 newX = ((1 - largerRatio) * averageX + largerRatio * centerX) - horizontalCenter;
                 newY = ((1 - largerRatio) * averageY + largerRatio * centerY) - verticalCenter;
                 nextElement.translate(newX - nextElement.position().x, newY - nextElement.position().y);
+                /*nextElement.transition('position', {x: newX, y: newY}, {
+                    delay: 0,
+                    duration: 1000,
+                    valueFunction: util.interpolate.object
+                })*/
                 tries = tries + 1;
             } else {
                 // current element impacts only one element
@@ -585,18 +642,6 @@ function placeProductFactors() {
                 || nextElement.position().y < 0
                 || (nextElement.position().y + nextElement.size().height) > qmPaper.value.clientHeight;
         }
-
-        /*
-        console.log({
-            "name": nextElementId,
-            "impactedElements": impactedElements,
-            "try": tries,
-            "elementOutsidePaper": elementOutsidePaper,
-            "overlapping": graph.findModelsInArea(nextElement.getBBox()).filter(el => el !== nextElement),
-            "position-x": nextElement.position().x,
-            "position-y": nextElement.position().y,
-        })
-        */
 
         placed.push(toBePlaced.splice(0, 1)[0]);
         allTries.push(tries);
@@ -683,7 +728,7 @@ function onHighLevelFilterSelected() {
     display: flex;
     flex-grow: 1;
     min-width: 300px;
+    max-width: 600px;
+    padding: 5px;
 }
-
-
 </style>
