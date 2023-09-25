@@ -142,7 +142,7 @@ onUpdated(() => {
 
 })
 
-async function drawQualityModelElements(highLevelFilter: string[], productFactorFilter: string) {
+function drawQualityModelElements(highLevelFilter: string[], productFactorFilter: string) {
 
     // clear existing elements
     graph.clear();
@@ -181,7 +181,7 @@ async function drawQualityModelElements(highLevelFilter: string[], productFactor
             }
         })
 
-        qualityAspectElement.addTo(graph);
+        qualityAspectElement.addTo(graph, {async: false});
         qualityAspectElements.push(qualityAspectElement);
     }
 
@@ -225,7 +225,7 @@ async function drawQualityModelElements(highLevelFilter: string[], productFactor
             }
         })
 
-        productFactorElement.addTo(graph);
+        productFactorElement.addTo(graph, {async: false});
         productFactorElements.push(productFactorElement);
     }
 
@@ -550,7 +550,7 @@ function placeProductFactors() {
         const distanceToCenter = Math.sqrt(Math.pow((centerX - averageX), 2) + Math.pow((centerY - averageY), 2));
 
         // placement algorithm parameters:
-        const oneStep = 150;
+        const oneStep = 120;
         const centerDistanceRatio = oneStep / distanceToCenter;
         const angleMovement = 15;
         const radiusIncrease = Math.ceil(360 / angleMovement);
@@ -560,7 +560,7 @@ function placeProductFactors() {
 
         nextElement.translate(newX - nextElement.position().x, newY - nextElement.position().y);
 
-        let elementOverlapping = graph.findModelsInArea(nextElement.getBBox()).filter(el => el !== nextElement).length > 0;
+        let elementOverlapping = graph.findModelsInArea(nextElement.getBBox().moveAndExpand({ x: -10, y: -10, width: 20, height: 20 })).filter(el => el !== nextElement).length > 0;
         let elementOutsidePaper =
             nextElement.position().x < 0
             || (nextElement.position().x + nextElement.size().width) > qmPaper.value.clientWidth
@@ -614,7 +614,7 @@ function placeProductFactors() {
                 tries = tries + 1;
             }
 
-            elementOverlapping = graph.findModelsInArea(nextElement.getBBox()).filter(el => el !== nextElement).length > 0;
+            elementOverlapping = graph.findModelsInArea(nextElement.getBBox().moveAndExpand({ x: -10, y: -10, width: 20, height: 20 })).filter(el => el !== nextElement).length > 0;
             elementOutsidePaper =
                 nextElement.position().x < 0
                 || (nextElement.position().x + nextElement.size().width) > qmPaper.value.clientWidth
@@ -640,6 +640,7 @@ function calcAngleDegrees(x, y) {
 function updateLinkRoutes() {
     for (const impactElement of impactElements) {
         (impactElement.findView(paperRef.value) as dia.LinkView).requestConnectionUpdate();
+        impactElement.toBack();
     }
 }
 
