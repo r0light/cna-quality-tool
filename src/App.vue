@@ -70,6 +70,8 @@
         <Home v-if="pageContent.pageType === 'home'" v-show="currentPage === pageContent.index"></Home>
         <QualityModelApp v-if="pageContent.pageType === 'qualityModel'" v-show="currentPage === pageContent.index"
           :inView="currentPage === pageContent.index"></QualityModelApp>
+          <EvaluationApp v-if="pageContent.pageType === 'evaluation'" v-show="currentPage === pageContent.index"
+          :systemsData="sharedSystemsData" ></EvaluationApp>
         <ModelingApp v-if="pageContent.pageType === 'modeling'"
           v-show="pageContent.pageType === 'modeling' && currentPage === pageContent.index" :systemName="pageContent.name"
           :pageIndex="pageContent.index"
@@ -85,17 +87,18 @@
 
 <script lang="ts" setup>
 import $ from 'jquery';
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed, ComputedRef } from 'vue'
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import Home from './Home.vue';
 import ModelingApp from './modeling/ModelingApp.vue';
 import QualityModelApp from './qualitymodel/QualityModelApp.vue';
+import EvaluationApp from './evaluation/EvaluationApp.vue';
 import SystemEntityManager from './modeling/systemEntityManager';
 
 type Page = {
   index: number;
   active: boolean;
-  pageType: "home" | "qualityModel" | "modeling"
+  pageType: "home" | "qualityModel" | "evaluation" | "modeling"
   iconClass: string;
   name: string;
 }
@@ -120,10 +123,23 @@ const pages = ref<Page[]>([
     pageType: "qualityModel",
     iconClass: "fa-solid fa-sitemap",
     name: "Quality Model"
+  },
+  {
+    index: 2,
+    active: false,
+    pageType: "evaluation",
+    iconClass: "fa-solid fa-gauge-high",
+    name: "Evaluation"
   }
 ])
 
 const modeledSystemsData = ref<ModelingData[]>([]);
+const sharedSystemsData: ComputedRef<ModelingData[]> = computed(() => {
+  return modeledSystemsData.value.filter(data => data.index !== -1) as ModelingData[];
+});
+/*const sharedSystemsKey: ComputedRef<string> = computed(() => {
+  return modeledSystemsData.value.reduce((initial, b) => initial + b.name, "");
+});*/
 
 function storeModelingData(systemEntityManager: SystemEntityManager, pageName: string, index: number) {
   modeledSystemsData.value[index] = {
@@ -206,7 +222,7 @@ function addNewModelingPage(name: string) {
   // prepare modeledSystemsData so that the array at index newIndex is not empty
   while (modeledSystemsData.value.length <= newIndex + 1) {
     modeledSystemsData.value.push({
-      index: 0,
+      index: -1,
       name: "",
       entityManager: null
     });
@@ -231,6 +247,7 @@ function updatePageName(newName: string, index: number) {
       document.title += `CNA Modeling: ${newName}`;
     }
   }
+  modeledSystemsData.value[index].name = newName;
 }
 
 </script>

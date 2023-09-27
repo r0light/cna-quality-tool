@@ -26,7 +26,6 @@
 </template>
 
 <script lang="ts" setup>
-import $ from 'jquery';
 import { ref, onMounted, nextTick, toRaw } from 'vue'
 import { dia, shapes } from "jointjs";
 import SystemEntityManager from './systemEntityManager';
