@@ -68,15 +68,19 @@
     <div class="pagesContainer">
       <div v-for="pageContent of pages" class="pageWrapper">
         <Home v-if="pageContent.pageType === 'home'" v-show="currentPage === pageContent.index"></Home>
-        <QualityModelApp v-if="pageContent.pageType === 'qualityModel'" v-show="currentPage === pageContent.index" :inView="currentPage === pageContent.index"></QualityModelApp>
-        <ModelingApp v-if="pageContent.pageType === 'modeling'" v-show="pageContent.pageType === 'modeling' && currentPage === pageContent.index"
-          :systemName="pageContent.name" :pageIndex="pageContent.index" :pageData="pageContent.pageData"
-          @store:pageData="(dataKey, dataValue) => storePageData(dataKey, dataValue, pageContent.index)"
+        <QualityModelApp v-if="pageContent.pageType === 'qualityModel'" v-show="currentPage === pageContent.index"
+          :inView="currentPage === pageContent.index"></QualityModelApp>
+        <ModelingApp v-if="pageContent.pageType === 'modeling'"
+          v-show="pageContent.pageType === 'modeling' && currentPage === pageContent.index" :systemName="pageContent.name"
+          :pageIndex="pageContent.index"
+          :modelingData="(modeledSystemsData[pageContent.index] as ModelingData)"
+          @store:modelingData="(systemEntityManager) => storeModelingData(systemEntityManager, pageContent.name, pageContent.index)"
           @update:systemName="event => updatePageName(event, pageContent.index)"></ModelingApp>
       </div>
     </div>
   </main>
   <div id="modalBackground"></div>
+  <div id="modals" class="d-print-none"></div>
 </template>
 
 <script lang="ts" setup>
@@ -86,6 +90,7 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import Home from './Home.vue';
 import ModelingApp from './modeling/ModelingApp.vue';
 import QualityModelApp from './qualitymodel/QualityModelApp.vue';
+import SystemEntityManager from './modeling/systemEntityManager';
 
 type Page = {
   index: number;
@@ -93,7 +98,12 @@ type Page = {
   pageType: "home" | "qualityModel" | "modeling"
   iconClass: string;
   name: string;
-  pageData: Map<string, object>;
+}
+
+export type ModelingData = {
+  index: number,
+  name: string,
+  entityManager: SystemEntityManager
 }
 
 const pages = ref<Page[]>([
@@ -102,25 +112,26 @@ const pages = ref<Page[]>([
     active: false,
     pageType: "home",
     iconClass: "fa fa-fw fa-home",
-    name: "Home",
-    pageData: new Map<string, object>()
+    name: "Home"
   },
   {
     index: 1,
     active: false,
     pageType: "qualityModel",
     iconClass: "fa-solid fa-sitemap",
-    name: "Quality Model",
-    pageData: new Map<string, object>()
+    name: "Quality Model"
   }
 ])
 
-function storePageData(dataKey, dataValue, index) {
-  for (const page of pages.value) {
-    if (page.index === index) {
-      page.pageData.set(dataKey, dataValue);
-    }
+const modeledSystemsData = ref<ModelingData[]>([]);
+
+function storeModelingData(systemEntityManager: SystemEntityManager, pageName: string, index: number) {
+  modeledSystemsData.value[index] = {
+    index: index,
+    name: pageName,
+    entityManager: systemEntityManager
   }
+
 }
 
 const currentPage = ref(0);
@@ -192,13 +203,22 @@ function addNewModelingPage(name: string) {
   // increment currently highest index by one to get a new index
   const newIndex = Math.max(...pages.value.map(page => page.index)) + 1;
 
+  // prepare modeledSystemsData so that the array at index newIndex is not empty
+  while (modeledSystemsData.value.length <= newIndex + 1) {
+    modeledSystemsData.value.push({
+      index: 0,
+      name: "",
+      entityManager: null
+    });
+  }
+
+
   pages.value.push({
     index: newIndex,
     active: true,
     pageType: "modeling",
     iconClass: "fa-solid fa-pencil",
-    name: name,
-    pageData: new Map<string, object>()
+    name: name
   })
 
   selectPage(newIndex);
@@ -233,5 +253,4 @@ function updatePageName(newName: string, index: number) {
 
 .hide {
   display: none;
-}
-</style>
+}</style>

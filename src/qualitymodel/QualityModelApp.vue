@@ -181,7 +181,7 @@ function drawQualityModelElements(highLevelFilter: string[], productFactorFilter
             }
         })
 
-        qualityAspectElement.addTo(graph, {async: false});
+        qualityAspectElement.addTo(graph, { async: false });
         qualityAspectElements.push(qualityAspectElement);
     }
 
@@ -225,7 +225,7 @@ function drawQualityModelElements(highLevelFilter: string[], productFactorFilter
             }
         })
 
-        productFactorElement.addTo(graph, {async: false});
+        productFactorElement.addTo(graph, { async: false });
         productFactorElements.push(productFactorElement);
     }
 

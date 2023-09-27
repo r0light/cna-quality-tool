@@ -7,20 +7,15 @@ import { UIContentType } from './config/toolbarConfiguration';
 import UIModalDialog, { DialogSize } from './representations/guiElements.dialog';
 import { EntityDetailsConfig, PropertyContentType, TableDialogPropertyConfig } from './config/detailsSidebarConfig';
 import { DataUsageRelation, MetaData } from "@/core/common/entityDataTypes";
-import { convertToServiceTemplate } from "@/core/tosca-adapter/ToscaAdapter";
+import { convertToServiceTemplate, importFromServiceTemplate } from "@/core/tosca-adapter/ToscaAdapter";
 import {
     Component as ComponentElement, Service as ServiceElement, BackingService as BackingServiceElement, StorageBackingService as StorageBackingServiceElement,
     Endpoint as EndpointElement, ExternalEndpoint as ExternalEndpointElement, Link as LinkElement,
     Infrastructure as InfrastructureElement, DeploymentMapping as DeploymentMappingElement,
     RequestTrace as RequestTraceElement, DataAggregate as DataAggregateElement, BackingData as BackingDataElement
 } from './config/entityShapes'
-import { addSelectionToolToEntity } from "./views/tools/entitySelectionTools";
 import { DataAggregate } from "../core/entities";
-import { data } from "jquery";
 import { FormContentConfig } from "./config/actionDialogConfig";
-import { create } from "lodash";
-import { prop } from "vue-class-component";
-import ConnectionSelectionTools from "./views/tools/connectionSelectionTools";
 
 class SystemEntityManager {
 
@@ -37,31 +32,22 @@ class SystemEntityManager {
         this.#currentSystemGraph = currentGraph;
         this.#currentSystemEntity = new Entities.System("test");
 
-        this.#subscribeToEvents();
-
         // needed because javascript (https://stackoverflow.com/questions/67416881/es6-proxied-class-access-private-property-cannot-read-private-member-hidden-f)
         this.overwriteSystemEntity = this.overwriteSystemEntity.bind(this);
         this.convertToGraph = this.convertToGraph.bind(this);
     }
 
-    #subscribeToEvents() {
-
-        // TODO adjust to Vue Events
-
-        this.#currentSystemGraph.on("initialSystemName", (event) => {
-            this.#currentSystemEntity.setSystemName = event.systemName;
-        });
-
-        this.#currentSystemGraph.on("systemNameChanged", (event) => {
-            this.#currentSystemEntity.setSystemName = event.editedAppName;
-        });
-
-        this.#currentSystemGraph.on("startToscaTransformation", (event) => {
-            this.#createYamlDocument();
-        });
+    getSystemEntity(): Entities.System {
+        this.#convertToSystemEntity();
+        return this.#currentSystemEntity;
     }
 
-    #createYamlDocument() {
+    getGraph(): dia.Graph {
+        // call convertToGraph()?;
+        return this.#currentSystemGraph;
+    }
+
+    convertToCustomTosca(): string {
         this.#errorMessages = new Map();
         this.#includedDataAggregateEntities = new Map();
         this.#currentSystemEntity.resetAllIncludedSystemEntities();
@@ -82,15 +68,41 @@ class SystemEntityManager {
                 '!!null': 'empty'
             }
         });
-
-        // download created yaml taken from https://stackoverflow.com/a/22347908
-        let downloadElement = document.createElement("a");
-        downloadElement.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(asYaml));
-        downloadElement.setAttribute('download', `${this.#currentSystemEntity.getSystemName}.yaml`);
-        downloadElement.click();
+        return asYaml;
     }
 
-    #convertToSystemEntity() {
+    loadFromCustomTosca(stringifiedTOSCA: string, fileName: string): dia.Cell[] {
+        let system = importFromServiceTemplate(fileName, stringifiedTOSCA);
+        this.overwriteSystemEntity(system);
+        return this.convertToGraph();
+    }
+
+    convertToJson(): string {
+        let jsonSerializedGraph = this.#currentSystemGraph.toJSON();
+        return jsonSerializedGraph;
+    }
+
+    loadFromJson(stringifiedJson: string, fileName: string): dia.Cell[] {
+        try {
+            let jsonGraph: any = JSON.parse(stringifiedJson);
+            this.#currentSystemGraph.clear();
+            this.#currentSystemGraph.fromJSON(jsonGraph);
+            this.#currentSystemGraph.trigger("reloaded");
+        } catch (e) {
+            //TODO provide error message to user
+            console.log(e)
+        }
+
+        // update system entity
+        this.#convertToSystemEntity();
+        this.#currentSystemEntity.setSystemName = fileName.replace(/\..*$/g, "");
+
+        return this.#currentSystemGraph.getCells();
+    }
+
+
+
+    #convertToSystemEntity()  {
         // get first elements to ensure that all connection relate entities already exist
 
         let elements: dia.Element[] = this.#currentSystemGraph.getElements();
@@ -111,7 +123,7 @@ class SystemEntityManager {
             || element.prop("entity/type") === EntityTypes.INFRASTRUCTURE
         );
         for (const graphElement of componentEntities) {
-            this.#addEntity(graphElement);
+            this.#addComponentEntity(graphElement);
         }
 
         // next are Links and Deployment Mappings
@@ -122,7 +134,7 @@ class SystemEntityManager {
         // finally add Request Traces
         let traceEntities = elements.filter((element) => element.prop("entity/type") === EntityTypes.REQUEST_TRACE);
         for (const graphElement of traceEntities) {
-            this.#addTrace(graphElement);
+            this.#addTraceEntity(graphElement);
         }
 
         // now, validate the created system
@@ -134,14 +146,14 @@ class SystemEntityManager {
         let addedEntity: Entities.DataAggregate | Entities.BackingData;
         switch (graphElement.prop("entity/type")) {
             case EntityTypes.DATA_AGGREGATE:
-                addedEntity = this.#createDataAggregate(graphElement);
+                addedEntity = this.#createDataAggregateEntity(graphElement);
                 if ([...(this.#currentSystemEntity.getDataAggregateEntities)].filter(([id, existingDataAggregate]) => existingDataAggregate.getName === addedEntity.getName).length === 0) {
                     // only add data aggregate if a data aggregate with the same name not already exists
                     this.#currentSystemEntity.addEntity(addedEntity);
                 }
                 break;
             case EntityTypes.BACKING_DATA:
-                addedEntity = this.#createBackingData(graphElement);
+                addedEntity = this.#createBackingDataEntity(graphElement);
                 if ([...(this.#currentSystemEntity.getBackingDataEntities)].filter(([id, existingBackingData]) => existingBackingData.getName === addedEntity.getName).length === 0) {
                     // only add data aggregate if a data aggregate with the same name not already exists
                     this.#currentSystemEntity.addEntity(addedEntity);
@@ -152,14 +164,14 @@ class SystemEntityManager {
         }
     }
 
-    #addEntity(graphElement: dia.Element) {
+    #addComponentEntity(graphElement: dia.Element) {
         let addedEntity: Entities.Component | Entities.Infrastructure;
         switch (graphElement.prop("entity/type")) {
             case EntityTypes.COMPONENT:
             case EntityTypes.SERVICE:
             case EntityTypes.BACKING_SERVICE:
             case EntityTypes.STORAGE_BACKING_SERVICE:
-                addedEntity = this.#createComponent(graphElement);
+                addedEntity = this.#createComponentEntity(graphElement);
                 break;
             case EntityTypes.INFRASTRUCTURE:
                 addedEntity = this.#createInfrastructureEntity(graphElement);
@@ -175,10 +187,10 @@ class SystemEntityManager {
         let addedEntity: Entities.Link | Entities.DeploymentMapping;
         switch (graphLink.prop("entity/type")) {
             case EntityTypes.LINK:
-                addedEntity = this.#createLink(graphLink);
+                addedEntity = this.#createLinkEntity(graphLink);
                 break;
             case EntityTypes.DEPLOYMENT_MAPPING:
-                addedEntity = this.#createDeploymentMapping(graphLink);
+                addedEntity = this.#createDeploymentMappingEntity(graphLink);
                 break;
             default:
                 throw new TypeError("Unsuitable Link Element provided! No corresponding connection type is known for: " + JSON.stringify(graphLink));
@@ -187,12 +199,12 @@ class SystemEntityManager {
         this.#currentSystemEntity.addEntity(addedEntity);
     }
 
-    #addTrace(requestTrace: dia.Element) {
-        let requestTraceEntity: Entities.RequestTrace = this.#createRequestTrace(requestTrace);
+    #addTraceEntity(requestTrace: dia.Element) {
+        let requestTraceEntity: Entities.RequestTrace = this.#createRequestTraceEntity(requestTrace);
         this.#currentSystemEntity.addEntity(requestTraceEntity);
     }
 
-    #createDataAggregate(graphElement, returnDataAggregateAnyway = false) {
+    #createDataAggregateEntity(graphElement, returnDataAggregateAnyway = false) {
 
         // TODO allow for now
         /*
@@ -210,7 +222,7 @@ class SystemEntityManager {
         return dataAggregate;
     }
 
-    #createBackingData(graphElement) {
+    #createBackingDataEntity(graphElement) {
         // TODO allow for now
         /*
         if (!graphElement || !(graphElement.getParentCell())) {
@@ -240,7 +252,7 @@ class SystemEntityManager {
         return backingData;
     }
 
-    #createComponent(graphElement: dia.Element) {
+    #createComponentEntity(graphElement: dia.Element) {
 
         let componentModelEntity: Entities.Component | Entities.Service | Entities.BackingService | Entities.StorageBackingService;
         switch (graphElement.prop("entity/type")) {
@@ -479,7 +491,7 @@ class SystemEntityManager {
 
 
 
-    #createLink(graphLink) {
+    #createLinkEntity(graphLink) {
         const sourceElement = graphLink.getSourceElement();
         const targetElement = graphLink.getTargetElement();
         if (!sourceElement && targetElement) {
@@ -532,7 +544,7 @@ class SystemEntityManager {
         */
     }
 
-    #createDeploymentMapping(graphLink) {
+    #createDeploymentMappingEntity(graphLink) {
         const sourceElement = graphLink.getSourceElement(); // TODO check for storageBackingService
         const targetElement = graphLink.getTargetElement();
         if (!sourceElement && targetElement) {
@@ -579,7 +591,7 @@ class SystemEntityManager {
         return new Entities.DeploymentMapping(graphLink.id, deployedEntity, underlyingInfrastructure);
     }
 
-    #createRequestTrace(graphElement) {
+    #createRequestTraceEntity(graphElement) {
         const externalEndpointId = graphElement.prop("entity/properties/referredEndpoint");
         if (!externalEndpointId || !(externalEndpointId.trim())) {
             const message = `A Request Trace entity is only valid if it specifies its referred External Endpoint entity. However, for the Request Trace "${graphElement.attr("label/textWrap/text")}" 
@@ -1101,7 +1113,7 @@ class SystemEntityManager {
         })
 
         for (const property of EntityDetailsConfig.RequestTrace.specificProperties) {
-            switch(property.providedFeature) {
+            switch (property.providedFeature) {
                 case "referredEndpoint":
                     newRequestTrace.prop(property.jointJsConfig.modelPath, requestTrace.getExternalEndpoint.getId);
                     break;
@@ -1113,8 +1125,8 @@ class SystemEntityManager {
                 default:
                     if (property.jointJsConfig.modelPath) {
                         newRequestTrace.prop(property.jointJsConfig.modelPath, requestTrace.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
-                      }
-                      break;
+                    }
+                    break;
             }
         }
         return newRequestTrace;

@@ -51,7 +51,7 @@
     </div>
     <div class="app-header-second-row" v-show="showEntityBar">
         <div class="entity-tools">
-            <div class="entity-overall-group" data-group="entity-overall-group">
+            <div class="entity-overall-group" data-group="entity-overall-group"  >
                 <div v-for="entityTool of entityTools">
                     <div class="entity-group form-check form-check-inline" :data-group="entityTool.entityType"
                         :title="entityTool.tooltipText" data-toggle="tooltip" data-placement="bottom">
@@ -69,7 +69,6 @@
                     </div>
                     <div class="group-divider"></div>
                 </div>
-
             </div>
         </div>
         <div v-for="tool of secondAdditionalTools" class="second-row-tools" data-group="second-row-config-tools">
@@ -83,14 +82,13 @@
 
 <script lang="ts" setup>
 import $, { data } from 'jquery';
-import { ref, computed, onMounted, onUpdated, watch, reactive, Ref, ComputedRef, nextTick } from "vue";
+import { ref, computed, onMounted, onUpdated, watch, reactive, Ref, ComputedRef, nextTick, getCurrentInstance } from "vue";
 import { dia, util, highlighters } from "jointjs";
 import { ApplicationSettingsDialogConfig } from "../../config/actionDialogConfig";
 import EntityTypes from "../../config/entityTypes";
 import ToolbarConfig from "../../config/toolbarConfiguration";
 import ModalDialog from "../modalDialog";
 import UIModalDialog from "../../representations/guiElements.dialog";
-import { EntitySelectionTools, addSelectionToolToEntity } from "../tools/entitySelectionTools";
 import ButtonGroup from './ButtonGroup.vue';
 
 export type ToolbarButton = {
@@ -122,7 +120,10 @@ const emit = defineEmits<{
     (e: "update:systemName", newName: string): void;
     (e: "click:exitRequestTraceView"): void;
     (e: "click:printActivePaper"): void;
+    (e: "load:fromJson", stringifiedJson: string, fileName: string);
+    (e: "save:toJson");
     (e: "load:fromTosca", stringifiedYaml: string, fileName: string);
+    (e: "save:toTosca");
 }>();
 
 const currentSystemName = ref<string>(props.systemName);
@@ -190,7 +191,7 @@ const entityTools = ref((() => {
             entityLabel: entityElement.entityType + "-checkBoxLabel",
             labelText: entityElement.labelText,
             tooltipText: entityElement.tooltipText,
-            entityCounter: 0,
+            entityCounter: props.graph.getElements().filter(element => element.attributes.entity.type === entityElement.entityType).length,
             addingAnimation: false,
             removingAnimation: false,
         })
@@ -208,6 +209,11 @@ const secondAdditionalTools: Ref<ToolbarButtonGroup[]> = ref((() => {
 
 props.graph.on("add", (cell: dia.Cell) => updateEntityCounter(cell.attributes.entity.type, "add"));
 props.graph.on("remove", (cell: dia.Cell) => updateEntityCounter(cell.attributes.entity.type, "remove"));
+props.graph.on("reloaded", () => {
+    for (const [key, value] of Object.entries(EntityTypes)) {
+        updateEntityCounter(value, "add");
+    }
+}); 
 props.graph.on("change:entity", (element, entity, opt) => { entityTypeChanged(opt.previousType, entity.type) });
 props.graph.on("change:attrs", entityVisibilityChanged);
 
@@ -264,10 +270,11 @@ function onToolbarButtonClick(buttonId: string, event) {
             showEntityBar.value = false;
             break;
         case "convertModeledSystemEntityToJson-dropdownItemButton":
-            convertToJson();
+            emit("save:toJson");
+            //convertToJson();
             break;
         case "convertModeledSystemEntityToTosca-dropdownItemButton":
-            convertToTosca();
+            askForConversionToTosca();
             break;
         case "loadModeledSystemEntityFromJson-dropdownItemButton":
             loadFromJson();
@@ -416,58 +423,36 @@ function zoomOutPaper() {
     });
 }
 
-function convertToJson() {
-    let jsonSerializedGraph = props.graph.toJSON();
-    // download created yaml taken from https://stackoverflow.com/a/22347908
-    let downloadElement = document.createElement("a");
-    downloadElement.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify(jsonSerializedGraph)));
-    downloadElement.setAttribute('download', `${currentSystemName.value}.json`);
-    downloadElement.click();
-}
-
-function convertToTosca() {
+function askForConversionToTosca() {
     const config = ToolbarConfig.ToolbarButtonActionConfig["convertToTosca"];
     if (config) {
         let modalDialog = new UIModalDialog("tosca-export", "convertToTosca");
         modalDialog.create(config);
         modalDialog.render("modals", true);
-        modalDialog.configureSaveButtonAction(() => { props.graph.trigger("startToscaTransformation"); });
+        modalDialog.configureSaveButtonAction(() => { emit("save:toTosca"); });
         modalDialog.show();
     }
 }
 
 function loadFromJson() {
 
-    function replaceWithUpload(fileReader: ProgressEvent<FileReader>) {
+    let fileName = "";
+
+    function loadFromUpload(fileReader: ProgressEvent<FileReader>) {
         let stringifiedJson: string = fileReader.target.result.toString();
-        try {
-            let jsonGraph: any = JSON.parse(stringifiedJson);
-            props.graph.clear();
-            props.graph.fromJSON(jsonGraph);
-            let elements: dia.Cell[] = props.graph.getCells();
-            for (let element of elements) {
-                addSelectionToolToEntity(element, props.paper)
-            }
-            // call hideTools in Timeout, because it does not work when called directly...
-            setTimeout(() => { props.paper.hideTools() }, 100);
-
-            for (const [key, value] of Object.entries(EntityTypes)) {
-                updateEntityCounter(value, "add");
-            }
-        } catch (e) {
-            // TODO provide error message to user
-            console.log(e)
-        }
+        emit("load:fromJson", stringifiedJson, fileName);
     }
-
-    let fr = new FileReader();
-    fr.onload = replaceWithUpload.bind(this);
 
     let uploadElement = document.createElement("input");
     uploadElement.setAttribute("type", "file");
     uploadElement.setAttribute("accept", ".json");
+
+    let fr = new FileReader();
+    fr.onload = loadFromUpload;
+
     uploadElement.onchange = () => {
         // only one file should be selected
+        fileName = uploadElement.files[0].name;
         fr.readAsText(uploadElement.files[0]);
     }
     uploadElement.click();
@@ -479,7 +464,6 @@ function loadFromTosca() {
 
     function loadFromUpload(fileReader: ProgressEvent<FileReader>) {
         let stringified: string = fileReader.target.result.toString();
-
         emit("load:fromTosca", stringified, fileName);
     }
 
@@ -488,7 +472,7 @@ function loadFromTosca() {
     uploadElement.setAttribute("accept", ".yaml");
 
     let fr = new FileReader();
-    fr.onload = loadFromUpload.bind(this);
+    fr.onload = loadFromUpload;
 
     uploadElement.onchange = () => {
         // only one file should be selected
@@ -638,6 +622,7 @@ function updateEntityCounter(dataEntityType: string, updateType: string) {
         currentEntity.removingAnimation = true;
         setTimeout(() => currentEntity.removingAnimation = false, 2000);
     }
+
 }
 </script>
 

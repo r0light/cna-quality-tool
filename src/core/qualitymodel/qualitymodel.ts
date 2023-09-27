@@ -22,7 +22,7 @@ export const qualityModel = {
                 "authenticity": {
                     "name": "Authenticity",
                     "description": "Authenticity describes how well a system is able to identify a subject and validate its identity as well as claims made by a subject."
-                },
+                }
             }
         },
         "maintainability": {
@@ -51,7 +51,7 @@ export const qualityModel = {
                 "simplicity": {
                     "name": "Simplicity",
                     "description": "Simplicity describes how well a system is composed of as few components as possible and includes simple instead of complex interrelations to enable a good overview and understanding of the system."
-                },
+                }
             }
         },
         "performanceEfficiency": {
@@ -72,7 +72,7 @@ export const qualityModel = {
                 "elasticity": {
                     "name": "Elasticity",
                     "description": "Elasticity describes the rapidness and accurateness with which a system is able to adjust its allocated resources to the currently required amount without over- or under-allocation."
-                },
+                }
             }
         },
         "portability": {
@@ -89,7 +89,7 @@ export const qualityModel = {
                 "replaceability": {
                     "name": "Replaceability",
                     "description": "Replaceability describes how well a component or system can replace another component or system for the same purpose in the same environment."
-                },
+                }
             }
         },
         "reliability": {
@@ -110,7 +110,7 @@ export const qualityModel = {
                 "maturity": {
                     "name": "Maturity",
                     "description": "Maturity describes to what extent a system meets the specified needs for reliability in normal, expected circumstances."
-                },
+                }
             }
         },
         "compatibility": {
@@ -123,7 +123,7 @@ export const qualityModel = {
                 "interoperability": {
                     "name": "Interoperability",
                     "description": "Interoperability describes how well two parts of a system or two systems are able to exchange information and to process such exchanged information."
-                },
+                }
             }
         }
     },
@@ -644,7 +644,7 @@ export const qualityModel = {
             "relevantEntities": ["component", "link"],
             "sources": [{ "key": "Indrasiri2021", "section": "3 Sidecar Pattern, Service Mesh Pattern, Service Abstraction Pattern (Proxy communication with services to include service discovery and load balancing)" },{ "key": "Davis2019", "section": "10.3" },{ "key": "Richardson2019", "section": "11.4.2" }],
             "measures": []
-        },
+        }
     },
     "impacts": [
         { "impactedFactor": "secretsManagement", "sourceFactor": "secretsStoredInSpecializedServices", "impactType": "positive" },
@@ -761,6 +761,6 @@ export const qualityModel = {
             "name": "Ratio of endpoints that support token-based authentication ",
             "calculation": "Endpoints supportin tokens / All endpoints",
             "sources": ["Ntentos2022", "Zdun2023"]
-        },
+        }
     }
 }
