@@ -4,14 +4,21 @@ import { Impact, ImpactType } from "./Impact";
 import { Measure } from "./Measure";
 import { ProductFactor } from "./ProductFactor";
 import { QualityAspect } from "./QualityAspect";
+import { entities } from "./entities";
 import { qualityModel } from "./qualitymodel";
 import { LiteratureSource } from "./LiteratureSource";
+import { Entity } from "./Entity";
 
 
 function getQualityModel(): QualityModelInstance {
 
     const newQualityModel = new QualityModelInstance();
 
+    // add all entities
+    for (const [entityKey, entity] of Object.entries(entities)) {
+        let newEntity = new Entity(entityKey, entity.name, entity.description, entity.relation);
+        newQualityModel.entities.push(newEntity);
+    }
 
     // add all HighLevel Aspects and Quality Aspects
     for (const [highLevelQualityAspectKey, highLevelQualityAspect] of Object.entries(qualityModel.qualityAspects)) {
@@ -101,11 +108,14 @@ class QualityModelInstance {
 
     impacts: Impact[];
 
+    entities: Entity[];
+
     constructor() {
         this.highLevelAspects = [];
         this.qualityAspects = [];
         this.productFactors = [];
         this.impacts = [];
+        this.entities = [];
     }
 
     findQualityAspect(qualityAspectKey: string) {
@@ -114,6 +124,10 @@ class QualityModelInstance {
 
     findProductFactor(productFactorKey: string) {
         return this.productFactors.find(pf => pf.getId === productFactorKey);
+    }
+
+    findEntity(entityKey: string) {
+        return this.entities.find(e => e.getKey === entityKey);
     }
 }
 

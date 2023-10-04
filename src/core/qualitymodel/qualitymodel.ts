@@ -148,14 +148,14 @@ export const qualityModel = {
         "isolatedSecrets": {
             "name": "Isolated secrets",
             "description": "Secrets (e.g. passwords, access tokens, encryption keys) should not be stored by in component artifacts (e.g. binaries, images). Instead, components should be given access at runtime only to those secrets which they actually need and only when they need it.",
-            "relevantEntities": ["component", "backing Data"],
+            "relevantEntities": ["component", "backingData"],
             "sources": [{ "key": "Scholl2019", "section": "6 Never Store Secrets or Configuration Inside an Image" }, { "key": "Adkins2019", "section": "14 Don't Check In Secrets" }],
             "measures": []
         },
         "secretsStoredInSpecializedServices": {
             "name": "Secrets stored in specialized services",
             "description": "A dedicated backing service to host secrets (e.g. passwords, access tokens, encryption keys) exists. All secrets required by a system are hosted in this backing service where they can also be managed (for example they can be revoked or replaced with updated secrets). Components fetch secrets from this backing services in a controlled way when they need them.",
-            "relevantEntities": ["service", "sacking service", "backing data"],
+            "relevantEntities": ["service", "backingService", "backingData"],
             "sources": [{ "key": "Scholl2019", "section": "6 Securely Store All Secrets" },
             { "key": "Arundel2019", "section": "10 Kubernetes Secrets" }
             ],
@@ -192,7 +192,7 @@ export const qualityModel = {
         "authenticationDelegation": {
             "name": "Authentication delegation",
             "description": "The verification of an entity for authenticity, for example upon a request, is delegated to a dedicated backing service. This concern is therefore removed from individual components so that their focus can remain on business functionalities while for example different authentication options can be managed in one place only.",
-            "relevantEntities": ["system", "backing service"],
+            "relevantEntities": ["system", "backingService"],
             "sources": [{ "key": "Scholl2019", "section": "6 Use Federated Identity Management" }, { "key": "Goniwada2021", "section": "9 Decentralized Identity" }],
             "measures": []
         },
@@ -213,7 +213,7 @@ export const qualityModel = {
         "limitedDataScope": {
             "name": "Limited data scope",
             "description": "The number of data aggregates that are processed in a service is limited to those which need to be administrated together, for example to fulfill data consistency requirements. The aim is to keep the functional scope of a service cohesive. Data aggregates for which consistency requirements can be relaxed might be distributed over separate services.",
-            "relevantEntities": ["service", "data aggregate"],
+            "relevantEntities": ["service", "dataAggregate"],
             "sources": [],
             "measures": []
         },
@@ -242,7 +242,7 @@ export const qualityModel = {
         "isolatedState": {
             "name": "Isolated state",
             "description": "In cloud-native applications services should be structured by clearly separating stateless and stateful services. Stateful services should be reduced to a minimum.",
-            "relevantEntities": ["system", "component", "storage backing service"],
+            "relevantEntities": ["system", "component", "storageBackingService"],
             "sources": [{ "key": "Goniwada2021", "section": "3 Coupling (Services should be as loosely coupled as possible)" }],
             "measures": []
         },
@@ -256,7 +256,7 @@ export const qualityModel = {
         "specializedStatefulServices": {
             "name": "Specialized stateful services",
             "description": "For stateful components, that means components that do require durable disk space on the infrastructure that they run on, specialized software or frameworks are used that can handle distributed state by replicating it over several components or component instances while still ensuring consistency requirements for that state.",
-            "relevantEntities": ["component", "storage backing service"],
+            "relevantEntities": ["component", "storageBackingService"],
             "sources": [{ "key": "Davis2019", "section": "5.4" }, { "key": "Ibryam2020", "section": "11 “Stateful Service”" }],
             "measures": []
         },
@@ -277,7 +277,7 @@ export const qualityModel = {
         "communicationPartnerAbstraction": {
             "name": "Communication partner abstraction",
             "description": "Communication via links is not based on specific communication partners (specific components) but abstracted based on the content of communication. An example is event-driven communication where events are published to channels without the publisher knowing which components receive events and events can therefore also be received by components which are created later in time.",
-            "relevantEntities": ["link", "backing service"],
+            "relevantEntities": ["link", "backingService"],
             "sources": [{ "key": "Richardson2019", "section": "6 Event-driven communication" }, { "key": "Ruecker2021", "section": "8: Event-driven systems “event chains emerge over time and therefore lack visibility." }],
             "measures": []
         },
@@ -291,7 +291,7 @@ export const qualityModel = {
         "usageOfExistingSolutionsForNon-CoreCapabilities": {
             "name": "Usage of existing solutions for non-core capabilities",
             "description": "By using readily available standardized, open source solutions for non-core capabilities, the development effort is reduced and the software quality can be increased, because a broader community ensures the well-functioning of a software solution.",
-            "relevantEntities": ["component", "backing service"],
+            "relevantEntities": ["component", "backingService"],
             "sources": [{ "key": "Reznik2019", "section": "9 Avoid Reinventing the Wheel" }, { "key": "Adkins2019", "section": "12 Frameworks to Enforce Security and Reliability" }],
             "measures": []
         },
@@ -319,21 +319,21 @@ export const qualityModel = {
         "consistentCentralizedLogging": {
             "name": "Consistent centralized logging",
             "description": "Logging functionality, specifically the automated collection of logs, is concentrated in a centralized backing service which combines and stores logs from the components of a system. The logs are kept consistent regarding their format and level of granularity. In the backing service also log analysis functionalities are provided, for example by also enabling a correlation of logs from different components.",
-            "relevantEntities": ["service", "backing service"],
+            "relevantEntities": ["service", "backingService"],
             "sources": [{ "key": "Davis2019", "section": "11.1" }, { "key": "Scholl2019", "section": "6 Use a Unified Logging System" }, { "key": "Scholl2019", "section": "6 Common and Structured Logging Format" }, { "key": "Richardson2019", "section": "11.3.2 Applying the Log aggregation pattern" }, { "key": "Reznik2019", "section": "10 Observability" }, { "key": "Garrison2017", "section": "7 Monitoring and Logging" }, { "key": "Adkins2019", "section": "15 Design your logging to be immutable" }, { "key": "Arundel2019", "section": "15 Logging" }, { "key": "Winn2017", "section": "2 Aggregated Streaming of Logs and Metrics" }, { "key": "Bastani2017", "section": "13 Application Logging" }, { "key": "Bastani2017", "section": "13 Audit Events (capture events for audits, like failed logins etc)" }, { "key": "Ruecker2021", "section": "11 Custom Centralized Monitoring" }, { "key": "Goniwada2021", "section": "19 One Source of Truth" }],
             "measures": []
         },
         "consistentCentralizedMetrics": {
             "name": "Consistent centralized metrics",
             "description": "Metrics gathering and calculation functionality for monitoring purposes is concentrated in a centralized component which combines, aggregates and stores metrics from the components of a system. The metrics are kept consistent regarding their format and support multiple levels of granularity. In the backing service also metric analysis functionalities are provided, for example by also enabling correlations of metrics.",
-            "relevantEntities": ["service", "backing service"],
+            "relevantEntities": ["service", "backingService"],
             "sources": [{ "key": "Davis2019", "section": "11.2" }, { "key": "Scholl2019", "section": "6 Tag Your Metrics Appropriately" }, { "key": "Richardson2019", "section": "11.3.4 Applying the Applications metrics pattern" }, { "key": "Garrison2017", "section": "7 Monitoring and Logging, Metrics Aggregation" }, { "key": "Reznik2019", "section": "10 Observability" }, { "key": "Arundel2019", "section": "15 Metrics help predict problems" }, { "key": "Winn2017", "section": "2 Aggregated Streaming of Logs and Metrics" }, { "key": "Arundel2019", "section": "15 Logging" }, { "key": "Winn2017", "section": "2 Aggregated Streaming of Logs and Metrics" }, { "key": "Bastani2017", "section": "13 Metrics" }, { "key": "Arundel2019", "section": "16 The RED Pattern (common metrics you should have for services" }, { "key": "Arundel2019", "section": "16 The USE Pattern (common metrics for resources" }, { "key": "Goniwada2021", "section": "19 One Source of Truth" }],
             "measures": []
         },
         "distributedTracingOfInvocations": {
             "name": "Distributed tracing of invocations",
             "description": "For request traces that span multiple components in a system, distributed tracing is enabled so that traces based on correlation IDs are captured automatically and stored in a backing service where they can be analyzed and problems within request traces can be clearly attributed to single components.",
-            "relevantEntities": ["service", "link", "request trace"],
+            "relevantEntities": ["service", "link", "requestTrace"],
             "sources": [{ "key": "Davis2019", "section": "11.3" }, { "key": "Scholl2019", "section": "6 Use Correlation IDs" }, { "key": "Richardson2019", "section": "11.3.3 AUsing the Distributed tracing pattern" }, { "key": "Garrison2017", "section": "7 Debugging and Tracing" }, { "key": "Reznik2019", "section": "10 Observability" }, { "key": "Arundel2019", "section": "15 Tracing" }, { "key": "Bastani2017", "section": "13 Distributed Tracing" }, { "key": "Ruecker2021", "section": "11 Observability and Distributed Tracing Tools (Use Distributed Tracing)" }, { "key": "Goniwada2021", "section": "19 One Source of Truth" }],
             "measures": []
         },
@@ -389,7 +389,7 @@ export const qualityModel = {
         "limitedRequestTraceScope": {
             "name": "Limited request trace scope",
             "description": "A request that requires the collaboration of several services should still be limited to as few services as possible, because otherwise services are less independent the more they need to collaborate to handle requests.",
-            "relevantEntities": ["request trace"],
+            "relevantEntities": ["requestTrace"],
             "sources": [],
             "measures": []
         },
@@ -403,14 +403,14 @@ export const qualityModel = {
         "backingServiceDecentralization": {
             "name": "Backing service decentralization",
             "description": "By assigning different backing services to different components a decentralization can be achieved which makes components more independent. For example, instead of one message broker for a whole system, several message brokers can be used, each for a group of components that are interrelated. A problem in one messaging broker has an impact on only those components using it, but not on components having separate message brokers.",
-            "relevantEntities": ["service", "backing service"],
+            "relevantEntities": ["service", "backingService"],
             "sources": [{ "key": "Indrasiri2021", "section": "4 Decentralized Data Management (decentralized data leads to higher service independence while centralized data leads to higher consistency.)" }, { "key": "Indrasiri2021", "section": "4 Data Service Pattern (As having a negative impact because multiple services should not access the same data);" }, { "key": "Ruecker2021", "section": "2 Different Workflow Engines for different services" }, { "key": "Goniwada2021", "section": "5 Distributed State, Decentralized Data" }],
             "measures": []
         },
         "addressingAbstraction": {
             "name": "Addressing abstraction",
             "description": "By abstracting from specific addresses for reaching other components, address changes can be handled automatically without impacting the link between components. This can be achieved for example through service discovery where components are addressed through abstract service names and specific addresses are resolved through service discovery.",
-            "relevantEntities": ["link", "backing service"],
+            "relevantEntities": ["link", "backingService"],
             "sources": [{ "key": "Davis2019", "section": "8.3" }, { "key": "Ibryam2020", "section": "12 Service Discovery" }, { "key": "Richardson2019", "section": "Using service discovery" }, { "key": "Garrison2017", "section": "7 Service Discovery" }, { "key": "Indrasiri2021", "section": "3 Service Registry and Discovery Pattern" }, { "key": "Bastani2017", "section": "7 Routing (Use service discovery with support for health checks and respect varying workloads)" }, { "key": "Indrasiri2021", "section": "3 Service Abstraction Pattern (Use an abstraction layer in front of services (for example Kubernetes Service))" }, { "key": "Goniwada2021", "section": "4 Service Discovery" }],
             "measures": []
         },
@@ -424,7 +424,7 @@ export const qualityModel = {
         "operationOutsourcing": {
             "name": "Operation outsourcing",
             "description": "By outsourcing the operation of infrastructure and components to a cloud provider or other vendor, the operation is simplified because responsibility is transferred. Furthermore, costs can be made more flexible because providers and vendors can provide a usage-based pricing.",
-            "relevantEntities": ["backing service", "infrastructure"],
+            "relevantEntities": ["backingService", "infrastructure"],
             "sources": [],
             "measures": []
         },
@@ -438,7 +438,7 @@ export const qualityModel = {
         "managedBackingServices": {
             "name": "Managed backing services",
             "description": "Especially backing services that provide non-business functionality can be managed by vendors to ensure a stable functioning and up-to-date functionalities. Furthermore, it reduces the operational overhead.",
-            "relevantEntities": ["backing service"],
+            "relevantEntities": ["backingService"],
             "sources": [{ "key": "Scholl2019", "section": "6 Use Managed Databases and Analytics Services" }, { "key": "Arundel2019", "section": "15 Don't build your own monitoring infrastructure (Use an external monitoring service)" }, { "key": "Bastani2017", "section": "10 managed and automated messaging system (operating your own messaging system increases operational overhead, better use a system managed by a platform)" }],
             "measures": []
         },
@@ -459,21 +459,21 @@ export const qualityModel = {
         "horizontalDataReplication": {
             "name": "Horizontal data replication",
             "description": "Data should be replicated horizontally, that means duplicated across several data storage components so that higher load can be handled and replicas closer to the service where data is needed can be used to reduce latency.",
-            "relevantEntities": ["storage backing service", "data aggregate"],
+            "relevantEntities": ["storageBackingService", "dataAggregate"],
             "sources": [{ "key": "Scholl2019", "section": "6 Use Data Partitioning and Replication for Scale" }, { "key": "Goniwada2021", "section": "4 Data Replication" }],
             "measures": []
         },
         "verticalDataReplication": {
             "name": "Vertical data replication",
             "description": "Data should be replicated vertically, that means across a request trace so that it is available closer to where a request initially comes in. Typically caching is used for vertical data replication.",
-            "relevantEntities": ["service", "data aggregate"],
+            "relevantEntities": ["service", "dataAggregate"],
             "sources": [{ "key": "Scholl2019", "section": "6 Use Caching" }, { "key": "Bastani2017", "section": "9 Caching (Use an In-Memory cache for queries to relieve datastore from traffic; replication into faster data storage)" }, { "key": "Indrasiri2021", "section": "4 Caching Pattern" }],
             "measures": []
         },
         "shardedDataStoreReplication": {
             "name": "Sharded data store replication",
             "description": "Data should be sharded, that means split into several storage components by a reasonable strategy so that requests can be distributed across shards to increase performance, because one storage component is not as easily overloaded with requests.",
-            "relevantEntities": ["storage backing service", "data aggregate"],
+            "relevantEntities": ["storageBackingService", "dataAggregate"],
             "sources": [{ "key": "Indrasiri2014", "section": "4 Data Sharding Pattern" }, { "key": "Goniwada2021", "section": "4 Data Partitioning Pattern" }],
             "measures": []
         },
@@ -508,21 +508,21 @@ export const qualityModel = {
         "configurationManagement": {
             "name": "Configuration management",
             "description": "Configuration values which are specific to an environment should be managed separately in a consistent way. Through this, components are more portable across environments and configuration can change independently from components.",
-            "relevantEntities": ["component", "backing data"],
+            "relevantEntities": ["component", "backingData"],
             "sources": [],
             "measures": []
         },
         "isolatedConfiguration": {
             "name": "Isolated configuration",
             "description": "Following DevOps principles, environment-specific configurations should be separated from component artifacts (e.g. deployment units) and provided by the environment in which a cloud-native application runs. This enables adaptability across environments (also across testing and production environments)",
-            "relevantEntities": ["service", "backing data"],
+            "relevantEntities": ["service", "backingData"],
             "sources": [{ "key": "Davis2019", "section": "6.2 The app's configuration layer" },{ "key": "Ibryam2020", "section": "18" },{ "key": "Scholl2019", "section": "6 Never Store Secrets or Configuration Inside an Image" },{ "key": "Adkins2019", "section": "14 Treat Configuration as Code" },{ "key": "Indrasiri2021", "section": " Decoupled Configurations" }],
             "measures": []
         },
         "configurationStoredInSpecializedServices": {
             "name": "Configuration stored in specialized services",
             "description": "Configuration values are stored in specialized backing services and not only environment variables for example. That way, changing configurations at runtime is facilitated and can be enabled by connecting components to such specialized backing services and checking for updated configurations at runtime. Additionally, configurations can be stored once, but accessed by different components.",
-            "relevantEntities": ["service", "backing data", "backing service"],
+            "relevantEntities": ["service", "backingData", "backingService"],
             "sources": [{ "key": "Ibryam2020", "section": "19 Configuration Resource" },{ "key": "Richardson2019", "section": "11.2 “Designing configurable services" },{ "key": "Arundel2019", "section": "10 ConfigMaps" },{ "key": "Bastani2017", "section": "2 Centralized, Journaled Configuration" },{ "key": "Bastani2017", "section": "2 Refreshable Configuration" }],
             "measures": []
         },
@@ -564,7 +564,7 @@ export const qualityModel = {
         "physicalDataDistribution": {
             "name": "Physical data distribution",
             "description": "Storage Backing Service instances where Data aggregates are persisted are distributed across physical locations (e.g. availability zones of a cloud vendor) so that even in the case of a failure of one physical location, another physical location is still useable.",
-            "relevantEntities": ["storage backing service", "infrastructure"],
+            "relevantEntities": ["storageBackingService", "infrastructure"],
             "sources": [{ "key": "Scholl2019", "section": "6 Keep Data in Multiple Regions or Zones" },{ "key": "Indrasiri2021", "section": "4 Data Sharding Pattern: Geographically distribute data" }],
             "measures": []
         },
