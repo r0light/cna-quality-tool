@@ -6,6 +6,7 @@ import { ProductFactor } from "./ProductFactor";
 import { QualityAspect } from "./QualityAspect";
 import { entities } from "./entities";
 import { qualityModel } from "./qualitymodel";
+import { literature } from "./literature";
 import { LiteratureSource } from "./LiteratureSource";
 import { Entity } from "./Entity";
 
@@ -35,7 +36,10 @@ function getQualityModel(): QualityModelInstance {
         let newProductFactor = new ProductFactor(productFactorKey, productFactor.name, productFactor.description);
 
         productFactor.relevantEntities.forEach(entity => newProductFactor.addRelevantEntity(entity));
-        productFactor.sources.forEach(source => newProductFactor.addSource(new LiteratureSource(source.key, source.section, "")));
+        productFactor.sources.forEach(source => {
+            let url = literature[source.key] ? literature[source.key].url : "";
+            newProductFactor.addSource(new LiteratureSource(source.key, source.section, url))
+        });
 
         for (const measureKey of productFactor.measures) {
             let foundMeasure = qualityModel.measures[measureKey];

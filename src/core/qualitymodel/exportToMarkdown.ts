@@ -70,8 +70,22 @@ for (const highLevelAspect of qualityModel.highLevelAspects) {
                         output += `${indent()}  *${factor.getDescription}*  \n`;
                         // TODO add url
                         if (factor.getSources.length > 0) {
-                            output += `${indent()}  ${factor.getSources.map(source => source.getKey.concat(` ${source.getInfo}`)).join("; ")}\n`;
+                            let sourcesString = factor.getSources.map(source => {
+                                let keyString = "";
+                                if (source.getUrl) {
+                                    keyString += `[${source.getKey}](${source.getUrl})`;
+                                } else {
+                                    keyString += source.getKey;
+                                }
+                                return keyString.concat(` ${source.getInfo}`)
+                            }).join("; ");
+                            output += `${indent()}  ${sourcesString}\n`;
                         }
+                        indentationLevel += 1;
+                        for (const measure of factor.getMeasures) {
+                            output += `${indent()}* *${measure.getName}* (${measure.getReferences.join("; ")})\n`;
+                        }
+                        indentationLevel -= 1;
                         addImpactingFactors(factor);
                     }
                 }
