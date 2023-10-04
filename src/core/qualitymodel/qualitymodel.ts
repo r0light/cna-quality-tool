@@ -37,7 +37,7 @@ export const qualityModel = {
                     "description": "Reusability describes to what extent parts of a system can be used in more than one system."
                 },
                 "analyzability": {
-                    "name": "Analysability",
+                    "name": "Analyzability",
                     "description": "Analyzability describes to what extent it is possible to accurately assess the impact of an intended change as well as the extent to which failures can be diagnosed to find their cause or parts that need to be changed can be identified."
                 },
                 "modifiability": {
@@ -131,7 +131,7 @@ export const qualityModel = {
         "dataEncryptionInTransit": {
             "name": "Data encryption in transit",
             "description": "Data which is sent through a link from one component to another should be encrypted so that even when an attacker has access to the network layer, the data remains confidential.",
-            "relevantEntities": ["link, endpoint"],
+            "relevantEntities": ["link" , "endpoint"],
             "sources": [
                 { "key": "Scholl2019", "section": "6 Encrypt Data in Transit" },
                 { "key": "Indrasiri2021", "section": "2 Security (Use TLS for synchronous communications)" }
@@ -148,14 +148,14 @@ export const qualityModel = {
         "isolatedSecrets": {
             "name": "Isolated secrets",
             "description": "Secrets (e.g. passwords, access tokens, encryption keys) should not be stored by in component artifacts (e.g. binaries, images). Instead, components should be given access at runtime only to those secrets which they actually need and only when they need it.",
-            "relevantEntities": "Component, Backing Data",
+            "relevantEntities": ["component", "backing Data"],
             "sources": [{ "key": "Scholl2019", "section": "6 Never Store Secrets or Configuration Inside an Image" }, { "key": "Adkins2019", "section": "14 Don't Check In Secrets" }],
             "measures": []
         },
         "secretsStoredInSpecializedServices": {
             "name": "Secrets stored in specialized services",
             "description": "A dedicated backing service to host secrets (e.g. passwords, access tokens, encryption keys) exists. All secrets required by a system are hosted in this backing service where they can also be managed (for example they can be revoked or replaced with updated secrets). Components fetch secrets from this backing services in a controlled way when they need them.",
-            "relevantEntities": ["Service", "Backing Service", "Backing Data"],
+            "relevantEntities": ["service", "sacking service", "backing data"],
             "sources": [{ "key": "Scholl2019", "section": "6 Securely Store All Secrets" },
             { "key": "Arundel2019", "section": "10 Kubernetes Secrets" }
             ],
@@ -192,7 +192,7 @@ export const qualityModel = {
         "authenticationDelegation": {
             "name": "Authentication delegation",
             "description": "The verification of an entity for authenticity, for example upon a request, is delegated to a dedicated backing service. This concern is therefore removed from individual components so that their focus can remain on business functionalities while for example different authentication options can be managed in one place only.",
-            "relevantEntities": ["system, backing service"],
+            "relevantEntities": ["system", "backing service"],
             "sources": [{ "key": "Scholl2019", "section": "6 Use Federated Identity Management" }, { "key": "Goniwada2021", "section": "9 Decentralized Identity" }],
             "measures": []
         },
@@ -221,7 +221,7 @@ export const qualityModel = {
             "name": "Limited endpoint scope",
             "description": "To keep the functional scope of services limited, the number of endpoints of a service should be limited to a coveshive set of endpoints that provide related operations.",
             "relevantEntities": ["service", "endpoint"],
-            "sources": [{ "key": "", "section": "" }],
+            "sources": [],
             "measures": []
         },
         "commandQueryResponsibilitySegregation": {
@@ -299,7 +299,7 @@ export const qualityModel = {
             "name": "Standardization",
             "description": "By using standardized technologies within components, for interfaces, and especially for the infrastructure, backing services and other non-business concerns, reusability can be increased and the effort to develop additional functionality which integrates with existing components can be reduced.",
             "relevantEntities": ["system", "component", "link"],
-            "sources": [{ "key": "", "section": "" }],
+            "sources": [],
             "measures": []
         },
         "componentSimilarity": {
@@ -597,7 +597,7 @@ export const qualityModel = {
             "measures": []
         },
         "autonomousFaultHandling": {
-            "name": "Autonomous fault handling ",
+            "name": "Autonomous fault handling",
             "description": "In cloud-native applications services should expect faults at different levels and either handle them or minimize their impact by relying on the capabilities of cloud environments.",
             "relevantEntities": ["service", "link", "infrastructure"],
             "sources": [],

@@ -5,6 +5,7 @@ import { Measure } from "./Measure";
 import { ProductFactor } from "./ProductFactor";
 import { QualityAspect } from "./QualityAspect";
 import { qualityModel } from "./qualitymodel";
+import { LiteratureSource } from "./LiteratureSource";
 
 
 function getQualityModel(): QualityModelInstance {
@@ -26,6 +27,9 @@ function getQualityModel(): QualityModelInstance {
     for (const [productFactorKey, productFactor] of Object.entries(qualityModel.productFactors)) {
         let newProductFactor = new ProductFactor(productFactorKey, productFactor.name, productFactor.description);
 
+        productFactor.relevantEntities.forEach(entity => newProductFactor.addRelevantEntity(entity));
+        productFactor.sources.forEach(source => newProductFactor.addSource(new LiteratureSource(source.key, source.section, "")));
+
         for (const measureKey of productFactor.measures) {
             let foundMeasure = qualityModel.measures[measureKey];
             if (foundMeasure) {
@@ -37,7 +41,6 @@ function getQualityModel(): QualityModelInstance {
 
         newQualityModel.productFactors.push(newProductFactor);
 
-        //TODO also add sources
     }
 
     // add all Impacts

@@ -32,7 +32,11 @@
   },
   "ts-node": {
     // Tell ts-node CLI to install the --loader automatically
-    "esm": true
+    "esm": true,
+    "compilerOptions": {
+      "module": "nodenext",
+      "moduleResolution": "node",
+    }
   },
   "include": [
     "src/**/*.ts",
