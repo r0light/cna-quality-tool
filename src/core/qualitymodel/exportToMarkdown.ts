@@ -19,8 +19,10 @@ let longestRelationString = Math.max(...qualityModel.entities.map(entity => enti
 output += `| Name${" ".repeat(longestEntityName - 4)} | Description${" ".repeat(longestEntityDescription - 11)} | Relation${" ".repeat(longestRelationString - 8)} |\n`;
 output += `|${"-".repeat(longestEntityName + 2)}|${"-".repeat(longestEntityDescription + 2)}|${"-".repeat(longestRelationString + 2)}|\n`;
 for (const entity of qualityModel.entities) {
+    let nameString = `${entity.getName}${" ".repeat(longestEntityName - entity.getName.length)}`
+    let descriptionString = `${entity.getDescription}${" ".repeat(longestEntityDescription - entity.getDescription.length)}`
     let relationString = entity.getRelation.type ? `${entity.getRelation.type} ${qualityModel.entities.find(other => other.getKey === entity.getRelation.target).getName}`: "";
-    output += `| ${entity.getName}${" ".repeat(longestEntityName - entity.getName.length)} | ${entity.getDescription}${" ".repeat(longestEntityDescription - entity.getDescription.length)} | ${relationString}${" ".repeat(longestRelationString - relationString.length)} |\n`;
+    output += `| ${nameString} | ${descriptionString} | ${relationString}${" ".repeat(longestRelationString - relationString.length)} |\n`;
 }
 output += "\n"
 
