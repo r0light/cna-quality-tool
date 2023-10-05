@@ -454,7 +454,7 @@ export const qualityModel = {
             "description": "Services and therefore their provided functionalities are replicated across different locations so that the latency for accesses from different locations is minimized and the incoming load can be distributed among replicas.",
             "relevantEntities": ["service"],
             "sources": [],
-            "measures": ["amountOfRedudancy", "serviceReplicationLevel"]
+            "measures": ["amountOfRedundancy", "serviceReplicationLevel"]
         },
         "horizontalDataReplication": {
             "name": "Horizontal data replication",
@@ -742,9 +742,9 @@ export const qualityModel = {
         { "impactedFactor": "recoverability", "sourceFactor": "automatedRestarts", "impactType": "positive" },
         { "impactedFactor": "interoperability", "sourceFactor": "api-BasedCommunication", "impactType": "positive" },
         { "impactedFactor": "testability", "sourceFactor": "api-BasedCommunication", "impactType": "positive" },
-        { "impactedFactor": "interoperability", "sourceFactor": "mediatedCommunication", "impactType": "positive" },
-        { "impactedFactor": "timeBehaviour", "sourceFactor": "mediatedCommunication", "impactType": "negative" },
-        { "impactedFactor": "analyzability", "sourceFactor": "mediatedCommunication", "impactType": "positive" }
+        { "impactedFactor": "interoperability", "sourceFactor": "consistentlyMediatedCommunication", "impactType": "positive" },
+        { "impactedFactor": "timeBehaviour", "sourceFactor": "consistentlyMediatedCommunication", "impactType": "negative" },
+        { "impactedFactor": "analyzability", "sourceFactor": "consistentlyMediatedCommunication", "impactType": "positive" }
     ],
     "measures": {
         "ratioOfEndpointsSupportingSsl": {
@@ -777,8 +777,8 @@ export const qualityModel = {
             "calculation": "",
             "sources": ["Ntentos2022"]
         },
-        "totalServiceInterfaceCohesion ": {
-            "name": "Total Service Interface Cohesion ",
+        "totalServiceInterfaceCohesion": {
+            "name": "Total Service Interface Cohesion",
             "calculation": "",
             "sources": ["Bogner2017", "Perepletchikov2007"]
         },
@@ -792,17 +792,17 @@ export const qualityModel = {
             "calculation": "",
             "sources": ["Peng2022"]
         },
-        "dataAggregateScope ": {
+        "dataAggregateScope": {
             "name": "Data aggregate scope",
             "calculation": "",
             "sources": ["Shim2008"]
         },
-        "serviceInterfaceDataCohesion ": {
-            "name": "Service Interface Data Cohesion ",
+        "serviceInterfaceDataCohesion": {
+            "name": "Service Interface Data Cohesion",
             "calculation": "",
             "sources": ["Bogner2017", "Perepletchikov2007", "Kazemi2011", "Brito2021", "Jin2021", "Jin2018", "Athanasopoulos2011", "Athanasopoulos2015", "Bogner2020"]
         },
-        "cohesionBetweenEndpointsBasedOnDataAggregateUsage ": {
+        "cohesionBetweenEndpointsBasedOnDataAggregateUsage": {
             "name": "Cohesion between Endpoints based on data aggregate usage",
             "calculation": "",
             "sources": ["Peng2022"]
@@ -817,7 +817,7 @@ export const qualityModel = {
             "calculation": "",
             "sources": ["Shim2008"]
         },
-        "serviceInterfaceUsageCohesion ": {
+        "serviceInterfaceUsageCohesion": {
             "name": "Service Interface Usage Cohesion",
             "calculation": "",
             "sources": ["Bogner2017", "Perepletchikov2007", "Kazemi2011"]
@@ -837,8 +837,8 @@ export const qualityModel = {
             "calculation": "",
             "sources": ["Zimmermann2015"]
         },
-        "centralizationOfExternallyAvailableEndpoints ": {
-            "name": "Centralization of externally available endpoints ",
+        "centralizationOfExternallyAvailableEndpoints": {
+            "name": "Centralization of externally available endpoints",
             "calculation": "",
             "sources": ["Ntentos2020"]
         },
@@ -932,7 +932,7 @@ export const qualityModel = {
             "calculation": "",
             "sources": ["Ntentos2022"]
         },
-        "ratioOfComponentsOrInfrastructureNodesThatEnablePerformanceAnalytics ": {
+        "ratioOfComponentsOrInfrastructureNodesThatEnablePerformanceAnalytics": {
             "name": "Ratio of Components or Infrastructure nodes that enable Performance Analytics",
             "calculation": "",
             "sources": ["Ntentos2022"]
@@ -1272,8 +1272,8 @@ export const qualityModel = {
             "calculation": "",
             "sources": ["Yussupov2022"]
         },
-        "amountOfRedudancy": {
-            "name": "Amount of redudancy",
+        "amountOfRedundancy": {
+            "name": "Amount of redundancy",
             "calculation": "",
             "sources": ["Zimmermann2015"]
         },
@@ -1361,11 +1361,6 @@ export const qualityModel = {
             "name": "Total number of links in a system",
             "calculation": "",
             "sources": ["Brito2021", "Jin2018", "Tiwari2014"]
-        },
-        "dataAggregateScope": {
-            "name": "Data aggregate scope",
-            "calculation": "",
-            "sources": ["Shim2008"]
         },
         "numberOfSynchronousEndpoints": {
             "name": "Number of synchronous endpoints",
