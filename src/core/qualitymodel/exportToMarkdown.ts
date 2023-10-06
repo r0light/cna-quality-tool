@@ -68,7 +68,6 @@ for (const highLevelAspect of qualityModel.highLevelAspects) {
                         let additionalImpacts = printAdditionalImpacts(factor, currentFactor);
                         output += `${indent()}* ${factor.getName}${relevantEntities}${additionalImpacts}  \n`
                         output += `${indent()}  *${factor.getDescription}*  \n`;
-                        // TODO add url
                         if (factor.getSources.length > 0) {
                             let sourcesString = factor.getSources.map(source => {
                                 let keyString = "";
@@ -83,7 +82,10 @@ for (const highLevelAspect of qualityModel.highLevelAspects) {
                         }
                         indentationLevel += 1;
                         for (const measure of factor.getMeasures) {
-                            output += `${indent()}* *${measure.getName}* (${measure.getReferences.join("; ")})\n`;
+                            let measureSources = measure.getSources.map(source => {
+                                return source.getUrl ? `[${source.getKey}](${source.getUrl})` : source.getKey;
+                            })
+                            output += `${indent()}* *${measure.getName}* (${measureSources.join("; ")})\n`;
                         }
                         indentationLevel -= 1;
                         addImpactingFactors(factor);

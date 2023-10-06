@@ -1,17 +1,19 @@
+import { LiteratureSource } from "./LiteratureSource";
+
 class Measure {
 
     #id: string;
     #name: string;
     #description: string;
     #calculation: string;
-    #references: string[];
+    #sources: LiteratureSource[];
 
-    constructor(id: string, name: string, description: string, calculation: string, references: string[]) {
+    constructor(id: string, name: string, description: string, calculation: string) {
         this.#id = id;
         this.#name = name;
         this.#description = description;
         this.#calculation = calculation;
-        this.#references = references;
+        this.#sources = [];
     }
 
     get getId() {
@@ -30,8 +32,12 @@ class Measure {
         return this.#calculation;
     }
 
-    get getReferences() {
-        return this.#references;
+    get getSources() {
+        return this.#sources;
+    }
+
+    addSource(literatureSource: LiteratureSource) {
+        this.#sources.push(literatureSource);
     }
 }
 

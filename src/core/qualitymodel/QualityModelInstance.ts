@@ -38,13 +38,18 @@ function getQualityModel(): QualityModelInstance {
         productFactor.relevantEntities.forEach(entity => newProductFactor.addRelevantEntity(entity));
         productFactor.sources.forEach(source => {
             let url = literature[source.key] ? literature[source.key].url : "";
-            newProductFactor.addSource(new LiteratureSource(source.key, source.section, url))
+            newProductFactor.addSource(new LiteratureSource(source.key, source.section, url));
         });
 
         for (const measureKey of productFactor.measures) {
             let foundMeasure = qualityModel.measures[measureKey];
             if (foundMeasure) {
-                newProductFactor.addMeasure(new Measure(measureKey, foundMeasure.name, "", foundMeasure.calculation, foundMeasure.sources));
+                let newMeasure = new Measure(measureKey, foundMeasure.name, "", foundMeasure.calculation);
+                foundMeasure.sources.forEach(sourceKey => {
+                    let url = literature[sourceKey] ? literature[sourceKey].url : "";
+                    newMeasure.addSource(new LiteratureSource(sourceKey, "", url));
+                })
+                newProductFactor.addMeasure(newMeasure);
             } else {
                 throw Error("No measure with key " + measureKey + " could be found, please check the quality model definition.")
             }
