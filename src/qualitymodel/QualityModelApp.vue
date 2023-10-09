@@ -698,11 +698,14 @@ function onHighLevelFilterSelected() {
 .qualityModelView {
     display: flex;
     flex-direction: row;
+    overflow: scroll;
+    justify-content: center;
 }
 
 .paperContainer {
     display: flex;
     overflow: scroll;
+    border-left: 4px solid var(--menu-background-colour);
 }
 
 #qmPaper {

@@ -24,7 +24,7 @@
 
   <!-- Content -->
 
-  <main role="main" ref="mainSection" class="flex-grow-1">
+  <main role="main" ref="mainSection" class="flex-grow-1 mainElement">
     <div id="init-overlay" class="init-overlay" v-show="showInitOverlay">
       <div class="init-overlay-content">
         <h2 class="user-select-none text-center">Welcome to the CNA Modeling Application!</h2>
@@ -256,6 +256,7 @@ function updatePageName(newName: string, index: number) {
 .pagesContainer {
   display: flex;
   height: 100%;
+  width: 100%;
 }
 
 .pageWrapper {
@@ -266,6 +267,10 @@ function updatePageName(newName: string, index: number) {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+}
+
+.mainElement {
+  overflow: scroll;
 }
 
 .hide {
