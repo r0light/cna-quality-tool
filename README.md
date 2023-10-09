@@ -45,6 +45,15 @@ cd src/totypa/parsers
 ts-node profileParser.ts
 ```
 
+## Generate Markdown description of the quality model
+
+To generate a markdown representation of the quality model, a node script is included which you can run via:
+
+```sh
+cd src/core/qualitymodel
+ts-node profileParser.ts
+```
+
 ## TODO
 
 ### features

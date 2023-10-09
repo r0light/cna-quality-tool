@@ -1,15 +1,17 @@
 <template>
     <div id="app">
-        <Toolbar :system-name="currentSystemName" :key="currentSystemName" :paper="(mainPaper as dia.Paper)" :graph="(currentSystemGraph as dia.Graph)" :selectedRequestTrace="currentRequestTraceViewSelection"
+        <Toolbar :system-name="currentSystemName" :key="currentSystemName" :paper="(mainPaper as dia.Paper)"
+            :graph="(currentSystemGraph as dia.Graph)" :selectedRequestTrace="currentRequestTraceViewSelection"
             @update:systemName="setCurrentSystemName" @click:exit-request-trace-view="onRequestTraceDeselect"
-            @click:print-active-paper="onPrintRequested" @load:fromTosca="loadFromTosca"></Toolbar>
+            @click:print-active-paper="onPrintRequested" @load:fromJson="loadFromJson" @save:toJson="saveToJson"
+            @load:fromTosca="loadFromTosca" @save:toTosca="saveToTosca"></Toolbar>
         <div class="app-body">
             <div class="entityShapes-sidebar-container d-print-none">
                 <EntitySidebar :paper="mainPaper" :pageId="`model${pageIndex}`"></EntitySidebar>
             </div>
             <div class="visible-modeling-area">
-                <ModelingArea :pageId="`model${pageIndex}`" :graph="(currentSystemGraph as dia.Graph)" v-model:paper="mainPaper"
-                    :currentElementSelection="currentSelection"
+                <ModelingArea :pageId="`model${pageIndex}`" :graph="(currentSystemGraph as dia.Graph)"
+                    v-model:paper="mainPaper" :currentElementSelection="currentSelection"
                     :currentRequestTraceSelection="currentRequestTraceViewSelection" :printing="printing"
                     @select:Element="(element: dia.CellView | dia.LinkView) => currentSelection = element"
                     @select:RequestTrace="onSelectRequestTrace" @deselect:Element="currentSelection = null"
@@ -20,32 +22,30 @@
                 :selectedDataAggregate="currentDataAggregateHighlight" :selectedBackingData="currentBackingDataHightlight">
             </DetailsSidebar>
         </div>
-        <div id="modals" class="d-print-none"></div>
     </div>
 </template>
 
 <script lang="ts" setup>
-import $ from 'jquery';
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, onMounted, nextTick, toRaw } from 'vue'
 import { dia, shapes } from "jointjs";
 import SystemEntityManager from './systemEntityManager';
 import Toolbar from './views/toolbar/Toolbar.vue';
 import ModelingArea from './views/ModelingArea.vue';
 import DetailsSidebar from './views/detailsSidebar/DetailsSidebar.vue';
 import EntitySidebar from './views/EntitySidebar.vue';
-import { importFromServiceTemplate } from '@/core/tosca-adapter/ToscaAdapter';
 import { addSelectionToolToEntity } from './views/tools/entitySelectionTools';
+import { ModelingData } from '@/App.vue';
 
 const props = defineProps<{
     systemName: string,
     pageIndex: number,
-    pageData: Map<string,object>
+    modelingData: ModelingData
 }>()
 
 
 const emit = defineEmits<{
     (e: "update:systemName", newName: string): void;
-    (e: "store:pageData", key: string, value: object): void;
+    (e: "store:modelingData", systemEntitManager: SystemEntityManager): void;
 }>()
 
 const currentSystemName = ref(props.systemName);
@@ -62,15 +62,24 @@ function setCurrentSystemName(systemName: string) {
 const currentSystemGraph = ref<dia.Graph>((() => {
     const dataKey = "graph";
 
-    if (props.pageData.has(dataKey)) {
-        return props.pageData.get(dataKey)["graph"] as dia.Graph;
+    if (props.modelingData.entityManager) {
+        return props.modelingData.entityManager.getGraph() as dia.Graph;
     } else {
         const newGraph = new dia.Graph({}, { cellNamespace: shapes });
-        emit("store:pageData", dataKey, {graph: newGraph});
         return newGraph;
     }
 })());
-const systemEntityManager = ref(new SystemEntityManager(currentSystemGraph.value as dia.Graph));
+
+const systemEntityManager: SystemEntityManager = (() => {
+
+    if (props.modelingData.entityManager) {
+        return props.modelingData.entityManager;
+    } else {
+        const newEntityManager = new SystemEntityManager(currentSystemGraph.value as dia.Graph);
+        emit("store:modelingData", newEntityManager);
+        return new SystemEntityManager(currentSystemGraph.value as dia.Graph);
+    }
+})();
 
 const mainPaper = ref<dia.Paper>();
 
@@ -79,6 +88,7 @@ const currentRequestTraceViewSelection = ref<dia.Element>();
 const printing = ref(false);
 const currentDataAggregateHighlight = ref<string>("");
 const currentBackingDataHightlight = ref<string>("");
+
 
 onMounted(() => {
 
@@ -103,22 +113,53 @@ onMounted(() => {
 
 })
 
-function loadFromTosca(yamlString: string, fileName: string) {
-    let system = importFromServiceTemplate(fileName, yamlString);
-    systemEntityManager.value.overwriteSystemEntity(system);
-    let createdCells = systemEntityManager.value.convertToGraph();
+function loadFromJson(jsonString: string, fileName: string) {
+    let createdCells = systemEntityManager.loadFromJson(jsonString, fileName);
 
     for (const cell of createdCells) {
         addSelectionToolToEntity(cell, mainPaper.value);
     }
 
-    setCurrentSystemName(system.getSystemName);
+    setCurrentSystemName(systemEntityManager.getSystemEntity().getSystemName);
 
     setTimeout(() => {
         mainPaper.value.hideTools();
     }, 100)
 }
 
+function saveToJson() {
+    let jsonSerializedGraph = systemEntityManager.convertToJson();
+
+    // download created yaml taken from https://stackoverflow.com/a/22347908
+    let downloadElement = document.createElement("a");
+    downloadElement.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify(jsonSerializedGraph)));
+    downloadElement.setAttribute('download', `${currentSystemName.value}.json`);
+    downloadElement.click();
+}
+
+function loadFromTosca(yamlString: string, fileName: string) {
+    let createdCells = systemEntityManager.loadFromCustomTosca(yamlString, fileName);
+
+    for (const cell of createdCells) {
+        addSelectionToolToEntity(cell, mainPaper.value);
+    }
+
+    setCurrentSystemName(systemEntityManager.getSystemEntity().getSystemName);
+
+    setTimeout(() => {
+        mainPaper.value.hideTools();
+    }, 100)
+}
+
+function saveToTosca() {
+    let asYaml = systemEntityManager.convertToCustomTosca();
+
+    // download created yaml taken from https://stackoverflow.com/a/22347908
+    let downloadElement = document.createElement("a");
+    downloadElement.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(asYaml));
+    downloadElement.setAttribute('download', `${currentSystemName.value}.yaml`);
+    downloadElement.click();
+}
 
 function onSelectRequestTrace(element: dia.Element) {
 

@@ -24,7 +24,7 @@
 
   <!-- Content -->
 
-  <main role="main" ref="mainSection" class="flex-grow-1">
+  <main role="main" ref="mainSection" class="flex-grow-1 mainElement">
     <div id="init-overlay" class="init-overlay" v-show="showInitOverlay">
       <div class="init-overlay-content">
         <h2 class="user-select-none text-center">Welcome to the CNA Modeling Application!</h2>
@@ -67,28 +67,46 @@
     </div>
     <div class="pagesContainer">
       <div v-for="pageContent of pages" class="pageWrapper">
-        <Home v-show="pageContent.pageType === 'home' && currentPage === pageContent.index"></Home>
-        <ModelingApp v-show="pageContent.pageType === 'modeling' && currentPage === pageContent.index" :systemName="pageContent.name" :pageIndex="pageContent.index" :pageData="pageContent.pageData" @store:pageData="(dataKey, dataValue) => storePageData(dataKey, dataValue, pageContent.index)" @update:systemName="event => updatePageName(event, pageContent.index)"></ModelingApp>
+        <Home v-if="pageContent.pageType === 'home'" v-show="currentPage === pageContent.index"></Home>
+        <QualityModelApp v-if="pageContent.pageType === 'qualityModel'" v-show="currentPage === pageContent.index"
+          :inView="currentPage === pageContent.index"></QualityModelApp>
+          <EvaluationApp v-if="pageContent.pageType === 'evaluation'" v-show="currentPage === pageContent.index"
+          :systemsData="sharedSystemsData" ></EvaluationApp>
+        <ModelingApp v-if="pageContent.pageType === 'modeling'"
+          v-show="pageContent.pageType === 'modeling' && currentPage === pageContent.index" :systemName="pageContent.name"
+          :pageIndex="pageContent.index"
+          :modelingData="(modeledSystemsData[pageContent.index] as ModelingData)"
+          @store:modelingData="(systemEntityManager) => storeModelingData(systemEntityManager, pageContent.name, pageContent.index)"
+          @update:systemName="event => updatePageName(event, pageContent.index)"></ModelingApp>
       </div>
     </div>
   </main>
   <div id="modalBackground"></div>
+  <div id="modals" class="d-print-none"></div>
 </template>
 
 <script lang="ts" setup>
 import $ from 'jquery';
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed, ComputedRef } from 'vue'
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import Home from './Home.vue';
 import ModelingApp from './modeling/ModelingApp.vue';
+import QualityModelApp from './qualitymodel/QualityModelApp.vue';
+import EvaluationApp from './evaluation/EvaluationApp.vue';
+import SystemEntityManager from './modeling/systemEntityManager';
 
 type Page = {
   index: number;
   active: boolean;
-  pageType: "home" | "modeling"
+  pageType: "home" | "qualityModel" | "evaluation" | "modeling"
   iconClass: string;
   name: string;
-  pageData: Map<string,object>;
+}
+
+export type ModelingData = {
+  index: number,
+  name: string,
+  entityManager: SystemEntityManager
 }
 
 const pages = ref<Page[]>([
@@ -97,17 +115,39 @@ const pages = ref<Page[]>([
     active: false,
     pageType: "home",
     iconClass: "fa fa-fw fa-home",
-    name: "Home",
-    pageData: new Map<string,object>()
+    name: "Home"
+  },
+  {
+    index: 1,
+    active: false,
+    pageType: "qualityModel",
+    iconClass: "fa-solid fa-sitemap",
+    name: "Quality Model"
+  },
+  {
+    index: 2,
+    active: false,
+    pageType: "evaluation",
+    iconClass: "fa-solid fa-gauge-high",
+    name: "Evaluation"
   }
 ])
 
-function storePageData(dataKey, dataValue, index) {
-  for (const page of pages.value) {
-    if (page.index === index) {
-      page.pageData.set(dataKey, dataValue);
-    }
+const modeledSystemsData = ref<ModelingData[]>([]);
+const sharedSystemsData: ComputedRef<ModelingData[]> = computed(() => {
+  return modeledSystemsData.value.filter(data => data.index !== -1) as ModelingData[];
+});
+/*const sharedSystemsKey: ComputedRef<string> = computed(() => {
+  return modeledSystemsData.value.reduce((initial, b) => initial + b.name, "");
+});*/
+
+function storeModelingData(systemEntityManager: SystemEntityManager, pageName: string, index: number) {
+  modeledSystemsData.value[index] = {
+    index: index,
+    name: pageName,
+    entityManager: systemEntityManager
   }
+
 }
 
 const currentPage = ref(0);
@@ -161,7 +201,7 @@ function selectPage(index: number) {
   // set current page active
   for (const page of pages.value) {
     page.active = page.index === currentPage.value ? true : false;
-    switch(page.pageType) {
+    switch (page.pageType) {
       case "home":
         document.title = "Home";
         break;
@@ -179,13 +219,22 @@ function addNewModelingPage(name: string) {
   // increment currently highest index by one to get a new index
   const newIndex = Math.max(...pages.value.map(page => page.index)) + 1;
 
+  // prepare modeledSystemsData so that the array at index newIndex is not empty
+  while (modeledSystemsData.value.length <= newIndex + 1) {
+    modeledSystemsData.value.push({
+      index: -1,
+      name: "",
+      entityManager: null
+    });
+  }
+
+
   pages.value.push({
     index: newIndex,
     active: true,
     pageType: "modeling",
     iconClass: "fa-solid fa-pencil",
-    name: name,
-    pageData: new Map<string,object>()
+    name: name
   })
 
   selectPage(newIndex);
@@ -198,6 +247,7 @@ function updatePageName(newName: string, index: number) {
       document.title += `CNA Modeling: ${newName}`;
     }
   }
+  modeledSystemsData.value[index].name = newName;
 }
 
 </script>
@@ -206,6 +256,7 @@ function updatePageName(newName: string, index: number) {
 .pagesContainer {
   display: flex;
   height: 100%;
+  width: 100%;
 }
 
 .pageWrapper {
@@ -218,7 +269,10 @@ function updatePageName(newName: string, index: number) {
   min-height: 100vh;
 }
 
+.mainElement {
+  overflow: scroll;
+}
+
 .hide {
   display: none;
-}
-</style>
+}</style>
