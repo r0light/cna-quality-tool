@@ -18,6 +18,10 @@ class QualityAspect {
         this.#incomingImpacts = [];
     }
 
+    get getFactorType() {
+        return "qualityAspect";
+    }
+
     get getId() {
         return this.#id;
     }

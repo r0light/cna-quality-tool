@@ -26,6 +26,10 @@ class ProductFactor {
         this.#incomingImpacts = [];
     }
 
+    get getFactorType() {
+        return "productFactor";
+    }
+
     get getId() {
         return this.#id;
     }

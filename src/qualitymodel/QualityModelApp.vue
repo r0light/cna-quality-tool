@@ -19,9 +19,33 @@
             <div class="qualityModelDetails">
                 <div class="detailsHeading">Factor Details</div>
                 <div class="detailsBody p-2">
-                    <div v-if="!!selectedFactor">
+                    <div v-if="!!selectedFactor" class="factorDetails">
                         <h3>{{ selectedFactor.getName }}</h3>
                         <p class="font-italic">{{ selectedFactor.getDescription }}</p>
+                        <div v-if="selectedFactor.getFactorType === 'productFactor'">
+                            <span>Entities which are relevant for this factor: </span><br><span>{{  (selectedFactor as ProductFactor).getRelevantEntities.map(entityKey => entities[entityKey].name).join(", ") }}</span>
+                        </div>
+                        <div v-if="selectedFactor.getFactorType === 'productFactor' && (selectedFactor as ProductFactor).getSources.length > 0">
+                            <span>Read more:</span>
+                            <ul>
+                                <li v-for="source of (selectedFactor as ProductFactor).getSources">
+                                    <span><a :href="source.getUrl"><span>{{ source.getKey }}</span></a>: {{ source.getInfo }}</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div v-if="selectedFactor.getFactorType === 'productFactor' && (selectedFactor as ProductFactor).getMeasures.length > 0">
+                            <span>Potential measures:</span>
+                            <ul>
+                                <li v-for="measure of (selectedFactor as ProductFactor).getMeasures">
+                                    <span class="font-italics">{{ measure.getName }}</span>
+                                    <span> (</span>
+                                    <span v-for="source of measure.getSources">
+                                        <a :href="source.getUrl"><span>{{ source.getKey }}, </span></a>
+                                    </span>
+                                    <span> )</span>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                     <div v-if="!selectedFactor">Select a factor to see it's details here</div>
                 </div>
@@ -32,16 +56,20 @@
 
 <script lang="ts" setup>
 import $ from 'jquery';
-import { ref, onMounted, onUpdated, Ref, ComputedRef, computed } from 'vue';
+import { ref, onMounted, onUpdated, watch, Ref, ComputedRef, computed } from 'vue';
 import { dia, shapes, util, highlighters } from "jointjs";
 import { QualityAspectElement, ProductFactorElement, ImpactElement } from './config/elementShapes';
 import { getQualityModel } from '@/core/qualitymodel/QualityModelInstance';
 import { ProductFactor } from '@/core/qualitymodel/ProductFactor';
 import { QualityAspect } from '@/core/qualitymodel/QualityAspect';
+import { entities } from '@/core/qualitymodel/entities';
 
+let initialized = true;
+let doRearrange = false;
 const props = defineProps<{
-    inView: boolean,
+    inView: Boolean,
 }>()
+const watchInView = computed(() => props.inView);
 
 const qmContainer = ref(null);
 const qmPaper = ref(null)
@@ -106,13 +134,14 @@ onMounted(() => {
 
     drawQualityModelElements(getActiveHighLevelAspects(), "");
 
+
     paperRef.value.on({
         'element:pointerdown': function (cellView: dia.ElementView, evt, x, y) {
             selectedElement.value = cellView;
             //let currentPaper = this;
             this.model.getLinks().forEach(function (link) {
                 highlighters.stroke.remove(link.findView(paperRef.value));
-                //link.toBack();
+                link.toBack();
             });
             graph.getConnectedLinks(cellView.model).forEach(link => {
                 highlighters.stroke.add(link.findView(paperRef.value), { selector: 'line' }, 'my-element-highlight', {
@@ -133,17 +162,25 @@ onMounted(() => {
         },
 
     });
+
 });
 
-onUpdated(() => {
 
-    if (!props.inView) {
-        return;
+watch(watchInView, (newValue, oldValue) => {
+    // detect whether the page has just been entered for the first time and only then require a rearrangement of the quality model
+    if (initialized && oldValue === false && newValue === true) {
+        doRearrange = true;
+        initialized = false;
     }
-
-    arrangeQualityModelElements();
-
+});
+onUpdated(() => {
+    // make sure arrangeQualityModelElements is only called when the page is freshly viewed, otherwise this function here will be called everytime something in the component data changes.
+    if (doRearrange) {
+        arrangeQualityModelElements();
+        doRearrange = false;
+    }
 })
+
 
 function drawQualityModelElements(highLevelFilter: string[], productFactorFilter: string) {
 
@@ -306,7 +343,7 @@ function arrangeQualityModelElements() {
 
     placeProductFactors();
 
-    updateLinkRoutes();
+    //updateLinkRoutes();
 }
 
 
@@ -634,11 +671,13 @@ function placeProductFactors() {
     console.log("average tries: " + average(allTries));
     console.log("unplaceable: " + allTries.filter(value => value === maximumTries).length);
     */
+    
 }
 
 function calcAngleDegrees(x, y) {
     return (Math.atan2(y, x) * 180) / Math.PI;
 }
+
 
 function updateLinkRoutes() {
     for (const impactElement of impactElements) {
@@ -738,5 +777,15 @@ function onHighLevelFilterSelected() {
     justify-content: center;
     padding-bottom: 0.2em;
     background-color: var(--menu-background-colour);
+}
+
+.detailsBody {
+    overflow: scroll;
+}
+
+.factorDetails {
+    display: flex;
+    flex-direction: column;
+    row-gap: 0.5em;
 }
 </style>
