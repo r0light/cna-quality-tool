@@ -687,6 +687,11 @@ function onHighLevelFilterSelected() {
     column-gap: 0.2em;
 }
 
+.qualityModelTool>div>span {
+    display: flex;
+    align-items: center;
+}
+
 .filterCheckbox {
     accent-color: #343a40;
 }
@@ -710,7 +715,11 @@ function onHighLevelFilterSelected() {
 
 #qmPaper {
     min-width: 1600px;
-    min-height: 1400px;
+    width: calc(100vw) !important;
+    max-width: 1800px;
+    min-height: 1200px;
+    height: calc(100vh - 93px) !important;
+    max-width: 1400px;
 }
 
 .qualityModelDetails {
