@@ -1,14 +1,14 @@
 <template>
     <div class="qualitymodel-container" ref="qmContainer">
-        <div class="qualityModelToolbar">
+        <div class="qualityModelToolbar p-1">
             <div class="qualityModelTool">
                 <span>Filter by High-level aspect:</span>
                 <div v-for="[highLevelAspectKey, status] of Object.entries(highLevelAspectFilter)">
                     <input :id="`${highLevelAspectKey}-filter`" @input="onHighLevelFilterSelected()"
                         v-model="status.checked" class="filterCheckbox" type="checkbox" :value="highLevelAspectKey">
-                    <label class="" :for="`${highLevelAspectKey}-filter`">
+                    <span class="" :for="`${highLevelAspectKey}-filter`">
                         {{ status.name }}
-                    </label>
+                    </span>
                 </div>
             </div>
         </div>
@@ -17,11 +17,14 @@
                 <div id="qmPaper" ref="qmPaper"></div>
             </div>
             <div class="qualityModelDetails">
-                <div v-if="!!selectedFactor">
-                    <h2>{{ selectedFactor.getName }}</h2>
-                    <p>{{ selectedFactor.getDescription }}</p>
+                <div class="detailsHeading">Factor Details</div>
+                <div class="detailsBody p-2">
+                    <div v-if="!!selectedFactor">
+                        <h3>{{ selectedFactor.getName }}</h3>
+                        <p class="font-italic">{{ selectedFactor.getDescription }}</p>
+                    </div>
+                    <div v-if="!selectedFactor">Select a factor to see it's details here</div>
                 </div>
-                <div v-if="!selectedFactor">No Factor selected</div>
             </div>
         </div>
     </div>
@@ -668,7 +671,6 @@ function onHighLevelFilterSelected() {
     flex-direction: row;
     width: 100%;
     align-items: start;
-    padding: 5px;
     border-bottom: 5px solid var(--menu-background-colour);
 }
 
@@ -676,10 +678,13 @@ function onHighLevelFilterSelected() {
     display: flex;
     flex-direction: row;
     flex-grow: 1;
+    column-gap: 1em;
 }
 
-.qualityModelTool * {
-    margin-left: 5px;
+.qualityModelTool>div {
+    display: flex;
+    flex-direction: row;
+    column-gap: 0.2em;
 }
 
 .filterCheckbox {
@@ -693,7 +698,6 @@ function onHighLevelFilterSelected() {
 .qualityModelView {
     display: flex;
     flex-direction: row;
-    padding: 5px;
 }
 
 .paperContainer {
@@ -708,9 +712,19 @@ function onHighLevelFilterSelected() {
 
 .qualityModelDetails {
     display: flex;
+    flex-direction: column;
     flex-grow: 1;
     min-width: 300px;
     max-width: 600px;
-    padding: 5px;
+    border: 4px solid var(--menu-background-colour);
+}
+
+.detailsHeading {
+    display: flex;
+    color: #ffffff;
+    text-align: center;
+    justify-content: center;
+    padding-bottom: 0.2em;
+    background-color: var(--menu-background-colour);
 }
 </style>
