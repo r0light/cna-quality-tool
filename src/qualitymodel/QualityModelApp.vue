@@ -750,6 +750,7 @@ function onHighLevelFilterSelected() {
     display: flex;
     overflow: scroll;
     border-left: 4px solid var(--menu-background-colour);
+    border-bottom: 4px solid var(--menu-background-colour);
 }
 
 #qmPaper {
@@ -758,7 +759,7 @@ function onHighLevelFilterSelected() {
     max-width: 1800px;
     min-height: 1200px;
     height: calc(100vh - 93px) !important;
-    max-width: 1400px;
+    max-height: 1400px;
 }
 
 .qualityModelDetails {
