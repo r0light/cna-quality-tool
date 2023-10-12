@@ -23,17 +23,22 @@
                         <h3>{{ selectedFactor.getName }}</h3>
                         <p class="font-italic">{{ selectedFactor.getDescription }}</p>
                         <div v-if="selectedFactor.getFactorType === 'productFactor'">
-                            <span>Entities which are relevant for this factor: </span><br><span>{{  (selectedFactor as ProductFactor).getRelevantEntities.map(entityKey => entities[entityKey].name).join(", ") }}</span>
+                            <span>Entities which are relevant for this factor: </span><br><span>{{ (selectedFactor as
+                                ProductFactor).getRelevantEntities.map(entityKey => entities[entityKey].name).join(", ")
+                            }}</span>
                         </div>
-                        <div v-if="selectedFactor.getFactorType === 'productFactor' && (selectedFactor as ProductFactor).getSources.length > 0">
+                        <div
+                            v-if="selectedFactor.getFactorType === 'productFactor' && (selectedFactor as ProductFactor).getSources.length > 0">
                             <span>Read more:</span>
                             <ul>
                                 <li v-for="source of (selectedFactor as ProductFactor).getSources">
-                                    <span><a :href="source.getUrl"><span>{{ source.getKey }}</span></a>: {{ source.getInfo }}</span>
+                                    <span><a :href="source.getUrl"><span>{{ source.getKey }}</span></a>: {{ source.getInfo
+                                    }}</span>
                                 </li>
                             </ul>
                         </div>
-                        <div v-if="selectedFactor.getFactorType === 'productFactor' && (selectedFactor as ProductFactor).getMeasures.length > 0">
+                        <div
+                            v-if="selectedFactor.getFactorType === 'productFactor' && (selectedFactor as ProductFactor).getMeasures.length > 0">
                             <span>Potential measures:</span>
                             <ul>
                                 <li v-for="measure of (selectedFactor as ProductFactor).getMeasures">
@@ -432,10 +437,10 @@ function placeQualityAspects() {
 
     // [top,right,bottom,left]; Decrease maximum for right and left because of corner elements
     let paperSideDistribution = [
-        { side: "top", sideLength: availableWidth, elementLength: elementWidth, elements: 0, maximum: maxElementsOnWidth, maximumReached: false, spaceBetween: 0 },
-        { side: "right", sideLength: availableHeight, elementLength: elementHeight, elements: 0, maximum: maxElementsOnHeight - 2, maximumReached: false, spaceBetween: 0 },
-        { side: "bottom", sideLength: availableWidth, elementLength: elementWidth, elements: 0, maximum: maxElementsOnWidth, maximumReached: false, spaceBetween: 0 },
-        { side: "left", sideLength: availableHeight, elementLength: elementHeight, elements: 0, maximum: maxElementsOnHeight - 2, maximumReached: false, spaceBetween: 0 }
+        { side: "top", sideX: 10, sideY: 10, sideLength: availableWidth, elementLength: elementWidth, elements: 0, maximum: maxElementsOnWidth, maximumReached: false, spaceBetween: 0 },
+        { side: "right", sideX: 10 + availableWidth - elementWidth, sideY: 10 + elementHeight, sideLength: availableHeight, elementLength: elementHeight, elements: 0, maximum: maxElementsOnHeight - 2, maximumReached: false, spaceBetween: 0 },
+        { side: "bottom", sideX: 10 + availableWidth - elementWidth, sideY: 10 + availableHeight - elementHeight, sideLength: availableWidth, elementLength: elementWidth, elements: 0, maximum: maxElementsOnWidth, maximumReached: false, spaceBetween: 0 },
+        { side: "left", sideX: 10, sideY: 10 + availableHeight - elementHeight, sideLength: availableHeight, elementLength: elementHeight, elements: 0, maximum: maxElementsOnHeight - 2, maximumReached: false, spaceBetween: 0 }
     ];
 
     // distribute elements equally over the four sides
@@ -463,72 +468,80 @@ function placeQualityAspects() {
             case "bottom":
                 let horizontalSpaceForElements = paperSide.elements * paperSide.elementLength;
                 let horizontalRemainingSpace = paperSide.sideLength - horizontalSpaceForElements;
-                if (paperSide.elements <= 1) {
-                    paperSide.spaceBetween = horizontalRemainingSpace;
-                } else {
-                    paperSide.spaceBetween = Math.floor(horizontalRemainingSpace / (paperSide.elements - 1));
-                }
+                let horizontalSpaces = paperSide.elements + 1;
+                paperSide.spaceBetween = Math.floor(horizontalRemainingSpace / horizontalSpaces);
                 break;
             case "right":
             case "left":
                 let verticalSpaceForElements = (paperSide.elements + 2) * paperSide.elementLength;
                 let verticalRemainingSpace = paperSide.sideLength - verticalSpaceForElements;
-                paperSide.spaceBetween = Math.floor(verticalRemainingSpace / (paperSide.elements + 1));
+                let verticalSpaces = paperSide.elements + 1;
+                paperSide.spaceBetween = Math.floor(verticalRemainingSpace / verticalSpaces);
                 break;
         }
 
     }
 
-    // start positioning in the left top corner;
-    let currentX = 10
-    let currentY = 10;
-    let phase = 0; //phase should describe the phases when walking along the perimeter
+    // initialize
+    let elementIndex = 0;
     let sides = [0, 0, 0, 0];
 
-    for (const qualityAspect of qualityAspectElements) {
+    // iterate through phases
+    for (let phase = 0; phase < 4; phase++) {
 
-        if (phase === 4) {
-            throw new Error("There is no space left to place elements")
+        let current = paperSideDistribution[phase];
+        let currentX = current.sideX;
+        let currentY = current.sideY;
+
+        let calculateNextPosition = (x, y) => { return { x: x, y: y } };
+        switch (current.side) {
+            case "top":
+                currentX = current.sideX + current.spaceBetween;
+                calculateNextPosition = (currentX, currentY) => {
+                    return {
+                        x: currentX + current.spaceBetween + current.elementLength,
+                        y: currentY
+                    }
+                }
+                break;
+            case "right":
+                currentY = current.sideY + current.spaceBetween;
+                calculateNextPosition = (currentX, currentY) => {
+                    return {
+                        x: currentX,
+                        y: currentY + current.spaceBetween + current.elementLength,
+                    }
+                }
+                break;
+            case "bottom":
+                currentX = currentX - current.spaceBetween;
+                calculateNextPosition = (currentX, currentY) => {
+                    return {
+                        x: currentX - current.spaceBetween - current.elementLength,
+                        y: currentY
+                    }
+                }
+                break;
+            case "left":
+                currentY = current.sideY - current.spaceBetween;
+                calculateNextPosition = (currentX, currentY) => {
+                    return {
+                        x: currentX,
+                        y: currentY - current.spaceBetween - current.elementLength,
+                    }
+                }
+                break;
         }
 
-        //(graph.getCell(qualityAspect.id) as dia.Element).position(currentX, currentY);
-        qualityAspect.translate(currentX - qualityAspect.position().x, currentY - qualityAspect.position().y); //TODO animation?
-        sides[phase] = sides[phase] + 1;
+        while (sides[phase] < current.elements) {
+            let nextQualityAspect = qualityAspectElements[elementIndex];
+            nextQualityAspect.translate(currentX - nextQualityAspect.position().x, currentY - nextQualityAspect.position().y); //TODO animation?
+            sides[phase] = sides[phase] + 1;
+            elementIndex = elementIndex + 1;
 
-        if (phase === 0) {
-
-            if (sides[phase] < paperSideDistribution[phase].elements) {
-                currentX = currentX + paperSideDistribution[phase].elementLength + paperSideDistribution[phase].spaceBetween;
-            } else {
-                // at the end of phase 0, move furthest to the right to ensure also the edge case when only one element is placed top
-                currentX = paperSideDistribution[phase].sideLength - paperSideDistribution[phase].elementLength + 10;
-                phase = phase + 1;
-            }
-        }
-        if (phase === 1) {
-
-            if (sides[phase] < paperSideDistribution[phase].elements) {
-                currentY = currentY + paperSideDistribution[phase].elementLength + paperSideDistribution[phase].spaceBetween;
-            } else {
-                // at the end of the right side, go one step further down for the first element of the bottom row, and continue here so that we don't move to the left yet
-                currentY = currentY + paperSideDistribution[phase].elementLength + paperSideDistribution[phase].spaceBetween;
-                phase = phase + 1;
-                continue;
-            }
-        }
-        if (phase === 2) {
-            if (sides[phase] < paperSideDistribution[phase].elements) {
-                currentX = currentX - paperSideDistribution[phase].elementLength - paperSideDistribution[phase].spaceBetween;
-            } else {
-                phase = phase + 1;
-            }
-        }
-        if (phase === 3) {
-            if (sides[phase] < paperSideDistribution[phase].elements) {
-                currentY = currentY - paperSideDistribution[phase].elementLength - paperSideDistribution[phase].spaceBetween;
-            } else {
-                phase = phase + 1;
-            }
+            let nextPosition = calculateNextPosition(currentX, currentY);
+            currentX = nextPosition.x;
+            currentY = nextPosition.y;
         }
     }
 
@@ -671,7 +684,7 @@ function placeProductFactors() {
     console.log("average tries: " + average(allTries));
     console.log("unplaceable: " + allTries.filter(value => value === maximumTries).length);
     */
-    
+
 }
 
 function calcAngleDegrees(x, y) {
