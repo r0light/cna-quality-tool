@@ -191,6 +191,16 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
       },
       "requirements": [
         {
+          "host": {
+            "capability": "tosca.capabilities.Compute",
+            "relationship": "tosca.relationships.HostedOn",
+            "occurrences": [
+              1,
+              1
+            ]
+          }
+        },
+        {
           "provides_endpoint": {
             "capability": "tosca.capabilities.Endpoint",
             "relationship": "cna.qualityModel.relationships.Provides.Endpoint",

@@ -1,5 +1,5 @@
 import { Component } from './component'
-import { parseProperties } from '../common/entityProperty';
+import { loadAllProperties, parseProperties } from '../common/entityProperty';
 import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_modeling_tosca_profile'
 import { MetaData } from '../common/entityDataTypes';
 import { Infrastructure } from './infrastructure';
@@ -13,7 +13,7 @@ const STORAGE_BACKING_SERVICE_TOSCA_KEY = "cna.qualityModel.entities.DBMS.Storag
 const STORAGE_BACKING_SERVICE_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types[STORAGE_BACKING_SERVICE_TOSCA_KEY];
 
 function getStorageBackingServiceProperties() {
-    let parsed = parseProperties(STORAGE_BACKING_SERVICE_TOSCA_EQUIVALENT.properties);
+    let parsed = loadAllProperties(STORAGE_BACKING_SERVICE_TOSCA_EQUIVALENT);
 
     for (const prop of parsed) {
         switch (prop.getKey) {

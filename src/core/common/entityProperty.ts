@@ -3,7 +3,10 @@
  * @module entities/entityProperty
  */
 
+import { all_profiles } from "@/totypa/parsedProfiles/all_profiles";
 import { TOSCA_Property } from "@/totypa/tosca-types/core-types";
+import { TOSCA_Node } from "@/totypa/tosca-types/entity-types";
+import { parse } from "path";
 
 type propertyDatatype = "text" | "textarea" | "number" | "boolean" | "bounded" | "list" | "map" //TODO | "timestamp" | "version"
 
@@ -210,6 +213,25 @@ class MapEntityProperty extends EntityProperty {
 
 }
 
+function loadAllProperties(nodeDefinition: TOSCA_Node): EntityProperty[] {
+    let parsedProperties: EntityProperty[] = [];
+    let currentNode = nodeDefinition;
+    if (nodeDefinition.properties) {
+        parsedProperties.push(...parseProperties(nodeDefinition.properties));
+    }
+    while (currentNode.derived_from) {
+        let nextNode = all_profiles.flatMap(profile => Object.entries(profile.node_types)).find(([nodeName, nodeType]) => nodeName === currentNode.derived_from);
+        if (nextNode) {
+            currentNode = nextNode[1];
+            if (currentNode.properties) {
+                parsedProperties.push(...parseProperties(currentNode.properties));
+            }
+        } else {
+            break;
+        }
+    }
+    return parsedProperties;
+}
 
 function parseProperties(properties: { [propertyKey: string]: TOSCA_Property}): EntityProperty[] {
 
@@ -249,4 +271,4 @@ function parseProperties(properties: { [propertyKey: string]: TOSCA_Property}): 
 }
 
 
-export { EntityProperty, TextEntityProperty, TextAreaEntityProperty, NumberEntityProperty, BooleanEntityProperty, BoundsEntityProperty as BoundedEntityProperty, ListEntityProperty, MapEntityProperty, parseProperties };
+export { EntityProperty, TextEntityProperty, TextAreaEntityProperty, NumberEntityProperty, BooleanEntityProperty, BoundsEntityProperty as BoundedEntityProperty, ListEntityProperty, MapEntityProperty, loadAllProperties, parseProperties };

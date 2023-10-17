@@ -53,34 +53,3 @@ To generate a markdown representation of the quality model, a node script is inc
 cd src/core/qualitymodel
 ts-node profileParser.ts
 ```
-
-## TODO
-
-### features
-
-- [ ] preserve state in case of page reload
-- [ ] new Tab: Quality Evaluation
-  - [ ] calculated metrics
-  - [ ] product factors and their "presence" expressed as value or color
-  - [ ] quality ratings based on quality aspects
-- [ ] new Tab: QM Configuration
-  - [ ] Edit measures
-  - [ ] Edit evaluations (relation between )
-  - [ ] Edit product factors
-  - [ ] Edit quality aspects
-- [x] Import JSON model
-- [ ] Import TOSCA model
-- [ ] More specific show/hide features (all backing services, all infrastructure and deployment mappings, )
-
-### Editor features
-
-- [x] Delete element with delete button
-- [x] Do not let infrastructure element grow in height
-- [x] Data Aggregate / Backing Data Family selection: // TODO handle family topic
-- [ ] make Paper draggable with mouse (https://stackoverflow.com/questions/28431384/how-to-make-a-paper-draggable)
-- [ ] increase element size to ensure embedded elements are within the element when added
-
-### technical things
-
-- [x] refactor to TypeScript
-- [ ] add tests for quality calculations (using https://github.com/avajs/ava)
