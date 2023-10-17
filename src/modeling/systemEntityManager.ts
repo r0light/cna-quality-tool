@@ -63,12 +63,16 @@ class SystemEntityManager {
         */
 
         let serviceTemplate = convertToServiceTemplate(this.#currentSystemEntity);
-        const asYaml = yaml.dump(serviceTemplate, {
-            styles: {
-                '!!null': 'empty'
-            }
-        });
-        return asYaml;
+        try {
+            const asYaml = yaml.dump(serviceTemplate, {
+                styles: {
+                    '!!null': 'empty'
+                }
+            });
+            return asYaml;
+        } catch (err) {
+            console.error(err);
+        }
     }
 
     loadFromCustomTosca(stringifiedTOSCA: string, fileName: string): dia.Cell[] {
@@ -605,7 +609,7 @@ class SystemEntityManager {
     }
 
     #createRequestTraceEntity(graphElement) {
-        const externalEndpointId = graphElement.prop("entity/properties/referredEndpoint");
+        const externalEndpointId = graphElement.prop("entity/properties/referred_endpoint");
         if (!externalEndpointId || !(externalEndpointId.trim())) {
             const message = `A Request Trace entity is only valid if it specifies its referred External Endpoint entity. However, for the Request Trace "${graphElement.attr("label/textWrap/text")}" 
             no External Endpoint was selected and it is, therefore, invalid.`;
@@ -614,7 +618,7 @@ class SystemEntityManager {
             return null;
         }
 
-        const involvedLinkIds = graphElement.prop("entity/properties/involvedLinks");
+        const involvedLinkIds = graphElement.prop("entity/properties/involved_links");
         if (!involvedLinkIds || !involvedLinkIds[0] || involvedLinkIds[0].length <= 0) {
             const message = `A Request Trace entity is only valid if it specifies its involved Link entities. However, the Request Trace "${graphElement.attr("label/textWrap/text")}" 
             does not provide any information about its involved Links and it is, therefore, invalid.`;
@@ -1147,7 +1151,7 @@ class SystemEntityManager {
 
         for (const property of EntityDetailsConfig.RequestTrace.specificProperties) {
             switch (property.providedFeature) {
-                case "referredEndpoint":
+                case "referred_endpoint":
                     newRequestTrace.prop(property.jointJsConfig.modelPath, requestTrace.getExternalEndpoint.getId);
                     break;
                 case "involvedLinks-wrapper":

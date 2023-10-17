@@ -170,13 +170,13 @@ function onSelectRequestTrace(element: dia.Element) {
     element.attr("body/fill", "gold");
 
     // get involved Links
-    const involvedLinks = element.prop("entity/properties/involvedLinks");
+    const involvedLinks = element.prop("entity/properties/involved_links");
 
     let allInvolvedEntities = new Set(involvedLinks);
     // add Request Trace entity itself 
     allInvolvedEntities.add(element.id);
     // add referred External Endpoint
-    allInvolvedEntities.add(element.prop("entity/properties/referredEndpoint"));
+    allInvolvedEntities.add(element.prop("entity/properties/referred_endpoint"));
 
     if (involvedLinks && involvedLinks.length > 0) {
         for (const involvedLink of involvedLinks) {

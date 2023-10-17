@@ -19,6 +19,7 @@ import { EXTERNAL_ENDPOINT_TOSCA_KEY } from '../entities/externalEndpoint';
 import { DEPLOYMENT_MAPPING_TOSCA_KEY } from '../entities/deploymentMapping';
 import { LINK_TOSCA_KEY } from '../entities/link';
 import { REQUEST_TRACE_TOSCA_KEY } from '../entities/requestTrace';
+import { request } from 'node:http';
 
 const TOSCA_DEFINITIONS_VERSION = "tosca_simple_yaml_1_3"
 
@@ -344,24 +345,25 @@ function createRequestTraceTemplate(requestTrace: Entities.RequestTrace, systemE
     let template: TOSCA_Node_Template = {
         type: REQUEST_TRACE_TOSCA_KEY,
         metadata: flatMetaData(requestTrace.getMetaData),
-        properties: {
-            nodes: [],
-            links: []
-        }
+        properties: parsePropertiesForYaml(requestTrace.getProperties())
     }
 
+    // overwrite with keys
+    template.properties.referred_endpoint = keyIdMap.getKey(requestTrace.getExternalEndpoint.getId);
+
+    let linkKeys = new Set<string>();
     let nodeKeys = new Set<string>();
     for (const link of requestTrace.getLinks) {
-        template.properties.links.push(keyIdMap.getKey(link.getId));
+        //template.properties.links.push(keyIdMap.getKey(link.getId));
+        linkKeys.add(keyIdMap.getKey(link.getId));
         nodeKeys.add(keyIdMap.getKey(link.getSourceEntity.getId));
         let targetComponent = systemEntity.searchComponentOfEndpoint(link.getTargetEndpoint.getId);
         if (targetComponent) {
             nodeKeys.add(keyIdMap.getKey(targetComponent.getId));
         }
     }
-    template.properties.nodes.push(...nodeKeys);
-
-    template.properties.external_endpoint = keyIdMap.getKey(requestTrace.getExternalEndpoint.getId)
+    template.properties.involved_links = [...linkKeys];
+    template.properties.nodes = [...nodeKeys];
 
     return template;
 }
@@ -571,10 +573,30 @@ export function importFromServiceTemplate(fileName: string, stringifiedServiceTe
         if (node.type === REQUEST_TRACE_TOSCA_KEY) {
             let uuid = uuidv4();
 
-            let externalEndpoint = node.properties && node.properties["external_endpoint"] ? endpoints.get(keyIdMap.getId(node.properties["external_endpoint"])) : null; // TODO something better than null?
-            let links = node.properties && node.properties["links"] ? node.properties["links"].map(linkKey => importedSystem.getLinkEntities.get(keyIdMap.getId(linkKey))) : [];
+            let externalEndpoint = node.properties && node.properties["referred_endpoint"] ? endpoints.get(keyIdMap.getId(node.properties["referred_endpoint"])) : null; // TODO something better than null?
+            let links = node.properties && node.properties["involved_links"] ? node.properties["involved_links"].map(linkKey => importedSystem.getLinkEntities.get(keyIdMap.getId(linkKey))) : [];
 
             let requestTrace = new Entities.RequestTrace(uuid, transformYamlKeyToLabel(key), readToscaMetaData(node.metadata), externalEndpoint, links);
+
+            if (node.properties) {
+                for (const [key, value] of Object.entries(node.properties)) {
+                    switch(key) {
+                        case "involved_links":
+                            requestTrace.setPropertyValue(key, value.map(linkKey => keyIdMap.getId(linkKey)));
+                            break;
+                        case "referred_endpoint":
+                            requestTrace.setPropertyValue(key, keyIdMap.getId(value));
+                            break;
+                        case "nodes":
+                            requestTrace.setPropertyValue(key, value.map(nodeKey => keyIdMap.getId(nodeKey)));
+                            break;
+                        default:
+                            requestTrace.setPropertyValue(key, value);
+                    }
+                }
+            }
+
+            console.log(requestTrace);
 
             // TODO handle additional properties
 
