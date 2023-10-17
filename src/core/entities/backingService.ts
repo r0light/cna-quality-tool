@@ -1,4 +1,4 @@
-import { EntityProperty } from '../common/entityProperty'
+import { EntityProperty, loadAllProperties } from '../common/entityProperty'
 import { Component } from './component'
 import { Infrastructure } from './infrastructure'
 import { parseProperties } from '../common/entityProperty'
@@ -15,7 +15,8 @@ const BACKING_SERVICE_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types[B
 
 
 function getBackingServiceProperties(): EntityProperty[] {
-    let parsed = parseProperties(BACKING_SERVICE_TOSCA_EQUIVALENT.properties);
+    let parsed = loadAllProperties(BACKING_SERVICE_TOSCA_EQUIVALENT);
+
     for (const prop of parsed) {
         switch (prop.getKey) {
             case "providedFunctionality":

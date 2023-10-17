@@ -9,5 +9,5 @@ export { Link } from './entities/link';
 export { Infrastructure, InfrastructureTypes, getInfrastructureProperties } from './entities/infrastructure';
 export { DeploymentMapping } from './entities/deploymentMapping';
 export { RequestTrace, getRequestTraceProperties } from './entities/requestTrace';
-export { DataAggregate } from './entities/dataAggregate';
-export { BackingData } from './entities/backingData';
+export { DataAggregate, getDataAggregateProperties } from './entities/dataAggregate';
+export { BackingData, getBackingDataProperties } from './entities/backingData';

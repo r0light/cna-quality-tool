@@ -124,7 +124,7 @@ function refreshHighlightOptions() {
         let updatedOptions = [{ optionValue: "none", optionText: "Choose existing entity..." }];
         let considerableEntites = props.graph.getElements().filter(element => element.prop("entity/type") === highlightOption.selectId);
         for (const entity of considerableEntites) {
-            let familyName = entity.prop("entity/properties/assignedFamily")
+            let familyName = entity.prop("entity/assignedFamily")
             if (familyName) {
                 if (updatedOptions.filter(selectableOption => selectableOption.optionValue === familyName).length === 0) {
                     updatedOptions.push({ optionValue: familyName, optionText: familyName });
@@ -144,7 +144,7 @@ function refreshHighlightOptions() {
 function onSelectHighlighOption(highlightOption) {
     let considerableEntites = props.graph.getElements().filter(element => element.prop("entity/type") === highlightOption.selectId);
     for (const entity of considerableEntites) {
-        if (entity.id.toString() === highlightOption.selectedOption || entity.prop("entity/properties/assignedFamily") === highlightOption.selectedOption) {
+        if (entity.id.toString() === highlightOption.selectedOption || entity.prop("entity/assignedFamily") === highlightOption.selectedOption) {
             entity.attr("body/fill", highlightOption.highlightColour);
         } else {
             // reset highlighting of all other elements
@@ -319,7 +319,19 @@ onUpdated(() => {
 
             let includedDataOption = findInDialogByFeature(includedDataOptionWrapper.buttonActionContent, "backingData-includedData");
             includedDataOption.includeFormCheck = false;
-            includedDataOption.value = props.selectedEntity.model.prop("entity/properties/includedData");
+
+            const toArray = (o: object, keyName: string, valueName: string) => {
+                let asArray = [];
+                for (const [attributeKey, attributeValue] of Object.entries(o)) {
+                    let element = {};
+                    element[keyName] = attributeKey;
+                    element[valueName] = attributeValue;
+                    asArray.push(element);
+                };
+                return asArray;
+            }
+
+            includedDataOption.value = toArray(props.selectedEntity.model.prop("entity/properties/included_data"), includedDataOption.listElementFields[0].key, includedDataOption.listElementFields[1].key);
 
             let backingDataAssignedFamilyOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "backingData-assignedFamily");
             backingDataAssignedFamilyOption.show = computed(() => {
@@ -575,9 +587,9 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
             // handle special cases first
             switch (selectedEntityElement.prop("entity/type")) {
                 case EntityTypes.DATA_AGGREGATE:
-                    if (propertyOption.providedFeature === "entity-text" && selectedEntityElement.prop("entity/properties/assignedFamily")) {
+                    if (propertyOption.providedFeature === "entity-text" && selectedEntityElement.prop("entity/assignedFamily")) {
 
-                        selectedEntityElement.prop("entity/properties/assignedFamily", propertyOption.value);
+                        selectedEntityElement.prop("entity/assignedFamily", propertyOption.value);
 
                         const relatedDataAggregateEntities = props.graph.getElements().filter((entityElement) => {
                             return entityElement.prop("entity/type") === EntityTypes.DATA_AGGREGATE && entityElement.attr(propertyOption.jointJsConfig.modelPath).localeCompare(selectedEntityElement.attr(propertyOption.jointJsConfig.modelPath)) === 0;
@@ -585,22 +597,22 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
 
                         for (const relatedDataAggregateEntity of relatedDataAggregateEntities) {
                             relatedDataAggregateEntity.attr(propertyOption.jointJsConfig.modelPath, propertyOption.value);
-                            relatedDataAggregateEntity.prop("entity/properties/assignedFamily", propertyOption.value);
+                            relatedDataAggregateEntity.prop("entity/assignedFamily", propertyOption.value);
                         }
                         continue;
                     }
                     break;
                 case EntityTypes.BACKING_DATA:
-                    if (propertyOption.providedFeature === "entity-text" && selectedEntityElement.prop("entity/properties/assignedFamily")) {
+                    if (propertyOption.providedFeature === "entity-text" && selectedEntityElement.prop("entity/assignedFamily")) {
 
-                        selectedEntityElement.prop("entity/properties/assignedFamily", propertyOption.value);
+                        selectedEntityElement.prop("entity/assignedFamily", propertyOption.value);
                         // also change all other backing data elements of the same family
                         const relatedBackingDataEntities = props.graph.getElements().filter((entityElement) => {
                             return entityElement.prop("entity/type") === EntityTypes.BACKING_DATA && entityElement.attr(propertyOption.jointJsConfig.modelPath).localeCompare(selectedEntityElement.attr(propertyOption.jointJsConfig.modelPath)) === 0;
                         });
                         for (const relatedBackingDataEntity of relatedBackingDataEntities) {
                             relatedBackingDataEntity.attr(propertyOption.jointJsConfig.modelPath, propertyOption.value);
-                            relatedBackingDataEntity.prop("entity/properties/assignedFamily", propertyOption.value);
+                            relatedBackingDataEntity.prop("entity/assignedFamily", propertyOption.value);
                         }
                         continue;
                     }
@@ -622,11 +634,11 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                         for (let otherBackingData of propertyOption.tableRows) {
                             if (otherBackingData.columns["included"]["checked"]) {
                                 (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).attr("label/textWrap/text", currentFamilyName);
-                                (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).prop("entity/properties/assignedFamily", currentFamilyName);
+                                (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).prop("entity/assignedFamily", currentFamilyName);
                             } else {
                                 // TODO reset name or not?
                                 (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).attr("label/textWrap/text", "Data Aggregate");
-                                (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).prop("entity/properties/assignedFamily", "");
+                                (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).prop("entity/assignedFamily", "");
                             }
                         }
                         continue;
@@ -638,14 +650,24 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                         for (let otherBackingData of propertyOption.tableRows) {
                             if (otherBackingData.columns["included"]["checked"]) {
                                 (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).attr("label/textWrap/text", currentFamilyName);
-                                (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).prop("entity/properties/assignedFamily", currentFamilyName);
+                                (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).prop("entity/assignedFamily", currentFamilyName);
                             } else {
                                 // TODO reset name or not?
                                 (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).attr("label/textWrap/text", "Backing Data");
-                                (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).prop("entity/properties/assignedFamily", "");
+                                (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).prop("entity/assignedFamily", "");
                             }
                         }
                         continue;
+                    } else if (propertyOption.providedFeature === "backingData-includedData") {
+                        const toObject = (a: object[]) => {
+                            let asObject = {};
+                            for (const element of a) {
+                                asObject[element[propertyOption.listElementFields[0].key]] = element[propertyOption.listElementFields[1].key];
+                            }
+                            return asObject;
+                        }
+
+                        selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, toObject(propertyOption.value as any[]), { rewrite: true });
                     }
                     break;
                 case EntityTypes.REQUEST_TRACE:

@@ -1,4 +1,4 @@
-import { EntityProperty, parseProperties } from '../common/entityProperty'
+import { EntityProperty, loadAllProperties, parseProperties } from '../common/entityProperty'
 import { Endpoint } from './endpoint.js'
 import { ExternalEndpoint } from './externalEndpoint.js'
 import { DataAggregate } from './dataAggregate.js'
@@ -16,7 +16,8 @@ const COMPONENT_TOSCA_KEY = "cna.qualityModel.entities.Root.Component"
 const COMPONENT_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types[COMPONENT_TOSCA_KEY];
 
 function getComponentProperties(): EntityProperty[] {
-    let parsed = parseProperties(COMPONENT_TOSCA_EQUIVALENT.properties);
+    let parsed = loadAllProperties(COMPONENT_TOSCA_EQUIVALENT);
+
     for (const prop of parsed) {
         switch (prop.getKey) {
             case "managed":

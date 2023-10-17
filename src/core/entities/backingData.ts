@@ -1,5 +1,6 @@
 import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_modeling_tosca_profile'
 import { MetaData } from '../common/entityDataTypes';
+import { EntityProperty, loadAllProperties } from '../common/entityProperty';
 
 /**
  * The module for aspects related to a Backing Data quality model entity.
@@ -8,6 +9,11 @@ import { MetaData } from '../common/entityDataTypes';
 
 const BACKING_DATA_TOSCA_KEY = "cna.qualityModel.entities.BackingData";
 const BACKING_DATA_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types[BACKING_DATA_TOSCA_KEY];
+
+function getBackingDataProperties(): EntityProperty[] {
+    let parsed = loadAllProperties(BACKING_DATA_TOSCA_EQUIVALENT);
+    return parsed;
+}
 
 /**
  * Class representing a Backing Data entity.
@@ -23,6 +29,8 @@ class BackingData {
 
     #includedData: { key: string, value: string }[]; //TODO more specific type
 
+    #properties: EntityProperty[] = new Array();
+
     /**
      * Create a Backing Data entity.representation has in the joint.dia.Graph model.
      * @param {string} id The unique id for this entity.
@@ -35,6 +43,7 @@ class BackingData {
         this.name = name;
         this.#metaData = metaData;
         this.#includedData = includedData;
+        this.#properties = getBackingDataProperties();
     }
 
     /**
@@ -70,6 +79,23 @@ class BackingData {
     }
 
     /**
+     * Returns all properties of this entity
+     * @returns {EntityProperty[]}
+    */
+    getProperties() {
+        return this.#properties;
+    }
+
+    setPropertyValue(propertyKey: string, propertyValue: any) {
+        let propertyToSet = (this.#properties.find(property => property.getKey === propertyKey))
+        if (propertyToSet) {
+            propertyToSet.value = propertyValue
+        } else {
+            throw new Error(`Property with key ${propertyKey} not found in ${this.constructor}`)
+        }
+    }
+
+    /**
      * Transforms the BackingData object into a String. 
      * @returns {string}
      */
@@ -78,4 +104,4 @@ class BackingData {
     }
 }
 
-export { BackingData, BACKING_DATA_TOSCA_KEY };
+export { BackingData, BACKING_DATA_TOSCA_KEY, getBackingDataProperties };

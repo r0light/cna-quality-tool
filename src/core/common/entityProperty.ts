@@ -102,7 +102,7 @@ class TextEntityProperty extends EntityProperty {
 
     #proposedOptions: listOptions[]
 
-    constructor(key: string, name: string, description: string, example: string, required: boolean,  maxLength: number, options: listOptions[], value: string) {
+    constructor(key: string, name: string, description: string, example: string, required: boolean, maxLength: number, options: listOptions[], value: string) {
         super(key, name, description, example, required, "text", value);
         this.#maxLength = maxLength;
         this.#proposedOptions = options;
@@ -132,7 +132,7 @@ class TextAreaEntityProperty extends EntityProperty {
 
     #rows: number;
 
-    constructor(key: string, name: string, description: string, example: string, required: boolean,  maxLength: number, rows: number, value: string) {
+    constructor(key: string, name: string, description: string, example: string, required: boolean, maxLength: number, rows: number, value: string) {
         super(key, name, description, example, required, "textarea", value);
         this.#maxLength = maxLength;
         this.#rows = rows;
@@ -207,10 +207,37 @@ class ListEntityProperty extends EntityProperty {
 
 class MapEntityProperty extends EntityProperty {
 
-    constructor(key: string, name: string, description: string, example: string, required: boolean, value: object) {
+    #keyType: string;
+
+    #keyDescription: string;
+
+    #valueType: string;
+
+    #valueDescription: string;
+
+    constructor(key: string, name: string, description: string, example: string, required: boolean, value: object, keyType: string, keyDescription: string, valueType: string, valueDescription: string) {
         super(key, name, description, example, required, "map", value);
+        this.#keyType = keyType;
+        this.#keyDescription = keyDescription;
+        this.#valueType = valueType;
+        this.#valueDescription = valueDescription;
     }
 
+    get getKeyType() {
+        return this.#keyType;
+    }
+
+    get getKeyDescription() {
+        return this.#keyDescription;
+    }
+
+    get getValueType() {
+        return this.#valueType;
+    }
+
+    get getValueDescription() {
+        return this.#valueDescription;
+    }
 }
 
 function loadAllProperties(nodeDefinition: TOSCA_Node): EntityProperty[] {
@@ -233,41 +260,84 @@ function loadAllProperties(nodeDefinition: TOSCA_Node): EntityProperty[] {
     return parsedProperties;
 }
 
-function parseProperties(properties: { [propertyKey: string]: TOSCA_Property}): EntityProperty[] {
+function toReadableKey(yamlKey: string) {
+    return yamlKey.replace(/^[-_]*(.)/, (_, c) => c.toUpperCase())       // Initial char (after -/_)
+        .replace(/[-_]+(.)/g, (_, c) => ' ' + c.toUpperCase()) // First char after each -/_
+}
+
+function parseProperties(properties: { [propertyKey: string]: TOSCA_Property }): EntityProperty[] {
 
     let parsedProperties: EntityProperty[] = [];
 
     for (const [key, property] of Object.entries(properties)) {
-        switch(property.type) {
+        switch (property.type) {
             case "string":
             case "timestamp": // TODO more specific type?
             case "version": // TODO more specific type?
             case "scalar-unit": // TODO more specific type(s)!
             default:
-                parsedProperties.push(new TextEntityProperty(key, key, property.description, "", property.required, 255, [], ""));
+                parsedProperties.push(new TextEntityProperty(key,
+                    toReadableKey(key),
+                    property.description ? property.description : "",
+                    "",
+                    property.required,
+                    255,
+                    [],
+                    ""));
                 break;
             case "integer":
             case "float": // TODO more specific property?
-                parsedProperties.push(new NumberEntityProperty(key, key, property.description, "", property.required, Number.MAX_SAFE_INTEGER, Number.MIN_SAFE_INTEGER, 0));
+                parsedProperties.push(new NumberEntityProperty(key, 
+                    toReadableKey(key), 
+                    property.description ? property.description : "", 
+                    "", 
+                    property.required, 
+                    Number.MAX_SAFE_INTEGER, 
+                    Number.MIN_SAFE_INTEGER, 
+                    0));
                 break;
             case "boolean":
-                parsedProperties.push(new BooleanEntityProperty(key, key, property.description, "", property.required, false));
+                parsedProperties.push(new BooleanEntityProperty(key, 
+                    toReadableKey(key), 
+                    property.description ? property.description : "",
+                    "", 
+                    property.required, 
+                    false));
                 break;
             case "range":
-                parsedProperties.push( new BoundsEntityProperty(key, key, property.description, "", property.required, [Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER]));
+                parsedProperties.push(new BoundsEntityProperty(key, 
+                    toReadableKey(key), 
+                    property.description ? property.description : "",
+                    "", 
+                    property.required, 
+                    [Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER]));
                 break;
             case "list":
-                parsedProperties.push(new ListEntityProperty(key, key, property.description, "", property.required, []))
+                parsedProperties.push(new ListEntityProperty(key, 
+                    toReadableKey(key), 
+                    property.description ? property.description : "", 
+                    "", 
+                    property.required, 
+                    []))
                 break;
             case "map":
-                parsedProperties.push(new MapEntityProperty(key, key, property.description, "", property.required, {}))
+
+                parsedProperties.push(new MapEntityProperty(key, 
+                    toReadableKey(key), 
+                    property.description ? property.description : "",
+                    "", 
+                    property.required, 
+                    {},
+                    property.key_schema ? property.key_schema.type : "string",
+                    property.key_schema ? property.key_schema.description : "",
+                    property.entry_schema ? property.entry_schema.type : "string",
+                    property.entry_schema ? property.entry_schema.description : ""))
+                    //TODO handle case where a map does not have a key_schema
                 break;
-        }   
+        }
     }
 
     return parsedProperties;
-
-
 }
 
 

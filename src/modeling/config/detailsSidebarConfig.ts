@@ -1,7 +1,8 @@
 import EntityTypes from "./entityTypes";
-import { getComponentProperties, getBackingServiceProperties, getStorageBackingServiceProperties, getEndpointProperties, getExternalEndpointProperties, getInfrastructureProperties, getRequestTraceProperties } from "../../core/entities";
+import { getComponentProperties, getBackingServiceProperties, getStorageBackingServiceProperties, getEndpointProperties, getExternalEndpointProperties, getInfrastructureProperties, getRequestTraceProperties, getBackingDataProperties, getDataAggregateProperties } from "../../core/entities";
 import { UIContentType } from "./toolbarConfiguration";
 import { DialogConfig, DialogSize } from "./actionDialogConfig";
+import { EntityProperty, NumberEntityProperty, TextEntityProperty } from "@/core/common/entityProperty";
 
 export type DatalistItem = {
     value: string,
@@ -65,7 +66,6 @@ export type NumberPropertyConfig = BasicPropertyConfig & {
         min: number,
         max: number,
         defaultValue: number,
-        maxLength: number,
     }
 }
 
@@ -158,8 +158,11 @@ export type ListElementField = {
 
 export type PropertyConfig = TextPropertyConfig | TextAreaPropertyConfig | NumberPropertyConfig | NumberRangePropertyConfig | CheckboxPropertyConfig | CheckboxWithoutLabelPropertyConfig | DropdownPropertyConfig | TableDialogPropertyConfig | TogglePropertyConfig | TablePropertyConfig | DynamicListPropertyConfig;
 
-function parseProperties(properties): PropertyConfig[] {
-    return properties.map(property => {
+function parseProperties(properties: EntityProperty[]): PropertyConfig[] {
+    return properties.filter(property => {
+        // ignore the following property types because they are handled customly
+        return property.getDataType !== "map"
+    }).map(property => {
 
         var preparedConfig: BasicPropertyConfig = {
             providedFeature: property.getKey,
@@ -202,8 +205,7 @@ function parseProperties(properties): PropertyConfig[] {
                         attributes: {
                             min: Number.MIN_SAFE_INTEGER,
                             max: Number.MAX_SAFE_INTEGER,
-                            defaultValue: 0,
-                            maxLength: property.getMaxLength,
+                            defaultValue: 0
                         }
                     }
                 }
@@ -219,7 +221,7 @@ function parseProperties(properties): PropertyConfig[] {
                             svgRepresentation: "",
                             inputLabelIcon: "",
                             provideEditButton: false,
-                            suggestedValues: property.getOptions
+                            suggestedValues: (property as TextEntityProperty).getOptions
                         }
                     }
                 }
@@ -380,7 +382,6 @@ const DetailsSidebarConfig: {
                         min: 40,
                         max: 99999,
                         defaultValue: 150,
-                        maxLength: 5,
                     },
                     helpText: "The entity width",
                     show: true,
@@ -408,7 +409,6 @@ const DetailsSidebarConfig: {
                         min: 40,
                         max: 99999,
                         defaultValue: 150,
-                        maxLength: 5,
                     },
                     helpText: "The value will be calculated based on the given width to preserve the aspect ratio of the entity shape",
                     show: true,
@@ -502,7 +502,6 @@ const DetailsSidebarConfig: {
                         min: 21,
                         max: Number.MAX_SAFE_INTEGER,
                         defaultValue: 21,
-                        maxLength: Number.MAX_SAFE_INTEGER,
                     },
                     helpText: "X Coordinate for the entity placement",
                     show: true,
@@ -530,7 +529,6 @@ const DetailsSidebarConfig: {
                         min: 21,
                         max: Number.MAX_SAFE_INTEGER,
                         defaultValue: 21,
-                        maxLength: Number.MAX_SAFE_INTEGER,
                     },
                     helpText: "Y Coordinate for the entity placement",
                     show: true,
@@ -690,7 +688,7 @@ const EntityDetailsConfig: {
     },
     DataAggregate: {
         type: EntityTypes.DATA_AGGREGATE,
-        specificProperties: [{
+        specificProperties: parseProperties(getDataAggregateProperties()).concat([{
             providedFeature: "dataAggregate-chooseEditMode",
             contentType: PropertyContentType.TOGGLE,
             label: "Edit Mode:",
@@ -814,7 +812,7 @@ const EntityDetailsConfig: {
             show: true,
             jointJsConfig: {
                 propertyType: "property",
-                modelPath: "entity/properties/assignedFamily",
+                modelPath: "entity/assignedFamily",
                 defaultPropPath: "",
                 minPath: "",
                 min: ""
@@ -914,11 +912,11 @@ const EntityDetailsConfig: {
                 }
             }
         }
-        ]
+        ])
     },
     BackingData: {
         type: EntityTypes.BACKING_DATA,
-        specificProperties: [
+        specificProperties: parseProperties(getBackingDataProperties()).concat([
             {
                 providedFeature: "backingData-chooseEditMode",
                 contentType: PropertyContentType.TOGGLE,
@@ -1045,7 +1043,7 @@ const EntityDetailsConfig: {
                                         show: true,
                                         jointJsConfig: {
                                             propertyType: "customProperty",
-                                            modelPath: "entity/properties/includedData",
+                                            modelPath: "entity/properties/included_data",
                                             defaultPropPath: "",
                                             minPath: "",
                                             min: ""
@@ -1101,7 +1099,7 @@ const EntityDetailsConfig: {
                 show: true,
                 jointJsConfig: {
                     propertyType: "property",
-                    modelPath: "entity/properties/assignedFamily",
+                    modelPath: "entity/assignedFamily",
                     defaultPropPath: "",
                     minPath: "",
                     min: ""
@@ -1203,11 +1201,11 @@ const EntityDetailsConfig: {
                     }
                 }
             }
-        ]
+        ])
     },
     RequestTrace: {
         type: EntityTypes.REQUEST_TRACE,
-        specificProperties: ([
+        specificProperties: parseProperties(getRequestTraceProperties()).concat([
             {
                 providedFeature: "referredEndpoint",
                 contentType: PropertyContentType.DROPDOWN,
@@ -1339,7 +1337,7 @@ const EntityDetailsConfig: {
                 }
             }
 
-        ] as PropertyConfig[]).concat(parseProperties(getRequestTraceProperties()))
+        ])
     }
 };
 

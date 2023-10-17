@@ -1,5 +1,5 @@
 import { dia, shapes } from 'jointjs'
-import { getComponentProperties, getBackingServiceProperties, getStorageBackingServiceProperties, getEndpointProperties, getInfrastructureProperties } from "../../core/entities";
+import { getComponentProperties, getBackingServiceProperties, getStorageBackingServiceProperties, getEndpointProperties, getInfrastructureProperties, getDataAggregateProperties, getBackingDataProperties } from "../../core/entities";
 import EntityTypes from "./entityTypes";
 
 // TODO section:
@@ -14,11 +14,12 @@ const defaultTextFont = "sans-serif";
 const expandEntityIconPath = "static/icons/magnifying-glass-plus-solid.svg";
 
 function parseProperties(entityProperties) {
-    return entityProperties.map(property => {
-        var keyValueOnlyProperty = {}
+    var keyValueOnlyProperty = {}
+    entityProperties.map(property => {
         keyValueOnlyProperty[property.getKey] = property.value;
-        return keyValueOnlyProperty;
+        
     });
+    return keyValueOnlyProperty;
 }
 
 /**
@@ -292,7 +293,7 @@ const BackingService = dia.Element.define("qualityModel.BackingService", {
     entityTypeHidden: false,
     entity: {
         type: EntityTypes.BACKING_SERVICE,
-        properties: parseProperties(getComponentProperties()).concat(parseProperties(getBackingServiceProperties()))
+        properties: parseProperties(getComponentProperties().concat(getBackingServiceProperties()))
     }
 }, {
     markup: [{
@@ -881,13 +882,8 @@ const DataAggregate = dia.Element.define("qualityModel.DataAggregate", {
     entity: {
         type: EntityTypes.DATA_AGGREGATE,
         embedded: "", // id of the element in which this entity is embedded
-        properties: {
-            /**
-             * Identifies whether the Data Aggregate is contained 
-             * in multiple entities and which ones belong together 
-             */
-            assignedFamily: ""
-        }
+        assignedFamily: "",
+        properties: parseProperties(getDataAggregateProperties())
     }
 }, {
     markup: [{
@@ -965,14 +961,8 @@ const BackingData = dia.Element.define("qualityModel.BackingData", {
         type: EntityTypes.BACKING_DATA,
         /*isEmbedded: false,*/
         embedded: "",
-        properties: {
-            includedData: [],
-            /**
-             * Identifies whether the Data Aggregate is contained 
-             * in multiple entities and which ones belong together 
-             */
-            assignedFamily: "",
-        }
+        assignedFamily: "",
+        properties: parseProperties(getBackingDataProperties())
     }
 }, {
     markup: [{
