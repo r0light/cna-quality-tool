@@ -1,5 +1,5 @@
 import EntityTypes from "./entityTypes";
-import { getComponentProperties, getBackingServiceProperties, getStorageBackingServiceProperties, getEndpointProperties, getExternalEndpointProperties, getInfrastructureProperties, getRequestTraceProperties, getBackingDataProperties, getDataAggregateProperties } from "../../core/entities";
+import { getComponentProperties, getBackingServiceProperties, getStorageBackingServiceProperties, getEndpointProperties, getExternalEndpointProperties, getInfrastructureProperties, getRequestTraceProperties, getBackingDataProperties, getDataAggregateProperties, getDeploymentMappingProperties } from "../../core/entities";
 import { UIContentType } from "./toolbarConfiguration";
 import { DialogConfig, DialogSize } from "./actionDialogConfig";
 import { EntityProperty, NumberEntityProperty, TextEntityProperty } from "@/core/common/entityProperty";
@@ -684,7 +684,7 @@ const EntityDetailsConfig: {
     },
     DeploymentMapping: {
         type: EntityTypes.DEPLOYMENT_MAPPING,
-        specificProperties: [/* currently no properties */]
+        specificProperties: parseProperties(getDeploymentMappingProperties())
     },
     DataAggregate: {
         type: EntityTypes.DATA_AGGREGATE,

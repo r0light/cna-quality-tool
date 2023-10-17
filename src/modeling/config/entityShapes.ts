@@ -1,5 +1,5 @@
 import { dia, shapes } from 'jointjs'
-import { getComponentProperties, getBackingServiceProperties, getStorageBackingServiceProperties, getEndpointProperties, getInfrastructureProperties, getDataAggregateProperties, getBackingDataProperties } from "../../core/entities";
+import { getComponentProperties, getBackingServiceProperties, getStorageBackingServiceProperties, getEndpointProperties, getInfrastructureProperties, getDataAggregateProperties, getBackingDataProperties, getDeploymentMappingProperties } from "../../core/entities";
 import EntityTypes from "./entityTypes";
 
 // TODO section:
@@ -812,7 +812,8 @@ const DeploymentMapping = shapes.standard.Link.define("qualityModel.DeploymentMa
     },
     entityTypeHidden: false,
     entity: {
-        type: EntityTypes.DEPLOYMENT_MAPPING
+        type: EntityTypes.DEPLOYMENT_MAPPING,
+        properties: parseProperties(getDeploymentMappingProperties())
     }
 });
 

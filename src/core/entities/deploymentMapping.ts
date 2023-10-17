@@ -1,6 +1,7 @@
 import { Component } from './component'
 import { Infrastructure } from './infrastructure'
 import { tosca_simple_profile_for_yaml_v1_3 } from '../../totypa/parsedProfiles/tosca_simple_profile_for_yaml_v1_3'
+import { EntityProperty, loadAllProperties } from '../common/entityProperty';
 
 
 /**
@@ -9,6 +10,12 @@ import { tosca_simple_profile_for_yaml_v1_3 } from '../../totypa/parsedProfiles/
  */
 const DEPLOYMENT_MAPPING_TOSCA_KEY = "tosca.relationships.HostedOn";
 const DEPLOYMENT_MAPPING_TOSCA_EQUIVALENT = tosca_simple_profile_for_yaml_v1_3.relationship_types[DEPLOYMENT_MAPPING_TOSCA_KEY];
+
+function getDeploymentMappingProperties(): EntityProperty[] {
+    let parsed = loadAllProperties(DEPLOYMENT_MAPPING_TOSCA_EQUIVALENT);
+
+    return parsed;
+}
 
 /**
  * Class representing a Deployment Mapping entity.
@@ -21,6 +28,8 @@ class DeploymentMapping {
     #deployedEntity: Component | Infrastructure;
 
     #underlyingInfrastructure: Infrastructure;
+
+    #properties: EntityProperty[] = new Array();
 
     /**
      * Create a Deployment Mapping entity. Represents the connection between either {@link Component} - {@link Infrastructure} or {@link Infrastructure} - {@link Infrastructure}. 
@@ -49,6 +58,7 @@ class DeploymentMapping {
         this.#id = id;
         this.#deployedEntity = deployedEntity;
         this.#underlyingInfrastructure = underlyingInfrastructure;
+        this.#properties = getDeploymentMappingProperties();
     }
 
     /**
@@ -111,6 +121,23 @@ class DeploymentMapping {
         this.#underlyingInfrastructure = newUnderlyingInfrastructure;
     }
 
+        /**
+     * Returns all properties of this entity
+     * @returns {EntityProperty[]}
+    */
+        getProperties() {
+            return this.#properties;
+        }
+    
+        setPropertyValue(propertyKey: string, propertyValue: any) {
+            let propertyToSet = (this.#properties.find(property => property.getKey === propertyKey))
+            if (propertyToSet) {
+                propertyToSet.value = propertyValue
+            } else {
+                throw new Error(`Property with key ${propertyKey} not found in ${this.constructor}`)
+            }
+        }
+
     /**
      * Transforms the DeploymentMapping object into a String. 
      * @returns {string}
@@ -120,4 +147,4 @@ class DeploymentMapping {
     }
 }
 
-export { DeploymentMapping, DEPLOYMENT_MAPPING_TOSCA_KEY };
+export { DeploymentMapping, DEPLOYMENT_MAPPING_TOSCA_KEY, getDeploymentMappingProperties };

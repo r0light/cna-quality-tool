@@ -137,8 +137,6 @@ onMounted(() => {
         },
         "link:pointerclick": function (linkView: dia.LinkView, evt) {
 
-            console.log(linkView);
-
             linkView.unhighlight();
 
             setCurrentSelection(linkView);
