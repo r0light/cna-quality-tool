@@ -27,8 +27,6 @@ class BackingData {
 
     #metaData: MetaData;
 
-    #includedData: { key: string, value: string }[]; //TODO more specific type
-
     #properties: EntityProperty[] = new Array();
 
     /**
@@ -36,13 +34,11 @@ class BackingData {
      * @param {string} id The unique id for this entity.
      * @param {string} name The name of the Backing Data entity.
      * @param {MetaData} metaData The meta data for this entity, needed for displaying it in a diagram. 
-     * @param {Array} includedData The included data values with key of this Backing Data entity.
      */
-    constructor(id: string, name: string, metaData: MetaData, includedData: { key: string, value: string }[]) {
+    constructor(id: string, name: string, metaData: MetaData, ) {
         this.#id = id;
         this.name = name;
         this.#metaData = metaData;
-        this.#includedData = includedData;
         this.#properties = getBackingDataProperties();
     }
 
@@ -68,14 +64,6 @@ class BackingData {
      */
     get getMetaData() {
         return this.#metaData;
-    }
-
-    /**
-     * Returns the data items that are included in this Backing Data entities.
-     * @returns {Array}
-     */
-    get getIncludedData() {
-        return this.#includedData;
     }
 
     /**

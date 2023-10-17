@@ -102,7 +102,7 @@ class SystemEntityManager {
 
 
 
-    #convertToSystemEntity()  {
+    #convertToSystemEntity() {
         // get first elements to ensure that all connection relate entities already exist
 
         let elements: dia.Element[] = this.#currentSystemGraph.getElements();
@@ -234,8 +234,6 @@ class SystemEntityManager {
         }
         */
 
-        const includedData = graphElement.prop("entity/properties/includedData");
-
         // TODO allow for now
         /*
         if (includedData.length <= 0) {
@@ -247,7 +245,12 @@ class SystemEntityManager {
         }
         */
 
-        const backingData = new Entities.BackingData(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement), includedData);
+        const backingData = new Entities.BackingData(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement));
+
+        // set entity properties
+        for (let property of backingData.getProperties()) {
+            property.value = graphElement.prop("entity/properties/" + property.getKey)
+        }
 
         return backingData;
     }
@@ -977,6 +980,9 @@ class SystemEntityManager {
 
 
     #createBackingDataCell(backingData: Entities.BackingData, parent: dia.Element, index: number) {
+
+        console.log(backingData)
+
         let xPosition = parent.position().x + Math.floor(parent.size().width / 3) + backingData.getMetaData.size.width * index;
         let yPosition = parent.position().y + Math.floor(parent.size().height / 3) + backingData.getMetaData.size.height * index;
 
@@ -1006,16 +1012,20 @@ class SystemEntityManager {
                 case "embedded":
                     newBackingData.prop(property.jointJsConfig.modelPath, parent.id.toString());
                     break;
-                case "dataAggregate-assignedFamily":
+                case "backingData-assignedFamily":
                     newBackingData.prop(property.jointJsConfig.modelPath, backingData.getName);
                     break;
                 case "backingData-includedData-wrapper":
                     let tmp = (property as TableDialogPropertyConfig).buttonActionContent.dialogContent as FormContentConfig;
                     let actualProperty = tmp.groups[0].contentItems[0];
-                    newBackingData.prop(actualProperty.jointJsConfig.modelPath, backingData.getIncludedData);
+                    newBackingData.prop(actualProperty.jointJsConfig.modelPath, backingData.getProperties().find(entityProperty => entityProperty.getKey === "included_data").value);
+                    break;
+                case "backingData-chooseEditMode":
+                case "backingData-familyConfig-wrapper":
+                    // ignore
                     break;
                 default:
-                //TODO default case
+                    newBackingData.prop(property.jointJsConfig.modelPath, backingData.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
             }
         }
         return newBackingData;

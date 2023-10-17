@@ -248,14 +248,8 @@ function createBackingDataTemplate(backingData: Entities.BackingData): TOSCA_Nod
         metadata: flatMetaData(backingData.getMetaData),
     }
 
-    if (backingData.getIncludedData.length > 0) {
-        let includedData = {};
-        for (const data of backingData.getIncludedData) {
-            includedData[data.key] = data.value;
-        }
-        template.properties = {
-            "includedData": includedData
-        }
+    if (backingData.getProperties().length > 0) {
+        template.properties = parsePropertiesForYaml(backingData.getProperties());
     }
 
     return template;
@@ -391,13 +385,14 @@ export function importFromServiceTemplate(fileName: string, stringifiedServiceTe
         } else if (node.type === BACKING_DATA_TOSCA_KEY) {
             let uuid = uuidv4();
 
-            let includedData = [];
-            if (node.properties && node.properties["includedData"]) {
-                for (const [key, value] of Object.entries(node.properties["includedData"])) {
-                    includedData.push({ key: key, value: value });
+            let backingData = new Entities.BackingData(uuid, transformYamlKeyToLabel(key), readToscaMetaData(node.metadata));
+
+            if (node.properties) {
+                for (const [key, value] of Object.entries(node.properties)) {
+                    backingData.setPropertyValue(key, value);
                 }
             }
-            let backingData = new Entities.BackingData(uuid, transformYamlKeyToLabel(key), readToscaMetaData(node.metadata), includedData)
+
             importedSystem.addEntity(backingData);
             keyIdMap.add(key, uuid);
         }
