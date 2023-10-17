@@ -1,9 +1,8 @@
 import EntityTypes from "./entityTypes";
-import { getComponentProperties, getBackingServiceProperties, getStorageBackingServiceProperties, getEndpointProperties, getExternalEndpointProperties, getInfrastructureProperties, getRequestTraceProperties, getBackingDataProperties, getDataAggregateProperties, getDeploymentMappingProperties } from "../../core/entities";
+import { getComponentProperties, getBackingServiceProperties, getStorageBackingServiceProperties, getEndpointProperties, getExternalEndpointProperties, getInfrastructureProperties, getRequestTraceProperties, getBackingDataProperties, getDataAggregateProperties, getDeploymentMappingProperties, getLinkProperties, getServiceProperties } from "../../core/entities";
 import { UIContentType } from "./toolbarConfiguration";
-import { DialogConfig, DialogSize } from "./actionDialogConfig";
+import { DialogConfig, DialogSize, FormContentConfig } from "./actionDialogConfig";
 import { EntityProperty, NumberEntityProperty, TextEntityProperty } from "@/core/common/entityProperty";
-import { getLinkProperties } from "@/core/entities/link";
 
 export type DatalistItem = {
     value: string,
@@ -162,7 +161,7 @@ export type PropertyConfig = TextPropertyConfig | TextAreaPropertyConfig | Numbe
 function parseProperties(properties: EntityProperty[]): PropertyConfig[] {
     return properties.filter(property => {
         // ignore the following property types because they are handled customly
-        return property.getDataType !== "map"
+        return property.getDataType !== "map" && property.getDataType !== "list"
     }).map(property => {
 
         var preparedConfig: BasicPropertyConfig = {
@@ -229,6 +228,25 @@ function parseProperties(properties: EntityProperty[]): PropertyConfig[] {
                 return textPropertyConfig as PropertyConfig;
         }
     })
+}
+
+function customizePropertyConfigs(configs: PropertyConfig[], customConfigOverwrites: PropertyConfig[]): PropertyConfig[] {
+    for (const customConfig of customConfigOverwrites) {
+        let propertyKey = "";
+        if (customConfig.providedFeature.includes("wrapper")) {
+            propertyKey = ((customConfig as TableDialogPropertyConfig).buttonActionContent.dialogContent as FormContentConfig).groups[0].contentItems[0].providedFeature;
+        } else {
+            propertyKey = customConfig.providedFeature;
+        }
+
+        let existingConfigIndex = configs.findIndex(config => config.providedFeature === propertyKey);
+        if (~existingConfigIndex) {
+            configs[existingConfigIndex] = customConfig
+        } else {
+            configs.push(customConfig);
+        }
+    }
+    return configs;
 }
 
 export type PropertyContentType = "checkbox" | "checkbox-without-label" | "text" | "number" | "range" | "textarea" | "select" | "table-dialog" | "table" | "toggle" | "formgroup" | "dynamic-list";
@@ -566,7 +584,7 @@ const EntityDetailsConfig: {
     },
     Service: {
         type: EntityTypes.SERVICE,
-        specificProperties: parseProperties(getComponentProperties())
+        specificProperties: parseProperties(getComponentProperties()).concat(parseProperties(getServiceProperties()))
     },
     BackingService: {
         type: EntityTypes.BACKING_SERVICE,
@@ -1175,9 +1193,9 @@ const EntityDetailsConfig: {
     },
     RequestTrace: {
         type: EntityTypes.REQUEST_TRACE,
-        specificProperties: parseProperties(getRequestTraceProperties()).concat([
+        specificProperties: customizePropertyConfigs(parseProperties(getRequestTraceProperties()), [
             {
-                providedFeature: "referredEndpoint",
+                providedFeature: "referred_endpoint",
                 contentType: PropertyContentType.DROPDOWN,
                 label: "External Endpoint:",
                 inputProperties: {
@@ -1198,7 +1216,7 @@ const EntityDetailsConfig: {
                 provideEnterButton: false,
                 jointJsConfig: {
                     propertyType: "property",
-                    modelPath: "entity/properties/referredEndpoint",
+                    modelPath: "entity/properties/referred_endpoint",
                     defaultPropPath: "",
                     minPath: "",
                     min: ""
@@ -1264,7 +1282,7 @@ const EntityDetailsConfig: {
                                 },
                                 contentItems: [
                                     {
-                                        providedFeature: "requestTrace-involvedLinks",
+                                        providedFeature: "involved_links",
                                         contentType: PropertyContentType.TABLE,
                                         label: "",
                                         helpText: "",
@@ -1279,7 +1297,7 @@ const EntityDetailsConfig: {
                                         show: true,
                                         jointJsConfig: {
                                             propertyType: "customProperty",
-                                            modelPath: "entity/properties/involvedLinks",
+                                            modelPath: "entity/properties/involved_links",
                                             defaultPropPath: "",
                                             minPath: "",
                                             min: ""

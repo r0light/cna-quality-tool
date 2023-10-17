@@ -2,6 +2,7 @@ import { Component } from './component'
 import { Infrastructure } from './infrastructure';
 import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_modeling_tosca_profile'
 import { MetaData } from '../common/entityDataTypes';
+import { loadAllProperties } from '../common/entityProperty';
 
 
 /**
@@ -11,6 +12,13 @@ import { MetaData } from '../common/entityDataTypes';
 
 const SERVICE_TOSCA_KEY = "cna.qualityModel.entities.SoftwareComponent.Service";
 const SERVICE_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types[SERVICE_TOSCA_KEY];
+
+function getServiceProperties() {
+    let parsed = loadAllProperties(SERVICE_TOSCA_EQUIVALENT);
+
+    return parsed;
+}
+
 
 /**
  * Class representing a Service entity.
@@ -28,6 +36,7 @@ class Service extends Component {
      */
     constructor(id: string, name: string, metaData: MetaData) {
         super(id, name, metaData)
+        this.addProperties(getServiceProperties());
     }
 
     /**
@@ -39,4 +48,4 @@ class Service extends Component {
     }
 }
 
-export { Service, SERVICE_TOSCA_KEY };
+export { Service, SERVICE_TOSCA_KEY, getServiceProperties };

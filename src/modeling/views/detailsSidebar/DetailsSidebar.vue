@@ -385,7 +385,7 @@ onUpdated(() => {
             break;
         case EntityTypes.REQUEST_TRACE:
             const externalEndpoints = props.graph.getElements().filter(element => element.prop("entity/type") === EntityTypes.EXTERNAL_ENDPOINT);
-            let externalEndpointOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "referredEndpoint");
+            let externalEndpointOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "referred_endpoint");
             const selectedExternalEndpoint = props.selectedEntity.model.prop(externalEndpointOption.jointJsConfig.modelPath);
             const dropdownOptions = externalEndpoints.map((endpoint) => {
 
@@ -416,7 +416,7 @@ onUpdated(() => {
 
             // prepare involved links selection
             let involvedLinksWrapperConfig: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "involvedLinks-wrapper");
-            let involvedLinksConfig = findInDialogByFeature(involvedLinksWrapperConfig.buttonActionContent, "requestTrace-involvedLinks");
+            let involvedLinksConfig = findInDialogByFeature(involvedLinksWrapperConfig.buttonActionContent, "involved_links");
             involvedLinksConfig.includeFormCheck = false;
 
             const existingLinks = props.graph.getLinks().filter((link) => { return link.prop("entity/type") === EntityTypes.LINK });
@@ -671,7 +671,7 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                     }
                     break;
                 case EntityTypes.REQUEST_TRACE:
-                    if (propertyOption.providedFeature === "requestTrace-involvedLinks") {
+                    if (propertyOption.providedFeature === "involved_links") {
                         let selectedLinkIDs = propertyOption.tableRows.filter(row => row.columns["included"]["checked"])
                             .map(row => row.columns["included"]["id"]);
                         selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, selectedLinkIDs);

@@ -1,5 +1,5 @@
 import { dia, shapes } from 'jointjs'
-import { getComponentProperties, getBackingServiceProperties, getStorageBackingServiceProperties, getEndpointProperties, getInfrastructureProperties, getDataAggregateProperties, getBackingDataProperties, getDeploymentMappingProperties, getExternalEndpointProperties } from "../../core/entities";
+import { getComponentProperties, getBackingServiceProperties, getStorageBackingServiceProperties, getEndpointProperties, getInfrastructureProperties, getDataAggregateProperties, getBackingDataProperties, getDeploymentMappingProperties, getExternalEndpointProperties, getServiceProperties, getRequestTraceProperties } from "../../core/entities";
 import EntityTypes from "./entityTypes";
 import { getLinkProperties } from '@/core/entities/link';
 
@@ -201,7 +201,7 @@ const Service = dia.Element.define("qualityModel.Service", {
     entityTypeHidden: false,
     entity: {
         type: EntityTypes.SERVICE,
-        properties: parseProperties(getComponentProperties())
+        properties: parseProperties(getComponentProperties().concat(getServiceProperties()))
     }
 }, {
     markup: [{
@@ -374,7 +374,7 @@ const StorageBackingService = shapes.standard.Cylinder.define("qualityModel.Stor
     entityTypeHidden: false,
     entity: {
         type: EntityTypes.STORAGE_BACKING_SERVICE,
-        properties: parseProperties(getStorageBackingServiceProperties())
+        properties: parseProperties(getComponentProperties().concat(getStorageBackingServiceProperties()))
     }
 }, {
     markup: [{
@@ -451,11 +451,6 @@ const Endpoint = shapes.standard.Circle.define("qualityModel.Endpoint", {
     entity: {
         type: EntityTypes.ENDPOINT,
         embedded: "",
-        /*properties: {
-            endpointType: "",
-            endpointPath: "",
-            port: ""
-        }*/
         properties: parseProperties(getEndpointProperties())
     }
 }, {
@@ -713,10 +708,7 @@ const RequestTrace = dia.Element.define("qualityModel.RequestTrace", {
     collapsed: true,
     entity: {
         type: EntityTypes.REQUEST_TRACE,
-        properties: {
-            referredEndpoint: "",
-            involvedLinks: []
-        }
+        properties: parseProperties(getRequestTraceProperties())
     }
 }, {
     markup: [{
@@ -959,8 +951,7 @@ const BackingData = dia.Element.define("qualityModel.BackingData", {
     parentCollapsed: false,
     entity: {
         type: EntityTypes.BACKING_DATA,
-        /*isEmbedded: false,*/
-        embedded: "",
+        embedded: "", // id of the element in which this entity is embedded
         assignedFamily: "",
         properties: parseProperties(getBackingDataProperties())
     }

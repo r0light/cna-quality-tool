@@ -253,7 +253,7 @@ node_types:
     derived_from: tosca.nodes.Root
     description: Node Type to model Request Trace entities
     properties:
-      endpoint:
+      referred_endpoint:
         type: string
         required: true
       nodes:
@@ -262,7 +262,7 @@ node_types:
         entry_schema:
           description: An existing Component, Service, Backing Service or Storage Backing Service entity which is part of this Request Trace entity
           type: string
-      links:
+      involved_links:
         type: list
         required: true
         entry_schema:

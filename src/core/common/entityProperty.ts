@@ -321,7 +321,6 @@ function parseProperties(properties: { [propertyKey: string]: TOSCA_Property }):
                     []))
                 break;
             case "map":
-
                 parsedProperties.push(new MapEntityProperty(key, 
                     toReadableKey(key), 
                     property.description ? property.description : "",

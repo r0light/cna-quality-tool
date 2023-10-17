@@ -454,7 +454,7 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
       "derived_from": "tosca.nodes.Root",
       "description": "Node Type to model Request Trace entities",
       "properties": {
-        "endpoint": {
+        "referred_endpoint": {
           "type": "string",
           "required": true
         },
@@ -466,7 +466,7 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
             "type": "string"
           }
         },
-        "links": {
+        "involved_links": {
           "type": "list",
           "required": true,
           "entry_schema": {
