@@ -1,6 +1,7 @@
 import { dia, shapes } from 'jointjs'
-import { getComponentProperties, getBackingServiceProperties, getStorageBackingServiceProperties, getEndpointProperties, getInfrastructureProperties, getDataAggregateProperties, getBackingDataProperties, getDeploymentMappingProperties } from "../../core/entities";
+import { getComponentProperties, getBackingServiceProperties, getStorageBackingServiceProperties, getEndpointProperties, getInfrastructureProperties, getDataAggregateProperties, getBackingDataProperties, getDeploymentMappingProperties, getExternalEndpointProperties } from "../../core/entities";
 import EntityTypes from "./entityTypes";
+import { getLinkProperties } from '@/core/entities/link';
 
 // TODO section:
 /*  -   Icon on first load not on correct position --> with firefox for every F5, 
@@ -527,7 +528,7 @@ const ExternalEndpoint = shapes.standard.Circle.define("qualityModel.ExternalEnd
     entity: {
         type: EntityTypes.EXTERNAL_ENDPOINT,
         embedded: "",
-        properties: parseProperties(getEndpointProperties())
+        properties: parseProperties(getEndpointProperties().concat(getExternalEndpointProperties()))
     }
 }, {
     markup: [{
@@ -770,9 +771,7 @@ const Link = shapes.standard.Link.define("qualityModel.Link", {
     entityTypeHidden: false,
     entity: {
         type: EntityTypes.LINK,
-        properties: {
-            relationType: ""
-        }
+        properties: parseProperties(getLinkProperties())
     }
 });
 

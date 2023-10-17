@@ -5,6 +5,7 @@ import { ExternalEndpoint } from './externalEndpoint';
 import { Service } from './service';
 import { StorageBackingService } from './storageBackingService';
 import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_modeling_tosca_profile'
+import { EntityProperty, loadAllProperties } from '../common/entityProperty';
 
 
 /**
@@ -14,6 +15,25 @@ import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_mode
 
 const LINK_TOSCA_KEY = "cna.qualityModel.entities.ConnectsTo.Link";
 const LINK_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.relationship_types[LINK_TOSCA_KEY];
+
+function getLinkProperties(): EntityProperty[] {
+    let parsed = loadAllProperties(LINK_TOSCA_EQUIVALENT);
+
+    // TODO filter like this?
+    parsed = parsed.filter(property => property.getKey !== "target_endpoint");
+
+    for (const prop of parsed) {
+        switch (prop.getKey) {
+            case "relation_type":
+                prop.setName = "Relation Type:";
+                prop.setExample = "e.g. subscribes to";
+                break;
+        }
+    }
+
+    return parsed;
+}
+
 
 /**
  * Class representing a Link entity.
@@ -27,7 +47,7 @@ class Link {
 
     #targetEndpoint: Endpoint;
 
-    #relationType: string;
+    #properties: EntityProperty[] = new Array();
 
     /**
      * Create a Link entity. Represents the connection between {@link Component}, {@link Service}, {@link BackingService} or {@link StorageBackingService} and an {@link Endpoint} or {@link ExternalEndpoint} entity.
@@ -42,18 +62,12 @@ class Link {
         this.#sourceEntity = sourceEntity;
         this.#targetEndpoint = targetEndpoint;
 
-        if(sourceEntity.getEndpointEntities.find(endpoint => endpoint.getId === targetEndpoint.getId)) {
+        if (sourceEntity.getEndpointEntities.find(endpoint => endpoint.getId === targetEndpoint.getId)) {
             const errorMessage = "A Link cannot be created from an entity to its own included Endpoint.";
             throw new Error(errorMessage);
         }
-    }
 
-    /**
-     * Add information about the type of relation this Link realizes, e.g. subscribes or routes to
-     * @param {string} relationType 
-     */
-    addRelationType(relationType) {
-        this.#relationType = relationType;
+        this.#properties = getLinkProperties();
     }
 
     /**
@@ -79,7 +93,7 @@ class Link {
       * @throws {Error} If the targeted Endpoint is included in the newSourceEntity.
       */
     set setSourceEntity(newSourceEntity: Component) {
-        if(newSourceEntity.getEndpointEntities.find(endpoint => endpoint.getId === this.#targetEndpoint.getId)) {
+        if (newSourceEntity.getEndpointEntities.find(endpoint => endpoint.getId === this.#targetEndpoint.getId)) {
             const errorMessage = "A Link cannot be created from an entity to its own included Endpoint.";
             throw new Error(errorMessage);
         }
@@ -102,7 +116,7 @@ class Link {
       * @throws {Error} If the targeted Endpoint is included in the sourceEntity.
       */
     set setTargetEndpoint(newTargetEndpoint: Endpoint) {
-        if(this.#sourceEntity.getEndpointEntities.find(endpoint => endpoint.getId === newTargetEndpoint.getId)) {
+        if (this.#sourceEntity.getEndpointEntities.find(endpoint => endpoint.getId === newTargetEndpoint.getId)) {
             const errorMessage = "A Link cannot be created from an entity to its own included Endpoint.";
             throw new Error(errorMessage);
         }
@@ -110,11 +124,20 @@ class Link {
     }
 
     /**
-     * Returns the information that was provided about the type of relation this Link entity realizes.
-     * @returns {string} e.g. subscribes to
-     */
-    get getRelationType() {
-        return this.#relationType
+     * Returns all properties of this entity
+     * @returns {EntityProperty[]}
+    */
+    getProperties() {
+        return this.#properties;
+    }
+
+    setPropertyValue(propertyKey: string, propertyValue: any) {
+        let propertyToSet = (this.#properties.find(property => property.getKey === propertyKey))
+        if (propertyToSet) {
+            propertyToSet.value = propertyValue
+        } else {
+            throw new Error(`Property with key ${propertyKey} not found in ${this.constructor}`)
+        }
     }
 
     /**
@@ -126,4 +149,4 @@ class Link {
     }
 }
 
-export { Link, LINK_TOSCA_KEY };
+export { Link, LINK_TOSCA_KEY, getLinkProperties };

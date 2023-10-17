@@ -156,6 +156,11 @@ export function convertToServiceTemplate(systemEntity: Entities.System): TOSCA_S
             type: DEPLOYMENT_MAPPING_TOSCA_KEY
         }
 
+        let properties = parsePropertiesForYaml(deploymentMapping.getProperties());
+        if (isNonEmpty(properties)) {
+            relationship.properties = properties;
+        }
+
         keyIdMap.add(deploymentRelationshipKey, id);
         topologyTemplate.relationship_templates[deploymentRelationshipKey] = relationship;
 
@@ -171,6 +176,8 @@ export function convertToServiceTemplate(systemEntity: Entities.System): TOSCA_S
                 relationship: deploymentRelationshipKey
             }
         })
+
+
     }
 
     for (const [id, link] of systemEntity.getLinkEntities.entries()) {
@@ -180,6 +187,11 @@ export function convertToServiceTemplate(systemEntity: Entities.System): TOSCA_S
 
         let relationship: TOSCA_Relationship_Template = {
             type: LINK_TOSCA_KEY
+        }
+
+        let properties = parsePropertiesForYaml(link.getProperties());
+        if (isNonEmpty(properties)) {
+            relationship.properties = properties;
         }
 
         keyIdMap.add(linkRelationshipKey, id);
@@ -380,11 +392,17 @@ export function importFromServiceTemplate(fileName: string, stringifiedServiceTe
         if (node.type === DATA_AGGREGATE_TOSCA_KEY) {
             let uuid = uuidv4();
             let dataAggregate = new Entities.DataAggregate(uuid, transformYamlKeyToLabel(key), readToscaMetaData(node.metadata))
+
+            if (node.properties) {
+                for (const [key, value] of Object.entries(node.properties)) {
+                    dataAggregate.setPropertyValue(key, value);
+                }
+            }
+
             importedSystem.addEntity(dataAggregate);
             keyIdMap.add(key, uuid);
         } else if (node.type === BACKING_DATA_TOSCA_KEY) {
             let uuid = uuidv4();
-
             let backingData = new Entities.BackingData(uuid, transformYamlKeyToLabel(key), readToscaMetaData(node.metadata));
 
             if (node.properties) {
@@ -528,6 +546,26 @@ export function importFromServiceTemplate(fileName: string, stringifiedServiceTe
         }
     }
 
+    // parse relationship_templates to add properties to links and deployment mappings
+    for (const [key, relationship] of Object.entries(topologyTemplate.relationship_templates)) {
+
+        if (relationship.type === LINK_TOSCA_KEY) {
+            if (relationship.properties) {
+                const linkEntity = importedSystem.getLinkEntities.get(keyIdMap.getId(key));
+                for (const [key, value] of Object.entries(relationship.properties)) {
+                    linkEntity.setPropertyValue(key, value);
+                }
+            }
+        } else if (relationship.type === DEPLOYMENT_MAPPING_TOSCA_KEY) {
+            if (relationship.properties) {
+                const deploymentMappingEntity = importedSystem.getDeploymentMappingEntities.get(keyIdMap.getId(key));
+                for (const [key, value] of Object.entries(relationship.properties)) {
+                    deploymentMappingEntity.setPropertyValue(key, value);
+                }
+            }
+        }
+    }
+
     // finally add request traces
     for (const [key, node] of Object.entries(topologyTemplate.node_templates)) {
         if (node.type === REQUEST_TRACE_TOSCA_KEY) {
@@ -604,7 +642,7 @@ function parseRequirements(node: TOSCA_Node_Template, component: Entities.Compon
                     case "endpoint_link":
                         if (typeof requirement === "string") {
                             // TODO requirement is of type string
-                        } else {
+                        } else if (typeof requirement === "object") {
                             let linkId = uuidv4();
                             let link = new Entities.Link(linkId, component, endpoints.get(keyIdMap.getId(requirement.node)));
                             keyIdMap.add(requirement.relationship as string, linkId) // TODO requirement.relationship is object

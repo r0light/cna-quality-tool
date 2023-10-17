@@ -534,8 +534,11 @@ class SystemEntityManager {
 
         let linkEntity = new Entities.Link(graphLink.id, sourceEntity, targetEndpoint[0]);
 
-        const relationType = graphLink.prop("entity/properties/relationType");
-        linkEntity.addRelationType(relationType);
+
+        // set entity properties
+        for (let property of linkEntity.getProperties()) {
+            property.value = graphLink.prop("entity/properties/" + property.getKey)
+        }
 
         return linkEntity;
 
@@ -591,7 +594,14 @@ class SystemEntityManager {
             return null;
         }
 
-        return new Entities.DeploymentMapping(graphLink.id, deployedEntity, underlyingInfrastructure);
+        const deploymentMapping = new Entities.DeploymentMapping(graphLink.id, deployedEntity, underlyingInfrastructure);
+
+        // set entity properties
+        for (let property of deploymentMapping.getProperties()) {
+            property.value = graphLink.prop("entity/properties/" + property.getKey)
+        }
+
+        return deploymentMapping
     }
 
     #createRequestTraceEntity(graphElement) {
@@ -622,6 +632,12 @@ class SystemEntityManager {
         const involvedLinks = involvedLinkIds.map(linkId => this.#currentSystemEntity.getLinkEntities.get(linkId));
 
         const requestTrace = new Entities.RequestTrace(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement), externalEndpoint, involvedLinks);
+
+        // set entity properties
+        for (let property of requestTrace.getProperties()) {
+            property.value = graphElement.prop("entity/properties/" + property.getKey)
+        }
+
         return requestTrace;
     }
 
@@ -758,6 +774,13 @@ class SystemEntityManager {
             let newDeploymentMapping = new DeploymentMappingElement({ id: id })
             newDeploymentMapping.source(createdCells.find(cell => cell.id.toString() === deploymentMapping.getDeployedEntity.getId));
             newDeploymentMapping.target(createdCells.find(cell => cell.id.toString() === deploymentMapping.getUnderlyingInfrastructure.getId));
+
+            for (const property of EntityDetailsConfig.DeploymentMapping.specificProperties) {
+                if (property.jointJsConfig.modelPath) {
+                    newDeploymentMapping.prop(property.jointJsConfig.modelPath, deploymentMapping.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
+                }
+            }
+
             newDeploymentMapping.addTo(this.#currentSystemGraph);
             createdEdges.push(newDeploymentMapping);
         }
@@ -769,8 +792,8 @@ class SystemEntityManager {
             newLink.target(createdCells.find(cell => cell.id.toString() === link.getTargetEndpoint.getId));
 
             for (const property of EntityDetailsConfig.Link.specificProperties) {
-                if (property.providedFeature === "relationType") {
-                    newLink.prop(property.jointJsConfig.modelPath, link.getRelationType)
+                if (property.jointJsConfig.modelPath) {
+                    newLink.prop(property.jointJsConfig.modelPath, link.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
                 }
             }
 

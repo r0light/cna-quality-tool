@@ -3,6 +3,7 @@ import { getComponentProperties, getBackingServiceProperties, getStorageBackingS
 import { UIContentType } from "./toolbarConfiguration";
 import { DialogConfig, DialogSize } from "./actionDialogConfig";
 import { EntityProperty, NumberEntityProperty, TextEntityProperty } from "@/core/common/entityProperty";
+import { getLinkProperties } from "@/core/entities/link";
 
 export type DatalistItem = {
     value: string,
@@ -645,38 +646,7 @@ const EntityDetailsConfig: {
     },
     Link: {
         type: EntityTypes.LINK,
-        specificProperties: [
-            {
-                providedFeature: "relationType",
-                contentType: PropertyContentType.INPUT_TEXTBOX,
-                label: "Relation Type:",
-                inputProperties: {
-                    disabled: false,
-                    required: true,
-                    checked: false,
-                    selected: false,
-                    readonly: false,
-                },
-                attributes: {
-                    placeholder: "e.g. subscribes to",
-                    defaultValue: "",
-                    svgRepresentation: "",
-                    inputLabelIcon: "",
-                    provideEditButton: false,
-                    suggestedValues: []
-                },
-                helpText: "Type of relation",
-                show: true,
-                provideEnterButton: true,
-                jointJsConfig: {
-                    propertyType: "property",
-                    modelPath: "entity/properties/relationType",
-                    defaultPropPath: "",
-                    minPath: "",
-                    min: ""
-                }
-            }
-        ]
+        specificProperties: parseProperties(getLinkProperties())
     },
     Infrastructure: {
         type: EntityTypes.INFRASTRUCTURE,

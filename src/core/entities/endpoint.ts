@@ -139,4 +139,4 @@ class Endpoint {
     }
 }
 
-export { Endpoint, ENDPOINT_TOSCA_KEY, getEndpointProperties }; // TODO keep endpointType?
+export { Endpoint, ENDPOINT_TOSCA_KEY, getEndpointProperties };

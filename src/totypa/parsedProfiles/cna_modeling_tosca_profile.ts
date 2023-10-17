@@ -33,6 +33,11 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
           "type": "string",
           "required": true,
           "description": "The Endpoint to which the linked Component connects."
+        },
+        "relation_type": {
+          "type": "string",
+          "required": true,
+          "description": "Type of relation, e.g. subscribes to or calls"
         }
       }
     },

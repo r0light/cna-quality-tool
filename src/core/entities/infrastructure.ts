@@ -1,5 +1,5 @@
 import { BackingData } from "./backingData";
-import { EntityProperty } from "../common/entityProperty";
+import { EntityProperty, loadAllProperties } from "../common/entityProperty";
 import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_modeling_tosca_profile'
 import { MetaData } from "../common/entityDataTypes";
 
@@ -20,7 +20,9 @@ const InfrastructureTypes = Object.freeze({
 type infrastructureType = "compute" | "dbms"
 
 function getInfrastructureProperties() {
-    return []
+    let parsed = loadAllProperties(INFRASTRUCTURE_TOSCA_EQUIVALENT);
+
+    return parsed;
 }
 
 /**

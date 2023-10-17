@@ -19,6 +19,10 @@ relationship_types:
         type: string
         required: true
         description: The Endpoint to which the linked Component connects.
+      relation_type:
+        type: string
+        required: true
+        description: Type of relation, e.g. subscribes to or calls
 
   cna.qualityModel.relationships.Provides.Endpoint:
     derived_from: tosca.relationships.Root
