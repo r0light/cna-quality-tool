@@ -596,10 +596,6 @@ export function importFromServiceTemplate(fileName: string, stringifiedServiceTe
                 }
             }
 
-            console.log(requestTrace);
-
-            // TODO handle additional properties
-
             keyIdMap.add(key, uuid);
             importedSystem.addEntity(requestTrace);
         }

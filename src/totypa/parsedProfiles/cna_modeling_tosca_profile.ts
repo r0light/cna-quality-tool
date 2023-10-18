@@ -29,11 +29,6 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
       "derived_from": "tosca.relationships.ConnectsTo",
       "description": "Relationship Type to model Link entities",
       "properties": {
-        "target_endpoint": {
-          "type": "string",
-          "required": true,
-          "description": "The Endpoint to which the linked Component connects."
-        },
         "relation_type": {
           "type": "string",
           "required": true,
@@ -95,6 +90,7 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
         {
           "endpoint_link": {
             "capability": "tosca.capabilities.Endpoint",
+            "node": "cna.qualityModel.entities.Endpoint",
             "relationship": "cna.qualityModel.relationships.ConnectsTo.Link",
             "occurrences": [
               0,
@@ -153,6 +149,7 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
         {
           "endpoint_link": {
             "capability": "tosca.capabilities.Endpoint",
+            "node": "cna.qualityModel.entities.Endpoint",
             "relationship": "cna.qualityModel.relationships.ConnectsTo.Link",
             "occurrences": [
               0,
@@ -228,6 +225,7 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
         {
           "endpoint_link": {
             "capability": "tosca.capabilities.Endpoint",
+            "node": "cna.qualityModel.entities.Endpoint",
             "relationship": "cna.qualityModel.relationships.ConnectsTo.Link",
             "occurrences": [
               0,
@@ -392,6 +390,7 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
         {
           "endpoint_link": {
             "capability": "tosca.capabilities.Endpoint",
+            "node": "cna.qualityModel.entities.Endpoint",
             "relationship": "cna.qualityModel.relationships.ConnectsTo.Link",
             "occurrences": [
               0,

@@ -37,6 +37,7 @@ node_types:
       # Allow the definition of Links between Components
       - endpoint_link:
           capability: tosca.capabilities.Endpoint
+          node: cna.qualityModel.entities.Endpoint
           relationship: cna.qualityModel.relationships.ConnectsTo.Link
           occurrences: [0, UNBOUNDED]
       # Allow the definition of Data Aggregate usage
@@ -69,6 +70,7 @@ node_types:
       # Allow the definition of Links between Components
       - endpoint_link:
           capability: tosca.capabilities.Endpoint
+          node: cna.qualityModel.entities.Endpoint
           relationship: cna.qualityModel.relationships.ConnectsTo.Link
           occurrences: [0, UNBOUNDED]
       # Allow the definition of Data Aggregate usage
@@ -110,6 +112,7 @@ node_types:
       # Allow the definition of Links between Components
       - endpoint_link:
           capability: tosca.capabilities.Endpoint
+          node: cna.qualityModel.entities.Endpoint
           relationship: cna.qualityModel.relationships.ConnectsTo.Link
           occurrences: [0, UNBOUNDED]
       # Allow the definition of Data Aggregate usage
@@ -218,6 +221,7 @@ node_types:
       # Allow the definition of Links between Components
       - endpoint_link:
           capability: tosca.capabilities.Endpoint
+          node: cna.qualityModel.entities.Endpoint
           relationship: cna.qualityModel.relationships.ConnectsTo.Link
           occurrences: [0, UNBOUNDED]
       # Allow the definition of Data Aggregate usage

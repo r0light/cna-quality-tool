@@ -19,9 +19,6 @@ const LINK_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.relationship_types[LINK
 function getLinkProperties(): EntityProperty[] {
     let parsed = loadAllProperties(LINK_TOSCA_EQUIVALENT);
 
-    // TODO filter like this?
-    parsed = parsed.filter(property => property.getKey !== "target_endpoint");
-
     for (const prop of parsed) {
         switch (prop.getKey) {
             case "relation_type":
