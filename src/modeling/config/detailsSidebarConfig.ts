@@ -596,7 +596,7 @@ const EntityDetailsConfig: {
     },
     Endpoint: {
         type: EntityTypes.ENDPOINT,
-        specificProperties: ([
+        specificProperties: customizePropertyConfigs(parseProperties(getEndpointProperties()), [
             {
                 providedFeature: "embedded",
                 contentType: PropertyContentType.INPUT_TEXTBOX,
@@ -615,6 +615,7 @@ const EntityDetailsConfig: {
                     svgRepresentation: "",
                     inputLabelIcon: "",
                     provideEditButton: false,
+                    suggestedValues: []
                 },
                 provideEnterButton: false,
                 show: false,
@@ -626,11 +627,11 @@ const EntityDetailsConfig: {
                     min: ""
                 }
             },
-        ] as PropertyConfig[]).concat(parseProperties(getEndpointProperties()))
+        ])
     },
     ExternalEndpoint: {
         type: EntityTypes.EXTERNAL_ENDPOINT,
-        specificProperties: ([
+        specificProperties: customizePropertyConfigs(parseProperties(getEndpointProperties().concat(getExternalEndpointProperties())), [
             {
                 providedFeature: "embedded",
                 contentType: PropertyContentType.INPUT_TEXTBOX,
@@ -649,6 +650,7 @@ const EntityDetailsConfig: {
                     svgRepresentation: "",
                     inputLabelIcon: "",
                     provideEditButton: false,
+                    suggestedValues: []
                 },
                 provideEnterButton: false,
                 show: false,
@@ -660,7 +662,7 @@ const EntityDetailsConfig: {
                     min: ""
                 }
             },
-        ] as PropertyConfig[]).concat(parseProperties(getEndpointProperties()).concat(parseProperties(getExternalEndpointProperties())))
+        ])
     },
     Link: {
         type: EntityTypes.LINK,
@@ -676,7 +678,7 @@ const EntityDetailsConfig: {
     },
     DataAggregate: {
         type: EntityTypes.DATA_AGGREGATE,
-        specificProperties: parseProperties(getDataAggregateProperties()).concat([{
+        specificProperties: customizePropertyConfigs(parseProperties(getDataAggregateProperties()), [{
             providedFeature: "dataAggregate-chooseEditMode",
             contentType: PropertyContentType.TOGGLE,
             label: "Edit Mode:",
@@ -808,7 +810,7 @@ const EntityDetailsConfig: {
         }, {
             providedFeature: "dataAggregate-familyConfig-wrapper",
             contentType: PropertyContentType.TABLE_DIALOG,
-            label: "– Family:",
+            label: "- Family:",
             helpText: "",
             inputProperties: {
                 disabled: false,
@@ -904,7 +906,7 @@ const EntityDetailsConfig: {
     },
     BackingData: {
         type: EntityTypes.BACKING_DATA,
-        specificProperties: parseProperties(getBackingDataProperties()).concat([
+        specificProperties: customizePropertyConfigs(parseProperties(getBackingDataProperties()), [
             {
                 providedFeature: "backingData-chooseEditMode",
                 contentType: PropertyContentType.TOGGLE,
@@ -1066,7 +1068,7 @@ const EntityDetailsConfig: {
             {
                 providedFeature: "backingData-assignedFamily",
                 contentType: PropertyContentType.INPUT_TEXTBOX,
-                label: `– Family assigned:`,
+                label: `- Family assigned:`,
                 inputProperties: {
                     disabled: true,
                     required: true,
