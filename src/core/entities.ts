@@ -6,7 +6,7 @@ export { StorageBackingService, getStorageBackingServiceProperties } from './ent
 export { Endpoint, getEndpointProperties } from './entities/endpoint';
 export { ExternalEndpoint, getExternalEndpointProperties } from './entities/externalEndpoint';
 export { Link, getLinkProperties } from './entities/link';
-export { Infrastructure, InfrastructureTypes, getInfrastructureProperties } from './entities/infrastructure';
+export { Infrastructure, getInfrastructureProperties } from './entities/infrastructure';
 export { DeploymentMapping, getDeploymentMappingProperties } from './entities/deploymentMapping';
 export { RequestTrace, getRequestTraceProperties } from './entities/requestTrace';
 export { DataAggregate, getDataAggregateProperties } from './entities/dataAggregate';

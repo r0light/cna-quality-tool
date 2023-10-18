@@ -18,9 +18,6 @@ const REQUEST_TRACE_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types[REQ
 function getRequestTraceProperties(): EntityProperty[] {
     let parsed = parseProperties(REQUEST_TRACE_TOSCA_EQUIVALENT.properties);
 
-    // ignore the following properties, because they are handled customly
-    //parsed = parsed.filter(prop => prop.getKey !== "nodes")
-
     return parsed;
 }
 

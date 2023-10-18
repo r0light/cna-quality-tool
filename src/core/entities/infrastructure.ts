@@ -12,13 +12,6 @@ import { MetaData } from "../common/entityDataTypes";
 const INFRASTRUCTURE_TOSCA_KEY = "cna.qualityModel.entities.Compute.Infrastructure";
 const INFRASTRUCTURE_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types[INFRASTRUCTURE_TOSCA_KEY];
 
-const InfrastructureTypes = Object.freeze({
-    COMPUTE: "compute",
-    DBMS: "dbms"
-});
-
-type infrastructureType = "compute" | "dbms"
-
 function getInfrastructureProperties() {
     let parsed = loadAllProperties(INFRASTRUCTURE_TOSCA_EQUIVALENT);
 
@@ -37,8 +30,6 @@ class Infrastructure {
 
     #metaData: MetaData;
 
-    #infrastructureType: infrastructureType;
-
     #backingDataEntities = new Array<BackingData>();
 
     #properties: EntityProperty[];
@@ -49,11 +40,10 @@ class Infrastructure {
      * @param {string} name The name of the Infrastructure entity. 
      * @param {MetaData} metaData The meta data for this entity, needed for displaying it in a diagram. 
      */
-    constructor(id: string, name: string, metaData: MetaData, infrastructureType: infrastructureType) {
+    constructor(id: string, name: string, metaData: MetaData) {
         this.#id = id;
         this.name = name;
         this.#metaData = metaData;
-        this.#infrastructureType = infrastructureType;
         this.#properties = getInfrastructureProperties();
     }
 
@@ -85,14 +75,6 @@ class Infrastructure {
      */
     get getMetaData() {
         return this.#metaData;
-    }
-
-    /**
-     * Returns the type of Infrastructure, meaning if Storage Backing Service entities are deployed its a DBMS Tosca Node e.g.
-     * returns {InfrastructureType}
-     */
-    get getInfrastructureType() {
-        return this.#infrastructureType;
     }
 
     /**
@@ -138,4 +120,4 @@ class Infrastructure {
 
 }
 
-export { Infrastructure, InfrastructureTypes, INFRASTRUCTURE_TOSCA_KEY, getInfrastructureProperties };
+export { Infrastructure, INFRASTRUCTURE_TOSCA_KEY, getInfrastructureProperties };

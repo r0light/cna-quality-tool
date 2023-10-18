@@ -422,7 +422,7 @@ export function importFromServiceTemplate(fileName: string, stringifiedServiceTe
     for (const [key, node] of Object.entries(topologyTemplate.node_templates)) {
         if (node.type === INFRASTRUCTURE_TOSCA_KEY) {
             let uuid = uuidv4();
-            let infrastructure = new Entities.Infrastructure(uuid, transformYamlKeyToLabel(key), readToscaMetaData(node.metadata), "compute"); // TODO: what to do with infrastructure type?
+            let infrastructure = new Entities.Infrastructure(uuid, transformYamlKeyToLabel(key), readToscaMetaData(node.metadata));
 
             if (node.requirements) {
                 for (const requirementAssignment of node.requirements) {

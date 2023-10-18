@@ -320,7 +320,7 @@ class SystemEntityManager {
     }
 
     #createInfrastructureEntity(graphElement) {
-        let infrastructureEntity = new Entities.Infrastructure(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement), Entities.InfrastructureTypes.COMPUTE); // TODO differentiate infrastructure types?
+        let infrastructureEntity = new Entities.Infrastructure(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement));
 
         const backingDataEntities = graphElement.getEmbeddedCells();
 
@@ -342,6 +342,7 @@ class SystemEntityManager {
         return infrastructureEntity;
     }
 
+    /*
     #checkIfStorageBackingServiceConnected(graphElement) {
         let connectedLinksForCurrentInfrastructure = this.#currentSystemGraph.getConnectedLinks(graphElement);
 
@@ -376,7 +377,7 @@ class SystemEntityManager {
         }
         return new Entities.Infrastructure(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement), Entities.InfrastructureTypes.COMPUTE);
     }
-
+    */
 
 
 

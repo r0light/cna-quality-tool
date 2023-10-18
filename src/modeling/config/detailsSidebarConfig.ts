@@ -160,7 +160,7 @@ export type PropertyConfig = TextPropertyConfig | TextAreaPropertyConfig | Numbe
 
 function parseProperties(properties: EntityProperty[]): PropertyConfig[] {
     return properties.filter(property => {
-        // ignore the following property types because they are handled customly
+        // ignore the following property types because they are handled customly, TODO is there a better way?
         return property.getDataType !== "map" && property.getDataType !== "list"
     }).map(property => {
 
