@@ -6,6 +6,7 @@ export type TOSCA_Property_Instance_Key = string;
 export type TOSCA_Attribute_Definition_Key = string;
 export type TOSCA_Attribute_Instance_Key = string;
 
+export type TOSCA_Artifact_Instance_Key = string;
 export type TOSCA_Artifact_Definition_Key = string;
 
 export type TOSCA_Group_Type_Key = string;
@@ -30,4 +31,16 @@ export type TOSCA_Relationship_Template_Key = string;
 export type TOSCA_Interface_Definition_Key = string;
 export type TOSCA_Interface_Template_Key = string;
 
+export type TOSCA_Operation_Definition_Key = string;
+export type TOSCA_Operation_Instance_Key = string;
+
+export type TOSCA_Workflow_Instance_Key = string;
+export type TOSCA_Workflow_Step_Definition_Key = string;
+
+export type TOSCA_Notification_Definition_Key = string;
+export type TOSCA_Notification_Instance_Key = string;
+
+export type TOSCA_Repository_Definition_Key = string;
+
 export type TOSCA_Parameter_Definition_Key = string;
+export type TOSCA_Parameter_Instance_Key = string;
