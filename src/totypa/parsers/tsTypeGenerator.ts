@@ -6,7 +6,8 @@ import path from 'node:path';
 
 type ProfileInfo = {
     fileName: string,
-    profileName: string
+    profileName: string,
+    profile: TOSCA_Service_Template
 }
 
 const hint = "/* \n   Caution!!! This code is generated!!!! Do not modify, but instead regenerate it based on the .yaml Profile descriptions \n*/\n";
@@ -16,17 +17,36 @@ startParsing();
 async function startParsing() {
     parseAllProfiles("../../../tosca-profiles").then(promises => {
         return Promise.all(promises).then(profiles => {
-            let importStatements = profiles.map(info => {
-                return `import { ${info.profileName} } from "./${info.profileName}";`
+
+            let results : Promise<string>[] = [];
+
+            // 1. write profiles as Typescript (but basically JSON)
+            let profileResults : Promise<ProfileInfo>[] = [];
+            profiles.forEach(profile => {
+                profileResults.push(saveGeneratedProfileAsJson(profile));
             })
-    
-            let preparedData = `import { TOSCA_Service_Template } from '../tosca-types/template-types';\n${importStatements.join("\n")}\n\nexport const all_profiles: TOSCA_Service_Template[] = [\n${profiles.map(info => info.profileName).join(",\n")}\n];`
-    
-            fs.writeFile(`../parsedProfiles/all_profiles.ts`, `${hint}\n${preparedData}`, (err) => {
-                if (err) {
-                    console.error(`Could not save all_profiles: ${err}`)
-                }
-            })
+            results.push(Promise.all(profileResults).then(profileInfos => {
+                let importStatements = profileInfos.map(info => {
+                    return `import { ${info.profileName} } from "./${info.profileName}";`
+                })
+        
+                let preparedData = `import { TOSCA_Service_Template } from '../tosca-types/template-types';\n${importStatements.join("\n")}\n\nexport const all_profiles: TOSCA_Service_Template[] = [\n${profileInfos.map(info => info.profileName).join(",\n")}\n];`
+        
+                fs.writeFile(`../parsedProfiles/all_profiles.ts`, `${hint}\n${preparedData}`, (err) => {
+                    if (err) {
+                        console.error(`Could not save all_profiles: ${err}`)
+                        return err;
+                    }
+                })
+                return "success";
+            }))
+
+            // 2. write Typescript Type Definition for the parsed profiles
+
+            // TODO ensure type uniqueness
+            // TODO for each TOSCA type definition generate a corresponding Typescript Type
+
+
         })
     }).catch(err => {
         console.error("Profile parsing failed!: " + err);
@@ -40,7 +60,12 @@ function parseAllProfiles(profilesFolder: string): Promise<Promise<ProfileInfo>[
             return fs.promises.lstat(fullDirectoryPath).then(stats => {
                 if (stats.isDirectory) {
                     return generateFromProfile(fullDirectoryPath).then(profile => {
-                        return saveGeneratedProfile(entry, profile);
+                        let generatedName = entry.replace(/\s/g, "").replace(/[\.-]/g, "_");
+                        return {
+                            fileName: `${generatedName}.ts`,
+                            profileName: generatedName,
+                            profile: profile
+                        }
                     })
                 }
             });
@@ -151,22 +176,17 @@ async function generateFromProfile(profileDirectory: string): Promise<TOSCA_Serv
             return profile;
         }
 
-async function saveGeneratedProfile(name: string, profile: TOSCA_Service_Template): Promise<ProfileInfo> {
-
-            let generatedName = name.replace(/\s/g, "").replace(/[\.-]/g, "_");
+async function saveGeneratedProfileAsJson(profileInfo: ProfileInfo): Promise<ProfileInfo> {
 
             let hint = "/* \n   Caution!!! This code is generated!!!! Do not modify, but instead regenerate it based on the .yaml Profile descriptions \n*/\n";
 
-            let preparedData = `import { TOSCA_Service_Template } from '../tosca-types/template-types';\n\nexport const ${generatedName}: TOSCA_Service_Template = ${JSON.stringify(profile, null, 2)};`
+            let preparedData = `import { TOSCA_Service_Template } from '../tosca-types/template-types';\n\nexport const ${profileInfo.profileName}: TOSCA_Service_Template = ${JSON.stringify(profileInfo.profile, null, 2)};`
 
-            fs.writeFile(`../parsedProfiles/${generatedName}.ts`, `${hint}\n${preparedData}`, (err) => {
+            fs.writeFile(`../parsedProfiles/${profileInfo.fileName}`, `${hint}\n${preparedData}`, (err) => {
                 if (err) {
-                    console.error(`Could not save ${generatedName} to file: ${err}`)
+                    console.error(`Could not save ${profileInfo.profileName} to file: ${err}`)
+                    return err;
                 }
             })
-            return {
-                fileName: `${generatedName}.ts`,
-                profileName: generatedName
-            }
-
+            return profileInfo;
         }

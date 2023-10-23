@@ -1,3 +1,4 @@
+import { TOSCA_Attribute_Definition_Key, TOSCA_Property_Definition_Key, TOSCA_Requirement_Definition_Key } from "./alias-types"
 import type { TOSCA_Metadata, TOSCA_Property, TOSCA_Attribute, TOSCA_Interface, TOSCA_Property_Schema, TOSCA_Operation, TOSCA_Notification, TOSCA_Trigger } from "./core-types"
 
 
@@ -68,13 +69,13 @@ export type TOSCA_Node = {
     metadata?: TOSCA_Metadata,
     description?: string
     properties?: {
-        [propertyKey: string]: TOSCA_Property
+        [propertyKey: TOSCA_Property_Definition_Key]: TOSCA_Property
     },
     attributes?: {
-        [attributeKey: string]: TOSCA_Attribute
+        [attributeKey: TOSCA_Attribute_Definition_Key]: TOSCA_Attribute
     },
     requirements?: {
-        [requirementKey: string]: TOSCA_Requirement
+        [requirementKey: TOSCA_Requirement_Definition_Key]: TOSCA_Requirement
     }[],
     capabilities?: {
         [capabilityKey: string]: TOSCA_Capability | string

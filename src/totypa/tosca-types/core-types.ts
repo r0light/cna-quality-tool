@@ -1,3 +1,5 @@
+import { TOSCA_Datatype_Type_Key } from "./alias-types"
+
 export type TOSCA_Version = "tosca_simple_yaml_1_3" 
 
 // 3.6.2 Metadata
@@ -75,7 +77,7 @@ export type TOSCA_Property_Status = "supported" | "unsupported" | "experimental"
 
 // 3.6.10 Property definition
 export type TOSCA_Property = {
-    type?: string,
+    type?: TOSCA_Datatype_Type_Key,
     description?: string,
     required?: boolean,
     default?: any,
