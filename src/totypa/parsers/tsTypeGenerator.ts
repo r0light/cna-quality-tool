@@ -341,7 +341,6 @@ async function saveGeneratedProfileAsTypescriptTypes(profileInfo: ProfileInfo, m
         }
     }
 
-
     // 4. Capabilities (depend on datatypes)
     if (profileInfo.profile.capability_types) {
         for (const [capabilityKey, capability] of Object.entries(profileInfo.profile.capability_types)) {
@@ -361,6 +360,12 @@ async function saveGeneratedProfileAsTypescriptTypes(profileInfo: ProfileInfo, m
     }
 
     // 6. Nodes (depend on datatypes, capabilities, relationships, interfaces, artifacts)
+    if (profileInfo.profile.node_types) {
+        for (const [nodeKey, node] of Object.entries(profileInfo.profile.node_types)) {
+            let nodeTypeName = toPascalCase(nodeKey);
+
+        }
+    }
 
     // 7. Groups (depend on nodes)
 
@@ -499,90 +504,71 @@ function getTypeForToscaAttributeType(attribute: TOSCA_Attribute, allDataTypes: 
 }
 
 function buildTsTypeForCapability(capability: TOSCA_Capability_Type, allCapabilityTypes: { [capabilityKey: string]: TOSCA_Capability_Type }, allDataTypes: { [datatypeKey: string]: TOSCA_Datatype }, alreadyParsedTypes: TwoWayKeyTypeMap): string {
-    let allProperties: { [propKey: string]: TOSCA_Property } = {};
-    let allAttributes: { [attrKey: string]: TOSCA_Attribute } = {};
-    let currentCapability = capability;
-    while (currentCapability) {
-        if (currentCapability.properties) {
-            for (const [propKey, prop] of Object.entries(currentCapability.properties)) {
-                allProperties[propKey] = prop;
-            }
-        }
-        if (currentCapability.attributes) {
-            for (const [attrKey, attribute] of Object.entries(currentCapability.attributes)) {
-                allAttributes[attrKey] = attribute;
-            }
-        }
-        if (currentCapability.derived_from) {
-            currentCapability = allCapabilityTypes[currentCapability.derived_from];
-        } else {
-            break;
-        }
+    let properties = deriveAllProperties(capability, allCapabilityTypes, allDataTypes, alreadyParsedTypes);
+    let attributes = deriveAllAttributes(capability, allCapabilityTypes, allDataTypes, alreadyParsedTypes);
+    if (properties.length === 0 && attributes.length === 0) {
+        return "string" //TODO how to deal with a capability that has no properties and no attributes?
     }
-    let generatedTypeDefinition = "{\n";
-    if (Object.keys(allProperties).length > 0) {
-        generatedTypeDefinition = generatedTypeDefinition.concat("    properties: {\n");
-        for (const [propKey, prop] of Object.entries(allProperties)) {
-            generatedTypeDefinition = generatedTypeDefinition.concat(`    ${propKey}${prop.required ? "" : "?"}: ${getTypeForToscaPropertyType(prop, allDataTypes, alreadyParsedTypes)},\n`)
-        }
-        generatedTypeDefinition = generatedTypeDefinition.concat("    },\n")
-    }
-    if (Object.keys(allAttributes).length > 0) {
-        generatedTypeDefinition = generatedTypeDefinition.concat("    attributes: {\n");
-        for (const [attrKey, attribute] of Object.entries(allAttributes)) {
-            generatedTypeDefinition = generatedTypeDefinition.concat(`    ${attrKey}: ${getTypeForToscaAttributeType(attribute, allDataTypes, alreadyParsedTypes)},\n`)
-        }
-        generatedTypeDefinition = generatedTypeDefinition.concat("    },\n")
-    }
-    if (generatedTypeDefinition !== "{\n") {
-        return generatedTypeDefinition.concat("}");
-    } else {
-        return "string" //TODO how to deal with a capability that has no properties?
-    }
-
+    return `{\n    ${properties}${attributes}}`;
 }
 
 
 function buildTsTypeForRelationship(relationship: TOSCA_Relationship, allRelationshipTypes: { [relationshipKey: string]: TOSCA_Relationship }, allDataTypes: { [datatypeKey: string]: TOSCA_Datatype }, alreadyParsedTypes: TwoWayKeyTypeMap): string {
+    let properties = deriveAllProperties(relationship, allRelationshipTypes, allDataTypes, alreadyParsedTypes);
+    let attributes = deriveAllAttributes(relationship, allRelationshipTypes, allDataTypes, alreadyParsedTypes);
+    if (properties.length === 0 && attributes.length === 0) {
+        return "string" //TODO how to deal with a capability that has no properties and no attributes?
+    }
+
+    return `{\n    ${properties}${attributes}}`;
+}
+
+function deriveAllProperties(entity: TOSCA_Relationship | TOSCA_Capability_Type, allEntities: { [entityKey: string]: TOSCA_Relationship | TOSCA_Capability_Type}, allDataTypes: { [datatypeKey: string]: TOSCA_Datatype}, alreadyParsedTypes: TwoWayKeyTypeMap) {
     let allProperties: { [propKey: string]: TOSCA_Property } = {};
-    let allAttributes: { [attrKey: string]: TOSCA_Attribute } = {};
-    let currentRelationship = relationship;
-    while (currentRelationship) {
-        if (currentRelationship.properties) {
-            for (const [propKey, prop] of Object.entries(currentRelationship.properties)) {
+    let currentEntity = entity;
+    while (currentEntity) {
+        if (currentEntity.properties) {
+            for (const [propKey, prop] of Object.entries(currentEntity.properties)) {
                 allProperties[propKey] = prop;
             }
         }
-        if (currentRelationship.attributes) {
-            for (const [attrKey, attribute] of Object.entries(currentRelationship.attributes)) {
-                allAttributes[attrKey] = attribute;
-            }
-        }
-        if (currentRelationship.derived_from) {
-            currentRelationship = allRelationshipTypes[currentRelationship.derived_from];
+        if (currentEntity.derived_from) {
+            currentEntity = allEntities[currentEntity.derived_from];
         } else {
             break;
         }
     }
-    let generatedTypeDefinition = "{\n";
     if (Object.keys(allProperties).length > 0) {
-        generatedTypeDefinition = generatedTypeDefinition.concat("    properties: {\n");
+        let generatedPropertiesTypeDefinition = "properties: {\n";
         for (const [propKey, prop] of Object.entries(allProperties)) {
-            generatedTypeDefinition = generatedTypeDefinition.concat(`    ${propKey}${prop.required ? "" : "?"}: ${getTypeForToscaPropertyType(prop, allDataTypes, alreadyParsedTypes)},\n`)
+            generatedPropertiesTypeDefinition = generatedPropertiesTypeDefinition.concat(`    ${propKey}${prop.required ? "" : "?"}: ${getTypeForToscaPropertyType(prop, allDataTypes, alreadyParsedTypes)},\n`)
         }
-        generatedTypeDefinition = generatedTypeDefinition.concat("    },\n")
+        return generatedPropertiesTypeDefinition.concat("},\n")
+    }
+    return "";
+}
+
+function deriveAllAttributes(entity: TOSCA_Relationship | TOSCA_Capability_Type, allEntities: { [entityKey: string]: TOSCA_Relationship | TOSCA_Capability_Type}, allDataTypes: { [datatypeKey: string]: TOSCA_Datatype}, alreadyParsedTypes: TwoWayKeyTypeMap) {
+    let allAttributes: { [attrKey: string]: TOSCA_Attribute } = {};
+    let currentEntity = entity;
+    while (currentEntity) {
+        if (currentEntity.attributes) {
+            for (const [propKey, prop] of Object.entries(currentEntity.attributes)) {
+                allAttributes[propKey] = prop;
+            }
+        }
+        if (currentEntity.derived_from) {
+            currentEntity = allEntities[currentEntity.derived_from];
+        } else {
+            break;
+        }
     }
     if (Object.keys(allAttributes).length > 0) {
-        generatedTypeDefinition = generatedTypeDefinition.concat("    attributes: {\n");
+        let generatedAttributesTypeDefinition = "attributes: {\n";
         for (const [attrKey, attribute] of Object.entries(allAttributes)) {
-            generatedTypeDefinition = generatedTypeDefinition.concat(`    ${attrKey}: ${getTypeForToscaAttributeType(attribute, allDataTypes, alreadyParsedTypes)},\n`)
+            generatedAttributesTypeDefinition = generatedAttributesTypeDefinition.concat(`    ${attrKey}: ${getTypeForToscaAttributeType(attribute, allDataTypes, alreadyParsedTypes)},\n`)
         }
-        generatedTypeDefinition = generatedTypeDefinition.concat("    },\n")
+        return generatedAttributesTypeDefinition.concat("},\n")
     }
-    if (generatedTypeDefinition !== "{\n") {
-        return generatedTypeDefinition.concat("}");
-    } else {
-        return "string" //TODO how to deal with a capability that has no properties?
-    }
-
+    return "";
 }

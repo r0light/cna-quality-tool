@@ -15,10 +15,10 @@ export type CnaQualityModelEntitiesConnectsToLink = {
     user?: string,
     }
 },
-    },
-    attributes: {
+},
+attributes: {
     tosca_id: string,
     tosca_name: string,
     state: string,
-    },
+},
 }
