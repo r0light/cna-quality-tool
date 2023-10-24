@@ -1,17 +1,17 @@
 type key = string;
-type typeName = string;
+type tsType = {typeName: string, sourceFile: string};
 
 class TwoWayKeyTypeMap {
 
-    #keyToType = new Map<key, typeName>();
-    #typeToKey = new Map<typeName, key>();
+    #keyToType = new Map<key, tsType>();
+    #typeToKey = new Map<tsType, key>();
 
-    add(type: typeName, key: key) {
+    add(type: tsType, key: key) {
         this.#keyToType.set(key, type);
         this.#typeToKey.set(type, key);
     }
 
-    getKey(type: typeName) { 
+    getKey(type: tsType) { 
         return this.#typeToKey.get(type); 
     }
 
