@@ -3,10 +3,10 @@ import * as fs from 'fs';
 import { TOSCA_Service_Template } from '../tosca-types/template-types';
 import { readdir } from 'node:fs/promises';
 import path from 'node:path';
-import { TOSCA_Datatype, TOSCA_Property } from '../tosca-types/core-types';
+import { TOSCA_Attribute, TOSCA_Datatype, TOSCA_Property } from '../tosca-types/core-types';
 import { data } from 'jquery';
 import { TwoWayKeyTypeMap } from './TwoWayKeyTypeMap';
-import { TOSCA_Capability_Type } from '../tosca-types/entity-types';
+import { TOSCA_Capability_Type, TOSCA_Relationship } from '../tosca-types/entity-types';
 
 type ProfileInfo = {
     fileName: string,
@@ -352,6 +352,13 @@ async function saveGeneratedProfileAsTypescriptTypes(profileInfo: ProfileInfo, m
     }
 
     // 5. Relationships (depend on capabilities)
+    if (profileInfo.profile.relationship_types) {
+        for (const [relationshipKey, relationship] of Object.entries(profileInfo.profile.relationship_types)) {
+            let relationshipTypeName = toPascalCase(relationshipKey);
+            generatedTypeDefinitions.push(`export type ${relationshipTypeName} = ${buildTsTypeForRelationship(relationship, mergedProfiles.relationship_types, mergedProfiles.data_types, typeKeyMap)}`);
+            typeKeyMap.add(relationshipTypeName, relationshipKey);
+        }
+    }
 
     // 6. Nodes (depend on datatypes, capabilities, relationships, interfaces, artifacts)
 
@@ -471,14 +478,39 @@ function getTypeForToscaPropertyType(property: TOSCA_Property, allDataTypes: { [
     return buildTsTypeForDatatype(property.type, allDataTypes, alreadyParsedTypes);
 }
 
+function getTypeForToscaAttributeType(attribute: TOSCA_Attribute, allDataTypes: { [datatypeKey: string]: TOSCA_Datatype }, alreadyParsedTypes: TwoWayKeyTypeMap): string {
+    switch (attribute.type) {
+        case "map":
+            if (attribute.entry_schema) {
+                return `{[mapKey: string]: ${buildTsTypeForDatatype(attribute.entry_schema.type, allDataTypes, alreadyParsedTypes)}}`;
+            } else {
+                return "{[mapKey: string]: string}";
+            }
+        case "list":
+            if (attribute.entry_schema) {
+                return `${buildTsTypeForDatatype(attribute.entry_schema.type, allDataTypes, alreadyParsedTypes)}[]`;
+            } else {
+                return "string[]";
+            }
+        default:
+            break;
+    }
+    return buildTsTypeForDatatype(attribute.type, allDataTypes, alreadyParsedTypes);
+}
+
 function buildTsTypeForCapability(capability: TOSCA_Capability_Type, allCapabilityTypes: { [capabilityKey: string]: TOSCA_Capability_Type }, allDataTypes: { [datatypeKey: string]: TOSCA_Datatype }, alreadyParsedTypes: TwoWayKeyTypeMap): string {
     let allProperties: { [propKey: string]: TOSCA_Property } = {};
+    let allAttributes: { [attrKey: string]: TOSCA_Attribute } = {};
     let currentCapability = capability;
     while (currentCapability) {
         if (currentCapability.properties) {
             for (const [propKey, prop] of Object.entries(currentCapability.properties)) {
                 allProperties[propKey] = prop;
-                //generatedTypeDefinition = generatedTypeDefinition.concat(`    ${propKey}${prop.required ? "" : "?"}: ${getTypeForToscaType(prop.type, allDataTypes)},\n`)
+            }
+        }
+        if (currentCapability.attributes) {
+            for (const [attrKey, attribute] of Object.entries(currentCapability.attributes)) {
+                allAttributes[attrKey] = attribute;
             }
         }
         if (currentCapability.derived_from) {
@@ -487,14 +519,70 @@ function buildTsTypeForCapability(capability: TOSCA_Capability_Type, allCapabili
             break;
         }
     }
+    let generatedTypeDefinition = "{\n";
     if (Object.keys(allProperties).length > 0) {
-        let generatedTypeDefinition = "{\n    properties: {\n";
+        generatedTypeDefinition = generatedTypeDefinition.concat("    properties: {\n");
         for (const [propKey, prop] of Object.entries(allProperties)) {
             generatedTypeDefinition = generatedTypeDefinition.concat(`    ${propKey}${prop.required ? "" : "?"}: ${getTypeForToscaPropertyType(prop, allDataTypes, alreadyParsedTypes)},\n`)
         }
-        generatedTypeDefinition = generatedTypeDefinition.concat("    }\n}")
-        return generatedTypeDefinition;
+        generatedTypeDefinition = generatedTypeDefinition.concat("    },\n")
+    }
+    if (Object.keys(allAttributes).length > 0) {
+        generatedTypeDefinition = generatedTypeDefinition.concat("    attributes: {\n");
+        for (const [attrKey, attribute] of Object.entries(allAttributes)) {
+            generatedTypeDefinition = generatedTypeDefinition.concat(`    ${attrKey}: ${getTypeForToscaAttributeType(attribute, allDataTypes, alreadyParsedTypes)},\n`)
+        }
+        generatedTypeDefinition = generatedTypeDefinition.concat("    },\n")
+    }
+    if (generatedTypeDefinition !== "{\n") {
+        return generatedTypeDefinition.concat("}");
     } else {
         return "string" //TODO how to deal with a capability that has no properties?
     }
+
+}
+
+
+function buildTsTypeForRelationship(relationship: TOSCA_Relationship, allRelationshipTypes: { [relationshipKey: string]: TOSCA_Relationship }, allDataTypes: { [datatypeKey: string]: TOSCA_Datatype }, alreadyParsedTypes: TwoWayKeyTypeMap): string {
+    let allProperties: { [propKey: string]: TOSCA_Property } = {};
+    let allAttributes: { [attrKey: string]: TOSCA_Attribute } = {};
+    let currentRelationship = relationship;
+    while (currentRelationship) {
+        if (currentRelationship.properties) {
+            for (const [propKey, prop] of Object.entries(currentRelationship.properties)) {
+                allProperties[propKey] = prop;
+            }
+        }
+        if (currentRelationship.attributes) {
+            for (const [attrKey, attribute] of Object.entries(currentRelationship.attributes)) {
+                allAttributes[attrKey] = attribute;
+            }
+        }
+        if (currentRelationship.derived_from) {
+            currentRelationship = allRelationshipTypes[currentRelationship.derived_from];
+        } else {
+            break;
+        }
+    }
+    let generatedTypeDefinition = "{\n";
+    if (Object.keys(allProperties).length > 0) {
+        generatedTypeDefinition = generatedTypeDefinition.concat("    properties: {\n");
+        for (const [propKey, prop] of Object.entries(allProperties)) {
+            generatedTypeDefinition = generatedTypeDefinition.concat(`    ${propKey}${prop.required ? "" : "?"}: ${getTypeForToscaPropertyType(prop, allDataTypes, alreadyParsedTypes)},\n`)
+        }
+        generatedTypeDefinition = generatedTypeDefinition.concat("    },\n")
+    }
+    if (Object.keys(allAttributes).length > 0) {
+        generatedTypeDefinition = generatedTypeDefinition.concat("    attributes: {\n");
+        for (const [attrKey, attribute] of Object.entries(allAttributes)) {
+            generatedTypeDefinition = generatedTypeDefinition.concat(`    ${attrKey}: ${getTypeForToscaAttributeType(attribute, allDataTypes, alreadyParsedTypes)},\n`)
+        }
+        generatedTypeDefinition = generatedTypeDefinition.concat("    },\n")
+    }
+    if (generatedTypeDefinition !== "{\n") {
+        return generatedTypeDefinition.concat("}");
+    } else {
+        return "string" //TODO how to deal with a capability that has no properties?
+    }
+
 }
