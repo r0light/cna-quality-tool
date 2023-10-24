@@ -1,4 +1,4 @@
-import { TOSCA_Attribute_Definition_Key, TOSCA_Attribute_Instance_Key, TOSCA_Capability_Instance_Key, TOSCA_Datatype_Type_Key, TOSCA_Group_Template_Key, TOSCA_Node_Template_Key, TOSCA_Node_Type_Key, TOSCA_Notification_Definition_Key, TOSCA_Notification_Instance_Key, TOSCA_Operation_Definition_Key, TOSCA_Operation_Instance_Key, TOSCA_Parameter_Definition_Key, TOSCA_Parameter_Instance_Key, TOSCA_Property_Definition_Key, TOSCA_Property_Instance_Key, TOSCA_Requirement_Instance_Key, TOSCA_Workflow_Instance_Key } from "./alias-types"
+import { TOSCA_Artifact_File_Uri, TOSCA_Artifact_Type_Key, TOSCA_Attribute_Definition_Key, TOSCA_Attribute_Instance_Key, TOSCA_Capability_Instance_Key, TOSCA_Datatype_Type_Key, TOSCA_Group_Template_Key, TOSCA_Interface_Type_Key, TOSCA_Node_Template_Key, TOSCA_Node_Type_Key, TOSCA_Notification_Definition_Key, TOSCA_Notification_Instance_Key, TOSCA_Operation_Definition_Key, TOSCA_Operation_Instance_Key, TOSCA_Parameter_Definition_Key, TOSCA_Parameter_Instance_Key, TOSCA_Property_Definition_Key, TOSCA_Property_Instance_Key, TOSCA_Repository_Definition_Key, TOSCA_Requirement_Instance_Key, TOSCA_Workflow_Instance_Key } from "./alias-types"
 
 export type TOSCA_Version = "tosca_simple_yaml_1_3" 
 
@@ -41,9 +41,9 @@ export type TOSCA_Repository = {
 
 // 3.6.7 Artifact definition
 export type TOSCA_Artifact = {
-    type: string,
-    file: string,
-    repository?: string,
+    type: TOSCA_Artifact_Type_Key,
+    file: TOSCA_Artifact_File_Uri,
+    repository?: TOSCA_Repository_Definition_Key,
     description?: string,
     deploy_path?: string,
     artifact_version?: string,
@@ -161,7 +161,7 @@ export type TOSCA_Notification = {
 
 // 3.6.20 Interface definition
 export type TOSCA_Interface = {
-    type?: string,
+    type?: TOSCA_Interface_Type_Key,
     description?: string,
     derived_from?: string,
     inputs?: { [parameterKey: TOSCA_Property_Definition_Key]: TOSCA_Property_Schema } | { [propertyKey: TOSCA_Property_Instance_Key]: any },

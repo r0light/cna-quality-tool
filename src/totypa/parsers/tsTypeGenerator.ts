@@ -5,6 +5,8 @@ import { readdir } from 'node:fs/promises';
 import path from 'node:path';
 import { TOSCA_Datatype, TOSCA_Property } from '../tosca-types/core-types';
 import { data } from 'jquery';
+import { TwoWayKeyTypeMap } from './TwoWayKeyTypeMap';
+import { TOSCA_Capability_Type } from '../tosca-types/entity-types';
 
 type ProfileInfo = {
     fileName: string,
@@ -43,15 +45,18 @@ async function startParsing() {
                 return "success";
             }))
 
-            // TODO merge all definitions to be able to use them
+            // merge all definitions to be able to use them
             const mergedProfiles = mergeAllProfiles(profiles);
+
+            // remember all stored types
+            const typeKeyMap = new TwoWayKeyTypeMap();
 
             // TODO ensure type uniqueness
 
             // 2. write Typescript Type Definition for the parsed profiles
             let profileTypescriptResults: Promise<profileTypesInfo>[] = [];
             profiles.forEach(profile => {
-                profileTypescriptResults.push(saveGeneratedProfileAsTypescriptTypes(profile, mergedProfiles));
+                profileTypescriptResults.push(saveGeneratedProfileAsTypescriptTypes(profile, mergedProfiles, typeKeyMap));
             })
             results.push(Promise.all(profileTypescriptResults).then(profileTypeInfo => {
 
@@ -301,33 +306,58 @@ type profileTypesInfo = {
 }
 
 
-async function saveGeneratedProfileAsTypescriptTypes(profileInfo: ProfileInfo, mergedProfiles: TOSCA_Service_Template): Promise<profileTypesInfo> {
+async function saveGeneratedProfileAsTypescriptTypes(profileInfo: ProfileInfo, mergedProfiles: TOSCA_Service_Template, typeKeyMap: TwoWayKeyTypeMap): Promise<profileTypesInfo> {
 
     let generatedTypeDefinitions: string[] = [];
 
     // 1. Datatypes
     if (profileInfo.profile.data_types) {
         for (const [datatypeKey, datatype] of Object.entries(profileInfo.profile.data_types)) {
-            generatedTypeDefinitions.push(`export type ${toPascalCase(datatypeKey)} = ${buildTsTypeForDatatype(datatypeKey, datatype, mergedProfiles.data_types)}`)
+            let datatypeTypeName = toPascalCase(datatypeKey);
+            generatedTypeDefinitions.push(`export type ${datatypeTypeName} = ${buildTsTypeForDatatype(datatype, mergedProfiles.data_types, typeKeyMap)}`)
+            typeKeyMap.add(datatypeTypeName, datatypeKey);
         }
     }
 
-    // 2. Operations
-
-    // 3. Interfaces (depend on operations)
+    // 2. Interfaces (together with operations)
+    if (profileInfo.profile.interface_types) {
+        for (const [interfaceKey, interfaceDefinition] of Object.entries(profileInfo.profile.interface_types)) {
+            let interfaceTypeName = toPascalCase(interfaceKey);
+            generatedTypeDefinitions.push(`export type ${interfaceTypeName} = object`)
+            // TODO add attributes to type, based on an example of a node template that declares an interface of a specific type.
+            // TODO consider derived_from to add all attributes also of parent interface types
+            typeKeyMap.add(interfaceTypeName, interfaceKey);
+        }
+    }
 
     // 3. Artifacts
+    if (profileInfo.profile.artifact_types) {
+        for (const [artifactKey, artifact] of Object.entries(profileInfo.profile.artifact_types)) {
+            let artifactTypeName = toPascalCase(artifactKey);
+            generatedTypeDefinitions.push(`export type ${artifactTypeName} = object`)
+            // TODO add attributes to type, based on an example of a node template that declares an artifact of a specific type.
+            // TODO consider derived_from to add all attributes also of parent artifact types
+            typeKeyMap.add(artifactTypeName, artifactKey);
+        }
+    }
 
-    // 4. Groups
 
-    // 5. Policies
+    // 4. Capabilities (depend on datatypes)
+    if (profileInfo.profile.capability_types) {
+        for (const [capabilityKey, capability] of Object.entries(profileInfo.profile.capability_types)) {
+            let capabilityTypeName = toPascalCase(capabilityKey);
+            generatedTypeDefinitions.push(`export type ${capabilityTypeName} = ${buildTsTypeForCapability(capability, mergedProfiles.capability_types, mergedProfiles.data_types, typeKeyMap)}`)
+            typeKeyMap.add(capabilityTypeName, capabilityKey);
+        }
+    }
 
-    // 6. Capabilities (depend on datatypes)
+    // 5. Relationships (depend on capabilities)
 
-    // 7. Relationships (depend on capabilities)
+    // 6. Nodes (depend on datatypes, capabilities, relationships, interfaces, artifacts)
 
-    // 8. Nodes (depend on datatypes, capabilities, relationships, interfaces, artifacts)
+    // 7. Groups (depend on nodes)
 
+    // 8. Policies (depend on nodes, groups)
 
     // write file
     let hint = "/* \n   Caution!!! This code is generated!!!! Do not modify, but instead regenerate it based on the .yaml Profile descriptions \n*/\n";
@@ -350,59 +380,121 @@ async function saveGeneratedProfileAsTypescriptTypes(profileInfo: ProfileInfo, m
 }
 
 
-function buildTsTypeForDatatype(datatypeKey: string, datatype: TOSCA_Datatype, allDataTypes: { [datatypeKey: string]: TOSCA_Datatype }): string {
-    if (!datatype.derived_from) {
-        return "any";
-    } else if (datatype.derived_from === "boolean") {
-        return "boolean";
-    } else if (datatype.derived_from === "string" || datatype.derived_from === "timestamp" || datatype.derived_from === "version") {
-        return "string";
-    } else if (datatype.derived_from === "integer" || datatype.derived_from === "float") {
-        return "number";
-    } else if (datatype.derived_from === "range") {
-        return "number[]";
-    } else { //TODO consider "list" and "map" here?
-        let generatedTypeDefinition = "{\n";
-        let datatypeProperties: { [propertyKey: string]: TOSCA_Property } = {};
-        let currentType = datatype;
-        while (currentType) {
-            if (currentType.properties) {
-                for (const [propKey, prop] of Object.entries(currentType.properties)) {
-                    generatedTypeDefinition = generatedTypeDefinition.concat(`    ${propKey}${prop.required ? "" : "?"}: ${getTypeForToscaType(prop.type, allDataTypes)},\n`)
+function buildTsTypeForDatatype(datatype: string | TOSCA_Datatype, allDataTypes: { [datatypeKey: string]: TOSCA_Datatype }, alreadyParsedTypes: TwoWayKeyTypeMap): string {
+    if (typeof datatype === "string") {
+        switch (datatype) {
+            case "boolean":
+                return "boolean";
+            case "string":
+            case "timestamp":
+            case "version":
+            case "scalar-unit.size":
+            case "scalar-unit.time":
+            case "scalar-unit.frequency":
+            case "scalar-unit.bitrate":
+                return "string";
+            case "integer":
+            case "float":
+                return "number";
+            case "range":
+                return "number[]";
+            default:
+                let alreadyParsed = alreadyParsedTypes.getType(datatype);
+                if (alreadyParsed) {
+                    console.log("type " + datatype + " found in already parsed types");
+                    return alreadyParsed;
+                } else {
+                    console.log("trying to derive type for: " + datatype);
+                    return buildTsTypeForDatatype(allDataTypes[datatype], allDataTypes, alreadyParsedTypes);
+                }
+        }
+    } else {
+        // type must be TOSCA_Datatype
+        if (!datatype.derived_from) {
+            return "any"
+        } else {
+            switch (datatype.derived_from) {
+                case "boolean":
+                case "string":
+                case "timestamp":
+                case "version":
+                case "scalar-unit.size":
+                case "scalar-unit.time":
+                case "scalar-unit.frequency":
+                case "scalar-unit.bitrate":
+                case "integer":
+                case "float":
+                case "range":
+                    return buildTsTypeForDatatype(datatype.derived_from, allDataTypes, alreadyParsedTypes)
+                default:
+                    console.log("trying to derive type for: " + datatype);
+                    break;
+            }
+            let generatedTypeDefinition = "{\n    properties: {\n";
+            let currentType = datatype;
+            while (currentType) {
+                if (currentType.properties) {
+                    for (const [propKey, prop] of Object.entries(currentType.properties)) {
+                        generatedTypeDefinition = generatedTypeDefinition.concat(`    ${propKey}${prop.required ? "" : "?"}: ${getTypeForToscaPropertyType(prop, allDataTypes, alreadyParsedTypes)},\n`)
+                    }
+                }
+                if (currentType.derived_from) {
+                    currentType = allDataTypes[currentType.derived_from];
+                } else {
+                    break;
                 }
             }
-            if (currentType.derived_from) {
-                currentType = allDataTypes[currentType.derived_from];
-            } else {
-                break;
-            }
+            generatedTypeDefinition = generatedTypeDefinition.concat("    }\n}")
+            return generatedTypeDefinition;
         }
-        generatedTypeDefinition = generatedTypeDefinition.concat("}")
-        return generatedTypeDefinition;
     }
 }
 
 
-function getTypeForToscaType(toscaType: string, allDataTypes: { [datatypeKey: string]: TOSCA_Datatype }): string {
-    switch (toscaType) {
-        case "boolean":
-            return "boolean";
-        case "string":
-        case "timestamp":
-        case "version":
-            return "string";
-        case "integer":
-        case "float":
-            return "number";
-        case "range":
-            return "number[]";
-        case "list":
-            return "string[]";
+function getTypeForToscaPropertyType(property: TOSCA_Property, allDataTypes: { [datatypeKey: string]: TOSCA_Datatype }, alreadyParsedTypes: TwoWayKeyTypeMap): string {
+    switch (property.type) {
         case "map":
-            return "{[mapKey: string]: string}";
+            if (property.entry_schema) {
+                return `{[mapKey: string]: ${buildTsTypeForDatatype(property.entry_schema.type, allDataTypes, alreadyParsedTypes)}}`;
+            } else {
+                return "{[mapKey: string]: string}";
+            }
+        case "list":
+            if (property.entry_schema) {
+                return `${buildTsTypeForDatatype(property.entry_schema.type, allDataTypes, alreadyParsedTypes)}[]`;
+            } else {
+                return "string[]";
+            }
         default:
-            console.log("trying to derive type for: " + toscaType);
             break;
     }
-    return getTypeForToscaType(allDataTypes[toscaType].derived_from, allDataTypes);
+    return buildTsTypeForDatatype(property.type, allDataTypes, alreadyParsedTypes);
+}
+
+function buildTsTypeForCapability(capability: TOSCA_Capability_Type, allCapabilityTypes: { [capabilityKey: string]: TOSCA_Capability_Type }, allDataTypes: { [datatypeKey: string]: TOSCA_Datatype }, alreadyParsedTypes: TwoWayKeyTypeMap): string {
+    let allProperties: { [propKey: string]: TOSCA_Property } = {};
+    let currentCapability = capability;
+    while (currentCapability) {
+        if (currentCapability.properties) {
+            for (const [propKey, prop] of Object.entries(currentCapability.properties)) {
+                allProperties[propKey] = prop;
+                //generatedTypeDefinition = generatedTypeDefinition.concat(`    ${propKey}${prop.required ? "" : "?"}: ${getTypeForToscaType(prop.type, allDataTypes)},\n`)
+            }
+        }
+        if (currentCapability.derived_from) {
+            currentCapability = allCapabilityTypes[currentCapability.derived_from];
+        } else {
+            break;
+        }
+    }
+    if (Object.keys(allProperties).length > 0) {
+        let generatedTypeDefinition = "{\n    properties: {\n";
+        for (const [propKey, prop] of Object.entries(allProperties)) {
+            generatedTypeDefinition = generatedTypeDefinition.concat(`    ${propKey}${prop.required ? "" : "?"}: ${getTypeForToscaPropertyType(prop, allDataTypes, alreadyParsedTypes)},\n`)
+        }
+        generatedTypeDefinition = generatedTypeDefinition.concat("    }\n}")
+        return generatedTypeDefinition;
+    } else {
+        return "string" //TODO how to deal with a capability that has no properties?
+    }
 }

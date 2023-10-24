@@ -1,6 +1,6 @@
-import { TOSCA_Attribute_Instance_Key, TOSCA_Capability_Definition_Key as TOSCA_Capability_Type_Key, TOSCA_Capability_Instance_Key, TOSCA_Interface_Template_Key, TOSCA_Node_Type_Key, TOSCA_Node_Template_Key, TOSCA_Property_Instance_Key, TOSCA_Relationship_Type_Key, TOSCA_Relationship_Template_Key, TOSCA_Requirement_Instance_Key, TOSCA_Capability_Definition_Key, TOSCA_Interface_Definition_Key, TOSCA_Artifact_Definition_Key, TOSCA_Group_Type_Key, TOSCA_Policy_Type_Key, TOSCA_Trigger_Type_Key, TOSCA_Property_Definition_Key, TOSCA_Parameter_Definition_Key, TOSCA_Group_Template_Key, TOSCA_Datatype_Type_Key, TOSCA_Repository_Definition_Key, TOSCA_Workflow_Step_Definition_Key, TOSCA_Operation_Instance_Key, TOSCA_Workflow_Instance_Key } from "./alias-types"
-import { TOSCA_Datatype, TOSCA_Attribute_Assignment, TOSCA_Import, TOSCA_Interface, TOSCA_Metadata, TOSCA_Node_Filter, TOSCA_Operation_Implementation, TOSCA_Parameter, TOSCA_Property, TOSCA_Property_Assignment, TOSCA_Repository, TOSCA_Trigger, TOSCA_Workflow_Precondition, TOSCA_Workflow_Step } from "./core-types"
-import { TOSCA_Capability, TOSCA_Artifact, TOSCA_Interface2, TOSCA_Relationship, TOSCA_Group, TOSCA_Policy, TOSCA_Node } from "./entity-types"
+import { TOSCA_Attribute_Instance_Key, TOSCA_Capability_Instance_Key, TOSCA_Node_Type_Key, TOSCA_Node_Template_Key, TOSCA_Property_Instance_Key, TOSCA_Relationship_Type_Key, TOSCA_Relationship_Template_Key, TOSCA_Requirement_Instance_Key, TOSCA_Group_Type_Key, TOSCA_Policy_Type_Key, TOSCA_Trigger_Type_Key, TOSCA_Property_Definition_Key, TOSCA_Parameter_Definition_Key, TOSCA_Group_Template_Key, TOSCA_Datatype_Type_Key, TOSCA_Repository_Definition_Key, TOSCA_Workflow_Step_Definition_Key, TOSCA_Operation_Instance_Key, TOSCA_Workflow_Instance_Key, TOSCA_Interface_Type_Key, TOSCA_Interface_Instance_Key, TOSCA_Capability_Type_Key, TOSCA_Artifact_Type_Key, TOSCA_Artifact_Instance_Key } from "./alias-types"
+import { TOSCA_Datatype, TOSCA_Attribute_Assignment, TOSCA_Import, TOSCA_Interface, TOSCA_Metadata, TOSCA_Node_Filter, TOSCA_Operation_Implementation, TOSCA_Parameter, TOSCA_Property, TOSCA_Property_Assignment, TOSCA_Repository, TOSCA_Trigger, TOSCA_Workflow_Precondition, TOSCA_Workflow_Step, TOSCA_Artifact } from "./core-types"
+import { TOSCA_Capability, TOSCA_Relationship, TOSCA_Group, TOSCA_Policy, TOSCA_Node, TOSCA_Interface_Type, TOSCA_Capability_Type, TOSCA_Artifact_Type } from "./entity-types"
 
 
 // 3.8.1 Capability assignment
@@ -24,7 +24,7 @@ export type TOSCA_Requirement_Assignment = {
             [propertyKey: TOSCA_Property_Instance_Key]: TOSCA_Property_Assignment
         },
         interfaces?: {
-            [interfaceKey: TOSCA_Interface_Template_Key]: TOSCA_Interface
+            [interfaceKey: TOSCA_Interface_Instance_Key]: TOSCA_Interface
         }
     }
     node_filer?: TOSCA_Node_Filter,
@@ -50,10 +50,10 @@ export type TOSCA_Node_Template = {
         [capabilityKey: TOSCA_Capability_Instance_Key]: TOSCA_Capability_Assignment
     },
     interfaces?: {
-        [interfaceKey: TOSCA_Interface_Definition_Key]: TOSCA_Interface
+        [interfaceKey: TOSCA_Interface_Instance_Key]: TOSCA_Interface
     },
     artifacts?: {
-        [artifactKey: TOSCA_Artifact_Definition_Key]: TOSCA_Artifact
+        [artifactKey: TOSCA_Artifact_Instance_Key]: TOSCA_Artifact
     },
     node_filter?: TOSCA_Node_Filter,
     copy?: TOSCA_Node_Template_Key
@@ -71,7 +71,7 @@ export type TOSCA_Relationship_Template = {
         [attributeKey: TOSCA_Attribute_Instance_Key]: TOSCA_Attribute_Assignment
     },
     interfaces?: {
-        [interfaceKey: TOSCA_Interface_Definition_Key]: TOSCA_Interface
+        [interfaceKey: TOSCA_Interface_Instance_Key]: TOSCA_Interface
     },
     copy?: TOSCA_Relationship_Template_Key
 }
@@ -173,7 +173,7 @@ export type TOSCA_Substitution_Mapping = {
         [requirementKey: TOSCA_Requirement_Instance_Key]: TOSCA_Requirement_Mapping
     },
     interfaces?: {
-        [interfaceKey: TOSCA_Interface_Template_Key]: TOSCA_Interface_Mapping
+        [interfaceKey: TOSCA_Interface_Instance_Key]: TOSCA_Interface_Mapping
     }
 }
 
@@ -220,16 +220,16 @@ export type TOSCA_Service_Template = {
     },
     imports?: TOSCA_Import[],
     artifact_types?: {
-        [artifactKey: TOSCA_Artifact_Definition_Key]: TOSCA_Artifact
+        [artifactKey: TOSCA_Artifact_Type_Key]: TOSCA_Artifact_Type
     },
     data_types?:  {
         [datatypeKey: TOSCA_Datatype_Type_Key]: TOSCA_Datatype
     },
     capability_types?: {
-        [capabilityKey: TOSCA_Capability_Type_Key]: TOSCA_Capability 
+        [capabilityKey: TOSCA_Capability_Type_Key]: TOSCA_Capability_Type
     },
     interface_types?: {
-        [interfaceKey: TOSCA_Interface_Definition_Key]: TOSCA_Interface2
+        [interfaceKey: TOSCA_Interface_Type_Key]: TOSCA_Interface_Type
     },
     relationship_types?: {
         [relationshipKey: TOSCA_Relationship_Type_Key]: TOSCA_Relationship

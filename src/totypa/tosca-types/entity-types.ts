@@ -1,5 +1,5 @@
-import { TOSCA_Artifact_Definition_Key, TOSCA_Artifact_Instance_Key, TOSCA_Attribute_Definition_Key, TOSCA_Capability_Definition_Key, TOSCA_Capability_Instance_Key, TOSCA_Group_Template_Key, TOSCA_Group_Type_Key, TOSCA_Interface_Definition_Key, TOSCA_Interface_Template_Key, TOSCA_Node_Type_Key, TOSCA_Notification_Definition_Key, TOSCA_Operation_Definition_Key, TOSCA_Policy_Type_Key, TOSCA_Property_Definition_Key, TOSCA_Relationship_Type_Key, TOSCA_Requirement_Definition_Key, TOSCA_Requirement_Instance_Key, TOSCA_Trigger_Type_Key } from "./alias-types"
-import type { TOSCA_Metadata, TOSCA_Property, TOSCA_Attribute, TOSCA_Interface, TOSCA_Property_Schema, TOSCA_Operation, TOSCA_Notification, TOSCA_Trigger } from "./core-types"
+import { TOSCA_Artifact_File_Uri, TOSCA_Artifact_Instance_Key, TOSCA_Artifact_Type_Key, TOSCA_Attribute_Definition_Key, TOSCA_Capability_Instance_Key, TOSCA_Capability_Type_Key, TOSCA_Group_Template_Key, TOSCA_Group_Type_Key, TOSCA_Interface_Instance_Key, TOSCA_Interface_Type_Key, TOSCA_Node_Type_Key, TOSCA_Notification_Definition_Key, TOSCA_Operation_Definition_Key, TOSCA_Policy_Type_Key, TOSCA_Property_Definition_Key, TOSCA_Relationship_Type_Key, TOSCA_Requirement_Instance_Key, TOSCA_Trigger_Type_Key } from "./alias-types"
+import type { TOSCA_Metadata, TOSCA_Property, TOSCA_Attribute, TOSCA_Interface, TOSCA_Property_Schema, TOSCA_Operation, TOSCA_Notification, TOSCA_Trigger, TOSCA_Artifact } from "./core-types"
 
 
 // 3.7.1 Entity Type Schema
@@ -10,11 +10,10 @@ export type TOSCA_Entity = {
     description?: string
 }
 
-// 3.7.2 Capability definition / 3.7.7 Capability Type
+// 3.7.2 Capability definition
 export type TOSCA_Capability = {
-    type?: TOSCA_Capability_Definition_Key,
+    type?: TOSCA_Capability_Type_Key,
     description?: string,
-    derived_from?: TOSCA_Capability_Definition_Key,
     properties?: {
         [propertyKey: TOSCA_Property_Definition_Key]: TOSCA_Property
     }
@@ -25,18 +24,18 @@ export type TOSCA_Capability = {
     occurrences?: (string | number)[]
 }
 
-// 3.7.3 Requirement definition / 3.7.8 Requirement Type
+// 3.7.3 Requirement definition
 export type TOSCA_Requirement = {
-    capability: TOSCA_Capability_Definition_Key,
+    capability: TOSCA_Capability_Type_Key,
     node?: TOSCA_Node_Type_Key,
-    relationship?: TOSCA_Relationship_Type_Key | { type: TOSCA_Relationship_Type_Key, interfaces: { [interfaceKey: TOSCA_Interface_Definition_Key]: TOSCA_Interface } }
+    relationship?: TOSCA_Relationship_Type_Key | { type: TOSCA_Relationship_Type_Key, interfaces: { [interfaceKey: TOSCA_Interface_Instance_Key]: TOSCA_Interface } }
     occurrences?: (string| number)[],
     description?: string
 }
 
 // 3.7.4 Artifact Type
-export type TOSCA_Artifact = {
-    derived_from?: TOSCA_Attribute_Definition_Key,
+export type TOSCA_Artifact_Type = {
+    derived_from?: TOSCA_Artifact_Type_Key,
     version?: string,
     metadata?: TOSCA_Metadata,
     description?: string
@@ -48,8 +47,8 @@ export type TOSCA_Artifact = {
 }
 
 // 3.7.5 Interface Type
-export type TOSCA_Interface2 = {
-    derived_from?: TOSCA_Interface_Definition_Key,
+export type TOSCA_Interface_Type = {
+    derived_from?: TOSCA_Interface_Type_Key,
     version?: string,
     metadata?: TOSCA_Metadata,
     description?: string
@@ -61,6 +60,23 @@ export type TOSCA_Interface2 = {
         [notificationKey: TOSCA_Notification_Definition_Key]: TOSCA_Notification
     }
 }
+
+// 3.7.7 Capability Type
+export type TOSCA_Capability_Type = {
+    derived_from?: TOSCA_Capability_Type_Key,
+    description?: string,
+    properties?: {
+        [propertyKey: TOSCA_Property_Definition_Key]: TOSCA_Property
+    }
+    attributes?: {
+        [attributeKey: TOSCA_Attribute_Definition_Key]: TOSCA_Attribute,
+    }
+    valid_source_types?: TOSCA_Node_Type_Key[],
+    occurrences?: (string | number)[]
+}
+
+// 3.7.8 Requirement Type
+// not needed anymore
 
 // 3.7.9 Node Type
 export type TOSCA_Node = {
@@ -75,16 +91,16 @@ export type TOSCA_Node = {
         [attributeKey: TOSCA_Attribute_Definition_Key]: TOSCA_Attribute
     },
     requirements?: {
-        [requirementKey: TOSCA_Requirement_Instance_Key]: TOSCA_Requirement | TOSCA_Requirement_Definition_Key
+        [requirementKey: TOSCA_Requirement_Instance_Key]: TOSCA_Requirement | TOSCA_Capability_Type_Key
     }[],
     capabilities?: {
-        [capabilityKey: TOSCA_Capability_Instance_Key]: TOSCA_Capability | TOSCA_Capability_Definition_Key
+        [capabilityKey: TOSCA_Capability_Instance_Key]: TOSCA_Capability | TOSCA_Capability_Type_Key
     },
     interfaces?: {
-        [interfaceKey: TOSCA_Interface_Template_Key]: TOSCA_Interface | TOSCA_Interface_Definition_Key
+        [interfaceKey: TOSCA_Interface_Instance_Key]: TOSCA_Interface
     },
     artifacts?: {
-        [artifactKey: TOSCA_Artifact_Instance_Key]: TOSCA_Artifact | TOSCA_Artifact_Definition_Key
+        [artifactKey: TOSCA_Artifact_Instance_Key]: TOSCA_Artifact | TOSCA_Artifact_File_Uri
     }
 }
 
@@ -101,9 +117,9 @@ export type TOSCA_Relationship = {
         [attributeKey: TOSCA_Attribute_Definition_Key]: TOSCA_Attribute
     },
     interfaces?: {
-        [interfaceKey: TOSCA_Interface_Definition_Key]: TOSCA_Interface
+        [interfaceKey: TOSCA_Interface_Instance_Key]: TOSCA_Interface
     },
-    valid_target_types?: TOSCA_Capability_Definition_Key[]
+    valid_target_types?: TOSCA_Capability_Type_Key[]
 }
 
 // 3.7.11 Group Type
