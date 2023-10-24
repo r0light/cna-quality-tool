@@ -3,6 +3,7 @@
 */
 
 import { TOSCA_Requirement_Assignment } from "../tosca-types/template-types"
+import { ToscaDatatypesCredential, ToscaCapabilitiesEndpoint, ToscaDatatypesNetworkNetworkInfo, ToscaDatatypesNetworkPortInfo, ToscaCapabilitiesCompute, ToscaCapabilitiesAttachment, ToscaCapabilitiesNode } from './tosca_simple_profile_for_yaml_v1_3_ts_types'
 
 export type CnaQualityModelCapabilitiesDataStorage = string
 export type CnaQualityModelEntitiesConnectsToLink = {
@@ -27,8 +28,6 @@ attributes: {
 },
 capabilities: {
     endpoint: ToscaCapabilitiesEndpoint,
-    external_endpoint: ToscaCapabilitiesEndpointPublic,
-    feature: ToscaCapabilitiesNode,
 },
 requirements: {host: TOSCA_Requirement_Assignment | string} | {endpoint_link: TOSCA_Requirement_Assignment | string} | {uses_data: TOSCA_Requirement_Assignment | string} | {uses_backing_data: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[]}
 export type CnaQualityModelEntitiesSoftwareComponentService = {
@@ -43,8 +42,6 @@ attributes: {
 },
 capabilities: {
     endpoint: ToscaCapabilitiesEndpoint,
-    external_endpoint: ToscaCapabilitiesEndpointPublic,
-    feature: ToscaCapabilitiesNode,
 },
 requirements: {endpoint_link: TOSCA_Requirement_Assignment | string} | {uses_data: TOSCA_Requirement_Assignment | string} | {uses_backing_data: TOSCA_Requirement_Assignment | string} | {host: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[]}
 export type CnaQualityModelEntitiesBackingService = {
@@ -58,8 +55,6 @@ attributes: {
 },
 capabilities: {
     endpoint: ToscaCapabilitiesEndpoint,
-    external_endpoint: ToscaCapabilitiesEndpointPublic,
-    feature: ToscaCapabilitiesNode,
 },
 requirements: {endpoint_link: TOSCA_Requirement_Assignment | string} | {uses_data: TOSCA_Requirement_Assignment | string} | {uses_backing_data: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[]}
 export type CnaQualityModelEntitiesComputeInfrastructure = {
@@ -74,11 +69,6 @@ export type CnaQualityModelEntitiesComputeInfrastructure = {
 },
 capabilities: {
     host: ToscaCapabilitiesCompute,
-    os: ToscaCapabilitiesOperatingSystem,
-    endpoint: ToscaCapabilitiesEndpointAdmin,
-    scalable: ToscaCapabilitiesScalable,
-    binding: ToscaCapabilitiesNetworkBindable,
-    feature: ToscaCapabilitiesNode,
 },
 requirements: {host: TOSCA_Requirement_Assignment | string} | {uses_backing_data: TOSCA_Requirement_Assignment | string} | {local_storage: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[]}
 export type CnaQualityModelEntitiesBackingData = {
@@ -92,7 +82,6 @@ attributes: {
 },
 capabilities: {
     provided_data: ToscaCapabilitiesAttachment,
-    feature: ToscaCapabilitiesNode,
 },
 requirements: {dependency: TOSCA_Requirement_Assignment | string}[]}
 export type CnaQualityModelEntitiesDataAggregate = {
@@ -103,7 +92,6 @@ export type CnaQualityModelEntitiesDataAggregate = {
 },
 capabilities: {
     provided_data: ToscaCapabilitiesAttachment,
-    feature: ToscaCapabilitiesNode,
 },
 requirements: {persistence: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[]}
 export type CnaQualityModelEntitiesDBMSStorageService = {
@@ -121,10 +109,6 @@ attributes: {
 },
 capabilities: {
     endpoint: ToscaCapabilitiesEndpoint,
-    external_endpoint: ToscaCapabilitiesEndpointPublic,
-    persist_data: CnaQualityModelCapabilitiesDataStorage,
-    host: ToscaCapabilitiesCompute,
-    feature: ToscaCapabilitiesNode,
 },
 requirements: {endpoint_link: TOSCA_Requirement_Assignment | string} | {uses_data: TOSCA_Requirement_Assignment | string} | {uses_backing_data: TOSCA_Requirement_Assignment | string} | {host: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[]}
 export type CnaQualityModelEntitiesRequestTrace = {

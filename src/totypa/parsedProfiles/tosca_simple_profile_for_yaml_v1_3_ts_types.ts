@@ -246,7 +246,6 @@ export type ToscaNodesAbstractCompute = {
 },
 capabilities: {
     host: ToscaCapabilitiesCompute,
-    feature: ToscaCapabilitiesNode,
 },
 requirements: {dependency: TOSCA_Requirement_Assignment | string}[]}
 export type ToscaNodesCompute = {
@@ -261,11 +260,6 @@ export type ToscaNodesCompute = {
 },
 capabilities: {
     host: ToscaCapabilitiesCompute,
-    os: ToscaCapabilitiesOperatingSystem,
-    endpoint: ToscaCapabilitiesEndpointAdmin,
-    scalable: ToscaCapabilitiesScalable,
-    binding: ToscaCapabilitiesNetworkBindable,
-    feature: ToscaCapabilitiesNode,
 },
 requirements: {local_storage: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[]}
 export type ToscaNodesSoftwareComponent = {
@@ -294,9 +288,6 @@ attributes: {
 },
 capabilities: {
     data_endpoint: ToscaCapabilitiesEndpoint,
-    admin_endpoint: ToscaCapabilitiesEndpointAdmin,
-    host: ToscaCapabilitiesCompute,
-    feature: ToscaCapabilitiesNode,
 },
 requirements: {host: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[]}
 export type ToscaNodesWebApplication = {
@@ -310,7 +301,6 @@ attributes: {
 },
 capabilities: {
     app_endpoint: ToscaCapabilitiesEndpoint,
-    feature: ToscaCapabilitiesNode,
 },
 requirements: {host: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[]}
 export type ToscaNodesDBMS = {
@@ -327,7 +317,6 @@ attributes: {
 },
 capabilities: {
     host: ToscaCapabilitiesCompute,
-    feature: ToscaCapabilitiesNode,
 },
 requirements: {host: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[]}
 export type ToscaNodesDatabase = {
@@ -344,7 +333,6 @@ attributes: {
 },
 capabilities: {
     database_endpoint: ToscaCapabilitiesEndpointDatabase,
-    feature: ToscaCapabilitiesNode,
 },
 requirements: {host: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[]}
 export type ToscaNodesAbstractStorage = {
@@ -374,7 +362,6 @@ attributes: {
 },
 capabilities: {
     storage_endpoint: ToscaCapabilitiesEndpoint,
-    feature: ToscaCapabilitiesNode,
 },
 requirements: {dependency: TOSCA_Requirement_Assignment | string}[]}
 export type ToscaNodesStorageBlockStorage = {
@@ -391,7 +378,6 @@ attributes: {
 },
 capabilities: {
     attachment: ToscaCapabilitiesAttachment,
-    feature: ToscaCapabilitiesNode,
 },
 requirements: {dependency: TOSCA_Requirement_Assignment | string}[]}
 export type ToscaNodesContainerRuntime = {
@@ -406,8 +392,6 @@ attributes: {
 },
 capabilities: {
     host: ToscaCapabilitiesCompute,
-    scalable: ToscaCapabilitiesScalable,
-    feature: ToscaCapabilitiesNode,
 },
 requirements: {host: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[]}
 export type ToscaNodesContainerApplication = {
@@ -431,7 +415,6 @@ attributes: {
 },
 capabilities: {
     client: ToscaCapabilitiesEndpointPublic,
-    feature: ToscaCapabilitiesNode,
 },
 requirements: {application: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[]}
 export type ToscaNodesNetworkNetwork = {
@@ -456,7 +439,6 @@ attributes: {
 },
 capabilities: {
     link: ToscaCapabilitiesNetworkLinkable,
-    feature: ToscaCapabilitiesNode,
 },
 requirements: {dependency: TOSCA_Requirement_Assignment | string}[]}
 export type ToscaNodesNetworkPort = {

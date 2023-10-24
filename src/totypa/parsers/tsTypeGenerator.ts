@@ -13,7 +13,8 @@ const YAML_KEY_PATTERN = new RegExp(/\.([A-z])/g);
 const MATCH_FIRST_CHARACTER = new RegExp(/^./g);
 
 type ProfileInfo = {
-    fileName: string,
+    jsonFileName: string,
+    typesFileName: string,
     profileName: string,
     profile: TOSCA_Service_Template
 }
@@ -25,8 +26,6 @@ startParsing();
 async function startParsing() {
     parseAllProfiles("../../../tosca-profiles").then(promises => {
         return Promise.all(promises).then(profiles => {
-
-            console.log(profiles)
 
             let results: Promise<void>[] = [];
 
@@ -94,7 +93,8 @@ function parseAllProfiles(profilesFolder: string): Promise<Promise<ProfileInfo>[
                     return generateFromProfile(fullDirectoryPath).then(profile => {
                         let generatedName = entry.replace(/\s/g, "").replace(/[\.-]/g, "_");
                         return {
-                            fileName: `${generatedName}.ts`,
+                            jsonFileName: `${generatedName}.ts`,
+                            typesFileName: `${generatedName}_ts_types.ts`,
                             profileName: generatedName,
                             profile: profile
                         }
@@ -297,7 +297,7 @@ async function saveGeneratedProfileAsJson(profileInfo: ProfileInfo): Promise<Pro
 
     let preparedData = `import { TOSCA_Service_Template } from '../tosca-types/template-types';\n\nexport const ${profileInfo.profileName}: TOSCA_Service_Template = ${JSON.stringify(profileInfo.profile, null, 2)};`
 
-    fs.writeFile(`../parsedProfiles/${profileInfo.fileName}`, `${hint}\n${preparedData}`, (err) => {
+    fs.writeFile(`../parsedProfiles/${profileInfo.jsonFileName}`, `${hint}\n${preparedData}`, (err) => {
         if (err) {
             console.error(`Could not save ${profileInfo.profileName} to file: ${err}`)
             return err;
@@ -316,6 +316,30 @@ function toPascalCase(name: string): string {
     return name.replace(YAML_KEY_PATTERN, (match, capture) => capture.toUpperCase()).replace(MATCH_FIRST_CHARACTER, (match) => match.toUpperCase())
 }
 
+class ImportManager {
+
+    #requiredImports = new Map<string, Set<string>>;
+
+    add(typeName, sourceFile) {
+        if (this.#requiredImports.has(sourceFile)) {
+            this.#requiredImports.get(sourceFile).add(typeName);
+        } else {
+            let imports: Set<string> = new Set();
+            imports.add(typeName);
+            this.#requiredImports.set(sourceFile, imports);
+        }
+    }
+
+    generateImportStatement() {
+        let statement = "";
+        for (const [sourceFile, imports] of this.#requiredImports.entries()) {
+            let fileWithoutEnding = sourceFile.includes(".ts") ? sourceFile.substring(0, sourceFile.indexOf(".ts")) : sourceFile;
+            statement = statement.concat(`import { ${[...imports].join(", ")} } from './${fileWithoutEnding}'\n`);
+        }
+        return statement;
+    }
+}
+
 
 class TypescriptTypeGenerator {
 
@@ -325,18 +349,16 @@ class TypescriptTypeGenerator {
 
     #typeKeyMap: TwoWayKeyTypeMap;
 
-    #requiredImports: Map<string, string[]>;
+    #importManager: ImportManager;
 
     constructor(mergedProfile: TOSCA_Service_Template, currentProfile: ProfileInfo, typeKeyMap: TwoWayKeyTypeMap) {
         this.#mergedProfile = mergedProfile;
         this.#currentProfile = currentProfile;
         this.#typeKeyMap = typeKeyMap;
-        this.#requiredImports = new Map();
+        this.#importManager = new ImportManager();
     }
 
     async saveGeneratedProfileAsTypescriptTypes(): Promise<profileTypesInfo> {
-
-        // TODO handle type imports from other already parsed types
 
         let generatedTypeDefinitions: string[] = [];
 
@@ -345,7 +367,7 @@ class TypescriptTypeGenerator {
             for (const [datatypeKey, datatype] of Object.entries(this.#currentProfile.profile.data_types)) {
                 let datatypeTypeName = toPascalCase(datatypeKey);
                 generatedTypeDefinitions.push(`export type ${datatypeTypeName} = ${this.#buildTsTypeForDatatype(datatype)}`)
-                this.#typeKeyMap.add({ typeName: datatypeTypeName, sourceFile: this.#currentProfile.fileName }, datatypeKey);
+                this.#typeKeyMap.add({ typeName: datatypeTypeName, sourceFile: this.#currentProfile.typesFileName }, datatypeKey);
             }
         }
 
@@ -356,7 +378,7 @@ class TypescriptTypeGenerator {
                 generatedTypeDefinitions.push(`export type ${interfaceTypeName} = object`)
                 // TODO add attributes to type, based on an example of a node template that declares an interface of a specific type.
                 // TODO consider derived_from to add all attributes also of parent interface types
-                this.#typeKeyMap.add({ typeName: interfaceTypeName, sourceFile: this.#currentProfile.fileName }, interfaceKey);
+                this.#typeKeyMap.add({ typeName: interfaceTypeName, sourceFile: this.#currentProfile.typesFileName }, interfaceKey);
             }
         }
 
@@ -367,7 +389,7 @@ class TypescriptTypeGenerator {
                 generatedTypeDefinitions.push(`export type ${artifactTypeName} = object`)
                 // TODO add attributes to type, based on an example of a node template that declares an artifact of a specific type.
                 // TODO consider derived_from to add all attributes also of parent artifact types
-                this.#typeKeyMap.add({ typeName: artifactTypeName, sourceFile: this.#currentProfile.fileName }, artifactKey);
+                this.#typeKeyMap.add({ typeName: artifactTypeName, sourceFile: this.#currentProfile.typesFileName }, artifactKey);
             }
         }
 
@@ -376,7 +398,7 @@ class TypescriptTypeGenerator {
             for (const [capabilityKey, capability] of Object.entries(this.#currentProfile.profile.capability_types)) {
                 let capabilityTypeName = toPascalCase(capabilityKey);
                 generatedTypeDefinitions.push(`export type ${capabilityTypeName} = ${this.#buildTsTypeForCapability(capability)}`)
-                this.#typeKeyMap.add({ typeName: capabilityTypeName, sourceFile: this.#currentProfile.fileName }, capabilityKey);
+                this.#typeKeyMap.add({ typeName: capabilityTypeName, sourceFile: this.#currentProfile.typesFileName }, capabilityKey);
             }
         }
 
@@ -385,7 +407,7 @@ class TypescriptTypeGenerator {
             for (const [relationshipKey, relationship] of Object.entries(this.#currentProfile.profile.relationship_types)) {
                 let relationshipTypeName = toPascalCase(relationshipKey);
                 generatedTypeDefinitions.push(`export type ${relationshipTypeName} = ${this.#buildTsTypeForRelationship(relationship)}`);
-                this.#typeKeyMap.add({ typeName: relationshipTypeName, sourceFile: this.#currentProfile.fileName }, relationshipKey);
+                this.#typeKeyMap.add({ typeName: relationshipTypeName, sourceFile: this.#currentProfile.typesFileName }, relationshipKey);
             }
         }
 
@@ -394,7 +416,7 @@ class TypescriptTypeGenerator {
             for (const [nodeKey, node] of Object.entries(this.#currentProfile.profile.node_types)) {
                 let nodeTypeName = toPascalCase(nodeKey);
                 generatedTypeDefinitions.push(`export type ${nodeTypeName} = ${this.#buildTsTypeForNode(node)}`);
-                this.#typeKeyMap.add({ typeName: nodeTypeName, sourceFile: this.#currentProfile.fileName }, nodeKey);
+                this.#typeKeyMap.add({ typeName: nodeTypeName, sourceFile: this.#currentProfile.typesFileName }, nodeKey);
             }
         }
 
@@ -405,7 +427,7 @@ class TypescriptTypeGenerator {
         // write file
         let hint = "/* \n   Caution!!! This code is generated!!!! Do not modify, but instead regenerate it based on the .yaml Profile descriptions \n*/\n";
 
-        let imports = 'import { TOSCA_Requirement_Assignment } from "../tosca-types/template-types"\n';
+        let imports = 'import { TOSCA_Requirement_Assignment } from "../tosca-types/template-types"\n'.concat(this.#importManager.generateImportStatement());
 
         let preparedData = generatedTypeDefinitions.join("\n");
 
@@ -447,6 +469,9 @@ class TypescriptTypeGenerator {
                     let alreadyParsed = this.#typeKeyMap.getType(datatype);
                     if (alreadyParsed.typeName) {
                         console.log("type " + datatype + " found in already parsed types");
+                        if (alreadyParsed.sourceFile !== this.#currentProfile.typesFileName) {
+                            this.#importManager.add(alreadyParsed.typeName, alreadyParsed.sourceFile);
+                        }
                         return alreadyParsed.typeName;
                     } else {
                         console.log("trying to derive type for: " + datatype);
@@ -638,15 +663,16 @@ class TypescriptTypeGenerator {
         if (Object.keys(allCapabilities).length > 0) {
             let generatedCapabilitesTypeDefinition = "capabilities: {\n";
             for (const [capabilityKey, capability] of Object.entries(allCapabilities)) {
-                if (typeof capability === "string") {
-                    generatedCapabilitesTypeDefinition = generatedCapabilitesTypeDefinition.concat(`    ${capabilityKey}: ${this.#typeKeyMap.getType(capability).typeName},\n`)
-                } else {
-                    generatedCapabilitesTypeDefinition = generatedCapabilitesTypeDefinition.concat(`    ${capabilityKey}: ${this.#typeKeyMap.getType(capability.type).typeName},\n`)
+                let alreadyParsed = typeof capability === "string" ? this.#typeKeyMap.getType(capability) : this.#typeKeyMap.getType(capability.type);
+                if (alreadyParsed.typeName) {
+                    if (alreadyParsed.sourceFile !== this.#currentProfile.typesFileName) {
+                        this.#importManager.add(alreadyParsed.typeName, alreadyParsed.sourceFile);
+                    }
+                    generatedCapabilitesTypeDefinition = generatedCapabilitesTypeDefinition.concat(`    ${capabilityKey}: ${alreadyParsed.typeName},\n`)
                 }
+                return generatedCapabilitesTypeDefinition.concat("},\n")
             }
-            return generatedCapabilitesTypeDefinition.concat("},\n")
         }
-
     }
 
     #deriveAllRequirements(node: TOSCA_Node, allNodes: { [nodeKey: string]: TOSCA_Node }): string {
