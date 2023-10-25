@@ -415,7 +415,7 @@ class TypescriptTypeGenerator {
         if (this.#currentProfile.profile.node_types) {
             for (const [nodeKey, node] of Object.entries(this.#currentProfile.profile.node_types)) {
                 let nodeTypeName = toPascalCase(nodeKey);
-                generatedTypeDefinitions.push(`export type ${nodeTypeName} = ${this.#buildTsTypeForNode(node)}`);
+                generatedTypeDefinitions.push(`export type ${nodeTypeName} = ${this.#buildTsTypeForNode(nodeKey, node)}`);
                 this.#typeKeyMap.add({ typeName: nodeTypeName, sourceFile: this.#currentProfile.typesFileName }, nodeKey);
             }
         }
@@ -428,7 +428,7 @@ class TypescriptTypeGenerator {
         let hint = "/* \n   Caution!!! This code is generated!!!! Do not modify, but instead regenerate it based on the .yaml Profile descriptions \n*/\n";
 
         let imports = 'import { TOSCA_Requirement_Assignment } from "../tosca-types/template-types"\n'
-            .concat('import { TOSCA_Interface, TOSCA_Artifact } from "../tosca-types/core-types"\n')
+            .concat('import { TOSCA_Metadata, TOSCA_Interface, TOSCA_Artifact } from "../tosca-types/core-types"\n')
             .concat(this.#importManager.generateImportStatement());
 
         let preparedData = generatedTypeDefinitions.join("\n");
@@ -567,7 +567,7 @@ class TypescriptTypeGenerator {
         let properties = this.#deriveAllProperties(capability, this.#mergedProfile.capability_types);
         let attributes = this.#deriveAllAttributes(capability, this.#mergedProfile.capability_types);
         if (properties.length === 0 && attributes.length === 0) {
-            return "string" //TODO how to deal with a capability that has no properties and no attributes?
+            return "any" //TODO how to deal with a capability that has no properties and no attributes?
         }
         return `{\n    ${properties}${attributes}}`;
     }
@@ -576,13 +576,13 @@ class TypescriptTypeGenerator {
         let properties = this.#deriveAllProperties(relationship, this.#mergedProfile.relationship_types);
         let attributes = this.#deriveAllAttributes(relationship, this.#mergedProfile.relationship_types);
         if (properties.length === 0 && attributes.length === 0) {
-            return "string" //TODO how to deal with a capability that has no properties and no attributes?
+            return "any" //TODO how to deal with a capability that has no properties and no attributes?
         }
 
         return `{\n    ${properties}${attributes}}`;
     }
 
-    #buildTsTypeForNode(node: TOSCA_Node): string {
+    #buildTsTypeForNode(nodeTypeKey: string, node: TOSCA_Node): string {
         let properties = this.#deriveAllProperties(node, this.#mergedProfile.node_types);
         let attributes = this.#deriveAllAttributes(node, this.#mergedProfile.node_types);
         let capabilities = this.#deriveAllCapabilities(node, this.#mergedProfile.node_types);
@@ -591,7 +591,9 @@ class TypescriptTypeGenerator {
         let interfaces = this.#copyAllInterfaces(node, this.#mergedProfile.node_types);
         let artifacts = this.#copyAllArtifacts(node, this.#mergedProfile.node_types);
 
-        return `{\n    ${properties}${attributes}${capabilities}${requirements}${interfaces}${artifacts}}`;
+        return `{\n    type: "${nodeTypeKey}",
+                       metadata?: TOSCA_Metadata,
+                       ${properties}${attributes}${capabilities}${requirements}${interfaces}${artifacts}}`;
     }
 
     #deriveAllProperties(entity: TOSCA_Relationship | TOSCA_Capability_Type | TOSCA_Node, allEntities: { [entityKey: string]: TOSCA_Relationship | TOSCA_Capability_Type | TOSCA_Node }): string {
@@ -610,7 +612,7 @@ class TypescriptTypeGenerator {
             }
         }
         if (Object.keys(allProperties).length > 0) {
-            let generatedPropertiesTypeDefinition = "properties: {\n";
+            let generatedPropertiesTypeDefinition = "properties?: {\n";
             for (const [propKey, prop] of Object.entries(allProperties)) {
                 generatedPropertiesTypeDefinition = generatedPropertiesTypeDefinition.concat(`    ${propKey}${prop.required ? "" : "?"}: ${this.#getTypeForToscaPropertyType(prop)},\n`)
             }
@@ -635,9 +637,9 @@ class TypescriptTypeGenerator {
             }
         }
         if (Object.keys(allAttributes).length > 0) {
-            let generatedAttributesTypeDefinition = "attributes: {\n";
+            let generatedAttributesTypeDefinition = "attributes?: {\n";
             for (const [attrKey, attribute] of Object.entries(allAttributes)) {
-                generatedAttributesTypeDefinition = generatedAttributesTypeDefinition.concat(`    ${attrKey}: ${this.#getTypeForToscaAttributeType(attribute)},\n`)
+                generatedAttributesTypeDefinition = generatedAttributesTypeDefinition.concat(`    ${attrKey}?: ${this.#getTypeForToscaAttributeType(attribute)},\n`)
             }
             return generatedAttributesTypeDefinition.concat("},\n")
         }
@@ -660,14 +662,14 @@ class TypescriptTypeGenerator {
             }
         }
         if (Object.keys(allCapabilities).length > 0) {
-            let generatedCapabilitesTypeDefinition = "capabilities: {\n";
+            let generatedCapabilitesTypeDefinition = "capabilities?: {\n";
             for (const [capabilityKey, capability] of Object.entries(allCapabilities)) {
                 let alreadyParsed = typeof capability === "string" ? this.#typeKeyMap.getType(capability) : this.#typeKeyMap.getType(capability.type);
                 if (alreadyParsed.typeName) {
                     if (alreadyParsed.sourceFile !== this.#currentProfile.typesFileName) {
                         this.#importManager.add(alreadyParsed.typeName, alreadyParsed.sourceFile);
                     }
-                    generatedCapabilitesTypeDefinition = generatedCapabilitesTypeDefinition.concat(`    ${capabilityKey}: ${alreadyParsed.typeName},\n`)
+                    generatedCapabilitesTypeDefinition = generatedCapabilitesTypeDefinition.concat(`    ${capabilityKey}?: ${alreadyParsed.typeName},\n`)
                 }
             }
             return generatedCapabilitesTypeDefinition.concat("},\n")
@@ -690,7 +692,7 @@ class TypescriptTypeGenerator {
         }
         if (allRequirements.length > 0) {
 
-            let generatedRequirementsTypeDefinition = "requirements: ";
+            let generatedRequirementsTypeDefinition = "requirements?: ";
             let requirementTypeOptions: string[] = [];
             for (const requirement of allRequirements) {
                 for (const [requirementKey, requirementDefinition] of Object.entries(requirement)) {
@@ -717,10 +719,10 @@ class TypescriptTypeGenerator {
                 break;
             }
         }
-        let generatedInterfacesTypeDefinition = "interfaces: {\n";
+        let generatedInterfacesTypeDefinition = "interfaces?: {\n";
         if (Object.keys(allInterfaces).length > 0) {
             for (const [interfaceKey, interfaceDefinition] of Object.entries(allInterfaces)) {
-                generatedInterfacesTypeDefinition = generatedInterfacesTypeDefinition.concat(`    ${interfaceKey}: TOSCA_Interface,\n`)
+                generatedInterfacesTypeDefinition = generatedInterfacesTypeDefinition.concat(`    ${interfaceKey}?: TOSCA_Interface,\n`)
             }
         }
         return generatedInterfacesTypeDefinition.concat("    [interfaceKey: string]: TOSCA_Interface\n},\n")
@@ -742,10 +744,10 @@ class TypescriptTypeGenerator {
                 break;
             }
         }
-        let generatedArtifactsTypeDefinition = "artifacts: {\n";
+        let generatedArtifactsTypeDefinition = "artifacts?: {\n";
         if (Object.keys(allArtifacts).length > 0) {
             for (const [artifactKey, artifact] of Object.entries(allArtifacts)) {
-                generatedArtifactsTypeDefinition = generatedArtifactsTypeDefinition.concat(`    ${artifactKey}: TOSCA_Artifact,\n`)
+                generatedArtifactsTypeDefinition = generatedArtifactsTypeDefinition.concat(`    ${artifactKey}?: TOSCA_Artifact,\n`)
             }
         }
         return generatedArtifactsTypeDefinition.concat("    [artifactKey: string]: TOSCA_Artifact\n},\n")

@@ -17,6 +17,7 @@ import { BACKING_SERVICE_TOSCA_KEY } from '../entities/backingService';
 import { STORAGE_BACKING_SERVICE_TOSCA_KEY } from '../entities/storageBackingService';
 import { COMPONENT_TOSCA_KEY } from '../entities/component';
 import { EXTERNAL_ENDPOINT_TOSCA_KEY } from '../entities/externalEndpoint';
+import { CnaQualityModelEntitiesEndpoint, CnaQualityModelEntitiesEndpointExternal } from '@/totypa/parsedProfiles/cna_modeling_tosca_profile_ts_types';
 
 const TOSCA_DEFINITIONS_VERSION = "tosca_simple_yaml_1_3"
 const MATCH_WHITESPACES = new RegExp(/\s/g);
@@ -318,35 +319,35 @@ class EntitiesToToscaConverter {
     }
 
 
-    #createEndpointTemplate(endpoint: Entities.Endpoint): TOSCA_Node_Template {
-        let template: TOSCA_Node_Template = {
+    #createEndpointTemplate(endpoint: Entities.Endpoint): CnaQualityModelEntitiesEndpoint {
+        let template: CnaQualityModelEntitiesEndpoint = {
             type: ENDPOINT_TOSCA_KEY,
             metadata: flatMetaData(endpoint.getMetaData),
+            capabilities: {}
         };
 
-        template.capabilities = {
-            "endpoint": {
-                properties: this.#parsePropertiesForYaml(endpoint.getProperties())
-            }
+        template.capabilities.endpoint =  {
+            properties: this.#parsePropertiesForYaml(endpoint.getProperties())
         }
         return template;
     }
 
-    #createExternalEndpointTemplate(endpoint: Entities.ExternalEndpoint): TOSCA_Node_Template {
-        let template: TOSCA_Node_Template = {
+    #createExternalEndpointTemplate(endpoint: Entities.ExternalEndpoint): CnaQualityModelEntitiesEndpointExternal {
+        let template: CnaQualityModelEntitiesEndpointExternal = {
             type: EXTERNAL_ENDPOINT_TOSCA_KEY,
             metadata: flatMetaData(endpoint.getMetaData),
+            capabilities: {}
         };
 
-        template.capabilities = {
-            "external_endpoint": {
-                properties: this.#parsePropertiesForYaml(endpoint.getProperties())
-            }
+        template.capabilities.external_endpoint =  {
+            properties: this.#parsePropertiesForYaml(endpoint.getProperties())
         }
+
+           
         return template;
     }
 
-    #createRequestTraceTemplate(requestTrace: Entities.RequestTrace, systemEntity: Entities.System, keyIdMap: TwoWayKeyIdMap) {
+    #createRequestTraceTemplate(requestTrace: Entities.RequestTrace, systemEntity: Entities.System, keyIdMap: TwoWayKeyIdMap): TOSCA_Node_Template {
 
         let template: TOSCA_Node_Template = {
             type: REQUEST_TRACE_TOSCA_KEY,
