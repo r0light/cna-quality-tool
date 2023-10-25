@@ -241,6 +241,10 @@ capabilities: {
 requirements: {dependency: TOSCA_Requirement_Assignment | string}[],
 interfaces: {
     Standard: TOSCA_Interface,
+    [interfaceKey: string]: TOSCA_Interface
+},
+artifacts: {
+    [artifactKey: string]: TOSCA_Artifact
 },
 }
 export type ToscaNodesAbstractCompute = {
@@ -256,6 +260,10 @@ capabilities: {
 requirements: {dependency: TOSCA_Requirement_Assignment | string}[],
 interfaces: {
     Standard: TOSCA_Interface,
+    [interfaceKey: string]: TOSCA_Interface
+},
+artifacts: {
+    [artifactKey: string]: TOSCA_Artifact
 },
 }
 export type ToscaNodesCompute = {
@@ -279,6 +287,10 @@ capabilities: {
 requirements: {local_storage: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[],
 interfaces: {
     Standard: TOSCA_Interface,
+    [interfaceKey: string]: TOSCA_Interface
+},
+artifacts: {
+    [artifactKey: string]: TOSCA_Artifact
 },
 }
 export type ToscaNodesSoftwareComponent = {
@@ -297,6 +309,10 @@ capabilities: {
 requirements: {host: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[],
 interfaces: {
     Standard: TOSCA_Interface,
+    [interfaceKey: string]: TOSCA_Interface
+},
+artifacts: {
+    [artifactKey: string]: TOSCA_Artifact
 },
 }
 export type ToscaNodesWebServer = {
@@ -318,6 +334,10 @@ capabilities: {
 requirements: {host: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[],
 interfaces: {
     Standard: TOSCA_Interface,
+    [interfaceKey: string]: TOSCA_Interface
+},
+artifacts: {
+    [artifactKey: string]: TOSCA_Artifact
 },
 }
 export type ToscaNodesWebApplication = {
@@ -336,6 +356,10 @@ capabilities: {
 requirements: {host: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[],
 interfaces: {
     Standard: TOSCA_Interface,
+    [interfaceKey: string]: TOSCA_Interface
+},
+artifacts: {
+    [artifactKey: string]: TOSCA_Artifact
 },
 }
 export type ToscaNodesDBMS = {
@@ -357,6 +381,10 @@ capabilities: {
 requirements: {host: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[],
 interfaces: {
     Standard: TOSCA_Interface,
+    [interfaceKey: string]: TOSCA_Interface
+},
+artifacts: {
+    [artifactKey: string]: TOSCA_Artifact
 },
 }
 export type ToscaNodesDatabase = {
@@ -378,6 +406,10 @@ capabilities: {
 requirements: {host: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[],
 interfaces: {
     Standard: TOSCA_Interface,
+    [interfaceKey: string]: TOSCA_Interface
+},
+artifacts: {
+    [artifactKey: string]: TOSCA_Artifact
 },
 }
 export type ToscaNodesAbstractStorage = {
@@ -396,6 +428,10 @@ capabilities: {
 requirements: {dependency: TOSCA_Requirement_Assignment | string}[],
 interfaces: {
     Standard: TOSCA_Interface,
+    [interfaceKey: string]: TOSCA_Interface
+},
+artifacts: {
+    [artifactKey: string]: TOSCA_Artifact
 },
 }
 export type ToscaNodesStorageObjectStorage = {
@@ -416,6 +452,10 @@ capabilities: {
 requirements: {dependency: TOSCA_Requirement_Assignment | string}[],
 interfaces: {
     Standard: TOSCA_Interface,
+    [interfaceKey: string]: TOSCA_Interface
+},
+artifacts: {
+    [artifactKey: string]: TOSCA_Artifact
 },
 }
 export type ToscaNodesStorageBlockStorage = {
@@ -437,6 +477,10 @@ capabilities: {
 requirements: {dependency: TOSCA_Requirement_Assignment | string}[],
 interfaces: {
     Standard: TOSCA_Interface,
+    [interfaceKey: string]: TOSCA_Interface
+},
+artifacts: {
+    [artifactKey: string]: TOSCA_Artifact
 },
 }
 export type ToscaNodesContainerRuntime = {
@@ -457,6 +501,10 @@ capabilities: {
 requirements: {host: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[],
 interfaces: {
     Standard: TOSCA_Interface,
+    [interfaceKey: string]: TOSCA_Interface
+},
+artifacts: {
+    [artifactKey: string]: TOSCA_Artifact
 },
 }
 export type ToscaNodesContainerApplication = {
@@ -471,6 +519,10 @@ capabilities: {
 requirements: {host: TOSCA_Requirement_Assignment | string} | {storage: TOSCA_Requirement_Assignment | string} | {network: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[],
 interfaces: {
     Standard: TOSCA_Interface,
+    [interfaceKey: string]: TOSCA_Interface
+},
+artifacts: {
+    [artifactKey: string]: TOSCA_Artifact
 },
 }
 export type ToscaNodesLoadBalancer = {
@@ -489,6 +541,10 @@ capabilities: {
 requirements: {application: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[],
 interfaces: {
     Standard: TOSCA_Interface,
+    [interfaceKey: string]: TOSCA_Interface
+},
+artifacts: {
+    [artifactKey: string]: TOSCA_Artifact
 },
 }
 export type ToscaNodesNetworkNetwork = {
@@ -518,6 +574,10 @@ capabilities: {
 requirements: {dependency: TOSCA_Requirement_Assignment | string}[],
 interfaces: {
     Standard: TOSCA_Interface,
+    [interfaceKey: string]: TOSCA_Interface
+},
+artifacts: {
+    [artifactKey: string]: TOSCA_Artifact
 },
 }
 export type ToscaNodesNetworkPort = {
@@ -540,5 +600,9 @@ capabilities: {
 requirements: {link: TOSCA_Requirement_Assignment | string} | {binding: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[],
 interfaces: {
     Standard: TOSCA_Interface,
+    [interfaceKey: string]: TOSCA_Interface
+},
+artifacts: {
+    [artifactKey: string]: TOSCA_Artifact
 },
 }

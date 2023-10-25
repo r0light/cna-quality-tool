@@ -40,6 +40,10 @@ capabilities: {
 requirements: {host: TOSCA_Requirement_Assignment | string} | {provides_endpoint: TOSCA_Requirement_Assignment | string} | {provides_external_endpoint: TOSCA_Requirement_Assignment | string} | {endpoint_link: TOSCA_Requirement_Assignment | string} | {uses_data: TOSCA_Requirement_Assignment | string} | {uses_backing_data: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[],
 interfaces: {
     Standard: TOSCA_Interface,
+    [interfaceKey: string]: TOSCA_Interface
+},
+artifacts: {
+    [artifactKey: string]: TOSCA_Artifact
 },
 }
 export type CnaQualityModelEntitiesSoftwareComponentService = {
@@ -58,6 +62,10 @@ capabilities: {
 requirements: {provides_endpoint: TOSCA_Requirement_Assignment | string} | {provides_external_endpoint: TOSCA_Requirement_Assignment | string} | {endpoint_link: TOSCA_Requirement_Assignment | string} | {uses_data: TOSCA_Requirement_Assignment | string} | {uses_backing_data: TOSCA_Requirement_Assignment | string} | {host: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[],
 interfaces: {
     Standard: TOSCA_Interface,
+    [interfaceKey: string]: TOSCA_Interface
+},
+artifacts: {
+    [artifactKey: string]: TOSCA_Artifact
 },
 }
 export type CnaQualityModelEntitiesBackingService = {
@@ -75,6 +83,10 @@ capabilities: {
 requirements: {host: TOSCA_Requirement_Assignment | string} | {provides_endpoint: TOSCA_Requirement_Assignment | string} | {provides_external_endpoint: TOSCA_Requirement_Assignment | string} | {endpoint_link: TOSCA_Requirement_Assignment | string} | {uses_data: TOSCA_Requirement_Assignment | string} | {uses_backing_data: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[],
 interfaces: {
     Standard: TOSCA_Interface,
+    [interfaceKey: string]: TOSCA_Interface
+},
+artifacts: {
+    [artifactKey: string]: TOSCA_Artifact
 },
 }
 export type CnaQualityModelEntitiesEndpoint = {
@@ -90,6 +102,10 @@ capabilities: {
 requirements: {dependency: TOSCA_Requirement_Assignment | string}[],
 interfaces: {
     Standard: TOSCA_Interface,
+    [interfaceKey: string]: TOSCA_Interface
+},
+artifacts: {
+    [artifactKey: string]: TOSCA_Artifact
 },
 }
 export type CnaQualityModelEntitiesEndpointExternal = {
@@ -105,6 +121,10 @@ capabilities: {
 requirements: {dependency: TOSCA_Requirement_Assignment | string}[],
 interfaces: {
     Standard: TOSCA_Interface,
+    [interfaceKey: string]: TOSCA_Interface
+},
+artifacts: {
+    [artifactKey: string]: TOSCA_Artifact
 },
 }
 export type CnaQualityModelEntitiesComputeInfrastructure = {
@@ -128,6 +148,10 @@ capabilities: {
 requirements: {host: TOSCA_Requirement_Assignment | string} | {uses_backing_data: TOSCA_Requirement_Assignment | string} | {local_storage: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[],
 interfaces: {
     Standard: TOSCA_Interface,
+    [interfaceKey: string]: TOSCA_Interface
+},
+artifacts: {
+    [artifactKey: string]: TOSCA_Artifact
 },
 }
 export type CnaQualityModelEntitiesBackingData = {
@@ -146,6 +170,10 @@ capabilities: {
 requirements: {dependency: TOSCA_Requirement_Assignment | string}[],
 interfaces: {
     Standard: TOSCA_Interface,
+    [interfaceKey: string]: TOSCA_Interface
+},
+artifacts: {
+    [artifactKey: string]: TOSCA_Artifact
 },
 }
 export type CnaQualityModelEntitiesDataAggregate = {
@@ -161,6 +189,10 @@ capabilities: {
 requirements: {persistence: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[],
 interfaces: {
     Standard: TOSCA_Interface,
+    [interfaceKey: string]: TOSCA_Interface
+},
+artifacts: {
+    [artifactKey: string]: TOSCA_Artifact
 },
 }
 export type CnaQualityModelEntitiesDBMSStorageService = {
@@ -186,6 +218,10 @@ capabilities: {
 requirements: {endpoint_link: TOSCA_Requirement_Assignment | string} | {uses_data: TOSCA_Requirement_Assignment | string} | {uses_backing_data: TOSCA_Requirement_Assignment | string} | {host: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[],
 interfaces: {
     Standard: TOSCA_Interface,
+    [interfaceKey: string]: TOSCA_Interface
+},
+artifacts: {
+    [artifactKey: string]: TOSCA_Artifact
 },
 }
 export type CnaQualityModelEntitiesRequestTrace = {
@@ -205,5 +241,9 @@ capabilities: {
 requirements: {external_endpoint: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[],
 interfaces: {
     Standard: TOSCA_Interface,
+    [interfaceKey: string]: TOSCA_Interface
+},
+artifacts: {
+    [artifactKey: string]: TOSCA_Artifact
 },
 }

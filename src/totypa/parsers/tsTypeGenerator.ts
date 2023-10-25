@@ -591,10 +591,6 @@ class TypescriptTypeGenerator {
         let interfaces = this.#copyAllInterfaces(node, this.#mergedProfile.node_types);
         let artifacts = this.#copyAllArtifacts(node, this.#mergedProfile.node_types);
 
-        if (properties.length + attributes.length + capabilities.length + requirements.length + interfaces.length + artifacts.length === 0) {
-            return "string" //TODO how to deal with a node that has nothing?
-        }
-
         return `{\n    ${properties}${attributes}${capabilities}${requirements}${interfaces}${artifacts}}`;
     }
 
@@ -721,14 +717,13 @@ class TypescriptTypeGenerator {
                 break;
             }
         }
+        let generatedInterfacesTypeDefinition = "interfaces: {\n";
         if (Object.keys(allInterfaces).length > 0) {
-            let generatedInterfacesTypeDefinition = "interfaces: {\n";
             for (const [interfaceKey, interfaceDefinition] of Object.entries(allInterfaces)) {
                 generatedInterfacesTypeDefinition = generatedInterfacesTypeDefinition.concat(`    ${interfaceKey}: TOSCA_Interface,\n`)
             }
-            return generatedInterfacesTypeDefinition.concat("},\n")
         }
-        return "";
+        return generatedInterfacesTypeDefinition.concat("    [interfaceKey: string]: TOSCA_Interface\n},\n")
     }
 
 
@@ -747,16 +742,14 @@ class TypescriptTypeGenerator {
                 break;
             }
         }
+        let generatedArtifactsTypeDefinition = "artifacts: {\n";
         if (Object.keys(allArtifacts).length > 0) {
-            let generatedArtifactsTypeDefinition = "artifacts: {\n";
             for (const [artifactKey, artifact] of Object.entries(allArtifacts)) {
                 generatedArtifactsTypeDefinition = generatedArtifactsTypeDefinition.concat(`    ${artifactKey}: TOSCA_Artifact,\n`)
             }
-            return generatedArtifactsTypeDefinition.concat("},\n")
         }
-        return "";
+        return generatedArtifactsTypeDefinition.concat("    [artifactKey: string]: TOSCA_Artifact\n},\n")
     }
-
 }
 
 
