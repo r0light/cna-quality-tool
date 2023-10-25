@@ -3,12 +3,10 @@
 */
 
 import { TOSCA_Service_Template } from '../tosca-types/template-types';
-import { cna_modeling_tosca_profile } from "./cna_modeling_tosca_profile";
-import { cna_modeling_tosca_profile_original } from "./cna_modeling_tosca_profile_original";
 import { tosca_simple_profile_for_yaml_v1_3 } from "./tosca_simple_profile_for_yaml_v1_3";
+import { cna_modeling_tosca_profile } from "./cna_modeling_tosca_profile";
 
 export const all_profiles: TOSCA_Service_Template[] = [
-cna_modeling_tosca_profile,
-cna_modeling_tosca_profile_original,
-tosca_simple_profile_for_yaml_v1_3
+   tosca_simple_profile_for_yaml_v1_3,
+   cna_modeling_tosca_profile
 ];
