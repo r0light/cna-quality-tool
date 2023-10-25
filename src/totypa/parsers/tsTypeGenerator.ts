@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import { TOSCA_Service_Template } from '../tosca-types/template-types';
 import { readdir } from 'node:fs/promises';
 import path from 'node:path';
-import { TOSCA_Attribute, TOSCA_Datatype, TOSCA_Property } from '../tosca-types/core-types';
+import { TOSCA_Artifact, TOSCA_Attribute, TOSCA_Datatype, TOSCA_Interface, TOSCA_Property } from '../tosca-types/core-types';
 import { data } from 'jquery';
 import { TwoWayKeyTypeMap } from './TwoWayKeyTypeMap';
 import { TOSCA_Capability, TOSCA_Capability_Type, TOSCA_Node, TOSCA_Relationship, TOSCA_Requirement } from '../tosca-types/entity-types';
@@ -427,7 +427,9 @@ class TypescriptTypeGenerator {
         // write file
         let hint = "/* \n   Caution!!! This code is generated!!!! Do not modify, but instead regenerate it based on the .yaml Profile descriptions \n*/\n";
 
-        let imports = 'import { TOSCA_Requirement_Assignment } from "../tosca-types/template-types"\n'.concat(this.#importManager.generateImportStatement());
+        let imports = 'import { TOSCA_Requirement_Assignment } from "../tosca-types/template-types"\n'
+            .concat('import { TOSCA_Interface, TOSCA_Artifact } from "../tosca-types/core-types"\n')
+            .concat(this.#importManager.generateImportStatement());
 
         let preparedData = generatedTypeDefinitions.join("\n");
 
@@ -586,13 +588,14 @@ class TypescriptTypeGenerator {
         let capabilities = this.#deriveAllCapabilities(node, this.#mergedProfile.node_types);
         let requirements = this.#deriveAllRequirements(node, this.#mergedProfile.node_types);
 
-        // TODO further things?
+        let interfaces = this.#copyAllInterfaces(node, this.#mergedProfile.node_types);
+        let artifacts = this.#copyAllArtifacts(node, this.#mergedProfile.node_types);
 
-        if (properties.length + attributes.length + capabilities.length + requirements.length === 0) {
+        if (properties.length + attributes.length + capabilities.length + requirements.length + interfaces.length + artifacts.length === 0) {
             return "string" //TODO how to deal with a node that has nothing?
         }
 
-        return `{\n    ${properties}${attributes}${capabilities}${requirements}}`;
+        return `{\n    ${properties}${attributes}${capabilities}${requirements}${interfaces}${artifacts}}`;
     }
 
     #deriveAllProperties(entity: TOSCA_Relationship | TOSCA_Capability_Type | TOSCA_Node, allEntities: { [entityKey: string]: TOSCA_Relationship | TOSCA_Capability_Type | TOSCA_Node }): string {
@@ -670,9 +673,10 @@ class TypescriptTypeGenerator {
                     }
                     generatedCapabilitesTypeDefinition = generatedCapabilitesTypeDefinition.concat(`    ${capabilityKey}: ${alreadyParsed.typeName},\n`)
                 }
-                return generatedCapabilitesTypeDefinition.concat("},\n")
             }
+            return generatedCapabilitesTypeDefinition.concat("},\n")
         }
+        return "";
     }
 
     #deriveAllRequirements(node: TOSCA_Node, allNodes: { [nodeKey: string]: TOSCA_Node }): string {
@@ -697,11 +701,61 @@ class TypescriptTypeGenerator {
                     requirementTypeOptions.push(`{${requirementKey}: TOSCA_Requirement_Assignment | string}`);
                 }
             }
-            return generatedRequirementsTypeDefinition.concat(requirementTypeOptions.join(" | "), "[]");
+            return generatedRequirementsTypeDefinition.concat(requirementTypeOptions.join(" | "), "[],\n");
         }
         return "";
     }
 
+    #copyAllInterfaces(node: TOSCA_Node, allNodes: { [nodeKey: string]: TOSCA_Node }): string {
+        let allInterfaces: {[interfaceKey: string]: TOSCA_Interface}[] = [];
+        let currentNode = node;
+        while (currentNode) {
+            if (currentNode.interfaces) {
+                for (const [interfaceKey, interfaceDefinition] of Object.entries(currentNode.interfaces)) {
+                    allInterfaces[interfaceKey] = interfaceDefinition;
+                }
+            }
+            if (currentNode.derived_from) {
+                currentNode = allNodes[currentNode.derived_from];
+            } else {
+                break;
+            }
+        }
+        if (Object.keys(allInterfaces).length > 0) {
+            let generatedInterfacesTypeDefinition = "interfaces: {\n";
+            for (const [interfaceKey, interfaceDefinition] of Object.entries(allInterfaces)) {
+                generatedInterfacesTypeDefinition = generatedInterfacesTypeDefinition.concat(`    ${interfaceKey}: TOSCA_Interface,\n`)
+            }
+            return generatedInterfacesTypeDefinition.concat("},\n")
+        }
+        return "";
+    }
+
+
+    #copyAllArtifacts(node: TOSCA_Node, allNodes: { [nodeKey: string]: TOSCA_Node }): string {
+        let allArtifacts: {[artifactKey: string]: TOSCA_Artifact}[] = [];
+        let currentNode = node;
+        while (currentNode) {
+            if (currentNode.artifacts) {
+                for (const [artifactKey, artifact] of Object.entries(currentNode.artifacts)) {
+                    allArtifacts[artifactKey] = artifact;
+                }
+            }
+            if (currentNode.derived_from) {
+                currentNode = allNodes[currentNode.derived_from];
+            } else {
+                break;
+            }
+        }
+        if (Object.keys(allArtifacts).length > 0) {
+            let generatedArtifactsTypeDefinition = "artifacts: {\n";
+            for (const [artifactKey, artifact] of Object.entries(allArtifacts)) {
+                generatedArtifactsTypeDefinition = generatedArtifactsTypeDefinition.concat(`    ${artifactKey}: TOSCA_Artifact,\n`)
+            }
+            return generatedArtifactsTypeDefinition.concat("},\n")
+        }
+        return "";
+    }
 
 }
 

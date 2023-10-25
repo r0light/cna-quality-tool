@@ -3,6 +3,7 @@
 */
 
 import { TOSCA_Requirement_Assignment } from "../tosca-types/template-types"
+import { TOSCA_Interface, TOSCA_Artifact } from "../tosca-types/core-types"
 
 export type ToscaDatatypesRoot = any
 export type ToscaDatatypesJson = string
@@ -237,7 +238,11 @@ export type ToscaNodesRoot = {
 capabilities: {
     feature: ToscaCapabilitiesNode,
 },
-requirements: {dependency: TOSCA_Requirement_Assignment | string}[]}
+requirements: {dependency: TOSCA_Requirement_Assignment | string}[],
+interfaces: {
+    Standard: TOSCA_Interface,
+},
+}
 export type ToscaNodesAbstractCompute = {
     attributes: {
     tosca_id: string,
@@ -246,8 +251,13 @@ export type ToscaNodesAbstractCompute = {
 },
 capabilities: {
     host: ToscaCapabilitiesCompute,
+    feature: ToscaCapabilitiesNode,
 },
-requirements: {dependency: TOSCA_Requirement_Assignment | string}[]}
+requirements: {dependency: TOSCA_Requirement_Assignment | string}[],
+interfaces: {
+    Standard: TOSCA_Interface,
+},
+}
 export type ToscaNodesCompute = {
     attributes: {
     private_address: string,
@@ -260,8 +270,17 @@ export type ToscaNodesCompute = {
 },
 capabilities: {
     host: ToscaCapabilitiesCompute,
+    os: ToscaCapabilitiesOperatingSystem,
+    endpoint: ToscaCapabilitiesEndpointAdmin,
+    scalable: ToscaCapabilitiesScalable,
+    binding: ToscaCapabilitiesNetworkBindable,
+    feature: ToscaCapabilitiesNode,
 },
-requirements: {local_storage: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[]}
+requirements: {local_storage: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[],
+interfaces: {
+    Standard: TOSCA_Interface,
+},
+}
 export type ToscaNodesSoftwareComponent = {
     properties: {
     component_version?: string,
@@ -275,7 +294,11 @@ attributes: {
 capabilities: {
     feature: ToscaCapabilitiesNode,
 },
-requirements: {host: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[]}
+requirements: {host: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[],
+interfaces: {
+    Standard: TOSCA_Interface,
+},
+}
 export type ToscaNodesWebServer = {
     properties: {
     component_version?: string,
@@ -288,8 +311,15 @@ attributes: {
 },
 capabilities: {
     data_endpoint: ToscaCapabilitiesEndpoint,
+    admin_endpoint: ToscaCapabilitiesEndpointAdmin,
+    host: ToscaCapabilitiesCompute,
+    feature: ToscaCapabilitiesNode,
 },
-requirements: {host: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[]}
+requirements: {host: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[],
+interfaces: {
+    Standard: TOSCA_Interface,
+},
+}
 export type ToscaNodesWebApplication = {
     properties: {
     context_root?: string,
@@ -301,8 +331,13 @@ attributes: {
 },
 capabilities: {
     app_endpoint: ToscaCapabilitiesEndpoint,
+    feature: ToscaCapabilitiesNode,
 },
-requirements: {host: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[]}
+requirements: {host: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[],
+interfaces: {
+    Standard: TOSCA_Interface,
+},
+}
 export type ToscaNodesDBMS = {
     properties: {
     root_password?: string,
@@ -317,8 +352,13 @@ attributes: {
 },
 capabilities: {
     host: ToscaCapabilitiesCompute,
+    feature: ToscaCapabilitiesNode,
 },
-requirements: {host: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[]}
+requirements: {host: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[],
+interfaces: {
+    Standard: TOSCA_Interface,
+},
+}
 export type ToscaNodesDatabase = {
     properties: {
     name: string,
@@ -333,8 +373,13 @@ attributes: {
 },
 capabilities: {
     database_endpoint: ToscaCapabilitiesEndpointDatabase,
+    feature: ToscaCapabilitiesNode,
 },
-requirements: {host: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[]}
+requirements: {host: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[],
+interfaces: {
+    Standard: TOSCA_Interface,
+},
+}
 export type ToscaNodesAbstractStorage = {
     properties: {
     name?: string,
@@ -348,7 +393,11 @@ attributes: {
 capabilities: {
     feature: ToscaCapabilitiesNode,
 },
-requirements: {dependency: TOSCA_Requirement_Assignment | string}[]}
+requirements: {dependency: TOSCA_Requirement_Assignment | string}[],
+interfaces: {
+    Standard: TOSCA_Interface,
+},
+}
 export type ToscaNodesStorageObjectStorage = {
     properties: {
     maxsize?: string,
@@ -362,8 +411,13 @@ attributes: {
 },
 capabilities: {
     storage_endpoint: ToscaCapabilitiesEndpoint,
+    feature: ToscaCapabilitiesNode,
 },
-requirements: {dependency: TOSCA_Requirement_Assignment | string}[]}
+requirements: {dependency: TOSCA_Requirement_Assignment | string}[],
+interfaces: {
+    Standard: TOSCA_Interface,
+},
+}
 export type ToscaNodesStorageBlockStorage = {
     properties: {
     size?: string,
@@ -378,8 +432,13 @@ attributes: {
 },
 capabilities: {
     attachment: ToscaCapabilitiesAttachment,
+    feature: ToscaCapabilitiesNode,
 },
-requirements: {dependency: TOSCA_Requirement_Assignment | string}[]}
+requirements: {dependency: TOSCA_Requirement_Assignment | string}[],
+interfaces: {
+    Standard: TOSCA_Interface,
+},
+}
 export type ToscaNodesContainerRuntime = {
     properties: {
     component_version?: string,
@@ -392,8 +451,14 @@ attributes: {
 },
 capabilities: {
     host: ToscaCapabilitiesCompute,
+    scalable: ToscaCapabilitiesScalable,
+    feature: ToscaCapabilitiesNode,
 },
-requirements: {host: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[]}
+requirements: {host: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[],
+interfaces: {
+    Standard: TOSCA_Interface,
+},
+}
 export type ToscaNodesContainerApplication = {
     attributes: {
     tosca_id: string,
@@ -403,7 +468,11 @@ export type ToscaNodesContainerApplication = {
 capabilities: {
     feature: ToscaCapabilitiesNode,
 },
-requirements: {host: TOSCA_Requirement_Assignment | string} | {storage: TOSCA_Requirement_Assignment | string} | {network: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[]}
+requirements: {host: TOSCA_Requirement_Assignment | string} | {storage: TOSCA_Requirement_Assignment | string} | {network: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[],
+interfaces: {
+    Standard: TOSCA_Interface,
+},
+}
 export type ToscaNodesLoadBalancer = {
     properties: {
     algorithm?: string,
@@ -415,8 +484,13 @@ attributes: {
 },
 capabilities: {
     client: ToscaCapabilitiesEndpointPublic,
+    feature: ToscaCapabilitiesNode,
 },
-requirements: {application: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[]}
+requirements: {application: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[],
+interfaces: {
+    Standard: TOSCA_Interface,
+},
+}
 export type ToscaNodesNetworkNetwork = {
     properties: {
     ip_version?: number,
@@ -439,8 +513,13 @@ attributes: {
 },
 capabilities: {
     link: ToscaCapabilitiesNetworkLinkable,
+    feature: ToscaCapabilitiesNode,
 },
-requirements: {dependency: TOSCA_Requirement_Assignment | string}[]}
+requirements: {dependency: TOSCA_Requirement_Assignment | string}[],
+interfaces: {
+    Standard: TOSCA_Interface,
+},
+}
 export type ToscaNodesNetworkPort = {
     properties: {
     ip_address?: string,
@@ -458,4 +537,8 @@ attributes: {
 capabilities: {
     feature: ToscaCapabilitiesNode,
 },
-requirements: {link: TOSCA_Requirement_Assignment | string} | {binding: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[]}
+requirements: {link: TOSCA_Requirement_Assignment | string} | {binding: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[],
+interfaces: {
+    Standard: TOSCA_Interface,
+},
+}
