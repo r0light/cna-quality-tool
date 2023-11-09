@@ -34,7 +34,7 @@ import ModelingArea from './views/ModelingArea.vue';
 import DetailsSidebar from './views/detailsSidebar/DetailsSidebar.vue';
 import EntitySidebar from './views/EntitySidebar.vue';
 import { addSelectionToolToEntity } from './views/tools/entitySelectionTools';
-import { ModelingData } from '@/App.vue';
+import { ImportData, ModelingData } from '@/App.vue';
 
 const props = defineProps<{
     systemName: string,
@@ -45,7 +45,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
     (e: "update:systemName", newName: string): void;
-    (e: "store:modelingData", systemEntitManager: SystemEntityManager): void;
+    (e: "store:modelingData", systemEntitManager: SystemEntityManager, toImport: ImportData): void;
 }>()
 
 const currentSystemName = ref(props.systemName);
@@ -76,7 +76,7 @@ const systemEntityManager: SystemEntityManager = (() => {
         return props.modelingData.entityManager;
     } else {
         const newEntityManager = new SystemEntityManager(currentSystemGraph.value as dia.Graph);
-        emit("store:modelingData", newEntityManager);
+        emit("store:modelingData", newEntityManager, props.modelingData.toImport);
         return new SystemEntityManager(currentSystemGraph.value as dia.Graph);
     }
 })();
@@ -96,6 +96,18 @@ onMounted(() => {
      * Create and initialize the Details Sidebar view. 
      * Additionally, it defines when the sidebar should be generally displayed.
     */
+
+    if (props.modelingData.toImport.fileName) {
+        if (props.modelingData.toImport.fileName.endsWith("json")) {
+            loadFromJson(props.modelingData.toImport.fileContent, props.modelingData.toImport.fileName);
+        } else if (props.modelingData.toImport.fileName.endsWith("yaml") 
+        || props.modelingData.toImport.fileName.endsWith("yml")
+        || props.modelingData.toImport.fileName.endsWith("tosca")) {
+            loadFromTosca(props.modelingData.toImport.fileContent, props.modelingData.toImport.fileName);
+        }
+
+        emit("store:modelingData", systemEntityManager, {fileName: '', fileContent: ''});
+    }
 
     currentSystemGraph.value.on("add", (cell) => {
         currentSelection.value = mainPaper.value.findViewByModel(cell);

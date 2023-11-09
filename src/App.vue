@@ -13,7 +13,7 @@
             </a>
           </li>
           <li class="nav-item">
-            <a id="newModelingApp" class="nav-link text-white" @click="startModelingForm">
+            <a id="newModelingApp" class="nav-link text-white" @click="overlayState = 'initial'">
               <i class="fa-solid fa-plus"></i>
               New Application Model</a>
           </li>
@@ -25,10 +25,12 @@
   <!-- Content -->
 
   <main role="main" ref="mainSection" class="flex-grow-1 mainElement">
-    <div id="init-overlay" class="init-overlay" v-show="showInitOverlay">
+    <div id="init-overlay" class="init-overlay" v-show="overlayState !== 'none'">
       <div class="init-overlay-content">
+        <button class="btn d-flex ml-auto" @click="overlayState = 'none'"><i
+            class="fa fa-fw fa-x text-white"></i></button>
         <h2 class="user-select-none text-center">Welcome to the CNA Modeling Application!</h2>
-        <div id="init-firstInformation" v-show="!showStartModelingForm">
+        <div id="init-firstInformation" v-show="overlayState === 'initial'">
           <p class="user-select-none">The modeling application allows you to model cloud-native application (CNA)
             architectures using thirteen different entities. It is based on the CNA quality model
             as introduced here:
@@ -36,10 +38,15 @@
             the application supports exporting the graphical model into an
             extended version of the TOSCA architecture description language. The extended TOSCA version is being
             introduced here: https://github.com/KarolinDuerr/MA-CNA-ModelingSupport/tree/main/TOSCA_Extension.</p>
-          <button id="createNewDiagramBtn" type="button" class="btn btn-outline-dark btn-light"
-            @click="startCreatingModel"> <i class="fa-solid fa-pencil"></i> Create new diagram </button>
+          <div class="d-flex flex-row justify-content-around">
+            <button type="button" class="btn btn-outline-dark btn-light" @click="overlayState = 'startNew'"> <i
+              class="fa-solid fa-pencil"></i> Create new diagram </button>
+          <button type="button" class="btn btn-outline-dark btn-light" @click="overlayState = 'startImport'"> <i
+              class="fa-solid fa-pencil"></i> Import existing diagram</button>
+          </div>
+
         </div>
-        <div id="startModelingForm" v-show="showStartModelingForm">
+        <div id="startModelingForm" v-show="overlayState === 'startNew'">
           <p class="user-select-none">Please type the application name of the System entity you want to model
             in the following form. Afterwards, you can start modeling your application's architecture.</p>
           <form class="needs-validation" novalidate>
@@ -63,6 +70,10 @@
             </div>
           </form>
         </div>
+        <div id="startModelingForm" v-show="overlayState === 'startImport'">
+          <p class="user-select-none">Please select a file to import a model from it (TOSCA or JSON format)</p>
+          <input type="file" accept=".json,.yaml,.yml,.tosca" ref="selectedFile" @change="importModelFromFile" tabindex="-1"/>
+        </div>
       </div>
     </div>
     <div class="pagesContainer">
@@ -70,13 +81,12 @@
         <Home v-if="pageContent.pageType === 'home'" v-show="currentPage === pageContent.index"></Home>
         <QualityModelApp v-if="pageContent.pageType === 'qualityModel'" v-show="currentPage === pageContent.index"
           :inView="currentPage === pageContent.index"></QualityModelApp>
-          <EvaluationApp v-if="pageContent.pageType === 'evaluation'" v-show="currentPage === pageContent.index"
-          :systemsData="sharedSystemsData" ></EvaluationApp>
+        <EvaluationApp v-if="pageContent.pageType === 'evaluation'" v-show="currentPage === pageContent.index"
+          :systemsData="sharedSystemsData"></EvaluationApp>
         <ModelingApp v-if="pageContent.pageType === 'modeling'"
           v-show="pageContent.pageType === 'modeling' && currentPage === pageContent.index" :systemName="pageContent.name"
-          :pageIndex="pageContent.index"
-          :modelingData="(modeledSystemsData[pageContent.index] as ModelingData)"
-          @store:modelingData="(systemEntityManager) => storeModelingData(systemEntityManager, pageContent.name, pageContent.index)"
+          :pageIndex="pageContent.index" :modelingData="(modeledSystemsData[pageContent.index] as ModelingData)"
+          @store:modelingData="(systemEntityManager, toImport) => storeModelingData(pageContent.index, toImport, systemEntityManager, pageContent.name, )"
           @update:systemName="event => updatePageName(event, pageContent.index)"></ModelingApp>
       </div>
     </div>
@@ -103,9 +113,15 @@ type Page = {
   name: string;
 }
 
+export type ImportData = {
+    fileName: string,
+    fileContent: string
+  }
+
 export type ModelingData = {
   index: number,
   name: string,
+  toImport: ImportData,
   entityManager: SystemEntityManager
 }
 
@@ -141,10 +157,11 @@ const sharedSystemsData: ComputedRef<ModelingData[]> = computed(() => {
   return modeledSystemsData.value.reduce((initial, b) => initial + b.name, "");
 });*/
 
-function storeModelingData(systemEntityManager: SystemEntityManager, pageName: string, index: number) {
+function storeModelingData(index: number, toImport: ImportData, systemEntityManager: SystemEntityManager, pageName: string, ) {
   modeledSystemsData.value[index] = {
     index: index,
     name: pageName,
+    toImport: toImport,
     entityManager: systemEntityManager
   }
 
@@ -152,18 +169,9 @@ function storeModelingData(systemEntityManager: SystemEntityManager, pageName: s
 
 const currentPage = ref(0);
 
-const showInitOverlay = ref(false);
-const showStartModelingForm = ref(false);
+const overlayState = ref<"none" | "initial" | "startNew" | "startImport">("none");
 const newSystemName = ref<string>("");
-
-function startModelingForm() {
-  showInitOverlay.value = true;
-  //showStartModelingForm.value = true;
-}
-
-function startCreatingModel() {
-  showStartModelingForm.value = true;
-}
+const selectedFile = ref<HTMLInputElement>(null);
 
 function onNameEntered() {
   let forms = $("#init-overlay .needs-validation");
@@ -175,10 +183,20 @@ function onNameEntered() {
   if (!newSystemName.value) {
     return;
   }
-  showInitOverlay.value = false;
-  showStartModelingForm.value = false;
-  addNewModelingPage(newSystemName.value);
+  overlayState.value = "none";
+  addNewModelingPage(newSystemName.value, {fileName: '', fileContent: ''});
   newSystemName.value = "";
+}
+
+function importModelFromFile() {
+  let fr = new FileReader();
+  fr.onload = (fileReader: ProgressEvent<FileReader>) => {
+        let fileName = selectedFile.value.files[0].name;
+        let stringifiedFile: string = fileReader.target.result.toString();
+        addNewModelingPage(newSystemName.value, {fileName: fileName, fileContent: stringifiedFile});
+        overlayState.value = "none";
+  };
+  fr.readAsText(selectedFile.value.files[0]);
 }
 
 onMounted(() => {
@@ -214,20 +232,27 @@ function selectPage(index: number) {
   }
 }
 
-function addNewModelingPage(name: string) {
+function addNewModelingPage(name: string, toImport: ImportData) {
 
   // increment currently highest index by one to get a new index
   const newIndex = Math.max(...pages.value.map(page => page.index)) + 1;
 
   // prepare modeledSystemsData so that the array at index newIndex is not empty
-  while (modeledSystemsData.value.length <= newIndex + 1) {
+  while (modeledSystemsData.value.length <= newIndex) {
     modeledSystemsData.value.push({
       index: -1,
       name: "",
+      toImport: {fileName: "", fileContent: ""},
       entityManager: null
     });
   }
 
+  modeledSystemsData.value[newIndex] = ({
+      index: newIndex,
+      name: "",
+      toImport: toImport,
+      entityManager: null
+    });
 
   pages.value.push({
     index: newIndex,
@@ -275,4 +300,5 @@ function updatePageName(newName: string, index: number) {
 
 .hide {
   display: none;
-}</style>
+}
+</style>
