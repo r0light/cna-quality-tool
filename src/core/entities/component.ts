@@ -45,7 +45,7 @@ class Component {
 
     #externalEndpointEntities = new Array<ExternalEndpoint>();
 
-    #backingDataEntities = new Array<BackingData>();
+    #backingDataEntities = new Array<{ backingData: BackingData, relation: DataUsageRelation }>();
 
     #dataAggregateEntities = new Array<{ data: DataAggregate, relation: DataUsageRelation }>();
 
@@ -99,11 +99,11 @@ class Component {
 
     };
 
-    addDataEntity(dataEntityToAdd: DataAggregate | BackingData, usageRelation?: DataUsageRelation) {
+    addDataEntity(dataEntityToAdd: DataAggregate | BackingData, usageRelation: DataUsageRelation) {
         if (dataEntityToAdd instanceof DataAggregate) {
             this.#dataAggregateEntities.push({ data: dataEntityToAdd, relation: usageRelation });
         } else if (dataEntityToAdd instanceof BackingData) {
-            this.#backingDataEntities.push(dataEntityToAdd);
+            this.#backingDataEntities.push({backingData: dataEntityToAdd, relation: usageRelation });
         }
     }
 

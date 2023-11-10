@@ -306,7 +306,7 @@ class SystemEntityManager {
                     let backingDataName: string = embeddedCell.attr("label/textWrap/text");
                     let referencedBackingData = [...(this.#currentSystemEntity.getBackingDataEntities)].filter(([id, backingData]) => backingData.getName === backingDataName);
                     if (referencedBackingData.length > 0) {
-                        componentModelEntity.addDataEntity(referencedBackingData[0][1]);
+                        componentModelEntity.addDataEntity(referencedBackingData[0][1], embeddedCell.prop("entity/properties/backingData-parentRelation"));
                     } else {
                         throw new Error(`Backing Data with name ${backingDataName} should be there, but could not be found in ${this.#currentSystemEntity.getBackingDataEntities}`);
                     }
@@ -330,7 +330,7 @@ class SystemEntityManager {
                     let backingDataName: string = embeddedBackingData.attr("label/textWrap/text");
                     let referencedBackingData = [...(this.#currentSystemEntity.getBackingDataEntities)].filter(([id, backingData]) => backingData.getName === backingDataName);
                     if (referencedBackingData.length > 0) {
-                        infrastructureEntity.addBackingDataEntity(referencedBackingData[0][1]);
+                        infrastructureEntity.addBackingDataEntity(referencedBackingData[0][1], embeddedBackingData.prop("entity/properties/backingData-parentRelation"));
                     } else {
                         throw new Error(`Backing Data with name ${backingDataName} should be there, but could not be found in ${this.#currentSystemEntity.getBackingDataEntities}`);
                     }
@@ -1007,16 +1007,16 @@ class SystemEntityManager {
     }
 
 
-    #createBackingDataCell(backingData: Entities.BackingData, parent: dia.Element, index: number) {
+    #createBackingDataCell(backingData: { backingData: Entities.BackingData, relation: DataUsageRelation }, parent: dia.Element, index: number) {
 
         console.log(backingData)
 
-        let xPosition = parent.position().x + Math.floor(parent.size().width / 3) + backingData.getMetaData.size.width * index;
-        let yPosition = parent.position().y + Math.floor(parent.size().height / 3) + backingData.getMetaData.size.height * index;
+        let xPosition = parent.position().x + Math.floor(parent.size().width / 3) + backingData.backingData.getMetaData.size.width * index;
+        let yPosition = parent.position().y + Math.floor(parent.size().height / 3) + backingData.backingData.getMetaData.size.height * index;
 
         let newBackingData = new BackingDataElement({
             position: { x: xPosition, y: yPosition }, // TODO good approach for positioning?
-            size: { width: backingData.getMetaData.size.width, height: backingData.getMetaData.size.height },
+            size: { width: backingData.backingData.getMetaData.size.width, height: backingData.backingData.getMetaData.size.height },
             attrs: {
                 root: {
                     title: "cna.qualityModel.BackingData"
@@ -1025,9 +1025,9 @@ class SystemEntityManager {
                     class: "entityHighlighting"
                 },
                 label: {
-                    fontSize: backingData.getMetaData.fontSize,
+                    fontSize: backingData.backingData.getMetaData.fontSize,
                     textWrap: {
-                        text: backingData.getName,
+                        text: backingData.backingData.getName,
                     }
                 }
             }
@@ -1040,20 +1040,23 @@ class SystemEntityManager {
                 case "embedded":
                     newBackingData.prop(property.jointJsConfig.modelPath, parent.id.toString());
                     break;
+                case "backingData-parentRelation":
+                    newBackingData.prop(property.jointJsConfig.modelPath, backingData.relation);
+                    break;
                 case "backingData-assignedFamily":
-                    newBackingData.prop(property.jointJsConfig.modelPath, backingData.getName);
+                    newBackingData.prop(property.jointJsConfig.modelPath, backingData.backingData.getName);
                     break;
                 case "backingData-includedData-wrapper":
                     let tmp = (property as TableDialogPropertyConfig).buttonActionContent.dialogContent as FormContentConfig;
                     let actualProperty = tmp.groups[0].contentItems[0];
-                    newBackingData.prop(actualProperty.jointJsConfig.modelPath, backingData.getProperties().find(entityProperty => entityProperty.getKey === "included_data").value);
+                    newBackingData.prop(actualProperty.jointJsConfig.modelPath, backingData.backingData.getProperties().find(entityProperty => entityProperty.getKey === "included_data").value);
                     break;
                 case "backingData-chooseEditMode":
                 case "backingData-familyConfig-wrapper":
                     // ignore
                     break;
                 default:
-                    newBackingData.prop(property.jointJsConfig.modelPath, backingData.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
+                    newBackingData.prop(property.jointJsConfig.modelPath, backingData.backingData.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
             }
         }
         return newBackingData;

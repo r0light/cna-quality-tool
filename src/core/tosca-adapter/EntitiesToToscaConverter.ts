@@ -75,16 +75,20 @@ class EntitiesToToscaConverter {
             if (infrastructure.getBackingDataEntities.length > 0) {
                 node.requirements = [];
                 for (const usedBackingData of infrastructure.getBackingDataEntities) {
-                    const usageRelationshipKey = this.#uniqueKeyManager.ensureUniqueness(`${nodeKey}_uses_${this.#keyIdMap.getKey(usedBackingData.getId)}`);
+                    const usageRelationshipKey = this.#uniqueKeyManager.ensureUniqueness(`${nodeKey}_uses_${this.#keyIdMap.getKey(usedBackingData.backingData.getId)}`);
                     let backingDataRelationship: TOSCA_Relationship_Template = {
                         type: "cna.qualityModel.relationships.AttachesTo.Data"
-                        //TODO properties, especially usage_relation
                     };
+                    if (usedBackingData.relation) {
+                        backingDataRelationship.properties = {
+                            "usage_relation": usedBackingData.relation
+                        }
+                    }
                     topologyTemplate.relationship_templates[usageRelationshipKey] = backingDataRelationship;
 
                     node.requirements.push({
                         "uses_backing_data": {
-                            node: this.#keyIdMap.getKey(usedBackingData.getId),
+                            node: this.#keyIdMap.getKey(usedBackingData.backingData.getId),
                             relationship: usageRelationshipKey
                         }
                     });
@@ -173,16 +177,20 @@ class EntitiesToToscaConverter {
                 }
                 for (const usedBackingData of component.getBackingDataEntities) {
 
-                    const usageRelationshipKey = this.#uniqueKeyManager.ensureUniqueness(`${nodeKey}_uses_${this.#keyIdMap.getKey(usedBackingData.getId)}`);
+                    const usageRelationshipKey = this.#uniqueKeyManager.ensureUniqueness(`${nodeKey}_uses_${this.#keyIdMap.getKey(usedBackingData.backingData.getId)}`);
                     let backingDataRelationship: TOSCA_Relationship_Template = {
                         type: "cna.qualityModel.relationships.AttachesTo.Data"
-                        //TODO properties, especially usage_relation
                     };
+                    if (usedBackingData.relation) {
+                        backingDataRelationship.properties = {
+                            "usage_relation": usedBackingData.relation
+                        }
+                    }
                     topologyTemplate.relationship_templates[usageRelationshipKey] = backingDataRelationship;
 
                     node.requirements.push({
                         "uses_backing_data": {
-                            node: this.#keyIdMap.getKey(usedBackingData.getId),
+                            node: this.#keyIdMap.getKey(usedBackingData.backingData.getId),
                             relationship: usageRelationshipKey
                         }
                     });
