@@ -7,6 +7,6 @@ import { tosca_simple_profile_for_yaml_v1_3 } from "./tosca_simple_profile_for_y
 import { cna_modeling_tosca_profile } from "./cna_modeling_tosca_profile";
 
 export const all_profiles: TOSCA_Service_Template[] = [
-   tosca_simple_profile_for_yaml_v1_3,
-   cna_modeling_tosca_profile
+tosca_simple_profile_for_yaml_v1_3,
+cna_modeling_tosca_profile
 ];

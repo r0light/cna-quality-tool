@@ -75,7 +75,19 @@ class EntitiesToToscaConverter {
             if (infrastructure.getBackingDataEntities.length > 0) {
                 node.requirements = [];
                 for (const usedBackingData of infrastructure.getBackingDataEntities) {
-                    node.requirements.push({ "uses_backing_data": this.#keyIdMap.getKey(usedBackingData.getId) });
+                    const usageRelationshipKey = this.#uniqueKeyManager.ensureUniqueness(`${nodeKey}_uses_${this.#keyIdMap.getKey(usedBackingData.getId)}`);
+                    let backingDataRelationship: TOSCA_Relationship_Template = {
+                        type: "cna.qualityModel.relationships.AttachesTo.Data"
+                        //TODO properties, especially usage_relation
+                    };
+                    topologyTemplate.relationship_templates[usageRelationshipKey] = backingDataRelationship;
+
+                    node.requirements.push({
+                        "uses_backing_data": {
+                            node: this.#keyIdMap.getKey(usedBackingData.getId),
+                            relationship: usageRelationshipKey
+                        }
+                    });
                 }
             }
             this.#keyIdMap.add(nodeKey, id);
@@ -134,8 +146,24 @@ class EntitiesToToscaConverter {
                     node.requirements = [];
                 }
                 for (const usedDataAggregate of component.getDataAggregateEntities) {
-                    // TODO save data usage relation
-                    node.requirements.push({ "uses_data": this.#keyIdMap.getKey(usedDataAggregate.data.getId) });
+
+                    const usageRelationshipKey = this.#uniqueKeyManager.ensureUniqueness(`${nodeKey}_uses_${this.#keyIdMap.getKey(usedDataAggregate.data.getId)}`);
+                    let dataAggregateRelationship: TOSCA_Relationship_Template = {
+                        type: "cna.qualityModel.relationships.AttachesTo.Data"
+                    };
+                    if (usedDataAggregate.relation) {
+                        dataAggregateRelationship.properties = {
+                            "usage_relation": usedDataAggregate.relation
+                        }
+                    }
+                    topologyTemplate.relationship_templates[usageRelationshipKey] = dataAggregateRelationship;
+
+                    node.requirements.push({
+                        "uses_data": {
+                            node: this.#keyIdMap.getKey(usedDataAggregate.data.getId),
+                            relationship: usageRelationshipKey
+                        }
+                    });
                 }
             }
 
@@ -144,7 +172,20 @@ class EntitiesToToscaConverter {
                     node.requirements = [];
                 }
                 for (const usedBackingData of component.getBackingDataEntities) {
-                    node.requirements.push({ "uses_backing_data": this.#keyIdMap.getKey(usedBackingData.getId) });
+
+                    const usageRelationshipKey = this.#uniqueKeyManager.ensureUniqueness(`${nodeKey}_uses_${this.#keyIdMap.getKey(usedBackingData.getId)}`);
+                    let backingDataRelationship: TOSCA_Relationship_Template = {
+                        type: "cna.qualityModel.relationships.AttachesTo.Data"
+                        //TODO properties, especially usage_relation
+                    };
+                    topologyTemplate.relationship_templates[usageRelationshipKey] = backingDataRelationship;
+
+                    node.requirements.push({
+                        "uses_backing_data": {
+                            node: this.#keyIdMap.getKey(usedBackingData.getId),
+                            relationship: usageRelationshipKey
+                        }
+                    });
                 }
             }
 
@@ -257,6 +298,9 @@ class EntitiesToToscaConverter {
         return {
             type: DATA_AGGREGATE_TOSCA_KEY,
             metadata: flatMetaData(dataAggregate.getMetaData),
+            capabilities: {
+                "provides_data": {}
+            }
         }
     }
 
@@ -266,6 +310,9 @@ class EntitiesToToscaConverter {
         let template: TOSCA_Node_Template = {
             type: BACKING_DATA_TOSCA_KEY,
             metadata: flatMetaData(backingData.getMetaData),
+            capabilities: {
+                "provides_data": {}
+            }
         }
 
         if (backingData.getProperties().length > 0) {
@@ -326,7 +373,7 @@ class EntitiesToToscaConverter {
             capabilities: {}
         };
 
-        template.capabilities.endpoint =  {
+        template.capabilities.endpoint = {
             properties: this.#parsePropertiesForYaml(endpoint.getProperties())
         }
         return template;
@@ -339,11 +386,11 @@ class EntitiesToToscaConverter {
             capabilities: {}
         };
 
-        template.capabilities.external_endpoint =  {
+        template.capabilities.external_endpoint = {
             properties: this.#parsePropertiesForYaml(endpoint.getProperties())
         }
 
-           
+
         return template;
     }
 

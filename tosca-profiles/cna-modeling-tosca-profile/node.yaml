@@ -176,7 +176,7 @@ node_types:
           type: string
           description: The value of the individual Backing Data element
     capabilities:
-      provided_data:
+      provides_data:
           type: tosca.capabilities.Attachment
           valid_source_types:
             - cna.qualityModel.entities.Root.Component
@@ -184,7 +184,7 @@ node_types:
             - cna.qualityModel.entities.BackingService
             - cna.qualityModel.entities.DBMS.StorageService
             - cna.qualityModel.entities.Compute.Infrastructure
-          occurrences: [1, 1]
+          occurrences: [1, UNBOUNDED]
 
   cna.qualityModel.entities.DataAggregate:
     derived_from: tosca.nodes.Root
@@ -198,14 +198,14 @@ node_types:
           occurrences: [1, UNBOUNDED]
     capabilities:
       # Allows Data Aggregate to be used by other entities
-      provided_data:
+      provides_data:
         type: tosca.capabilities.Attachment
         valid_source_types:
           - cna.qualityModel.entities.Root.Component
           - cna.qualityModel.entities.SoftwareComponent.Service
           - cna.qualityModel.entities.BackingService
           - cna.qualityModel.entities.DBMS.StorageService
-        occurrences: [1, 1]
+        occurrences: [1, UNBOUNDED]
 
 
   cna.qualityModel.entities.DBMS.StorageService:

@@ -34,15 +34,35 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
           "required": true,
           "description": "Type of relation, e.g. subscribes to or calls"
         }
-      }
+      },
+      "valid_target_types": [
+        "tosca.capabilities.Endpoint",
+        "tosca.capabilities.Endpoint.Public"
+      ]
     },
     "cna.qualityModel.relationships.Provides.Endpoint": {
       "derived_from": "tosca.relationships.Root",
       "description": "Relationship Type to connect Endpoints to the Components which provide them",
       "valid_target_types": [
-        "cna.qualityModel.entities.Endpoint",
-        "cna.qualityModel.entities.Endpoint.External"
+        "tosca.capabilities.Endpoint",
+        "tosca.capabilities.Endpoint.Public"
       ]
+    },
+    "cna.qualityModel.relationships.AttachesTo.Data": {
+      "derived_from": "tosca.relationships.AttachesTo",
+      "valid_target_types": [
+        "tosca.capabilities.Attachment"
+      ],
+      "properties": {
+        "location": {
+          "required": false
+        },
+        "usage_relation": {
+          "type": "string",
+          "required": true,
+          "description": "Describes how a component uses attached data, that means whether it just uses (reads) it for its functionality or if it also updates and persists (writes) it; possible values are uses and persists"
+        }
+      }
     }
   },
   "node_types": {
@@ -328,7 +348,7 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
         }
       },
       "capabilities": {
-        "provided_data": {
+        "provides_data": {
           "type": "tosca.capabilities.Attachment",
           "valid_source_types": [
             "cna.qualityModel.entities.Root.Component",
@@ -339,7 +359,7 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
           ],
           "occurrences": [
             1,
-            1
+            "UNBOUNDED"
           ]
         }
       }
@@ -361,7 +381,7 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
         }
       ],
       "capabilities": {
-        "provided_data": {
+        "provides_data": {
           "type": "tosca.capabilities.Attachment",
           "valid_source_types": [
             "cna.qualityModel.entities.Root.Component",
@@ -371,7 +391,7 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
           ],
           "occurrences": [
             1,
-            1
+            "UNBOUNDED"
           ]
         }
       }

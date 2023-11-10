@@ -4,7 +4,7 @@ import * as Entities from '../entities'
 import { TwoWayKeyIdMap } from "./TwoWayKeyIdMap";
 import { DATA_AGGREGATE_TOSCA_KEY } from '../entities/dataAggregate';
 import { BACKING_DATA_TOSCA_KEY } from '../entities/backingData';
-import { readToscaMetaData } from '../common/entityDataTypes';
+import { DataUsageRelation, readToscaMetaData } from '../common/entityDataTypes';
 import { DEPLOYMENT_MAPPING_TOSCA_KEY } from '../entities/deploymentMapping';
 import { LINK_TOSCA_KEY } from '../entities/link';
 import { INFRASTRUCTURE_TOSCA_KEY } from '../entities/infrastructure';
@@ -78,8 +78,10 @@ class ToscaToEntitesConverter {
                             if (requirementKey === "uses_backing_data") { // TODO no hard coded Key
                                 if (typeof requirement === "string") {
                                     infrastructure.addBackingDataEntity(this.#importedSystem.getBackingDataEntities.get(this.#keyIdMap.getId(requirement)));
-                                } else {
-                                    // TODO requirement is of type TOSCA_Requirement_Assignment
+                                } else if (typeof requirement === "object") {
+                                    if (requirement.node) {
+                                        infrastructure.addBackingDataEntity(this.#importedSystem.getBackingDataEntities.get(this.#keyIdMap.getId(requirement.node)));
+                                    }
                                 }
                             }
                         }
@@ -269,16 +271,24 @@ class ToscaToEntitesConverter {
                     switch (requirementKey) {
                         case "uses_data":
                             if (typeof requirement === "string") {
-                                component.addDataEntity(this.#importedSystem.getDataAggregateEntities.get(this.#keyIdMap.getId(requirement))); //TODO handle usageRelation
-                            } else {
+                                component.addDataEntity(this.#importedSystem.getDataAggregateEntities.get(this.#keyIdMap.getId(requirement)));
+                            } else if (typeof requirement === "object") {
                                 // TODO requirement is of type TOSCA_Requirement_Assignment
+                                if (requirement.node && requirement.relationship && typeof requirement.relationship === "string") {
+                                    let relationship = this.#topologyTemplate.relationship_templates[requirement.relationship];
+                                    let usageRelation: DataUsageRelation = relationship.properties && relationship.properties["usage_relation"] ? relationship.properties["usage_relation"] : "";
+                                    component.addDataEntity(this.#importedSystem.getDataAggregateEntities.get(this.#keyIdMap.getId(requirement.node)), usageRelation);
+                                }
                             }
                             break;
                         case "uses_backing_data":
                             if (typeof requirement === "string") {
                                 component.addDataEntity(this.#importedSystem.getBackingDataEntities.get(this.#keyIdMap.getId(requirement)));
-                            } else {
+                            } else if (typeof requirement === "object") {
                                 // TODO requirement is of type TOSCA_Requirement_Assignment
+                                if (requirement.node) {
+                                    component.addDataEntity(this.#importedSystem.getBackingDataEntities.get(this.#keyIdMap.getId(requirement.node)));
+                                }
                             }
                             break;
                         case "provides_endpoint":
