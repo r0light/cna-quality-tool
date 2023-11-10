@@ -7,10 +7,14 @@
         </div>
         <ul class="navbar-nav mr-auto">
           <li v-for="page of pages" class="nav-item" :class="{ active: page.active }">
-            <a class="nav-link text-white" @click="selectPage(page.index)">
+            <div class="nav-link d-flex flex-row">
+              <a class="text-white" @click="selectPage(page.index)">
               <i :class="page.iconClass"></i>
               {{ page.name }}
             </a>
+            <button class="btn d-flex p-1 closeModelBtn" v-if="page.pageType === 'modeling'" @click="deleteModelingPage(page.index)"><i
+            class="fa fa-fw fa-x text-white"></i></button>
+            </div>
           </li>
           <li class="nav-item">
             <a id="newModelingApp" class="nav-link text-white" @click="overlayState = 'initial'">
@@ -247,7 +251,7 @@ function addNewModelingPage(name: string, toImport: ImportData) {
     });
   }
 
-  modeledSystemsData.value[newIndex] = ({
+  modeledSystemsData.value.push({
       index: newIndex,
       name: "",
       toImport: toImport,
@@ -275,6 +279,29 @@ function updatePageName(newName: string, index: number) {
   modeledSystemsData.value[index].name = newName;
 }
 
+function deleteModelingPage(index: number) {
+  // TODO modal to ask for confirmation
+
+  let highestIndexBefore = -1;
+
+  for (let i = 0; i < pages.value.length; i++) {
+    if (pages.value[i].index === index) {
+      pages.value.splice(i, 1);
+      break;
+    }
+    highestIndexBefore = pages.value[i].index;
+  }
+
+  for (let i = 0; i < modeledSystemsData.value.length; i++) {
+    if (modeledSystemsData.value[i].index === index) {
+      modeledSystemsData.value.splice(i, 1);
+      break;
+    }
+  }
+
+  selectPage(highestIndexBefore);
+}
+
 </script>
 
 <style lang="scss">
@@ -300,5 +327,14 @@ function updatePageName(newName: string, index: number) {
 
 .hide {
   display: none;
+}
+
+.closeModelBtn {
+  margin-left: 1em;
+
+}
+
+.closeModelBtn:hover > i {
+  color:  #3db4f4 !important;
 }
 </style>
