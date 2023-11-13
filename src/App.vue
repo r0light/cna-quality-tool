@@ -8,12 +8,12 @@
         <ul class="navbar-nav mr-auto">
           <li v-for="page of pages" class="nav-item" :class="{ active: page.active }">
             <div class="nav-link d-flex flex-row">
-              <a class="text-white" @click="selectPage(page.index)">
-              <i :class="page.iconClass"></i>
-              {{ page.name }}
-            </a>
-            <button class="btn d-flex p-1 closeModelBtn" v-if="page.pageType === 'modeling'" @click="deleteModelingPage(page.index)"><i
-            class="fa fa-fw fa-x text-white"></i></button>
+              <a class="text-white" @click="selectPage(page.id)">
+                <i :class="page.iconClass"></i>
+                {{ page.name }}
+              </a>
+              <button class="btn d-flex p-1 closeModelBtn" v-if="page.pageType === 'modeling'"
+                @click="deleteModelingPage(page.id)"><i class="fa fa-fw fa-x text-white"></i></button>
             </div>
           </li>
           <li class="nav-item">
@@ -44,9 +44,9 @@
             introduced here: https://github.com/KarolinDuerr/MA-CNA-ModelingSupport/tree/main/TOSCA_Extension.</p>
           <div class="d-flex flex-row justify-content-around">
             <button type="button" class="btn btn-outline-dark btn-light" @click="overlayState = 'startNew'"> <i
-              class="fa-solid fa-pencil"></i> Create new diagram </button>
-          <button type="button" class="btn btn-outline-dark btn-light" @click="overlayState = 'startImport'"> <i
-              class="fa-solid fa-pencil"></i> Import existing diagram</button>
+                class="fa-solid fa-pencil"></i> Create new diagram </button>
+            <button type="button" class="btn btn-outline-dark btn-light" @click="overlayState = 'startImport'"> <i
+                class="fa-solid fa-pencil"></i> Import existing diagram</button>
           </div>
 
         </div>
@@ -76,22 +76,23 @@
         </div>
         <div id="startModelingForm" v-show="overlayState === 'startImport'">
           <p class="user-select-none">Please select a file to import a model from it (TOSCA or JSON format)</p>
-          <input type="file" accept=".json,.yaml,.yml,.tosca" ref="selectedFile" @change="importModelFromFile" tabindex="-1"/>
+          <input type="file" accept=".json,.yaml,.yml,.tosca" ref="selectedFile" @change="importModelFromFile"
+            tabindex="-1" />
         </div>
       </div>
     </div>
     <div class="pagesContainer">
       <div v-for="pageContent of pages" class="pageWrapper">
-        <Home v-if="pageContent.pageType === 'home'" v-show="currentPage === pageContent.index"></Home>
-        <QualityModelApp v-if="pageContent.pageType === 'qualityModel'" v-show="currentPage === pageContent.index"
-          :inView="currentPage === pageContent.index"></QualityModelApp>
-        <EvaluationApp v-if="pageContent.pageType === 'evaluation'" v-show="currentPage === pageContent.index"
+        <Home v-if="pageContent.pageType === 'home'" v-show="currentPage === pageContent.id"></Home>
+        <QualityModelApp v-if="pageContent.pageType === 'qualityModel'" v-show="currentPage === pageContent.id"
+          :inView="currentPage === pageContent.id"></QualityModelApp>
+        <EvaluationApp v-if="pageContent.pageType === 'evaluation'" v-show="currentPage === pageContent.id"
           :systemsData="sharedSystemsData"></EvaluationApp>
         <ModelingApp v-if="pageContent.pageType === 'modeling'"
-          v-show="pageContent.pageType === 'modeling' && currentPage === pageContent.index" :systemName="pageContent.name"
-          :pageIndex="pageContent.index" :modelingData="(modeledSystemsData[pageContent.index] as ModelingData)"
-          @store:modelingData="(systemEntityManager, toImport) => storeModelingData(pageContent.index, toImport, systemEntityManager, pageContent.name, )"
-          @update:systemName="event => updatePageName(event, pageContent.index)"></ModelingApp>
+          v-show="pageContent.pageType === 'modeling' && currentPage === pageContent.id" :systemName="pageContent.name"
+          :pageId="pageContent.id" :modelingData="(modeledSystemsData.find(systemData => systemData.id === pageContent.id) as ModelingData)"
+          @store:modelingData="(systemEntityManager, toImport) => storeModelingData(pageContent.id, toImport, systemEntityManager, pageContent.name,)"
+          @update:systemName="event => updatePageName(event, pageContent.id)"></ModelingApp>
       </div>
     </div>
   </main>
@@ -110,7 +111,7 @@ import EvaluationApp from './evaluation/EvaluationApp.vue';
 import SystemEntityManager from './modeling/systemEntityManager';
 
 type Page = {
-  index: number;
+  id: number;
   active: boolean;
   pageType: "home" | "qualityModel" | "evaluation" | "modeling"
   iconClass: string;
@@ -118,12 +119,12 @@ type Page = {
 }
 
 export type ImportData = {
-    fileName: string,
-    fileContent: string
-  }
+  fileName: string,
+  fileContent: string
+}
 
 export type ModelingData = {
-  index: number,
+  id: number,
   name: string,
   toImport: ImportData,
   entityManager: SystemEntityManager
@@ -131,21 +132,21 @@ export type ModelingData = {
 
 const pages = ref<Page[]>([
   {
-    index: 0,
+    id: 0,
     active: false,
     pageType: "home",
     iconClass: "fa fa-fw fa-home",
     name: "Home"
   },
   {
-    index: 1,
+    id: 1,
     active: false,
     pageType: "qualityModel",
     iconClass: "fa-solid fa-sitemap",
     name: "Quality Model"
   },
   {
-    index: 2,
+    id: 2,
     active: false,
     pageType: "evaluation",
     iconClass: "fa-solid fa-gauge-high",
@@ -155,20 +156,24 @@ const pages = ref<Page[]>([
 
 const modeledSystemsData = ref<ModelingData[]>([]);
 const sharedSystemsData: ComputedRef<ModelingData[]> = computed(() => {
-  return modeledSystemsData.value.filter(data => data.index !== -1) as ModelingData[];
+  return modeledSystemsData.value.filter(data => data.id !== -1) as ModelingData[];
 });
 /*const sharedSystemsKey: ComputedRef<string> = computed(() => {
   return modeledSystemsData.value.reduce((initial, b) => initial + b.name, "");
 });*/
 
-function storeModelingData(index: number, toImport: ImportData, systemEntityManager: SystemEntityManager, pageName: string, ) {
-  modeledSystemsData.value[index] = {
-    index: index,
-    name: pageName,
-    toImport: toImport,
-    entityManager: systemEntityManager
-  }
+function storeModelingData(id: number, toImport: ImportData, systemEntityManager: SystemEntityManager, pageName: string,) {
 
+  for (let i = 0; i < modeledSystemsData.value.length; i++) {
+    if (modeledSystemsData.value[i].id === id) {
+      modeledSystemsData.value[i] = {
+        id: id,
+        name: pageName,
+        toImport: toImport,
+        entityManager: systemEntityManager
+      }
+    }
+  }
 }
 
 const currentPage = ref(0);
@@ -188,17 +193,18 @@ function onNameEntered() {
     return;
   }
   overlayState.value = "none";
-  addNewModelingPage(newSystemName.value, {fileName: '', fileContent: ''});
+  addNewModelingPage(newSystemName.value, { fileName: '', fileContent: '' });
   newSystemName.value = "";
 }
 
 function importModelFromFile() {
   let fr = new FileReader();
   fr.onload = (fileReader: ProgressEvent<FileReader>) => {
-        let fileName = selectedFile.value.files[0].name;
-        let stringifiedFile: string = fileReader.target.result.toString();
-        addNewModelingPage(newSystemName.value, {fileName: fileName, fileContent: stringifiedFile});
-        overlayState.value = "none";
+    let fileName = selectedFile.value.files[0].name;
+    let systemName = fileName.replace(/\..*$/g, "");
+    let stringifiedFile: string = fileReader.target.result.toString();
+    addNewModelingPage(systemName, { fileName: fileName, fileContent: stringifiedFile });
+    overlayState.value = "none";
   };
   fr.readAsText(selectedFile.value.files[0]);
 }
@@ -206,7 +212,7 @@ function importModelFromFile() {
 onMounted(() => {
 
   for (const page of pages.value) {
-    page.active = page.index === currentPage.value ? true : false;
+    page.active = page.id === currentPage.value ? true : false;
   }
 
   document.getElementById("applicationNameInputField").addEventListener("keydown", (event) => {
@@ -217,89 +223,87 @@ onMounted(() => {
   });
 });
 
-function selectPage(index: number) {
-  currentPage.value = index;
+function selectPage(id: number) {
+  currentPage.value = id;
 
   // set current page active
   for (const page of pages.value) {
-    page.active = page.index === currentPage.value ? true : false;
-    switch (page.pageType) {
-      case "home":
-        document.title = "Home";
-        break;
-      case "modeling":
-        document.title = `CNA Modeling ${page.name}`;
-        break;
-      default:
-        document.title = "Home";
+    page.active = page.id === currentPage.value ? true : false;
+    if (page.active) {
+      switch (page.pageType) {
+        case "home":
+          document.title = "Home";
+          break;
+        case "modeling":
+          document.title = `CNA Modeling ${page.name}`;
+          break;
+        default:
+          document.title = "Home";
+      }
     }
   }
 }
 
 function addNewModelingPage(name: string, toImport: ImportData) {
 
-  // increment currently highest index by one to get a new index
-  const newIndex = Math.max(...pages.value.map(page => page.index)) + 1;
-
-  // prepare modeledSystemsData so that the array at index newIndex is not empty
-  while (modeledSystemsData.value.length <= newIndex) {
-    modeledSystemsData.value.push({
-      index: -1,
-      name: "",
-      toImport: {fileName: "", fileContent: ""},
-      entityManager: null
-    });
-  }
+  // increment currently highest id by one to get a new id
+  const newId = Math.max(...pages.value.map(page => page.id)) + 1;
 
   modeledSystemsData.value.push({
-      index: newIndex,
-      name: "",
-      toImport: toImport,
-      entityManager: null
-    });
+    id: newId,
+    name: name,
+    toImport: toImport,
+    entityManager: null
+  });
 
   pages.value.push({
-    index: newIndex,
+    id: newId,
     active: true,
     pageType: "modeling",
     iconClass: "fa-solid fa-pencil",
     name: name
   })
 
-  selectPage(newIndex);
+  selectPage(newId);
 }
 
-function updatePageName(newName: string, index: number) {
+function updatePageName(newName: string, id: number) {
   for (const page of pages.value) {
-    if (page.index === index) {
+    if (page.id === id) {
       page.name = newName;
       document.title += `CNA Modeling: ${newName}`;
     }
   }
-  modeledSystemsData.value[index].name = newName;
+
+  for (const systemData of modeledSystemsData.value) {
+    if (systemData.id === id) {
+      systemData.name = newName;
+      break;
+    }
+  }
 }
 
-function deleteModelingPage(index: number) {
+function deleteModelingPage(id: number) {
   // TODO modal to ask for confirmation
 
-  let highestIndexBefore = -1;
+  let highestIdBefore = -1;
 
   for (let i = 0; i < pages.value.length; i++) {
-    if (pages.value[i].index === index) {
+    if (pages.value[i].id === id) {
       pages.value.splice(i, 1);
       break;
     }
-    highestIndexBefore = pages.value[i].index;
+    highestIdBefore = pages.value[i].id;
   }
 
   for (let i = 0; i < modeledSystemsData.value.length; i++) {
-    if (modeledSystemsData.value[i].index === index) {
+    if (modeledSystemsData.value[i].id === id) {
       modeledSystemsData.value.splice(i, 1);
       break;
     }
   }
 
-  selectPage(highestIndexBefore);
+  selectPage(highestIdBefore);
 }
 
 </script>
@@ -334,7 +338,7 @@ function deleteModelingPage(index: number) {
 
 }
 
-.closeModelBtn:hover > i {
-  color:  #3db4f4 !important;
+.closeModelBtn:hover>i {
+  color: #3db4f4 !important;
 }
 </style>

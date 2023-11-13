@@ -7,10 +7,10 @@
             @load:fromTosca="loadFromTosca" @save:toTosca="saveToTosca"></Toolbar>
         <div class="app-body">
             <div class="entityShapes-sidebar-container d-print-none">
-                <EntitySidebar :paper="mainPaper" :pageId="`model${pageIndex}`"></EntitySidebar>
+                <EntitySidebar :paper="mainPaper" :pageId="`model${pageId}`"></EntitySidebar>
             </div>
             <div class="visible-modeling-area">
-                <ModelingArea :pageId="`model${pageIndex}`" :graph="(currentSystemGraph as dia.Graph)"
+                <ModelingArea :pageId="`model${pageId}`" :graph="(currentSystemGraph as dia.Graph)"
                     v-model:paper="mainPaper" :currentElementSelection="currentSelection"
                     :currentRequestTraceSelection="currentRequestTraceViewSelection" :printing="printing"
                     @select:Element="(element: dia.CellView | dia.LinkView) => currentSelection = element"
@@ -38,7 +38,7 @@ import { ImportData, ModelingData } from '@/App.vue';
 
 const props = defineProps<{
     systemName: string,
-    pageIndex: number,
+    pageId: number,
     modelingData: ModelingData
 }>()
 

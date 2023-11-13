@@ -2,14 +2,14 @@
     <div>
         <h2>Evaluation</h2>
         <div>
-            <select @change="onSelectSystem" v-model="selectedSystemIndex">
+            <select @change="onSelectSystem" v-model="selectedSystemId">
                 <option value=-1>Select a system...</option>
-                <option v-for="system of systemsData" :value="system.index">{{ system.name }}</option>
+                <option v-for="system of systemsData" :value="system.id">{{ system.name }}</option>
             </select>
         </div>
-        <div v-if="selectedSystemIndex > -1">
+        <div v-if="selectedSystemId > -1">
             <p>In development...</p>
-            <p>Number of services:<span> {{ getNumberOfServices(selectedSystemIndex) }} </span></p>
+            <p>Number of services:<span> {{ getNumberOfServices(selectedSystemId) }} </span></p>
         </div>
     </div>
 </template>
@@ -23,20 +23,20 @@ const props = defineProps<{
     systemsData: ModelingData[],
 }>()
 
-const selectedSystemIndex = ref<number>(-1)
+const selectedSystemId = ref<number>(-1)
 
 function onSelectSystem() {
 
     // start metric calculation here?
 }
 
-function getNumberOfServices(systemIndex: number) {
+function getNumberOfServices(systemId: number) {
 
-    if (systemIndex === -1) {
+    if (systemId === -1) {
         return;
     }
 
-    let selectedSystem = props.systemsData.find(system => system.index === systemIndex);
+    let selectedSystem = props.systemsData.find(system => system.id === systemId);
     let systemEntityManager = toRaw(selectedSystem.entityManager);
 
     let services = [...systemEntityManager.getSystemEntity().getComponentEntities.entries()].map(entry => entry[1]).filter(entity => entity.constructor.name === "Service");
