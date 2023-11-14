@@ -60,6 +60,7 @@ const SectionContentType = Object.freeze({
     INPUT_TEXTBOX: "text",
     INPUT_NUMBERBOX: "number",
     INPUT_RANGE: "range",
+    DROPDOWN: "select"
 });
 
 const ApplicationSettingsDialogConfig = {
@@ -132,6 +133,26 @@ const ApplicationSettingsDialogConfig = {
                     defaultValue: 1,
                     min: 1,
                     max: 10,
+                    additionalItems: [
+                        {
+                            text: "Reset",
+                            type: SectionContentType.BUTTON
+                        }
+                    ]
+                }
+            }
+        },
+        Router: {
+            id: "default-link-router",
+            heading: "Link Router Type",
+            sectionContent: {
+                Router: {
+                    providedFeature: "defaultRouter",
+                    name: "Link router",
+                    icon: "",
+                    type: SectionContentType.DROPDOWN,
+                    defaultValue: "manhattan",
+                    options: ["manhattan", "normal", "metro"],
                     additionalItems: [
                         {
                             text: "Reset",

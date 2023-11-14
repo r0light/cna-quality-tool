@@ -51,7 +51,7 @@
     </div>
     <div class="app-header-second-row" v-show="showEntityBar">
         <div class="entity-tools">
-            <div class="entity-overall-group" data-group="entity-overall-group"  >
+            <div class="entity-overall-group" data-group="entity-overall-group">
                 <div v-for="entityTool of entityTools">
                     <div class="entity-group form-check form-check-inline" :data-group="entityTool.entityType"
                         :title="entityTool.tooltipText" data-toggle="tooltip" data-placement="bottom">
@@ -83,13 +83,14 @@
 <script lang="ts" setup>
 import $, { data } from 'jquery';
 import { ref, computed, onMounted, onUpdated, watch, reactive, Ref, ComputedRef, nextTick, getCurrentInstance } from "vue";
-import { dia, util, highlighters } from "jointjs";
+import { dia, util, highlighters, routers } from "jointjs";
 import { ApplicationSettingsDialogConfig } from "../../config/actionDialogConfig";
 import EntityTypes from "../../config/entityTypes";
 import ToolbarConfig from "../../config/toolbarConfiguration";
 import ModalDialog from "../modalDialog";
 import UIModalDialog from "../../representations/guiElements.dialog";
 import ButtonGroup from './ButtonGroup.vue';
+import { parseProperties } from '@/core/common/entityProperty';
 
 export type ToolbarButton = {
     buttonType: string,
@@ -213,7 +214,7 @@ props.graph.on("reloaded", () => {
     for (const [key, value] of Object.entries(EntityTypes)) {
         updateEntityCounter(value, "add");
     }
-}); 
+});
 props.graph.on("change:entity", (element, entity, opt) => { entityTypeChanged(opt.previousType, entity.type) });
 props.graph.on("change:attrs", entityVisibilityChanged);
 
@@ -537,9 +538,45 @@ function editApplicationSettings() {
         let newHeight = $("#" + ApplicationSettingsDialogConfig.content.Size.sectionContent.PaperHeight.providedFeature).val() as string;
         let newGridSize = $("#" + ApplicationSettingsDialogConfig.content.Grid.sectionContent.Size.providedFeature).val() as number;
         let newGridThickness = $("#" + ApplicationSettingsDialogConfig.content.Grid.sectionContent.Thickness.providedFeature).val() as number;
+        let selectedRouter = $("#" + ApplicationSettingsDialogConfig.content.Router.sectionContent.Router.providedFeature).val() as string;
         props.paper.setDimensions(newWidth, newHeight);
         props.paper.setGridSize(newGridSize);
         props.paper.drawGrid({ thickness: newGridThickness });
+        switch (selectedRouter) {
+            case "normal":
+                props.paper.options.defaultRouter = {
+                    name: "normal"
+                }
+                break;
+            case "metro":
+                props.paper.options.defaultRouter = {
+                    name: "metro",
+                    args: {
+                        step: 10,
+                        padding: 15,
+                        maximumLoops: 5000,
+                        maxAllowedDirectionChange: 100,
+                    }
+                }
+                break;
+            case "manhattan":
+            default:
+                props.paper.options.defaultRouter = {
+                    name: "manhattan",
+                    args: {
+                        step: 10,
+                        padding: 15,
+                        maximumLoops: 5000,
+                        maxAllowedDirectionChange: 100,
+                    }
+                }
+                break;
+        }
+        // redraw
+        let currentGraph = JSON.stringify(props.graph.toJSON());
+        let currentName = props.systemName;
+        props.paper.render();
+        emit("load:fromJson", currentGraph, currentName);
     };
     // get current values
     ApplicationSettingsDialogConfig.content.Size.sectionContent.PaperWidth.min = props.paper.getFitToContentArea({ padding: util.normalizeSides(25) }).width;
@@ -549,6 +586,7 @@ function editApplicationSettings() {
     ApplicationSettingsDialogConfig.content.Grid.sectionContent.Size.defaultValue = props.paper.options.gridSize;
     // TODO fix access
     ApplicationSettingsDialogConfig.content.Grid.sectionContent.Thickness.defaultValue = props.paper["_gridSettings"][0].thickness;
+    ApplicationSettingsDialogConfig.content.Router.sectionContent.Router.defaultValue = (props.paper.options.defaultRouter as routers.Router).name;
     // create dialog with information
     let applicationModalDialog = new ModalDialog();
     applicationModalDialog.renderActionDialog(ApplicationSettingsDialogConfig.title, ApplicationSettingsDialogConfig.content, ApplicationSettingsDialogConfig.cancelButton.text, ApplicationSettingsDialogConfig.saveButton);

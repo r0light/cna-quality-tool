@@ -69,7 +69,7 @@ onMounted(() => {
                 step: 10,
                 padding: 15,
                 maximumLoops: 5000,
-                maxAllowedDirectionChange: 100  ,
+                maxAllowedDirectionChange: 100,
             }
         },
         defaultConnector: {
@@ -363,6 +363,7 @@ function adjustVertices(graph: dia.Graph, cell: dia.Cell | dia.CellView) {
         // reset own vertices
         let closestToTarget = cell.getSourcePoint();
         var lineToTarget = new g.Line(cell.getSourcePoint(), cell.getTargetPoint());
+
         var sourceCell = cell.getSourceCell();
         if (sourceCell) {
             var intersectionPoints = lineToTarget.intersect(sourceCell.getBBox());
@@ -379,7 +380,7 @@ function adjustVertices(graph: dia.Graph, cell: dia.Cell | dia.CellView) {
                 console.log("NO intersection points");
             }
         } else {
-            console.log("ERROR" + cell);
+            console.log("source cell currently not available for" + cell.id);
         }
         closestToTarget = moveOnLine(closestToTarget, cell.getTargetPoint(), PADDING_TO_SOURCE_ELEMENT);
 

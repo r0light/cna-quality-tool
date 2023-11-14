@@ -109,6 +109,8 @@ class ModalDialog {
             this.#renderInputBox(sectionContent);
         } else if (sectionContent.type === SectionContentType.INPUT_RANGE) {
             this.#renderRangeBox(sectionContent);
+        } else  if (sectionContent.type === SectionContentType.DROPDOWN) {
+            this.#renderDropdownField(sectionContent);
         }
     }
 
@@ -170,6 +172,38 @@ class ModalDialog {
             $("#" + sectionContent.providedFeature + "-inputRow").append(additionalButton);
             $("#" + sectionContent.providedFeature + "-resetButton").addClass("ml-2 btn-sm");
         }
+    }
+
+    #renderDropdownField(sectionContent) {
+        let inputGroup = '<div id="' + sectionContent.providedFeature + '-inputGroup" class="input-group"></div>';
+        $("#" + sectionContent.providedFeature + "-div").append(inputGroup);
+        let inputGroupIcon = '<div class="input-group-prepend"><span id="' + sectionContent.providedFeature + '-inputGroupIconText" class="input-group-text"></span></div>';
+        $("#" + sectionContent.providedFeature + "-inputGroup").append(inputGroupIcon);
+        let icon = '<i class="' + sectionContent.icon.trim() + '"></i>';
+        $("#" + sectionContent.providedFeature + "-inputGroupIconText").append(icon);
+        let text = '<span class="modalInputLabel">' + sectionContent.name + '</span>';
+        $("#" + sectionContent.providedFeature + "-inputGroupIconText").append(text);
+
+        let input = '<select id="' + sectionContent.providedFeature + '" class="form-control"></select>';
+        $("#" + sectionContent.providedFeature + "-inputGroup").append(input);
+
+        $("#" + sectionContent.providedFeature).attr({
+            value: sectionContent.defaultValue,
+            "aria-describedby": sectionContent.providedFeature + "-helpText",
+        });
+
+        for (const option of sectionContent.options) {
+            let optionElement = '<option value="' + option + '">' + option + '</option>';
+            $("#" + sectionContent.providedFeature).append(optionElement);
+        }
+
+
+        for (const additionalItem of sectionContent.additionalItems) {
+            let additionalButton = '<button id="' + sectionContent.providedFeature + '-resetButton" class="btn btn-outline-secondary" type="reset">' + additionalItem.text + '</button>';
+            $("#" + sectionContent.providedFeature + "-inputRow").append(additionalButton);
+            $("#" + sectionContent.providedFeature + "-resetButton").addClass("ml-2 btn-sm");
+        }
+
     }
 
     #configureTitle(title: dialogTitle | string) {
