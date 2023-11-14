@@ -12,14 +12,16 @@
 
 <script lang="ts" setup>
 import $ from 'jquery';
+import { chain, omit, first, each, has, partial } from 'lodash';
 import { onMounted, onUpdated } from 'vue';
-import { dia, routers, shapes, highlighters } from "jointjs";
+import { g, dia, routers, shapes, highlighters } from "jointjs";
 import { ModelingValidator } from '../modelingValidator';
 import ConnectionSelectionTools from "./tools/connectionSelectionTools";
 import EntityTypes from "../config/entityTypes";
 import { DeploymentMapping, Link } from "../config/entityShapes";
 import { UIContentType } from "../config/toolbarConfiguration";
 import UIModalDialog from "../representations/guiElements.dialog";
+import { NumberEntityProperty, parseProperties } from '@/core/common/entityProperty';
 
 
 const props = defineProps<{
@@ -62,10 +64,16 @@ onMounted(() => {
         // defaults:
         defaultLink: (cellView, magnet) => modelingValidator.defaultLink(cellView, magnet),
         defaultRouter: {
-            name: "manhattan"
+            name: "manhattan",
+            args: {
+                step: 10,
+                padding: 15,
+                maximumLoops: 5000,
+                maxAllowedDirectionChange: 100  ,
+            }
         },
         defaultConnector: {
-            name: "rounded",
+            name: "jumpover",
             args: {
                 radius: 4
             }
@@ -182,6 +190,14 @@ onMounted(() => {
         //     console.log(y)
         // }
     });
+
+
+    // bind `graph` to the `adjustVertices` function
+    var adjustGraphVertices = partial(adjustVertices, props.graph);
+    // adjust vertices when a cell is removed or its source/target was changed
+    props.graph.on('add remove change:source change:target', adjustGraphVertices);
+    // adjust vertices when the user stops interacting with an element
+    paper.on('cell:pointerup', adjustGraphVertices);
 
 
     paper.render();
@@ -326,7 +342,119 @@ const InvalidToscaConnectionDialogConfig = {
     }
 };
 
+type Vertex = { x: number, y: number };
 
+function adjustVertices(graph: dia.Graph, cell: dia.Cell | dia.CellView) {
 
+    const PADDING_TO_SOURCE_ELEMENT = 30;
+
+    // if `cell` is a view, find its model
+    if (cell instanceof dia.CellView) {
+        cell = cell.model;
+    }
+
+    if (cell instanceof dia.Element) {
+        // `cell` is an element
+
+        graph.getConnectedLinks(cell).forEach(link => adjustVertices(graph, link));
+        return;
+    } else if (cell instanceof dia.Link) {
+
+        // reset own vertices
+        let closestToTarget = cell.getSourcePoint();
+        var lineToTarget = new g.Line(cell.getSourcePoint(), cell.getTargetPoint());
+        var sourceCell = cell.getSourceCell();
+        if (sourceCell) {
+            var intersectionPoints = lineToTarget.intersect(sourceCell.getBBox());
+            if (intersectionPoints && intersectionPoints.length > 0) {
+                closestToTarget = intersectionPoints[0];
+                let smallestDistance = intersectionPoints[0].distance(cell.getTargetPoint());
+
+                for (const intersectionPoint of intersectionPoints) {
+                    if (intersectionPoint.distance(cell.getTargetPoint()) < smallestDistance) {
+                        closestToTarget = intersectionPoint;
+                    }
+                }
+            } else {
+                console.log("NO intersection points");
+            }
+        } else {
+            console.log("ERROR" + cell);
+        }
+        closestToTarget = moveOnLine(closestToTarget, cell.getTargetPoint(), PADDING_TO_SOURCE_ELEMENT);
+
+        // initialize vertices
+        cell.vertices([closestToTarget]);
+
+        /*
+        console.log({
+            "target": cell.getTargetPoint(),
+            "source": cell.getSourcePoint(),
+            "new vertice": closestToTarget
+        })
+        */
+
+        // try to avoid conflicts
+        var sourceId: dia.Cell.ID = cell.get('source').id || cell.previous('source').id;
+        var sameSource = graph.getLinks().filter(function (otherLink: dia.Link) {
+            if (cell.id === otherLink.id) {
+                return false;
+            }
+            return sourceId === otherLink.source().id;
+        });
+        let otherWayPoints: Vertex[] = [];
+        sameSource.forEach(link => {
+            otherWayPoints.push(...link.vertices());
+        })
+        for (let vertex of cell.vertices()) {
+            while (hasConflictingWaypoint(vertex, otherWayPoints)) {
+                adjustVertexPosition(vertex, closestToTarget, cell.getTargetPoint());
+            }
+        }
+    }
+}
+
+function moveOnLine(lineStart: g.Point, lineTarget: g.Point, distanceToMove): g.Point {
+
+    let distanceToTarget = lineStart.distance(lineTarget);
+    let distanceRatio = distanceToMove / distanceToTarget;
+
+    let newX = (1 - distanceRatio) * lineStart.x + distanceRatio * lineTarget.x;
+    let newY = (1 - distanceRatio) * lineStart.y + distanceRatio * lineTarget.y;
+    return new g.Point(newX, newY);
+}
+
+function hasConflictingWaypoint(vertex: Vertex, others: Vertex[]) {
+    return others.map(other => other.x === vertex.x && other.y === vertex.y).reduce((accumulator, conflict) => accumulator || conflict, false);
+}
+
+function adjustVertexPosition(currentVertex: Vertex, closestToTarget: g.Point, targetPoint: Vertex) {
+
+    let slopeOfLineToTarget = (targetPoint.y - closestToTarget.y) / (targetPoint.x - closestToTarget.x);
+    let slopeOfOrthogonalLine = -1 * slopeOfLineToTarget;
+    let axisDistanceOfOrthogonalLine = closestToTarget.y - slopeOfOrthogonalLine * closestToTarget.x;
+    let randomOtherPointOnLine: Vertex = { x: closestToTarget.x + 10, y: slopeOfOrthogonalLine * (closestToTarget.x + 10) + axisDistanceOfOrthogonalLine };
+    let singleStepDistance = 10;
+
+    let currentDistanceFromClosestPoint = new g.Point(currentVertex).distance(closestToTarget);
+    if (currentDistanceFromClosestPoint === 0) {
+        let newPoint = moveOnLine(closestToTarget, new g.Point(randomOtherPointOnLine), 10);
+        currentVertex.x = newPoint.x;
+        currentVertex.y = newPoint.y;
+        return;
+    } else {
+        if (currentVertex.x > closestToTarget.x) {
+            let newPoint = moveOnLine(closestToTarget, new g.Point(randomOtherPointOnLine), currentDistanceFromClosestPoint + singleStepDistance);
+            currentVertex.x = newPoint.x;
+            currentVertex.y = newPoint.y;
+            return;
+        } else {
+            let newPoint = moveOnLine(closestToTarget, new g.Point(randomOtherPointOnLine), currentDistanceFromClosestPoint * -1);
+            currentVertex.x = newPoint.x;
+            currentVertex.y = newPoint.y;
+            return;
+        }
+    }
+}
 
 </script>
