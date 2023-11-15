@@ -3,7 +3,6 @@ import * as yaml from 'js-yaml';
 import EntityTypes from './config/entityTypes';
 import * as Entities from '../core/entities';
 import ErrorMessage, { ErrorType } from './errorMessage'
-import { UIContentType } from './config/toolbarConfiguration';
 import UIModalDialog from './representations/guiElements.dialog';
 import { EntityDetailsConfig, PropertyContentType, TableDialogPropertyConfig } from './config/detailsSidebarConfig';
 import { DataUsageRelation, MetaData } from "@/core/common/entityDataTypes";
@@ -15,7 +14,7 @@ import {
     RequestTrace as RequestTraceElement, DataAggregate as DataAggregateElement, BackingData as BackingDataElement
 } from './config/entityShapes'
 import { DataAggregate } from "../core/entities";
-import { DialogSize, FormContentConfig } from "./config/actionDialogConfig";
+import { DialogSize, FormContentConfig, UIContentType } from "./config/actionDialogConfig";
 
 class SystemEntityManager {
 

@@ -1,7 +1,6 @@
 import EntityTypes from "./entityTypes";
 import { getComponentProperties, getBackingServiceProperties, getStorageBackingServiceProperties, getEndpointProperties, getExternalEndpointProperties, getInfrastructureProperties, getRequestTraceProperties, getBackingDataProperties, getDataAggregateProperties, getDeploymentMappingProperties, getLinkProperties, getServiceProperties } from "../../core/entities";
-import { UIContentType } from "./toolbarConfiguration";
-import { DialogConfig, DialogSize, FormContentConfig } from "./actionDialogConfig";
+import { DialogConfig, DialogSize, FormContentConfig, UIContentType } from "./actionDialogConfig";
 import { EntityProperty, NumberEntityProperty, TextEntityProperty } from "@/core/common/entityProperty";
 
 export type DatalistItem = {

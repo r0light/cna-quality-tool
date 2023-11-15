@@ -96,7 +96,7 @@
                         <ModalEditDialog :context="'entity'"  :titleId="option.providedFeature"
                             :header-data-type="'normal'" :dialog-config="option.buttonActionContent"
                             :show="option.showDialog" @close:Modal="option.showDialog = false"
-                            @save:Modal="onEnterProperties((option.buttonActionContent.dialogContent as FormContentData).groups.map(group => {return group.contentItems}).flat(1))">
+                            @save:Modal="onEnterProperties((option.buttonActionContent.dialogContent as FormContentData).groups.map(group => {return group.contentItems}).flat(1)); option.showDialog = false">
                         </ModalEditDialog>
                     </Teleport>
                 </div>

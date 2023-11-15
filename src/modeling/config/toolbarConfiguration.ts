@@ -10,10 +10,6 @@ const ItemType = Object.freeze({
     CHECKBOX: "checkbox"
 });
 
-const UIContentType = Object.freeze({
-    SINGLE_TEXTBLOCK: "textBlock",
-    GROUP_FORMS: "groupForms"
-})
 
 const ToolbarConfig = {
     Tools: [
@@ -328,48 +324,7 @@ const ToolbarConfig = {
                 }
             ]
         }
-    ],
-
-    ToolbarButtonActionConfig: {
-        "clearActivePaper": {
-            type: "modalDialog",
-            header: {
-                iconClass: "fa-solid fa-triangle-exclamation",
-                type: "warning",
-                text: "Warning",
-                closeButton: true
-            },
-            footer: {
-                cancelButtonText: "No, cancel",
-                saveButtonIconClass: "fa-solid fa-trash-can",
-                saveButtonText: "Yes, clear paper"
-            },
-            content: {
-                contentType: UIContentType.SINGLE_TEXTBLOCK,
-                text: "Are you sure you want to clear the entire paper? You won't be able to undo this action."
-            }
-        },
-        "convertToTosca": {
-            type: "modalDialog",
-            header: {
-                iconClass: "fa-solid fa-triangle-exclamation",
-                type: "warning",
-                text: "Warning",
-                closeButton: true
-            },
-            footer: {
-                cancelButtonText: "No, cancel",
-                saveButtonIconClass: "fa-solid fa-download",
-                saveButtonText: "Yes, start TOSCA transformation."
-            },
-            content: {
-                contentType: UIContentType.SINGLE_TEXTBLOCK,
-                text: `The TOSCA export uses the labels of the respective entities as keys for the node_templates that represent the modeled entities. Therefore, please make sure, each entity
-                has a unique label name, otherwise an entity might be missing in the export. Are you sure, you want to continue?`
-            }
-        }
-    }
+    ]
 }
 
-export { UIContentType };
 export default ToolbarConfig;

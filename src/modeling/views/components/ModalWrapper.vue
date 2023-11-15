@@ -28,7 +28,7 @@
                             {{ dialogMetaData.footer.cancelButtonText }}
                         </button>
                         <button type="button" class="btn btn-primary" tabindex="0" @click="requestSave">
-                            <i :class="dialogMetaData.footer.saveButtonIconClass" v-if="dialogMetaData.footer.saveButtonIconClass"></i>
+                            <i class="mr-1" :class="dialogMetaData.footer.saveButtonIconClass" v-if="dialogMetaData.footer.saveButtonIconClass"></i>
                             <span>{{ dialogMetaData.footer.saveButtonText }}</span>
                         </button>
                     </div>

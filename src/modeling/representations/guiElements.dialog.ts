@@ -1,9 +1,9 @@
 import $ from 'jquery';
 import { util } from "jointjs";
 import { PropertyContentType } from "../config/detailsSidebarConfig";
-import { UIContentType } from "../config/toolbarConfiguration";
 import { FormGroup } from "./guiElements";
 import Table from "./guiElements.table";
+import { UIContentType } from '../config/actionDialogConfig';
 
 class UIModalDialog {
 

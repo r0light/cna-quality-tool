@@ -19,9 +19,9 @@ import { ModelingValidator } from '../modelingValidator';
 import ConnectionSelectionTools from "./tools/connectionSelectionTools";
 import EntityTypes from "../config/entityTypes";
 import { DeploymentMapping, Link } from "../config/entityShapes";
-import { UIContentType } from "../config/toolbarConfiguration";
 import UIModalDialog from "../representations/guiElements.dialog";
 import { NumberEntityProperty, parseProperties } from '@/core/common/entityProperty';
+import { UIContentType } from '../config/actionDialogConfig';
 
 
 const props = defineProps<{

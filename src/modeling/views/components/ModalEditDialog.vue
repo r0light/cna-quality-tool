@@ -70,8 +70,7 @@ export function findInDialogByFeature(dialogData: ModalEditDialogData, feature: 
 </script>
 
 <script lang="ts" setup>
-import { UIContentType } from '@/modeling/config/toolbarConfiguration';
-import { ContentGroupMetaData, DialogConfig, DialogMetaData, InfoContentConfig } from '../../config/actionDialogConfig';
+import { ContentGroupMetaData, DialogConfig, DialogMetaData, InfoContentConfig, UIContentType } from '../../config/actionDialogConfig';
 import PropertiesEditor, { toPropertySections } from '../detailsSidebar/PropertiesEditor.vue';
 import { EditPropertySection } from '../detailsSidebar/PropertiesEditor.vue';
 import ModalWrapper from './ModalWrapper.vue';

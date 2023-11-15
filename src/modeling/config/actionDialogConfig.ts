@@ -41,7 +41,7 @@ export type ContentGroupMetaData = {
     text: string
 }
 
-const UIContentType = Object.freeze({
+export const UIContentType = Object.freeze({
     SINGLE_TEXTBLOCK: "textBlock",
     GROUP_FORMS: "groupForms"
 })
@@ -49,7 +49,7 @@ const UIContentType = Object.freeze({
 
 const DialogSize = Object.freeze({
     SMALL: "modal-sm",
-    DEFAULT: "modal-sm",
+    DEFAULT: "",
     LARGE: "modal-lg",
     EXTRA_LARGE: "modal-xl"
 })

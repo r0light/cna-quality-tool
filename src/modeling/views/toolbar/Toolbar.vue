@@ -77,8 +77,9 @@
                 @toolbarButtonClicked="onToolbarButtonClick"></ButtonGroup>
         </div>
     </div>
-    <ModalWrapper :show="showModal" :dialogMetaData="modalData" @close:Modal="showModal = false"
-        @save:Modal="showModal = false"></ModalWrapper>
+    <ModalConfirmationDialog :show="showConfirmationModal" :dialogMetaData="confirmationModalData"
+        :confirmationPrompt="confirmationModalPrompt" @close:Modal="showConfirmationModal = false"
+        @save:Modal="confirmationModalSave"></ModalConfirmationDialog>
 </template>
 
 
@@ -92,8 +93,8 @@ import ToolbarConfig from "../../config/toolbarConfiguration";
 import ModalDialog from "../modalDialog";
 import UIModalDialog from "../../representations/guiElements.dialog";
 import ButtonGroup from './ButtonGroup.vue';
-import ModalWrapper from '../components/ModalWrapper.vue';
-import { getEmptyMetaData } from '../components/modalHelper';
+import ModalConfirmationDialog from '../components/ModalConfirmationDialog.vue';
+import { getDefaultMetaData } from '../components/modalHelper';
 
 export type ToolbarButton = {
     buttonType: string,
@@ -135,8 +136,10 @@ const nameEditMode = ref<"none" | "editing">("none");
 const showEntityBar = ref<boolean>(true);
 const isFullScreen = ref<boolean>(false);
 
-const showModal = ref<boolean>(false);
-const modalData = ref<DialogMetaData>(getEmptyMetaData())
+const showConfirmationModal = ref<boolean>(false);
+const confirmationModalData = ref<DialogMetaData>(getDefaultMetaData());
+const confirmationModalPrompt = ref<string>("");
+const confirmationModalSave = ref<(event) => any>(() => showConfirmationModal.value = false)
 
 function configureToolbarButtons(config: any[]): ToolbarButtonGroup[] {
     let toolbarGroups: ToolbarButtonGroup[] = [];
@@ -383,34 +386,25 @@ function fitActivePaperToContent() {
 // }
 
 function clearActivePaper() {
-
-    modalData.value = {
+    confirmationModalData.value = {
         dialogSize: DialogSize.DEFAULT,
         header: {
-            iconClass: "fa-solid fa-info",
+            iconClass: "fa-solid fa-triangle-exclamation",
             svgRepresentation: "",
-            text: "Clear paper?"
+            text: "Warning"
         },
         footer: {
-            cancelButtonText: "Cancel",
-            saveButtonIconClass: "",
-            saveButtonText: "Clear"
+            cancelButtonText: "No, Cancel",
+            saveButtonIconClass: "fa-solid fa-trash-can",
+            saveButtonText: "Yes, clear paper"
         }
     }
-    showModal.value = true;
-
-    /*
-    const config = ToolbarConfig.ToolbarButtonActionConfig["clearActivePaper"];
-    if (config) {
-        let modalDialog = new UIModalDialog("extern-clear", "clearActivePaper");
-        modalDialog.create(config);
-        modalDialog.render("modals", true);
-        modalDialog.configureSaveButtonAction(() => { props.graph.clear() });
-        modalDialog.show();
-    } else {
+    confirmationModalPrompt.value = "Are you sure you want to clear the entire paper? You won't be able to undo this action."
+    showConfirmationModal.value = true;
+    confirmationModalSave.value = (event) => {
         props.graph.clear();
+        showConfirmationModal.value = false;
     }
-    */
 }
 
 function changeGrid() {
@@ -449,13 +443,24 @@ function zoomOutPaper() {
 }
 
 function askForConversionToTosca() {
-    const config = ToolbarConfig.ToolbarButtonActionConfig["convertToTosca"];
-    if (config) {
-        let modalDialog = new UIModalDialog("tosca-export", "convertToTosca");
-        modalDialog.create(config);
-        modalDialog.render("modals", true);
-        modalDialog.configureSaveButtonAction(() => { emit("save:toTosca"); });
-        modalDialog.show();
+    confirmationModalData.value = {
+        dialogSize: DialogSize.DEFAULT,
+        header: {
+            iconClass: "fa-solid fa-triangle-exclamation",
+            svgRepresentation: "",
+            text: "Warning"
+        },
+        footer: {
+            cancelButtonText: "No, cancel",
+            saveButtonIconClass: "fa-solid fa-download",
+            saveButtonText: "Yes, start TOSCA transformation."
+        }
+    }
+    confirmationModalPrompt.value = `The TOSCA export uses the labels of the respective entities as keys for the node_templates that represent the modeled entities. Therefore, please make sure, each entity has a unique label name, otherwise an entity might be missing in the export. Are you sure, you want to continue?`;
+    showConfirmationModal.value = true;
+    confirmationModalSave.value = (event) => {
+        emit("save:toTosca");
+        showConfirmationModal.value = false;
     }
 }
 

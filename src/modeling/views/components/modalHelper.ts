@@ -1,7 +1,7 @@
 import { DialogMetaData, DialogSize } from "@/modeling/config/actionDialogConfig";
 
 
-export function getEmptyMetaData(): DialogMetaData {
+export function getDefaultMetaData(): DialogMetaData {
     return {
         dialogSize: DialogSize.DEFAULT,
         header: {
