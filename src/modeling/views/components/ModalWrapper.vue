@@ -58,7 +58,6 @@ const emit = defineEmits<{
 }>()
 
 function requestClose() {
-    //TODO
     emit("close:Modal")
 }
 
