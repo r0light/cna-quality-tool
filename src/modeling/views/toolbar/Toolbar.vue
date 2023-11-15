@@ -78,19 +78,118 @@
         </div>
     </div>
     <ModalConfirmationDialog v-bind="confirmationModalManager"></ModalConfirmationDialog>
+    <ModalWrapper :show="showAppSettings" :dialogMetaData="settingsModalMetaData" @close:Modal="showAppSettings = false"
+        @save:Modal="updateAppSettings">
+        <template v-slot:modalContent>
+            <div class="modalDialogActionContainer container-fluid">
+                <div id="modeling-area-size-row">
+                    <h5>Modeling Area Size</h5>
+                    <div class="modalElementGroup">
+                        <form class="form-group">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">
+                                        <i class="fa-solid fa-ruler-horizontal"></i>
+                                        <span class="modalInputLabel">Width</span>
+                                    </span>
+                                </div>
+                                <input id="paperWidth" class="form-control" type="number" placeholder="Default: 3000"
+                                    v-model="appSettings.paperWidth" aria-describedby="paperWidth-helpText" min="26">
+                                <button id="paperWidth-resetButton" class="btn btn-outline-secondary" type="reset"
+                                    @click="appSettings.paperWidth = 3000">Reset</button>
+                                <small id="paperWidth-helpText" class="form-text text-muted">Due to the included content the
+                                    value has to be greater than 26</small>
+                            </div>
+                        </form>
+                        <form class="form-group">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">
+                                        <i class="fa-solid fa-ruler-vertical"></i>
+                                        <span class="modalInputLabel">Height</span>
+                                    </span>
+                                </div>
+                                <input id="paperHeight" class="form-control" type="number" placeholder="Default: 3000"
+                                    v-model="appSettings.paperHeight" aria-describedby="paperHeight-helpText" min="26">
+                                <button class="btn btn-outline-secondary" type="reset"
+                                    @click="appSettings.paperHeight = 3000">Reset</button>
+                                <small id="paperHeight-helpText" class="form-text text-muted">Due to the included content
+                                    the
+                                    value has to be greater than 26</small>
+                            </div>
+                        </form>
+                    </div>
+                    <hr>
+                </div>
+                <div>
+                    <h5>Modeling Area Grid</h5>
+                    <div class="modalElementGroup">
+                        <form class="form-group">
+                            <div>
+                                <label for="gridSize" class="align-baseline">Size:<span
+                                        class="rangeBoxCurrentValue ml-2 align-baseline badge badge-primary badge-pill">{{
+                                            appSettings.paperGridSize }}</span></label>
+                                <div class="inputRow form-row">
+                                    <input class="col px-md-2 form-control-range" id="gridSize" type="range" min="1"
+                                        max="50" v-model="appSettings.paperGridSize" step="1">
+                                    <button id="gridSize-resetButton" class="btn btn-outline-secondary ml-2 btn-sm"
+                                        type="reset" @click="appSettings.paperGridSize = 10">Reset</button>
+                                </div>
+                            </div>
+                        </form>
+                        <form  class="form-group">
+                            <div>
+                                <label for="gridThickness" class="align-baseline">Thickness:
+                                    <span id="gridThickness-currentValue"
+                                        class="rangeBoxCurrentValue ml-2 align-baseline badge badge-primary badge-pill">{{ appSettings.paperGridThickness }}</span></label>
+                                <div class="inputRow form-row"><input
+                                        class="col px-md-2 form-control-range" id="gridThickness" type="range" min="1"
+                                        max="10" v-model="appSettings.paperGridThickness" step="1">
+                                        <button id="gridThickness-resetButton"
+                                        class="btn btn-outline-secondary ml-2 btn-sm" type="reset" @click="appSettings.paperGridThickness = 1">Reset</button>
+                                    </div>
+                            </div>
+                        </form>
+                    </div>
+                    <hr>
+                </div>
+                <div>
+                    <h5>Link Router Type</h5>
+                    <div class="modalElementGroup" >
+                        <form class="form-group">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span id="defaultRouter-inputGroupIconText" class="input-group-text">
+                                        <i class=""></i>
+                                        <span class="modalInputLabel">Link router</span>
+                                    </span>
+                                </div>
+                                <select id="defaultRouter" class="form-control"
+                                    v-model="appSettings.routerType">
+                                    <option value="manhattan">Manhattan</option>
+                                    <option value="normal">Normal</option>
+                                    <option value="metro">Metro</option>
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </ModalWrapper>
 </template>
 
 
 <script lang="ts" setup>
 import $, { data } from 'jquery';
-import { ref, computed, onMounted, onUpdated, watch, reactive, Ref, ComputedRef, nextTick, getCurrentInstance, defineComponent } from "vue";
+import { ref, computed, onMounted, Ref, ComputedRef, } from "vue";
 import { dia, util, highlighters, routers } from "jointjs";
-import { ApplicationSettingsDialogConfig, DialogMetaData, DialogSize } from "../../config/actionDialogConfig";
+import { DialogSize } from "../../config/actionDialogConfig";
 import EntityTypes from "../../config/entityTypes";
 import ToolbarConfig from "../../config/toolbarConfiguration";
-import ModalDialog from "../modalDialog";
 import ButtonGroup from './ButtonGroup.vue';
 import ModalConfirmationDialog, { ConfirmationModalProps, getDefaultConfirmationDialogData } from '../components/ModalConfirmationDialog.vue';
+import ModalWrapper from '../components/ModalWrapper.vue';
 
 export type ToolbarButton = {
     buttonType: string,
@@ -133,6 +232,28 @@ const showEntityBar = ref<boolean>(true);
 const isFullScreen = ref<boolean>(false);
 
 const confirmationModalManager = ref<ConfirmationModalProps>(getDefaultConfirmationDialogData());
+
+const showAppSettings = ref<boolean>(false);
+const settingsModalMetaData = {
+    dialogSize: DialogSize.DEFAULT,
+    header: {
+        iconClass: "fa-solid fa-gear",
+        svgRepresentation: "",
+        text: "Application Settings"
+    },
+    footer: {
+        cancelButtonText: "Cancel",
+        saveButtonIconClass: "fa-regular fa-floppy-disk",
+        saveButtonText: "Apply changes"
+    }
+};
+const appSettings = ref({
+    paperWidth: 3000,
+    paperHeight: 3000,
+    paperGridSize: 10,
+    paperGridThickness: 1,
+    routerType: "manhattan"
+})
 
 function configureToolbarButtons(config: any[]): ToolbarButtonGroup[] {
     let toolbarGroups: ToolbarButtonGroup[] = [];
@@ -561,16 +682,31 @@ function toggleEntityExpansion(event) {
 }
 
 function editApplicationSettings() {
-    ApplicationSettingsDialogConfig.saveButton.action = () => {
-        let newWidth = $("#" + ApplicationSettingsDialogConfig.content.Size.sectionContent.PaperWidth.providedFeature).val() as string;
-        let newHeight = $("#" + ApplicationSettingsDialogConfig.content.Size.sectionContent.PaperHeight.providedFeature).val() as string;
-        let newGridSize = $("#" + ApplicationSettingsDialogConfig.content.Grid.sectionContent.Size.providedFeature).val() as number;
-        let newGridThickness = $("#" + ApplicationSettingsDialogConfig.content.Grid.sectionContent.Thickness.providedFeature).val() as number;
-        let selectedRouter = $("#" + ApplicationSettingsDialogConfig.content.Router.sectionContent.Router.providedFeature).val() as string;
-        props.paper.setDimensions(newWidth, newHeight);
-        props.paper.setGridSize(newGridSize);
-        props.paper.drawGrid({ thickness: newGridThickness });
-        switch (selectedRouter) {
+    // load current values
+    appSettings.value.paperWidth = props.paper.options.width as number;
+    appSettings.value.paperHeight = props.paper.options.height as number;
+    appSettings.value.paperGridSize = props.paper.options.gridSize;
+    appSettings.value.paperGridThickness = props.paper["_gridSettings"][0].thickness;
+    appSettings.value.routerType = (props.paper.options.defaultRouter as routers.Router).name;
+
+    showAppSettings.value = true;
+}
+
+function updateAppSettings() {
+    if (appSettings.value.paperWidth !== props.paper.options.width as number || appSettings.value.paperHeight !== props.paper.options.height as number) {
+        props.paper.setDimensions(appSettings.value.paperWidth, appSettings.value.paperHeight);
+    }
+
+    if (appSettings.value.paperGridSize !== props.paper["_gridSettings"][0].thickness) {
+        props.paper.setGridSize(appSettings.value.paperGridSize);
+    }
+
+    if (appSettings.value.paperGridThickness !== props.paper["_gridSettings"][0].thickness) {
+        props.paper.drawGrid({ thickness: appSettings.value.paperGridThickness });
+    }
+
+    if (appSettings.value.routerType !== (props.paper.options.defaultRouter as routers.Router).name) {
+        switch (appSettings.value.routerType) {
             case "normal":
                 props.paper.options.defaultRouter = {
                     name: "normal"
@@ -605,21 +741,8 @@ function editApplicationSettings() {
         let currentName = props.systemName;
         props.paper.render();
         emit("load:fromJson", currentGraph, currentName);
-    };
-    // get current values
-    ApplicationSettingsDialogConfig.content.Size.sectionContent.PaperWidth.min = props.paper.getFitToContentArea({ padding: util.normalizeSides(25) }).width;
-    ApplicationSettingsDialogConfig.content.Size.sectionContent.PaperHeight.min = props.paper.getFitToContentArea({ padding: util.normalizeSides(25) }).height;
-    ApplicationSettingsDialogConfig.content.Size.sectionContent.PaperWidth.defaultValue = props.paper.options.width as number;
-    ApplicationSettingsDialogConfig.content.Size.sectionContent.PaperHeight.defaultValue = props.paper.options.height as number;
-    ApplicationSettingsDialogConfig.content.Grid.sectionContent.Size.defaultValue = props.paper.options.gridSize;
-    // TODO fix access
-    ApplicationSettingsDialogConfig.content.Grid.sectionContent.Thickness.defaultValue = props.paper["_gridSettings"][0].thickness;
-    ApplicationSettingsDialogConfig.content.Router.sectionContent.Router.defaultValue = (props.paper.options.defaultRouter as routers.Router).name;
-    // create dialog with information
-    let applicationModalDialog = new ModalDialog();
-    applicationModalDialog.renderActionDialog(ApplicationSettingsDialogConfig.title, ApplicationSettingsDialogConfig.content, ApplicationSettingsDialogConfig.cancelButton.text, ApplicationSettingsDialogConfig.saveButton);
-
-    applicationModalDialog.show();
+    }
+    showAppSettings.value = false;
 }
 
 function entityTypeChanged(previousType, newType) {
@@ -911,5 +1034,4 @@ function updateEntityCounter(dataEntityType: string, updateType: string) {
 .exitRequestTraceView:hover {
     background-color: rgb(139, 0, 0, 0.8);
     border-color: rgb(139, 0, 0, 0.8);
-}
-</style>
+}</style>
