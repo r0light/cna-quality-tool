@@ -161,6 +161,7 @@ onMounted(() => {
             return;
         },
         "cell:highlight": function (cellView, node, options) {
+
             if (cellView.model.isLink()) {
                 this.hideTools();
                 this.model.getLinks().forEach(function (link) {
@@ -358,6 +359,7 @@ function adjustVertices(graph: dia.Graph, cell: dia.Cell | dia.CellView) {
         // `cell` is an element
 
         graph.getConnectedLinks(cell).forEach(link => adjustVertices(graph, link));
+        cell.getEmbeddedCells().forEach(child => graph.getConnectedLinks(child).forEach(link => adjustVertices(graph, link)));
         return;
     } else if (cell instanceof dia.Link) {
 

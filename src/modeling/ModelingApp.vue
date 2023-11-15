@@ -100,13 +100,13 @@ onMounted(() => {
     if (props.modelingData.toImport.fileName) {
         if (props.modelingData.toImport.fileName.endsWith("json")) {
             loadFromJson(props.modelingData.toImport.fileContent, props.modelingData.toImport.fileName);
-        } else if (props.modelingData.toImport.fileName.endsWith("yaml") 
-        || props.modelingData.toImport.fileName.endsWith("yml")
-        || props.modelingData.toImport.fileName.endsWith("tosca")) {
+        } else if (props.modelingData.toImport.fileName.endsWith("yaml")
+            || props.modelingData.toImport.fileName.endsWith("yml")
+            || props.modelingData.toImport.fileName.endsWith("tosca")) {
             loadFromTosca(props.modelingData.toImport.fileContent, props.modelingData.toImport.fileName);
         }
 
-        emit("store:modelingData", systemEntityManager, {fileName: '', fileContent: ''});
+        emit("store:modelingData", systemEntityManager, { fileName: '', fileContent: '' });
     }
 
     currentSystemGraph.value.on("add", (cell) => {
@@ -152,15 +152,24 @@ function saveToJson() {
 function loadFromTosca(yamlString: string, fileName: string) {
     let createdCells = systemEntityManager.loadFromCustomTosca(yamlString, fileName);
 
-    for (const cell of createdCells) {
-        addSelectionToolToEntity(cell, mainPaper.value);
-    }
-
     setCurrentSystemName(systemEntityManager.getSystemEntity().getSystemName);
 
+    // as a Workaround, reload the graph to make sure link highlighting works
+    let asJSON = currentSystemGraph.value.toJSON();
+    currentSystemGraph.value.clear();
+    currentSystemGraph.value.fromJSON(asJSON);
+
+
+    // as a workaround add tools later, otherwise it does not work..
     setTimeout(() => {
-        mainPaper.value.hideTools();
+        for (const cell of createdCells) {
+            addSelectionToolToEntity(cell, mainPaper.value);
+        }
+        setTimeout(() => {
+            mainPaper.value.hideTools();
+        }, 100)
     }, 100)
+
 }
 
 function saveToTosca() {

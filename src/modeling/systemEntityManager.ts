@@ -76,7 +76,9 @@ class SystemEntityManager {
     loadFromCustomTosca(stringifiedTOSCA: string, fileName: string): dia.Cell[] {
         let system = importFromServiceTemplate(fileName, stringifiedTOSCA);
         this.overwriteSystemEntity(system);
-        return this.convertToGraph();
+        this.convertToGraph();
+
+        return this.#currentSystemGraph.getCells();
     }
 
     convertToJson(): string {
