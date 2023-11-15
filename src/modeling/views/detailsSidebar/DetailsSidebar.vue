@@ -60,13 +60,12 @@
 <script lang="ts" setup>
 import { PropertyContentType, DetailsSidebarConfig, EntityDetailsConfig, PropertyConfig, } from '../../config/detailsSidebarConfig';
 import { dia } from 'jointjs';
-import { ref, computed, onUpdated, onMounted, nextTick } from 'vue';
+import { ref, computed, onUpdated, onMounted } from 'vue';
 import EntityTypes from '@/modeling/config/entityTypes';
 import PropertiesEditor from './PropertiesEditor.vue';
 import type { EditPropertySection } from './PropertiesEditor.vue';
 import { toPropertySections } from './PropertiesEditor.vue';
 import { FormContentData, findInDialogByFeature } from '../components/ModalEditDialog.vue';
-import { DialogMetaData } from '@/modeling/config/actionDialogConfig';
 
 const props = defineProps<{
     graph: dia.Graph;

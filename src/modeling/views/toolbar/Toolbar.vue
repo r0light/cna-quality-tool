@@ -91,7 +91,6 @@ import ToolbarConfig from "../../config/toolbarConfiguration";
 import ModalDialog from "../modalDialog";
 import ButtonGroup from './ButtonGroup.vue';
 import ModalConfirmationDialog, { ConfirmationModalProps, getDefaultConfirmationDialogData } from '../components/ModalConfirmationDialog.vue';
-import { getDefaultMetaData } from '../components/modalHelper';
 
 export type ToolbarButton = {
     buttonType: string,
