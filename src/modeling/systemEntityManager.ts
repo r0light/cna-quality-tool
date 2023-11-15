@@ -3,7 +3,6 @@ import * as yaml from 'js-yaml';
 import EntityTypes from './config/entityTypes';
 import * as Entities from '../core/entities';
 import ErrorMessage, { ErrorType } from './errorMessage'
-import UIModalDialog from './representations/guiElements.dialog';
 import { EntityDetailsConfig, PropertyContentType, TableDialogPropertyConfig } from './config/detailsSidebarConfig';
 import { DataUsageRelation, MetaData } from "@/core/common/entityDataTypes";
 import { convertToServiceTemplate, importFromServiceTemplate } from "@/core/tosca-adapter/ToscaAdapter";
@@ -647,6 +646,8 @@ class SystemEntityManager {
 
 
 
+    // TODO replace with additional method to validate model before export
+    /*
     #provideConnectionWarningDialog() {
         let modalDialog = new UIModalDialog("invalidToscaModelItems-error", "invalidToscaModelItems");
         const tableRows = this.#createErrorTableRows();
@@ -659,6 +660,7 @@ class SystemEntityManager {
         modalDialog.render("modals", true, DialogSize.EXTRA_LARGE);
         modalDialog.show();
     }
+    */
 
     #createErrorTableRows() {
         let tableRows = new Array();
@@ -1175,6 +1177,7 @@ class SystemEntityManager {
 }
 
 // TODO keep here? --> currently shown every time new problematic connection is added
+/*
 const InvalidModelItemsDialogConfig = {
     type: "modalDialog",
     header: {
@@ -1217,5 +1220,6 @@ const InvalidModelItemsDialogConfig = {
         ]
     }
 };
+*/
 
 export default SystemEntityManager;

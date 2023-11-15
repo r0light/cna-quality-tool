@@ -77,23 +77,20 @@
                 @toolbarButtonClicked="onToolbarButtonClick"></ButtonGroup>
         </div>
     </div>
-    <ModalConfirmationDialog :show="showConfirmationModal" :dialogMetaData="confirmationModalData"
-        :confirmationPrompt="confirmationModalPrompt" @close:Modal="showConfirmationModal = false"
-        @save:Modal="confirmationModalSave"></ModalConfirmationDialog>
+    <ModalConfirmationDialog v-bind="confirmationModalManager"></ModalConfirmationDialog>
 </template>
 
 
 <script lang="ts" setup>
 import $, { data } from 'jquery';
-import { ref, computed, onMounted, onUpdated, watch, reactive, Ref, ComputedRef, nextTick, getCurrentInstance } from "vue";
+import { ref, computed, onMounted, onUpdated, watch, reactive, Ref, ComputedRef, nextTick, getCurrentInstance, defineComponent } from "vue";
 import { dia, util, highlighters, routers } from "jointjs";
 import { ApplicationSettingsDialogConfig, DialogMetaData, DialogSize } from "../../config/actionDialogConfig";
 import EntityTypes from "../../config/entityTypes";
 import ToolbarConfig from "../../config/toolbarConfiguration";
 import ModalDialog from "../modalDialog";
-import UIModalDialog from "../../representations/guiElements.dialog";
 import ButtonGroup from './ButtonGroup.vue';
-import ModalConfirmationDialog from '../components/ModalConfirmationDialog.vue';
+import ModalConfirmationDialog, { ConfirmationModalProps, getDefaultConfirmationDialogData } from '../components/ModalConfirmationDialog.vue';
 import { getDefaultMetaData } from '../components/modalHelper';
 
 export type ToolbarButton = {
@@ -136,10 +133,7 @@ const nameEditMode = ref<"none" | "editing">("none");
 const showEntityBar = ref<boolean>(true);
 const isFullScreen = ref<boolean>(false);
 
-const showConfirmationModal = ref<boolean>(false);
-const confirmationModalData = ref<DialogMetaData>(getDefaultMetaData());
-const confirmationModalPrompt = ref<string>("");
-const confirmationModalSave = ref<(event) => any>(() => showConfirmationModal.value = false)
+const confirmationModalManager = ref<ConfirmationModalProps>(getDefaultConfirmationDialogData());
 
 function configureToolbarButtons(config: any[]): ToolbarButtonGroup[] {
     let toolbarGroups: ToolbarButtonGroup[] = [];
@@ -386,24 +380,27 @@ function fitActivePaperToContent() {
 // }
 
 function clearActivePaper() {
-    confirmationModalData.value = {
-        dialogSize: DialogSize.DEFAULT,
-        header: {
-            iconClass: "fa-solid fa-triangle-exclamation",
-            svgRepresentation: "",
-            text: "Warning"
+    confirmationModalManager.value = {
+        show: true,
+        dialogMetaData: {
+            dialogSize: DialogSize.DEFAULT,
+            header: {
+                iconClass: "fa-solid fa-triangle-exclamation",
+                svgRepresentation: "",
+                text: "Warning"
+            },
+            footer: {
+                cancelButtonText: "No, Cancel",
+                saveButtonIconClass: "fa-solid fa-trash-can",
+                saveButtonText: "Yes, clear paper"
+            },
         },
-        footer: {
-            cancelButtonText: "No, Cancel",
-            saveButtonIconClass: "fa-solid fa-trash-can",
-            saveButtonText: "Yes, clear paper"
+        confirmationPrompt: "Are you sure you want to clear the entire paper? You won't be able to undo this action.",
+        onCancel: () => confirmationModalManager.value.show = false,
+        onConfirm: () => {
+            props.graph.clear();
+            confirmationModalManager.value.show = false;
         }
-    }
-    confirmationModalPrompt.value = "Are you sure you want to clear the entire paper? You won't be able to undo this action."
-    showConfirmationModal.value = true;
-    confirmationModalSave.value = (event) => {
-        props.graph.clear();
-        showConfirmationModal.value = false;
     }
 }
 
@@ -443,24 +440,27 @@ function zoomOutPaper() {
 }
 
 function askForConversionToTosca() {
-    confirmationModalData.value = {
-        dialogSize: DialogSize.DEFAULT,
-        header: {
-            iconClass: "fa-solid fa-triangle-exclamation",
-            svgRepresentation: "",
-            text: "Warning"
+    confirmationModalManager.value = {
+        show: true,
+        dialogMetaData: {
+            dialogSize: DialogSize.DEFAULT,
+            header: {
+                iconClass: "fa-solid fa-triangle-exclamation",
+                svgRepresentation: "",
+                text: "Warning"
+            },
+            footer: {
+                cancelButtonText: "No, Cancel",
+                saveButtonIconClass: "fa-solid fa-download",
+                saveButtonText: "Yes, start TOSCA transformation."
+            },
         },
-        footer: {
-            cancelButtonText: "No, cancel",
-            saveButtonIconClass: "fa-solid fa-download",
-            saveButtonText: "Yes, start TOSCA transformation."
+        confirmationPrompt: `The TOSCA export uses the labels of the respective entities as keys for the node_templates that represent the modeled entities. Therefore, please make sure, each entity has a unique label name, otherwise an entity might be missing in the export. Are you sure, you want to continue?`,
+        onCancel: () => confirmationModalManager.value.show = false,
+        onConfirm: () => {
+            emit("save:toTosca");
+            confirmationModalManager.value.show = false;
         }
-    }
-    confirmationModalPrompt.value = `The TOSCA export uses the labels of the respective entities as keys for the node_templates that represent the modeled entities. Therefore, please make sure, each entity has a unique label name, otherwise an entity might be missing in the export. Are you sure, you want to continue?`;
-    showConfirmationModal.value = true;
-    confirmationModalSave.value = (event) => {
-        emit("save:toTosca");
-        showConfirmationModal.value = false;
     }
 }
 

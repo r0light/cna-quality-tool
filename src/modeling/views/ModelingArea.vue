@@ -8,20 +8,20 @@
             </div>
         </div>
     </Teleport>
+    <ModalConfirmationDialog v-bind="confirmationModalManager"></ModalConfirmationDialog>
 </template>
 
 <script lang="ts" setup>
 import $ from 'jquery';
-import { chain, omit, first, each, has, partial } from 'lodash';
-import { onMounted, onUpdated } from 'vue';
+import { partial } from 'lodash';
+import { onMounted, ref } from 'vue';
 import { g, dia, routers, shapes, highlighters } from "jointjs";
 import { ModelingValidator } from '../modelingValidator';
 import ConnectionSelectionTools from "./tools/connectionSelectionTools";
 import EntityTypes from "../config/entityTypes";
 import { DeploymentMapping, Link } from "../config/entityShapes";
-import UIModalDialog from "../representations/guiElements.dialog";
-import { NumberEntityProperty, parseProperties } from '@/core/common/entityProperty';
-import { UIContentType } from '../config/actionDialogConfig';
+import { DialogSize, UIContentType } from '../config/actionDialogConfig';
+import ModalConfirmationDialog, { ConfirmationModalProps, getDefaultConfirmationDialogData } from './components/ModalConfirmationDialog.vue';
 
 
 const props = defineProps<{
@@ -40,6 +40,8 @@ const emit = defineEmits<{
     (e: "deselect:Element"): void;
     (e: "deselect:RequestTrace"): void;
 }>()
+
+const confirmationModalManager = ref<ConfirmationModalProps>(getDefaultConfirmationDialogData());
 
 onMounted(() => {
 
@@ -314,33 +316,32 @@ function checkIfStorageBackingServiceConnected(linkView, elementViewConnected) {
 }
 
 function provideConnectionWarningDialog() {
-    let modalDialog = new UIModalDialog("invalidToscaConnection-information", "invalidToscaConnection");
-    modalDialog.create(InvalidToscaConnectionDialogConfig);
-    modalDialog.render("modals", true);
-    modalDialog.show();
-}
-
-
-// TODO keep here? --> currently shown every time new problematic connection is added
-const InvalidToscaConnectionDialogConfig = {
-    type: "modalDialog",
-    header: {
-        iconClass: "fa-solid fa-triangle-exclamation",
-        type: "warning",
-        text: "Deployment Mapping Connection",
-        closeButton: true
-    },
-    footer: {
-        cancelButtonText: "Ok, understood",
-    },
-    content: {
-        contentType: UIContentType.SINGLE_TEXTBLOCK,
-        text: "You are currently deploying at least one Storage Backing Service entity with Component, Service or Backing Service entities"
+    confirmationModalManager.value = {
+        show: true,
+        dialogMetaData: {
+            dialogSize: DialogSize.DEFAULT,
+            header: {
+                iconClass: "fa-solid fa-triangle-exclamation",
+                svgRepresentation: "",
+                text: "Deployment Mapping Connection"
+            },
+            footer: {
+                cancelButtonText: "Cancel",
+                saveButtonIconClass: "fa-solid fa-trash-can",
+                saveButtonText: "Ok, understood"
+            },
+        },
+        confirmationPrompt:  "You are currently deploying at least one Storage Backing Service entity with Component, Service or Backing Service entities"
             + " on the same Infrastructure. Although the modeling is generally possible, you won't be able to transform it into the TOSCA format like this."
             + " If you want to transform it into the TOSCA format, you have to introduce a new Infrastructure entity between the Storage Backing Service"
-            + " and the current Infrastructure entity."
+            + " and the current Infrastructure entity.",
+        onCancel: () => confirmationModalManager.value.show = false,
+        onConfirm: () => {
+            confirmationModalManager.value.show = false;
+        }
     }
-};
+}
+
 
 type Vertex = { x: number, y: number };
 
