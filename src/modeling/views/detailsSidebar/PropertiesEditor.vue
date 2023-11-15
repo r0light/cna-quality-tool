@@ -93,7 +93,7 @@
                     </button>
 
                     <Teleport to="#modals" v-show="option.showDialog">
-                        <ModalEditDialog :context="'entity'" :isStatic="false" :titleId="option.providedFeature"
+                        <ModalEditDialog :context="'entity'"  :titleId="option.providedFeature"
                             :header-data-type="'normal'" :dialog-config="option.buttonActionContent"
                             :show="option.showDialog" @close:Modal="option.showDialog = false"
                             @save:Modal="onEnterProperties((option.buttonActionContent.dialogContent as FormContentData).groups.map(group => {return group.contentItems}).flat(1))">

@@ -77,6 +77,8 @@
                 @toolbarButtonClicked="onToolbarButtonClick"></ButtonGroup>
         </div>
     </div>
+    <ModalWrapper :show="showModal" :dialogMetaData="modalData" @close:Modal="showModal = false"
+        @save:Modal="showModal = false"></ModalWrapper>
 </template>
 
 
@@ -84,13 +86,14 @@
 import $, { data } from 'jquery';
 import { ref, computed, onMounted, onUpdated, watch, reactive, Ref, ComputedRef, nextTick, getCurrentInstance } from "vue";
 import { dia, util, highlighters, routers } from "jointjs";
-import { ApplicationSettingsDialogConfig } from "../../config/actionDialogConfig";
+import { ApplicationSettingsDialogConfig, DialogMetaData, DialogSize } from "../../config/actionDialogConfig";
 import EntityTypes from "../../config/entityTypes";
 import ToolbarConfig from "../../config/toolbarConfiguration";
 import ModalDialog from "../modalDialog";
 import UIModalDialog from "../../representations/guiElements.dialog";
 import ButtonGroup from './ButtonGroup.vue';
-import { parseProperties } from '@/core/common/entityProperty';
+import ModalWrapper from '../components/ModalWrapper.vue';
+import { getEmptyMetaData } from '../components/modalHelper';
 
 export type ToolbarButton = {
     buttonType: string,
@@ -131,6 +134,9 @@ const currentSystemName = ref<string>(props.systemName);
 const nameEditMode = ref<"none" | "editing">("none");
 const showEntityBar = ref<boolean>(true);
 const isFullScreen = ref<boolean>(false);
+
+const showModal = ref<boolean>(false);
+const modalData = ref<DialogMetaData>(getEmptyMetaData())
 
 function configureToolbarButtons(config: any[]): ToolbarButtonGroup[] {
     let toolbarGroups: ToolbarButtonGroup[] = [];
@@ -377,6 +383,23 @@ function fitActivePaperToContent() {
 // }
 
 function clearActivePaper() {
+
+    modalData.value = {
+        dialogSize: DialogSize.DEFAULT,
+        header: {
+            iconClass: "fa-solid fa-info",
+            svgRepresentation: "",
+            text: "Clear paper?"
+        },
+        footer: {
+            cancelButtonText: "Cancel",
+            saveButtonIconClass: "",
+            saveButtonText: "Clear"
+        }
+    }
+    showModal.value = true;
+
+    /*
     const config = ToolbarConfig.ToolbarButtonActionConfig["clearActivePaper"];
     if (config) {
         let modalDialog = new UIModalDialog("extern-clear", "clearActivePaper");
@@ -387,6 +410,7 @@ function clearActivePaper() {
     } else {
         props.graph.clear();
     }
+    */
 }
 
 function changeGrid() {

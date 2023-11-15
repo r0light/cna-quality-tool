@@ -835,12 +835,12 @@ const EntityDetailsConfig: {
             },
             buttonActionContent: {
                 // contentType: PropertyContentType // TODO modalDialog,
-                dialogSize: DialogSize.LARGE,
                 dialogMetaData: {
+                    dialogSize: DialogSize.LARGE,
                     header: {
+                        iconClass: "",
                         svgRepresentation: `<svg width="30" height="20">${dataAggregateSvgRepresentation()}</svg>`,
                         text: "Data Aggregate Family Config",
-                        closeButton: false
                     },
                     footer: {
                         cancelButtonText: "Cancel",
@@ -1035,12 +1035,12 @@ const EntityDetailsConfig: {
                 },
                 buttonActionContent: {
                     // contentType: PropertyContentType // TODO modalDialog,
-                    dialogSize: DialogSize.LARGE,
                     dialogMetaData: {
+                        dialogSize: DialogSize.LARGE,
                         header: {
+                            iconClass: "",
                             svgRepresentation: `<svg width="30" height="20">${backingDataSvgRepresentation()}</svg>`,
-                            text: "Backing Data Included Data: ",
-                            closeButton: false
+                            text: "Backing Data Included Data: "
                         },
                         footer: {
                             cancelButtonText: "Cancel",
@@ -1166,12 +1166,12 @@ const EntityDetailsConfig: {
                 },
                 buttonActionContent: {
                     // contentType: PropertyContentType // TODO modalDialog,
-                    dialogSize: DialogSize.LARGE,
                     dialogMetaData: {
+                        dialogSize: DialogSize.LARGE,
                         header: {
+                            iconClass: "",
                             svgRepresentation: `<svg width="30" height="20">${backingDataSvgRepresentation()}</svg>`,
-                            text: "Backing Data Family Config ",
-                            closeButton: false
+                            text: "Backing Data Family Config "
                         },
                         footer: {
                             cancelButtonText: "Cancel",
@@ -1296,13 +1296,13 @@ const EntityDetailsConfig: {
                 },
                 buttonActionContent: {
                     // contentType: PropertyContentType // TODO modalDialog,
-                    dialogSize: DialogSize.LARGE,
                     dialogMetaData: {
+                        dialogSize: DialogSize.LARGE,
                         header: {
                             // iconClass: "bi bi-window-plus", // TODO decide if this or SVG
+                            iconClass: "",
                             svgRepresentation: '<svg width="35" height="20"><polygon points="0,0 28,0 35,7 28,14 0,14 7,7" transform="translate(0,1)" stroke-width="2" stroke="black" fill="white"></polygon></svg>',
                             text: "Request Trace: ",
-                            closeButton: false
                         },
                         footer: {
                             cancelButtonText: "Cancel",

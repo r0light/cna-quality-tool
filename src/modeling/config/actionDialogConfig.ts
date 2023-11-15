@@ -2,16 +2,16 @@ import { dia } from "jointjs"
 import { PropertyConfig } from "./detailsSidebarConfig"
 
 export type DialogConfig = {
-    dialogSize: string,
     dialogMetaData: DialogMetaData,
     dialogContent: InfoContentConfig | FormContentConfig
 }
 
 export type DialogMetaData = {
+    dialogSize: string,
     header: {
+        iconClass: string,
         svgRepresentation: string,
-        text: string,
-        closeButton: boolean
+        text: string
     }
     footer: {
         cancelButtonText: string,
@@ -49,7 +49,7 @@ const UIContentType = Object.freeze({
 
 const DialogSize = Object.freeze({
     SMALL: "modal-sm",
-    DEFAULT: "",
+    DEFAULT: "modal-sm",
     LARGE: "modal-lg",
     EXTRA_LARGE: "modal-xl"
 })

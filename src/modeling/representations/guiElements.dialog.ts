@@ -5,14 +5,6 @@ import { UIContentType } from "../config/toolbarConfiguration";
 import { FormGroup } from "./guiElements";
 import Table from "./guiElements.table";
 
-// Bootstrap-provided classes
-const DialogSize = Object.freeze({
-    SMALL: "modal-sm",
-    DEFAULT: "",
-    LARGE: "modal-lg",
-    EXTRA_LARGE: "modal-xl"
-})
-
 class UIModalDialog {
 
     $modalDialog;
@@ -345,5 +337,4 @@ class UIModalDialog {
 
 }
 
-export { DialogSize };
 export default UIModalDialog;
