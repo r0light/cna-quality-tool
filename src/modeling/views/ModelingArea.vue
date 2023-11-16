@@ -122,35 +122,33 @@ onMounted(() => {
     paper.on({
         'element:pointerdown': function (cellView: dia.ElementView, evt, x, y) {
             this.hideTools();
-            let currentPaper = this;
-            this.model.getLinks().forEach(function (link) {
-                highlighters.stroke.remove(link.findView(currentPaper));
-            });
-            // TODO if lock mechanism is included 
-            // if (cellView.paper.options.interactive == false) {
-            //     return;
-            // }
+            removeHighlightingFromAllLinks();
             setCurrentSelection(cellView);
             cellView.showTools();
+            props.graph.getConnectedLinks(cellView.model).forEach(link => {
+                highlighters.stroke.add(link.findView(props.paper), { selector: 'line' }, 'my-element-highlight', {
+                    layer: 'back',
+                    attrs: {
+                        'stroke': '#feb663',
+                        'stroke-width': 5,
+                    }
+                });
+            })
         },
         'blank:pointerdown': function (evt, x, y) {
             this.hideTools();
             //setSelectionHandle(undefined);
             resetCurrentSelection();
-            let currentPaper = this;
-            this.model.getLinks().forEach(function (link) {
-                highlighters.stroke.remove(link.findView(currentPaper));
-            });
+            removeHighlightingFromAllLinks();
         },
         'element:contextmenu': function (cellView, evt, x, y) {
             cellView.showTools();
         },
         "link:pointerclick": function (linkView: dia.LinkView, evt) {
 
-            linkView.unhighlight();
+            removeHighlightingFromAllLinks();
 
             setCurrentSelection(linkView);
-
             linkView.highlight();
 
             if (!linkView.hasTools()) {
@@ -162,6 +160,7 @@ onMounted(() => {
         },
         "cell:highlight": function (cellView, node, options) {
 
+            //TODO is this really necessary?
             if (cellView.model.isLink()) {
                 this.hideTools();
                 this.model.getLinks().forEach(function (link) {
@@ -171,6 +170,7 @@ onMounted(() => {
                     }
                 });
             }
+
         },
         "link:connect": (linkView, evt, elementViewConnected, magnet, arrowhead) => configureLink(linkView, evt, elementViewConnected, magnet, arrowhead),
 
@@ -217,6 +217,12 @@ onUpdated(() => {
     }
 })
 */
+
+function removeHighlightingFromAllLinks() {
+    props.graph.getLinks().forEach(function (link) {
+        highlighters.stroke.remove(link.findView(props.paper));
+    });
+}
 
 
 function setCurrentSelection(cell: dia.ElementView | dia.LinkView) {
@@ -332,7 +338,7 @@ function provideConnectionWarningDialog() {
                 saveButtonText: "Ok, understood"
             },
         },
-        confirmationPrompt:  "You are currently deploying at least one Storage Backing Service entity with Component, Service or Backing Service entities"
+        confirmationPrompt: "You are currently deploying at least one Storage Backing Service entity with Component, Service or Backing Service entities"
             + " on the same Infrastructure. Although the modeling is generally possible, you won't be able to transform it into the TOSCA format like this."
             + " If you want to transform it into the TOSCA format, you have to introduce a new Infrastructure entity between the Storage Backing Service"
             + " and the current Infrastructure entity.",
