@@ -20,7 +20,7 @@ import { ModelingValidator } from '../modelingValidator';
 import ConnectionSelectionTools from "./tools/connectionSelectionTools";
 import EntityTypes from "../config/entityTypes";
 import { DeploymentMapping, Link } from "../config/entityShapes";
-import { DialogSize, UIContentType } from '../config/actionDialogConfig';
+import { DialogSize } from '../config/actionDialogConfig';
 import ModalConfirmationDialog, { ConfirmationModalProps, getDefaultConfirmationDialogData } from './components/ModalConfirmationDialog.vue';
 
 

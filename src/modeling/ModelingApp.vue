@@ -6,8 +6,9 @@
             @click:print-active-paper="onPrintRequested" @load:fromJson="loadFromJson" @save:toJson="saveToJson"
             @load:fromTosca="loadFromTosca" @save:toTosca="saveToTosca"></Toolbar>
         <div class="app-body">
-            <div class="entityShapes-sidebar-container d-print-none">
-                <EntitySidebar :paper="mainPaper" :pageId="`model${pageId}`"></EntitySidebar>
+            <div :id="`entity-sidebar-${pageId}`" class="entityShapes-sidebar-container d-print-none">
+                <EntitySidebar :paper="mainPaper" :pageId="`model${pageId}`" :wrapperElementId="`entity-sidebar-${pageId}`">
+                </EntitySidebar>
             </div>
             <div class="visible-modeling-area">
                 <ModelingArea :pageId="`model${pageId}`" :graph="(currentSystemGraph as dia.Graph)"
@@ -26,7 +27,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, nextTick, toRaw } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import { dia, shapes } from "jointjs";
 import SystemEntityManager from './systemEntityManager';
 import Toolbar from './views/toolbar/Toolbar.vue';
@@ -56,11 +57,9 @@ function setCurrentSystemName(systemName: string) {
     }
     currentSystemName.value = systemName;
     emit("update:systemName", currentSystemName.value);
-    // TODO sessionStorage ?
 }
 
 const currentSystemGraph = ref<dia.Graph>((() => {
-    const dataKey = "graph";
 
     if (props.modelingData.entityManager) {
         return props.modelingData.entityManager.getGraph() as dia.Graph;
@@ -128,15 +127,16 @@ onMounted(() => {
 function loadFromJson(jsonString: string, fileName: string) {
     let createdCells = systemEntityManager.loadFromJson(jsonString, fileName);
 
+    setCurrentSystemName(systemEntityManager.getSystemEntity().getSystemName);
+
     for (const cell of createdCells) {
         addSelectionToolToEntity(cell, mainPaper.value);
     }
 
-    setCurrentSystemName(systemEntityManager.getSystemEntity().getSystemName);
-
+    // as a workaround add tools later, otherwise it does not work..
     setTimeout(() => {
         mainPaper.value.hideTools();
-    }, 100)
+    }, 20)
 }
 
 function saveToJson() {
@@ -159,16 +159,14 @@ function loadFromTosca(yamlString: string, fileName: string) {
     currentSystemGraph.value.clear();
     currentSystemGraph.value.fromJSON(asJSON);
 
+    for (const cell of createdCells) {
+        addSelectionToolToEntity(cell, mainPaper.value);
+    }
 
     // as a workaround add tools later, otherwise it does not work..
     setTimeout(() => {
-        for (const cell of createdCells) {
-            addSelectionToolToEntity(cell, mainPaper.value);
-        }
-        setTimeout(() => {
-            mainPaper.value.hideTools();
-        }, 100)
-    }, 100)
+        mainPaper.value.hideTools();
+    }, 20)
 
 }
 

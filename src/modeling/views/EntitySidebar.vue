@@ -1,6 +1,6 @@
 <template>
     <div class="entitySidebar">
-        <div class="user-select-none entityShapes-headline sticky-top">
+        <div :id="`${wrapperElementId}-headline`" class="user-select-none entityShapes-headline sticky-top">
             <div class="entityShapes-icon">
                 <i class="fa-solid fa-shapes"></i>
             </div>
@@ -25,7 +25,8 @@ import { addSelectionToolToEntity } from "./tools/entitySelectionTools";
 
 const props = defineProps<{
     paper: dia.Paper,
-    pageId: string
+    pageId: string,
+    wrapperElementId: string
 }>()
 
 const entityShapesPaperId = `entityShapesPaper-${props.pageId}`;
@@ -40,10 +41,10 @@ const dragging = ref<boolean>(false);
 onMounted(() => {
 
     // TODO might be problematic when multiple pages exist
-    let sidebarContainerElement = $(".entityShapes-sidebar-container").first();
+    let sidebarContainerElement = $(`#${props.wrapperElementId}`).first();
 
-    const sidebarWidth = sidebarContainerElement && sidebarContainerElement.innerWidth() ? sidebarContainerElement.innerWidth() : 245;
-    const sidebarHeight = sidebarContainerElement && sidebarContainerElement.innerHeight() ? sidebarContainerElement.innerHeight() : 600;
+    const sidebarWidth = sidebarContainerElement && sidebarContainerElement.innerWidth() && sidebarContainerElement.innerWidth() > 0 ? sidebarContainerElement.innerWidth() : 245;
+    const sidebarHeight = sidebarContainerElement && sidebarContainerElement.innerHeight() && sidebarContainerElement.innerHeight() > 0  ? sidebarContainerElement.innerHeight() : 600;
     // this.options.entityRepresentations = this.options.sidebarEntityConfig ? this.options.sidebarEntityConfig : {};
     entityHighlightColour.value = getComputedStyle(document.documentElement).getPropertyValue('--entitySidebar-highlighting-colour') ?? "darkorange";
     entityTextHighlightColour.value = getComputedStyle(document.documentElement).getPropertyValue('--entitySidebar-textHighlighting-colour') ?? "darkorange";
@@ -53,10 +54,10 @@ onMounted(() => {
     //TODO is this needed?
     //this.delegateEvents();
 
-    let paperHeight = sidebarHeight - ($('.entityShapes-headline').first().outerHeight());
+    let paperHeight = sidebarHeight - ($(`#${props.wrapperElementId}-headline`).first().outerHeight());
 
     // get colour from container element but change opacity value (otherwise the colour will appear darker than intended)
-    let parentBackgroundColorElements = $(".entityShapes-sidebar-container").first().css("backgroundColor").split(",");
+    let parentBackgroundColorElements = $(`#${props.wrapperElementId}`).first().css("backgroundColor").split(",");
     let adaptedBackgroundColor = parentBackgroundColorElements[0].concat(",", parentBackgroundColorElements[1]).concat(",", parentBackgroundColorElements[2]).concat(", ", "0)");
     //this._entityShapeGraph = new dia.Graph();
     let entityShapePaper = new dia.Paper({
@@ -144,7 +145,7 @@ function onDragEntity(cellView, event, x, y) {
     let transformedXCoordinate = props.paper.localToPaperPoint(props.paper.pageToLocalPoint(x));
     let transformedXEndCoordiante = transformedXCoordinate.x - (newElement.getBBox().width / 2);
 
-    let titleContainerHeight = $('.entityShapes-headline').first().outerHeight();
+    let titleContainerHeight = $(`#${props.wrapperElementId}-headline`).first().outerHeight();
     let correctedY = y + Math.floor(titleContainerHeight);
     let transformedYCoordinate = props.paper.localToPaperPoint(correctedY);
     let offsetToConsider = Math.abs(props.paper.pageOffset().y < 0 ? props.paper.pageOffset().y : 0);

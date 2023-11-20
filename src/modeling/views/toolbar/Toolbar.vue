@@ -137,17 +137,18 @@
                                 </div>
                             </div>
                         </form>
-                        <form  class="form-group">
+                        <form class="form-group">
                             <div>
                                 <label for="gridThickness" class="align-baseline">Thickness:
                                     <span id="gridThickness-currentValue"
-                                        class="rangeBoxCurrentValue ml-2 align-baseline badge badge-primary badge-pill">{{ appSettings.paperGridThickness }}</span></label>
-                                <div class="inputRow form-row"><input
-                                        class="col px-md-2 form-control-range" id="gridThickness" type="range" min="1"
-                                        max="10" v-model="appSettings.paperGridThickness" step="1">
-                                        <button id="gridThickness-resetButton"
-                                        class="btn btn-outline-secondary ml-2 btn-sm" type="reset" @click="appSettings.paperGridThickness = 1">Reset</button>
-                                    </div>
+                                        class="rangeBoxCurrentValue ml-2 align-baseline badge badge-primary badge-pill">{{
+                                            appSettings.paperGridThickness }}</span></label>
+                                <div class="inputRow form-row"><input class="col px-md-2 form-control-range"
+                                        id="gridThickness" type="range" min="1" max="10"
+                                        v-model="appSettings.paperGridThickness" step="1">
+                                    <button id="gridThickness-resetButton" class="btn btn-outline-secondary ml-2 btn-sm"
+                                        type="reset" @click="appSettings.paperGridThickness = 1">Reset</button>
+                                </div>
                             </div>
                         </form>
                     </div>
@@ -155,7 +156,7 @@
                 </div>
                 <div>
                     <h5>Link Router Type</h5>
-                    <div class="modalElementGroup" >
+                    <div class="modalElementGroup">
                         <form class="form-group">
                             <div class="input-group">
                                 <div class="input-group-prepend">
@@ -164,8 +165,7 @@
                                         <span class="modalInputLabel">Link router</span>
                                     </span>
                                 </div>
-                                <select id="defaultRouter" class="form-control"
-                                    v-model="appSettings.routerType">
+                                <select id="defaultRouter" class="form-control" v-model="appSettings.routerType">
                                     <option value="manhattan">Manhattan</option>
                                     <option value="normal">Normal</option>
                                     <option value="metro">Metro</option>
@@ -1034,4 +1034,5 @@ function updateEntityCounter(dataEntityType: string, updateType: string) {
 .exitRequestTraceView:hover {
     background-color: rgb(139, 0, 0, 0.8);
     border-color: rgb(139, 0, 0, 0.8);
-}</style>
+}
+</style>

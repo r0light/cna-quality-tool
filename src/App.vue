@@ -90,7 +90,8 @@
           :systemsData="sharedSystemsData"></EvaluationApp>
         <ModelingApp v-if="pageContent.pageType === 'modeling'"
           v-show="pageContent.pageType === 'modeling' && currentPage === pageContent.id" :systemName="pageContent.name"
-          :pageId="pageContent.id" :modelingData="(modeledSystemsData.find(systemData => systemData.id === pageContent.id) as ModelingData)"
+          :pageId="pageContent.id"
+          :modelingData="(modeledSystemsData.find(systemData => systemData.id === pageContent.id) as ModelingData)"
           @store:modelingData="(systemEntityManager, toImport) => storeModelingData(pageContent.id, toImport, systemEntityManager, pageContent.name,)"
           @update:systemName="event => updatePageName(event, pageContent.id)"></ModelingApp>
       </div>
@@ -102,7 +103,7 @@
 
 <script lang="ts" setup>
 import $ from 'jquery';
-import { ref, onMounted, computed, ComputedRef } from 'vue'
+import { ref, onMounted, computed, ComputedRef } from 'vue';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import Home from './Home.vue';
 import ModelingApp from './modeling/ModelingApp.vue';
@@ -211,9 +212,42 @@ function importModelFromFile() {
 
 onMounted(() => {
 
-  for (const page of pages.value) {
-    page.active = page.id === currentPage.value ? true : false;
+  let importDone: Promise<void> = Promise.resolve();
+
+  if (sessionStorage.getItem("modelingData")) {
+    let modelingDataToImport: ModelingData[] = JSON.parse(sessionStorage.getItem("modelingData"));
+
+    for (const modelingData of modelingDataToImport) {
+      importDone = importDone.then(() => {
+        return new Promise((resolve, reject) => {
+          modelingData.toImport.fileContent = JSON.stringify(modelingData.toImport.fileContent);
+          modeledSystemsData.value.push(modelingData);
+          pages.value.push({
+            id: modelingData.id,
+            active: false,
+            pageType: "modeling",
+            iconClass: "fa-solid fa-pencil",
+            name: modelingData.name
+          })
+          currentPage.value = modelingData.id;
+          // import each model with a little time buffer in between to avoid visualization issues
+          setTimeout(resolve, 50);
+        });
+      });
+    }
+
+    importDone.then(() => {
+      if (sessionStorage.getItem("currentPage")) {
+        currentPage.value = parseInt(sessionStorage.getItem("currentPage"));
+      }
+
+      for (const page of pages.value) {
+        page.active = page.id === currentPage.value ? true : false;
+      }
+
+    })
   }
+
 
   document.getElementById("applicationNameInputField").addEventListener("keydown", (event) => {
     if (event.key?.localeCompare("Enter") === 0) {
@@ -221,6 +255,24 @@ onMounted(() => {
       onNameEntered();
     }
   });
+
+  window.onbeforeunload = function () {
+    let modelingDataToStore = modeledSystemsData.value.map((modelingData: ModelingData): ModelingData => {
+      return {
+        id: modelingData.id,
+        name: modelingData.name,
+        toImport: {
+          fileName: `${modelingData.name}.json`,
+          fileContent: modelingData.entityManager.convertToJson()
+        },
+        entityManager: null
+      }
+    })
+
+    sessionStorage.setItem("modelingData", JSON.stringify(modelingDataToStore));
+    sessionStorage.setItem("currentPage", `${currentPage.value}`);
+  }
+
 });
 
 function selectPage(id: number) {
