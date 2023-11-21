@@ -126,13 +126,15 @@ onMounted(() => {
             setCurrentSelection(cellView);
             cellView.showTools();
             props.graph.getConnectedLinks(cellView.model).forEach(link => {
-                highlighters.stroke.add(link.findView(props.paper), { selector: 'line' }, 'my-element-highlight', {
-                    layer: 'back',
-                    attrs: {
-                        'stroke': '#feb663',
-                        'stroke-width': 5,
-                    }
-                });
+                if (link.attr("root/visibility") === "visible") {
+                    highlighters.stroke.add(link.findView(props.paper), { selector: 'line' }, 'my-element-highlight', {
+                        layer: 'back',
+                        attrs: {
+                            'stroke': '#feb663',
+                            'stroke-width': 5,
+                        }
+                    });
+                }
             })
         },
         'blank:pointerdown': function (evt, x, y) {

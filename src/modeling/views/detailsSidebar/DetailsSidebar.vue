@@ -423,7 +423,9 @@ onUpdated(() => {
 
             // clear table rows
             involvedLinksConfig.tableRows.length = 0;
-            existingLinks.forEach((link) => {
+            existingLinks.sort((a, b) => {
+                return a.getSourceElement().attr("label/textWrap/text").localeCompare(b.getSourceElement().attr("label/textWrap/text"));
+            }).forEach((link) => {
                 let isInvalid = true;
                 let targetHasParent = false;
                 let parentName = "-";

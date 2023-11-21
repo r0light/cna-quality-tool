@@ -51,3 +51,11 @@ function emitToolbarButtonClick(buttonId: string, event: Event) {
 
 
 </script>
+
+<style>
+
+.toolbarButton {
+    margin: 1px;
+}
+
+</style>

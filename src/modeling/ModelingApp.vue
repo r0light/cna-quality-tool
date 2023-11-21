@@ -218,6 +218,7 @@ function onSelectRequestTrace(element: dia.Element) {
 
 function onRequestTraceDeselect() {
 
+    //TODO unhighlight all request traces so that this function can be used for the reload
     unhighlightRequestTrace(currentRequestTraceViewSelection.value);
 
     currentRequestTraceViewSelection.value = null
