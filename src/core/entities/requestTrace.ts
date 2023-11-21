@@ -50,10 +50,6 @@ class RequestTrace {
      */
     constructor(id: string, name: string, metaData: MetaData, externalEndpoint: ExternalEndpoint, links: Link[]) {
         for (const linkEntity of links) {
-            if (this.#links.has(linkEntity)) {
-                return;
-            }
-
             this.#links.add(linkEntity);
         }
         this.#id = id;

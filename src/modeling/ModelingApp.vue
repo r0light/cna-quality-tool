@@ -36,6 +36,7 @@ import DetailsSidebar from './views/detailsSidebar/DetailsSidebar.vue';
 import EntitySidebar from './views/EntitySidebar.vue';
 import { addSelectionToolToEntity } from './views/tools/entitySelectionTools';
 import { ImportData, ModelingData } from '@/App.vue';
+import EntityTypes from './config/entityTypes';
 
 const props = defineProps<{
     systemName: string,
@@ -184,9 +185,7 @@ function onSelectRequestTrace(element: dia.Element) {
 
     currentRequestTraceViewSelection.value = element;
 
-    element.prop("collapsed", false);
-    element.attr("icon/visibility", "hidden");
-    element.attr("body/fill", "gold");
+    highlightRequestTrace(element);
 
     // get involved Links
     const involvedLinks = element.prop("entity/properties/involved_links");
@@ -213,21 +212,39 @@ function onSelectRequestTrace(element: dia.Element) {
             continue;
         }
         entity.attr("root/visibility", "hidden", { isolate: true }); // TODO check isolate
+        entity.attr("icon/visibility", "hidden", { isolate: true });
     }
 }
 
 function onRequestTraceDeselect() {
 
-    currentRequestTraceViewSelection.value?.attr("body/fill", "white");
-    currentRequestTraceViewSelection.value?.attr("icon/visibility", "visible");
-    currentRequestTraceViewSelection.value?.prop("collapsed", true);
+    unhighlightRequestTrace(currentRequestTraceViewSelection.value);
 
     currentRequestTraceViewSelection.value = null
 
     const allSystemEntities = currentSystemGraph.value.getCells();
     for (const entity of allSystemEntities) {
-        entity.attr("root/visibility", "visible", { isolate: true });
+
+        if (!entity.prop("parentCollapsed") || entity.prop("parentCollapsed") === false) {
+            entity.attr("root/visibility", "visible", { isolate: true });
+        }
+
+        if (entity.attr("collapsed") === true || entity.prop("entity/type") === EntityTypes.REQUEST_TRACE) {
+            entity.attr("icon/visibility", "visible", { isolate: true });
+        }
     }
+}
+
+function highlightRequestTrace(requestTrace: dia.Element) {
+    requestTrace.prop("collapsed", false);
+    requestTrace.attr("icon/visibility", "hidden");
+    requestTrace.attr("body/fill", "gold");
+}
+
+function unhighlightRequestTrace(requestTrace: dia.Element) {
+    requestTrace.prop("collapsed", true);
+    requestTrace.attr("icon/visibility", "visible");
+    requestTrace.attr("body/fill", "white");
 }
 
 function onPrintRequested() {
