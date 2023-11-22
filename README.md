@@ -51,5 +51,5 @@ To generate a markdown representation of the quality model, a node script is inc
 
 ```sh
 cd src/core/qualitymodel
-ts-node profileParser.ts
+ts-node exportToMarkdown.ts
 ```
