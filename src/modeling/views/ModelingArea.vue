@@ -54,7 +54,7 @@ onMounted(() => {
         drawGrid: true,
         model: props.graph as dia.Graph,
         embeddingMode: true,
-        background: {
+        background: {   
             color: "rgba(192, 192, 192, 0.3)"
         },
         async: true,
@@ -121,6 +121,9 @@ onMounted(() => {
 
     paper.on({
         'element:pointerdown': function (cellView: dia.ElementView, evt, x, y) {
+
+            console.log(cellView);
+
             this.hideTools();
             removeHighlightingFromAllLinks();
             setCurrentSelection(cellView);
@@ -259,40 +262,40 @@ function onShowRequestTraceIncludedEntities(elementView, evt) {
 
 function configureLink(linkView, evt, elementViewConnected, magnet, arrowhead) {
 
-    let linkSource = linkView.model.attributes.source;
-    let linkTarget = linkView.model.attributes.target;
+        let linkSource = linkView.model.attributes.source;
+        let linkTarget = linkView.model.attributes.target;
 
-    if ((linkView.model.prop("entity/type") === EntityTypes.LINK) && (elementViewConnected.model.prop("entity/type") === EntityTypes.INFRASTRUCTURE)) {
-        let deploymentMappingLink = new DeploymentMapping();
+        if ((linkView.model.prop("entity/type") === EntityTypes.LINK) && (elementViewConnected.model.prop("entity/type") === EntityTypes.INFRASTRUCTURE)) {
+            let deploymentMappingLink = new DeploymentMapping();
 
-        linkView.model.source(linkSource);
-        linkView.model.target(linkTarget);
-        linkView.model.set("type", deploymentMappingLink.prop("type"));
-        linkView.model.attr("root", deploymentMappingLink.attr("root"));
-        linkView.model.attr("line", deploymentMappingLink.attr("line"));
-        linkView.model.prop("entity", deploymentMappingLink.prop("entity"), { previousType: EntityTypes.LINK });
-    }
+            linkView.model.source(linkSource);
+            linkView.model.target(linkTarget);
+            linkView.model.set("type", deploymentMappingLink.prop("type"));
+            linkView.model.attr("root", deploymentMappingLink.attr("root"));
+            linkView.model.attr("line", deploymentMappingLink.attr("line"));
+            linkView.model.prop("entity", deploymentMappingLink.prop("entity"), { previousType: EntityTypes.LINK });
+        }
 
-    if ((linkView.model.prop("entity/type") === EntityTypes.DEPLOYMENT_MAPPING) &&
-        (elementViewConnected.model.prop("entity/type") === EntityTypes.ENDPOINT || elementViewConnected.model.prop("entity/type") === EntityTypes.EXTERNAL_ENDPOINT)) {
-        let link = new Link();
+        if ((linkView.model.prop("entity/type") === EntityTypes.DEPLOYMENT_MAPPING) &&
+            (elementViewConnected.model.prop("entity/type") === EntityTypes.ENDPOINT || elementViewConnected.model.prop("entity/type") === EntityTypes.EXTERNAL_ENDPOINT)) {
+            let link = new Link();
 
-        linkView.model.source(linkSource);
-        linkView.model.target(linkTarget);
-        linkView.model.set("type", link.prop("type"));
-        linkView.model.attr("root", link.attr("root"));
-        linkView.model.attr("line", link.attr("line"));
-        linkView.model.prop("entity", link.prop("entity"), { previousType: EntityTypes.DEPLOYMENT_MAPPING });
-        return;
-    }
+            linkView.model.source(linkSource);
+            linkView.model.target(linkTarget);
+            linkView.model.set("type", link.prop("type"));
+            linkView.model.attr("root", link.attr("root"));
+            linkView.model.attr("line", link.attr("line"));
+            linkView.model.prop("entity", link.prop("entity"), { previousType: EntityTypes.DEPLOYMENT_MAPPING });
+            return;
+        }
 
-    if (!(linkView.model.getSourceElement()) || !(linkView.model.getTargetElement()) || linkView.model.prop("entity/type") === EntityTypes.LINK) {
-        // possible since Link and Deployment Mapping can be added by sidebar
-        // ignore if the current connection is actually a Link entity --> Deploy problematic does not exist 
-        return;
-    }
+        if (!(linkView.model.getSourceElement()) || !(linkView.model.getTargetElement()) || linkView.model.prop("entity/type") === EntityTypes.LINK) {
+            // possible since Link and Deployment Mapping can be added by sidebar
+            // ignore if the current connection is actually a Link entity --> Deploy problematic does not exist 
+            return;
+        }
 
-    checkIfStorageBackingServiceConnected(linkView, elementViewConnected);
+        checkIfStorageBackingServiceConnected(linkView, elementViewConnected);
 }
 
 function checkIfStorageBackingServiceConnected(linkView, elementViewConnected) {
