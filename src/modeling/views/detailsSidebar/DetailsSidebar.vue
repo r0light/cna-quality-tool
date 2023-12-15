@@ -178,7 +178,7 @@ function preparePropertyGroupSections(exclude: string[]): PropertyGroupSection[]
 
 onMounted(() => {
     
-    props.graph.on("importDone", () => {
+    props.graph.on("reloaded", () => {
         refreshHighlightOptions();
     })
 

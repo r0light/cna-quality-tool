@@ -98,15 +98,20 @@ onMounted(() => {
 
 // TODO endpoints
 function addEntity(eventElement) {
+
     let cell: dia.Element = entityShapeGraph.getCell(eventElement.model.id) as dia.Element;
     let newElement = cell.clone();
-    newElement.resize(cell.prop("defaults/size/width"), cell.prop("defaults/size/height"));
+    
     newElement.attr("label/fontSize", cell.prop("defaults/fontSize"));
     newElement.removeAttr("root/title");
-
     newElement.position(30, 20);
-    props.paper.model.addCell(newElement);
-    addSelectionToolToEntity(newElement, props.paper);
+
+    let addedCell = props.paper.model.addCell(newElement).getCell(newElement.id) as dia.Element;
+
+    addSelectionToolToEntity(addedCell, props.paper);
+
+    props.paper.requireView(addedCell);
+    addedCell.resize(cell.prop("defaults/size/width"), cell.prop("defaults/size/height"));
 }
 
 function addLink(eventElement) {

@@ -109,9 +109,11 @@ onMounted(() => {
         emit("store:modelingData", systemEntityManager, { fileName: '', fileContent: '' });
     }
 
+    /*
     currentSystemGraph.value.on("add", (cell) => {
         currentSelection.value = mainPaper.value.findViewByModel(cell);
     })
+    */
 
     document.addEventListener("keydown", (keydownEvent) => {
         if (keydownEvent.code === "Delete") {
@@ -134,12 +136,8 @@ function loadFromJson(jsonString: string, fileName: string) {
         addSelectionToolToEntity(cell, mainPaper.value);
     }
 
-    // as a workaround add tools later, otherwise it does not work..
-    setTimeout(() => {
-        mainPaper.value.hideTools();
-        // trigger custom importDone event to refresh things, that would otherwise cause problems (such as the selection of data aggregates and backing data)
-        systemEntityManager.getGraph().trigger("importDone");
-    }, 20)
+    mainPaper.value.updateViews(); // use this to make sure the following calls work, because of the async property of the paper
+    mainPaper.value.hideTools();
 }
 
 function saveToJson() {
@@ -166,13 +164,8 @@ function loadFromTosca(yamlString: string, fileName: string) {
         addSelectionToolToEntity(cell, mainPaper.value);
     }
 
-    // as a workaround add tools later, otherwise it does not work..
-    setTimeout(() => {
-        mainPaper.value.hideTools();
-         // trigger custom importDone event to refresh things, that would otherwise cause problems (such as the selection of data aggregates and backing data)
-        systemEntityManager.getGraph().trigger("importDone");
-    }, 20)
-
+    mainPaper.value.updateViews(); // use this to make sure the following calls work, because of the async property of the paper
+    mainPaper.value.hideTools();
 }
 
 function saveToTosca() {

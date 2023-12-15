@@ -230,8 +230,8 @@ onMounted(() => {
             name: modelingData.name
           })
           currentPage.value = modelingData.id;
-          // import each model with a little time buffer in between to avoid visualization issues
-          setTimeout(resolve, 50);
+          // import each model with a little time buffer in between to avoid visualization issues, TODO: still needed?
+          setTimeout(resolve, 100);
         });
       });
     }
