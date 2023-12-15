@@ -119,6 +119,7 @@ const entityHighlighting = ref((() => {
 
 
 function refreshHighlightOptions() {
+
     for (let highlightOption of entityHighlighting.value) {
         let updatedOptions = [{ optionValue: "none", optionText: "Choose existing entity..." }];
         let considerableEntites = props.graph.getElements().filter(element => element.prop("entity/type") === highlightOption.selectId);
@@ -176,10 +177,8 @@ function preparePropertyGroupSections(exclude: string[]): PropertyGroupSection[]
 }
 
 onMounted(() => {
-    refreshHighlightOptions();
-
-    // TODO maybe add context and deregister before new registration?
-    props.graph.on("change", (cell) => {
+    
+    props.graph.on("importDone", () => {
         refreshHighlightOptions();
     })
 
@@ -632,14 +631,16 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                 case EntityTypes.DATA_AGGREGATE:
                     if (propertyOption.providedFeature === "dataAggregate-familyConfig") {
                         let currentFamilyName = selectedEntityElement.attr("label/textWrap/text");
-                        for (let otherBackingData of propertyOption.tableRows) {
-                            if (otherBackingData.columns["included"]["checked"]) {
-                                (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).attr("label/textWrap/text", currentFamilyName);
-                                (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).prop("entity/assignedFamily", currentFamilyName);
+                        for (let otherDataAggregate of propertyOption.tableRows) {
+                            if (otherDataAggregate.columns["included"]["checked"]) {
+                                (props.graph.getCell(otherDataAggregate.columns["included"]["id"]) as dia.Element).attr("label/textWrap/text", currentFamilyName);
+                                (props.graph.getCell(otherDataAggregate.columns["included"]["id"]) as dia.Element).prop("entity/assignedFamily", currentFamilyName);
                             } else {
-                                // TODO reset name or not?
-                                (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).attr("label/textWrap/text", "Data Aggregate");
-                                (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).prop("entity/assignedFamily", "");
+                                // reset name if it was previously in the same family
+                                if ((props.graph.getCell(otherDataAggregate.columns["included"]["id"]) as dia.Element).prop("entity/assignedFamily").localeCompare(currentFamilyName) === 0) {
+                                    (props.graph.getCell(otherDataAggregate.columns["included"]["id"]) as dia.Element).attr("label/textWrap/text", "Data Aggregate");
+                                    (props.graph.getCell(otherDataAggregate.columns["included"]["id"]) as dia.Element).prop("entity/assignedFamily", "");
+                                }
                             }
                         }
                         continue;
@@ -654,8 +655,11 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                                 (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).prop("entity/assignedFamily", currentFamilyName);
                             } else {
                                 // TODO reset name or not?
-                                (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).attr("label/textWrap/text", "Backing Data");
-                                (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).prop("entity/assignedFamily", "");
+                                // reset name if it was previously in the same family
+                                if ((props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).prop("entity/assignedFamily").localeCompare(currentFamilyName) === 0) {
+                                    (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).attr("label/textWrap/text", "Backing Data");
+                                    (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).prop("entity/assignedFamily", "");
+                                }
                             }
                         }
                         continue;

@@ -137,6 +137,8 @@ function loadFromJson(jsonString: string, fileName: string) {
     // as a workaround add tools later, otherwise it does not work..
     setTimeout(() => {
         mainPaper.value.hideTools();
+        // trigger custom importDone event to refresh things, that would otherwise cause problems (such as the selection of data aggregates and backing data)
+        systemEntityManager.getGraph().trigger("importDone");
     }, 20)
 }
 
@@ -167,6 +169,8 @@ function loadFromTosca(yamlString: string, fileName: string) {
     // as a workaround add tools later, otherwise it does not work..
     setTimeout(() => {
         mainPaper.value.hideTools();
+         // trigger custom importDone event to refresh things, that would otherwise cause problems (such as the selection of data aggregates and backing data)
+        systemEntityManager.getGraph().trigger("importDone");
     }, 20)
 
 }
