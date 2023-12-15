@@ -67,7 +67,10 @@ class ToscaToEntitesConverter {
         }
 
         // continue with Infrastructure
-        for (const [key, node] of Object.entries(this.#topologyTemplate.node_templates)) {
+        let infrastructureTemplates =  Object.entries(this.#topologyTemplate.node_templates).filter(([key, node]) => node.type === INFRASTRUCTURE_TOSCA_KEY);
+        outerLoop: while (infrastructureTemplates.length > 0) {
+            const [key, node] = infrastructureTemplates[0];
+
             if (node.type === INFRASTRUCTURE_TOSCA_KEY) {
                 let uuid = uuidv4();
                 let infrastructure = new Entities.Infrastructure(uuid, this.#transformYamlKeyToLabel(key), readToscaMetaData(node.metadata));
@@ -86,6 +89,23 @@ class ToscaToEntitesConverter {
                                     }
                                 }
 
+                            } else if (requirementKey === "host") {
+                                if (typeof requirement === "string") {
+                                    // TODO requirement is of type string
+                                } else {
+                                    let linkId = uuidv4();
+
+                                    // only create DeploymentMapping if referenced infrastructure entity has already been added, otherwise put current entity at the end of the list
+                                    if (this.#keyIdMap.getId(requirement.node)) {
+                                        let deploymentMapping = new Entities.DeploymentMapping(linkId, infrastructure, this.#importedSystem.getInfrastructureEntities.get(this.#keyIdMap.getId(requirement.node)));
+                                        this.#keyIdMap.add(requirement.relationship as string, linkId) // TODO requirement.relationship is object
+                                        this.#importedSystem.addEntity(deploymentMapping);
+                                    } else {
+                                        // add current infrastructure entity at the end of the list
+                                        infrastructureTemplates.push(infrastructureTemplates.splice(0,1)[0]);
+                                        continue outerLoop;
+                                    }
+                                }
                             }
                         }
                     }
@@ -99,9 +119,12 @@ class ToscaToEntitesConverter {
 
                 this.#importedSystem.addEntity(infrastructure);
                 this.#keyIdMap.add(key, uuid);
+
+                infrastructureTemplates.splice(0,1);
             }
 
         }
+
 
 
         let endpoints: Map<string, Entities.Endpoint> = new Map();

@@ -581,18 +581,11 @@ class SystemEntityManager {
             return null;
         }
 
-        let underlyingInfrastructure;
+        let underlyingInfrastructure = this.#currentSystemEntity.getInfrastructureEntities.get(targetElement.id);
         let deployedEntity;
         if (sourceElement.prop("entity/type") === EntityTypes.INFRASTRUCTURE) {
-            underlyingInfrastructure = this.#currentSystemEntity.getInfrastructureEntities.get(sourceElement.id);
-
-            if (targetElement.prop("entity/type") === EntityTypes.INFRASTRUCTURE) {
-                deployedEntity = this.#currentSystemEntity.getInfrastructureEntities.get(targetElement.id);
-            } else {
-                deployedEntity = this.#currentSystemEntity.getComponentEntities.get(targetElement.id);
-            }
+            deployedEntity = this.#currentSystemEntity.getInfrastructureEntities.get(sourceElement.id);
         } else {
-            underlyingInfrastructure = this.#currentSystemEntity.getInfrastructureEntities.get(targetElement.id);
             deployedEntity = this.#currentSystemEntity.getComponentEntities.get(sourceElement.id);
         }
 
@@ -1013,8 +1006,6 @@ class SystemEntityManager {
 
 
     #createBackingDataCell(backingData: { backingData: Entities.BackingData, relation: DataUsageRelation }, parent: dia.Element, index: number) {
-
-        console.log(backingData)
 
         let xPosition = parent.position().x + Math.floor(parent.size().width / 3) + backingData.backingData.getMetaData.size.width * index;
         let yPosition = parent.position().y + Math.floor(parent.size().height / 3) + backingData.backingData.getMetaData.size.height * index;
