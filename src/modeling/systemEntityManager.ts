@@ -14,6 +14,8 @@ import {
 } from './config/entityShapes'
 import { DataAggregate } from "../core/entities";
 import { DialogSize, FormContentConfig, UIContentType } from "./config/actionDialogConfig";
+import { Measure } from "@/core/qualitymodel/Measure";
+import { data } from "jquery";
 
 class SystemEntityManager {
 
@@ -299,7 +301,7 @@ class SystemEntityManager {
                     let dataAggregateName: string = embeddedCell.attr("label/textWrap/text");
                     let referencedDataAggregate = [...(this.#currentSystemEntity.getDataAggregateEntities)].filter(([id, dataAggregate]) => dataAggregate.getName === dataAggregateName);
                     if (referencedDataAggregate.length > 0) {
-                        componentModelEntity.addDataEntity(referencedDataAggregate[0][1], embeddedCell.prop("entity/properties/dataAggregate-parentRelation"));
+                        componentModelEntity.addDataEntity(referencedDataAggregate[0][1], embeddedCell.prop("entity/properties/dataAggregate-parentRelation"), this.#parseMetaDataFromElement(embeddedCell as dia.Element));
                     } else {
                         throw new Error(`Data Aggregate with name ${dataAggregateName} should be there, but could not be found in ${this.#currentSystemEntity.getDataAggregateEntities}`);
                     }
@@ -308,7 +310,7 @@ class SystemEntityManager {
                     let backingDataName: string = embeddedCell.attr("label/textWrap/text");
                     let referencedBackingData = [...(this.#currentSystemEntity.getBackingDataEntities)].filter(([id, backingData]) => backingData.getName === backingDataName);
                     if (referencedBackingData.length > 0) {
-                        componentModelEntity.addDataEntity(referencedBackingData[0][1], embeddedCell.prop("entity/properties/backingData-parentRelation"));
+                        componentModelEntity.addDataEntity(referencedBackingData[0][1], embeddedCell.prop("entity/properties/backingData-parentRelation"), this.#parseMetaDataFromElement(embeddedCell as dia.Element));
                     } else {
                         throw new Error(`Backing Data with name ${backingDataName} should be there, but could not be found in ${this.#currentSystemEntity.getBackingDataEntities}`);
                     }
@@ -332,7 +334,7 @@ class SystemEntityManager {
                     let backingDataName: string = embeddedBackingData.attr("label/textWrap/text");
                     let referencedBackingData = [...(this.#currentSystemEntity.getBackingDataEntities)].filter(([id, backingData]) => backingData.getName === backingDataName);
                     if (referencedBackingData.length > 0) {
-                        infrastructureEntity.addBackingDataEntity(referencedBackingData[0][1], embeddedBackingData.prop("entity/properties/backingData-parentRelation"));
+                        infrastructureEntity.addBackingDataEntity(referencedBackingData[0][1], embeddedBackingData.prop("entity/properties/backingData-parentRelation"), this.#parseMetaDataFromElement(embeddedBackingData));
                     } else {
                         throw new Error(`Backing Data with name ${backingDataName} should be there, but could not be found in ${this.#currentSystemEntity.getBackingDataEntities}`);
                     }
@@ -955,13 +957,17 @@ class SystemEntityManager {
     }
 
 
-    #createDataAggregateCell(dataAggregate: { data: DataAggregate, relation: DataUsageRelation }, parent: dia.Element, index: number) {
-        let xPosition = parent.position().x + Math.floor(parent.size().width / 3) + dataAggregate.data.getMetaData.size.width * index;
-        let yPosition = parent.position().y + Math.floor(parent.size().height / 3) + dataAggregate.data.getMetaData.size.height * index;
+    #createDataAggregateCell(dataAggregate: { data: DataAggregate, relation: DataUsageRelation, metaData: MetaData }, parent: dia.Element, index: number) {
+
+        let xPosition = dataAggregate.metaData.position.xCoord !== 0 ? dataAggregate.metaData.position.xCoord : parent.position().x + Math.floor(parent.size().width / 3) + dataAggregate.data.getMetaData.size.width * index;
+        let yPosition = dataAggregate.metaData.position.yCoord !== 0 ? dataAggregate.metaData.position.yCoord :parent.position().y + Math.floor(parent.size().height / 3) + dataAggregate.data.getMetaData.size.height * index;
+
+        let width = dataAggregate.metaData.size.width !== dataAggregate.data.getMetaData.size.width ? dataAggregate.metaData.size.width : dataAggregate.data.getMetaData.size.width;
+        let height = dataAggregate.metaData.size.height !== dataAggregate.data.getMetaData.size.height ? dataAggregate.metaData.size.height : dataAggregate.data.getMetaData.size.height;
 
         let newDataAggregate = new DataAggregateElement({
-            position: { x: xPosition, y: yPosition }, // TODO good approach for positioning?
-            size: { width: dataAggregate.data.getMetaData.size.width, height: dataAggregate.data.getMetaData.size.height },
+            position: { x: xPosition, y: yPosition },
+            size: { width: width, height: height },
             attrs: {
                 root: {
                     title: "cna.qualityModel.DataAggregate"
@@ -970,7 +976,7 @@ class SystemEntityManager {
                     class: "entityHighlighting"
                 },
                 label: {
-                    fontSize: dataAggregate.data.getMetaData.fontSize,
+                    fontSize: dataAggregate.metaData.fontSize !== dataAggregate.data.getMetaData.fontSize ? dataAggregate.metaData.fontSize : dataAggregate.data.getMetaData.fontSize,
                     textWrap: {
                         text: dataAggregate.data.getName,
                     }
@@ -1005,14 +1011,17 @@ class SystemEntityManager {
     }
 
 
-    #createBackingDataCell(backingData: { backingData: Entities.BackingData, relation: DataUsageRelation }, parent: dia.Element, index: number) {
+    #createBackingDataCell(backingData: { backingData: Entities.BackingData, relation: DataUsageRelation, metaData: MetaData }, parent: dia.Element, index: number) {
 
-        let xPosition = parent.position().x + Math.floor(parent.size().width / 3) + backingData.backingData.getMetaData.size.width * index;
-        let yPosition = parent.position().y + Math.floor(parent.size().height / 3) + backingData.backingData.getMetaData.size.height * index;
+        let xPosition = backingData.metaData.position.xCoord !== 0 ? backingData.metaData.position.xCoord : parent.position().x + Math.floor(parent.size().width / 3) + backingData.backingData.getMetaData.size.width * index;
+        let yPosition = backingData.metaData.position.yCoord !== 0 ? backingData.metaData.position.yCoord :parent.position().y + Math.floor(parent.size().height / 3) + backingData.backingData.getMetaData.size.height * index;
+
+        let width = backingData.metaData.size.width !== backingData.backingData.getMetaData.size.width ? backingData.metaData.size.width : backingData.backingData.getMetaData.size.width;
+        let height = backingData.metaData.size.height !== backingData.backingData.getMetaData.size.height ? backingData.metaData.size.height : backingData.backingData.getMetaData.size.height;
 
         let newBackingData = new BackingDataElement({
-            position: { x: xPosition, y: yPosition }, // TODO good approach for positioning?
-            size: { width: backingData.backingData.getMetaData.size.width, height: backingData.backingData.getMetaData.size.height },
+            position: { x: xPosition, y: yPosition },
+            size: { width: width, height: height },
             attrs: {
                 root: {
                     title: "cna.qualityModel.BackingData"
@@ -1021,7 +1030,7 @@ class SystemEntityManager {
                     class: "entityHighlighting"
                 },
                 label: {
-                    fontSize: backingData.backingData.getMetaData.fontSize,
+                    fontSize: backingData.metaData.fontSize !== backingData.backingData.getMetaData.fontSize ? backingData.metaData.fontSize : backingData.backingData.getMetaData.fontSize,
                     textWrap: {
                         text: backingData.backingData.getName,
                     }

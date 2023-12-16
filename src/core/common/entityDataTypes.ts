@@ -65,4 +65,19 @@ export function readToscaMetaData(toscaMetaData: TOSCA_Metadata): MetaData {
     };
 }
 
+export function getEmptyMetaData() {
+    return {
+        label: "",
+        fontSize: 12,
+        size: {
+            width: 50,
+            height: 20
+        },
+        position: {
+            xCoord: 0,
+            yCoord: 0
+        }
+    }
+}
+
 export type DataUsageRelation = "" | "used" | "persisted";

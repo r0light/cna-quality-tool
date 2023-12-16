@@ -122,8 +122,6 @@ onMounted(() => {
     paper.on({
         'element:pointerdown': function (cellView: dia.ElementView, evt, x, y) {
 
-            console.log(cellView);
-
             this.hideTools();
             removeHighlightingFromAllLinks();
             setCurrentSelection(cellView);

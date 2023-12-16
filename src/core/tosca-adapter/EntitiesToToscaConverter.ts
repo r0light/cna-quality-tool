@@ -77,7 +77,8 @@ class EntitiesToToscaConverter {
                 for (const usedBackingData of infrastructure.getBackingDataEntities) {
                     const usageRelationshipKey = this.#uniqueKeyManager.ensureUniqueness(`${nodeKey}_uses_${this.#keyIdMap.getKey(usedBackingData.backingData.getId)}`);
                     let backingDataRelationship: TOSCA_Relationship_Template = {
-                        type: "cna.qualityModel.relationships.AttachesTo.Data"
+                        type: "cna.qualityModel.relationships.AttachesTo.Data",
+                        metadata: flatMetaData(usedBackingData.metaData),
                     };
                     if (usedBackingData.relation) {
                         backingDataRelationship.properties = {
@@ -153,7 +154,8 @@ class EntitiesToToscaConverter {
 
                     const usageRelationshipKey = this.#uniqueKeyManager.ensureUniqueness(`${nodeKey}_uses_${this.#keyIdMap.getKey(usedDataAggregate.data.getId)}`);
                     let dataAggregateRelationship: TOSCA_Relationship_Template = {
-                        type: "cna.qualityModel.relationships.AttachesTo.Data"
+                        type: "cna.qualityModel.relationships.AttachesTo.Data",
+                        metadata: flatMetaData(usedDataAggregate.metaData),
                     };
                     if (usedDataAggregate.relation) {
                         dataAggregateRelationship.properties = {
@@ -179,7 +181,8 @@ class EntitiesToToscaConverter {
 
                     const usageRelationshipKey = this.#uniqueKeyManager.ensureUniqueness(`${nodeKey}_uses_${this.#keyIdMap.getKey(usedBackingData.backingData.getId)}`);
                     let backingDataRelationship: TOSCA_Relationship_Template = {
-                        type: "cna.qualityModel.relationships.AttachesTo.Data"
+                        type: "cna.qualityModel.relationships.AttachesTo.Data",
+                        metadata: flatMetaData(usedBackingData.metaData),
                     };
                     if (usedBackingData.relation) {
                         backingDataRelationship.properties = {
