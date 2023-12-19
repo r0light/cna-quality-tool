@@ -44,6 +44,7 @@ function parseProperties(entityProperties) {
  */
 const Component = dia.Element.define("qualityModel.Component", {
     defaults: {
+        type: "qualityModel.Component",
         size: {
             width: 160,
             height: 80
@@ -143,6 +144,7 @@ const Component = dia.Element.define("qualityModel.Component", {
  */
 const Service = dia.Element.define("qualityModel.Service", {
     defaults: {
+        type: "qualityModel.Service",
         size: {
             width: 140,
             height: 120
@@ -238,6 +240,7 @@ const Service = dia.Element.define("qualityModel.Service", {
  */
 const BackingService = dia.Element.define("qualityModel.BackingService", {
     defaults: {
+        type: "qualityModel.BackingService",
         size: {
             width: 200,
             height: 120
@@ -313,6 +316,7 @@ const BackingService = dia.Element.define("qualityModel.BackingService", {
 // TODO ensure aspect ratio
 const StorageBackingService = shapes.standard.Cylinder.define("qualityModel.StorageBackingService", {
     defaults: {
+        type: "qualityModel.StorageBackingService",
         size: {
             width: 160,
             height: 140
@@ -413,6 +417,7 @@ const StorageBackingService = shapes.standard.Cylinder.define("qualityModel.Stor
  */
 const Endpoint = shapes.standard.Circle.define("qualityModel.Endpoint", {
     defaults: {
+        type: "qualityModel.Endpoint",
         size: {
             width: 50,
             height: 50
@@ -485,6 +490,7 @@ const Endpoint = shapes.standard.Circle.define("qualityModel.Endpoint", {
  */
 const ExternalEndpoint = shapes.standard.Circle.define("qualityModel.ExternalEndpoint", {
     defaults: {
+        type: "qualityModel.ExternalEndpoint",
         size: {
             width: 50,
             height: 50
@@ -557,6 +563,7 @@ const ExternalEndpoint = shapes.standard.Circle.define("qualityModel.ExternalEnd
  */
 const Infrastructure = dia.Element.define("qualityModel.Infrastructure", {
     defaults: {
+        type: "qualityModel.Infrastructure",
         size: {
             width: 180,
             height: 90
@@ -652,6 +659,7 @@ const Infrastructure = dia.Element.define("qualityModel.Infrastructure", {
  */
 const RequestTrace = dia.Element.define("qualityModel.RequestTrace", {
     defaults: {
+        type: "qualityModel.RequestTrace",
         size: {
             width: 190,
             height: 76
@@ -745,6 +753,9 @@ const RequestTrace = dia.Element.define("qualityModel.RequestTrace", {
         })
  */
 const Link = shapes.standard.Link.define("qualityModel.Link", {
+    defaults: {
+        type: "qualityModel.Link",
+    },
     attrs: {
         root: {
             title: "Link"
@@ -789,6 +800,9 @@ const Link = shapes.standard.Link.define("qualityModel.Link", {
         })
  */
 const DeploymentMapping = shapes.standard.Link.define("qualityModel.DeploymentMapping", {
+    defaults: {
+        type: "qualityModel.DeploymentMapping",
+    },
     attrs: {
         root: {
             title: "Deployment Mapping"
@@ -829,6 +843,7 @@ const DeploymentMapping = shapes.standard.Link.define("qualityModel.DeploymentMa
  */
 const DataAggregate = dia.Element.define("qualityModel.DataAggregate", {
     defaults: {
+        type: "qualityModel.DataAggregate",
         size: {
             width: 50,
             height: 25
@@ -910,6 +925,7 @@ const DataAggregate = dia.Element.define("qualityModel.DataAggregate", {
  */
 const BackingData = dia.Element.define("qualityModel.BackingData", {
     defaults: {
+        type: "qualityModel.BackingData",
         size: {
             width: 100,
             height: 60
@@ -965,7 +981,8 @@ const BackingData = dia.Element.define("qualityModel.BackingData", {
     }]
 });
 
-/* TODO: not sure why this was needed, but it can lead to errors when simply serving the page
+
+
 Object.assign(shapes, {
     qualityModel: {
         Component, Service, BackingService, StorageBackingService,
@@ -974,7 +991,7 @@ Object.assign(shapes, {
         RequestTrace, DataAggregate, BackingData
     }
 });
-*/
+
 
 export {
     Component, Service, BackingService, StorageBackingService,
