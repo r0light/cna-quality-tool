@@ -1,0 +1,28 @@
+name: Publish as gh-pages site
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build_and_push:
+    name: Build app and push to gh-pages branch
+    runs-on: ubuntu-latest
+    steps:
+       - name: Check out the repo
+         uses: actions/checkout@v3
+       - name: setup dependencies
+         run: npm install
+       - name: build for gh-pages
+         run: npm run ghpages
+       - name: push to gh-pages branch
+         run: |
+           cd dist
+           git config --global user.email "${{ secrets.GIT_EMAIL }}"
+           git config --global user.name "${{ secrets.GIT_NAME }}"
+           git init --initial-branch=main
+           git add -A
+           git commit -m '${{ github.event.head_commit.message }}'
+           git push -f https://r0light:${{ secrets.GITHUB_TOKEN }}@github.com/r0light/cna-quality-tool.git main:gh-pages
+         shell: bash

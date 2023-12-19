@@ -17,6 +17,7 @@
 <script lang="ts" setup>
 import { ref, toRaw } from 'vue';
 import { ModelingData } from '../App.vue';
+import { Service } from '@/core/entities';
 
 
 const props = defineProps<{
@@ -39,7 +40,7 @@ function getNumberOfServices(systemId: number) {
     let selectedSystem = props.systemsData.find(system => system.id === systemId);
     let systemEntityManager = toRaw(selectedSystem.entityManager);
 
-    let services = [...systemEntityManager.getSystemEntity().getComponentEntities.entries()].map(entry => entry[1]).filter(entity => entity.constructor.name === "Service");
+    let services = [...systemEntityManager.getSystemEntity().getComponentEntities.entries()].map(entry => entry[1]).filter(entity => entity.constructor.name === Service.name);
 
     return services.length;
 }
