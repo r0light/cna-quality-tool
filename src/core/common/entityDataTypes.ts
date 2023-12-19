@@ -1,4 +1,4 @@
-import { TOSCA_Metadata } from "@/totypa/tosca-types/core-types"
+import { TOSCA_Metadata } from "../../totypa/tosca-types/core-types"
 import { DataAggregate } from "../entities"
 
 export type MetaData = {

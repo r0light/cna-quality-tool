@@ -1,7 +1,6 @@
 // This script is not intended to be used within the web app, but locally to generate a nice looking markdown representation of the quality model.
 
 import * as fs from 'fs';
-import {  System, Component, Service, BackingService, StorageBackingService, Endpoint, ExternalEndpoint, Link, Infrastructure, DeploymentMapping, RequestTrace, DataAggregate, BackingData} from '../entities';
 import { getQualityModel } from './QualityModelInstance';
 import { ProductFactor} from './ProductFactor';
 import { QualityAspect } from './QualityAspect';

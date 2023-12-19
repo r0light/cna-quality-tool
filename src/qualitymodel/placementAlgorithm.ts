@@ -1,6 +1,7 @@
-import { QualityModelInstance } from "@/core/qualitymodel/QualityModelInstance";
+import { QualityModelInstance } from "../core/qualitymodel/QualityModelInstance";
 import { dia } from "jointjs";
 import { QualityAspectElement } from "./config/elementShapes";
+import { QualityAspect } from "../core/qualitymodel/QualityAspect";
 
 
 export function orderQualityAspects(qualityAspectElements: dia.Element[], qualityModel: QualityModelInstance) {
@@ -235,7 +236,7 @@ export function placeProductFactors(qmPaper: HTMLElement, graph: dia.Graph, qual
         }
 
         let impactedElements = impactedFactors.map(impactedFactor => {
-            if (impactedFactor.constructor.name === "QualityAspect") {
+            if (impactedFactor.constructor.name === QualityAspect.name) {
                 return qualityAspectElements.find(element => element.id === impactedFactor.getId);
             } else {
                 return productFactorElements.find(element => element.id === impactedFactor.getId);

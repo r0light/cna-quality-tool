@@ -242,7 +242,7 @@ function drawQualityModelElements(highLevelFilter: string[], productFactorFilter
         while (i < factorsToCheck.length) {
             let toCheck = factorsToCheck[i];
 
-            if (toCheck.constructor.name === "QualityAspect") {
+            if (toCheck.constructor.name === QualityAspect.name) {
                 if (drawnQualityAspects.includes(toCheck.getId)) {
                     existingImpactedQualityAspect = true;
                 }

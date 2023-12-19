@@ -965,7 +965,7 @@ const BackingData = dia.Element.define("qualityModel.BackingData", {
     }]
 });
 
-
+/* TODO: not sure why this was needed, but it can lead to errors when simply serving the page
 Object.assign(shapes, {
     qualityModel: {
         Component, Service, BackingService, StorageBackingService,
@@ -974,6 +974,7 @@ Object.assign(shapes, {
         RequestTrace, DataAggregate, BackingData
     }
 });
+*/
 
 export {
     Component, Service, BackingService, StorageBackingService,

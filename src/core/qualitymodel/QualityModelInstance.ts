@@ -1,4 +1,3 @@
-import { h } from "vue";
 import { HighLevelAspect } from "./HighLevelAspect";
 import { Impact, ImpactType } from "./Impact";
 import { Measure } from "./Measure";
@@ -34,7 +33,6 @@ function getQualityModel(): QualityModelInstance {
     // add all Product Factors
     for (const [productFactorKey, productFactor] of Object.entries(qualityModel.productFactors)) {
         let newProductFactor = new ProductFactor(productFactorKey, productFactor.name, productFactor.description);
-
         productFactor.relevantEntities.forEach(entity => newProductFactor.addRelevantEntity(entity));
         productFactor.sources.forEach(source => {
             let url = literature[source.key] ? literature[source.key].url : "";
@@ -54,7 +52,7 @@ function getQualityModel(): QualityModelInstance {
                 throw Error("No measure with key " + measureKey + " could be found, please check the quality model definition.")
             }
         }
-
+        
         newQualityModel.productFactors.push(newProductFactor);
 
     }

@@ -3,9 +3,9 @@ import * as yaml from 'js-yaml';
 import EntityTypes from './config/entityTypes';
 import * as Entities from '../core/entities';
 import ErrorMessage, { ErrorType } from './errorMessage'
-import { EntityDetailsConfig, PropertyContentType, TableDialogPropertyConfig } from './config/detailsSidebarConfig';
-import { DataUsageRelation, MetaData } from "@/core/common/entityDataTypes";
-import { convertToServiceTemplate, importFromServiceTemplate } from "@/core/tosca-adapter/ToscaAdapter";
+import { EntityDetailsConfig, TableDialogPropertyConfig } from './config/detailsSidebarConfig';
+import { DataUsageRelation, MetaData } from "../core/common/entityDataTypes";
+import { convertToServiceTemplate, importFromServiceTemplate } from "../core/tosca-adapter/ToscaAdapter";
 import {
     Component as ComponentElement, Service as ServiceElement, BackingService as BackingServiceElement, StorageBackingService as StorageBackingServiceElement,
     Endpoint as EndpointElement, ExternalEndpoint as ExternalEndpointElement, Link as LinkElement,
@@ -13,9 +13,7 @@ import {
     RequestTrace as RequestTraceElement, DataAggregate as DataAggregateElement, BackingData as BackingDataElement
 } from './config/entityShapes'
 import { DataAggregate } from "../core/entities";
-import { DialogSize, FormContentConfig, UIContentType } from "./config/actionDialogConfig";
-import { Measure } from "@/core/qualitymodel/Measure";
-import { data } from "jquery";
+import { FormContentConfig } from "./config/actionDialogConfig";
 
 class SystemEntityManager {
 
@@ -728,19 +726,19 @@ class SystemEntityManager {
         for (const [id, component] of this.#currentSystemEntity.getComponentEntities) {
 
             let newComponent: dia.Element;
-            if (component.constructor.name === "Service") {
+            if (component.constructor.name === Entities.Service.name) {
                 newComponent = this.#createServiceCell(component);
                 this.#currentSystemGraph.addCell(newComponent);
                 createdCells.push(newComponent);
-            } else if (component.constructor.name === "BackingService") {
+            } else if (component.constructor.name === Entities.BackingService.name) {
                 newComponent = this.#createBackingServiceCell(component);
                 this.#currentSystemGraph.addCell(newComponent);
                 createdCells.push(newComponent);
-            } else if (component.constructor.name === "StorageBackingService") {
+            } else if (component.constructor.name === Entities.StorageBackingService.name) {
                 newComponent = this.#createStorageBackingServiceCell(component);
                 this.#currentSystemGraph.addCell(newComponent);
                 createdCells.push(newComponent);
-            } else if (component.constructor.name === "Component") {
+            } else if (component.constructor.name === Entities.Component.name) {
                 newComponent = this.#createComponentCell(component);
                 this.#currentSystemGraph.addCell(newComponent);
                 createdCells.push(newComponent);

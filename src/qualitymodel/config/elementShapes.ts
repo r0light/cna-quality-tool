@@ -157,12 +157,13 @@ const ImpactElement = shapes.standard.Link.define("quamoco.Impact", {
 });
 
 
-
+/* TODO: not sure why this was needed, but it can lead to errors when simply serving the page
 Object.assign(shapes, {
     quamoco: {
         QualityAspectElement, ProductFactorElement, ImpactElement
     }
 });
+*/
 
 export {
     QualityAspectElement, ProductFactorElement, ImpactElement
