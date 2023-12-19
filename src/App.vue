@@ -3,7 +3,7 @@
     <nav class="navbar navbar-expand navbar-light bg-dark text-white">
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <div class="navbar-header">
-          <a class="navbar-brand text-muted"><i class="fa-solid fa-cube"></i> CNA Modeling</a>
+          <a class="navbar-brand text-muted"><i class="fa-solid fa-cube"></i> Clounaq</a>
         </div>
         <ul class="navbar-nav mr-auto">
           <li v-for="page of pages" class="nav-item" :class="{ active: page.active }">
