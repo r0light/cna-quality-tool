@@ -63,7 +63,7 @@
 import $ from 'jquery';
 import { ref, onMounted, onUpdated, watch, Ref, ComputedRef, computed } from 'vue';
 import { dia, shapes, util, highlighters } from "jointjs";
-import { QualityAspectElement, ProductFactorElement, ImpactElement } from './config/elementShapes';
+import { QualityAspectElement, ProductFactorElement, ImpactElement, quamocoShapes } from './config/elementShapes';
 import { getQualityModel } from '@/core/qualitymodel/QualityModelInstance';
 import { ProductFactor } from '@/core/qualitymodel/ProductFactor';
 import { QualityAspect } from '@/core/qualitymodel/QualityAspect';
@@ -80,7 +80,7 @@ const watchInView = computed(() => props.inView);
 const qmContainer = ref<HTMLElement>(null);
 const qmPaper = ref<HTMLElement>(null)
 
-const namespace = shapes;
+const namespace = quamocoShapes;
 const graph = new dia.Graph({}, { cellNamespace: namespace });
 
 const paperRef = ref(null);

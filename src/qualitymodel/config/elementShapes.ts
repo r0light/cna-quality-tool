@@ -158,13 +158,13 @@ const ImpactElement = shapes.standard.Link.define("quamoco.Impact", {
 
 
 
-Object.assign(shapes, {
+const quamocoShapes = Object.assign({
     quamoco: {
         QualityAspectElement, ProductFactorElement, ImpactElement
     }
-});
+}, shapes);
 
 
 export {
-    QualityAspectElement, ProductFactorElement, ImpactElement
+    quamocoShapes, QualityAspectElement, ProductFactorElement, ImpactElement
 };

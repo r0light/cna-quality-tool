@@ -1,4 +1,4 @@
-import { util, shapes } from 'jointjs'
+import { util } from 'jointjs'
 import { Component, Service, BackingService, StorageBackingService,
     Endpoint, ExternalEndpoint, Link,
     Infrastructure, DeploymentMapping,

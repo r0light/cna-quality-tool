@@ -19,7 +19,7 @@ import { g, dia, routers, shapes, highlighters } from "jointjs";
 import { ModelingValidator } from '../modelingValidator';
 import ConnectionSelectionTools from "./tools/connectionSelectionTools";
 import EntityTypes from "../config/entityTypes";
-import { DeploymentMapping, Link } from "../config/entityShapes";
+import { DeploymentMapping, Link, entityShapes } from "../config/entityShapes";
 import { DialogSize } from '../config/actionDialogConfig';
 import ModalConfirmationDialog, { ConfirmationModalProps, getDefaultConfirmationDialogData } from './components/ModalConfirmationDialog.vue';
 
@@ -60,7 +60,7 @@ onMounted(() => {
         async: true,
         sorting: dia.Paper.sorting.APPROX,
 
-        cellViewNamespace: shapes,
+        cellViewNamespace: entityShapes,
         routerNamespace: routers,
 
         // defaults:

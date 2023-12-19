@@ -18,10 +18,11 @@
 <script lang="ts" setup>
 import $ from 'jquery';
 import { ref, onMounted } from 'vue'
-import { dia, shapes } from "jointjs";
+import { dia } from "jointjs";
 import SidebarEntityShapes from '../config/entitySidebarShape.config';
 import ConnectionSelectionTools from "./tools/connectionSelectionTools";
 import { addSelectionToolToEntity } from "./tools/entitySelectionTools";
+import { entityShapes } from '../config/entityShapes';
 
 const props = defineProps<{
     paper: dia.Paper,
@@ -72,7 +73,7 @@ onMounted(() => {
             color: adaptedBackgroundColor
         },
         interactive: false,
-        cellViewNamespace: shapes
+        cellViewNamespace: entityShapes
     });
 
     entityShapePaper.render();

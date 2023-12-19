@@ -28,7 +28,7 @@
 
 <script lang="ts" setup>
 import { ref, onMounted, nextTick } from 'vue'
-import { dia, shapes } from "jointjs";
+import { dia } from "jointjs";
 import SystemEntityManager from './systemEntityManager';
 import Toolbar from './views/toolbar/Toolbar.vue';
 import ModelingArea from './views/ModelingArea.vue';
@@ -37,6 +37,7 @@ import EntitySidebar from './views/EntitySidebar.vue';
 import { addSelectionToolToEntity } from './views/tools/entitySelectionTools';
 import { ImportData, ModelingData } from '@/App.vue';
 import EntityTypes from './config/entityTypes';
+import { entityShapes } from './config/entityShapes';
 
 const props = defineProps<{
     systemName: string,
@@ -65,7 +66,7 @@ const currentSystemGraph = ref<dia.Graph>((() => {
     if (props.modelingData.entityManager) {
         return props.modelingData.entityManager.getGraph() as dia.Graph;
     } else {
-        const newGraph = new dia.Graph({}, { cellNamespace: shapes });
+        const newGraph = new dia.Graph({}, { cellNamespace: entityShapes });
         return newGraph;
     }
 })());
