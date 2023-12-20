@@ -98,16 +98,20 @@ onMounted(() => {
      * Additionally, it defines when the sidebar should be generally displayed.
     */
 
+    let loaded;
+
     if (props.modelingData.toImport.fileName) {
         if (props.modelingData.toImport.fileName.endsWith("json")) {
-            loadFromJson(props.modelingData.toImport.fileContent, props.modelingData.toImport.fileName);
+            loaded = loadFromJson(props.modelingData.toImport.fileContent, props.modelingData.toImport.fileName);
         } else if (props.modelingData.toImport.fileName.endsWith("yaml")
             || props.modelingData.toImport.fileName.endsWith("yml")
             || props.modelingData.toImport.fileName.endsWith("tosca")) {
-            loadFromTosca(props.modelingData.toImport.fileContent, props.modelingData.toImport.fileName);
+            loaded = loadFromTosca(props.modelingData.toImport.fileContent, props.modelingData.toImport.fileName);
         }
 
-        emit("store:modelingData", systemEntityManager, { fileName: '', fileContent: '' }, true);
+        loaded.then(() => {
+            emit("store:modelingData", systemEntityManager, { fileName: '', fileContent: '' }, true);
+        })
     }
 
     /*
@@ -128,16 +132,12 @@ onMounted(() => {
 
 })
 
-function loadFromJson(jsonString: string, fileName: string) {
+function loadFromJson(jsonString: string, fileName: string): Promise<void> {
     let createdCells = systemEntityManager.loadFromJson(jsonString, fileName);
 
     setCurrentSystemName(systemEntityManager.getSystemEntity().getSystemName);
 
-    for (const cell of createdCells) {
-        addSelectionToolToEntity(mainPaper.value.requireView(cell).model, mainPaper.value);
-    }
-    mainPaper.value.updateViews(); // use this to make sure the following calls work, because of the async property of the paper
-    mainPaper.value.hideTools();
+    return ensureCorrectRendering(createdCells.filter(cell => cell.isElement()) as dia.Element[]);
 }
 
 function saveToJson() {
@@ -150,22 +150,61 @@ function saveToJson() {
     downloadElement.click();
 }
 
-function loadFromTosca(yamlString: string, fileName: string) {
+function loadFromTosca(yamlString: string, fileName: string): Promise<void> {
     let createdCells = systemEntityManager.loadFromCustomTosca(yamlString, fileName);
 
     setCurrentSystemName(systemEntityManager.getSystemEntity().getSystemName);
 
-    // as a Workaround, reload the graph to make sure link highlighting works
-    let asJSON = currentSystemGraph.value.toJSON();
-    currentSystemGraph.value.clear();
-    currentSystemGraph.value.fromJSON(asJSON);
+    return ensureCorrectRendering(createdCells.filter(cell => cell.isElement()) as dia.Element[]);
 
-    for (const cell of createdCells) {
-        addSelectionToolToEntity(mainPaper.value.requireView(cell).model, mainPaper.value);
-    }
+}
 
-    mainPaper.value.updateViews(); 
-    mainPaper.value.hideTools();
+function ensureCorrectRendering(createdElements: dia.Element[]): Promise<void> {
+    return new Promise<void>((outerResolve, outerReject) => {
+
+        let cellsRendered = [];
+
+        for (const element of createdElements) {
+
+            let cellRendered = Promise.resolve();
+
+            // resize element to a different size and that to the wanted size again, to rerender the bounding box and ensure that it has the right size
+
+            let wantedWidth = element.prop("size/width");
+            let wantedHeight = element.prop("size/height");
+            cellsRendered.push(
+                cellRendered.then(() => {
+                    return new Promise<void>((resolve, reject) => {
+                        //element.resize(element.prop("defaults/size").width, element.prop("defaults/size").height);
+                        element.resize(wantedWidth + 10, wantedHeight + 10);
+                        setTimeout(() => {
+                            resolve();
+                        }, 100)
+                    })
+                }).then(() => {
+                    return new Promise<void>((resolve, reject) => {
+                        element.resize(wantedWidth, wantedHeight);
+                        setTimeout(() => {
+                            resolve();
+                        }, 100)
+                    });
+                }).then(() => {
+                    return new Promise<void>((resolve, reject) => {
+                        addSelectionToolToEntity(mainPaper.value.requireView(element).model, mainPaper.value);
+                        setTimeout(() => {
+                            resolve();
+                        }, 100)
+                    });
+                })
+            );
+        }
+
+        Promise.all(cellsRendered).then(() => {
+            //mainPaper.value.updateViews();
+            mainPaper.value.hideTools();
+            outerResolve();
+        })
+    });
 }
 
 function saveToTosca() {

@@ -228,6 +228,21 @@ function importModelFromFile() {
   fr.readAsText(selectedFile.value.files[0]);
 }
 
+function waitForLoadedToResolve(modelingDataId: number, resolve) {
+
+  for (let i = 0; i < modeledSystemsData.value.length; i++) {
+    if (modeledSystemsData.value[i].id === modelingDataId
+      && modeledSystemsData.value[i].importDone) {
+      resolve();
+      return;
+    }
+  }
+
+  setTimeout(() => {
+    waitForLoadedToResolve(modelingDataId, resolve);
+  }, 2000); //TODO with 2 seconds all seems to work reasonably well, but it is not really a satisfying solution
+}
+
 onMounted(() => {
 
   let importDone: Promise<void> = Promise.resolve();
@@ -248,8 +263,8 @@ onMounted(() => {
             name: modelingData.name
           })
           currentPage.value = modelingData.id;
-          // import each model with a little time buffer in between to avoid visualization issues, TODO: still needed?
-          setTimeout(resolve, 100);
+
+          waitForLoadedToResolve(modelingData.id, resolve);
         });
       });
     }
@@ -385,7 +400,6 @@ function deleteModelingPage(id: number) {
 }
 
 function showImprint() {
-  console.log("imprint")
   selectPage(0);
 }
 
