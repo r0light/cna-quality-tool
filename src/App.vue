@@ -106,7 +106,7 @@
           @update:systemName="event => updatePageName(event, pageContent.id)"></ModelingApp>
       </div>
       <div v-show="currentPage === 0" class="pageWrapper">
-        <Legal></Legal>>
+        <Legal></Legal>
       </div>
     </div>
   </main>
@@ -145,6 +145,8 @@ export type ModelingData = {
   entityManager: SystemEntityManager,
   importDone: boolean
 }
+
+const CLOUNAQ = "Clounaq";
 
 const pages = ref<Page[]>([
   {
@@ -301,13 +303,19 @@ function selectPage(id: number) {
     if (page.active) {
       switch (page.pageType) {
         case "home":
-          document.title = "Home";
+          document.title = CLOUNAQ + ": Home";
+          break;
+        case "qualityModel":
+          document.title = CLOUNAQ + ": Quality Model";
+          break;
+        case "evaluation":
+          document.title = CLOUNAQ + ": Evaluation";
           break;
         case "modeling":
-          document.title = `CNA Modeling ${page.name}`;
+          document.title = CLOUNAQ + `: Modeling ${page.name}`;
           break;
         default:
-          document.title = "Home";
+          document.title = CLOUNAQ + ": Home";
       }
     }
   }
@@ -341,7 +349,7 @@ function updatePageName(newName: string, id: number) {
   for (const page of pages.value) {
     if (page.id === id) {
       page.name = newName;
-      document.title += `CNA Modeling: ${newName}`;
+      document.title = CLOUNAQ + `: Modeling ${newName}`;
     }
   }
 

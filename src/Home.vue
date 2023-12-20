@@ -17,7 +17,7 @@
                 <li>Evaluate applications based on their modeled architecture and the quality model</li>
                </ul>
                <p> 
-               The tool is <span class="font-weight-bold">still in development</span>, but you can already give it a try. Please use a desktop pc or similar with a suitable screen size. The application, especially the modeling functionality, is not optimized for mobile devices.
+               The tool is <span class="font-weight-bold">still in development</span> (source code at: <a href="https://github.com/r0light/cna-quality-tool">https://github.com/r0light/cna-quality-tool</a>), but you can already give it a try. Please use a desktop pc or similar with a suitable screen size. The application, especially the modeling functionality, is not optimized for mobile devices.
             </p>
         </div>
     </div>
