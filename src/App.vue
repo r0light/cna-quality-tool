@@ -106,7 +106,7 @@
           @update:systemName="event => updatePageName(event, pageContent.id)"></ModelingApp>
       </div>
       <div v-show="currentPage === 0" class="pageWrapper">
-        <h4>Imprint</h4>
+        <Legal></Legal>>
       </div>
     </div>
   </main>
@@ -119,6 +119,7 @@ import $ from 'jquery';
 import { ref, onMounted, computed, ComputedRef } from 'vue';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import Home from './Home.vue';
+import Legal from './Legal.vue';
 import ModelingApp from './modeling/ModelingApp.vue';
 import QualityModelApp from './qualitymodel/QualityModelApp.vue';
 import EvaluationApp from './evaluation/EvaluationApp.vue';
