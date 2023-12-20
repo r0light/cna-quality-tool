@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "ghpages": "vite build --base=/cna-quality-tool/",
+    "ghpages": "vite build --base=/",
     "preview": "vite preview"
   },
   "dependencies": {
