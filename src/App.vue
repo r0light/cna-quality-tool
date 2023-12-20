@@ -23,6 +23,16 @@
           </li>
         </ul>
       </div>
+      <div class="navbar-collapse collapse">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item p-2">
+            <a class="text-white" @click="showImprint">
+              <i class="fa-solid fa-scale-balanced"></i>
+              Imprint
+            </a>
+          </li>
+        </ul>
+      </div>
     </nav>
   </header>
 
@@ -82,7 +92,7 @@
       </div>
     </div>
     <div class="pagesContainer">
-      <div v-for="pageContent of pages" class="pageWrapper">
+      <div v-show="currentPage > 0" v-for="pageContent of pages" class="pageWrapper">
         <Home v-if="pageContent.pageType === 'home'" v-show="currentPage === pageContent.id"></Home>
         <QualityModelApp v-if="pageContent.pageType === 'qualityModel'" v-show="currentPage === pageContent.id"
           :inView="currentPage === pageContent.id"></QualityModelApp>
@@ -92,8 +102,11 @@
           v-show="pageContent.pageType === 'modeling' && currentPage === pageContent.id" :systemName="pageContent.name"
           :pageId="pageContent.id"
           :modelingData="(modeledSystemsData.find(systemData => systemData.id === pageContent.id) as ModelingData)"
-          @store:modelingData="(systemEntityManager, toImport) => storeModelingData(pageContent.id, toImport, systemEntityManager, pageContent.name,)"
+          @store:modelingData="(systemEntityManager, toImport, importDone) => storeModelingData(pageContent.id, toImport, systemEntityManager, pageContent.name, importDone)"
           @update:systemName="event => updatePageName(event, pageContent.id)"></ModelingApp>
+      </div>
+      <div v-show="currentPage === 0" class="pageWrapper">
+        <h4>Imprint</h4>
       </div>
     </div>
   </main>
@@ -128,26 +141,27 @@ export type ModelingData = {
   id: number,
   name: string,
   toImport: ImportData,
-  entityManager: SystemEntityManager
+  entityManager: SystemEntityManager,
+  importDone: boolean
 }
 
 const pages = ref<Page[]>([
   {
-    id: 0,
+    id: 1,
     active: false,
     pageType: "home",
     iconClass: "fa fa-fw fa-home",
     name: "Home"
   },
   {
-    id: 1,
+    id: 2,
     active: false,
     pageType: "qualityModel",
     iconClass: "fa-solid fa-sitemap",
     name: "Quality Model"
   },
   {
-    id: 2,
+    id: 3,
     active: false,
     pageType: "evaluation",
     iconClass: "fa-solid fa-gauge-high",
@@ -163,7 +177,7 @@ const sharedSystemsData: ComputedRef<ModelingData[]> = computed(() => {
   return modeledSystemsData.value.reduce((initial, b) => initial + b.name, "");
 });*/
 
-function storeModelingData(id: number, toImport: ImportData, systemEntityManager: SystemEntityManager, pageName: string,) {
+function storeModelingData(id: number, toImport: ImportData, systemEntityManager: SystemEntityManager, pageName: string, importDone: boolean) {
 
   for (let i = 0; i < modeledSystemsData.value.length; i++) {
     if (modeledSystemsData.value[i].id === id) {
@@ -171,13 +185,14 @@ function storeModelingData(id: number, toImport: ImportData, systemEntityManager
         id: id,
         name: pageName,
         toImport: toImport,
-        entityManager: systemEntityManager
+        entityManager: systemEntityManager,
+        importDone: importDone
       }
     }
   }
 }
 
-const currentPage = ref(0);
+const currentPage = ref(1);
 
 const overlayState = ref<"none" | "initial" | "startNew" | "startImport">("none");
 const newSystemName = ref<string>("");
@@ -265,7 +280,8 @@ onMounted(() => {
           fileName: `${modelingData.name}.json`,
           fileContent: modelingData.entityManager.convertToJson()
         },
-        entityManager: null
+        entityManager: null,
+        importDone: false
       }
     })
 
@@ -305,7 +321,8 @@ function addNewModelingPage(name: string, toImport: ImportData) {
     id: newId,
     name: name,
     toImport: toImport,
-    entityManager: null
+    entityManager: null,
+    importDone: true
   });
 
   pages.value.push({
@@ -356,6 +373,11 @@ function deleteModelingPage(id: number) {
   }
 
   selectPage(highestIdBefore);
+}
+
+function showImprint() {
+  console.log("imprint")
+  selectPage(0);
 }
 
 </script>

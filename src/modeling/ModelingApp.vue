@@ -48,7 +48,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
     (e: "update:systemName", newName: string): void;
-    (e: "store:modelingData", systemEntitManager: SystemEntityManager, toImport: ImportData): void;
+    (e: "store:modelingData", systemEntitManager: SystemEntityManager, toImport: ImportData, importDone: boolean): void;
 }>()
 
 const currentSystemName = ref(props.systemName);
@@ -77,7 +77,7 @@ const systemEntityManager: SystemEntityManager = (() => {
         return props.modelingData.entityManager;
     } else {
         const newEntityManager = new SystemEntityManager(currentSystemGraph.value as dia.Graph);
-        emit("store:modelingData", newEntityManager, props.modelingData.toImport);
+        emit("store:modelingData", newEntityManager, props.modelingData.toImport, true);
         return new SystemEntityManager(currentSystemGraph.value as dia.Graph);
     }
 })();
@@ -107,7 +107,7 @@ onMounted(() => {
             loadFromTosca(props.modelingData.toImport.fileContent, props.modelingData.toImport.fileName);
         }
 
-        emit("store:modelingData", systemEntityManager, { fileName: '', fileContent: '' });
+        emit("store:modelingData", systemEntityManager, { fileName: '', fileContent: '' }, true);
     }
 
     /*
@@ -134,9 +134,8 @@ function loadFromJson(jsonString: string, fileName: string) {
     setCurrentSystemName(systemEntityManager.getSystemEntity().getSystemName);
 
     for (const cell of createdCells) {
-        addSelectionToolToEntity(cell, mainPaper.value);
+        addSelectionToolToEntity(mainPaper.value.requireView(cell).model, mainPaper.value);
     }
-
     mainPaper.value.updateViews(); // use this to make sure the following calls work, because of the async property of the paper
     mainPaper.value.hideTools();
 }
@@ -162,10 +161,10 @@ function loadFromTosca(yamlString: string, fileName: string) {
     currentSystemGraph.value.fromJSON(asJSON);
 
     for (const cell of createdCells) {
-        addSelectionToolToEntity(cell, mainPaper.value);
+        addSelectionToolToEntity(mainPaper.value.requireView(cell).model, mainPaper.value);
     }
 
-    mainPaper.value.updateViews(); // use this to make sure the following calls work, because of the async property of the paper
+    mainPaper.value.updateViews(); 
     mainPaper.value.hideTools();
 }
 

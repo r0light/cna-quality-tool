@@ -128,7 +128,7 @@ onMounted(() => {
             cellView.showTools();
             props.graph.getConnectedLinks(cellView.model).forEach(link => {
                 if (link.attr("root/visibility") === "visible") {
-                    highlighters.stroke.add(link.findView(props.paper), { selector: 'line' }, 'my-element-highlight', {
+                    highlighters.stroke.add(props.paper.requireView(link), { selector: 'line' }, 'my-element-highlight', {
                         layer: 'back',
                         attrs: {
                             'stroke': '#feb663',

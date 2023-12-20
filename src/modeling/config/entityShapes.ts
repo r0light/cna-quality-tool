@@ -758,7 +758,8 @@ const Link = shapes.standard.Link.define("qualityModel.Link", {
     },
     attrs: {
         root: {
-            title: "Link"
+            title: "Link",
+            visibility: "visible"
         },
         line: {
             stroke: "black",
@@ -805,7 +806,8 @@ const DeploymentMapping = shapes.standard.Link.define("qualityModel.DeploymentMa
     },
     attrs: {
         root: {
-            title: "Deployment Mapping"
+            title: "Deployment Mapping",
+            visibility: "visible"
         },
         line: {
             stroke: "black",

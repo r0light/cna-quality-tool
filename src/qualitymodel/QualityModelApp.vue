@@ -83,7 +83,7 @@ const qmPaper = ref<HTMLElement>(null)
 const namespace = quamocoShapes;
 const graph = new dia.Graph({}, { cellNamespace: namespace });
 
-const paperRef = ref(null);
+const paperRef = ref<dia.Paper>(null);
 
 const qualityModel = getQualityModel();
 
@@ -150,7 +150,7 @@ onMounted(() => {
                 link.toBack();
             });
             graph.getConnectedLinks(cellView.model).forEach(link => {
-                highlighters.stroke.add(link.findView(paperRef.value), { selector: 'line' }, 'my-element-highlight', {
+                highlighters.stroke.add(link.findView(paperRef.value as dia.Paper), { selector: 'line' }, 'my-element-highlight', {
                     layer: 'back',
                     attrs: {
                         'stroke': '#feb663',
@@ -182,10 +182,19 @@ watch(watchInView, (newValue, oldValue) => {
 onUpdated(() => {
     // make sure arrangeQualityModelElements is only called when the page is freshly viewed, otherwise this function here will be called everytime something in the component data changes.
     if (doRearrange) {
-        arrangeQualityModelElements();
-        doRearrange = false;
+        updateViewIfPossible();
     }
 })
+
+function updateViewIfPossible() {
+    // to avoid errors, wait for the view to be visible and only then rearrange the factors
+    if ($('#qmPaper').is(':visible')) {
+        arrangeQualityModelElements();
+        doRearrange = false;
+    } else {
+        setTimeout(updateViewIfPossible, 50);
+    }
+}
 
 
 function drawQualityModelElements(highLevelFilter: string[], productFactorFilter: string) {
@@ -355,7 +364,7 @@ function arrangeQualityModelElements() {
 
 function updateLinkRoutes() {
     for (const impactElement of impactElements) {
-        (impactElement.findView(paperRef.value) as dia.LinkView).requestConnectionUpdate();
+        (impactElement.findView(paperRef.value as dia.Paper) as dia.LinkView).requestConnectionUpdate();
         impactElement.toBack();
     }
 }
