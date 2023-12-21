@@ -65,6 +65,7 @@ export type CnaQualityModelEntitiesSoftwareComponentService = {
     type: "cna.qualityModel.entities.SoftwareComponent.Service",
                        metadata?: TOSCA_Metadata,
                        properties?: {
+    replicas: number,
     component_version?: string,
     admin_credential?: ToscaDatatypesCredential,
 },

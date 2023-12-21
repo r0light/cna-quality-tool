@@ -151,6 +151,14 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
     "cna.qualityModel.entities.SoftwareComponent.Service": {
       "derived_from": "tosca.nodes.SoftwareComponent",
       "description": "Node Type to model Service entities",
+      "properties": {
+        "replicas": {
+          "type": "integer",
+          "description": "The minimum number of replicated instances for this service when it is running",
+          "required": true,
+          "default": 1
+        }
+      },
       "requirements": [
         {
           "provides_endpoint": {
