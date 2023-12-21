@@ -149,6 +149,15 @@ node_types:
   cna.qualityModel.entities.Compute.Infrastructure:
     derived_from: tosca.nodes.Compute
     description: Node Type to model Infrastructure entities
+    properties:
+      availability_zone:
+        type: string
+        required: true
+        description: The name of the availability zone in which this infrastructure is provided.
+      region:
+        type: string
+        required: true
+        description: The name of the region in which this infrastructure is provided.
     requirements:
       # Allow the deployment on another Infrastructure entity
       - host:

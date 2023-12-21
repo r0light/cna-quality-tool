@@ -60,7 +60,13 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
         "usage_relation": {
           "type": "string",
           "required": true,
-          "description": "Describes how a component uses attached data, that means whether it just uses (reads) it for its functionality or if it also updates and persists (writes) it; possible values are uses and persists"
+          "description": "Describes how a component uses attached data, that means whether it just uses (reads) it for its functionality or if it also updates and persists (writes) it; possible values are usage and persistence"
+        },
+        "sharding_level": {
+          "type": "integer",
+          "required": true,
+          "default": 0,
+          "description": "Only applicable if data is persisted by a component; If a component persists data, the sharding level describes the number of shards used; 0 acts as a placeholder if data is not persisted; 1 is the default meaning that no sharding is used; >1 is the number of shards"
         }
       }
     }
@@ -306,6 +312,18 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
     "cna.qualityModel.entities.Compute.Infrastructure": {
       "derived_from": "tosca.nodes.Compute",
       "description": "Node Type to model Infrastructure entities",
+      "properties": {
+        "availability_zone": {
+          "type": "string",
+          "required": true,
+          "description": "The name of the availability zone in which this infrastructure is provided."
+        },
+        "region": {
+          "type": "string",
+          "required": true,
+          "description": "The name of the region in which this infrastructure is provided."
+        }
+      },
       "requirements": [
         {
           "host": {

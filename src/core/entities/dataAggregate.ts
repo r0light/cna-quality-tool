@@ -11,6 +11,7 @@ import { EntityProperty, loadAllProperties } from '../common/entityProperty';
 const DATA_AGGREGATE_TOSCA_KEY = "cna.qualityModel.entities.DataAggregate";
 const DATA_AGGREGATE_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types[DATA_AGGREGATE_TOSCA_KEY];
 
+
 function getDataAggregateProperties(): EntityProperty[] {
     let parsed = loadAllProperties(DATA_AGGREGATE_TOSCA_EQUIVALENT);
 

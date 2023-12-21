@@ -29,6 +29,7 @@ export type CnaQualityModelRelationshipsAttachesToData = {
     properties?: {
     location?: string,
     usage_relation: string,
+    sharding_level: number,
     device?: string,
 },
 attributes?: {
@@ -152,7 +153,11 @@ artifacts?: {
 export type CnaQualityModelEntitiesComputeInfrastructure = {
     type: "cna.qualityModel.entities.Compute.Infrastructure",
                        metadata?: TOSCA_Metadata,
-                       attributes?: {
+                       properties?: {
+    availability_zone: string,
+    region: string,
+},
+attributes?: {
     private_address?: string,
     public_address?: string,
     networks?: {[mapKey: string]: ToscaDatatypesNetworkNetworkInfo},
