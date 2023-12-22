@@ -192,7 +192,7 @@ function parseProperties(properties: EntityProperty[]): PropertyConfig[] {
                     ...preparedConfig, ...{
                         contentType: "checkbox",
                         attributes: {
-                            defaultValue: false,
+                            defaultValue: property.getDefaultValue,
                         }
                     }
                 }
@@ -204,7 +204,7 @@ function parseProperties(properties: EntityProperty[]): PropertyConfig[] {
                         attributes: {
                             min: Number.MIN_SAFE_INTEGER,
                             max: Number.MAX_SAFE_INTEGER,
-                            defaultValue: 0
+                            defaultValue: property.getDefaultValue
                         }
                     }
                 }
@@ -216,7 +216,7 @@ function parseProperties(properties: EntityProperty[]): PropertyConfig[] {
                         contentType: "text",
                         attributes: {
                             placeholder: property.getExample,
-                            defaultValue: "",
+                            defaultValue: property.getDefaultValue,
                             svgRepresentation: "",
                             inputLabelIcon: "",
                             provideEditButton: false,
