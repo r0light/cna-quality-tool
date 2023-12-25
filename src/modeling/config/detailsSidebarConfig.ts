@@ -1,7 +1,8 @@
 import EntityTypes from "./entityTypes";
 import { getComponentProperties, getBackingServiceProperties, getStorageBackingServiceProperties, getEndpointProperties, getExternalEndpointProperties, getInfrastructureProperties, getRequestTraceProperties, getBackingDataProperties, getDataAggregateProperties, getDeploymentMappingProperties, getLinkProperties, getServiceProperties } from "../../core/entities";
 import { DialogConfig, DialogSize, FormContentConfig, UIContentType } from "./actionDialogConfig";
-import { EntityProperty, NumberEntityProperty, TextEntityProperty } from "../../core/common/entityProperty";
+import { EntityProperty, NumberEntityProperty, SelectEntityProperty, TextEntityProperty } from "../../core/common/entityProperty";
+import { getDataAggregateRelationshipProperties } from "@/core/entities/RelationToDataAggregate";
 
 export type DatalistItem = {
     value: string,
@@ -44,7 +45,7 @@ export type TextPropertyConfig = BasicPropertyConfig & {
         svgRepresentation: string,
         inputLabelIcon: string,
         provideEditButton: boolean,
-        suggestedValues: {value: string, text: string}[]
+        suggestedValues: { value: string, text: string }[]
     }
 }
 
@@ -157,7 +158,7 @@ export type ListElementField = {
 
 export type PropertyConfig = TextPropertyConfig | TextAreaPropertyConfig | NumberPropertyConfig | NumberRangePropertyConfig | CheckboxPropertyConfig | CheckboxWithoutLabelPropertyConfig | DropdownPropertyConfig | TableDialogPropertyConfig | TogglePropertyConfig | TablePropertyConfig | DynamicListPropertyConfig;
 
-function parseProperties(properties: EntityProperty[]): PropertyConfig[] {
+function parseProperties(properties: EntityProperty[], path: "entity" | "relationship"): PropertyConfig[] {
     return properties.filter(property => {
         // ignore the following property types because they are handled customly, TODO is there a better way?
         return property.getDataType !== "map" && property.getDataType !== "list"
@@ -178,7 +179,7 @@ function parseProperties(properties: EntityProperty[]): PropertyConfig[] {
             provideEnterButton: false,
             jointJsConfig: { //TODO add values 
                 propertyType: "property",
-                modelPath: "entity/properties/" + property.getKey,
+                modelPath: `${path}/properties/${property.getKey}`,
                 defaultPropPath: "",
                 minPath: "", // TODO set dynamically?
                 min: ""
@@ -209,6 +210,27 @@ function parseProperties(properties: EntityProperty[]): PropertyConfig[] {
                     }
                 }
                 return numberPropertyConfig as PropertyConfig;
+            case "select":
+                var selectPropertyConfig: DropdownPropertyConfig = {
+                    ...preparedConfig, ...{
+                        contentType: "select",
+                        attributes: {
+                            svgRepresentation: "",
+                            placeholder: property.getExample,
+                            defaultValue: property.getDefaultValue
+                        },
+                        dropdownOptions: (property as SelectEntityProperty).getOptions.map(option => {
+                            return {
+                                optionValue: option.value,
+                                optionText: option.text,
+                                optionTitle: "",
+                                representationClass: "",
+                                disabled: false
+                            }
+                        })
+                    }
+                }
+                return selectPropertyConfig as PropertyConfig;
             case "text":
             default:
                 var textPropertyConfig: TextPropertyConfig = {
@@ -579,23 +601,23 @@ const EntityDetailsConfig: {
 } = {
     Component: {
         type: EntityTypes.COMPONENT,
-        specificProperties: parseProperties(getComponentProperties())
+        specificProperties: parseProperties(getComponentProperties(), "entity")
     },
     Service: {
         type: EntityTypes.SERVICE,
-        specificProperties: parseProperties(getComponentProperties()).concat(parseProperties(getServiceProperties()))
+        specificProperties: parseProperties(getComponentProperties(), "entity").concat(parseProperties(getServiceProperties(), "entity"))
     },
     BackingService: {
         type: EntityTypes.BACKING_SERVICE,
-        specificProperties: parseProperties(getComponentProperties()).concat(parseProperties(getBackingServiceProperties()))
+        specificProperties: parseProperties(getComponentProperties(), "entity").concat(parseProperties(getBackingServiceProperties(), "entity"))
     },
     StorageBackingService: {
         type: EntityTypes.STORAGE_BACKING_SERVICE,
-        specificProperties: parseProperties(getComponentProperties()).concat(parseProperties(getStorageBackingServiceProperties()))
+        specificProperties: parseProperties(getComponentProperties(), "entity").concat(parseProperties(getStorageBackingServiceProperties(), "entity"))
     },
     Endpoint: {
         type: EntityTypes.ENDPOINT,
-        specificProperties: customizePropertyConfigs(parseProperties(getEndpointProperties()), [
+        specificProperties: customizePropertyConfigs(parseProperties(getEndpointProperties(), "entity"), [
             {
                 providedFeature: "embedded",
                 contentType: PropertyContentType.INPUT_TEXTBOX,
@@ -630,7 +652,7 @@ const EntityDetailsConfig: {
     },
     ExternalEndpoint: {
         type: EntityTypes.EXTERNAL_ENDPOINT,
-        specificProperties: customizePropertyConfigs(parseProperties(getEndpointProperties().concat(getExternalEndpointProperties())), [
+        specificProperties: customizePropertyConfigs(parseProperties(getEndpointProperties(), "entity").concat(parseProperties(getExternalEndpointProperties(), "entity")), [
             {
                 providedFeature: "embedded",
                 contentType: PropertyContentType.INPUT_TEXTBOX,
@@ -665,19 +687,19 @@ const EntityDetailsConfig: {
     },
     Link: {
         type: EntityTypes.LINK,
-        specificProperties: parseProperties(getLinkProperties())
+        specificProperties: parseProperties(getLinkProperties(), "entity")
     },
     Infrastructure: {
         type: EntityTypes.INFRASTRUCTURE,
-        specificProperties: parseProperties(getInfrastructureProperties())
+        specificProperties: parseProperties(getInfrastructureProperties(), "entity")
     },
     DeploymentMapping: {
         type: EntityTypes.DEPLOYMENT_MAPPING,
-        specificProperties: parseProperties(getDeploymentMappingProperties())
+        specificProperties: parseProperties(getDeploymentMappingProperties(), "entity")
     },
     DataAggregate: {
         type: EntityTypes.DATA_AGGREGATE,
-        specificProperties: customizePropertyConfigs(parseProperties(getDataAggregateProperties()), [{
+        specificProperties: customizePropertyConfigs(parseProperties(getDataAggregateProperties(), "entity").concat(parseProperties(getDataAggregateRelationshipProperties(), "relationship")), [{
             providedFeature: "dataAggregate-chooseEditMode",
             contentType: PropertyContentType.TOGGLE,
             label: "Edit Mode:",
@@ -733,7 +755,7 @@ const EntityDetailsConfig: {
                 minPath: "",
                 min: ""
             }
-        },
+        },/*
         {
             providedFeature: "dataAggregate-parentRelation",
             contentType: PropertyContentType.DROPDOWN,
@@ -776,7 +798,7 @@ const EntityDetailsConfig: {
                 minPath: "",
                 min: ""
             }
-        },
+        },*/
         {
             providedFeature: "dataAggregate-assignedFamily",
             contentType: PropertyContentType.INPUT_TEXTBOX,
@@ -905,7 +927,7 @@ const EntityDetailsConfig: {
     },
     BackingData: {
         type: EntityTypes.BACKING_DATA,
-        specificProperties: customizePropertyConfigs(parseProperties(getBackingDataProperties()), [
+        specificProperties: customizePropertyConfigs(parseProperties(getBackingDataProperties(), "entity"), [
             {
                 providedFeature: "backingData-chooseEditMode",
                 contentType: PropertyContentType.TOGGLE,
@@ -1237,7 +1259,7 @@ const EntityDetailsConfig: {
     },
     RequestTrace: {
         type: EntityTypes.REQUEST_TRACE,
-        specificProperties: customizePropertyConfigs(parseProperties(getRequestTraceProperties()), [
+        specificProperties: customizePropertyConfigs(parseProperties(getRequestTraceProperties(), "entity"), [
             {
                 providedFeature: "referred_endpoint",
                 contentType: PropertyContentType.DROPDOWN,

@@ -88,6 +88,8 @@ type PropertyGroupSection = {
     options: EditPropertySection[]
 }
 
+const relationshipPath = new RegExp("^relationship\/.*");
+
 const selectedEntityId = ref<string>("")
 const selectedEntityPropertyGroups = ref<PropertyGroupSection[]>([]);
 
@@ -177,7 +179,7 @@ function preparePropertyGroupSections(exclude: string[]): PropertyGroupSection[]
 }
 
 onMounted(() => {
-    
+
     props.graph.on("reloaded", () => {
         refreshHighlightOptions();
     })
@@ -245,9 +247,20 @@ onUpdated(() => {
 
     switch (props.selectedEntity.model.prop("entity/type")) {
         case EntityTypes.DATA_AGGREGATE:
-            let parentRelationOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "dataAggregate-parentRelation");
-            parentRelationOption.show = computed(() => findInSectionsByFeature(selectedEntityPropertyGroups.value, "embedded").value !== "" && findInSectionsByFeature(selectedEntityPropertyGroups.value, "dataAggregate-chooseEditMode").checked);
-            parentRelationOption.label = getParentRelationLabel(props.selectedEntity.model.prop("entity/embedded"));
+
+            for (let propertyOption of currentOptions) {
+                // if property is a relationship property it only applies to embedded data aggregates
+                if (propertyOption.jointJsConfig.modelPath && relationshipPath.test(propertyOption.jointJsConfig.modelPath)) {
+
+                    propertyOption.show = computed(() => findInSectionsByFeature(selectedEntityPropertyGroups.value, "embedded").value !== "" && findInSectionsByFeature(selectedEntityPropertyGroups.value, "dataAggregate-chooseEditMode").checked);
+
+                    // special case for parent relation, because we want a custom label for the field
+                    if (propertyOption.providedFeature === "usage_relation") {
+                        propertyOption.label = getParentRelationLabel(props.selectedEntity.model.prop("entity/embedded"));
+                    }
+                }
+            }
+
             let chooseEditModeOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "dataAggregate-chooseEditMode");
             chooseEditModeOption.show = computed(() => findInSectionsByFeature(selectedEntityPropertyGroups.value, "embedded").value !== "");
 
@@ -488,7 +501,7 @@ onUpdated(() => {
         findInSectionsByFeature(selectedEntityPropertyGroups.value, "embedded").value = parentId;
         props.selectedEntity.model.prop("entity/embedded", parentId);
         if (props.selectedEntity.model.prop("entity/type") === EntityTypes.DATA_AGGREGATE) {
-            let parentRelationOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "dataAggregate-parentRelation");
+            let parentRelationOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "usage_relation");
             parentRelationOption.label = getParentRelationLabel(props.selectedEntity.model.prop("entity/embedded"));
         }
 

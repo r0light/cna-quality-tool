@@ -8,7 +8,7 @@ import { TOSCA_Property } from "../../totypa/tosca-types/core-types";
 import { TOSCA_Node } from "../../totypa/tosca-types/entity-types";
 import { parse } from "path";
 
-type propertyDatatype = "text" | "textarea" | "number" | "boolean" | "bounded" | "list" | "map" //TODO | "timestamp" | "version"
+type propertyDatatype = "text" | "select" | "textarea" | "number" | "boolean" | "bounded" | "list" | "map" //TODO | "timestamp" | "version"
 
 /**
  * Class representing an Entity property
@@ -129,6 +129,25 @@ class TextEntityProperty extends EntityProperty {
 
     set setOptions(options: listOptions[]) {
         this.#proposedOptions = options;
+    }
+
+}
+
+class SelectEntityProperty extends EntityProperty {
+
+    #options: listOptions[]
+
+    constructor(key: string, name: string, description: string, example: string, required: boolean, options: listOptions[], defaultValue: string, value: string) {
+        super(key, name, description, example, required, "select", defaultValue,  value);
+        this.#options = options;
+    }
+
+    get getOptions() {
+        return this.#options;
+    }
+
+    set setOptions(options: listOptions[]) {
+        this.#options = options;
     }
 
 }
@@ -354,4 +373,4 @@ function parseProperties(properties: { [propertyKey: string]: TOSCA_Property }):
 }
 
 
-export { EntityProperty, TextEntityProperty, TextAreaEntityProperty, NumberEntityProperty, BooleanEntityProperty, BoundsEntityProperty as BoundedEntityProperty, ListEntityProperty, MapEntityProperty, loadAllProperties, parseProperties };
+export { EntityProperty, TextEntityProperty, SelectEntityProperty, TextAreaEntityProperty, NumberEntityProperty, BooleanEntityProperty, BoundsEntityProperty as BoundedEntityProperty, ListEntityProperty, MapEntityProperty, loadAllProperties, parseProperties };

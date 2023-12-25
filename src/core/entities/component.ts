@@ -6,6 +6,7 @@ import { BackingData } from './backingData.js'
 import { Infrastructure } from './infrastructure.js'
 import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_modeling_tosca_profile'
 import { DataUsageRelation, MetaData } from '../common/entityDataTypes'
+import { RelationToDataAggregate } from './RelationToDataAggregate'
 
 
 /**
@@ -47,7 +48,7 @@ class Component {
 
     #backingDataEntities = new Array<{ backingData: BackingData, relation: DataUsageRelation, metaData: MetaData }>();
 
-    #dataAggregateEntities = new Array<{ data: DataAggregate, relation: DataUsageRelation, metaData: MetaData }>();
+    #dataAggregateEntities = new Array<{ data: DataAggregate, relation: RelationToDataAggregate }>();
 
     #includedLinkEntities = new Array();
 
@@ -96,15 +97,14 @@ class Component {
             this.#endpointEntities.push(endpointToAdd);
         }
 
-
     };
 
-    addDataEntity(dataEntityToAdd: DataAggregate | BackingData, usageRelation: DataUsageRelation, metaData: MetaData) {
-        if (dataEntityToAdd instanceof DataAggregate) {
-            this.#dataAggregateEntities.push({ data: dataEntityToAdd, relation: usageRelation, metaData: metaData });
-        } else if (dataEntityToAdd instanceof BackingData) {
-            this.#backingDataEntities.push({backingData: dataEntityToAdd, relation: usageRelation, metaData: metaData });
-        }
+    addDataAggregateEntity(dataEntityToAdd: DataAggregate, relation: RelationToDataAggregate) {
+        this.#dataAggregateEntities.push({ data: dataEntityToAdd, relation });
+    }
+
+    addBackingDataEntity(entityToAdd: BackingData, usageRelation: DataUsageRelation, metaData: MetaData) {
+        this.#backingDataEntities.push({backingData: entityToAdd, relation: usageRelation, metaData: metaData });
     }
 
     addLinkEntity(linkEntity) {

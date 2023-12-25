@@ -15,6 +15,7 @@ import { BACKING_SERVICE_TOSCA_KEY } from '../entities/backingService';
 import { STORAGE_BACKING_SERVICE_TOSCA_KEY } from '../entities/storageBackingService';
 import { COMPONENT_TOSCA_KEY } from '../entities/component';
 import { REQUEST_TRACE_TOSCA_KEY } from '../entities/requestTrace';
+import { RelationToDataAggregate } from '../entities/RelationToDataAggregate';
 
 const MATCH_UNDERSCORE = new RegExp(/_/g);
 const MATCH_FIRST_CHARACTER = new RegExp(/^./g);
@@ -298,27 +299,33 @@ class ToscaToEntitesConverter {
                     switch (requirementKey) {
                         case "uses_data":
                             if (typeof requirement === "string") {
-                                component.addDataEntity(this.#importedSystem.getDataAggregateEntities.get(this.#keyIdMap.getId(requirement)), "", getEmptyMetaData());
+                                // TODO properly deal with this?
+                                component.addDataAggregateEntity(this.#importedSystem.getDataAggregateEntities.get(this.#keyIdMap.getId(requirement)), new RelationToDataAggregate(`${component.getId}_uses_data_${this.#keyIdMap.getId(requirement)}`, getEmptyMetaData()));
                             } else if (typeof requirement === "object") {
                                 // TODO requirement is of type TOSCA_Requirement_Assignment
                                 if (requirement.node && requirement.relationship && typeof requirement.relationship === "string") {
                                     let relationship = this.#topologyTemplate.relationship_templates[requirement.relationship];
-                                    let usageRelation: DataUsageRelation = relationship.properties && relationship.properties["usage_relation"] ? relationship.properties["usage_relation"] : "";
                                     let metaData = !!relationship.metadata ? readToscaMetaData(relationship.metadata) : getEmptyMetaData(); 
-                                    component.addDataEntity(this.#importedSystem.getDataAggregateEntities.get(this.#keyIdMap.getId(requirement.node)), usageRelation, metaData);
+                                    let relation = new RelationToDataAggregate(requirement.relationship, metaData);
+
+                                    for (const [key, value] of Object.entries(relationship.properties)) {
+                                        relation.setPropertyValue(key, value);
+                                    }
+
+                                    component.addDataAggregateEntity(this.#importedSystem.getDataAggregateEntities.get(this.#keyIdMap.getId(requirement.node)), relation);
                                 }
                             }
                             break;
                         case "uses_backing_data":
                             if (typeof requirement === "string") {
-                                component.addDataEntity(this.#importedSystem.getBackingDataEntities.get(this.#keyIdMap.getId(requirement)), "", getEmptyMetaData());
+                                component.addBackingDataEntity(this.#importedSystem.getBackingDataEntities.get(this.#keyIdMap.getId(requirement)), "", getEmptyMetaData());
                             } else if (typeof requirement === "object") {
                                 // TODO requirement is of type TOSCA_Requirement_Assignment
                                 if (requirement.node && requirement.relationship && typeof requirement.relationship === "string") {
                                     let relationship = this.#topologyTemplate.relationship_templates[requirement.relationship];
                                     let usageRelation: DataUsageRelation = relationship.properties && relationship.properties["usage_relation"] ? relationship.properties["usage_relation"] : "";
                                     let metaData = !!relationship.metadata ? readToscaMetaData(relationship.metadata) : getEmptyMetaData(); 
-                                    component.addDataEntity(this.#importedSystem.getBackingDataEntities.get(this.#keyIdMap.getId(requirement.node)), usageRelation, metaData);
+                                    component.addBackingDataEntity(this.#importedSystem.getBackingDataEntities.get(this.#keyIdMap.getId(requirement.node)), usageRelation, metaData);
                                 }
                             }
                             break;

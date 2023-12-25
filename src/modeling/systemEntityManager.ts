@@ -14,6 +14,7 @@ import {
 } from './config/entityShapes'
 import { DataAggregate } from "../core/entities";
 import { FormContentConfig } from "./config/actionDialogConfig";
+import { RelationToDataAggregate } from "@/core/entities/RelationToDataAggregate";
 
 class SystemEntityManager {
 
@@ -299,7 +300,12 @@ class SystemEntityManager {
                     let dataAggregateName: string = embeddedCell.attr("label/textWrap/text");
                     let referencedDataAggregate = [...(this.#currentSystemEntity.getDataAggregateEntities)].filter(([id, dataAggregate]) => dataAggregate.getName === dataAggregateName);
                     if (referencedDataAggregate.length > 0) {
-                        componentModelEntity.addDataEntity(referencedDataAggregate[0][1], embeddedCell.prop("entity/properties/dataAggregate-parentRelation"), this.#parseMetaDataFromElement(embeddedCell as dia.Element));
+                        let relation = new RelationToDataAggregate(embeddedCell.id.toString(), this.#parseMetaDataFromElement(embeddedCell as dia.Element));
+                        for (let property of relation.getProperties()) {
+                            property.value = embeddedCell.prop("relationship/properties/" + property.getKey)
+                        }
+                         // TODO parse data aggregate properties and use single data aggregate only?
+                        componentModelEntity.addDataAggregateEntity(referencedDataAggregate[0][1], relation);
                     } else {
                         throw new Error(`Data Aggregate with name ${dataAggregateName} should be there, but could not be found in ${this.#currentSystemEntity.getDataAggregateEntities}`);
                     }
@@ -308,7 +314,7 @@ class SystemEntityManager {
                     let backingDataName: string = embeddedCell.attr("label/textWrap/text");
                     let referencedBackingData = [...(this.#currentSystemEntity.getBackingDataEntities)].filter(([id, backingData]) => backingData.getName === backingDataName);
                     if (referencedBackingData.length > 0) {
-                        componentModelEntity.addDataEntity(referencedBackingData[0][1], embeddedCell.prop("entity/properties/backingData-parentRelation"), this.#parseMetaDataFromElement(embeddedCell as dia.Element));
+                        componentModelEntity.addBackingDataEntity(referencedBackingData[0][1], embeddedCell.prop("entity/properties/backingData-parentRelation"), this.#parseMetaDataFromElement(embeddedCell as dia.Element));
                     } else {
                         throw new Error(`Backing Data with name ${backingDataName} should be there, but could not be found in ${this.#currentSystemEntity.getBackingDataEntities}`);
                     }
@@ -955,13 +961,13 @@ class SystemEntityManager {
     }
 
 
-    #createDataAggregateCell(dataAggregate: { data: DataAggregate, relation: DataUsageRelation, metaData: MetaData }, parent: dia.Element, index: number) {
+    #createDataAggregateCell(dataAggregate: { data: DataAggregate, relation: RelationToDataAggregate }, parent: dia.Element, index: number) {
 
-        let xPosition = dataAggregate.metaData.position.xCoord !== 0 ? dataAggregate.metaData.position.xCoord : parent.position().x + Math.floor(parent.size().width / 3) + dataAggregate.data.getMetaData.size.width * index;
-        let yPosition = dataAggregate.metaData.position.yCoord !== 0 ? dataAggregate.metaData.position.yCoord :parent.position().y + Math.floor(parent.size().height / 3) + dataAggregate.data.getMetaData.size.height * index;
+        let xPosition = dataAggregate.relation.getMetaData.position.xCoord !== 0 ? dataAggregate.relation.getMetaData.position.xCoord : parent.position().x + Math.floor(parent.size().width / 3) + dataAggregate.data.getMetaData.size.width * index;
+        let yPosition = dataAggregate.relation.getMetaData.position.yCoord !== 0 ? dataAggregate.relation.getMetaData.position.yCoord :parent.position().y + Math.floor(parent.size().height / 3) + dataAggregate.data.getMetaData.size.height * index;
 
-        let width = dataAggregate.metaData.size.width !== dataAggregate.data.getMetaData.size.width ? dataAggregate.metaData.size.width : dataAggregate.data.getMetaData.size.width;
-        let height = dataAggregate.metaData.size.height !== dataAggregate.data.getMetaData.size.height ? dataAggregate.metaData.size.height : dataAggregate.data.getMetaData.size.height;
+        let width = dataAggregate.relation.getMetaData.size.width !== dataAggregate.data.getMetaData.size.width ? dataAggregate.relation.getMetaData.size.width : dataAggregate.data.getMetaData.size.width;
+        let height = dataAggregate.relation.getMetaData.size.height !== dataAggregate.data.getMetaData.size.height ? dataAggregate.relation.getMetaData.size.height : dataAggregate.data.getMetaData.size.height;
 
         let newDataAggregate = new DataAggregateElement({
             position: { x: xPosition, y: yPosition },
@@ -974,7 +980,7 @@ class SystemEntityManager {
                     class: "entityHighlighting"
                 },
                 label: {
-                    fontSize: dataAggregate.metaData.fontSize !== dataAggregate.data.getMetaData.fontSize ? dataAggregate.metaData.fontSize : dataAggregate.data.getMetaData.fontSize,
+                    fontSize: dataAggregate.relation.getMetaData.fontSize !== dataAggregate.data.getMetaData.fontSize ? dataAggregate.relation.getMetaData.fontSize : dataAggregate.data.getMetaData.fontSize,
                     textWrap: {
                         text: dataAggregate.data.getName,
                     }
@@ -989,20 +995,20 @@ class SystemEntityManager {
                 case "embedded":
                     newDataAggregate.prop(property.jointJsConfig.modelPath, parent.id.toString());
                     break;
-                case "dataAggregate-parentRelation":
-                    newDataAggregate.prop(property.jointJsConfig.modelPath, dataAggregate.relation);
-                    break;
                 case "dataAggregate-assignedFamily":
                     newDataAggregate.prop(property.jointJsConfig.modelPath, dataAggregate.data.getName);
                     break;
                 default:
-                // TODO handle additional attributes?    
-                /*
+                // TODO handle additional attributes?; decide based on model path whether it can be found in data or relation    
                   if (property.jointJsConfig.modelPath) {
-                    newDataAggregate.prop(property.jointJsConfig.modelPath, dataAggregate.data.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
+                    if (dataAggregate.data.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature)) {
+                        newDataAggregate.prop(property.jointJsConfig.modelPath, dataAggregate.data.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
+                    } else if (dataAggregate.relation.getProperties().find(relationProperty => relationProperty.getKey === property.providedFeature)) {
+                        newDataAggregate.prop(property.jointJsConfig.modelPath, dataAggregate.relation.getProperties().find(relationProperty => relationProperty.getKey === property.providedFeature).value)
+                    }
                   }
                   break;
-                */
+                
             }
         }
         return newDataAggregate;

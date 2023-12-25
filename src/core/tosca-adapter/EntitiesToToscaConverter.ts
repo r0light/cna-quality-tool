@@ -155,13 +155,13 @@ class EntitiesToToscaConverter {
                     const usageRelationshipKey = this.#uniqueKeyManager.ensureUniqueness(`${nodeKey}_uses_${this.#keyIdMap.getKey(usedDataAggregate.data.getId)}`);
                     let dataAggregateRelationship: TOSCA_Relationship_Template = {
                         type: "cna.qualityModel.relationships.AttachesTo.Data",
-                        metadata: flatMetaData(usedDataAggregate.metaData),
+                        metadata: flatMetaData(usedDataAggregate.relation.getMetaData),
                     };
-                    if (usedDataAggregate.relation) {
-                        dataAggregateRelationship.properties = {
-                            "usage_relation": usedDataAggregate.relation
-                        }
+
+                    if (usedDataAggregate.relation.getProperties().length > 0) {
+                        dataAggregateRelationship.properties = this.#parsePropertiesForYaml(usedDataAggregate.relation.getProperties());
                     }
+            
                     topologyTemplate.relationship_templates[usageRelationshipKey] = dataAggregateRelationship;
 
                     node.requirements.push({
