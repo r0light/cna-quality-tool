@@ -3,16 +3,16 @@ import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_mode
 import { MetaData } from '../common/entityDataTypes'
 
 /**
- * The module for aspects related to the relationship between a component and a data aggregate
- * @module relationships/componentToDataAggregate
+ * The module for aspects related to the relationship between a component and backing data
+ * @module relationships/componentToBackingData
  */
 
-const ATTACHES_TO_DATA_AGGREGATE_TOSCA_KEY = "cna.qualityModel.relationships.AttachesTo.DataAggregate";
-const ATTACHES_TO_DATA_AGGREGATE_EQUIVALENT = cna_modeling_tosca_profile.relationship_types[ATTACHES_TO_DATA_AGGREGATE_TOSCA_KEY];
+const ATTACHES_TO_BACKING_DATA_TOSCA_KEY = "cna.qualityModel.relationships.AttachesTo.BackingData";
+const ATTACHES_TO_BACKING_DATA_EQUIVALENT = cna_modeling_tosca_profile.relationship_types[ATTACHES_TO_BACKING_DATA_TOSCA_KEY];
 
 
-function getDataAggregateRelationshipProperties(): EntityProperty[] {
-    let parsed = loadAllProperties(ATTACHES_TO_DATA_AGGREGATE_EQUIVALENT);
+function getBackingDataRelationshipProperties(): EntityProperty[] {
+    let parsed = loadAllProperties(ATTACHES_TO_BACKING_DATA_EQUIVALENT);
 
     return parsed.map((prop) => {
         switch (prop.getKey) {
@@ -45,10 +45,10 @@ function getDataAggregateRelationshipProperties(): EntityProperty[] {
 
 
 /**
- * Class representing the relationship between a component and data aggregate
+ * Class representing the relationship between a component and backing data
  * @class
  */
-class RelationToDataAggregate {
+class RelationToBackingData {
 
     #id: string;
 
@@ -57,14 +57,14 @@ class RelationToDataAggregate {
     #properties: EntityProperty[] = new Array();
 
     /**
-     * Create a relation to data aggregate
+     * Create a relation to backing data
      * @param {string} id The unique id for this relationship.
      * @param {MetaData} metaData The meta data for this relationship, needed for displaying it in a diagram. 
      */
     constructor(id: string, metaData: MetaData) {
         this.#id = id,
             this.#metaData = metaData;
-        this.#properties = getDataAggregateRelationshipProperties();
+        this.#properties = getBackingDataRelationshipProperties();
     }
 
     /**
@@ -105,8 +105,8 @@ class RelationToDataAggregate {
      * @returns {string}
      */
     toString() {
-        return "Data Aggregate Relationship " + JSON.stringify(this);
+        return "Backing Data Relationship " + JSON.stringify(this);
     }
 }
 
-export { RelationToDataAggregate, ATTACHES_TO_DATA_AGGREGATE_TOSCA_KEY, getDataAggregateRelationshipProperties };
+export { RelationToBackingData, ATTACHES_TO_BACKING_DATA_TOSCA_KEY, getBackingDataRelationshipProperties };

@@ -314,6 +314,20 @@ onUpdated(() => {
 
             break;
         case EntityTypes.BACKING_DATA:
+
+            for (let propertyOption of currentOptions) {
+                // if property is a relationship property it only applies to embedded data aggregates
+                if (propertyOption.jointJsConfig.modelPath && relationshipPath.test(propertyOption.jointJsConfig.modelPath)) {
+
+                    propertyOption.show = computed(() => findInSectionsByFeature(selectedEntityPropertyGroups.value, "embedded").value !== "" && findInSectionsByFeature(selectedEntityPropertyGroups.value, "backingData-chooseEditMode").checked);
+
+                    // special case for parent relation, because we want a custom label for the field
+                    if (propertyOption.providedFeature === "usage_relation") {
+                        propertyOption.label = getParentRelationLabel(props.selectedEntity.model.prop("entity/embedded"));
+                    }
+                }
+            }
+
             let chooseBDEditModeOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "backingData-chooseEditMode");
             chooseBDEditModeOption.show = computed(() => findInSectionsByFeature(selectedEntityPropertyGroups.value, "embedded").value !== "");
 

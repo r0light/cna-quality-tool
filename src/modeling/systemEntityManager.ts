@@ -4,7 +4,7 @@ import EntityTypes from './config/entityTypes';
 import * as Entities from '../core/entities';
 import ErrorMessage, { ErrorType } from './errorMessage'
 import { EntityDetailsConfig, TableDialogPropertyConfig } from './config/detailsSidebarConfig';
-import { DataUsageRelation, MetaData } from "../core/common/entityDataTypes";
+import { MetaData } from "../core/common/entityDataTypes";
 import { convertToServiceTemplate, importFromServiceTemplate } from "../core/tosca-adapter/ToscaAdapter";
 import {
     Component as ComponentElement, Service as ServiceElement, BackingService as BackingServiceElement, StorageBackingService as StorageBackingServiceElement,
@@ -15,6 +15,7 @@ import {
 import { DataAggregate } from "../core/entities";
 import { FormContentConfig } from "./config/actionDialogConfig";
 import { RelationToDataAggregate } from "@/core/entities/RelationToDataAggregate";
+import { RelationToBackingData } from "@/core/entities/RelationToBackingData";
 
 class SystemEntityManager {
 
@@ -304,7 +305,7 @@ class SystemEntityManager {
                         for (let property of relation.getProperties()) {
                             property.value = embeddedCell.prop("relationship/properties/" + property.getKey)
                         }
-                         // TODO parse data aggregate properties and use single data aggregate only?
+                        // TODO parse data aggregate properties and use single data aggregate only?
                         componentModelEntity.addDataAggregateEntity(referencedDataAggregate[0][1], relation);
                     } else {
                         throw new Error(`Data Aggregate with name ${dataAggregateName} should be there, but could not be found in ${this.#currentSystemEntity.getDataAggregateEntities}`);
@@ -314,7 +315,13 @@ class SystemEntityManager {
                     let backingDataName: string = embeddedCell.attr("label/textWrap/text");
                     let referencedBackingData = [...(this.#currentSystemEntity.getBackingDataEntities)].filter(([id, backingData]) => backingData.getName === backingDataName);
                     if (referencedBackingData.length > 0) {
-                        componentModelEntity.addBackingDataEntity(referencedBackingData[0][1], embeddedCell.prop("entity/properties/backingData-parentRelation"), this.#parseMetaDataFromElement(embeddedCell as dia.Element));
+                        let relation = new RelationToBackingData(embeddedCell.id.toString(), this.#parseMetaDataFromElement(embeddedCell as dia.Element));
+                    
+                        for (let property of relation.getProperties()) {
+                            property.value = embeddedCell.prop("relationship/properties/" + property.getKey)
+                        }
+
+                        componentModelEntity.addBackingDataEntity(referencedBackingData[0][1], relation);
                     } else {
                         throw new Error(`Backing Data with name ${backingDataName} should be there, but could not be found in ${this.#currentSystemEntity.getBackingDataEntities}`);
                     }
@@ -338,7 +345,13 @@ class SystemEntityManager {
                     let backingDataName: string = embeddedBackingData.attr("label/textWrap/text");
                     let referencedBackingData = [...(this.#currentSystemEntity.getBackingDataEntities)].filter(([id, backingData]) => backingData.getName === backingDataName);
                     if (referencedBackingData.length > 0) {
-                        infrastructureEntity.addBackingDataEntity(referencedBackingData[0][1], embeddedBackingData.prop("entity/properties/backingData-parentRelation"), this.#parseMetaDataFromElement(embeddedBackingData));
+                        let relation = new RelationToBackingData(embeddedBackingData.id.toString(), this.#parseMetaDataFromElement(embeddedBackingData as dia.Element));
+
+                        for (let property of relation.getProperties()) {
+                            property.value = embeddedBackingData.prop("relationship/properties/" + property.getKey)
+                        }
+
+                        infrastructureEntity.addBackingDataEntity(referencedBackingData[0][1], relation);
                     } else {
                         throw new Error(`Backing Data with name ${backingDataName} should be there, but could not be found in ${this.#currentSystemEntity.getBackingDataEntities}`);
                     }
@@ -964,7 +977,7 @@ class SystemEntityManager {
     #createDataAggregateCell(dataAggregate: { data: DataAggregate, relation: RelationToDataAggregate }, parent: dia.Element, index: number) {
 
         let xPosition = dataAggregate.relation.getMetaData.position.xCoord !== 0 ? dataAggregate.relation.getMetaData.position.xCoord : parent.position().x + Math.floor(parent.size().width / 3) + dataAggregate.data.getMetaData.size.width * index;
-        let yPosition = dataAggregate.relation.getMetaData.position.yCoord !== 0 ? dataAggregate.relation.getMetaData.position.yCoord :parent.position().y + Math.floor(parent.size().height / 3) + dataAggregate.data.getMetaData.size.height * index;
+        let yPosition = dataAggregate.relation.getMetaData.position.yCoord !== 0 ? dataAggregate.relation.getMetaData.position.yCoord : parent.position().y + Math.floor(parent.size().height / 3) + dataAggregate.data.getMetaData.size.height * index;
 
         let width = dataAggregate.relation.getMetaData.size.width !== dataAggregate.data.getMetaData.size.width ? dataAggregate.relation.getMetaData.size.width : dataAggregate.data.getMetaData.size.width;
         let height = dataAggregate.relation.getMetaData.size.height !== dataAggregate.data.getMetaData.size.height ? dataAggregate.relation.getMetaData.size.height : dataAggregate.data.getMetaData.size.height;
@@ -999,29 +1012,29 @@ class SystemEntityManager {
                     newDataAggregate.prop(property.jointJsConfig.modelPath, dataAggregate.data.getName);
                     break;
                 default:
-                // TODO handle additional attributes?; decide based on model path whether it can be found in data or relation    
-                  if (property.jointJsConfig.modelPath) {
-                    if (dataAggregate.data.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature)) {
-                        newDataAggregate.prop(property.jointJsConfig.modelPath, dataAggregate.data.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
-                    } else if (dataAggregate.relation.getProperties().find(relationProperty => relationProperty.getKey === property.providedFeature)) {
-                        newDataAggregate.prop(property.jointJsConfig.modelPath, dataAggregate.relation.getProperties().find(relationProperty => relationProperty.getKey === property.providedFeature).value)
+                    // TODO handle additional attributes?; decide based on model path whether it can be found in data or relation    
+                    if (property.jointJsConfig.modelPath) {
+                        if (dataAggregate.data.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature)) {
+                            newDataAggregate.prop(property.jointJsConfig.modelPath, dataAggregate.data.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
+                        } else if (dataAggregate.relation.getProperties().find(relationProperty => relationProperty.getKey === property.providedFeature)) {
+                            newDataAggregate.prop(property.jointJsConfig.modelPath, dataAggregate.relation.getProperties().find(relationProperty => relationProperty.getKey === property.providedFeature).value)
+                        }
                     }
-                  }
-                  break;
-                
+                    break;
+
             }
         }
         return newDataAggregate;
     }
 
 
-    #createBackingDataCell(backingData: { backingData: Entities.BackingData, relation: DataUsageRelation, metaData: MetaData }, parent: dia.Element, index: number) {
+    #createBackingDataCell(backingData: { backingData: Entities.BackingData, relation: RelationToBackingData }, parent: dia.Element, index: number) {
 
-        let xPosition = backingData.metaData.position.xCoord !== 0 ? backingData.metaData.position.xCoord : parent.position().x + Math.floor(parent.size().width / 3) + backingData.backingData.getMetaData.size.width * index;
-        let yPosition = backingData.metaData.position.yCoord !== 0 ? backingData.metaData.position.yCoord :parent.position().y + Math.floor(parent.size().height / 3) + backingData.backingData.getMetaData.size.height * index;
+        let xPosition = backingData.relation.getMetaData.position.xCoord !== 0 ? backingData.relation.getMetaData.position.xCoord : parent.position().x + Math.floor(parent.size().width / 3) + backingData.backingData.getMetaData.size.width * index;
+        let yPosition = backingData.relation.getMetaData.position.yCoord !== 0 ? backingData.relation.getMetaData.position.yCoord : parent.position().y + Math.floor(parent.size().height / 3) + backingData.backingData.getMetaData.size.height * index;
 
-        let width = backingData.metaData.size.width !== backingData.backingData.getMetaData.size.width ? backingData.metaData.size.width : backingData.backingData.getMetaData.size.width;
-        let height = backingData.metaData.size.height !== backingData.backingData.getMetaData.size.height ? backingData.metaData.size.height : backingData.backingData.getMetaData.size.height;
+        let width = backingData.relation.getMetaData.size.width !== backingData.backingData.getMetaData.size.width ? backingData.relation.getMetaData.size.width : backingData.backingData.getMetaData.size.width;
+        let height = backingData.relation.getMetaData.size.height !== backingData.backingData.getMetaData.size.height ? backingData.relation.getMetaData.size.height : backingData.backingData.getMetaData.size.height;
 
         let newBackingData = new BackingDataElement({
             position: { x: xPosition, y: yPosition },
@@ -1034,7 +1047,7 @@ class SystemEntityManager {
                     class: "entityHighlighting"
                 },
                 label: {
-                    fontSize: backingData.metaData.fontSize !== backingData.backingData.getMetaData.fontSize ? backingData.metaData.fontSize : backingData.backingData.getMetaData.fontSize,
+                    fontSize: backingData.relation.getMetaData.fontSize !== backingData.backingData.getMetaData.fontSize ? backingData.relation.getMetaData.fontSize : backingData.backingData.getMetaData.fontSize,
                     textWrap: {
                         text: backingData.backingData.getName,
                     }
@@ -1049,9 +1062,6 @@ class SystemEntityManager {
                 case "embedded":
                     newBackingData.prop(property.jointJsConfig.modelPath, parent.id.toString());
                     break;
-                case "backingData-parentRelation":
-                    newBackingData.prop(property.jointJsConfig.modelPath, backingData.relation);
-                    break;
                 case "backingData-assignedFamily":
                     newBackingData.prop(property.jointJsConfig.modelPath, backingData.backingData.getName);
                     break;
@@ -1065,7 +1075,15 @@ class SystemEntityManager {
                     // ignore
                     break;
                 default:
-                    newBackingData.prop(property.jointJsConfig.modelPath, backingData.backingData.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
+                    // TODO handle additional attributes?; decide based on model path whether it can be found in data or relation    
+                    if (property.jointJsConfig.modelPath) {
+                        if (backingData.backingData.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature)) {
+                            newBackingData.prop(property.jointJsConfig.modelPath, backingData.backingData.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
+                        } else if (backingData.relation.getProperties().find(relationProperty => relationProperty.getKey === property.providedFeature)) {
+                            newBackingData.prop(property.jointJsConfig.modelPath, backingData.relation.getProperties().find(relationProperty => relationProperty.getKey === property.providedFeature).value)
+                        }
+                    }
+                    break;
             }
         }
         return newBackingData;

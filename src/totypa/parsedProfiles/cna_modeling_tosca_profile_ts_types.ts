@@ -25,11 +25,23 @@ export type CnaQualityModelRelationshipsProvidesEndpoint = {
     state?: string,
 },
 }
-export type CnaQualityModelRelationshipsAttachesToData = {
+export type CnaQualityModelRelationshipsAttachesToDataAggregate = {
     properties?: {
     location?: string,
     usage_relation: string,
     sharding_level: number,
+    device?: string,
+},
+attributes?: {
+    tosca_id?: string,
+    tosca_name?: string,
+    state?: string,
+},
+}
+export type CnaQualityModelRelationshipsAttachesToBackingData = {
+    properties?: {
+    location?: string,
+    usage_relation: string,
     device?: string,
 },
 attributes?: {

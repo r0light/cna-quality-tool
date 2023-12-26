@@ -44,13 +44,13 @@ node_types:
       - uses_data:
           capability: tosca.capabilities.Attachment
           node: cna.qualityModel.entities.DataAggregate
-          relationship: cna.qualityModel.relationships.AttachesTo.Data
+          relationship: cna.qualityModel.relationships.AttachesTo.DataAggregate
           occurrences: [0, UNBOUNDED]
       # Allow the definition of Backing Data usage
       - uses_backing_data:
           capability: tosca.capabilities.Attachment
           node: cna.qualityModel.entities.BackingData
-          relationship: cna.qualityModel.relationships.AttachesTo.Data
+          relationship: cna.qualityModel.relationships.AttachesTo.BackingData
           occurrences: [0, UNBOUNDED]
 
   cna.qualityModel.entities.SoftwareComponent.Service:
@@ -83,13 +83,13 @@ node_types:
       - uses_data:
           capability: tosca.capabilities.Attachment
           node: cna.qualityModel.entities.DataAggregate
-          relationship: cna.qualityModel.relationships.AttachesTo.Data
+          relationship: cna.qualityModel.relationships.AttachesTo.DataAggregate
           occurrences: [0, UNBOUNDED]
       # Allow the definition of Backing Data usage
       - uses_backing_data:
           capability: tosca.capabilities.Attachment
           node: cna.qualityModel.entities.BackingData
-          relationship: cna.qualityModel.relationships.AttachesTo.Data
+          relationship: cna.qualityModel.relationships.AttachesTo.BackingData
           occurrences: [0, UNBOUNDED]
 
   cna.qualityModel.entities.BackingService:
@@ -125,13 +125,13 @@ node_types:
       - uses_data:
           capability: tosca.capabilities.Attachment
           node: cna.qualityModel.entities.DataAggregate
-          relationship: cna.qualityModel.relationships.AttachesTo.Data
+          relationship: cna.qualityModel.relationships.AttachesTo.DataAggregate
           occurrences: [0, UNBOUNDED]
       # Allow the definition of Backing Data usage
       - uses_backing_data:
           capability: tosca.capabilities.Attachment
           node: cna.qualityModel.entities.BackingData
-          relationship: cna.qualityModel.relationships.AttachesTo.Data
+          relationship: cna.qualityModel.relationships.AttachesTo.BackingData
           occurrences: [0, UNBOUNDED]
 
   cna.qualityModel.entities.Endpoint:
@@ -174,7 +174,7 @@ node_types:
       - uses_backing_data:
           capability: tosca.capabilities.Attachment
           node: cna.qualityModel.entities.BackingData
-          relationship: cna.qualityModel.relationships.AttachesTo.Data
+          relationship: cna.qualityModel.relationships.AttachesTo.BackingData
           occurrences: [0, UNBOUNDED]
 
   cna.qualityModel.entities.BackingData:
@@ -243,13 +243,13 @@ node_types:
       - uses_data:
           capability: tosca.capabilities.Attachment
           node: cna.qualityModel.entities.DataAggregate
-          relationship: cna.qualityModel.relationships.AttachesTo.Data
+          relationship: cna.qualityModel.relationships.AttachesTo.DataAggregate
           occurrences: [0, UNBOUNDED]
       # Allow the definition of Backing Data usage
       - uses_backing_data:
           capability: tosca.capabilities.Attachment
           node: cna.qualityModel.entities.BackingData
-          relationship: cna.qualityModel.relationships.AttachesTo.Data
+          relationship: cna.qualityModel.relationships.AttachesTo.BackingData
           occurrences: [0, UNBOUNDED]
     capabilities:
       # Allow assigning Endpoint entities

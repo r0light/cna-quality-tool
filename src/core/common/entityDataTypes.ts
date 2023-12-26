@@ -79,5 +79,3 @@ export function getEmptyMetaData() {
         }
     }
 }
-
-export type DataUsageRelation = "" | "used" | "persisted";

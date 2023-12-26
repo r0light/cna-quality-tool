@@ -3,10 +3,10 @@ import { Endpoint } from './endpoint.js'
 import { ExternalEndpoint } from './externalEndpoint.js'
 import { DataAggregate } from './dataAggregate.js'
 import { BackingData } from './backingData.js'
-import { Infrastructure } from './infrastructure.js'
 import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_modeling_tosca_profile'
-import { DataUsageRelation, MetaData } from '../common/entityDataTypes'
+import { MetaData } from '../common/entityDataTypes'
 import { RelationToDataAggregate } from './RelationToDataAggregate'
+import { RelationToBackingData } from './RelationToBackingData'
 
 
 /**
@@ -46,7 +46,7 @@ class Component {
 
     #externalEndpointEntities = new Array<ExternalEndpoint>();
 
-    #backingDataEntities = new Array<{ backingData: BackingData, relation: DataUsageRelation, metaData: MetaData }>();
+    #backingDataEntities = new Array<{ backingData: BackingData, relation: RelationToBackingData }>();
 
     #dataAggregateEntities = new Array<{ data: DataAggregate, relation: RelationToDataAggregate }>();
 
@@ -103,8 +103,8 @@ class Component {
         this.#dataAggregateEntities.push({ data: dataEntityToAdd, relation });
     }
 
-    addBackingDataEntity(entityToAdd: BackingData, usageRelation: DataUsageRelation, metaData: MetaData) {
-        this.#backingDataEntities.push({backingData: entityToAdd, relation: usageRelation, metaData: metaData });
+    addBackingDataEntity(entityToAdd: BackingData, relation: RelationToBackingData) {
+        this.#backingDataEntities.push({backingData: entityToAdd, relation: relation });
     }
 
     addLinkEntity(linkEntity) {

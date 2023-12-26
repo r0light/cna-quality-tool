@@ -3,6 +3,7 @@ import { getComponentProperties, getBackingServiceProperties, getStorageBackingS
 import { DialogConfig, DialogSize, FormContentConfig, UIContentType } from "./actionDialogConfig";
 import { EntityProperty, NumberEntityProperty, SelectEntityProperty, TextEntityProperty } from "../../core/common/entityProperty";
 import { getDataAggregateRelationshipProperties } from "@/core/entities/RelationToDataAggregate";
+import { getBackingDataRelationshipProperties } from "@/core/entities/RelationToBackingData";
 
 export type DatalistItem = {
     value: string,
@@ -755,50 +756,7 @@ const EntityDetailsConfig: {
                 minPath: "",
                 min: ""
             }
-        },/*
-        {
-            providedFeature: "dataAggregate-parentRelation",
-            contentType: PropertyContentType.DROPDOWN,
-            label: "Parent Relation:",
-            helpText: "How the entity is utilized by its parent.",
-            inputProperties: {
-                disabled: false,
-                required: true,
-                checked: true,
-                selected: false,
-                readonly: false
-            },
-            attributes: {
-                placeholder: "", // TODO keep assumption that "used" if nothing selected?
-                defaultValue: ParentRelation.USED,
-                svgRepresentation: ""
-            },
-            dropdownOptions: [
-                {
-                    optionValue: ParentRelation.USED,
-                    optionText: ParentRelation.USED,
-                    optionTitle: "",
-                    representationClass: "",
-                    disabled: false
-                },
-                {
-                    optionValue: ParentRelation.PERSISTED,
-                    optionText: ParentRelation.PERSISTED,
-                    optionTitle: "",
-                    representationClass: "",
-                    disabled: false
-                }
-            ],
-            provideEnterButton: false,
-            show: true,
-            jointJsConfig: {
-                propertyType: "property",
-                modelPath: "entity/properties/dataAggregate-parentRelation",
-                defaultPropPath: "",
-                minPath: "",
-                min: ""
-            }
-        },*/
+        },
         {
             providedFeature: "dataAggregate-assignedFamily",
             contentType: PropertyContentType.INPUT_TEXTBOX,
@@ -927,7 +885,7 @@ const EntityDetailsConfig: {
     },
     BackingData: {
         type: EntityTypes.BACKING_DATA,
-        specificProperties: customizePropertyConfigs(parseProperties(getBackingDataProperties(), "entity"), [
+        specificProperties: customizePropertyConfigs(parseProperties(getBackingDataProperties(), "entity").concat(parseProperties(getBackingDataRelationshipProperties(), "relationship")), [
             {
                 providedFeature: "backingData-chooseEditMode",
                 contentType: PropertyContentType.TOGGLE,
@@ -980,49 +938,6 @@ const EntityDetailsConfig: {
                 jointJsConfig: {
                     propertyType: "property",
                     modelPath: "entity/embedded",
-                    defaultPropPath: "",
-                    minPath: "",
-                    min: ""
-                }
-            },
-            {
-                providedFeature: "backingData-parentRelation",
-                contentType: PropertyContentType.DROPDOWN,
-                label: "Parent Relation:",
-                helpText: "How the entity is utilized by its parent.",
-                inputProperties: {
-                    disabled: false,
-                    required: true,
-                    checked: true,
-                    selected: false,
-                    readonly: false
-                },
-                attributes: {
-                    placeholder: "", // TODO keep assumption that "used" if nothing selected?
-                    defaultValue: ParentRelation.USED,
-                    svgRepresentation: ""
-                },
-                dropdownOptions: [
-                    {
-                        optionValue: ParentRelation.USED,
-                        optionText: ParentRelation.USED,
-                        optionTitle: "",
-                        representationClass: "",
-                        disabled: false
-                    },
-                    {
-                        optionValue: ParentRelation.PERSISTED,
-                        optionText: ParentRelation.PERSISTED,
-                        optionTitle: "",
-                        representationClass: "",
-                        disabled: false
-                    }
-                ],
-                provideEnterButton: false,
-                show: true,
-                jointJsConfig: {
-                    propertyType: "property",
-                    modelPath: "entity/properties/backingData-parentRelation",
                     defaultPropPath: "",
                     minPath: "",
                     min: ""

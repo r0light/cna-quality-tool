@@ -1,7 +1,8 @@
 import { BackingData } from "./backingData";
 import { EntityProperty, loadAllProperties } from "../common/entityProperty";
 import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_modeling_tosca_profile'
-import { DataUsageRelation, MetaData } from "../common/entityDataTypes";
+import { MetaData } from "../common/entityDataTypes";
+import { RelationToBackingData } from "./RelationToBackingData";
 
 
 /**
@@ -30,7 +31,7 @@ class Infrastructure {
 
     #metaData: MetaData;
 
-    #backingDataEntities = new Array<{ backingData: BackingData, relation: DataUsageRelation, metaData: MetaData }>();
+    #backingDataEntities = new Array<{ backingData: BackingData, relation: RelationToBackingData }>();
 
     #properties: EntityProperty[];
 
@@ -52,8 +53,8 @@ class Infrastructure {
      * @param {BackingData} backingDataEntity The Backing Data entity that should be added.
      * @throws {TypeError} If the provided parameter is neither an instance of External Endpoint, Endpoint, Data Aggregate or Backing Data.  
      */
-    addBackingDataEntity(backingDataEntity: BackingData, usageRelation: DataUsageRelation, metaData: MetaData) {
-        this.#backingDataEntities.push({backingData: backingDataEntity, relation: usageRelation, metaData: metaData });
+    addBackingDataEntity(backingDataEntity: BackingData, relation: RelationToBackingData) {
+        this.#backingDataEntities.push({backingData: backingDataEntity, relation: relation });
 
         /*
         const errorMessage = "The provided entity cannot be added. Only BackingData entities are allowed. However, the object to add was: " + Object.getPrototypeOf(backingDataEntity) + JSON.stringify(backingDataEntity);

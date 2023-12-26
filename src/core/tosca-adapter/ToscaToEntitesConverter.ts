@@ -4,7 +4,7 @@ import * as Entities from '../entities'
 import { TwoWayKeyIdMap } from "./TwoWayKeyIdMap";
 import { DATA_AGGREGATE_TOSCA_KEY } from '../entities/dataAggregate';
 import { BACKING_DATA_TOSCA_KEY } from '../entities/backingData';
-import { DataUsageRelation, getEmptyMetaData, readToscaMetaData } from '../common/entityDataTypes';
+import { getEmptyMetaData, readToscaMetaData } from '../common/entityDataTypes';
 import { DEPLOYMENT_MAPPING_TOSCA_KEY } from '../entities/deploymentMapping';
 import { LINK_TOSCA_KEY } from '../entities/link';
 import { INFRASTRUCTURE_TOSCA_KEY } from '../entities/infrastructure';
@@ -16,6 +16,7 @@ import { STORAGE_BACKING_SERVICE_TOSCA_KEY } from '../entities/storageBackingSer
 import { COMPONENT_TOSCA_KEY } from '../entities/component';
 import { REQUEST_TRACE_TOSCA_KEY } from '../entities/requestTrace';
 import { RelationToDataAggregate } from '../entities/RelationToDataAggregate';
+import { RelationToBackingData } from '../entities/RelationToBackingData';
 
 const MATCH_UNDERSCORE = new RegExp(/_/g);
 const MATCH_FIRST_CHARACTER = new RegExp(/^./g);
@@ -80,17 +81,25 @@ class ToscaToEntitesConverter {
                     for (const requirementAssignment of node.requirements) {
                         for (const [requirementKey, requirement] of Object.entries(requirementAssignment)) {
                             if (requirementKey === "uses_backing_data") { // TODO no hard coded Key
+
+
                                 if (typeof requirement === "string") {
-                                    infrastructure.addBackingDataEntity(this.#importedSystem.getBackingDataEntities.get(this.#keyIdMap.getId(requirement)), "", getEmptyMetaData());
+                                    infrastructure.addBackingDataEntity(this.#importedSystem.getBackingDataEntities.get(this.#keyIdMap.getId(requirement)), new RelationToBackingData(`${infrastructure.getId}_uses_backing_data_${this.#keyIdMap.getId(requirement)}`, getEmptyMetaData()));
                                 } else if (typeof requirement === "object") {
+                                    // TODO requirement is of type TOSCA_Requirement_Assignment
                                     if (requirement.node && requirement.relationship && typeof requirement.relationship === "string") {
                                         let relationship = this.#topologyTemplate.relationship_templates[requirement.relationship];
-                                        let usageRelation: DataUsageRelation = relationship.properties && relationship.properties["usage_relation"] ? relationship.properties["usage_relation"] : "";
-                                        let metaData = !!relationship.metadata ? readToscaMetaData(relationship.metadata) : getEmptyMetaData();
-                                        infrastructure.addBackingDataEntity(this.#importedSystem.getBackingDataEntities.get(this.#keyIdMap.getId(requirement.node)), usageRelation, readToscaMetaData(relationship.metadata));
+    
+                                        let metaData = !!relationship.metadata ? readToscaMetaData(relationship.metadata) : getEmptyMetaData(); 
+                                        let relation = new RelationToBackingData(requirement.relationship, metaData);
+    
+                                        for (const [key, value] of Object.entries(relationship.properties)) {
+                                            relation.setPropertyValue(key, value);
+                                        }
+    
+                                        infrastructure.addBackingDataEntity(this.#importedSystem.getBackingDataEntities.get(this.#keyIdMap.getId(requirement.node)), relation);
                                     }
                                 }
-
                             } else if (requirementKey === "host") {
                                 if (typeof requirement === "string") {
                                     // TODO requirement is of type string
@@ -318,14 +327,20 @@ class ToscaToEntitesConverter {
                             break;
                         case "uses_backing_data":
                             if (typeof requirement === "string") {
-                                component.addBackingDataEntity(this.#importedSystem.getBackingDataEntities.get(this.#keyIdMap.getId(requirement)), "", getEmptyMetaData());
+                                component.addBackingDataEntity(this.#importedSystem.getBackingDataEntities.get(this.#keyIdMap.getId(requirement)), new RelationToBackingData(`${component.getId}_uses_backing_data_${this.#keyIdMap.getId(requirement)}`, getEmptyMetaData()));
                             } else if (typeof requirement === "object") {
                                 // TODO requirement is of type TOSCA_Requirement_Assignment
                                 if (requirement.node && requirement.relationship && typeof requirement.relationship === "string") {
                                     let relationship = this.#topologyTemplate.relationship_templates[requirement.relationship];
-                                    let usageRelation: DataUsageRelation = relationship.properties && relationship.properties["usage_relation"] ? relationship.properties["usage_relation"] : "";
+
                                     let metaData = !!relationship.metadata ? readToscaMetaData(relationship.metadata) : getEmptyMetaData(); 
-                                    component.addBackingDataEntity(this.#importedSystem.getBackingDataEntities.get(this.#keyIdMap.getId(requirement.node)), usageRelation, metaData);
+                                    let relation = new RelationToBackingData(requirement.relationship, metaData);
+
+                                    for (const [key, value] of Object.entries(relationship.properties)) {
+                                        relation.setPropertyValue(key, value);
+                                    }
+
+                                    component.addBackingDataEntity(this.#importedSystem.getBackingDataEntities.get(this.#keyIdMap.getId(requirement.node)), relation);
                                 }
                             }
                             break;

@@ -48,7 +48,7 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
         "tosca.capabilities.Endpoint.Public"
       ]
     },
-    "cna.qualityModel.relationships.AttachesTo.Data": {
+    "cna.qualityModel.relationships.AttachesTo.DataAggregate": {
       "derived_from": "tosca.relationships.AttachesTo",
       "valid_target_types": [
         "tosca.capabilities.Attachment"
@@ -67,6 +67,22 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
           "required": true,
           "default": 0,
           "description": "Only applicable if data is persisted by a component; If a component persists data, the sharding level describes the number of shards used; 0 acts as a placeholder if data is not persisted; 1 is the default meaning that no sharding is used; >1 is the number of shards"
+        }
+      }
+    },
+    "cna.qualityModel.relationships.AttachesTo.BackingData": {
+      "derived_from": "tosca.relationships.AttachesTo",
+      "valid_target_types": [
+        "tosca.capabilities.Attachment"
+      ],
+      "properties": {
+        "location": {
+          "required": false
+        },
+        "usage_relation": {
+          "type": "string",
+          "required": true,
+          "description": "Describes how a component uses attached data, that means whether it just uses (reads) it for its functionality or if it also updates and persists (writes) it; possible values are usage and persistence"
         }
       }
     }
@@ -128,7 +144,7 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
           "uses_data": {
             "capability": "tosca.capabilities.Attachment",
             "node": "cna.qualityModel.entities.DataAggregate",
-            "relationship": "cna.qualityModel.relationships.AttachesTo.Data",
+            "relationship": "cna.qualityModel.relationships.AttachesTo.DataAggregate",
             "occurrences": [
               0,
               "UNBOUNDED"
@@ -139,7 +155,7 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
           "uses_backing_data": {
             "capability": "tosca.capabilities.Attachment",
             "node": "cna.qualityModel.entities.BackingData",
-            "relationship": "cna.qualityModel.relationships.AttachesTo.Data",
+            "relationship": "cna.qualityModel.relationships.AttachesTo.BackingData",
             "occurrences": [
               0,
               "UNBOUNDED"
@@ -195,7 +211,7 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
           "uses_data": {
             "capability": "tosca.capabilities.Attachment",
             "node": "cna.qualityModel.entities.DataAggregate",
-            "relationship": "cna.qualityModel.relationships.AttachesTo.Data",
+            "relationship": "cna.qualityModel.relationships.AttachesTo.DataAggregate",
             "occurrences": [
               0,
               "UNBOUNDED"
@@ -206,7 +222,7 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
           "uses_backing_data": {
             "capability": "tosca.capabilities.Attachment",
             "node": "cna.qualityModel.entities.BackingData",
-            "relationship": "cna.qualityModel.relationships.AttachesTo.Data",
+            "relationship": "cna.qualityModel.relationships.AttachesTo.BackingData",
             "occurrences": [
               0,
               "UNBOUNDED"
@@ -271,7 +287,7 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
           "uses_data": {
             "capability": "tosca.capabilities.Attachment",
             "node": "cna.qualityModel.entities.DataAggregate",
-            "relationship": "cna.qualityModel.relationships.AttachesTo.Data",
+            "relationship": "cna.qualityModel.relationships.AttachesTo.DataAggregate",
             "occurrences": [
               0,
               "UNBOUNDED"
@@ -282,7 +298,7 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
           "uses_backing_data": {
             "capability": "tosca.capabilities.Attachment",
             "node": "cna.qualityModel.entities.BackingData",
-            "relationship": "cna.qualityModel.relationships.AttachesTo.Data",
+            "relationship": "cna.qualityModel.relationships.AttachesTo.BackingData",
             "occurrences": [
               0,
               "UNBOUNDED"
@@ -347,7 +363,7 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
           "uses_backing_data": {
             "capability": "tosca.capabilities.Attachment",
             "node": "cna.qualityModel.entities.BackingData",
-            "relationship": "cna.qualityModel.relationships.AttachesTo.Data",
+            "relationship": "cna.qualityModel.relationships.AttachesTo.BackingData",
             "occurrences": [
               0,
               "UNBOUNDED"
@@ -448,7 +464,7 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
           "uses_data": {
             "capability": "tosca.capabilities.Attachment",
             "node": "cna.qualityModel.entities.DataAggregate",
-            "relationship": "cna.qualityModel.relationships.AttachesTo.Data",
+            "relationship": "cna.qualityModel.relationships.AttachesTo.DataAggregate",
             "occurrences": [
               0,
               "UNBOUNDED"
@@ -459,7 +475,7 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
           "uses_backing_data": {
             "capability": "tosca.capabilities.Attachment",
             "node": "cna.qualityModel.entities.BackingData",
-            "relationship": "cna.qualityModel.relationships.AttachesTo.Data",
+            "relationship": "cna.qualityModel.relationships.AttachesTo.BackingData",
             "occurrences": [
               0,
               "UNBOUNDED"
