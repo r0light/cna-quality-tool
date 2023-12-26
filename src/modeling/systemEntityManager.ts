@@ -81,6 +81,7 @@ class SystemEntityManager {
         let system = importFromServiceTemplate(fileName, stringifiedTOSCA);
         this.overwriteSystemEntity(system);
         this.convertToGraph();
+        this.#currentSystemGraph.trigger("reloaded");
 
         return this.#currentSystemGraph.getCells();
     }

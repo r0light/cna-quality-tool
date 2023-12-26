@@ -75,6 +75,11 @@ const props = defineProps<{
     selectedBackingData: string;
 }>()
 
+const emit = defineEmits<{
+    (e: "update:selectedDataAggregate", selectedDataAggregate: string): void;
+    (e: "update:selectedBackingData", selectedBackingData: string): void;
+}>();
+
 type PropertyGroupSection = {
     groupId: string,
     cardId: string,
@@ -113,7 +118,15 @@ const entityHighlighting = ref((() => {
             labelText: entityType.labelText,
             highlightColour: entityType.highlightColour,
             options: [{ optionValue: "none", optionText: "Choose existing entity..." }],
-            selectedOption: ""
+            selectedOption: ((entityTypeName) => {
+                switch (entityTypeName) {
+                    case EntityTypes.DATA_AGGREGATE:
+                        return props.selectedDataAggregate;
+                    case EntityTypes.BACKING_DATA:
+                        return props.selectedBackingData;
+                    default:
+                        return "none";
+                }})(entityType.type)
         })
     }
     return highlightOptions;
@@ -121,7 +134,6 @@ const entityHighlighting = ref((() => {
 
 
 function refreshHighlightOptions() {
-
     for (let highlightOption of entityHighlighting.value) {
         let updatedOptions = [{ optionValue: "none", optionText: "Choose existing entity..." }];
         let considerableEntites = props.graph.getElements().filter(element => element.prop("entity/type") === highlightOption.selectId);
@@ -153,6 +165,14 @@ function onSelectHighlighOption(highlightOption) {
             entity.attr("body/fill", "white");
         }
     }
+    switch (highlightOption.selectId) {
+        case EntityTypes.DATA_AGGREGATE:
+            emit("update:selectedDataAggregate", highlightOption.selectedOption);
+            break;
+        case EntityTypes.BACKING_DATA:
+            emit("update:selectedDataAggregate", highlightOption.selectedOption);
+            break;
+    }
 }
 
 function preparePropertyGroupSections(exclude: string[]): PropertyGroupSection[] {
@@ -179,6 +199,13 @@ function preparePropertyGroupSections(exclude: string[]): PropertyGroupSection[]
 }
 
 onMounted(() => {
+
+    props.graph.on("resetHighlighting", () => {
+        for (const highlightingType of entityHighlighting.value) {
+            highlightingType.selectedOption = "none";
+            onSelectHighlighOption(highlightingType);
+        }
+    });
 
     props.graph.on("reloaded", () => {
         refreshHighlightOptions();

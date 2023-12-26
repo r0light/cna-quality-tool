@@ -2,7 +2,7 @@
     <div id="app">
         <Toolbar :system-name="currentSystemName" :key="currentSystemName" :paper="(mainPaper as dia.Paper)"
             :graph="(currentSystemGraph as dia.Graph)" :selectedRequestTrace="currentRequestTraceViewSelection"
-            @update:systemName="setCurrentSystemName" @click:exit-request-trace-view="onRequestTraceDeselect"
+            @update:systemName="setCurrentSystemName" @click:exit-request-trace-view="resetRequestTraceSelection"
             @click:print-active-paper="onPrintRequested" @load:fromJson="loadFromJson" @save:toJson="saveToJson"
             @load:fromTosca="loadFromTosca" @save:toTosca="saveToTosca"></Toolbar>
         <div class="app-body">
@@ -16,11 +16,11 @@
                     :currentRequestTraceSelection="currentRequestTraceViewSelection" :printing="printing"
                     @select:Element="(element: dia.CellView | dia.LinkView) => currentSelection = element"
                     @select:RequestTrace="onSelectRequestTrace" @deselect:Element="currentSelection = null"
-                    @deselect:RequestTrace="onRequestTraceDeselect">
+                    @deselect:RequestTrace="resetRequestTraceSelection">
                 </ModelingArea>
             </div>
             <DetailsSidebar :paper="mainPaper" :graph="(currentSystemGraph as dia.Graph)" :selectedEntity="currentSelection"
-                :selectedDataAggregate="currentDataAggregateHighlight" :selectedBackingData="currentBackingDataHightlight">
+                :selectedDataAggregate="currentDataAggregateHighlight" :selectedBackingData="currentBackingDataHightlight" >
             </DetailsSidebar>
         </div>
     </div>
@@ -87,8 +87,8 @@ const mainPaper = ref<dia.Paper>();
 const currentSelection = ref<dia.CellView | dia.LinkView>();
 const currentRequestTraceViewSelection = ref<dia.Element>();
 const printing = ref(false);
-const currentDataAggregateHighlight = ref<string>("");
-const currentBackingDataHightlight = ref<string>("");
+const currentDataAggregateHighlight = ref<string>("none");
+const currentBackingDataHightlight = ref<string>("none");
 
 
 onMounted(() => {
@@ -132,7 +132,18 @@ onMounted(() => {
 
 })
 
+function resetAllHighlighting() {
+    mainPaper.value.trigger('blank:pointerdown');
+    currentSelection.value = null;
+
+    currentSystemGraph.value.trigger('resetHighlighting');
+    
+    resetRequestTraceSelection();
+}
+
 function loadFromJson(jsonString: string, fileName: string): Promise<void> {
+    resetAllHighlighting();
+
     let createdCells = systemEntityManager.loadFromJson(jsonString, fileName);
 
     setCurrentSystemName(systemEntityManager.getSystemEntity().getSystemName);
@@ -141,6 +152,8 @@ function loadFromJson(jsonString: string, fileName: string): Promise<void> {
 }
 
 function saveToJson() {
+    resetAllHighlighting();
+
     let jsonSerializedGraph = systemEntityManager.convertToJson();
 
     // download created yaml taken from https://stackoverflow.com/a/22347908
@@ -151,6 +164,8 @@ function saveToJson() {
 }
 
 function loadFromTosca(yamlString: string, fileName: string): Promise<void> {
+    resetAllHighlighting();
+
     let createdCells = systemEntityManager.loadFromCustomTosca(yamlString, fileName);
 
     setCurrentSystemName(systemEntityManager.getSystemEntity().getSystemName);
@@ -252,10 +267,12 @@ function onSelectRequestTrace(element: dia.Element) {
     }
 }
 
-function onRequestTraceDeselect() {
+function resetRequestTraceSelection() {
 
     //TODO unhighlight all request traces so that this function can be used for the reload
-    unhighlightRequestTrace(currentRequestTraceViewSelection.value);
+    if (currentRequestTraceViewSelection.value) {
+        unhighlightRequestTrace(currentRequestTraceViewSelection.value);
+    }
 
     currentRequestTraceViewSelection.value = null
 
