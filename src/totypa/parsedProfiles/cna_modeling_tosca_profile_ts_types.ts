@@ -10,6 +10,7 @@ export type CnaQualityModelCapabilitiesDataStorage = any
 export type CnaQualityModelEntitiesConnectsToLink = {
     properties?: {
     relation_type: string,
+    timeout: number,
     credential?: ToscaDatatypesCredential,
 },
 attributes?: {
@@ -54,7 +55,8 @@ export type CnaQualityModelEntitiesRootComponent = {
     type: "cna.qualityModel.entities.Root.Component",
                        metadata?: TOSCA_Metadata,
                        properties?: {
-    managed?: string,
+    managed: boolean,
+    software_type: string,
 },
 attributes?: {
     tosca_id?: string,
@@ -167,6 +169,7 @@ export type CnaQualityModelEntitiesComputeInfrastructure = {
     type: "cna.qualityModel.entities.Compute.Infrastructure",
                        metadata?: TOSCA_Metadata,
                        properties?: {
+    managed: boolean,
     availability_zone: string,
     region: string,
 },

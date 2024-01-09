@@ -33,6 +33,12 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
           "type": "string",
           "required": true,
           "description": "Type of relation, e.g. subscribes to or calls"
+        },
+        "timeout": {
+          "type": "integer",
+          "description": "If a timeout is applied for this link, specify it's length here. If no timeout is applied, use 0.",
+          "default": 0,
+          "required": true
         }
       },
       "valid_target_types": [
@@ -93,9 +99,15 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
       "description": "Node Type to model Component entities",
       "properties": {
         "managed": {
+          "type": "boolean",
+          "description": "A component is managed if it is exclusively operated by someone else, e.g. a cloud provider and the source code of the component instance is inaccessible. If the source code of a component can be changed by yourself, the component is not managed",
+          "required": true
+        },
+        "software_type": {
           "type": "string",
-          "description": "A component is managed if it is operated by a cloud provider.",
-          "required": false
+          "description": "The type of the software in the sense of who developed it. If it is a self-written component use \"custom\", if it is an existing open-source solution which is not customized (apart from configuration) use \"open-source\". If it is licensed proprietary software, use \"proprietary\".",
+          "default": "custom",
+          "required": true
         }
       },
       "requirements": [
@@ -337,15 +349,23 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
       "derived_from": "tosca.nodes.Compute",
       "description": "Node Type to model Infrastructure entities",
       "properties": {
+        "managed": {
+          "type": "boolean",
+          "description": "Infrastructure is managed if it is exclusively operated by someone else, e.g. a cloud provider and the source code of the infrastructure instance is inaccessible. If the source code of an infrastructure can be changed by yourself, the infrastructure is not managed.",
+          "required": true,
+          "default": false
+        },
         "availability_zone": {
           "type": "string",
           "required": true,
-          "description": "The name of the availability zone in which this infrastructure is provided."
+          "description": "The name of the availability zone in which this infrastructure is provided. If it is running in multiple availability zones, provide their names as a comma-separated list.",
+          "default": "default-zone"
         },
         "region": {
           "type": "string",
           "required": true,
-          "description": "The name of the region in which this infrastructure is provided."
+          "description": "The name of the region in which this infrastructure is provided.",
+          "default": "default-region"
         }
       },
       "requirements": [

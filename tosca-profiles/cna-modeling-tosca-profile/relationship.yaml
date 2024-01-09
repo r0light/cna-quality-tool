@@ -18,6 +18,11 @@ relationship_types:
         type: string
         required: true
         description: Type of relation, e.g. subscribes to or calls
+      timeout:
+        type: integer
+        description: If a timeout is applied for this link, specify it's length here. If no timeout is applied, use 0.
+        default: 0
+        required: true
     valid_target_types: [ tosca.capabilities.Endpoint, tosca.capabilities.Endpoint.Public]
 
   cna.qualityModel.relationships.Provides.Endpoint:

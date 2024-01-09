@@ -309,8 +309,8 @@ function parseProperties(properties: { [propertyKey: string]: TOSCA_Property }):
                     property.required,
                     255,
                     [],
-                    property.default ? property.default : "",
-                    property.default ? property.default : ""));
+                    property.default !== undefined ? property.default : "",
+                    property.default !== undefined ? property.default : ""));
                 break;
             case "integer":
             case "float": // TODO more specific property?
@@ -321,8 +321,8 @@ function parseProperties(properties: { [propertyKey: string]: TOSCA_Property }):
                     property.required, 
                     Number.MAX_SAFE_INTEGER, 
                     Number.MIN_SAFE_INTEGER, 
-                    property.default ? property.default : "",
-                    property.default ? property.default : ""));
+                    property.default !== undefined ? property.default : "",
+                    property.default !== undefined ? property.default : ""));
                 break;
             case "boolean":
                 parsedProperties.push(new BooleanEntityProperty(key, 
@@ -330,8 +330,8 @@ function parseProperties(properties: { [propertyKey: string]: TOSCA_Property }):
                     property.description ? property.description : "",
                     "", 
                     property.required, 
-                    property.default ? property.default : false,
-                    property.default ? property.default : false));
+                    property.default !== undefined ? property.default : false,
+                    property.default !== undefined ? property.default : false));
                 break;
             case "range":
                 parsedProperties.push(new BoundsEntityProperty(key, 
@@ -339,8 +339,8 @@ function parseProperties(properties: { [propertyKey: string]: TOSCA_Property }):
                     property.description ? property.description : "",
                     "",
                     property.required,
-                    property.default ? property.default : [Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER],
-                    property.default ? property.default : [Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER], 
+                    property.default !== undefined ? property.default : [Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER],
+                    property.default !== undefined ? property.default : [Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER], 
                     ));
                 break;
             case "list":
@@ -349,8 +349,8 @@ function parseProperties(properties: { [propertyKey: string]: TOSCA_Property }):
                     property.description ? property.description : "", 
                     "", 
                     property.required, 
-                    property.default ? property.default : [],
-                    property.default ? property.default : []))
+                    property.default !== undefined ? property.default : [],
+                    property.default !== undefined ? property.default : []))
                 break;
             case "map":
                 parsedProperties.push(new MapEntityProperty(key, 
@@ -358,8 +358,8 @@ function parseProperties(properties: { [propertyKey: string]: TOSCA_Property }):
                     property.description ? property.description : "",
                     "", 
                     property.required, 
-                    property.default ? property.default : {}, 
-                    property.default ? property.default : {}, 
+                    property.default !== undefined ? property.default : {}, 
+                    property.default !== undefined ? property.default : {}, 
                     property.key_schema ? property.key_schema.type : "string",
                     property.key_schema ? property.key_schema.description : "",
                     property.entry_schema ? property.entry_schema.type : "string",
