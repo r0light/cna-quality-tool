@@ -9,7 +9,9 @@
         </div>
         <div v-if="selectedSystemId > -1">
             <p>In development...</p>
-            <p>Number of services:<span> {{ getNumberOfServices(selectedSystemId) }} </span></p>
+            <div v-for="metric of calculatedMetrics">
+                <span>{{ metric.name }}</span>: <span> {{  metric.value }}</span>
+            </div>
         </div>
     </div>
 </template>
@@ -20,29 +22,38 @@ import { ModelingData } from '../App.vue';
 import { Service } from '@/core/entities';
 
 
+type Metric = {
+    name: string,
+    value: any
+}
+
 const props = defineProps<{
     systemsData: ModelingData[],
 }>()
 
-const selectedSystemId = ref<number>(-1)
+const selectedSystemId = ref<number>(-1);
+
+const calculatedMetrics = ref<Metric[]>([]);
 
 function onSelectSystem() {
 
-    // start metric calculation here?
-}
-
-function getNumberOfServices(systemId: number) {
-
-    if (systemId === -1) {
-        return;
-    }
-
-    let selectedSystem = props.systemsData.find(system => system.id === systemId);
+    let selectedSystem = props.systemsData.find(system => system.id === selectedSystemId.value);
     let systemEntityManager = toRaw(selectedSystem.entityManager);
 
-    let services = [...systemEntityManager.getSystemEntity().getComponentEntities.entries()].map(entry => entry[1]).filter(entity => entity.constructor.name === Service.name);
+    // start metric calculation here?
+    calculatedMetrics.value.length = 0;
 
-    return services.length;
+    calculatedMetrics.value.push({
+        name: "Number of services",
+        value:  [...systemEntityManager.getSystemEntity().getComponentEntities.entries()].map(entry => entry[1]).filter(entity => entity.constructor.name === Service.name).length
+    });
+
+    calculatedMetrics.value.push({
+        name: "Number of managed components",
+        value: [...systemEntityManager.getSystemEntity().getComponentEntities.entries()].map(entry => entry[1]).filter(entity => entity.getProperties().find(property => property.getKey === "managed").value === true).length
+    })
+
 }
+
 
 </script>
