@@ -2,8 +2,8 @@
 
 import * as fs from 'fs';
 import { getQualityModel } from './QualityModelInstance';
-import { ProductFactor} from './ProductFactor';
-import { QualityAspect } from './QualityAspect';
+import { ProductFactor} from './quamoco/ProductFactor';
+import { QualityAspect } from './quamoco/QualityAspect';
 
 const qualityModel = getQualityModel();
 

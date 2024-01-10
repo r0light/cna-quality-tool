@@ -10,7 +10,7 @@
         <div v-if="selectedSystemId > -1">
             <p>In development...</p>
             <div v-for="metric of calculatedMetrics">
-                <span>{{ metric.name }}</span>: <span> {{  metric.value }}</span>
+                <span>{{ metric.name }}</span>: <span> {{ metric.value }}</span>
             </div>
         </div>
     </div>
@@ -20,6 +20,7 @@
 import { ref, toRaw } from 'vue';
 import { ModelingData } from '../App.vue';
 import { Service } from '@/core/entities';
+import { QualityModelInstance, getQualityModel } from '@/core/qualitymodel/QualityModelInstance';
 
 
 type Metric = {
@@ -31,29 +32,42 @@ const props = defineProps<{
     systemsData: ModelingData[],
 }>()
 
+const qualityModel: QualityModelInstance = getQualityModel();
+
 const selectedSystemId = ref<number>(-1);
 
 const calculatedMetrics = ref<Metric[]>([]);
 
 function onSelectSystem() {
 
+    calculatedMetrics.value.length = 0;
+
+    if (selectedSystemId.value == -1) {
+        return
+    }
+
+    console.time('measure calculation');
+
     let selectedSystem = props.systemsData.find(system => system.id === selectedSystemId.value);
     let systemEntityManager = toRaw(selectedSystem.entityManager);
 
-    // start metric calculation here?
-    calculatedMetrics.value.length = 0;
+    for (const measure of qualityModel.measures) {
 
-    calculatedMetrics.value.push({
-        name: "Number of services",
-        value:  [...systemEntityManager.getSystemEntity().getComponentEntities.entries()].map(entry => entry[1]).filter(entity => entity.constructor.name === Service.name).length
-    });
+        if (measure.isCalculationAvailable()) {
+            calculatedMetrics.value.push({
+                name: measure.getName,
+                value: measure.calculate(systemEntityManager.getSystemEntity())
+            });
 
-    calculatedMetrics.value.push({
-        name: "Number of managed components",
-        value: [...systemEntityManager.getSystemEntity().getComponentEntities.entries()].map(entry => entry[1]).filter(entity => entity.getProperties().find(property => property.getKey === "managed").value === true).length
-    })
+        } else {
+            // console.log(`Could not calculate metric ${measure.getName}`);
+        }
+
+
+    }
+
+    console.timeEnd('measure calculation');
 
 }
-
 
 </script>

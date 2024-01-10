@@ -1,7 +1,7 @@
 import { QualityModelInstance } from "../core/qualitymodel/QualityModelInstance";
 import { dia } from "jointjs";
 import { QualityAspectElement } from "./config/elementShapes";
-import { QualityAspect } from "../core/qualitymodel/QualityAspect";
+import { QualityAspect } from "../core/qualitymodel/quamoco/QualityAspect";
 
 
 export function orderQualityAspects(qualityAspectElements: dia.Element[], qualityModel: QualityModelInstance) {

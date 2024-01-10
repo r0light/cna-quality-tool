@@ -1,13 +1,14 @@
-import { HighLevelAspect } from "./HighLevelAspect";
-import { Impact, ImpactType } from "./Impact";
-import { Measure } from "./Measure";
-import { ProductFactor } from "./ProductFactor";
-import { QualityAspect } from "./QualityAspect";
-import { entities } from "./entities";
-import { qualityModel } from "./qualitymodel";
-import { literature } from "./literature";
-import { LiteratureSource } from "./LiteratureSource";
-import { Entity } from "./Entity";
+import { HighLevelAspect } from "./quamoco/HighLevelAspect";
+import { Impact, ImpactType } from "./quamoco/Impact";
+import { Measure } from "./quamoco/Measure";
+import { ProductFactor } from "./quamoco/ProductFactor";
+import { QualityAspect } from "./quamoco/QualityAspect";
+import { entities } from "./specifications/entities";
+import { qualityModel } from "./specifications/qualitymodel";
+import { literature } from "./specifications/literature";
+import { LiteratureSource } from "./quamoco/LiteratureSource";
+import { Entity } from "./quamoco/Entity";
+import { measureImplementations } from "./measureImplementations";
 
 
 function getQualityModel(): QualityModelInstance {
@@ -30,6 +31,21 @@ function getQualityModel(): QualityModelInstance {
         }
     }
 
+    // add all Measures
+    for (const [measureKey, measure] of Object.entries(qualityModel.measures)) {
+        let newMeasure = new Measure(measureKey, measure.name, "", measure.calculation);
+        measure.sources.forEach(sourceKey => {
+            let url = literature[sourceKey] ? literature[sourceKey].url : "";
+            newMeasure.addSource(new LiteratureSource(sourceKey, "", url));
+        });
+        if (measureImplementations[measureKey]) {
+            newMeasure.addCalculation(measureImplementations[measureKey]);
+        } else {
+            //console.log(`No measure implementation found for measure ${measureKey}`);
+        }
+        newQualityModel.measures.push(newMeasure);
+    }
+
     // add all Product Factors
     for (const [productFactorKey, productFactor] of Object.entries(qualityModel.productFactors)) {
         let newProductFactor = new ProductFactor(productFactorKey, productFactor.name, productFactor.description);
@@ -40,14 +56,9 @@ function getQualityModel(): QualityModelInstance {
         });
 
         for (const measureKey of productFactor.measures) {
-            let foundMeasure = qualityModel.measures[measureKey];
+            let foundMeasure = newQualityModel.findMeasure(measureKey);
             if (foundMeasure) {
-                let newMeasure = new Measure(measureKey, foundMeasure.name, "", foundMeasure.calculation);
-                foundMeasure.sources.forEach(sourceKey => {
-                    let url = literature[sourceKey] ? literature[sourceKey].url : "";
-                    newMeasure.addSource(new LiteratureSource(sourceKey, "", url));
-                })
-                newProductFactor.addMeasure(newMeasure);
+                newProductFactor.addMeasure(foundMeasure);
             } else {
                 throw Error("No measure with key " + measureKey + " could be found, please check the quality model definition.")
             }
@@ -115,6 +126,8 @@ class QualityModelInstance {
 
     impacts: Impact[];
 
+    measures: Measure[];
+
     entities: Entity[];
 
     constructor() {
@@ -122,6 +135,7 @@ class QualityModelInstance {
         this.qualityAspects = [];
         this.productFactors = [];
         this.impacts = [];
+        this.measures = [];
         this.entities = [];
     }
 
@@ -131,6 +145,10 @@ class QualityModelInstance {
 
     findProductFactor(productFactorKey: string) {
         return this.productFactors.find(pf => pf.getId === productFactorKey);
+    }
+
+    findMeasure(measureKey: string) {
+        return this.measures.find(m => m.getId === measureKey);
     }
 
     findEntity(entityKey: string) {

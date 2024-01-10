@@ -65,9 +65,9 @@ import { ref, onMounted, onUpdated, watch, Ref, ComputedRef, computed } from 'vu
 import { dia, shapes, util, highlighters } from "jointjs";
 import { QualityAspectElement, ProductFactorElement, ImpactElement, quamocoShapes } from './config/elementShapes';
 import { getQualityModel } from '@/core/qualitymodel/QualityModelInstance';
-import { ProductFactor } from '@/core/qualitymodel/ProductFactor';
-import { QualityAspect } from '@/core/qualitymodel/QualityAspect';
-import { entities } from '@/core/qualitymodel/entities';
+import { ProductFactor } from '@/core/qualitymodel/quamoco/ProductFactor';
+import { QualityAspect } from '@/core/qualitymodel/quamoco/QualityAspect';
+import { entities } from '@/core/qualitymodel/specifications/entities';
 import { orderQualityAspects, placeProductFactors, placeQualityAspects } from './placementAlgorithm';
 
 let initialized = true;
