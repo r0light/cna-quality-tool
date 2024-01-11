@@ -1,7 +1,9 @@
+import { ProductFactorEvaluation, ProductFactorEvaluationResult } from "./ProductFactorEvaluation";
 import { Impact } from "./Impact";
 import { LiteratureSource } from "./LiteratureSource";
 import { Measure } from "./Measure";
 import { QualityAspect } from "./QualityAspect";
+import { System } from "@/core/entities";
 
 class ProductFactor {
 
@@ -11,6 +13,7 @@ class ProductFactor {
     #relevantEntities: string[];
     #sources: LiteratureSource[];
     #measures: Measure[];
+    #evaluation: ProductFactorEvaluation;
 
     #outgoingImpacts: Impact[];
     #incomingImpacts: Impact[];
@@ -22,6 +25,7 @@ class ProductFactor {
         this.#relevantEntities = [];
         this.#sources = [];
         this.#measures = [];
+        this.#evaluation = undefined;
         this.#outgoingImpacts = [];
         this.#incomingImpacts = [];
     }
@@ -82,12 +86,33 @@ class ProductFactor {
         this.#incomingImpacts.push(impact);
     }
 
+    addEvaluation(evaluation: ProductFactorEvaluation) {
+        this.#evaluation = evaluation;
+    }
+
     getImpactedFactors(): (ProductFactor | QualityAspect)[] {
         return this.#outgoingImpacts.map(impact => impact.getImpactedFactor);
     }
 
     getImpactingFactors(): ProductFactor[] {
         return this.#incomingImpacts.map(impact => impact.getSourceFactor);
+    }
+
+    getMeasure(measureKey: string) {
+        let measure = this.#measures.find(measure => measure.getId === measureKey);
+        if (measure) {
+            return measure;
+        } else {
+            throw new Error (`Measure ${measureKey} not found for product factor ${this.#id}`);
+        }
+    }
+
+    isEvaluationAvailable(): boolean {
+        return this.#evaluation !== undefined;
+    }
+
+    evaluate(system: System): ProductFactorEvaluationResult {
+        return this.#evaluation.evaluate(system);
     }
 
 }

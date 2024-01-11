@@ -8,7 +8,8 @@ import { qualityModel } from "./specifications/qualitymodel";
 import { literature } from "./specifications/literature";
 import { LiteratureSource } from "./quamoco/LiteratureSource";
 import { Entity } from "./quamoco/Entity";
-import { measureImplementations } from "./measureImplementations";
+import { measureImplementations, productFactorEvaluationImplementation } from "./evaluationImplementation";
+import { ProductFactorEvaluation } from "./quamoco/ProductFactorEvaluation";
 
 
 function getQualityModel(): QualityModelInstance {
@@ -110,6 +111,26 @@ function getQualityModel(): QualityModelInstance {
         impacted.addIncomingImpact(newImpact);
         impacter.addOutgoingImpact(newImpact);
         newQualityModel.impacts.push(newImpact);
+    }
+
+    // add all product factor evaluations
+    for (const productFactorEvaluation of qualityModel.productFactorEvaluations) {
+
+        let evaluatedProductFactor = newQualityModel.findProductFactor(productFactorEvaluation.targetFactor);
+        if (evaluatedProductFactor) {
+
+            let newEvaluation = new ProductFactorEvaluation(evaluatedProductFactor, productFactorEvaluation.reasoning);
+            let availableImplementation = productFactorEvaluationImplementation[evaluatedProductFactor.getId]
+            if (availableImplementation) {
+                newEvaluation.addEvaluation(availableImplementation);
+                evaluatedProductFactor.addEvaluation(newEvaluation);
+            } else {
+                console.log(`No evaluation implementation found for evaluation of factor ${evaluatedProductFactor.getId}`);
+            }
+        } else {
+            throw new Error(`There is no product factor with key ${productFactorEvaluation.targetFactor}`);
+        }
+
     }
 
     return newQualityModel;

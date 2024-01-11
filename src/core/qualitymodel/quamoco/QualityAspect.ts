@@ -1,5 +1,6 @@
 import { Impact } from "./Impact";
 import { ProductFactor } from "./ProductFactor";
+import { QualityAspectEvaluation, QualityAspectEvaluationResult } from "./QualityAspectEvaluation";
 
 class QualityAspect {
 
@@ -7,6 +8,7 @@ class QualityAspect {
     #name: string;
     #highLevelAspectKey: string;
     #description: string;
+    #evaluation: QualityAspectEvaluation;
 
     #incomingImpacts: Impact[];
 
@@ -46,9 +48,22 @@ class QualityAspect {
         this.#incomingImpacts.push(impact);
     }
 
+    addEvaluation(evaluation: QualityAspectEvaluation) {
+        this.#evaluation = evaluation;
+    }
+
     getImpactingFactors(): ProductFactor[] {
         return this.#incomingImpacts.map(impact => impact.getSourceFactor);
     }
+
+    isEvaluationAvailable(): boolean {
+        return this.#evaluation !== undefined;
+    }
+
+    evaluate(): QualityAspectEvaluationResult {
+        return this.#evaluation.evaluate();
+    }
+
 
 }
 

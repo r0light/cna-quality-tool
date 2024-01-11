@@ -1392,5 +1392,13 @@ export const qualityModel = {
             "calculation": "",
             "sources": ["Shim2008", "Hofmeister2008"]
         }
-    }
+    },
+    "productFactorEvaluations": [
+        {
+            "targetFactor": "serviceReplication",
+            "reasoning": "TODO write a suitable reasoning"
+        },
+    ],
+    "qualityAspectEvaluations": [
+    ]
 }
