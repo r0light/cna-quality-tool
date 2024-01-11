@@ -3,7 +3,7 @@ import { ProductFactor } from "./ProductFactor";
 
 type NumericResult = number;
 type OrdinalResult = "none" | "low" | "high";
-type ProductFactorEvaluationResult = NumericResult | OrdinalResult;
+type ProductFactorEvaluationResult = NumericResult | OrdinalResult | "n/a";
 
 type ProductFactorEvaluationFunction = (factor: ProductFactor, system: System) => ProductFactorEvaluationResult;
 

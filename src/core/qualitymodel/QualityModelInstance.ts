@@ -8,8 +8,9 @@ import { qualityModel } from "./specifications/qualitymodel";
 import { literature } from "./specifications/literature";
 import { LiteratureSource } from "./quamoco/LiteratureSource";
 import { Entity } from "./quamoco/Entity";
-import { measureImplementations, productFactorEvaluationImplementation } from "./evaluationImplementation";
+import { productFactorEvaluationImplementation } from "./evaluationImplementations";
 import { ProductFactorEvaluation } from "./quamoco/ProductFactorEvaluation";
+import { measureImplementations } from "./measureImplementations";
 
 
 function getQualityModel(): QualityModelInstance {

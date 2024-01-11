@@ -73,9 +73,9 @@ import { orderQualityAspects, placeProductFactors, placeQualityAspects } from '.
 let initialized = true;
 let doRearrange = false;
 const props = defineProps<{
-    inView: Boolean,
+    active: boolean,
 }>()
-const watchInView = computed(() => props.inView);
+const watchInView = computed(() => props.active);
 
 const qmContainer = ref<HTMLElement>(null);
 const qmPaper = ref<HTMLElement>(null)

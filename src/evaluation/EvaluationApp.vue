@@ -20,7 +20,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, toRaw } from 'vue';
+import { onUpdated, ref, toRaw } from 'vue';
 import { ModelingData } from '../App.vue';
 import { QualityModelInstance, getQualityModel } from '@/core/qualitymodel/QualityModelInstance';
 
@@ -32,6 +32,7 @@ type Metric = {
 
 const props = defineProps<{
     systemsData: ModelingData[],
+    active: boolean
 }>()
 
 const qualityModel: QualityModelInstance = getQualityModel();
@@ -40,7 +41,20 @@ const selectedSystemId = ref<number>(-1);
 
 const calculatedMetrics = ref<Metric[]>([]);
 
-const evaluatedProductFactors = ref<{name: string, result: any}[]>([]);
+const evaluatedProductFactors = ref<{ name: string, result: any }[]>([]);
+
+var refresh = true;
+
+onUpdated(() => {
+    if (props.active) {
+        if (refresh) {
+            refresh = false;
+            onSelectSystem();
+        }
+    } else {
+        refresh = true;
+    }
+})
 
 function onSelectSystem() {
 

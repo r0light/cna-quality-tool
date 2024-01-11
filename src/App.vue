@@ -95,9 +95,9 @@
       <div v-show="currentPage > 0" v-for="pageContent of pages" class="pageWrapper">
         <Home v-if="pageContent.pageType === 'home'" v-show="currentPage === pageContent.id"></Home>
         <QualityModelApp v-if="pageContent.pageType === 'qualityModel'" v-show="currentPage === pageContent.id"
-          :inView="currentPage === pageContent.id"></QualityModelApp>
+          :active="pageContent.active"></QualityModelApp>
         <EvaluationApp v-if="pageContent.pageType === 'evaluation'" v-show="currentPage === pageContent.id"
-          :systemsData="sharedSystemsData"></EvaluationApp>
+          :systemsData="sharedSystemsData" :active="pageContent.active"></EvaluationApp>
         <ModelingApp v-if="pageContent.pageType === 'modeling'"
           v-show="pageContent.pageType === 'modeling' && currentPage === pageContent.id" :systemName="pageContent.name"
           :pageId="pageContent.id"
@@ -228,19 +228,20 @@ function importModelFromFile() {
   fr.readAsText(selectedFile.value.files[0]);
 }
 
-function waitForLoadedToResolve(modelingDataId: number, resolve) {
+function waitForLoadedToResolve(modelingDataId: number, resolve: () => void) {
 
   for (let i = 0; i < modeledSystemsData.value.length; i++) {
-    if (modeledSystemsData.value[i].id === modelingDataId
-      && modeledSystemsData.value[i].importDone) {
-      resolve();
-      return;
+    if (modeledSystemsData.value[i].id === modelingDataId) {
+      if (modeledSystemsData.value[i].importDone) {
+        resolve();
+        return;
+      } else {
+        setTimeout(() => {
+          waitForLoadedToResolve(modelingDataId, resolve);
+        }, 2000); //TODO with 2 seconds all seems to work reasonably well, but it is not really a satisfying solution
+      }
     }
   }
-
-  setTimeout(() => {
-    waitForLoadedToResolve(modelingDataId, resolve);
-  }, 2000); //TODO with 2 seconds all seems to work reasonably well, but it is not really a satisfying solution
 }
 
 onMounted(() => {

@@ -1,7 +1,7 @@
 import { System } from "@/core/entities";
 import { LiteratureSource } from "./LiteratureSource";
 
-type Calculation = (system: System) => any;
+type Calculation = (system: System) => number | string | "n/a";
 
 class Measure {
 

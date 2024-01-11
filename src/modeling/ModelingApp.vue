@@ -20,7 +20,7 @@
                 </ModelingArea>
             </div>
             <DetailsSidebar :paper="mainPaper" :graph="(currentSystemGraph as dia.Graph)" :selectedEntity="currentSelection"
-                :selectedDataAggregate="currentDataAggregateHighlight" :selectedBackingData="currentBackingDataHightlight" >
+                :selectedDataAggregate="currentDataAggregateHighlight" :selectedBackingData="currentBackingDataHightlight">
             </DetailsSidebar>
         </div>
     </div>
@@ -90,6 +90,23 @@ const printing = ref(false);
 const currentDataAggregateHighlight = ref<string>("none");
 const currentBackingDataHightlight = ref<string>("none");
 
+/*
+function startWaitingForPaperToBeVisible(): Promise<void> {
+    return new Promise((resolve, reject) => {
+        waitForPaperToBeVisible(resolve);
+    })
+}
+
+function waitForPaperToBeVisible(resolve: () => void) {
+
+    console.log(`paper of ${props.systemName} is visible? ${mainPaper.value.$el.is(':visible')}`);
+    if (mainPaper.value.$el.is(':visible')) {
+        resolve();
+    } else {
+        setTimeout(waitForPaperToBeVisible.bind(this, resolve), 100);
+    }
+}
+*/
 
 onMounted(() => {
 
@@ -137,7 +154,7 @@ function resetAllHighlighting() {
     currentSelection.value = null;
 
     currentSystemGraph.value.trigger('resetHighlighting');
-    
+
     resetRequestTraceSelection();
 }
 
@@ -148,7 +165,7 @@ function loadFromJson(jsonString: string, fileName: string): Promise<void> {
 
     setCurrentSystemName(systemEntityManager.getSystemEntity().getSystemName);
 
-    return ensureCorrectRendering(createdCells.filter(cell => cell.isElement()) as dia.Element[]);
+    return ensureCorrectRendering(createdCells);
 }
 
 function saveToJson() {
@@ -170,48 +187,68 @@ function loadFromTosca(yamlString: string, fileName: string): Promise<void> {
 
     setCurrentSystemName(systemEntityManager.getSystemEntity().getSystemName);
 
-    return ensureCorrectRendering(createdCells.filter(cell => cell.isElement()) as dia.Element[]);
+    return ensureCorrectRendering(createdCells);
 
 }
 
-function ensureCorrectRendering(createdElements: dia.Element[]): Promise<void> {
+/*
+function waitForCellToBeVisible(cell: dia.CellView, resolve: () => void) {
+    if (cell.$el.is(':visible')) {
+        resolve()
+    } else {
+        setTimeout(waitForCellToBeVisible.bind(this, cell, resolve), 100);
+    }
+}
+*/
+
+function ensureCorrectRendering(createdCells: dia.Cell[]): Promise<void> {
     return new Promise<void>((outerResolve, outerReject) => {
 
         let cellsRendered = [];
 
-        for (const element of createdElements) {
+        for (const cell of createdCells) {
 
             let cellRendered = Promise.resolve();
 
-            // resize element to a different size and that to the wanted size again, to rerender the bounding box and ensure that it has the right size
+            if (cell.isElement()) {
 
-            let wantedWidth = element.prop("size/width");
-            let wantedHeight = element.prop("size/height");
-            cellsRendered.push(
-                cellRendered.then(() => {
-                    return new Promise<void>((resolve, reject) => {
-                        //element.resize(element.prop("defaults/size").width, element.prop("defaults/size").height);
-                        element.resize(wantedWidth + 10, wantedHeight + 10);
-                        setTimeout(() => {
-                            resolve();
-                        }, 100)
+                // resize element to a different size and that to the wanted size again, to rerender the bounding box and ensure that it has the right size
+                let wantedWidth = cell.prop("size/width");
+                let wantedHeight = cell.prop("size/height");
+                cellsRendered.push(
+                    cellRendered.then(() => {
+                        return new Promise<void>((resolve, reject) => {
+                            //element.resize(element.prop("defaults/size").width, element.prop("defaults/size").height);
+                            (cell as dia.Element).resize(wantedWidth + 10, wantedHeight + 10);
+                            setTimeout(() => {
+                                resolve();
+                            }, 100)
+                        })
+                    }).then(() => {
+                        return new Promise<void>((resolve, reject) => {
+                            (cell as dia.Element).resize(wantedWidth, wantedHeight);
+                            setTimeout(() => {
+                                resolve();
+                            }, 100)
+                        });
+                    }).then(() => {
+                        return new Promise<void>((resolve, reject) => {
+                            addSelectionToolToEntity(mainPaper.value.requireView(cell as dia.Element).model, mainPaper.value);
+                            setTimeout(() => {
+                                resolve();
+                            }, 100)
+                        });
                     })
-                }).then(() => {
-                    return new Promise<void>((resolve, reject) => {
-                        element.resize(wantedWidth, wantedHeight);
-                        setTimeout(() => {
-                            resolve();
-                        }, 100)
-                    });
-                }).then(() => {
-                    return new Promise<void>((resolve, reject) => {
-                        addSelectionToolToEntity(mainPaper.value.requireView(element).model, mainPaper.value);
-                        setTimeout(() => {
-                            resolve();
-                        }, 100)
-                    });
-                })
-            );
+                );
+            } /*else if (cell.isLink) {
+                cellsRendered.push(
+                    cellRendered.then(() => {
+                        return new Promise<void>((resolve, reject) => {
+                            waitForCellToBeVisible(cell.findView(mainPaper.value), resolve);
+                        })
+                    })  
+                )
+            } */
         }
 
         Promise.all(cellsRendered).then(() => {
