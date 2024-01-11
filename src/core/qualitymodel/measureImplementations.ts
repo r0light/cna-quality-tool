@@ -7,7 +7,6 @@ const average: (list: number[]) => number = list => {
 
 const measureImplementations: { [measureKey: string]: Calculation } = {
     "serviceReplicationLevel": (system) => {
-
         let services = [...system.getComponentEntities.entries()]
             .map(entry => entry[1])
             .filter(entity => entity.constructor.name === Service.name);

@@ -77,12 +77,9 @@ function onSelectSystem() {
                 name: measure.getName,
                 value: measure.calculate(systemEntityManager.getSystemEntity())
             });
-
         } else {
             // console.log(`Could not calculate metric ${measure.getName}`);
         }
-
-
     }
 
     for (const productFactor of qualityModel.productFactors) {
