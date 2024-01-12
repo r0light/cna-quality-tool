@@ -13,6 +13,7 @@ class Impact {
         this.#impactedFactor = impactedFactor;
         this.#sourceFactor = sourceFactor;
         this.#impactType = impactType;
+
     }
 
     get getImpactedFactor() {
