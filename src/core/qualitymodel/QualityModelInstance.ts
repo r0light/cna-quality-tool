@@ -50,7 +50,10 @@ function getQualityModel(): QualityModelInstance {
 
     // add all Product Factors
     for (const [productFactorKey, productFactor] of Object.entries(qualityModel.productFactors)) {
-        let newProductFactor = new ProductFactor(productFactorKey, productFactor.name, productFactor.description);
+        let newProductFactor = new ProductFactor(productFactorKey, productFactor.name, productFactor.description, productFactor.categories);
+
+        //TODO also add categories and explicit attribute of categories to quality model?
+
         productFactor.relevantEntities.forEach(entity => newProductFactor.addRelevantEntity(entity));
         productFactor.sources.forEach(source => {
             let url = literature[source.key] ? literature[source.key].url : "";

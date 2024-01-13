@@ -10,6 +10,7 @@ class ProductFactor {
     #id: string;
     #name: string;
     #description: string;
+    #categories: string[];
     #relevantEntities: string[];
     #sources: LiteratureSource[];
     #measures: Measure[];
@@ -18,10 +19,11 @@ class ProductFactor {
     #outgoingImpacts: Impact[];
     #incomingImpacts: Impact[];
 
-    constructor(id: string, name: string, description: string) {
+    constructor(id: string, name: string, description: string, categories: string[]) {
         this.#id = id;
         this.#name = name;
         this.#description = description;
+        this.#categories = categories;
         this.#relevantEntities = [];
         this.#sources = [];
         this.#measures = [];
@@ -44,6 +46,10 @@ class ProductFactor {
 
     get getDescription() {
         return this.#description;
+    }
+
+    get getCategories() {
+        return this.#categories;
     }
 
     get getRelevantEntities(): string[] {
