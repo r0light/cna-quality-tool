@@ -1,4 +1,4 @@
-import { QualityAspect } from "./QualityAspect";
+import { QualityAspect } from "../quamoco/QualityAspect";
 
 type QualityAspectEvaluationResult = string //TODO what to do here?
 

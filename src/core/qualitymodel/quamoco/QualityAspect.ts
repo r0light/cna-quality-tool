@@ -1,6 +1,6 @@
 import { Impact } from "./Impact";
 import { ProductFactor } from "./ProductFactor";
-import { QualityAspectEvaluation, QualityAspectEvaluationResult } from "./QualityAspectEvaluation";
+import { QualityAspectEvaluation, QualityAspectEvaluationResult } from "../evaluation/QualityAspectEvaluation";
 
 class QualityAspect {
 

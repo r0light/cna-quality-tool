@@ -1,5 +1,5 @@
-import { Service } from "../entities";
-import { Calculation } from "./quamoco/Measure";
+import { Service } from "../../entities";
+import { Calculation } from "../quamoco/Measure";
 
 const average: (list: number[]) => number = list => {
     return list.reduce((e1, e2) => e1 + e2, 0) / list.length

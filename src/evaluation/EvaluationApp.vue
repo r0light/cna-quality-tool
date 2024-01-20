@@ -29,13 +29,13 @@
                                 impact.impactedFactorName }}</span>
                         </div>
                         <p>Relevant measures:</p>
-                        <div v-for="measure of productFactor.measures">
+                        <div v-for="[key, measure] of productFactor.measures">
                             <span>{{ measure.name }}</span>: <span> {{ measure.value }}</span>
                         </div>
                     </div>
 
                 </div>
-                <div v-for="calculatedMeasure of calculatedMeasures">
+                <div v-for="[key, calculatedMeasure] of calculatedMeasures">
                     <span>{{ calculatedMeasure.name }}</span>: <span> {{ calculatedMeasure.value }}</span>
                 </div>
             </div>
@@ -47,50 +47,7 @@
 import { onUpdated, ref, toRaw } from 'vue';
 import { ModelingData } from '../App.vue';
 import { QualityModelInstance, getQualityModel } from '@/core/qualitymodel/QualityModelInstance';
-import { ProductFactorEvaluationResult } from '@/core/qualitymodel/quamoco/ProductFactorEvaluation';
-import { Impact } from '@/core/qualitymodel/quamoco/Impact';
-import { QualityAspectEvaluationResult } from '@/core/qualitymodel/quamoco/QualityAspectEvaluation';
-import { ProductFactor } from '@/core/qualitymodel/quamoco/ProductFactor';
-import { QualityAspect } from '@/core/qualitymodel/quamoco/QualityAspect';
-
-
-type CalculatedMeasure = {
-    name: string,
-    value: number | string | "n/a";
-}
-
-type EvaluatedProductFactor = {
-    id: string,
-    name: string,
-    productFactor: ProductFactor,
-    result: ProductFactorEvaluationResult,
-    measures: CalculatedMeasure[],
-    impacts: ForwardImpactingPath[]
-}
-
-type EvaluatedQualityAspect = {
-    id: string,
-    name: string,
-    qualityAspect: QualityAspect,
-    result: QualityAspectEvaluationResult,
-    impacts: BackwardImpactingPath[]
-}
-
-type ForwardImpactingPath = {
-    impactedFactorKey: string,
-    impactedFactorName: string,
-    impactType: string,
-    weight: string,
-    impactedFactor?: EvaluatedProductFactor | EvaluatedQualityAspect
-}
-
-type BackwardImpactingPath = {
-    impactingFactorKey: string,
-    impactingFactorName: string,
-    impactType: string,
-    weight: string,
-    impactingFactor: EvaluatedProductFactor
-}
+import { CalculatedMeasure, EvaluatedProductFactor, EvaluatedQualityAspect, EvaluatedSystemModel } from '@/core/qualitymodel/evaluation/EvaluatedSystemModel';
 
 const props = defineProps<{
     systemsData: ModelingData[],
@@ -103,11 +60,11 @@ const selectedSystemId = ref<number>(-1);
 
 const selectedViewpoint = ref<"perQualityAspect" | "perProductFactor">("perProductFactor");
 
-const calculatedMeasures = ref<CalculatedMeasure[]>([]);
+const calculatedMeasures = ref<Map<string,CalculatedMeasure>>(new Map());
 
 const evaluatedProductFactors = ref<Map<string, EvaluatedProductFactor>>(new Map());
 
-const notImplementedProductFactors = ref<Map<string, ProductFactor>>(new Map());
+const evaluatedQualityAspects = ref<Map<string, EvaluatedQualityAspect>>(new Map());
 
 var refresh = true;
 
@@ -128,85 +85,37 @@ function onSelectViewpoint() {
 
 function onSelectSystem() {
 
-    calculatedMeasures.value.length = 0;
+    calculatedMeasures.value.clear();
     evaluatedProductFactors.value.clear();
+    evaluatedQualityAspects.value.clear();
 
     if (selectedSystemId.value == -1) {
         return
     }
 
-    console.time('measure calculation');
-
     let selectedSystem = props.systemsData.find(system => system.id === selectedSystemId.value);
     let systemEntityManager = toRaw(selectedSystem.entityManager);
     let currentSystemEntity = systemEntityManager.getSystemEntity();
 
-    /*
-    for (const measure of qualityModel.measures) {
+    let evaluatedSystem = new EvaluatedSystemModel(currentSystemEntity, qualityModel);
 
-        if (measure.isCalculationAvailable()) {
-            calculatedMeasures.value.push({
-                name: measure.getName,
-                value: measure.calculate(systemEntityManager.getSystemEntity())
-            });
-        } else {
-            // console.log(`Could not calculate metric ${measure.getName}`);
-        }
-    }
-    */
+    console.time('evaluation');
 
-    let factorsToEvaluate = qualityModel.productFactors.slice(0);
+    evaluatedSystem.evaluate();
 
-    factorLoop: while (factorsToEvaluate.length > 0) {
-        let currentFactor = factorsToEvaluate[0];
+    evaluatedSystem.getCalculatedMeasures.forEach((value, key, map) => {
+        calculatedMeasures.value.set(key, value);
+    });
 
-        // if the current factor has impacting factors and any of these has not been evaluated yet, skip the current factor and try again later
-        for (const impactingFactor of currentFactor.getImpactingFactors()) {
-            if (!evaluatedProductFactors.value.has(impactingFactor.getId) && !notImplementedProductFactors.value.has(impactingFactor.getId)) {
-                factorsToEvaluate.push(factorsToEvaluate.splice(0, 1)[0]);
-                continue factorLoop;
-            }
-        }
+    evaluatedSystem.getEvaluatedProductFactors.forEach((value, key, map) => {
+        evaluatedProductFactors.value.set(key, value);
+    });
 
-        // TODO: temporarily ignore factors for which no evaluation is available
-        if (!currentFactor.isEvaluationAvailable()) {
-            notImplementedProductFactors.value.set(currentFactor.getId, currentFactor);
-            factorsToEvaluate.splice(0, 1);
-            continue factorLoop;
-        }
+    evaluatedSystem.getEvaluatedQualityAspects.forEach((value, key, map) => {
+        evaluatedQualityAspects.value.set(key, value);
+    });
 
-        let evaluatedProductFactor = {
-            id: currentFactor.getId,
-            name: currentFactor.getName,
-            productFactor: currentFactor,
-            result: currentFactor.evaluate(currentSystemEntity),
-            measures: currentFactor.getMeasures.filter(measure => measure.isCalculationAvailable())
-                .map(measure => {
-                    return {
-                        name: measure.getName,
-                        value: measure.calculate(currentSystemEntity)
-                    }
-                }),
-            impacts: []
-        }
-
-        for (const impact of currentFactor.getOutgoingImpacts) {
-            evaluatedProductFactor.impacts.push({
-                impactedFactorKey: impact.getImpactedFactor.getId,
-                impactedFactorName: impact.getImpactedFactor.getName,
-                impactType: impact.getImpactType,
-                weight: "slightly" //TODO properly implement a weight assignment here
-            })
-        }
-
-        // TODO if factor has incoming impacts, set them properly now in the evaluatedProductFactors
-
-        evaluatedProductFactors.value.set(currentFactor.getId, evaluatedProductFactor);
-        factorsToEvaluate.splice(0, 1);
-    }
-
-
-    console.timeEnd('measure calculation');
+    console.timeEnd('evaluation');
 
 }
 

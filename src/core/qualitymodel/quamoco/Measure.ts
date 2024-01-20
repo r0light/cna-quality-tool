@@ -1,7 +1,8 @@
 import { System } from "@/core/entities";
 import { LiteratureSource } from "./LiteratureSource";
 
-type Calculation = (system: System) => number | string | "n/a";
+type MeasureValue = number | string | "n/a";
+type Calculation = (system: System) => MeasureValue;
 
 class Measure {
 
@@ -58,4 +59,4 @@ class Measure {
     }
 }
 
-export { Measure, Calculation }
+export { Measure, MeasureValue, Calculation }

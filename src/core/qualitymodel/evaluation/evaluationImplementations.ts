@@ -1,14 +1,14 @@
-import { ProductFactorEvaluationFunction } from "./quamoco/ProductFactorEvaluation";
-import { QualityAspectEvaluationFunction } from "./quamoco/QualityAspectEvaluation";
-import { ProductFactor } from "./quamoco/ProductFactor";
-import { System } from "../entities";
+import { ProductFactorEvaluationFunction } from "./ProductFactorEvaluation";
+import { QualityAspectEvaluationFunction } from "./QualityAspectEvaluation";
+import { ProductFactor } from "../quamoco/ProductFactor";
+import { CalculatedMeasure, EvaluatedProductFactor } from "./EvaluatedSystemModel";
 
 
 const productFactorEvaluationImplementation: {
     [factorKey: string]: ProductFactorEvaluationFunction
 } = {
-    "serviceReplication": (factor: ProductFactor, system: System) => {
-        let serviceReplicationLevel = factor.getMeasure("serviceReplicationLevel").calculate(system);
+    "serviceReplication": (factor: ProductFactor, calculatedMeasures: Map<string, CalculatedMeasure>, evaluatedProductFactors: Map<string, EvaluatedProductFactor>) => {
+        let serviceReplicationLevel = calculatedMeasures.get("serviceReplicationLevel").value;
         if (serviceReplicationLevel === "n/a") {
             return "n/a";
         } else if (typeof serviceReplicationLevel === "number") {
