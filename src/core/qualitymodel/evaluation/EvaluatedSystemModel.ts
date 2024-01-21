@@ -12,20 +12,22 @@ type CalculatedMeasure = {
     value: MeasureValue
 }
 
-type ImpactWeight = "negative" | "slightly negative" | "neutral" | "slightly positive" | "positive";
+type ImpactWeight = "negative" | "slightly negative" | "neutral" | "slightly positive" | "positive" | "n/a";
 
 type EvaluatedProductFactor = {
     id: string,
     name: string,
+    factorType: 'productFactor', //TODO has to be "productFactor"
     productFactor: ProductFactor,
     result: ProductFactorEvaluationResult,
     measures: Map<string, CalculatedMeasure>,
-    impacts: ForwardImpactingPath[]
+    impacts: ForwardImpactingPath[] //TODO | BackwardImpactingPath[] ?
 }
 
 type EvaluatedQualityAspect = {
     id: string,
     name: string,
+    factorType: 'qualityAspect',  //TODO has to be "qualityAspect"
     qualityAspect: QualityAspect,
     result: QualityAspectEvaluationResult,
     impacts: BackwardImpactingPath[]
@@ -99,6 +101,7 @@ class EvaluatedSystemModel {
                 continue factorLoop;
             }
 
+            // add measures for this factor
             let measuresForThisFactor = new Map();
             currentFactor.getMeasures.forEach(measure => {
                 if (this.#calculatedMeasures.has(measure.getId)) {
@@ -116,6 +119,7 @@ class EvaluatedSystemModel {
             let evaluatedProductFactor = {
                 id: currentFactor.getId,
                 name: currentFactor.getName,
+                factorType: 'productFactor' as const,
                 productFactor: currentFactor,
                 result: currentFactor.evaluate(this),
                 measures: measuresForThisFactor,
@@ -127,11 +131,17 @@ class EvaluatedSystemModel {
                     impactedFactorKey: impact.getImpactedFactor.getId,
                     impactedFactorName: impact.getImpactedFactor.getName,
                     impactType: impact.getImpactType,
-                    weight: "slightly" //TODO properly implement a weight assignment here depeding on evaluatedProductFactor.result
-                })
+                    weight: deriveImpactWeight(evaluatedProductFactor.result, impact.getImpactType)
+                });
             }
     
-            // TODO if factor has incoming impacts, set them properly now in the evaluatedProductFactors
+
+            for (const impact of currentFactor.getIncomingImpacts) {
+                // TODO currently only add them, if they were evaluated
+                if (this.#evaluatedProductFactors.has(impact.getSourceFactor.getId)) {
+                    this.#evaluatedProductFactors.get(impact.getSourceFactor.getId).impacts.find(impact => impact.impactedFactorKey === currentFactor.getId).impactedFactor = evaluatedProductFactor;
+                }
+            }
     
             this.#evaluatedProductFactors.set(currentFactor.getId, evaluatedProductFactor);
             factorsToEvaluate.splice(0, 1);
@@ -146,9 +156,62 @@ class EvaluatedSystemModel {
                 this.#calculatedMeasures.set(measure.getId, calculatedMeasure);
             }
         }) 
+
+        console.log(this);
     
     }
 
 }
 
-export { EvaluatedSystemModel, CalculatedMeasure,EvaluatedProductFactor, EvaluatedQualityAspect }
+// TODO: how to specify this and where to put it?
+function deriveImpactWeight(evaluationResult: ProductFactorEvaluationResult, impactType: ImpactType): ImpactWeight {
+    if (evaluationResult === "n/a") {
+        return "n/a"
+    }
+    if (typeof evaluationResult === "string") {
+        switch(evaluationResult) {
+            case "none":
+                return "neutral";
+            case "low":
+                if (impactType === "+" || impactType === "++") {
+                    return "slightly positive";
+                } else  if (impactType === "--" || impactType === "-") {
+                    return "slightly negative";
+                }
+                break;
+            case "high":
+                if (impactType === "+" || impactType === "++") {
+                    return "positive";
+                } else  if (impactType === "--" || impactType === "-") {
+                    return "negative";
+                }
+                break;
+        }
+    } else if (typeof evaluationResult === "number") {
+        if (evaluationResult === 0) {
+            return "neutral";
+        }
+
+        if (evaluationResult > 0 && evaluationResult < 0.5) {
+            if (impactType === "+" || impactType === "++") {
+                return "slightly positive";
+            } else  if (impactType === "--" || impactType === "-") {
+                return "slightly negative";
+            }
+        }
+
+        if (evaluationResult >= 0.5 && evaluationResult <= 1) {
+            if (impactType === "+" || impactType === "++") {
+                return "positive";
+            } else  if (impactType === "--" || impactType === "-") {
+                return "negative";
+            }
+        }
+
+        // else
+        throw new Error("A numeric evaluation result for a product factor should be between 0 and 1, here it is: " + evaluationResult);
+
+    }
+}
+
+export { EvaluatedSystemModel, CalculatedMeasure,EvaluatedProductFactor, EvaluatedQualityAspect, ForwardImpactingPath }

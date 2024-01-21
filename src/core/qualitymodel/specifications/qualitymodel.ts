@@ -1488,6 +1488,10 @@ export const qualityModel = {
             "targetFactor": "serviceReplication",
             "reasoning": "TODO write a suitable reasoning"
         },
+        {
+            "targetFactor": "replication",
+            "reasoning": "TODO write a suitable reasoning"
+        },
     ],
     "qualityAspectEvaluations": [
     ]

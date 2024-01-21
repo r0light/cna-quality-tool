@@ -24,9 +24,7 @@
                     <div v-for="[productFactorKey, productFactor] of evaluatedProductFactors.entries()">
                         <span>{{ productFactor.name }}</span>: <span> {{ productFactor.result }}</span>
                         <div v-for="impact of productFactor.impacts">
-                            <!-- TODO recursively show impacts using an explicit component-->
-                            <span>{{ productFactor.name }} has a {{ impact.impactType }} impact on {{
-                                impact.impactedFactorName }}</span>
+                            <ImpactRelation :currentFactor="productFactor" :impactPath="impact"></ImpactRelation>
                         </div>
                         <p>Relevant measures:</p>
                         <div v-for="[key, measure] of productFactor.measures">
@@ -48,6 +46,7 @@ import { onUpdated, ref, toRaw } from 'vue';
 import { ModelingData } from '../App.vue';
 import { QualityModelInstance, getQualityModel } from '@/core/qualitymodel/QualityModelInstance';
 import { CalculatedMeasure, EvaluatedProductFactor, EvaluatedQualityAspect, EvaluatedSystemModel } from '@/core/qualitymodel/evaluation/EvaluatedSystemModel';
+import ImpactRelation from './ImpactRelation.vue';
 
 const props = defineProps<{
     systemsData: ModelingData[],

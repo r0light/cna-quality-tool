@@ -22,6 +22,14 @@ const productFactorEvaluationImplementation: {
         } else {
             throw new Error(`serviceReplicationLevel is of type ${typeof serviceReplicationLevel}, but should be of type number`);
         }
+    },
+    "replication": (factor: ProductFactor, calculatedMeasures: Map<string, CalculatedMeasure>, evaluatedProductFactors: Map<string, EvaluatedProductFactor>) => {
+        // TODO integrate all impacting factors
+        if (evaluatedProductFactors.has("serviceReplication")) {
+            return evaluatedProductFactors.get("serviceReplication").result;
+        } else {
+            return "n/a";
+        }
     }
 };
 
