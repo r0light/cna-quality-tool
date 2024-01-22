@@ -156,8 +156,6 @@ class EvaluatedSystemModel {
                 this.#calculatedMeasures.set(measure.getId, calculatedMeasure);
             }
         }) 
-
-        console.log(this);
     
     }
 
