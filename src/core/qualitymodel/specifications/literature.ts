@@ -593,5 +593,84 @@ export const literature = {
         "authors": "Hariharan Venkitachalam and Kalkin Anand Powale and Christian Granrath and Johannes Richenhagen",
         "publisher": "Gesellschaft für Informatik, Bonn",
         "url": ""
-    }
+    },
+
+
+    "Abgaz2023": {
+        "title": "Decomposition of Monolith Applications Into Microservices Architectures: A Systematic Review",
+        "year": "2023",
+        "authors": "Abgaz, Yalemisew and McCarren, Andrew and Elger, Peter and Solan, David and Lapuz, Neil and Bivol, Marin and Jackson, Glenn and Yilmaz, Murat and Buckley, Jim and Clarke, Paul",
+        "publisher": "IEEE",
+        "url": "https://doi.org/10.1109/TSE.2023.3287297"
+    },
+    "AlDebagy2020": {
+        "title": "A Metrics Framework for Evaluating Microservices Architecture Designs",
+        "year": "2020",
+        "authors": "Al-Debagy, O. and Martinek, P.",
+        "publisher": "IEEE",
+        "url": "https://doi.org/10.13052/jwe1540-9589.19341"
+    },
+    "Asik2017": {
+        "title": "Policy enforcement upon software based on microservice architecture",
+        "year": "2017",
+        "authors": "Asik, Tugrul and Selcuk, Yunus Emre",
+        "publisher": "IEEE",
+        "url": "https://doi.org/10.1109/SERA.2017.7965739"
+    },
+    "Assuncao2021": {
+        "title": "A Multi-Criteria Strategy for Redesigning Legacy Features as Microservices: An Industrial Case Study",
+        "year": "2021",
+        "authors": "Assuncao, Wesley K. G. and Colanzi, Thelma Elita and Carvalho, Luiz and Pereira, Juliana Alves and Garcia, Alessandro and de Lima, Maria Julia and Lucena, Carlos",
+        "publisher": "IEEE",
+        "url": "https://doi.org/10.1109/saner50967.2021.00042"
+    },
+    "Daniel2023": {
+        "title": "Towards the Detection of Microservice Patterns Based on Metrics",
+        "year": "2023",
+        "authors": "Daniel, João and Guerra, Eduardo and Rosa, Thatiane and Goldman, Alfredo",
+        "publisher": "IEEE",
+        "url": "https://doi.org/10.1109/SEAA60479.2023.00029"
+    },
+    "Desai2021": {
+        "title": "Graph Neural Network to Dilute Outliers for Refactoring Monolith Application",
+        "year": "2021",
+        "authors": "Desai, Utkarsh and Bandyopadhyay, Sambaran and Tamilselvam, Srikanth",
+        "publisher": "PKP PS",
+        "url": "https://doi.org/10.1609/aaai.v35i1.16079"
+    },
+    "Gamage2021": {
+        "title": "Using dependency graph and graph theory concepts to identify anti-patterns in a microservices system: A tool-based approach",
+        "year": "2021",
+        "authors": "Gamage, Isuru Udara Piyadigama and Perera, Indika",
+        "publisher": "IEEE",
+        "url": "https://doi.org/10.1109/MERCon52712.2021.9525743"
+    },
+    "Ntentos2021": {
+        "title": "Evaluating and Improving Microservice Architecture Conformance to Architectural Design Decisions",
+        "year": "2021",
+        "authors": "Ntentos, Evangelos and Zdun, Uwe and Plakidas, Konstantinos and Geiger, Sebastian",
+        "publisher": "IEEE",
+        "url": "https://doi.org/10.1007/978-3-030-91431-8_12"
+    },
+    "Perera2018": {
+        "title": "TheArchitect: A Serverless-Microservices Based High-level Architecture Generation Tool",
+        "year": "2018",
+        "authors": "Perera, K. J. P. G. and Perera, I.",
+        "publisher": "Springer",
+        "url": "https://doi.org/10.1109/ICIS.2018.8466390"
+    },
+    "Perera2018a": {
+        "title": "A Rule-based System for Automated Generation of Serverless-Microservices Architecture",
+        "year": "2018",
+        "authors": "Perera, K. J. P. G. and Perera, I.",
+        "publisher": "IEEE",
+        "url": "https://doi.org/10.1109/SysEng.2018.8544423"
+    },
+    "Zdun2023a": {
+        "title": "Detection Strategies for Microservice Security Tactics",
+        "year": "2023",
+        "authors": "Zdun, Uwe and Queval, Pierre-Jean and Simhandl, Georg and Scandariato, Riccardo and Chakravarty, Somik and Jelić, Marjan and Jovanović, Aleksandar",
+        "publisher": "IEEE",
+        "url": "https://doi.org/10.1109/TDSC.2023.3276487"
+    },
 }
