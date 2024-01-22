@@ -65,7 +65,7 @@ for (const highLevelAspect of qualityModel.highLevelAspects) {
                     if (factor.getImpactedFactors()[0].getId === currentFactor.getId) {
                         let relevantEntities = factor.getRelevantEntities.length === 0 ? "" : ` (${factor.getRelevantEntities.map(entityKey => qualityModel.findEntity(entityKey).getName).join(", ")})`;
                         let additionalImpacts = printAdditionalImpacts(factor, currentFactor);
-                        output += `${indent()}* ${factor.getName}${relevantEntities}${additionalImpacts}  \n`
+                        output += `${indent()}* **${factor.getName}**${relevantEntities}${additionalImpacts}  \n`
                         output += `${indent()}  *${factor.getDescription}*  \n`;
                         if (factor.getSources.length > 0) {
                             let sourcesString = factor.getSources.map(source => {
