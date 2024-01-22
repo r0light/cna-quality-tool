@@ -236,7 +236,7 @@ export const qualityModel = {
             "categories": ["businessDomain"],
             "relevantEntities": ["service", "endpoint"],
             "sources": [{ "key": "Reznik2019", "section": "9 Microservices Architecture" }, { "key": "Adkins2019", "section": "7 Use Microservices" }, { "key": "Goniwada2021", "section": "3 Polylithic Architecture Principle (Build separate services for different business functionalitites) " }],
-            "measures": ["totalServiceInterfaceCohesion", "covesivenessOfService", "cohesionOfAServiceBasedOnOtherEndpointsCalled"]
+            "measures": ["totalServiceInterfaceCohesion", "covesivenessOfService", "cohesionOfAServiceBasedOnOtherEndpointsCalled", "lackOfCohesion", "averageLackOfCohesion", "serviceSize", "unreachableEndpointCount"]
         },
         "limitedDataScope": {
             "name": "Limited data scope",
@@ -244,7 +244,7 @@ export const qualityModel = {
             "categories": ["businessDomain", "dataManagement"],
             "relevantEntities": ["service", "dataAggregate"],
             "sources": [],
-            "measures": ["dataAggregateScope", "serviceInterfaceDataCohesion", "cohesionBetweenEndpointsBasedOnDataAggregateUsage"]
+            "measures": ["dataAggregateScope", "serviceInterfaceDataCohesion", "cohesionBetweenEndpointsBasedOnDataAggregateUsage", "resourceCount"]
         },
         "limitedEndpointScope": {
             "name": "Limited endpoint scope",
@@ -252,7 +252,7 @@ export const qualityModel = {
             "categories": ["businessDomain"],
             "relevantEntities": ["service", "endpoint"],
             "sources": [],
-            "measures": ["numberOfProvidedSynchronousAndAsynchronousEndpoints", "numberOfSynchronousEndpointsOfferedByAService", "serviceInterfaceUsageCohesion", "distributionOfSynchronousCalls", "cohesionOfEndpointsBasedOnInvocationByOtherServices"]
+            "measures": ["numberOfProvidedSynchronousAndAsynchronousEndpoints", "numberOfSynchronousEndpointsOfferedByAService", "serviceInterfaceUsageCohesion", "distributionOfSynchronousCalls", "cohesionOfEndpointsBasedOnInvocationByOtherServices", "unusedResourceCount"]
         },
         "commandQueryResponsibilitySegregation": {
             "name": "Command Query Responsibility Segregation",
@@ -260,7 +260,7 @@ export const qualityModel = {
             "categories": ["networkCommunication", "businessDomain"],
             "relevantEntities": ["service", "endpoint"],
             "sources": [{ "key": "Davis2019", "section": "4.4" }, { "key": "Richardson2019", "section": "7.2 Using the CQRS pattern" }, { "key": "Bastani2017", "section": "12 CQRS (Command Query Responsibility Segregation)" }, { "key": "Indrasiri2021", "section": "4 Command and Query Responsibility Segregation Pattern" }, { "key": "Goniwada2021", "section": "4 Command and Query Responsibility Segregation Pattern" }],
-            "measures": []
+            "measures": ["numberOfReadEndpointsProvidedByAService", "numberOfWriteEndpointsProvidedByAService"]
         },
         "separationByGateways": {
             "name": "Separation by gateways",
@@ -269,7 +269,7 @@ export const qualityModel = {
             "relevantEntities": ["system", "component", "endpoint"],
             "sources": [{ "key": "Davis2019", "section": "10.2" },
             { "key": "Richardson2019", "section": "8.2" }, { "key": "Bastani2017", "section": "8 Edge Services: Filtering and Proxying with Netflix Zuul" }, { "key": "Indrasiri2021", "section": "7 API Gateway Pattern" }, { "key": "Indrasiri2021", "section": "7 API Microgateway Pattern (Smaller API microgateways to avoid having a monolithic API gateway)" }, { "key": "Goniwada2021", "section": "4 “Mediator” (Use a mediator pattern between clients and servers)" }],
-            "measures": ["externallyAvailableEndpoints", "centralizationOfExternallyAvailableEndpoints", "apiCompositionUtilizationMetric"]
+            "measures": ["externallyAvailableEndpoints", "centralizationOfExternallyAvailableEndpoints", "apiCompositionUtilizationMetric", "ratioOfRequestTracesThroughGateway"]
         },
         "isolatedState": {
             "name": "Isolated state",
@@ -461,7 +461,7 @@ export const qualityModel = {
             "categories": ["applicationAdministration", "cloudInfrastructure", "dataManagement"],
             "relevantEntities": ["service", "backingService"],
             "sources": [{ "key": "Indrasiri2021", "section": "4 Decentralized Data Management (decentralized data leads to higher service independence while centralized data leads to higher consistency.)" }, { "key": "Indrasiri2021", "section": "4 Data Service Pattern (As having a negative impact because multiple services should not access the same data);" }, { "key": "Ruecker2021", "section": "2 Different Workflow Engines for different services" }, { "key": "Goniwada2021", "section": "5 Distributed State, Decentralized Data" }],
-            "measures": ["degreeOfStorageBackendSharing", "ratioOfStorageBackendSharing", "sharedStorageBackingServiceInteractions", "databaseTypeUtilization"]
+            "measures": ["degreeOfStorageBackendSharing", "ratioOfStorageBackendSharing", "sharedStorageBackingServiceInteractions", "databaseTypeUtilization", "numberOfServiceConnectedToStorageBackingService"]
         },
         "addressingAbstraction": {
             "name": "Addressing abstraction",
@@ -637,7 +637,7 @@ export const qualityModel = {
             "categories": ["dataManagement", "cloudInfrastructure"],
             "relevantEntities": ["service", "infrastructure"],
             "sources": [],
-            "measures": ["componentDensity"]
+            "measures": ["componentDensity", "numberOfServiceHostedOnOneInfrastructure"]
         },
         "physicalDataDistribution": {
             "name": "Physical data distribution",
@@ -845,12 +845,12 @@ export const qualityModel = {
         "ratioOfSecuredLinks": {
             "name": "Ratio of secured links",
             "calculation": "Links secured by SSL / All links",
-            "sources": ["Zdun2023"]
+            "sources": ["Zdun2023", "Zdun2023a"]
         },
         "ratioOfEndpointsThatSupportTokenBasedAuthentication": {
             "name": "Ratio of endpoints that support token-based authentication ",
             "calculation": "Endpoints supportin tokens / All endpoints",
-            "sources": ["Ntentos2022", "Zdun2023"]
+            "sources": ["Ntentos2022", "Zdun2023", "Zdun2023a"]
         },
         "ratioOfEndpointsThatSupportApiKeys": {
             "name": "Ratio of endpoints that support API Keys",
@@ -860,7 +860,7 @@ export const qualityModel = {
         "ratioOfEndpointsThatSupportPlaintextAuthentication": {
             "name": "Ratio of endpoints that support plaintext authentication",
             "calculation": "",
-            "sources": ["Ntentos2022", "Zdun2023"]
+            "sources": ["Ntentos2022", "Zdun2023", "Zdun2023a"]
         },
         "ratioOfEndpointsThatAreIncludedInASingleSignOnApproach": {
             "name": "Ratio of endpoints that are included in an single-sign-on approach",
@@ -900,7 +900,7 @@ export const qualityModel = {
         "numberOfProvidedSynchronousAndAsynchronousEndpoints": {
             "name": "Number of provided synchronous and asynchronous endpoints",
             "calculation": "",
-            "sources": ["Apel2019", "Engel2018", "Shim2008", "Brito2021", "Jin2021"]
+            "sources": ["Apel2019", "Engel2018", "Shim2008", "Brito2021", "Jin2021", "Daniel2023"]
         },
         "numberOfSynchronousEndpointsOfferedByAService": {
             "name": "Number of synchronous endpoints offered by a service",
@@ -930,12 +930,12 @@ export const qualityModel = {
         "centralizationOfExternallyAvailableEndpoints": {
             "name": "Centralization of externally available endpoints",
             "calculation": "",
-            "sources": ["Ntentos2020"]
+            "sources": ["Ntentos2020", "Ntentos2021"]
         },
         "apiCompositionUtilizationMetric": {
             "name": "API Composition utilization metric",
             "calculation": "",
-            "sources": ["Ntentos2020"]
+            "sources": ["Ntentos2020", "Ntentos2021"]
         },
         "ratioOfStateDependencyOfEndpoints": {
             "name": "Ratio of state dependency of endpoints",
@@ -960,17 +960,17 @@ export const qualityModel = {
         "numberOfAsynchronousEndpointsOfferedByAService": {
             "name": "Number of asynchronous endpoints offered by a service",
             "calculation": "",
-            "sources": ["Shim2008"]
+            "sources": ["Shim2008", "Daniel2023"]
         },
         "numberOfSynchronousOutgoingLinks": {
             "name": "Number of synchronous outgoing links",
             "calculation": "",
-            "sources": ["Apel2019"]
+            "sources": ["Apel2019", "Daniel2023"]
         },
         "numberOfAsynchronousOutgoingLinks": {
             "name": "Number of asynchronous outgoing links",
             "calculation": "",
-            "sources": ["Apel2019"]
+            "sources": ["Apel2019", "Daniel2023"]
         },
         "ratioOfAsynchronousOutgoingLinks": {
             "name": "Ratio of asynchronous outgoing links",
@@ -995,12 +995,12 @@ export const qualityModel = {
         "serviceLinkPersistenceUtilizationMetric": {
             "name": "Service Link Persistence utilization metric",
             "calculation": "",
-            "sources": ["Ntentos2020"]
+            "sources": ["Ntentos2020", "Ntentos2021"]
         },
         "outboxEventSourcingUtilizationMetric": {
             "name": "Outbox/Event Sourcing utilization metric",
             "calculation": "",
-            "sources": ["Ntentos2020"]
+            "sources": ["Ntentos2020", "Ntentos2021"]
         },
         "ratioOfInfrastructureNodesThatSupportMonitoring": {
             "name": "Ratio of Infrastructure nodes that support Monitoring",
@@ -1030,7 +1030,7 @@ export const qualityModel = {
         "distributedTracingSupport": {
             "name": "Distributed Tracing Support",
             "calculation": "",
-            "sources": ["Ntentos2020"]
+            "sources": ["Ntentos2020", "Ntentos2021"]
         },
         "ratioOfServicesThatProvideHealthEndpoints": {
             "name": "Ratio of Services that provide Health endpoints",
@@ -1050,7 +1050,7 @@ export const qualityModel = {
         "numberOfConsumedEndpoints": {
             "name": "Number of Consumed Endpoints",
             "calculation": "",
-            "sources": ["Apel2019"]
+            "sources": ["Apel2019", "Gamage2021", "Perera2018"]
         },
         "incomingOutgoingRatioOfAComponent": {
             "name": "Incoming outgoing ratio of a component",
@@ -1120,7 +1120,7 @@ export const qualityModel = {
         "numberOfComponentsThatAreLinkedToAComponent": {
             "name": "Number of Components that are linked to a component",
             "calculation": "",
-            "sources": ["Bogner2017", "Rud2009", "Shim2008", "Zhang2009"]
+            "sources": ["Bogner2017", "Rud2009", "Shim2008", "Zhang2009", "Asik2017", "Gamage2021", "Perera2018"]
         },
         "numberOfComponentsAComponentIsLinkedTo": {
             "name": "Number of Components a component is linked to",
@@ -1135,7 +1135,7 @@ export const qualityModel = {
         "aggregateSystemMetricToMeasureServiceCoupling": {
             "name": "Aggregate System metric to measure service coupling",
             "calculation": "",
-            "sources": ["Hofmeister2008"]
+            "sources": ["Hofmeister2008", "Gamage2021"]
         },
         "numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfComponents": {
             "name": "Number of Components a component is linked to relative to the total amount of components",
@@ -1290,12 +1290,12 @@ export const qualityModel = {
         "requestTraceLength": {
             "name": "Request Trace Length",
             "calculation": "",
-            "sources": ["Peng2022"]
+            "sources": ["Peng2022", "Gamage2021"]
         },
         "numberOfCyclesInRequestTraces": {
             "name": "Number of Cycles in Request Traces",
             "calculation": "",
-            "sources": ["Peng2022"]
+            "sources": ["Peng2022", "Gamage2021"]
         },
         "degreeOfStorageBackendSharing": {
             "name": "Degree of Storage Backend Sharing",
@@ -1310,7 +1310,7 @@ export const qualityModel = {
         "sharedStorageBackingServiceInteractions": {
             "name": "Shared Storage Backing Service Interactions",
             "calculation": "",
-            "sources": ["Ntentos2020", "Ntentos2020a"]
+            "sources": ["Ntentos2020", "Ntentos2020a", "Ntentos2021"]
         },
         "databaseTypeUtilization": {
             "name": "Database Type Utilization",
@@ -1325,7 +1325,7 @@ export const qualityModel = {
         "averageNumberOfEndpointsPerService": {
             "name": "Average Number of Endpoints per Service",
             "calculation": "",
-            "sources": ["Bogner2017", "Bogner2020", "Hirzalla2009", "Brito2021", "Jin2021", "Rosa2020", "Kazemi2013", "Ma2009"]
+            "sources": ["Bogner2017", "Bogner2020", "Hirzalla2009", "Brito2021", "Jin2021", "Rosa2020", "Kazemi2013", "Ma2009", "Desai2021"]
         },
         "numberOfDependencies": {
             "name": "Number of Dependencies",
@@ -1430,7 +1430,7 @@ export const qualityModel = {
         "serviceInteractionViaCentralComponentUtilizationMetric": {
             "name": "Service Interaction via Central Component utilization metric",
             "calculation": "",
-            "sources": ["Ntentos2020"]
+            "sources": ["Ntentos2020", "Ntentos2021"]
         },
         "totalNumberOfComponents": {
             "name": "Total Number of Components",
@@ -1450,7 +1450,7 @@ export const qualityModel = {
         "totalNumberOfLinksInASystem": {
             "name": "Total number of links in a system",
             "calculation": "",
-            "sources": ["Brito2021", "Jin2018", "Tiwari2014"]
+            "sources": ["Brito2021", "Jin2018", "Tiwari2014", "Assuncao2021"]
         },
         "numberOfSynchronousEndpoints": {
             "name": "Number of synchronous endpoints",
@@ -1481,7 +1481,67 @@ export const qualityModel = {
             "name": "Number of Services which have both incoming and outgoing links",
             "calculation": "",
             "sources": ["Shim2008", "Hofmeister2008"]
-        }
+        },
+        "lackOfCohesion": {
+            "name": "Lack of cohesion of a service",
+            "calculation": "",
+            "sources": ["AlDebagy2020"]
+        },
+        "averageLackOfCohesion": {
+            "name": "Average system lack of cohesion of a service",
+            "calculation": "",
+            "sources": ["AlDebagy2020"]
+        },
+        "serviceSize": {
+            "name": "Size of a service",
+            "calculation": "",
+            "sources": ["Asik2017"]
+        },
+        "resourceCount": {
+            "name": "Data Aggregate Count",
+            "calculation": "",
+            "sources": ["Asik2017"]
+        },
+        "unusedResourceCount": {
+            "name": "Unused Endpoint Count",
+            "calculation": "",
+            "sources": ["Asik2017"]
+        },
+        "unreachableEndpointCount": {
+            "name": "Unreachable Endpoint Count",
+            "calculation": "",
+            "sources": ["Asik2017"]
+        },
+        "numberOfServiceConnectedToStorageBackingService": {
+            "name": "Number of Services connected to a Storage Backing Service",
+            "calculation": "",
+            "sources": ["Daniel2023"]
+        },
+        "numberOfReadEndpointsProvidedByAService": {
+            "name": "Number of Read Endpoints provided by a service",
+            "calculation": "",
+            "sources": ["Daniel2023"]
+        },
+        "numberOfWriteEndpointsProvidedByAService": {
+            "name": "Number of Wrie Endpoints provided by a service",
+            "calculation": "",
+            "sources": ["Daniel2023"]
+        },
+        "numberOfServiceHostedOnOneInfrastructure": {
+            "name": "Number of Services hosted on one infrastructure entity",
+            "calculation": "",
+            "sources": ["Daniel2023"]
+        },
+        "ratioOfRequestTracesThroughGateway": {
+            "name": "Ratio of request traces through a gateway",
+            "calculation": "",
+            "sources": ["Zdun2023a"]
+        },
+        "ratioOfRequestTracesContainingFrontend": {
+            "name": "Ratio of request traces containing a frontend component",
+            "calculation": "",
+            "sources": ["Zdun2023a"]
+        },
     },
     "productFactorEvaluations": [
         {
