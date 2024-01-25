@@ -1,6 +1,5 @@
 import { System } from "@/core/entities";
 import { QualityModelInstance } from "../QualityModelInstance";
-import { ProductFactorEvaluationResult } from "./ProductFactorEvaluation";
 import { QualityAspectEvaluationResult } from "./QualityAspectEvaluation";
 import { QualityAspect } from "../quamoco/QualityAspect";
 import { ProductFactor } from "../quamoco/ProductFactor";
@@ -11,6 +10,11 @@ type CalculatedMeasure = {
     name: string,
     value: MeasureValue
 }
+
+type NumericEvaluationResult = number;
+type OrdinalEvaluationResult = "none" | "low" | "high";
+type ProductFactorEvaluationResult = NumericEvaluationResult | OrdinalEvaluationResult | "n/a";
+
 
 type ImpactWeight = "negative" | "slightly negative" | "neutral" | "slightly positive" | "positive" | "n/a";
 
@@ -56,7 +60,6 @@ class EvaluatedSystemModel {
     #calculatedMeasures: Map<string, CalculatedMeasure>;
     #evaluatedProductFactors: Map<string, EvaluatedProductFactor>;
     #evaluatedQualityAspects: Map<string, EvaluatedQualityAspect>;
-    #notImplementedProductFactors: Map<string, ProductFactor>;
 
     constructor(system: System, qualityModel: QualityModelInstance) {
         this.#system = system;
@@ -64,7 +67,6 @@ class EvaluatedSystemModel {
         this.#calculatedMeasures = new Map();
         this.#evaluatedProductFactors = new Map();
         this.#evaluatedQualityAspects = new Map();
-        this.#notImplementedProductFactors = new Map();
     }
 
     get getCalculatedMeasures() {
@@ -85,20 +87,13 @@ class EvaluatedSystemModel {
 
         factorLoop: while (factorsToEvaluate.length > 0) {
             let currentFactor = factorsToEvaluate[0];
-    
+
             // if the current factor has impacting factors and any of these has not been evaluated yet, skip the current factor and try again later
             for (const impactingFactor of currentFactor.getImpactingFactors()) {
-                if (!this.#evaluatedProductFactors.has(impactingFactor.getId) && !this.#notImplementedProductFactors.has(impactingFactor.getId)) {
+                if (!this.#evaluatedProductFactors.has(impactingFactor.getId)) {
                     factorsToEvaluate.push(factorsToEvaluate.splice(0, 1)[0]);
                     continue factorLoop;
                 }
-            }
-    
-            // TODO: temporarily ignore factors for which no evaluation is available
-            if (!currentFactor.isEvaluationAvailable()) {
-                !this.#notImplementedProductFactors.set(currentFactor.getId, currentFactor);
-                factorsToEvaluate.splice(0, 1);
-                continue factorLoop;
             }
 
             // add measures for this factor
@@ -107,7 +102,7 @@ class EvaluatedSystemModel {
                 if (this.#calculatedMeasures.has(measure.getId)) {
                     measuresForThisFactor.set(measure.getId, this.#calculatedMeasures.get(measure.getId));
                     return;
-                } 
+                }
                 if (measure.isCalculationAvailable()) {
                     let calculatedMeasure = { name: measure.getName, value: measure.calculate(this.#system) };
 
@@ -115,17 +110,17 @@ class EvaluatedSystemModel {
                     this.#calculatedMeasures.set(measure.getId, calculatedMeasure);
                 }
             })
-    
-            let evaluatedProductFactor = {
+
+            let evaluatedProductFactor: EvaluatedProductFactor = {
                 id: currentFactor.getId,
                 name: currentFactor.getName,
                 factorType: 'productFactor' as const,
                 productFactor: currentFactor,
-                result: currentFactor.evaluate(this),
+                result: currentFactor.isEvaluationAvailable() ? currentFactor.evaluate(this) : "n/a",
                 measures: measuresForThisFactor,
                 impacts: []
             }
-    
+
             for (const impact of currentFactor.getOutgoingImpacts) {
                 evaluatedProductFactor.impacts.push({
                     impactedFactorKey: impact.getImpactedFactor.getId,
@@ -134,7 +129,7 @@ class EvaluatedSystemModel {
                     weight: deriveImpactWeight(evaluatedProductFactor.result, impact.getImpactType)
                 });
             }
-    
+
 
             for (const impact of currentFactor.getIncomingImpacts) {
                 // TODO currently only add them, if they were evaluated
@@ -142,21 +137,56 @@ class EvaluatedSystemModel {
                     this.#evaluatedProductFactors.get(impact.getSourceFactor.getId).impacts.find(impact => impact.impactedFactorKey === currentFactor.getId).impactedFactor = evaluatedProductFactor;
                 }
             }
-    
+
             this.#evaluatedProductFactors.set(currentFactor.getId, evaluatedProductFactor);
             factorsToEvaluate.splice(0, 1);
+        }
+
+        for (const qualityAspect of this.#qualityModel.qualityAspects) {
+
+            let evaluatedQualityAspect: EvaluatedQualityAspect = {
+                id: qualityAspect.getId,
+                name: qualityAspect.getName,
+                factorType: "qualityAspect",
+                qualityAspect: qualityAspect,
+                result: "n/a",
+                impacts: []
+            }
+
+            // TODO add all backwards impacting paths recursively?
+            for (const incomingImpact of qualityAspect.getIncomingImpacts) {
+                let evaluatedProductFactor = this.#evaluatedProductFactors.get(incomingImpact.getSourceFactor.getId);
+
+                evaluatedQualityAspect.impacts.push({
+                    impactingFactorKey: evaluatedProductFactor.id,
+                    impactingFactorName: evaluatedProductFactor.name,
+                    impactType: incomingImpact.getImpactType,
+                    weight: evaluatedProductFactor.impacts.find(impact => impact.impactedFactorKey === evaluatedQualityAspect.id).weight,
+                    impactingFactor: evaluatedProductFactor
+                })
+
+                for (const impact of incomingImpact.getSourceFactor.getOutgoingImpacts) {
+                    // TODO currently only add them, if they were evaluated
+                    if (this.#evaluatedProductFactors.has(impact.getSourceFactor.getId)) {
+                        this.#evaluatedProductFactors.get(impact.getSourceFactor.getId).impacts.find(impact => impact.impactedFactorKey === evaluatedQualityAspect.id).impactedFactor = evaluatedQualityAspect;
+                    }
+                }
+
+            }
+
+            this.#evaluatedQualityAspects.set(evaluatedQualityAspect.id, evaluatedQualityAspect);
         }
 
         this.#qualityModel.measures.forEach(measure => {
             if (this.#calculatedMeasures.has(measure.getId)) {
                 return;
-            } 
+            }
             if (measure.isCalculationAvailable()) {
                 let calculatedMeasure = { name: measure.getName, value: measure.calculate(this.#system) };
                 this.#calculatedMeasures.set(measure.getId, calculatedMeasure);
             }
-        }) 
-    
+        })
+
     }
 
 }
@@ -167,20 +197,20 @@ function deriveImpactWeight(evaluationResult: ProductFactorEvaluationResult, imp
         return "n/a"
     }
     if (typeof evaluationResult === "string") {
-        switch(evaluationResult) {
+        switch (evaluationResult) {
             case "none":
                 return "neutral";
             case "low":
                 if (impactType === "+" || impactType === "++") {
                     return "slightly positive";
-                } else  if (impactType === "--" || impactType === "-") {
+                } else if (impactType === "--" || impactType === "-") {
                     return "slightly negative";
                 }
                 break;
             case "high":
                 if (impactType === "+" || impactType === "++") {
                     return "positive";
-                } else  if (impactType === "--" || impactType === "-") {
+                } else if (impactType === "--" || impactType === "-") {
                     return "negative";
                 }
                 break;
@@ -193,7 +223,7 @@ function deriveImpactWeight(evaluationResult: ProductFactorEvaluationResult, imp
         if (evaluationResult > 0 && evaluationResult < 0.5) {
             if (impactType === "+" || impactType === "++") {
                 return "slightly positive";
-            } else  if (impactType === "--" || impactType === "-") {
+            } else if (impactType === "--" || impactType === "-") {
                 return "slightly negative";
             }
         }
@@ -201,7 +231,7 @@ function deriveImpactWeight(evaluationResult: ProductFactorEvaluationResult, imp
         if (evaluationResult >= 0.5 && evaluationResult <= 1) {
             if (impactType === "+" || impactType === "++") {
                 return "positive";
-            } else  if (impactType === "--" || impactType === "-") {
+            } else if (impactType === "--" || impactType === "-") {
                 return "negative";
             }
         }
@@ -212,4 +242,4 @@ function deriveImpactWeight(evaluationResult: ProductFactorEvaluationResult, imp
     }
 }
 
-export { EvaluatedSystemModel, CalculatedMeasure,EvaluatedProductFactor, EvaluatedQualityAspect, ForwardImpactingPath }
+export { EvaluatedSystemModel, CalculatedMeasure, ProductFactorEvaluationResult, EvaluatedProductFactor, OrdinalEvaluationResult, NumericEvaluationResult, ImpactWeight, EvaluatedQualityAspect, ForwardImpactingPath }

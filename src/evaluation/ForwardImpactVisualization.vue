@@ -1,17 +1,19 @@
 
 <template>
-    <div :id="graphId" v-html="renderImpact()"></div>
+    <div :id="graphId" v-html="renderImpactGraph()"></div>
 </template>
 
 
 <script lang="ts" setup>
 import $ from 'jquery';
-import { EvaluatedProductFactor, EvaluatedQualityAspect, ForwardImpactingPath } from '@/core/qualitymodel/evaluation/EvaluatedSystemModel';
+import { EvaluatedProductFactor, EvaluatedQualityAspect, ImpactWeight } from '@/core/qualitymodel/evaluation/EvaluatedSystemModel';
 import mermaid from 'mermaid';
 import { onMounted } from 'vue';
+import { ImpactType } from '@/core/qualitymodel/quamoco/Impact';
+import { MermaidBuffer } from './MermaidBuffer';
 
 
-onMounted(() => {
+onMounted(() => {   
     mermaid.initialize({ startOnLoad: true });
 })
 
@@ -22,15 +24,17 @@ const props = defineProps<{
 const graphId = `${props.rootFactor.id}-impact-graph`;
 
 
-function renderImpact() {
+function renderImpactGraph() {
 
     let graphDefinition = "graph LR";
 
     let rootNode = props.rootFactor;
 
-    graphDefinition = graphDefinition.concat(`\n\t${rootNode.id}[${rootNode.name}\n\t<span class="evaluation-result">${rootNode.result}</span>]`);
+    graphDefinition = graphDefinition.concat(describeFactor(rootNode));
 
-    graphDefinition = graphDefinition.concat(addImpacts(rootNode));
+    let mermaidBuffer = new MermaidBuffer();
+    addImpacts(rootNode, mermaidBuffer);
+    graphDefinition = graphDefinition.concat(mermaidBuffer.getElementSection, "\n", mermaidBuffer.getStylingSection);
 
     mermaid.render(`${graphId}-svg`, graphDefinition).then(result => {
         let element = $(`#${graphId}`)[0];
@@ -38,25 +42,76 @@ function renderImpact() {
     });
 }
 
-function addImpacts(currentFactor: EvaluatedProductFactor) {
-    let impactDescriptions = "";
+function addImpacts(currentFactor: EvaluatedProductFactor, buffer: MermaidBuffer) {
 
     for (const impact of currentFactor.impacts) {
 
         // TODO currently only render completely, if evaluation result is available
         if (impact.impactedFactor) {
-            impactDescriptions = impactDescriptions.concat(`\n\t${impact.impactedFactorKey}[${impact.impactedFactorName}\n\t<span class="evaluation-result">${impact.impactedFactor.result}</span>]`);
+            buffer.addElement(describeFactor(impact.impactedFactor));
         } else {
-            impactDescriptions = impactDescriptions.concat(`\n\t${impact.impactedFactorKey}[${impact.impactedFactorName}]`);
+            throw new Error(`Impacted factor ${impact.impactedFactorKey} for factor ${currentFactor.id} is undefined`);
         }
-        impactDescriptions = impactDescriptions.concat(`\n\t${currentFactor.id}-->|${impact.weight}|${impact.impactedFactorKey}`);
+        buffer.addElement(describeImpact(currentFactor.id, impact.weight, impact.impactType, impact.impactedFactorKey));
+        buffer.addStyling(describeImpactStyle(buffer.getLinkCounter, impact.weight));
+        buffer.incrementLinkCounter();
 
         if (impact.impactedFactor && impact.impactedFactor.factorType === "productFactor") {
-            impactDescriptions = impactDescriptions.concat(addImpacts(impact.impactedFactor))
+            addImpacts(impact.impactedFactor, buffer);
         }
 
     }
-    return impactDescriptions;
+}
+
+function describeFactor(factor: EvaluatedProductFactor | EvaluatedQualityAspect): string {
+    return `\n\t${factor.id}[${factor.name}\n\t<span class="evaluation-result">${factor.result}</span>]`;
+}
+
+
+function describeImpact(sourceFactorKey: string, impactWeight: ImpactWeight, impactType: ImpactType, targetFactorKey: string) {
+    let impactLabel = "";
+    switch (impactWeight) { 
+        case "neutral":
+            impactLabel = "o";
+            break;
+        case "positive":
+        case "slightly positive":
+            impactLabel = "+";
+            break;
+        case "negative":
+        case "slightly negative":
+            impactLabel = "-";
+            break;
+        case "n/a":
+        default:
+            impactLabel = impactType;
+            break;
+    }
+    return `\n\t${sourceFactorKey}-->|${impactLabel}|${targetFactorKey}`;
+}
+
+function describeImpactStyle(count: number, impactWeight: ImpactWeight): string {
+    let color = "#000";
+
+    switch (impactWeight) {
+        case "neutral":
+            color = "#000";
+            break;
+        case "positive":
+        case "slightly positive":
+            color = "#33cc33";
+            break;
+        case "negative":
+        case "slightly negative":
+            color = "#ff5050";
+            break;
+        case "n/a":
+        default:
+            color = "#d9d9d9";
+            break;
+    }
+
+    return `\n\tlinkStyle ${count} stroke-width:2px,fill:none,stroke:${color},color:#000`;
 }
 
 
@@ -66,4 +121,10 @@ function addImpacts(currentFactor: EvaluatedProductFactor) {
 .evaluation-result {
     font-style: italic;
 }
+
+.unknownFactorResult {}
+
+.neutralFactorResult {}
+
+.highFactorResult {}
 </style>
