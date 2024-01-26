@@ -1,21 +1,22 @@
 <template>
     <div v-for="factorGroup of factorGroups">
+        <ForwardImpactVisualization :rootFactors="(factorGroup as EvaluatedProductFactor[])"></ForwardImpactVisualization>
         <div v-for="productFactor of factorGroup">
-            <span>{{ productFactor.name }}</span>: <span> {{ productFactor.result }}</span>
-            <p>Relevant measures:</p>
+            <p>
+            <span>{{ productFactor.name }}</span>: <span> {{ productFactor.result }}</span><br>
+            <span v-if="productFactor.measures.size > 0">Relevant measures:</span><br>
             <div v-for="[key, measure] of productFactor.measures">
                 <span>{{ measure.name }}</span>: <span> {{ measure.value }}</span>
             </div>
+            </p>
         </div>
-        <ForwardImpactVisualization :rootFactors="(factorGroup as EvaluatedProductFactor[])"></ForwardImpactVisualization>
     </div>
 </template>
 
 <script lang="ts" setup>
 import { EvaluatedProductFactor } from '@/core/qualitymodel/evaluation/EvaluatedSystemModel';
 import ForwardImpactVisualization from './ForwardImpactVisualization.vue';
-import { ComputedRef, computed, onMounted, onUpdated, ref, render } from 'vue';
-import { ProductFactor } from '@/core/qualitymodel/quamoco/ProductFactor';
+import { ComputedRef, computed } from 'vue';
 
 const props = defineProps<{
     evaluatedProductFactors: Map<string, EvaluatedProductFactor>,
@@ -72,8 +73,6 @@ function getGroupsOfRelatedFactors() {
         });
 
     };
-
-    console.log(relatedFactorGroups);
 
     return relatedFactorGroups.map(relatedFactors => relatedFactors.factors);
 

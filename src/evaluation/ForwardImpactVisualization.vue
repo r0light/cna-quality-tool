@@ -28,17 +28,19 @@ function renderImpactGraph() {
 
     let graphDefinition = "graph LR";
 
-    let rootNodes = props.rootFactors;
-
-    for (const node of rootNodes) {
-        graphDefinition = graphDefinition.concat(describeFactor(node));
-    }
-
     let mermaidBuffer = new MermaidBuffer();
+    mermaidBuffer.addStyling(describeNodeStyleClasses());
+
+    let rootNodes = props.rootFactors;
+    for (const node of rootNodes) {
+        mermaidBuffer.addElement(node.id, describeFactor(node));
+        mermaidBuffer.addStyling(describeFactorStyle(node));
+    }
 
     for (const node of rootNodes) {
         addImpacts(node, mermaidBuffer);
     }
+
     graphDefinition = graphDefinition.concat(mermaidBuffer.getElementSection, "\n", mermaidBuffer.getStylingSection);
 
     mermaid.render(`${graphId}-svg`, graphDefinition).then(result => {
@@ -55,6 +57,7 @@ function addImpacts(currentFactor: EvaluatedProductFactor, buffer: MermaidBuffer
         if (impact.impactedFactor) {
             if (buffer.isNotYetAdded(impact.impactedFactorKey)) {
                 buffer.addElement(impact.impactedFactorKey, describeFactor(impact.impactedFactor));
+                buffer.addStyling(describeFactorStyle(impact.impactedFactor));
             }
         } else {
             throw new Error(`Impacted factor ${impact.impactedFactorKey} for factor ${currentFactor.id} is undefined`);
@@ -75,6 +78,30 @@ function addImpacts(currentFactor: EvaluatedProductFactor, buffer: MermaidBuffer
 
 function describeFactor(factor: EvaluatedProductFactor | EvaluatedQualityAspect): string {
     return `\n\t${factor.id}[${factor.name}\n\t<span class="evaluation-result">${factor.result}</span>]`;
+}
+
+function describeFactorStyle(factor: EvaluatedProductFactor | EvaluatedQualityAspect): string {
+    let styleClass = "";
+
+    if (typeof factor.result === "string") {
+        switch (factor.result) {
+            case "none":
+                styleClass = "factor-applicable";
+                break;
+            case "low":
+                styleClass = "factor-low";
+                break;
+            case "high":
+                styleClass = "factor-high";
+                break;
+            case "n/a":
+            default:
+                styleClass = "factor-not-applicable";
+                break;
+        }
+    }
+
+    return `\n\tclass ${factor.id} ${styleClass}`; 
 }
 
 
@@ -124,6 +151,13 @@ function describeImpactStyle(count: number, impactWeight: ImpactWeight): string 
     return `\n\tlinkStyle ${count} stroke-width:2px,fill:none,stroke:${color},color:#000`;
 }
 
+function describeNodeStyleClasses(): string {
+    return `     classDef factor-not-applicable fill:#f2f2f2,stroke:#d9d9d9,stroke-width:2px;
+    classDef factor-applicable fill:#d9d9d9,stroke:#000,stroke-width:2px;
+    classDef factor-low fill:#b3d9ff,stroke:#000,stroke-width:2px;
+    classDef factor-high fill:#80bfff,stroke:#000,stroke-width:3px;`;
+}
+
 
 </script>
 
@@ -132,9 +166,28 @@ function describeImpactStyle(count: number, impactWeight: ImpactWeight): string 
     font-style: italic;
 }
 
-.unknownFactorResult {}
+.factor-not-applicable {
+    fill: #f2f2f2;
+    stroke: #d9d9d9;
+    stroke-width:2px;
+}
 
-.neutralFactorResult {}
+.factor-applicable {
+    fill: #bfbfbf;
+    stroke: #000;
+    stroke-width:2px;
+}
 
-.highFactorResult {}
+.factor-low {
+    fill: #b3d9ff;
+    stroke: #000;
+    stroke-width:3px;
+}
+
+.factor-high {
+    fill: #66b3ff;
+    stroke: #000;
+    stroke-width: 4px;  
+}
+
 </style>
