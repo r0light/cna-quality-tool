@@ -50,9 +50,9 @@ function getGroupsOfRelatedFactors() {
             continue factorsToCheck;
         }
 
-        let impactedFactors = searchForImpactedFactors(evaluatedProductFactor);
+        let impactedFactors = searchForImpactedFactors(evaluatedProductFactor, false);
 
-        for (const relatedFactorsGroup of  relatedFactorGroups) {
+        for (const relatedFactorsGroup of relatedFactorGroups) {
             // check for common key among impacted factors
             if (Array.from(relatedFactorsGroup.impactedFactorKeys).some(factorKey => impactedFactors.includes(factorKey))) {
                 // add this factor to an existing group
@@ -69,7 +69,7 @@ function getGroupsOfRelatedFactors() {
             rootFactorKeys: new Set([factorKey]),
             impactedFactorKeys: new Set(impactedFactors),
             factors: [evaluatedProductFactor]
-        }); 
+        });
 
     };
 
@@ -80,12 +80,14 @@ function getGroupsOfRelatedFactors() {
 
 }
 
-function searchForImpactedFactors(evaluatedProductFactor: EvaluatedProductFactor): string[] {
+function searchForImpactedFactors(evaluatedProductFactor: EvaluatedProductFactor, recursively: boolean): string[] {
     let impactedFactors = [];
     for (const impact of evaluatedProductFactor.impacts) {
         impactedFactors.push(impact.impactedFactorKey);
-        if (impact.impactedFactor.factorType === "productFactor") {
-            impactedFactors.push(...searchForImpactedFactors(impact.impactedFactor));
+        if (recursively) {
+            if (impact.impactedFactor.factorType === "productFactor") {
+                impactedFactors.push(...searchForImpactedFactors(impact.impactedFactor, recursively));
+            }
         }
     }
     return impactedFactors;
