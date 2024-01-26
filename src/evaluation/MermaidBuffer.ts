@@ -1,10 +1,12 @@
 export class MermaidBuffer {
     #linkCounter: number;
+    #addedElementIds: string[];
     #elementsSection: string;
     #stylingSection: string;
 
     constructor() {
         this.#linkCounter = 0;
+        this.#addedElementIds = [];
         this.#elementsSection = "";
         this.#stylingSection = "";
     }
@@ -17,8 +19,13 @@ export class MermaidBuffer {
         return this.#linkCounter;
     }
 
-    addElement(element: string) {
+    isNotYetAdded(elementId: string) {
+        return !this.#addedElementIds.includes(elementId);
+    }
+
+    addElement(elementId: string, element: string) {
         this.#elementsSection = this.#elementsSection.concat(element);
+        this.#addedElementIds.push(elementId);
     }
 
     get getElementSection() {

@@ -22,15 +22,7 @@
             <div v-if="selectedSystemId > -1">
 
                 <div v-if="selectedViewpoint === 'perProductFactor'">
-                    <div v-for="[productFactorKey, productFactor] of evaluatedProductFactors.entries()">
-                        <span>{{ productFactor.name }}</span>: <span> {{ productFactor.result }}</span>
-                        <ForwardImpactVisualization :rootFactor="(productFactor as EvaluatedProductFactor)"></ForwardImpactVisualization>
-                        <p>Relevant measures:</p>
-                        <div v-for="[key, measure] of productFactor.measures">
-                            <span>{{ measure.name }}</span>: <span> {{ measure.value }}</span>
-                        </div>
-                    </div>
-
+                    <ProductFactorViewpoint :evaluatedProductFactors="(evaluatedProductFactors as Map<string, EvaluatedProductFactor>)"></ProductFactorViewpoint>
                 </div>
                 <div v-for="[key, calculatedMeasure] of calculatedMeasures">
                     <span>{{ calculatedMeasure.name }}</span>: <span> {{ calculatedMeasure.value }}</span>
@@ -45,7 +37,7 @@ import { onUpdated, ref, toRaw } from 'vue';
 import { ModelingData } from '../App.vue';
 import { QualityModelInstance, getQualityModel } from '@/core/qualitymodel/QualityModelInstance';
 import { CalculatedMeasure, EvaluatedProductFactor, EvaluatedQualityAspect, EvaluatedSystemModel, ForwardImpactingPath } from '@/core/qualitymodel/evaluation/EvaluatedSystemModel';
-import ForwardImpactVisualization from './ForwardImpactVisualization.vue';
+import ProductFactorViewpoint from './ProductFactorViewpoint.vue';
 
 const props = defineProps<{
     systemsData: ModelingData[],

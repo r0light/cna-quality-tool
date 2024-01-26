@@ -13,27 +13,32 @@ import { ImpactType } from '@/core/qualitymodel/quamoco/Impact';
 import { MermaidBuffer } from './MermaidBuffer';
 
 
-onMounted(() => {   
+onMounted(() => {
     mermaid.initialize({ startOnLoad: true });
 })
 
 const props = defineProps<{
-    rootFactor: EvaluatedProductFactor,
+    rootFactors: EvaluatedProductFactor[],
 }>()
 
-const graphId = `${props.rootFactor.id}-impact-graph`;
+const graphId = `${props.rootFactors.map(factor => factor.id).join("-")}-impact-graph`;
 
 
 function renderImpactGraph() {
 
     let graphDefinition = "graph LR";
 
-    let rootNode = props.rootFactor;
+    let rootNodes = props.rootFactors;
 
-    graphDefinition = graphDefinition.concat(describeFactor(rootNode));
+    for (const node of rootNodes) {
+        graphDefinition = graphDefinition.concat(describeFactor(node));
+    }
 
     let mermaidBuffer = new MermaidBuffer();
-    addImpacts(rootNode, mermaidBuffer);
+
+    for (const node of rootNodes) {
+        addImpacts(node, mermaidBuffer);
+    }
     graphDefinition = graphDefinition.concat(mermaidBuffer.getElementSection, "\n", mermaidBuffer.getStylingSection);
 
     mermaid.render(`${graphId}-svg`, graphDefinition).then(result => {
@@ -48,13 +53,18 @@ function addImpacts(currentFactor: EvaluatedProductFactor, buffer: MermaidBuffer
 
         // TODO currently only render completely, if evaluation result is available
         if (impact.impactedFactor) {
-            buffer.addElement(describeFactor(impact.impactedFactor));
+            if (buffer.isNotYetAdded(impact.impactedFactorKey)) {
+                buffer.addElement(impact.impactedFactorKey, describeFactor(impact.impactedFactor));
+            }
         } else {
             throw new Error(`Impacted factor ${impact.impactedFactorKey} for factor ${currentFactor.id} is undefined`);
         }
-        buffer.addElement(describeImpact(currentFactor.id, impact.weight, impact.impactType, impact.impactedFactorKey));
-        buffer.addStyling(describeImpactStyle(buffer.getLinkCounter, impact.weight));
-        buffer.incrementLinkCounter();
+        let impactElementId = `${currentFactor.id}-impacts-${impact.impactedFactorKey}`;
+        if (buffer.isNotYetAdded(impactElementId)) {
+            buffer.addElement(impactElementId, describeImpact(currentFactor.id, impact.weight, impact.impactType, impact.impactedFactorKey));
+            buffer.addStyling(describeImpactStyle(buffer.getLinkCounter, impact.weight));
+            buffer.incrementLinkCounter();
+        }
 
         if (impact.impactedFactor && impact.impactedFactor.factorType === "productFactor") {
             addImpacts(impact.impactedFactor, buffer);
@@ -70,7 +80,7 @@ function describeFactor(factor: EvaluatedProductFactor | EvaluatedQualityAspect)
 
 function describeImpact(sourceFactorKey: string, impactWeight: ImpactWeight, impactType: ImpactType, targetFactorKey: string) {
     let impactLabel = "";
-    switch (impactWeight) { 
+    switch (impactWeight) {
         case "neutral":
             impactLabel = "o";
             break;
