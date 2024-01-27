@@ -1,8 +1,8 @@
 <template>
-    <div>
+    <div class="full-width">
         <div class="d-flex flex-column p-1">
             <h2>Evaluation</h2>
-            <p>In development...</p>
+            <p class="font-weight-bold">The evaluation feature is still in development...</p>
             <div class="d-flex flex-row">
                 <div class="m-1">
                     <span>Select the evaluation viewpoint: </span>
@@ -24,6 +24,9 @@
                 <div v-if="selectedViewpoint === 'perProductFactor'">
                     <ProductFactorViewpoint :evaluatedProductFactors="(evaluatedProductFactors as Map<string, EvaluatedProductFactor>)"></ProductFactorViewpoint>
                 </div>
+                <div v-if="selectedViewpoint === 'perQualityAspect'">
+                    <QualityAspectViewpoint :evaluatedQualityAspects="(evaluatedQualityAspects as Map<string, EvaluatedQualityAspect>)"></QualityAspectViewpoint>
+                </div>
                 <div v-for="[key, calculatedMeasure] of calculatedMeasures">
                     <span>{{ calculatedMeasure.name }}</span>: <span> {{ calculatedMeasure.value }}</span>
                 </div>
@@ -38,6 +41,7 @@ import { ModelingData } from '../App.vue';
 import { QualityModelInstance, getQualityModel } from '@/core/qualitymodel/QualityModelInstance';
 import { CalculatedMeasure, EvaluatedProductFactor, EvaluatedQualityAspect, EvaluatedSystemModel, ForwardImpactingPath } from '@/core/qualitymodel/evaluation/EvaluatedSystemModel';
 import ProductFactorViewpoint from './ProductFactorViewpoint.vue';
+import QualityAspectViewpoint from './QualityAspectViewpoint.vue';
 
 const props = defineProps<{
     systemsData: ModelingData[],
@@ -84,6 +88,14 @@ function onSelectSystem() {
     }
 
     let selectedSystem = props.systemsData.find(system => system.id === selectedSystemId.value);
+
+    if (!selectedSystem) {
+        // selectedSystem might not be findable, if it has been deleted
+        selectedSystemId.value = -1;
+        return;
+    }
+
+
     let systemEntityManager = toRaw(selectedSystem.entityManager);
     let currentSystemEntity = systemEntityManager.getSystemEntity();
 
@@ -115,4 +127,8 @@ function onSelectSystem() {
 
 </script>
 
-<style></style>
+<style>
+.full-width {
+    width: 100%;
+}
+</style>

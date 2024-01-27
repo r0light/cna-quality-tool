@@ -46,8 +46,8 @@ function getGroupsOfRelatedFactors() {
 
     factorsToCheck: for (const [factorKey, evaluatedProductFactor] of props.evaluatedProductFactors.entries()) {
 
-        // ignore non-leaf factors TODO: do not rely on original quality model to not interfere with filtering?
-        if (evaluatedProductFactor.productFactor.getImpactingFactors().length > 0) {
+        // ignore non-leaf factors
+        if (evaluatedProductFactor.backwardImpacts.length > 0) {
             continue factorsToCheck;
         }
 
@@ -81,7 +81,7 @@ function getGroupsOfRelatedFactors() {
 
 function searchForImpactedFactors(evaluatedProductFactor: EvaluatedProductFactor, recursively: boolean): string[] {
     let impactedFactors = [];
-    for (const impact of evaluatedProductFactor.impacts) {
+    for (const impact of evaluatedProductFactor.forwardImpacts) {
         impactedFactors.push(impact.impactedFactorKey);
         if (recursively) {
             if (impact.impactedFactor.factorType === "productFactor") {

@@ -25,7 +25,8 @@ type EvaluatedProductFactor = {
     productFactor: ProductFactor,
     result: ProductFactorEvaluationResult,
     measures: Map<string, CalculatedMeasure>,
-    impacts: ForwardImpactingPath[] //TODO | BackwardImpactingPath[] ?
+    forwardImpacts: ForwardImpactingPath[],
+    backwardImpacts: BackwardImpactingPath[]
 }
 
 type EvaluatedQualityAspect = {
@@ -34,7 +35,7 @@ type EvaluatedQualityAspect = {
     factorType: 'qualityAspect',  //TODO has to be "qualityAspect"
     qualityAspect: QualityAspect,
     result: QualityAspectEvaluationResult,
-    impacts: BackwardImpactingPath[]
+    backwardImpacts: BackwardImpactingPath[]
 }
 
 type ForwardImpactingPath = {
@@ -118,11 +119,12 @@ class EvaluatedSystemModel {
                 productFactor: currentFactor,
                 result: currentFactor.isEvaluationAvailable() ? currentFactor.evaluate(this) : "n/a",
                 measures: measuresForThisFactor,
-                impacts: []
+                forwardImpacts: [],
+                backwardImpacts: []
             }
 
             for (const impact of currentFactor.getOutgoingImpacts) {
-                evaluatedProductFactor.impacts.push({
+                evaluatedProductFactor.forwardImpacts.push({
                     impactedFactorKey: impact.getImpactedFactor.getId,
                     impactedFactorName: impact.getImpactedFactor.getName,
                     impactType: impact.getImpactType,
@@ -132,9 +134,19 @@ class EvaluatedSystemModel {
 
 
             for (const impact of currentFactor.getIncomingImpacts) {
-                // TODO currently only add them, if they were evaluated
+                // TODO remove if condition?
                 if (this.#evaluatedProductFactors.has(impact.getSourceFactor.getId)) {
-                    this.#evaluatedProductFactors.get(impact.getSourceFactor.getId).impacts.find(impact => impact.impactedFactorKey === currentFactor.getId).impactedFactor = evaluatedProductFactor;
+                    let impactingFactor = this.#evaluatedProductFactors.get(impact.getSourceFactor.getId);
+                    let correspondingForwardingImpact = impactingFactor.forwardImpacts.find(impact => impact.impactedFactorKey === currentFactor.getId);
+                    correspondingForwardingImpact.impactedFactor = evaluatedProductFactor;
+
+                    evaluatedProductFactor.backwardImpacts.push({
+                        impactingFactorKey: impactingFactor.id,
+                        impactingFactorName: impactingFactor.name,
+                        impactType: impact.getImpactType,
+                        weight: correspondingForwardingImpact.weight,
+                        impactingFactor: impactingFactor
+                    })
                 }
             }
 
@@ -150,25 +162,26 @@ class EvaluatedSystemModel {
                 factorType: "qualityAspect",
                 qualityAspect: qualityAspect,
                 result: "n/a",
-                impacts: []
+                backwardImpacts: []
             }
 
             // TODO add all backwards impacting paths recursively?
             for (const incomingImpact of qualityAspect.getIncomingImpacts) {
                 let evaluatedProductFactor = this.#evaluatedProductFactors.get(incomingImpact.getSourceFactor.getId);
 
-                evaluatedQualityAspect.impacts.push({
+                evaluatedQualityAspect.backwardImpacts.push({
                     impactingFactorKey: evaluatedProductFactor.id,
                     impactingFactorName: evaluatedProductFactor.name,
                     impactType: incomingImpact.getImpactType,
-                    weight: evaluatedProductFactor.impacts.find(impact => impact.impactedFactorKey === evaluatedQualityAspect.id).weight,
+                    weight: evaluatedProductFactor.forwardImpacts.find(impact => impact.impactedFactorKey === evaluatedQualityAspect.id).weight,
                     impactingFactor: evaluatedProductFactor
                 })
 
                 for (const impact of incomingImpact.getSourceFactor.getOutgoingImpacts) {
                     // TODO currently only add them, if they were evaluated
+
                     if (this.#evaluatedProductFactors.has(impact.getSourceFactor.getId)) {
-                        this.#evaluatedProductFactors.get(impact.getSourceFactor.getId).impacts.find(impact => impact.impactedFactorKey === evaluatedQualityAspect.id).impactedFactor = evaluatedQualityAspect;
+                        this.#evaluatedProductFactors.get(impact.getSourceFactor.getId).forwardImpacts.find(impact => impact.impactedFactorKey === evaluatedQualityAspect.id).impactedFactor = evaluatedQualityAspect;
                     }
                 }
 

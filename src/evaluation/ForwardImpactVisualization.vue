@@ -11,6 +11,7 @@ import mermaid from 'mermaid';
 import { onMounted } from 'vue';
 import { ImpactType } from '@/core/qualitymodel/quamoco/Impact';
 import { MermaidBuffer } from './MermaidBuffer';
+import { describeFactor, describeFactorStyle, describeImpact, describeImpactStyle, describeNodeStyleClasses } from './evaluation-commons';
 
 
 onMounted(() => {
@@ -51,17 +52,13 @@ function renderImpactGraph() {
 
 function addImpacts(currentFactor: EvaluatedProductFactor, buffer: MermaidBuffer) {
 
-    for (const impact of currentFactor.impacts) {
+    for (const impact of currentFactor.forwardImpacts) {
 
-        // TODO currently only render completely, if evaluation result is available
-        if (impact.impactedFactor) {
-            if (buffer.isNotYetAdded(impact.impactedFactorKey)) {
-                buffer.addElement(impact.impactedFactorKey, describeFactor(impact.impactedFactor));
-                buffer.addStyling(describeFactorStyle(impact.impactedFactor));
-            }
-        } else {
-            throw new Error(`Impacted factor ${impact.impactedFactorKey} for factor ${currentFactor.id} is undefined`);
+        if (buffer.isNotYetAdded(impact.impactedFactorKey)) {
+            buffer.addElement(impact.impactedFactorKey, describeFactor(impact.impactedFactor));
+            buffer.addStyling(describeFactorStyle(impact.impactedFactor));
         }
+        
         let impactElementId = `${currentFactor.id}-impacts-${impact.impactedFactorKey}`;
         if (buffer.isNotYetAdded(impactElementId)) {
             buffer.addElement(impactElementId, describeImpact(currentFactor.id, impact.weight, impact.impactType, impact.impactedFactorKey));
@@ -76,88 +73,6 @@ function addImpacts(currentFactor: EvaluatedProductFactor, buffer: MermaidBuffer
     }
 }
 
-function describeFactor(factor: EvaluatedProductFactor | EvaluatedQualityAspect): string {
-    return `\n\t${factor.id}[${factor.name}\n\t<span class="evaluation-result">${factor.result}</span>]`;
-}
-
-function describeFactorStyle(factor: EvaluatedProductFactor | EvaluatedQualityAspect): string {
-    let styleClass = "";
-
-    if (typeof factor.result === "string") {
-        switch (factor.result) {
-            case "none":
-                styleClass = "factor-applicable";
-                break;
-            case "low":
-                styleClass = "factor-low";
-                break;
-            case "high":
-                styleClass = "factor-high";
-                break;
-            case "n/a":
-            default:
-                styleClass = "factor-not-applicable";
-                break;
-        }
-    }
-
-    return `\n\tclass ${factor.id} ${styleClass}`; 
-}
-
-
-function describeImpact(sourceFactorKey: string, impactWeight: ImpactWeight, impactType: ImpactType, targetFactorKey: string) {
-    let impactLabel = "";
-    switch (impactWeight) {
-        case "neutral":
-            impactLabel = "o";
-            break;
-        case "positive":
-        case "slightly positive":
-            impactLabel = "+";
-            break;
-        case "negative":
-        case "slightly negative":
-            impactLabel = "-";
-            break;
-        case "n/a":
-        default:
-            impactLabel = impactType;
-            break;
-    }
-    return `\n\t${sourceFactorKey}-->|${impactLabel}|${targetFactorKey}`;
-}
-
-function describeImpactStyle(count: number, impactWeight: ImpactWeight): string {
-    let color = "#000";
-
-    switch (impactWeight) {
-        case "neutral":
-            color = "#000";
-            break;
-        case "positive":
-        case "slightly positive":
-            color = "#33cc33";
-            break;
-        case "negative":
-        case "slightly negative":
-            color = "#ff5050";
-            break;
-        case "n/a":
-        default:
-            color = "#d9d9d9";
-            break;
-    }
-
-    return `\n\tlinkStyle ${count} stroke-width:2px,fill:none,stroke:${color},color:#000`;
-}
-
-function describeNodeStyleClasses(): string {
-    return `     classDef factor-not-applicable fill:#f2f2f2,stroke:#d9d9d9,stroke-width:2px;
-    classDef factor-applicable fill:#d9d9d9,stroke:#000,stroke-width:2px;
-    classDef factor-low fill:#b3d9ff,stroke:#000,stroke-width:2px;
-    classDef factor-high fill:#80bfff,stroke:#000,stroke-width:3px;`;
-}
-
 
 </script>
 
@@ -169,25 +84,24 @@ function describeNodeStyleClasses(): string {
 .factor-not-applicable {
     fill: #f2f2f2;
     stroke: #d9d9d9;
-    stroke-width:2px;
+    stroke-width: 2px;
 }
 
 .factor-applicable {
     fill: #bfbfbf;
     stroke: #000;
-    stroke-width:2px;
+    stroke-width: 2px;
 }
 
 .factor-low {
     fill: #b3d9ff;
     stroke: #000;
-    stroke-width:3px;
+    stroke-width: 3px;
 }
 
 .factor-high {
     fill: #66b3ff;
     stroke: #000;
-    stroke-width: 4px;  
+    stroke-width: 4px;
 }
-
 </style>
