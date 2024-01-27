@@ -1,0 +1,97 @@
+<template>
+    <div v-for="factorGroup of factorGroups">
+        <ForwardImpactVisualization :rootFactors="(factorGroup as EvaluatedProductFactor[])"></ForwardImpactVisualization>
+        <div v-for="productFactor of factorGroup">
+            <p>
+            <span>{{ productFactor.name }}</span>: <span> {{ productFactor.result }}</span><br>
+            <span v-if="productFactor.measures.size > 0">Relevant measures:</span><br>
+            <div v-for="[key, measure] of productFactor.measures">
+                <span>{{ measure.name }}</span>: <span> {{ measure.value }}</span>
+            </div>
+            </p>
+        </div>
+    </div>
+</template>
+
+<script lang="ts" setup>
+import { EvaluatedProductFactor } from '@/core/qualitymodel/evaluation/EvaluatedSystemModel';
+import ForwardImpactVisualization from './ForwardImpactVisualization.vue';
+import { ComputedRef, computed } from 'vue';
+
+const props = defineProps<{
+    evaluatedProductFactors: Map<string, EvaluatedProductFactor>,
+}>()
+
+const factorGroups: ComputedRef<EvaluatedProductFactor[][]> = computed(() => {
+    return getGroupsOfRelatedFactors();
+});
+
+function getEachFactorSeparately() {
+    let eachFactorSeparately = [];
+    for (const evaluatedProductFactor of props.evaluatedProductFactors.values()) {
+        eachFactorSeparately.push([evaluatedProductFactor]);
+    };
+    return eachFactorSeparately;
+}
+
+
+type RelatedFactorGroup = {
+    rootFactorKeys: Set<string>,
+    impactedFactorKeys: Set<string>,
+    factors: EvaluatedProductFactor[]
+}
+
+function getGroupsOfRelatedFactors() {
+    let relatedFactorGroups: RelatedFactorGroup[] = [];
+
+    factorsToCheck: for (const [factorKey, evaluatedProductFactor] of props.evaluatedProductFactors.entries()) {
+
+        // ignore non-leaf factors
+        if (evaluatedProductFactor.backwardImpacts.length > 0) {
+            continue factorsToCheck;
+        }
+
+        let impactedFactors = searchForImpactedFactors(evaluatedProductFactor, false);
+
+        for (const relatedFactorsGroup of relatedFactorGroups) {
+            // check for common key among impacted factors
+            if (Array.from(relatedFactorsGroup.impactedFactorKeys).some(factorKey => impactedFactors.includes(factorKey))) {
+                // add this factor to an existing group
+                relatedFactorsGroup.rootFactorKeys.add(factorKey);
+                relatedFactorsGroup.factors.push(evaluatedProductFactor);
+                // add all factors impacted by this factor
+                impactedFactors.forEach(factorKey => relatedFactorsGroup.impactedFactorKeys.add(factorKey));
+                continue factorsToCheck;
+            }
+        }
+
+        // if no impacted factors common to an existing group could be found, start a new group
+        relatedFactorGroups.push({
+            rootFactorKeys: new Set([factorKey]),
+            impactedFactorKeys: new Set(impactedFactors),
+            factors: [evaluatedProductFactor]
+        });
+
+    };
+
+    return relatedFactorGroups.map(relatedFactors => relatedFactors.factors);
+
+
+}
+
+function searchForImpactedFactors(evaluatedProductFactor: EvaluatedProductFactor, recursively: boolean): string[] {
+    let impactedFactors = [];
+    for (const impact of evaluatedProductFactor.forwardImpacts) {
+        impactedFactors.push(impact.impactedFactorKey);
+        if (recursively) {
+            if (impact.impactedFactor.factorType === "productFactor") {
+                impactedFactors.push(...searchForImpactedFactors(impact.impactedFactor, recursively));
+            }
+        }
+    }
+    return impactedFactors;
+}
+
+</script>
+
+<style></style>

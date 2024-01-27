@@ -1,5 +1,5 @@
-import { EvaluatedSystemModel } from "../evaluation/EvaluatedSystemModel";
-import { ProductFactorEvaluation, ProductFactorEvaluationResult } from "../evaluation/ProductFactorEvaluation";
+import { EvaluatedSystemModel, ProductFactorEvaluationResult } from "../evaluation/EvaluatedSystemModel";
+import { ProductFactorEvaluation } from "../evaluation/ProductFactorEvaluation";
 import { Impact } from "./Impact";
 import { LiteratureSource } from "./LiteratureSource";
 import { Measure } from "./Measure";
@@ -30,6 +30,9 @@ class ProductFactor {
         this.#evaluation = undefined;
         this.#outgoingImpacts = [];
         this.#incomingImpacts = [];
+
+        this.getImpactedFactors = this.getImpactedFactors.bind(this);
+        this.getImpactingFactors = this.getImpactingFactors.bind(this);
     }
 
     get getFactorType() {

@@ -1,7 +1,8 @@
 <template>
-    <div>
+    <div class="full-width">
         <div class="d-flex flex-column p-1">
             <h2>Evaluation</h2>
+            <p class="font-weight-bold">The evaluation feature is still in development...</p>
             <div class="d-flex flex-row">
                 <div class="m-1">
                     <span>Select the evaluation viewpoint: </span>
@@ -19,19 +20,12 @@
                 </div>
             </div>
             <div v-if="selectedSystemId > -1">
-                <p>In development...</p>
-                <div v-if="selectedViewpoint === 'perProductFactor'">
-                    <div v-for="[productFactorKey, productFactor] of evaluatedProductFactors.entries()">
-                        <span>{{ productFactor.name }}</span>: <span> {{ productFactor.result }}</span>
-                        <div v-for="impact of productFactor.impacts">
-                            <ImpactRelation :currentFactor="productFactor" :impactPath="impact"></ImpactRelation>
-                        </div>
-                        <p>Relevant measures:</p>
-                        <div v-for="[key, measure] of productFactor.measures">
-                            <span>{{ measure.name }}</span>: <span> {{ measure.value }}</span>
-                        </div>
-                    </div>
 
+                <div v-if="selectedViewpoint === 'perProductFactor'">
+                    <ProductFactorViewpoint :evaluatedProductFactors="(evaluatedProductFactors as Map<string, EvaluatedProductFactor>)"></ProductFactorViewpoint>
+                </div>
+                <div v-if="selectedViewpoint === 'perQualityAspect'">
+                    <QualityAspectViewpoint :evaluatedQualityAspects="(evaluatedQualityAspects as Map<string, EvaluatedQualityAspect>)"></QualityAspectViewpoint>
                 </div>
                 <div v-for="[key, calculatedMeasure] of calculatedMeasures">
                     <span>{{ calculatedMeasure.name }}</span>: <span> {{ calculatedMeasure.value }}</span>
@@ -45,8 +39,9 @@
 import { onUpdated, ref, toRaw } from 'vue';
 import { ModelingData } from '../App.vue';
 import { QualityModelInstance, getQualityModel } from '@/core/qualitymodel/QualityModelInstance';
-import { CalculatedMeasure, EvaluatedProductFactor, EvaluatedQualityAspect, EvaluatedSystemModel } from '@/core/qualitymodel/evaluation/EvaluatedSystemModel';
-import ImpactRelation from './ImpactRelation.vue';
+import { CalculatedMeasure, EvaluatedProductFactor, EvaluatedQualityAspect, EvaluatedSystemModel, ForwardImpactingPath } from '@/core/qualitymodel/evaluation/EvaluatedSystemModel';
+import ProductFactorViewpoint from './ProductFactorViewpoint.vue';
+import QualityAspectViewpoint from './QualityAspectViewpoint.vue';
 
 const props = defineProps<{
     systemsData: ModelingData[],
@@ -59,7 +54,7 @@ const selectedSystemId = ref<number>(-1);
 
 const selectedViewpoint = ref<"perQualityAspect" | "perProductFactor">("perProductFactor");
 
-const calculatedMeasures = ref<Map<string,CalculatedMeasure>>(new Map());
+const calculatedMeasures = ref<Map<string, CalculatedMeasure>>(new Map());
 
 const evaluatedProductFactors = ref<Map<string, EvaluatedProductFactor>>(new Map());
 
@@ -93,6 +88,14 @@ function onSelectSystem() {
     }
 
     let selectedSystem = props.systemsData.find(system => system.id === selectedSystemId.value);
+
+    if (!selectedSystem) {
+        // selectedSystem might not be findable, if it has been deleted
+        selectedSystemId.value = -1;
+        return;
+    }
+
+
     let systemEntityManager = toRaw(selectedSystem.entityManager);
     let currentSystemEntity = systemEntityManager.getSystemEntity();
 
@@ -107,7 +110,10 @@ function onSelectSystem() {
     });
 
     evaluatedSystem.getEvaluatedProductFactors.forEach((value, key, map) => {
-        evaluatedProductFactors.value.set(key, value);
+        // only add leaf factors ? Otherwise also a specific entry for aggregating factors would be possible
+        if (value.productFactor.getImpactingFactors().length === 0) {
+            evaluatedProductFactors.value.set(key, value);
+        }
     });
 
     evaluatedSystem.getEvaluatedQualityAspects.forEach((value, key, map) => {
@@ -118,4 +124,11 @@ function onSelectSystem() {
 
 }
 
+
 </script>
+
+<style>
+.full-width {
+    width: 100%;
+}
+</style>

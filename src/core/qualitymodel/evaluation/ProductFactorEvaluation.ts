@@ -1,10 +1,7 @@
 import { System } from "@/core/entities";
 import { ProductFactor } from "../quamoco/ProductFactor";
-import { CalculatedMeasure, EvaluatedProductFactor } from "./EvaluatedSystemModel";
+import { CalculatedMeasure, EvaluatedProductFactor, ProductFactorEvaluationResult } from "./EvaluatedSystemModel";
 
-type NumericResult = number;
-type OrdinalResult = "none" | "low" | "high";
-type ProductFactorEvaluationResult = NumericResult | OrdinalResult | "n/a";
 
 type ProductFactorEvaluationFunction = (factor: ProductFactor, calculatedMeasures: Map<string, CalculatedMeasure>, evaluatedProductFactors: Map<string, EvaluatedProductFactor>) => ProductFactorEvaluationResult;
 
@@ -36,4 +33,4 @@ class ProductFactorEvaluation {
     }
 }
 
-export { ProductFactorEvaluation, ProductFactorEvaluationResult, ProductFactorEvaluationFunction }
+export { ProductFactorEvaluation, ProductFactorEvaluationFunction }
