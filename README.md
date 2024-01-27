@@ -27,6 +27,7 @@ Afterwards you can go to [http://localhost:5173](http://localhost:5173)
 The application uses:
 - the open-source modeling library [JointJS](https://www.jointjs.com/opensource) published under the [Open Source Mozilla Public License Version 2.0](https://www.mozilla.org/en-US/MPL/2.0/). The modeling application uses the library as-is.
 - [Vue.js](https://vuejs.org/)
+- [Mermaid](https://mermaid.js.org/)
 
 ## Generate objects from TOSCA profiles
 
