@@ -1,4 +1,10 @@
-export const entities: {[key: string]: {name: string, description: string, relation: {type: "" | "part-of" | "is-a", target: string }}}  = {
+type EntitySpec =  {
+    name: string, 
+    description: string, 
+    relation: {type: "" | "part-of" | "is-a", target: string }
+}
+
+export const entities: {[key: string]: EntitySpec}  = {
     "system": {
         "name": "System",
         "description": "The cloud-native application as a whole",

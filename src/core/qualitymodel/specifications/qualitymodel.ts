@@ -1,4 +1,65 @@
-export const qualityModel = {
+type QualityModelSpec = {
+    qualityAspects: { [highLevelAspectKey: string]: HighLevelQualityAspecSpec},
+    factorCategories: { [categoryKey: string]: CategorySpec},
+    productFactors: { [productFatorKey: string]: ProductFactorSpec},
+    impacts: ImpactSpec[],
+    measures: { [measureKey: string]: MeasureSpec},
+    productFactorEvaluations: ProductFactorEvaluationSpec[],
+    qualityAspectEvaluations: QualityAspectEvaluationSpec[]
+
+}
+
+type HighLevelQualityAspecSpec = {
+    name: string,
+    aspects: { [aspectKey: string]: QualityAspectSpec}
+}
+
+type QualityAspectSpec = {
+    name: string,
+    description: string
+}
+
+type CategorySpec = {
+    name: string
+}
+
+type ProductFactorSpec = {
+        name: string,
+        description: string,
+        categories: string[],
+        relevantEntities: string[],
+        sources: SourceSpec[],
+        measures: string[]
+}
+
+type SourceSpec = {
+    key: string,
+    section: string
+}
+
+type ImpactSpec = {
+    impactedFactor: string, 
+    sourceFactor: string,
+    impactType: string
+}
+
+type MeasureSpec = {
+    name: string,
+    calculation: string,
+    sources : string[]
+}
+
+type ProductFactorEvaluationSpec = {
+    targetFactor: string,
+    reasoning: string
+}
+
+type QualityAspectEvaluationSpec = {
+    targetAspect: string,
+    reasoning: string
+}
+
+export const qualityModel: QualityModelSpec = {
     "qualityAspects": {
         "security": {
             "name": "Security",
