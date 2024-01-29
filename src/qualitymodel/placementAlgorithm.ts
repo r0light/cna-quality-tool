@@ -204,11 +204,11 @@ export function placeProductFactors(qmPaper: HTMLElement, graph: dia.Graph, qual
     let centerX = qmPaper.clientWidth / 2;
     let centerY = qmPaper.clientHeight / 2;
 
-    let drawnQualityAspects = qualityAspectElements.map(element => element.id);
-    let drawnProductFactors = productFactorElements.map(element => element.id);
+    let drawnQualityAspects = qualityAspectElements.map(element => element.id.toString());
+    let drawnProductFactors = productFactorElements.map(element => element.id.toString());
 
-    let toBePlaced = productFactorElements.map(element => element.id);
-    let placed = qualityAspectElements.map(element => element.id);
+    let toBePlaced = productFactorElements.map(element => element.id.toString());
+    let placed = qualityAspectElements.map(element => element.id.toString());
     let allTries = [];
     const maximumTries = 1000;
 
@@ -219,7 +219,26 @@ export function placeProductFactors(qmPaper: HTMLElement, graph: dia.Graph, qual
         let horizontalCenter = nextElement.size().width / 2;
         let verticalCenter = nextElement.size().height / 2;
 
-        let impactedFactors = qualityModel.findProductFactor(nextElement.id.toString()).getImpactedFactors();
+        let impactedFactors = qualityModel.findProductFactor(nextElement.id.toString())
+            .getImpactedFactors()
+            .filter(factor => {
+                // only consider factors which are actually drawn
+                for (const factorToBePlaced of drawnProductFactors) {
+                    if (factor.getId === factorToBePlaced) {
+                        return true;
+                    }
+                }
+                for (const drawnAspect of drawnQualityAspects) {
+                    if (factor.getId === drawnAspect) {
+                        return true;
+                    }
+                }
+                return false;
+            });
+
+        if (impactedFactors.length === 0) {
+            throw new Error(`No impacted factors found for: ${nextElementId}`);
+        }
 
         // check if all impacted factors are already placed
         innerLoop: for (const factor of impactedFactors) {

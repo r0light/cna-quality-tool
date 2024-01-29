@@ -33,6 +33,14 @@ function getQualityModel(): QualityModelInstance {
         }
     }
 
+    // add all factor categories
+    for (const [categoryKey, category] of Object.entries(qualityModel.factorCategories)) {
+        newQualityModel.factorCategories.push({
+            categoryKey: categoryKey,
+            categoryName: category.name
+        })
+    }
+
     // add all Measures
     for (const [measureKey, measure] of Object.entries(qualityModel.measures)) {
         let newMeasure = new Measure(measureKey, measure.name, "", measure.calculation);
@@ -50,6 +58,15 @@ function getQualityModel(): QualityModelInstance {
 
     // add all Product Factors
     for (const [productFactorKey, productFactor] of Object.entries(qualityModel.productFactors)) {
+
+        let assignedCategories = productFactor.categories.map(categoryKey => {
+            if (newQualityModel.findFactorCategory(categoryKey)) {
+                return categoryKey;
+            } else {
+                throw new Error(`Category with key ${categoryKey} in product factor ${productFactorKey} does not exist!`);
+            }
+        })
+
         let newProductFactor = new ProductFactor(productFactorKey, productFactor.name, productFactor.description, productFactor.categories);
 
         //TODO also add categories and explicit attribute of categories to quality model?
@@ -149,6 +166,8 @@ class QualityModelInstance {
 
     productFactors: ProductFactor[];
 
+    factorCategories: {categoryKey: string, categoryName: string}[];
+
     impacts: Impact[];
 
     measures: Measure[];
@@ -159,6 +178,7 @@ class QualityModelInstance {
         this.highLevelAspects = [];
         this.qualityAspects = [];
         this.productFactors = [];
+        this.factorCategories = [];
         this.impacts = [];
         this.measures = [];
         this.entities = [];
@@ -166,6 +186,10 @@ class QualityModelInstance {
 
     findQualityAspect(qualityAspectKey: string) {
         return this.qualityAspects.find(qa => qa.getId === qualityAspectKey);
+    }
+
+    findFactorCategory(categoryKey: string) {
+        return this.factorCategories.find(category => category.categoryKey === categoryKey);
     }
 
     findProductFactor(productFactorKey: string) {

@@ -220,7 +220,7 @@ export const qualityModel: QualityModelSpec = {
         "secretsManagement": {
             "name": "Secrets management",
             "description": "Secrets (e.g. passwords, access tokens, encryption keys) which allow access to other components or data are managed specifically to make sure they stay confidential and only authorized components or persons can access them. Managed in this case refers to where and how secrets are stored and how components which need them can access them.",
-            "categories": ["applicationAdministration"],
+            "categories": ["applicationAdministration", "cloudInfrastructure", "dataManagement"],
             "relevantEntities": ["component"],
             "sources": [],
             "measures": []
@@ -246,7 +246,7 @@ export const qualityModel: QualityModelSpec = {
         "accessRestriction": {
             "name": "Access restriction",
             "description": "Access to components is restricted to those who actually need it. Also, within a system access controls are put in place to have multiple layers of defense. A dedicated component to manage access policies can be used.",
-            "categories": ["networkCommunication"],
+            "categories": ["networkCommunication", "applicationAdministration"],
             "relevantEntities": ["component", "endpoint"],
             "sources": [],
             "measures": []
@@ -286,7 +286,7 @@ export const qualityModel: QualityModelSpec = {
         "serviceOrientation": {
             "name": "Service-orientation",
             "description": "Cloud-native applications realize modularity by being service-oriented, that means the system is decomposed into services encapsulating specific functionalities and communicating with each other only through specific interfaces. Commonly, a microservices architectural style is used.",
-            "categories": ["businessDomain"],
+            "categories": ["businessDomain", "dataManagement", "networkCommunication"],
             "relevantEntities": ["system", "service"],
             "sources": [],
             "measures": []
@@ -294,7 +294,7 @@ export const qualityModel: QualityModelSpec = {
         "limitedFunctionalScope": {
             "name": "Limited functional scope",
             "description": "Each service covers only a limited, but cohesive functional scope to keep services manageable.",
-            "categories": ["businessDomain"],
+            "categories": ["businessDomain", "dataManagement"],
             "relevantEntities": ["service", "endpoint"],
             "sources": [{ "key": "Reznik2019", "section": "9 Microservices Architecture" }, { "key": "Adkins2019", "section": "7 Use Microservices" }, { "key": "Goniwada2021", "section": "3 Polylithic Architecture Principle (Build separate services for different business functionalitites) " }],
             "measures": ["totalServiceInterfaceCohesion", "covesivenessOfService", "cohesionOfAServiceBasedOnOtherEndpointsCalled", "lackOfCohesion", "averageLackOfCohesion", "serviceSize", "unreachableEndpointCount"]
@@ -359,7 +359,7 @@ export const qualityModel: QualityModelSpec = {
         "looseCoupling": {
             "name": "Loose coupling",
             "description": "In cloud-native applications communication between components is loosely coupled in time, location, and language to achieve greater independence.",
-            "categories": ["businessDomain"],
+            "categories": ["businessDomain", "networkCommunication"],
             "relevantEntities": ["system", "component", "link"],
             "sources": [],
             "measures": []
@@ -415,7 +415,7 @@ export const qualityModel: QualityModelSpec = {
         "automatedMonitoring": {
             "name": "Automated Monitoring",
             "description": "Cloud-native applications enable monitoring at various levels (business functionalities in services, backing-service functionalities, infrastructure) in an automated fashion to enable observable and autonomous reactions to changing system conditions.",
-            "categories": ["applicationAdministration"],
+            "categories": ["applicationAdministration", "businessDomain", "networkCommunication"],
             "relevantEntities": ["service", "link", "infrastructure"],
             "sources": [{ "key": "Goniwada2021", "section": "3 High Observability Principle" }],
             "measures": ["ratioOfInfrastructureNodesThatSupportMonitoring", "ratioOfComponentsThatSupportMonitoring"]
@@ -479,7 +479,7 @@ export const qualityModel: QualityModelSpec = {
         "serviceIndependence": {
             "name": "Service independence",
             "description": "Services are as independent as possible throughout their lifecycle, that means development, operation, and evolution. Changes to one service have a minimum impact on other services.",
-            "categories": ["businessDomain"],
+            "categories": ["businessDomain", "networkCommunication", "cloudInfrastructure", "applicationAdministration", "dataManagement"],
             "relevantEntities": ["service", "link"],
             "sources": [{ "key": "Goniwada2021", "section": "3 Decentralize Everything Principle (Decentralize deployment, governance)" }],
             "measures": []
@@ -719,7 +719,7 @@ export const qualityModel: QualityModelSpec = {
         "seamlessUpgrades": {
             "name": "Seamless upgrades",
             "description": "Upgrades of services do not interfere with availability. There are different strategies, like rolling upgrades, to achieve this which should be provided as a capability by the infrastructure.",
-            "categories": ["applicationAdministration", "cloudInfrastructure"],
+            "categories": ["applicationAdministration", "cloudInfrastructure", "networkCommunication", "businessDomain"],
             "relevantEntities": ["component"],
             "sources": [],
             "measures": []
