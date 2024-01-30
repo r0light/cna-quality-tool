@@ -10,7 +10,6 @@
                     </span>
                 </div>
             </div>
-            <div class="filter-divider"></div>
             <div class="filterTool">
                 <span>Product factor filter:</span>
                 <div v-for="[categoryKey, status] of Object.entries(factorCategoryFilter)">
@@ -145,8 +144,9 @@ function onFilterSelected() {
     flex-direction: row;
     width: 100%;
     align-items: start;
-    column-gap: 0.5em;
-    border-bottom: 5px solid var(--menu-background-colour);
+    column-gap: 0.5em; 
+    border-top: 2px solid var(--menu-background-colour);
+    border-bottom: 2px solid var(--menu-background-colour);
 }
 
 .filterTool{
@@ -155,6 +155,11 @@ function onFilterSelected() {
     column-gap: 0.5em;
     flex-wrap: wrap;
     font-size: 0.9em;
+}
+
+.filterTool:not(:last-child) {
+    padding-right: 5px;
+    border-right: 2px solid var(--toolbar-line-colour);
 }
 
 .filterTool>div {
@@ -168,27 +173,9 @@ function onFilterSelected() {
     align-items: center;
 }
 
+
 .filterCheckbox {
     accent-color: #343a40;
-}
-
-.filter-divider {
-    margin-left: 6px;
-    margin-right: 4px;
-    position: relative;
-    height: 100%;
-}
-
-.filter-divider:after {
-    content: '';
-    width: 2px;
-
-    position: absolute;
-    right: 0;
-    top: 0;
-
-    background-color: var(--toolbar-line-colour);
-    height: 100%;
 }
 
 

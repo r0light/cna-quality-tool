@@ -91,9 +91,15 @@ class EvaluatedSystemModel {
         factorLoop: while (factorsToEvaluate.length > 0) {
             let currentFactor = factorsToEvaluate[0];
 
+            if (!activeProductFactors.includes(currentFactor.getId)) {
+                factorsToEvaluate.splice(0, 1);
+                continue factorLoop;
+            }
+
+
             // if the current factor has impacting factors and any of these has not been evaluated yet, skip the current factor and try again later
             for (const impactingFactor of currentFactor.getImpactingFactors()) {
-                if (!this.#evaluatedProductFactors.has(impactingFactor.getId)) {
+                if (!this.#evaluatedProductFactors.has(impactingFactor.getId) && activeProductFactors.includes(impactingFactor.getId)) {
                     factorsToEvaluate.push(factorsToEvaluate.splice(0, 1)[0]);
                     continue factorLoop;
                 }
@@ -126,18 +132,19 @@ class EvaluatedSystemModel {
             }
 
             for (const impact of currentFactor.getOutgoingImpacts) {
-                evaluatedProductFactor.forwardImpacts.push({
-                    impactedFactorKey: impact.getImpactedFactor.getId,
-                    impactedFactorName: impact.getImpactedFactor.getName,
-                    impactType: impact.getImpactType,
-                    weight: deriveImpactWeight(evaluatedProductFactor.result, impact.getImpactType)
-                });
+                if (activeProductFactors.includes(impact.getImpactedFactor.getId) || activeQualityAspects.includes(impact.getImpactedFactor.getId)) {
+                    evaluatedProductFactor.forwardImpacts.push({
+                        impactedFactorKey: impact.getImpactedFactor.getId,
+                        impactedFactorName: impact.getImpactedFactor.getName,
+                        impactType: impact.getImpactType,
+                        weight: deriveImpactWeight(evaluatedProductFactor.result, impact.getImpactType)
+                    });
+                }
             }
 
 
             for (const impact of currentFactor.getIncomingImpacts) {
-                // TODO remove if condition?
-                if (this.#evaluatedProductFactors.has(impact.getSourceFactor.getId)) {
+                if (activeProductFactors.includes(impact.getSourceFactor.getId)) {
                     let impactingFactor = this.#evaluatedProductFactors.get(impact.getSourceFactor.getId);
                     let correspondingForwardingImpact = impactingFactor.forwardImpacts.find(impact => impact.impactedFactorKey === currentFactor.getId);
                     correspondingForwardingImpact.impactedFactor = evaluatedProductFactor;
@@ -156,7 +163,11 @@ class EvaluatedSystemModel {
             factorsToEvaluate.splice(0, 1);
         }
 
-        for (const qualityAspect of this.#qualityModel.qualityAspects) {
+        aspectsLoop: for (const qualityAspect of this.#qualityModel.qualityAspects) {
+
+            if (!activeQualityAspects.includes(qualityAspect.getId)) {
+                continue aspectsLoop;
+            }
 
             let evaluatedQualityAspect: EvaluatedQualityAspect = {
                 id: qualityAspect.getId,
@@ -167,26 +178,24 @@ class EvaluatedSystemModel {
                 backwardImpacts: []
             }
 
-            // TODO add all backwards impacting paths recursively?
             for (const incomingImpact of qualityAspect.getIncomingImpacts) {
-                let evaluatedProductFactor = this.#evaluatedProductFactors.get(incomingImpact.getSourceFactor.getId);
 
-                evaluatedQualityAspect.backwardImpacts.push({
-                    impactingFactorKey: evaluatedProductFactor.id,
-                    impactingFactorName: evaluatedProductFactor.name,
-                    impactType: incomingImpact.getImpactType,
-                    weight: evaluatedProductFactor.forwardImpacts.find(impact => impact.impactedFactorKey === evaluatedQualityAspect.id).weight,
-                    impactingFactor: evaluatedProductFactor
-                })
+                if (activeProductFactors.includes(incomingImpact.getSourceFactor.getId)) {
+                    let evaluatedProductFactor = this.#evaluatedProductFactors.get(incomingImpact.getSourceFactor.getId);
 
-                for (const impact of incomingImpact.getSourceFactor.getOutgoingImpacts) {
-                    // TODO currently only add them, if they were evaluated
+                    evaluatedQualityAspect.backwardImpacts.push({
+                        impactingFactorKey: evaluatedProductFactor.id,
+                        impactingFactorName: evaluatedProductFactor.name,
+                        impactType: incomingImpact.getImpactType,
+                        weight: evaluatedProductFactor.forwardImpacts.find(impact => impact.impactedFactorKey === evaluatedQualityAspect.id).weight,
+                        impactingFactor: evaluatedProductFactor
+                    })
 
-                    if (this.#evaluatedProductFactors.has(impact.getSourceFactor.getId)) {
-                        this.#evaluatedProductFactors.get(impact.getSourceFactor.getId).forwardImpacts.find(impact => impact.impactedFactorKey === evaluatedQualityAspect.id).impactedFactor = evaluatedQualityAspect;
-                    }
+                    this.#evaluatedProductFactors.get(incomingImpact.getSourceFactor.getId)
+                    .forwardImpacts
+                    .find(impact => impact.impactedFactorKey === evaluatedQualityAspect.id)
+                    .impactedFactor = evaluatedQualityAspect;
                 }
-
             }
 
             this.#evaluatedQualityAspects.set(evaluatedQualityAspect.id, evaluatedQualityAspect);

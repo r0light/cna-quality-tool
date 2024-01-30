@@ -4,7 +4,7 @@
             <h2>Evaluation</h2>
             <p class="font-weight-bold">The evaluation feature is still in development...</p>
             <FilterToolbar :highLevelAspectFilter="highLevelAspectFilter" :factorCategoryFilter="factorCategoryFilter"
-                @update:filters="onSelectSystem"></FilterToolbar>
+                @update:filters="onSelectFilter"></FilterToolbar>
             <div class="d-flex flex-row">
                 <div class="m-1">
                     <span>Select the evaluation viewpoint: </span>
@@ -89,6 +89,10 @@ onUpdated(() => {
 
 function onSelectViewpoint() {
     // TODO reorder display of evaluation
+}
+
+function onSelectFilter() {
+    setTimeout(onSelectSystem, 50);
 }
 
 function onSelectSystem() {
