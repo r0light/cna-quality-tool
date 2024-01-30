@@ -415,7 +415,7 @@ export const qualityModel: QualityModelSpec = {
         "automatedMonitoring": {
             "name": "Automated Monitoring",
             "description": "Cloud-native applications enable monitoring at various levels (business functionalities in services, backing-service functionalities, infrastructure) in an automated fashion to enable observable and autonomous reactions to changing system conditions.",
-            "categories": ["applicationAdministration", "businessDomain", "networkCommunication"],
+            "categories": ["applicationAdministration", "businessDomain", "networkCommunication", "dataManagement"],
             "relevantEntities": ["service", "link", "infrastructure"],
             "sources": [{ "key": "Goniwada2021", "section": "3 High Observability Principle" }],
             "measures": ["ratioOfInfrastructureNodesThatSupportMonitoring", "ratioOfComponentsThatSupportMonitoring"]
@@ -567,7 +567,7 @@ export const qualityModel: QualityModelSpec = {
         "replication": {
             "name": "Replication",
             "description": "Business logic and needed data is replicated at various points in a system so that latencies can be minimized and requests can be distributed for fast request handling.",
-            "categories": ["applicationAdministration", "dataManagement"],
+            "categories": ["applicationAdministration", "dataManagement", "cloudInfrastructure"],
             "relevantEntities": ["system", "component"],
             "sources": [],
             "measures": []

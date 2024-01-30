@@ -27,7 +27,7 @@
 <script lang="ts">
 type ItemFilter =  { [key: string]: { key: string, name: string, checked: boolean } };
 
-export function getActiveFilterItems(filter: ItemFilter) {
+export function getActiveFilterItems(filter: ItemFilter): string[] {
     return Object.entries(filter).filter(item => item[1].checked).map(item => item[1].key);
 }
 
@@ -55,10 +55,69 @@ export function createFactorCategoryFilter(qualityModel: QualityModelInstance) {
     return filter;
 }
 
+export function getActiveElements(activeHighLevelAspects: string[], activeCategories: string[], qualityModel: QualityModelInstance): {activeQualityAspects: string[], activeProductFactors: string[]} {
+    let activeQualityAspects = qualityModel.qualityAspects.filter(aspect => activeHighLevelAspects.includes(aspect.getHighLevelAspectKey)).map(aspect => aspect.getId);
+
+    // use this to track which quality aspects are also impacted by active factors to later filter out quality aspects for which no impacting factors are active
+    let qualityAspectsImpactedByActiveFactor = new Set<string>();
+
+    let activeProductFactors = [];
+
+    for (const productFactor of qualityModel.productFactors) {
+
+        // ignore factors which are not assigned to any of the currently selected categories
+        if (!isFactorCategoryInSelectedCategories(productFactor.getCategories, activeCategories)) {
+            continue;
+        }
+
+        let existingImpactedQualityAspect = false;
+        let factorsToCheck: (ProductFactor | QualityAspect)[] = [];
+        factorsToCheck.push(...productFactor.getImpactedFactors());
+        let i = 0;
+
+        while (i < factorsToCheck.length) {
+            let toCheck = factorsToCheck[i];
+
+            if (toCheck.constructor.name === QualityAspect.name) {
+                if (activeQualityAspects.includes(toCheck.getId)) {
+                    existingImpactedQualityAspect = true;
+                    qualityAspectsImpactedByActiveFactor.add(toCheck.getId);
+                }
+            } else {
+                factorsToCheck.push(...(toCheck as ProductFactor).getImpactedFactors());
+            }
+            i = i + 1;
+        }
+        // ignore factors for which impacted factors are not drawn
+        if (!existingImpactedQualityAspect) {
+            continue;
+        }
+
+        activeProductFactors.push(productFactor.getId);
+    }
+
+    // filter out quality aspects for which no active product factors exist
+    activeQualityAspects = activeQualityAspects.filter(aspect => qualityAspectsImpactedByActiveFactor.has(aspect));
+
+    return {
+        activeQualityAspects: activeQualityAspects,
+        activeProductFactors: activeProductFactors
+    }
+
+}
+
+function isFactorCategoryInSelectedCategories(factorCategories: string[], factorCategoryFilter: string[]) {
+    return factorCategories.some(categoryKey => {
+        return factorCategoryFilter.includes(categoryKey);
+    })
+}
+
 </script>
 
 <script lang="ts" setup>
 import { QualityModelInstance } from '@/core/qualitymodel/QualityModelInstance';
+import { ProductFactor } from '@/core/qualitymodel/quamoco/ProductFactor';
+import { QualityAspect } from '@/core/qualitymodel/quamoco/QualityAspect';
 
 const props = defineProps<{
     highLevelAspectFilter: ItemFilter,

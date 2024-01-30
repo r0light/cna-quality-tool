@@ -3,6 +3,7 @@
         <div class="d-flex flex-column p-1">
             <h2>Evaluation</h2>
             <p class="font-weight-bold">The evaluation feature is still in development...</p>
+            <FilterToolbar :highLevelAspectFilter="highLevelAspectFilter" :factorCategoryFilter="factorCategoryFilter" @update:filters="onSelectSystem"></FilterToolbar>
             <div class="d-flex flex-row">
                 <div class="m-1">
                     <span>Select the evaluation viewpoint: </span>
@@ -42,6 +43,7 @@ import { QualityModelInstance, getQualityModel } from '@/core/qualitymodel/Quali
 import { CalculatedMeasure, EvaluatedProductFactor, EvaluatedQualityAspect, EvaluatedSystemModel, ForwardImpactingPath } from '@/core/qualitymodel/evaluation/EvaluatedSystemModel';
 import ProductFactorViewpoint from './ProductFactorViewpoint.vue';
 import QualityAspectViewpoint from './QualityAspectViewpoint.vue';
+import FilterToolbar, { createFactorCategoryFilter, createHighLevelAspectFilter, getActiveFilterItems } from '../qualitymodel/FilterToolbar.vue';
 
 const props = defineProps<{
     systemsData: ModelingData[],
@@ -49,6 +51,14 @@ const props = defineProps<{
 }>()
 
 const qualityModel: QualityModelInstance = getQualityModel();
+
+const highLevelAspectFilter: { [key: string]: { key: string, name: string, checked: boolean } } = (() => {
+    return createHighLevelAspectFilter(qualityModel);
+})();
+
+const factorCategoryFilter: { [key: string]: { key: string, name: string, checked: boolean } } = (() => {
+    return createFactorCategoryFilter(qualityModel);
+})();
 
 const selectedSystemId = ref<number>(-1);
 
@@ -78,6 +88,7 @@ function onSelectViewpoint() {
 }
 
 function onSelectSystem() {
+    //TODO split in different functions (depending on system or filter select) for better performance?
 
     calculatedMeasures.value.clear();
     evaluatedProductFactors.value.clear();
@@ -103,6 +114,7 @@ function onSelectSystem() {
 
     console.time('evaluation');
 
+    //TODO apply filter also to evaluation?
     evaluatedSystem.evaluate();
 
     evaluatedSystem.getCalculatedMeasures.forEach((value, key, map) => {
@@ -124,6 +136,8 @@ function onSelectSystem() {
 
 }
 
+
+function 
 
 </script>
 

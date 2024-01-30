@@ -1,6 +1,7 @@
 <template>
     <div class="qualitymodel-container" ref="qmContainer">
-        <FilterToolbar :highLevelAspectFilter="highLevelAspectFilter" :factorCategoryFilter="factorCategoryFilter" @update:filters="redrawWithFilter"></FilterToolbar>
+        <FilterToolbar :highLevelAspectFilter="highLevelAspectFilter" :factorCategoryFilter="factorCategoryFilter"
+            @update:filters="redrawWithFilter"></FilterToolbar>
         <div class="qualityModelView">
             <div class="paperContainer">
                 <div id="qmPaper" ref="qmPaper"></div>
@@ -58,7 +59,7 @@ import { ProductFactor } from '@/core/qualitymodel/quamoco/ProductFactor';
 import { QualityAspect } from '@/core/qualitymodel/quamoco/QualityAspect';
 import { entities } from '@/core/qualitymodel/specifications/entities';
 import { orderQualityAspects, placeProductFactors, placeQualityAspects } from './placementAlgorithm';
-import FilterToolbar, { createFactorCategoryFilter, createHighLevelAspectFilter, getActiveFilterItems } from './FilterToolbar.vue';
+import FilterToolbar, { createFactorCategoryFilter, createHighLevelAspectFilter, getActiveElements, getActiveFilterItems } from './FilterToolbar.vue';
 
 let initialized = true;
 let doRearrange = false;
@@ -178,13 +179,6 @@ function updateViewIfPossible() {
     }
 }
 
-function isFactorCategoryInSelectedCategories(factorCategories: string[], factorCategoryFilter: string[]) {
-    return factorCategories.some(categoryKey => {
-        return factorCategoryFilter.includes(categoryKey);
-    })
-}
-
-
 function drawQualityModelElements(highLevelFilter: string[], factorCategoryFilter: string[]) {
 
     // clear existing elements
@@ -193,19 +187,15 @@ function drawQualityModelElements(highLevelFilter: string[], factorCategoryFilte
     productFactorElements.length = 0;
     impactElements.length = 0;
 
+    let activeElements = getActiveElements(highLevelFilter, factorCategoryFilter, qualityModel);
+
     let initialPositionX = -50;
     let initialPositionY = -50;
     for (const qualityAspect of qualityModel.qualityAspects) {
 
-        // Filters
 
-        // 1. ignore quality aspects for which no impacts are defined
-        if (qualityAspect.getImpactingFactors().length === 0) {
-            continue;
-        }
-        
-        // 2. filter based on high level quality aspect
-        if (!highLevelFilter.includes(qualityAspect.getHighLevelAspectKey)) {
+        // filter
+        if (!activeElements.activeQualityAspects.includes(qualityAspect.getId)) {
             continue;
         }
 
@@ -232,33 +222,8 @@ function drawQualityModelElements(highLevelFilter: string[], factorCategoryFilte
     let drawnQualityAspects = qualityAspectElements.map(element => element.id);
     for (const productFactor of qualityModel.productFactors) {
 
-        // Filters
-
-        // 1. ignore factors which are not assigned to any of the currently selected categories
-        if (!isFactorCategoryInSelectedCategories(productFactor.getCategories, factorCategoryFilter)) {
-            continue;
-        }
-
-
-        let existingImpactedQualityAspect = false;
-        let factorsToCheck: (ProductFactor | QualityAspect)[] = [];
-        factorsToCheck.push(...productFactor.getImpactedFactors());
-        let i = 0;
-
-        while (i < factorsToCheck.length) {
-            let toCheck = factorsToCheck[i];
-
-            if (toCheck.constructor.name === QualityAspect.name) {
-                if (drawnQualityAspects.includes(toCheck.getId)) {
-                    existingImpactedQualityAspect = true;
-                }
-            } else {
-                factorsToCheck.push(...(toCheck as ProductFactor).getImpactedFactors());
-            }
-            i = i + 1;
-        }
-        // ignore factors for which impacted factors are not drawn
-        if (!existingImpactedQualityAspect) {
+        // filter
+        if (!activeElements.activeProductFactors.includes(productFactor.getId)) {
             continue;
         }
 
