@@ -325,13 +325,13 @@ function arrangeQualityModelElements() {
 
     placeProductFactors(qmPaper.value, graph, qualityAspectElements, productFactorElements, qualityModel);
 
-    //updateLinkRoutes();
+    setTimeout(updateLinkRoutes, 50);
 }
 
 
 function updateLinkRoutes() {
     for (const impactElement of impactElements) {
-        (impactElement.findView(paperRef.value as dia.Paper) as dia.LinkView).requestConnectionUpdate();
+        //(impactElement.findView(paperRef.value as dia.Paper) as dia.LinkView).requestConnectionUpdate();
         impactElement.toBack();
     }
 }
