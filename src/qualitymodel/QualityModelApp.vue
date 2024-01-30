@@ -1,28 +1,6 @@
 <template>
     <div class="qualitymodel-container" ref="qmContainer">
-        <div class="qualityModelToolbar p-1">
-            <div class="qualityModelTool">
-                <span>Quality aspect filter:</span>
-                <div v-for="[highLevelAspectKey, status] of Object.entries(highLevelAspectFilter)">
-                    <input :id="`${highLevelAspectKey}-filter`" @input="onHighLevelFilterSelected()"
-                        v-model="status.checked" class="filterCheckbox" type="checkbox" :value="highLevelAspectKey">
-                    <span class="" :for="`${highLevelAspectKey}-filter`">
-                        {{ status.name }}
-                    </span>
-                </div>
-            </div>
-            <div class="group-divider"></div>
-            <div class="qualityModelTool">
-                <span>Product factor filter:</span>
-                <div v-for="[categoryKey, status] of Object.entries(factorCategoryFilter)">
-                    <input :id="`${categoryKey}-filter`" @input="onCategoryFilterSelected()"
-                        v-model="status.checked" class="filterCheckbox" type="checkbox" :value="categoryKey">
-                    <span class="" :for="`${categoryKey}-filter`">
-                        {{ status.name }}
-                    </span>
-                </div>
-            </div>
-        </div>
+        <FilterToolbar :highLevelAspectFilter="highLevelAspectFilter" :factorCategoryFilter="factorCategoryFilter" @update:filters="redrawWithFilter"></FilterToolbar>
         <div class="qualityModelView">
             <div class="paperContainer">
                 <div id="qmPaper" ref="qmPaper"></div>
@@ -80,6 +58,7 @@ import { ProductFactor } from '@/core/qualitymodel/quamoco/ProductFactor';
 import { QualityAspect } from '@/core/qualitymodel/quamoco/QualityAspect';
 import { entities } from '@/core/qualitymodel/specifications/entities';
 import { orderQualityAspects, placeProductFactors, placeQualityAspects } from './placementAlgorithm';
+import FilterToolbar, { createFactorCategoryFilter, createHighLevelAspectFilter, getActiveFilterItems } from './FilterToolbar.vue';
 
 let initialized = true;
 let doRearrange = false;
@@ -99,36 +78,12 @@ const paperRef = ref<dia.Paper>(null);
 const qualityModel = getQualityModel();
 
 const highLevelAspectFilter: { [key: string]: { key: string, name: string, checked: boolean } } = (() => {
-    let filter = {};
-    for (const highLevelAspectKey of [...new Set(qualityModel.qualityAspects.map(qualityAspect => qualityAspect.getHighLevelAspectKey))]) {
-        filter[highLevelAspectKey] = {
-            key: highLevelAspectKey,
-            name: qualityModel.highLevelAspects.find(aspect => aspect.getId === highLevelAspectKey).getName,
-            checked: true
-        }
-    }
-    return filter;
+    return createHighLevelAspectFilter(qualityModel);
 })();
 
 const factorCategoryFilter: { [key: string]: { key: string, name: string, checked: boolean } } = (() => {
-    let filter = {};
-    for (const category of qualityModel.factorCategories) {
-        filter[category.categoryKey] = {
-            key: category.categoryKey,
-            name: category.categoryName,
-            checked: true
-        }
-    }
-    return filter;
+    return createFactorCategoryFilter(qualityModel);
 })();
-
-function getActiveHighLevelAspects() {
-    return Object.entries(highLevelAspectFilter).filter(aspect => aspect[1].checked).map(aspect => aspect[1].key);
-}
-
-function getActiveFactorCategories() {
-    return Object.entries(factorCategoryFilter).filter(category => category[1].checked).map(category => category[1].key);
-}
 
 const qualityAspectElements: dia.Element[] = [];
 const productFactorElements: dia.Element[] = [];
@@ -165,7 +120,7 @@ onMounted(() => {
 
     paperRef.value.render();
 
-    drawQualityModelElements(getActiveHighLevelAspects(), getActiveFactorCategories());
+    drawQualityModelElements(getActiveFilterItems(highLevelAspectFilter), getActiveFilterItems(factorCategoryFilter));
 
 
     paperRef.value.on({
@@ -411,18 +366,10 @@ function updateLinkRoutes() {
     }
 }
 
-function onHighLevelFilterSelected() {
+function redrawWithFilter() {
     // use setTimeout as a workaround to wait for highLevelAspectFilter to be properly updated so that the filter is applied
     setTimeout(() => {
-        drawQualityModelElements(getActiveHighLevelAspects(), getActiveFactorCategories());
-        arrangeQualityModelElements();
-    }, 50);
-}
-
-function onCategoryFilterSelected() {
-    // use setTimeout as a workaround to wait for factorCategoryFilter to be properly updated so that the filter is applied
-    setTimeout(() => {
-        drawQualityModelElements(getActiveHighLevelAspects(), getActiveFactorCategories());
+        drawQualityModelElements(getActiveFilterItems(highLevelAspectFilter), getActiveFilterItems(factorCategoryFilter));
         arrangeQualityModelElements();
     }, 50);
 }
@@ -435,61 +382,6 @@ function onCategoryFilterSelected() {
     display: flex;
     flex-direction: column;
     width: 100%;
-    height: 100%;
-}
-
-.qualityModelToolbar {
-    display: flex;
-    flex-direction: row;
-    width: 100%;
-    align-items: start;
-    border-bottom: 5px solid var(--menu-background-colour);
-}
-
-.qualityModelTool {
-    display: flex;
-    flex-direction: row;
-    flex-grow: 1;
-    column-gap: 1em;
-    flex-wrap: wrap;
-    font-size: 0.9em;
-}
-
-.qualityModelTool>div {
-    display: flex;
-    flex-direction: row;
-    column-gap: 0.2em;
-}
-
-.qualityModelTool>div>span {
-    display: flex;
-    align-items: center;
-}
-
-.filterCheckbox {
-    accent-color: #343a40;
-}
-
-.highLevel-select {
-    width: 300px;
-}
-
-.group-divider {
-    margin-left: 6px;
-    margin-right: 4px;
-    position: relative;
-    height: 100%;
-}
-
-.group-divider:after {
-    content: '';
-    width: 2px;
-
-    position: absolute;
-    right: 0;
-    top: 0;
-
-    background-color: var(--toolbar-line-colour);
     height: 100%;
 }
 
