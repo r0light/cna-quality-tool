@@ -82,7 +82,9 @@ class EvaluatedSystemModel {
         return this.#evaluatedQualityAspects;
     }
 
-    evaluate() {
+    evaluate(activeQualityAspects: string[], activeProductFactors: string[]) {
+
+        //TODO use supplied filters
 
         let factorsToEvaluate = this.#qualityModel.productFactors.slice(0);
 

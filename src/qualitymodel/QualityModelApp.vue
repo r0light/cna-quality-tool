@@ -17,6 +17,11 @@
                                 ProductFactor).getRelevantEntities.map(entityKey => entities[entityKey].name).join(", ")
                             }}</span>
                         </div>
+                        <div v-if="selectedFactor.getFactorType === 'productFactor'">
+                            <span>Categories that this factor is assigned to: </span><br><span>{{ (selectedFactor as
+                                ProductFactor).getCategories.map(categoryKey => qualityModel.findFactorCategory(categoryKey).categoryName).join(", ")
+                            }}</span>
+                        </div>
                         <div
                             v-if="selectedFactor.getFactorType === 'productFactor' && (selectedFactor as ProductFactor).getSources.length > 0">
                             <span>Read more:</span>

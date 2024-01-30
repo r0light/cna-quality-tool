@@ -3,7 +3,8 @@
         <div class="d-flex flex-column p-1">
             <h2>Evaluation</h2>
             <p class="font-weight-bold">The evaluation feature is still in development...</p>
-            <FilterToolbar :highLevelAspectFilter="highLevelAspectFilter" :factorCategoryFilter="factorCategoryFilter" @update:filters="onSelectSystem"></FilterToolbar>
+            <FilterToolbar :highLevelAspectFilter="highLevelAspectFilter" :factorCategoryFilter="factorCategoryFilter"
+                @update:filters="onSelectSystem"></FilterToolbar>
             <div class="d-flex flex-row">
                 <div class="m-1">
                     <span>Select the evaluation viewpoint: </span>
@@ -21,12 +22,15 @@
                 </div>
             </div>
             <div v-if="selectedSystemId > -1">
-
                 <div v-if="selectedViewpoint === 'perProductFactor'">
-                    <ProductFactorViewpoint :evaluatedProductFactors="(evaluatedProductFactors as Map<string, EvaluatedProductFactor>)"></ProductFactorViewpoint>
+                    <ProductFactorViewpoint
+                        :evaluatedProductFactors="(evaluatedProductFactors as Map<string, EvaluatedProductFactor>)">
+                    </ProductFactorViewpoint>
                 </div>
                 <div v-if="selectedViewpoint === 'perQualityAspect'">
-                    <QualityAspectViewpoint :evaluatedQualityAspects="(evaluatedQualityAspects as Map<string, EvaluatedQualityAspect>)"></QualityAspectViewpoint>
+                    <QualityAspectViewpoint
+                        :evaluatedQualityAspects="(evaluatedQualityAspects as Map<string, EvaluatedQualityAspect>)">
+                    </QualityAspectViewpoint>
                 </div>
                 <div v-for="[key, calculatedMeasure] of calculatedMeasures">
                     <span>{{ calculatedMeasure.name }}</span>: <span> {{ calculatedMeasure.value }}</span>
@@ -43,7 +47,7 @@ import { QualityModelInstance, getQualityModel } from '@/core/qualitymodel/Quali
 import { CalculatedMeasure, EvaluatedProductFactor, EvaluatedQualityAspect, EvaluatedSystemModel, ForwardImpactingPath } from '@/core/qualitymodel/evaluation/EvaluatedSystemModel';
 import ProductFactorViewpoint from './ProductFactorViewpoint.vue';
 import QualityAspectViewpoint from './QualityAspectViewpoint.vue';
-import FilterToolbar, { createFactorCategoryFilter, createHighLevelAspectFilter, getActiveFilterItems } from '../qualitymodel/FilterToolbar.vue';
+import FilterToolbar, { ItemFilter, createFactorCategoryFilter, createHighLevelAspectFilter, getActiveElements, getActiveFilterItems } from '../qualitymodel/FilterToolbar.vue';
 
 const props = defineProps<{
     systemsData: ModelingData[],
@@ -52,11 +56,11 @@ const props = defineProps<{
 
 const qualityModel: QualityModelInstance = getQualityModel();
 
-const highLevelAspectFilter: { [key: string]: { key: string, name: string, checked: boolean } } = (() => {
+const highLevelAspectFilter: ItemFilter = (() => {
     return createHighLevelAspectFilter(qualityModel);
 })();
 
-const factorCategoryFilter: { [key: string]: { key: string, name: string, checked: boolean } } = (() => {
+const factorCategoryFilter: ItemFilter = (() => {
     return createFactorCategoryFilter(qualityModel);
 })();
 
@@ -114,8 +118,9 @@ function onSelectSystem() {
 
     console.time('evaluation');
 
-    //TODO apply filter also to evaluation?
-    evaluatedSystem.evaluate();
+    let activeElements = getActiveElements(getActiveFilterItems(highLevelAspectFilter), getActiveFilterItems(factorCategoryFilter), qualityModel);
+
+    evaluatedSystem.evaluate(activeElements.activeQualityAspects, activeElements.activeProductFactors);
 
     evaluatedSystem.getCalculatedMeasures.forEach((value, key, map) => {
         calculatedMeasures.value.set(key, value);
@@ -135,9 +140,6 @@ function onSelectSystem() {
     console.timeEnd('evaluation');
 
 }
-
-
-function 
 
 </script>
 

@@ -10,7 +10,7 @@
                     </span>
                 </div>
             </div>
-            <div class="group-divider"></div>
+            <div class="filter-divider"></div>
             <div class="filterTool">
                 <span>Product factor filter:</span>
                 <div v-for="[categoryKey, status] of Object.entries(factorCategoryFilter)">
@@ -25,7 +25,7 @@
 </template>
 
 <script lang="ts">
-type ItemFilter =  { [key: string]: { key: string, name: string, checked: boolean } };
+export type ItemFilter =  { [key: string]: { key: string, name: string, checked: boolean } };
 
 export function getActiveFilterItems(filter: ItemFilter): string[] {
     return Object.entries(filter).filter(item => item[1].checked).map(item => item[1].key);
@@ -172,14 +172,14 @@ function onFilterSelected() {
     accent-color: #343a40;
 }
 
-.group-divider {
+.filter-divider {
     margin-left: 6px;
     margin-right: 4px;
     position: relative;
     height: 100%;
 }
 
-.group-divider:after {
+.filter-divider:after {
     content: '';
     width: 2px;
 
