@@ -28,7 +28,7 @@ node_types:
       - host:
           capability: tosca.capabilities.Compute
           relationship: tosca.relationships.HostedOn
-          occurrences: [1, 1]
+          occurrences: [1, UNBOUNDED]
       # Allow the definition of endpoints provided by this Component
       - provides_endpoint:
           capability: tosca.capabilities.Endpoint
@@ -109,7 +109,7 @@ node_types:
       - host:
           capability: tosca.capabilities.Compute
           relationship: tosca.relationships.HostedOn
-          occurrences: [1, 1]
+          occurrences: [1, UNBOUNDED]
       # Allow the definition of endpoints provided by this Component
       - provides_endpoint:
           capability: tosca.capabilities.Endpoint
@@ -181,7 +181,7 @@ node_types:
       - host:
           capability: tosca.capabilities.Compute
           relationship: tosca.relationships.HostedOn
-          occurrences: [0, 1]
+          occurrences: [0, UNBOUNDED]
       # Allow the definition of Backing Data usage
       - uses_backing_data:
           capability: tosca.capabilities.Attachment

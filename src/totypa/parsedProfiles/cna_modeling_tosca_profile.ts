@@ -117,7 +117,7 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
             "relationship": "tosca.relationships.HostedOn",
             "occurrences": [
               1,
-              1
+              "UNBOUNDED"
             ]
           }
         },
@@ -260,7 +260,7 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
             "relationship": "tosca.relationships.HostedOn",
             "occurrences": [
               1,
-              1
+              "UNBOUNDED"
             ]
           }
         },
@@ -375,7 +375,7 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
             "relationship": "tosca.relationships.HostedOn",
             "occurrences": [
               0,
-              1
+              "UNBOUNDED"
             ]
           }
         },

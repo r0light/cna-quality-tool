@@ -1,5 +1,5 @@
 import * as yaml from 'js-yaml';
-import { TOSCA_Service_Template } from "../tosca-types/template-types";
+import { TOSCA_Service_Template } from "../tosca-types/template-types.js";
 
 console.log("hello world")
 
