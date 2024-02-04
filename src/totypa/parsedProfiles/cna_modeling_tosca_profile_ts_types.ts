@@ -57,6 +57,7 @@ export type CnaQualityModelEntitiesRootComponent = {
                        properties?: {
     managed: boolean,
     software_type: string,
+    stateless: boolean,
 },
 attributes?: {
     tosca_id?: string,
@@ -249,6 +250,9 @@ export type CnaQualityModelEntitiesDBMSStorageService = {
                        metadata?: TOSCA_Metadata,
                        properties?: {
     name: string,
+    stateless: boolean,
+    replicas: number,
+    shards: number,
     root_password?: string,
     port?: number,
     component_version?: string,

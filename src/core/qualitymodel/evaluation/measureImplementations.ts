@@ -1,4 +1,4 @@
-import { Service } from "../../entities";
+import { Service, StorageBackingService } from "../../entities";
 import { Calculation } from "../quamoco/Measure";
 
 const average: (list: number[]) => number = list => {
@@ -17,6 +17,19 @@ const measureImplementations: { [measureKey: string]: Calculation } = {
                 services
                     .map(service => service.getProperties()
                         .find(prop => prop.getKey === "replicas").value)
+            );
+        }
+    },
+    "storageReplicationLevel": (system) => {
+        let storageBackingServices = [...system.getComponentEntities.entries()]
+            .map(entry => entry[1])
+            .filter(entity => entity.constructor.name === StorageBackingService.name);
+        if (storageBackingServices.length === 0) {
+            return "n/a";
+        } else {
+            return average(storageBackingServices
+                .map(storageService => storageService.getProperties()
+                    .find(prop => prop.getKey === "replicas").value)
             );
         }
     },

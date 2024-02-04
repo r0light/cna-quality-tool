@@ -8,16 +8,22 @@ type ProductFactorEvaluationFunction = (factor: ProductFactor, calculatedMeasure
 class ProductFactorEvaluation {
 
     #evaluatedFactor: ProductFactor;
+    #evaluationId: string;
     #evaluate: ProductFactorEvaluationFunction;
     #reasoning: string;
 
-    constructor(evaluatedFactor: ProductFactor, reasoning: string) {
+    constructor(evaluatedFactor: ProductFactor, evaluationId: string, reasoning: string) {
         this.#evaluatedFactor = evaluatedFactor;
+        this.#evaluationId = evaluationId;
         this.#reasoning = reasoning;
     }
 
     get getEvaluatedFactor() {
         return this.#evaluatedFactor;
+    }
+
+    get getEvaluationId() {
+        return this.#evaluationId;
     }
 
     get getReasoning() {

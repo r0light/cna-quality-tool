@@ -23,6 +23,11 @@ node_types:
         description: The type of the software in the sense of who developed it. If it is a self-written component use "custom", if it is an existing open-source solution which is not customized (apart from configuration) use "open-source". If it is licensed proprietary software, use "proprietary".
         default: custom
         required: true
+      stateless:
+        type: boolean
+        description: True if this component is stateless, that means it requires no disk storage space where data is persisted between executions. That means it can store data to disk, but should not rely on this data to be available for following executions. Instead it should be able to restore required data after a restart in a different environment. 
+        default: true
+        required: true
     requirements:
       # Require deployment on an Infrastructure entity
       - host:
@@ -244,6 +249,21 @@ node_types:
         description: >-
           the logical name of the database
         required: true
+      stateless:
+        type: boolean
+        description: Storage Backing Service are per default stateful (not stateless)
+        default: false
+        required: true
+      replicas:
+        type: integer
+        description: The minimum number of replicated instances for this storage service when it is running
+        required: true
+        default: 1
+      shards:
+        type: integer
+        description: The number of shards this storage service is configured with, the default of 1 means no sharding is used.
+        required: true
+        default: 1
     requirements:
       # Allow the definition of Links between Components
       - endpoint_link:

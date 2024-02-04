@@ -51,11 +51,13 @@ type MeasureSpec = {
 
 type ProductFactorEvaluationSpec = {
     targetFactor: string,
+    evaluation: string,
     reasoning: string
 }
 
 type QualityAspectEvaluationSpec = {
     targetAspect: string,
+    evaluation: string,
     reasoning: string
 }
 
@@ -1601,15 +1603,22 @@ export const qualityModel: QualityModelSpec = {
             "name": "Ratio of request traces containing a frontend component",
             "calculation": "",
             "sources": ["Zdun2023a"]
-        },
+        }
     },
     "productFactorEvaluations": [
         {
             "targetFactor": "serviceReplication",
+            "evaluation": "serviceReplication",
             "reasoning": "TODO write a suitable reasoning"
         },
         {
+            "targetFactor": "horizontalDataReplication",
+            "evaluation": "horizontalDataReplication",
+            "reasoning": ""
+        },
+        {
             "targetFactor": "replication",
+            "evaluation": "replication", // TODO more general evaluation, like aggregate?
             "reasoning": "TODO write a suitable reasoning"
         },
     ],

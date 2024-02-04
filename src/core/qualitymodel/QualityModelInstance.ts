@@ -140,13 +140,13 @@ function getQualityModel(): QualityModelInstance {
         let evaluatedProductFactor = newQualityModel.findProductFactor(productFactorEvaluation.targetFactor);
         if (evaluatedProductFactor) {
 
-            let newEvaluation = new ProductFactorEvaluation(evaluatedProductFactor, productFactorEvaluation.reasoning);
-            let availableImplementation = productFactorEvaluationImplementation[evaluatedProductFactor.getId]
+            let newEvaluation = new ProductFactorEvaluation(evaluatedProductFactor, productFactorEvaluation.evaluation, productFactorEvaluation.reasoning);
+            let availableImplementation = productFactorEvaluationImplementation[newEvaluation.getEvaluationId]
             if (availableImplementation) {
                 newEvaluation.addEvaluation(availableImplementation);
                 evaluatedProductFactor.addEvaluation(newEvaluation);
             } else {
-                console.log(`No evaluation implementation found for evaluation of factor ${evaluatedProductFactor.getId}`);
+                throw new Error(`No evaluation implementation found with id ${newEvaluation.getEvaluationId}`);
             }
         } else {
             throw new Error(`There is no product factor with key ${productFactorEvaluation.targetFactor}`);

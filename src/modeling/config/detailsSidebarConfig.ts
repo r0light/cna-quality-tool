@@ -252,6 +252,21 @@ function parseProperties(properties: EntityProperty[], path: "entity" | "relatio
     })
 }
 
+
+function concatInOrder(...propertyConfigs: PropertyConfig[][]): PropertyConfig[] {
+    let concatenatedProperties: PropertyConfig[] = [];
+    let propertyKeys: string[] = [];
+    for (const propertyConfig of propertyConfigs) {
+        propertyConfig.forEach(propertyConfig => {
+            if (!propertyKeys.includes(propertyConfig.providedFeature)) {
+                concatenatedProperties.push(propertyConfig);
+                propertyKeys.push(propertyConfig.providedFeature);
+            }
+        })
+    }
+    return concatenatedProperties;
+}
+
 function customizePropertyConfigs(configs: PropertyConfig[], customConfigOverwrites: PropertyConfig[]): PropertyConfig[] {
     for (const customConfig of customConfigOverwrites) {
         let propertyKey = "";
@@ -605,16 +620,16 @@ const EntityDetailsConfig: {
         specificProperties: parseProperties(getComponentProperties(), "entity")
     },
     Service: {
-        type: EntityTypes.SERVICE,
-        specificProperties: parseProperties(getComponentProperties(), "entity").concat(parseProperties(getServiceProperties(), "entity"))
+        type: EntityTypes.SERVICE, 
+        specificProperties: concatInOrder(parseProperties(getServiceProperties(), "entity"), parseProperties(getComponentProperties(), "entity"))
     },
     BackingService: {
         type: EntityTypes.BACKING_SERVICE,
-        specificProperties: parseProperties(getComponentProperties(), "entity").concat(parseProperties(getBackingServiceProperties(), "entity"))
+        specificProperties: concatInOrder(parseProperties(getBackingServiceProperties(), "entity"), parseProperties(getComponentProperties(), "entity"))
     },
     StorageBackingService: {
         type: EntityTypes.STORAGE_BACKING_SERVICE,
-        specificProperties: parseProperties(getComponentProperties(), "entity").concat(parseProperties(getStorageBackingServiceProperties(), "entity"))
+        specificProperties: concatInOrder(parseProperties(getStorageBackingServiceProperties(), "entity"), parseProperties(getComponentProperties(), "entity"))
     },
     Endpoint: {
         type: EntityTypes.ENDPOINT,
@@ -653,7 +668,7 @@ const EntityDetailsConfig: {
     },
     ExternalEndpoint: {
         type: EntityTypes.EXTERNAL_ENDPOINT,
-        specificProperties: customizePropertyConfigs(parseProperties(getEndpointProperties(), "entity").concat(parseProperties(getExternalEndpointProperties(), "entity")), [
+        specificProperties: customizePropertyConfigs(concatInOrder(parseProperties(getExternalEndpointProperties(), "entity"), parseProperties(getEndpointProperties(), "entity")), [
             {
                 providedFeature: "embedded",
                 contentType: PropertyContentType.INPUT_TEXTBOX,

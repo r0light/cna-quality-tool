@@ -277,7 +277,8 @@ function loadAllProperties(nodeDefinition: TOSCA_Node): EntityProperty[] {
         if (nextNode) {
             currentNode = nextNode[1];
             if (currentNode.properties) {
-                parsedProperties.push(...parseProperties(currentNode.properties));
+                parsedProperties.push(...parseProperties(currentNode.properties)
+                    .filter(property => !parsedProperties.map(parsedProperty => parsedProperty.getKey).includes(property.getKey)));
             }
         } else {
             break;
