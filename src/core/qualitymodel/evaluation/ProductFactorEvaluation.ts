@@ -1,9 +1,9 @@
 import { System } from "@/core/entities";
 import { ProductFactor } from "../quamoco/ProductFactor";
-import { CalculatedMeasure, EvaluatedProductFactor, ProductFactorEvaluationResult } from "./EvaluatedSystemModel";
+import { CalculatedMeasure, EvaluatedProductFactor, ForwardImpactingPath, ProductFactorEvaluationResult } from "./EvaluatedSystemModel";
 
 
-type ProductFactorEvaluationFunction = (factor: ProductFactor, calculatedMeasures: Map<string, CalculatedMeasure>, evaluatedProductFactors: Map<string, EvaluatedProductFactor>) => ProductFactorEvaluationResult;
+type ProductFactorEvaluationFunction = (factor: ProductFactor, incomingImpacts: ForwardImpactingPath[], calculatedMeasures: Map<string, CalculatedMeasure>, evaluatedProductFactors: Map<string, EvaluatedProductFactor>) => ProductFactorEvaluationResult;
 
 class ProductFactorEvaluation {
 
@@ -35,7 +35,21 @@ class ProductFactorEvaluation {
     }
 
     evaluate(calculatedMeasures: Map<string, CalculatedMeasure>, evaluatedProductFactors: Map<string, EvaluatedProductFactor>) {
-        return this.#evaluate(this.#evaluatedFactor, calculatedMeasures, evaluatedProductFactors);
+
+        let impacts: ForwardImpactingPath[] = [];
+
+        for (const impactingFactor of this.#evaluatedFactor.getImpactingFactors()) {
+            let evaluatedImpactingFactor = evaluatedProductFactors.get(impactingFactor.getId)
+            if (evaluatedImpactingFactor) {
+                let impact = evaluatedImpactingFactor.forwardImpacts.find(impact => impact.impactedFactorKey === this.#evaluatedFactor.getId);
+                if (impact) {
+                    impacts.push(impact);
+                }
+            }
+        }
+
+
+        return this.#evaluate(this.#evaluatedFactor, impacts, calculatedMeasures, evaluatedProductFactors);
     }
 }
 

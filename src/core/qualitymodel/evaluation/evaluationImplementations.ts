@@ -7,7 +7,7 @@ import { CalculatedMeasure, EvaluatedProductFactor } from "./EvaluatedSystemMode
 const productFactorEvaluationImplementation: {
     [factorKey: string]: ProductFactorEvaluationFunction
 } = {
-    "serviceReplication": (factor: ProductFactor, calculatedMeasures: Map<string, CalculatedMeasure>, evaluatedProductFactors: Map<string, EvaluatedProductFactor>) => {
+    "serviceReplication": (factor , incomingPaths, calculatedMeasures, evaluatedProductFactors) => {
         let serviceReplicationLevel = calculatedMeasures.get("serviceReplicationLevel").value;
         if (serviceReplicationLevel === "n/a") {
             return "n/a";
@@ -23,7 +23,7 @@ const productFactorEvaluationImplementation: {
             throw new Error(`serviceReplicationLevel is of type ${typeof serviceReplicationLevel}, but should be of type number`);
         }
     },
-    "horizontalDataReplication": (factor, calculatedMeasures, evaluatedProductFactors) => {
+    "horizontalDataReplication": (factor, incomingPaths, calculatedMeasures, evaluatedProductFactors) => {
         let storageReplicationLevel = calculatedMeasures.get("storageReplicationLevel").value;
         if (storageReplicationLevel === "n/a") {
             return "n/a";
@@ -39,12 +39,14 @@ const productFactorEvaluationImplementation: {
             throw new Error(`storageReplicationLevel is of type ${typeof storageReplicationLevel}, but should be of type number`);
         }
     },
-    "replication": (factor: ProductFactor, calculatedMeasures: Map<string, CalculatedMeasure>, evaluatedProductFactors: Map<string, EvaluatedProductFactor>) => {
+    "replication": (factor, incomingPaths, calculatedMeasures, evaluatedProductFactors) => {
         // TODO integrate all impacting factors
-        if (evaluatedProductFactors.has("serviceReplication")) {
-            return evaluatedProductFactors.get("serviceReplication").result;
-        } else {
+        let aggregateResult: string[] = incomingPaths.map(impact => impact.weight);
+        
+        if (aggregateResult.length === 0) {
             return "n/a";
+        } else {
+            return aggregateResult;
         }
     }
 };

@@ -13,7 +13,8 @@ type CalculatedMeasure = {
 
 type NumericEvaluationResult = number;
 type OrdinalEvaluationResult = "none" | "low" | "high";
-type ProductFactorEvaluationResult = NumericEvaluationResult | OrdinalEvaluationResult | "n/a";
+type AggregateResult = string[];
+type ProductFactorEvaluationResult = NumericEvaluationResult | OrdinalEvaluationResult | "n/a" | AggregateResult;
 
 
 type ImpactWeight = "negative" | "slightly negative" | "neutral" | "slightly positive" | "positive" | "n/a";

@@ -9,7 +9,15 @@ export function describeNodeStyleClasses(): string {
 }
 
 export function describeFactor(factor: EvaluatedProductFactor | EvaluatedQualityAspect): string {
-    return `\n\t${factor.id}[${factor.name}\n\t<span class="evaluation-result">${factor.result}</span>]`;
+    let result = "";
+    if (factor.result.constructor === Array) {
+        result = `${factor.result.join(" #124; ")}`;
+    } else if (typeof factor.result === "string") {
+        result = factor.result;
+    } else {
+        result = factor.result.toString();
+    }
+    return `\n\t${factor.id}[${factor.name}\n\t<span class="evaluation-result">${result}</span>]`;
 }
 
 
@@ -32,6 +40,8 @@ export function describeFactorStyle(factor: EvaluatedProductFactor | EvaluatedQu
                 styleClass = "factor-not-applicable";
                 break;
         }
+    } else if (factor.result.constructor === Array) {
+        styleClass = "factor-applicable"; // TODO better solution?
     }
 
     return `\n\tclass ${factor.id} ${styleClass}`; 
