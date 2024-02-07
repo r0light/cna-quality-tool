@@ -745,15 +745,57 @@ function onFilterSelection(viewKey: string) {
                     return cell.attributes.entity.type === EntityTypes.INFRASTRUCTURE || cell.attributes.entity.type === EntityTypes.DEPLOYMENT_MAPPING
                 }));
             break;
+        case "communicationView":
+            filteredGraphCells.push(...props.graph
+                .getCells()
+                .filter(cell => {
+                    return cell.attributes.entity.type === EntityTypes.LINK || cell.attributes.entity.type === EntityTypes.ENDPOINT || cell.attributes.entity.type === EntityTypes.EXTERNAL_ENDPOINT || cell.attributes.entity.type === EntityTypes.REQUEST_TRACE
+                })
+            )
+            break;
+        case "backingView":
+            filteredGraphCells.push(...props.graph
+                .getCells()
+                .filter(cell => {
+                    return cell.attributes.entity.type === EntityTypes.BACKING_SERVICE
+                })
+            )
         default:
             break;
     }
 
-    let index = 0;
-    while (index < filteredGraphCells.length) {
-        let filteredEntity = filteredGraphCells[0];
-        filteredGraphCells.push(...filteredEntity.getEmbeddedCells());
-        index = index + 1;
+    // TODO ignore Data Aggregates and Backing Data, if data view is not active
+
+    // TODO if viewKey is communication check if backing view is active
+
+    if (viewKey === "backingView" && !filterTools.value.find(filter => filter.viewKey === "communicationView").filterState) {
+        // communication is currently not shown, therefore everything is fine
+    } else if (viewKey === "backingView" && filterTools.value.find(filter => filter.viewKey === "communicationView").filterState) {
+        // communication is shown, therefore communication to from backing services should be hidden.
+        let index = 0;
+        while (index < filteredGraphCells.length) {
+            console.log("loop 1:" + index);
+            let filteredEntity = filteredGraphCells[index];
+
+            let embeddedEntities = filteredEntity.getEmbeddedCells();
+            embeddedEntities.forEach(embeddedEntity => {
+                let incomingLinks = props.graph.getConnectedLinks(embeddedEntity);
+                filteredGraphCells.push(...incomingLinks);
+                filteredGraphCells.push(embeddedEntity);
+            })
+
+            let outgoingLinks = props.graph.getConnectedLinks(filteredEntity);
+            filteredGraphCells.push(...outgoingLinks);
+            index = index + 1;
+        }
+    } else {
+        let index = 0;
+        while (index < filteredGraphCells.length) {
+            console.log("loop 2:" + index);
+            let filteredEntity = filteredGraphCells[index];
+            filteredGraphCells.push(...filteredEntity.getEmbeddedCells());
+            index = index + 1;
+        }
     }
 
     filteredGraphCells.forEach(cell => {
