@@ -3,7 +3,7 @@
             <div class="filterTool">
                 <span>Quality aspect filter:</span>
                 <div v-for="[highLevelAspectKey, status] of Object.entries(highLevelAspectFilter)">
-                    <input :id="`${highLevelAspectKey}-filter`" @input="onFilterSelected()"
+                    <input :id="`${highLevelAspectKey}-filter`" @change="onFilterSelected()"
                         v-model="status.checked" class="filterCheckbox" type="checkbox" :value="highLevelAspectKey">
                     <span class="" :for="`${highLevelAspectKey}-filter`">
                         {{ status.name }}
@@ -13,7 +13,7 @@
             <div class="filterTool">
                 <span>Product factor filter:</span>
                 <div v-for="[categoryKey, status] of Object.entries(factorCategoryFilter)">
-                    <input :id="`${categoryKey}-filter`" @input="onFilterSelected()"
+                    <input :id="`${categoryKey}-filter`" @change="onFilterSelected()"
                         v-model="status.checked" class="filterCheckbox" type="checkbox" :value="categoryKey">
                     <span class="" :for="`${categoryKey}-filter`">
                         {{ status.name }}
