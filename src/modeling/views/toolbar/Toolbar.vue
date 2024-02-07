@@ -52,18 +52,15 @@
     <div class="app-header-second-row" v-show="showEntityBar">
         <div class="entity-tools">
             <div class="entity-overall-group" data-group="entity-overall-group">
-                <div v-for="entityTool of entityTools">
-                    <div class="entity-group form-check form-check-inline" :data-group="entityTool.entityType"
-                        :title="entityTool.tooltipText" data-toggle="tooltip" data-placement="bottom">
-                        <input :id="entityTool.entityInput" @input="onEntitySelection(entityTool.entityInput, $event)"
-                            :data-entity-type="entityTool.entityType" class="entityCheckBox form-check-input"
-                            type="checkbox" :value="entityTool.entityType" checked>
-                        <label :id="entityTool.entityLabel" class="user-select-none entityCheckBoxLabel form-check-label"
-                            :for="entityTool.entityInput">
-                            {{ entityTool.labelText }}
-                            <span class="numberOfEntities badge badge-primary badge-pill"
-                                :class="{ addingEntity: entityTool.addingAnimation, removingEntity: entityTool.removingAnimation }"
-                                :data-entity-type="entityTool.entityType">{{ entityTool.entityCounter }}</span>
+                <div v-for="filterTool of filterTools">
+                    <div class="entity-group form-check form-check-inline" :data-group="filterTool.viewKey"
+                        :title="filterTool.tooltipText" data-toggle="tooltip" data-placement="bottom">
+                        <input :id="filterTool.filterInput" @change="onFilterSelection(filterTool.viewKey)"
+                            :data-entity-type="filterTool.viewKey" v-model="filterTool.filterState"
+                            class="entityCheckBox form-check-input" type="checkbox" :value="filterTool.viewKey" checked>
+                        <label :id="filterTool.entityLabel" class="user-select-none entityCheckBoxLabel form-check-label"
+                            :for="filterTool.filterInput">
+                            {{ filterTool.labelText }}
                         </label>
 
                     </div>
@@ -182,7 +179,7 @@
 
 <script lang="ts" setup>
 import $, { data } from 'jquery';
-import { ref, computed, onMounted, Ref, ComputedRef, } from "vue";
+import { ref, computed, onMounted, Ref, ComputedRef, nextTick } from "vue";
 import { dia, util, highlighters, routers } from "jointjs";
 import { DialogSize } from "../../config/actionDialogConfig";
 import EntityTypes from "../../config/entityTypes";
@@ -190,6 +187,7 @@ import ToolbarConfig from "../../config/toolbarConfiguration";
 import ButtonGroup from './ButtonGroup.vue';
 import ModalConfirmationDialog, { ConfirmationModalProps, getDefaultConfirmationDialogData } from '../components/ModalConfirmationDialog.vue';
 import ModalWrapper from '../components/ModalWrapper.vue';
+import { filter } from 'lodash';
 
 export type ToolbarButton = {
     buttonType: string,
@@ -306,18 +304,16 @@ const generalTools: Ref<ToolbarButtonGroup[]> = ref((() => {
     return configureToolbarButtons(ToolbarConfig.Tools)
 })());
 
-const entityTools = ref((() => {
+const filterTools = ref((() => {
     let toolEntries = [];
-    for (const entityElement of ToolbarConfig.EntityConfig) {
+    for (const filterElement of ToolbarConfig.FilterConfig) {
         toolEntries.push({
-            entityType: entityElement.entityType,
-            entityInput: entityElement.entityType + "-checkBox",
-            entityLabel: entityElement.entityType + "-checkBoxLabel",
-            labelText: entityElement.labelText,
-            tooltipText: entityElement.tooltipText,
-            entityCounter: props.graph.getElements().filter(element => element.attributes.entity.type === entityElement.entityType).length,
-            addingAnimation: false,
-            removingAnimation: false,
+            viewKey: filterElement.key,
+            filterInput: filterElement.key + "-checkBox",
+            entityLabel: filterElement.key + "-checkBoxLabel",
+            labelText: filterElement.labelText,
+            tooltipText: filterElement.tooltipText,
+            filterState: true
         })
     }
     return toolEntries;
@@ -331,14 +327,6 @@ const secondAdditionalTools: Ref<ToolbarButtonGroup[]> = ref((() => {
     return configureToolbarButtons(ToolbarConfig.ToolbarRowConfig.find(element => element.rowIndex === 2).tools)
 })());
 
-props.graph.on("add", (cell: dia.Cell) => updateEntityCounter(cell.attributes.entity.type, "add"));
-props.graph.on("remove", (cell: dia.Cell) => updateEntityCounter(cell.attributes.entity.type, "remove"));
-props.graph.on("reloaded", () => {
-    for (const [key, value] of Object.entries(EntityTypes)) {
-        updateEntityCounter(value, "add");
-    }
-});
-props.graph.on("change:entity", (element, entity, opt) => { entityTypeChanged(opt.previousType, entity.type) });
 props.graph.on("change:attrs", entityVisibilityChanged);
 
 
@@ -422,10 +410,6 @@ function onNameEditSubmit() {
         emit("update:systemName", currentSystemName.value);
     }
     nameEditMode.value = "none";
-}
-
-function onEntitySelection(buttonId: string, event) {
-    toggleEntityVisibility(event);
 }
 
 onMounted(() => {
@@ -745,48 +729,54 @@ function updateAppSettings() {
     showAppSettings.value = false;
 }
 
-function entityTypeChanged(previousType, newType) {
-    if (!previousType) {
-        // entity properties not type changed
-        return;
+function onFilterSelection(viewKey: string) {
+    let showView = filterTools.value.find(filter => filter.viewKey === viewKey).filterState;
+    console.log(`${viewKey} set to ${showView}`);
+
+    let newVisibilityValue = showView ? "visible" : "hidden";
+
+    let filteredGraphCells: dia.Cell[] = [];
+
+    switch (viewKey) {
+        case "deploymentView":
+            filteredGraphCells.push(...props.graph
+                .getCells()
+                .filter(cell => {
+                    return cell.attributes.entity.type === EntityTypes.INFRASTRUCTURE || cell.attributes.entity.type === EntityTypes.DEPLOYMENT_MAPPING
+                }));
+            break;
+        default:
+            break;
     }
 
-    if (!(Object.values(EntityTypes).includes(previousType)) || !(Object.values(EntityTypes).includes(newType))) {
-        console.error("Entity Type does not exist"); // TODO error?
-        return;
+    let index = 0;
+    while (index < filteredGraphCells.length) {
+        let filteredEntity = filteredGraphCells[0];
+        filteredGraphCells.push(...filteredEntity.getEmbeddedCells());
+        index = index + 1;
     }
 
-    updateEntityCounter(previousType, "remove");
-    updateEntityCounter(newType, "add");
+    filteredGraphCells.forEach(cell => {
+        toggleCellVisibility(cell, newVisibilityValue);
+    });
 }
 
-function toggleEntityVisibility(event) {
-    let affectedEntityType = event.target.value;
-    let clickedCheckbox = $('.entityCheckBox[data-entity-type="' + affectedEntityType + '"]');
+function toggleCellVisibility(cell: dia.Cell, newVisibilityValue: string) {
+    cell.prop("entityTypeHidden", newVisibilityValue === "hidden");
 
-    let graphCells = props.graph.getCells();
-    let filteredGraphCells = graphCells.filter((graphCell) => {
-        return graphCell.attributes.entity.type === affectedEntityType;
-    });
-
-    for (const relevantCell of filteredGraphCells) {
-        let newVisibilityValue = clickedCheckbox.prop("checked") ? "visible" : "hidden";
-        relevantCell.prop("entityTypeHidden", (clickedCheckbox.prop("checked") === false));
-
-        // ensure icon appears when needed despite filtering
-        if (relevantCell.attr("icon")) {
-            let entityCollapsed = relevantCell.get("collapsed") === true ? "visible" : "hidden";
-            let iconVisibility = clickedCheckbox.prop("checked") ? entityCollapsed : "hidden";
-            relevantCell.attr("icon/visibility", iconVisibility, { isolate: true });
-        }
-
-        // ensure child entities stay hidden when parent entity is collapsed 
-        if (relevantCell.prop("parentCollapsed")) {
-            newVisibilityValue = "hidden";
-        }
-
-        relevantCell.attr("root/visibility", newVisibilityValue, { isolate: true });
+    // ensure icon appears when needed despite filtering
+    if (cell.attr("icon")) {
+        let entityCollapsed = cell.get("collapsed") === true ? "visible" : "hidden";
+        let iconVisibility = newVisibilityValue === "visible" ? entityCollapsed : "hidden";
+        cell.attr("icon/visibility", iconVisibility, { isolate: true });
     }
+
+    // ensure child entities stay hidden when parent entity is collapsed 
+    if (cell.prop("parentCollapsed")) {
+        newVisibilityValue = "hidden";
+    }
+
+    cell.attr("root/visibility", newVisibilityValue, { isolate: true });
 }
 
 function entityVisibilityChanged(element, attrs, opt) {
@@ -797,22 +787,6 @@ function entityVisibilityChanged(element, attrs, opt) {
     }
 }
 
-function updateEntityCounter(dataEntityType: string, updateType: string) {
-
-    let newValue = props.graph.getElements().filter(element => element.attributes.entity.type === dataEntityType).length
-
-    let currentEntity = entityTools.value.find(element => element.entityType === dataEntityType)
-    currentEntity.entityCounter = newValue;
-
-    if (updateType === "add") {
-        currentEntity.addingAnimation = true;
-        setTimeout(() => currentEntity.addingAnimation = false, 2000);
-    } else if (updateType === "remove") {
-        currentEntity.removingAnimation = true;
-        setTimeout(() => currentEntity.removingAnimation = false, 2000);
-    }
-
-}
 </script>
 
 
@@ -936,8 +910,6 @@ function updateEntityCounter(dataEntityType: string, updateType: string) {
     position: relative;
     width: auto;
     width: 100%;
-    /* distribute included elements evenly */
-    justify-content: space-evenly;
     /* multiple lines if not enough space */
     flex-wrap: wrap;
 }

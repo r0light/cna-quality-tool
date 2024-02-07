@@ -211,69 +211,28 @@ const ToolbarConfig = {
         }
     ],
 
-    EntityConfig: [
+    FilterConfig: [
         {
-            entityType: EntityTypes.COMPONENT,
-            labelText: "Component",
-            tooltipText: "Show/Hide all Component entities"
+            key: "deploymentView",
+            labelText: "Deployment View",
+            tooltipText: "Show/Hide Infrastructure and Deployment Mapping Entities"
         },
         {
-            entityType: EntityTypes.SERVICE,
-            labelText: "Service",
-            tooltipText: "Show/Hide all Service entities"
+            key: "communicationView",
+            labelText: "Communication View",
+            tooltipText: "Show/Hide Endpoint and Link Entities"
         },
         {
-            entityType: EntityTypes.BACKING_SERVICE,
-            labelText: "Backing Service",
-            tooltipText: "Show/Hide all Backing Service entities"
+            key: "backingView",
+            labelText: "Backing Services View",
+            tooltipText: "Show/Hide Backing Services"
         },
         {
-            entityType: EntityTypes.STORAGE_BACKING_SERVICE,
-            labelText: "Storage Backing Service",
-            tooltipText: "Show/Hide all Storage Backing Service entities"
+            key: "dataView",
+            labelText: "Data View",
+            tooltipText: "Show/Hide Data Aggregates and Backing Data"
         },
-        {
-            entityType: EntityTypes.ENDPOINT,
-            labelText: "Endpoint",
-            tooltipText: "Show/Hide all Endpoint entities"
-        },
-        {
-            entityType: EntityTypes.EXTERNAL_ENDPOINT,
-            labelText: "External Endpoint",
-            tooltipText: "Show/Hide all External Endpoint entities"
-        },
-        {
-            entityType: EntityTypes.LINK,
-            labelText: "Link",
-            tooltipText: "Show/Hide all Link entities"
-        },
-        {
-            entityType: EntityTypes.INFRASTRUCTURE,
-            labelText: "Infrastructure",
-            tooltipText: "Show/Hide all Infrastructure entities"
-        },
-        {
-            entityType: EntityTypes.DEPLOYMENT_MAPPING,
-            labelText: "Deployment Mapping",
-            tooltipText: "Show/Hide all Deployment Mapping entities"
-        },
-        {
-            entityType: EntityTypes.REQUEST_TRACE,
-            labelText: "Request Trace",
-            tooltipText: "Show/Hide all Request Trace entities"
-        },
-        {
-            entityType: EntityTypes.DATA_AGGREGATE,
-            labelText: "Data Aggregate",
-            tooltipText: "Show/Hide all Data Aggregate entities"
-        },
-        {
-            entityType: EntityTypes.BACKING_DATA,
-            labelText: "Backing Data",
-            tooltipText: "Show/Hide all Backing Data entities"
-        }
     ],
-
     ToolbarRowConfig: [
         {
             rowIndex: 1,
