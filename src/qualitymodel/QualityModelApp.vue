@@ -19,7 +19,8 @@
                         </div>
                         <div v-if="selectedFactor.getFactorType === 'productFactor'">
                             <span>Categories that this factor is assigned to: </span><br><span>{{ (selectedFactor as
-                                ProductFactor).getCategories.map(categoryKey => qualityModel.findFactorCategory(categoryKey).categoryName).join(", ")
+                                ProductFactor).getCategories.map(categoryKey =>
+                                    qualityModel.findFactorCategory(categoryKey).categoryName).join(", ")
                             }}</span>
                         </div>
                         <div
@@ -337,11 +338,8 @@ function updateLinkRoutes() {
 }
 
 function redrawWithFilter() {
-    // use setTimeout as a workaround to wait for highLevelAspectFilter to be properly updated so that the filter is applied
-    setTimeout(() => {
-        drawQualityModelElements(getActiveFilterItems(highLevelAspectFilter), getActiveFilterItems(factorCategoryFilter));
-        arrangeQualityModelElements();
-    }, 50);
+    drawQualityModelElements(getActiveFilterItems(highLevelAspectFilter), getActiveFilterItems(factorCategoryFilter));
+    arrangeQualityModelElements();
 }
 
 </script>

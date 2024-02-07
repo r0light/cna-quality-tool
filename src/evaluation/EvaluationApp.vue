@@ -92,7 +92,7 @@ function onSelectViewpoint() {
 }
 
 function onSelectFilter() {
-    setTimeout(onSelectSystem, 50);
+    onSelectSystem();
 }
 
 function onSelectSystem() {
