@@ -188,6 +188,8 @@ import ButtonGroup from './ButtonGroup.vue';
 import ModalConfirmationDialog, { ConfirmationModalProps, getDefaultConfirmationDialogData } from '../components/ModalConfirmationDialog.vue';
 import ModalWrapper from '../components/ModalWrapper.vue';
 import { filter } from 'lodash';
+import { EntitiesToToscaConverter } from '@/core/tosca-adapter/EntitiesToToscaConverter';
+import { getAffectedBackingViewCells, getAffectedCommunicationViewCells, getAffectedDataViewCells, getAffectedDeploymentViewCells } from './viewfilter';
 
 export type ToolbarButton = {
     buttonType: string,
@@ -439,9 +441,24 @@ onMounted(() => {
         .find(element => element.providedFeature === "hideEntityToolbarRow-button")
         .show = computed(() => showEntityBar.value);
 
+    tryResetFilters();
+
     return this;
 })
 
+
+function tryResetFilters() {
+    // workaround, paper might be undefined, therefore wait for it to be ready
+    if (props.paper) {
+        // reset all filtering
+        for (const filterTool of filterTools.value) {
+            filterTool.filterState = true;
+            onFilterSelection(filterTool.viewKey);
+        }
+    } else {
+        setTimeout(tryResetFilters, 50);
+    }
+}
 
 function enterFullScreen() {
     //TODO use only one button to toggle fullscreen? Because now, the button switching does not work when exiting full screen via browser "Esc"
@@ -729,9 +746,13 @@ function updateAppSettings() {
     showAppSettings.value = false;
 }
 
+function getFilterState(viewKey: string): boolean {
+    return filterTools.value.find(filter => filter.viewKey === viewKey).filterState;
+}
+
 function onFilterSelection(viewKey: string) {
+
     let showView = filterTools.value.find(filter => filter.viewKey === viewKey).filterState;
-    console.log(`${viewKey} set to ${showView}`);
 
     let newVisibilityValue = showView ? "visible" : "hidden";
 
@@ -739,63 +760,19 @@ function onFilterSelection(viewKey: string) {
 
     switch (viewKey) {
         case "deploymentView":
-            filteredGraphCells.push(...props.graph
-                .getCells()
-                .filter(cell => {
-                    return cell.attributes.entity.type === EntityTypes.INFRASTRUCTURE || cell.attributes.entity.type === EntityTypes.DEPLOYMENT_MAPPING
-                }));
+            filteredGraphCells.push(...getAffectedDeploymentViewCells(props.graph, getFilterState("backingView"), getFilterState("dataView")));
             break;
         case "communicationView":
-            filteredGraphCells.push(...props.graph
-                .getCells()
-                .filter(cell => {
-                    return cell.attributes.entity.type === EntityTypes.LINK || cell.attributes.entity.type === EntityTypes.ENDPOINT || cell.attributes.entity.type === EntityTypes.EXTERNAL_ENDPOINT || cell.attributes.entity.type === EntityTypes.REQUEST_TRACE
-                })
-            )
+            filteredGraphCells.push(...getAffectedCommunicationViewCells(props.graph, getFilterState("backingView")))
             break;
         case "backingView":
-            filteredGraphCells.push(...props.graph
-                .getCells()
-                .filter(cell => {
-                    return cell.attributes.entity.type === EntityTypes.BACKING_SERVICE
-                })
-            )
+            filteredGraphCells.push(...getAffectedBackingViewCells(props.graph, getFilterState("communicationView"), getFilterState("deploymentView"), getFilterState("dataView")));
+            break;
+        case "dataView":
+            filteredGraphCells.push(...getAffectedDataViewCells(props.graph, getFilterState("deploymentView"), getFilterState("backingView")));
+            break;
         default:
             break;
-    }
-
-    // TODO ignore Data Aggregates and Backing Data, if data view is not active
-
-    // TODO if viewKey is communication check if backing view is active
-
-    if (viewKey === "backingView" && !filterTools.value.find(filter => filter.viewKey === "communicationView").filterState) {
-        // communication is currently not shown, therefore everything is fine
-    } else if (viewKey === "backingView" && filterTools.value.find(filter => filter.viewKey === "communicationView").filterState) {
-        // communication is shown, therefore communication to from backing services should be hidden.
-        let index = 0;
-        while (index < filteredGraphCells.length) {
-            console.log("loop 1:" + index);
-            let filteredEntity = filteredGraphCells[index];
-
-            let embeddedEntities = filteredEntity.getEmbeddedCells();
-            embeddedEntities.forEach(embeddedEntity => {
-                let incomingLinks = props.graph.getConnectedLinks(embeddedEntity);
-                filteredGraphCells.push(...incomingLinks);
-                filteredGraphCells.push(embeddedEntity);
-            })
-
-            let outgoingLinks = props.graph.getConnectedLinks(filteredEntity);
-            filteredGraphCells.push(...outgoingLinks);
-            index = index + 1;
-        }
-    } else {
-        let index = 0;
-        while (index < filteredGraphCells.length) {
-            console.log("loop 2:" + index);
-            let filteredEntity = filteredGraphCells[index];
-            filteredGraphCells.push(...filteredEntity.getEmbeddedCells());
-            index = index + 1;
-        }
     }
 
     filteredGraphCells.forEach(cell => {
