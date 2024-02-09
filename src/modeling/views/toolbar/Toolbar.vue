@@ -220,6 +220,7 @@ const emit = defineEmits<{
     (e: "update:systemName", newName: string): void;
     (e: "click:exitRequestTraceView"): void;
     (e: "click:printActivePaper"): void;
+    (e: "click:exportSvg"): void;
     (e: "load:fromJson", stringifiedJson: string, fileName: string);
     (e: "save:toJson");
     (e: "load:fromTosca", stringifiedYaml: string, fileName: string);
@@ -358,6 +359,9 @@ function onToolbarButtonClick(buttonId: string, event) {
             break;
         case "printActivePaper-button":
             emit("click:printActivePaper");
+            break;
+        case "exportSvg-button":
+            emit("click:exportSvg");
             break;
         case "zoomOutPaper-button":
             zoomOutPaper();

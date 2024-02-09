@@ -78,6 +78,14 @@ const ToolbarConfig = {
                     buttonType: ToolbarElementType.BUTTON
                 },
                 {
+                    providedFeature: "exportSvg",
+                    tooltipText: "Export current model as SVG",
+                    text: "",
+                    iconClass: "fa-solid fa-bezier-curve",
+                    additionalCssClass: "",
+                    buttonType: ToolbarElementType.BUTTON
+                },
+                {
                     providedFeature: "convertModeledSystemEntity",
                     tooltipText: "Export modeled System",
                     text: "",

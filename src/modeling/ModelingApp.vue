@@ -3,7 +3,7 @@
         <Toolbar :system-name="currentSystemName" :key="currentSystemName" :paper="(mainPaper as dia.Paper)"
             :graph="(currentSystemGraph as dia.Graph)" :selectedRequestTrace="currentRequestTraceViewSelection"
             @update:systemName="setCurrentSystemName" @click:exit-request-trace-view="resetRequestTraceSelection"
-            @click:print-active-paper="onPrintRequested" @load:fromJson="loadFromJson" @save:toJson="saveToJson"
+            @click:print-active-paper="onPrintRequested" @click:exportSvg="onSvgExportRequested" @load:fromJson="loadFromJson" @save:toJson="saveToJson"
             @load:fromTosca="loadFromTosca" @save:toTosca="saveToTosca"></Toolbar>
         <div class="app-body">
             <div :id="`entity-sidebar-${pageId}`" class="entityShapes-sidebar-container d-print-none">
@@ -27,6 +27,7 @@
 </template>
 
 <script lang="ts" setup>
+import $ from 'jquery';
 import { ref, onMounted, nextTick } from 'vue'
 import { dia } from "jointjs";
 import SystemEntityManager from './systemEntityManager';
@@ -345,6 +346,22 @@ function onPrintRequested() {
         window.print();
         printing.value = false;
     });
+}
+
+function onSvgExportRequested() {
+    let paperDiv = $(`#model${props.pageId}`);
+
+    let svgElement = paperDiv.find("svg").clone()[0];
+    svgElement.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+
+    let asString = svgElement.outerHTML;
+    asString = asString.replaceAll("&nbsp;", " ");
+
+    // download created svg (taken from https://stackoverflow.com/a/22347908)
+    let downloadElement = document.createElement("a");
+    downloadElement.setAttribute('href', 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(asString));
+    downloadElement.setAttribute('download', `${currentSystemName.value}.svg`);
+    downloadElement.click();
 }
 
 </script>
