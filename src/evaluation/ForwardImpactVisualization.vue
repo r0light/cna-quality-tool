@@ -44,6 +44,8 @@ function renderImpactGraph() {
 
     graphDefinition = graphDefinition.concat(mermaidBuffer.getElementSection, "\n", mermaidBuffer.getStylingSection);
 
+    //console.log(graphDefinition);
+
     mermaid.render(`${graphId}-svg`, graphDefinition).then(result => {
         let element = $(`#${graphId}`)[0];
         element.innerHTML = result.svg;
@@ -81,27 +83,39 @@ function addImpacts(currentFactor: EvaluatedProductFactor, buffer: MermaidBuffer
     font-style: italic;
 }
 
-.factor-not-applicable {
-    fill: #f2f2f2;
-    stroke: #d9d9d9;
-    stroke-width: 2px;
+.factor-not-applicable > * {
+    fill: #f2f2f2 !important;
+    stroke: #d9d9d9 !important;
+    stroke-width: 2px !important;
 }
 
 .factor-applicable {
-    fill: #bfbfbf;
-    stroke: #000;
-    stroke-width: 2px;
+    fill: #bfbfbf !important;
+    stroke: #000 !important;
+    stroke-width: 2px !important;
 }
 
 .factor-low {
-    fill: #b3d9ff;
-    stroke: #000;
-    stroke-width: 3px;
+    fill: #b3d9ff !important;
+    stroke: #000 !important;
+    stroke-width: 3px !important;
 }
 
 .factor-high {
-    fill: #66b3ff;
-    stroke: #000;
-    stroke-width: 4px;
+    fill: #66b3ff !important;
+    stroke: #000 !important;
+    stroke-width: 4px !important;
+}
+
+.factor-negative {
+    fill: #ff9999 !important;
+    stroke: #000 !important;
+    stroke-width: 2px !important;
+}
+
+.factor-positive > * {
+    fill: #99ff99 !important;
+    stroke: #000 !important;
+    stroke-width: 2px !important;
 }
 </style>

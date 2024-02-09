@@ -1,22 +1,27 @@
 import { QualityAspect } from "../quamoco/QualityAspect";
+import { EvaluatedProductFactor, ForwardImpactingPath, QualityAspectEvaluationResult } from "./EvaluatedSystemModel";
 
-type QualityAspectEvaluationResult = string //TODO what to do here?
-
-type QualityAspectEvaluationFunction = (factor: QualityAspect) => QualityAspectEvaluationResult;
+type QualityAspectEvaluationFunction = (factor: QualityAspect, incomingImpacts: ForwardImpactingPath[], evaluatedProductFactors: Map<string, EvaluatedProductFactor>) => QualityAspectEvaluationResult;
 
 class QualityAspectEvaluation {
 
-    #evaluatedFactor: QualityAspect;
+    #evaluatedAspect: QualityAspect;
+    #evaluationId: string;
     #evaluate: QualityAspectEvaluationFunction;
     #reasoning: string;
 
-    constructor(evaluatedFactor: QualityAspect, reasoning: string) {
-        this.#evaluatedFactor = evaluatedFactor;
+    constructor(evaluatedFactor: QualityAspect, evaluationId: string,  reasoning: string) {
+        this.#evaluatedAspect = evaluatedFactor;
+        this.#evaluationId = evaluationId;
         this.#reasoning = reasoning;
     }
 
     get getEvaluatedFactor() {
-        return this.#evaluatedFactor;
+        return this.#evaluatedAspect;
+    }
+
+    get getEvaluationId() {
+        return this.#evaluationId;
     }
 
     get getReasoning() {
@@ -27,9 +32,23 @@ class QualityAspectEvaluation {
         this.#evaluate = evaluationFunction;
     }
 
-    evaluate() {
-        return this.#evaluate(this.#evaluatedFactor);
+    evaluate(evaluatedProductFactors: Map<string, EvaluatedProductFactor>) {
+
+        let impacts: ForwardImpactingPath[] = [];
+
+        for (const impactingFactor of this.#evaluatedAspect.getImpactingFactors()) {
+            let evaluatedImpactingFactor = evaluatedProductFactors.get(impactingFactor.getId)
+            if (evaluatedImpactingFactor) {
+                let impact = evaluatedImpactingFactor.forwardImpacts.find(impact => impact.impactedFactorKey === this.#evaluatedAspect.getId);
+                if (impact) {
+                    impacts.push(impact);
+                }
+            }
+        }
+
+
+        return this.#evaluate(this.#evaluatedAspect, impacts, evaluatedProductFactors);
     }
 }
 
-export { QualityAspectEvaluation, QualityAspectEvaluationResult, QualityAspectEvaluationFunction}
+export { QualityAspectEvaluation, QualityAspectEvaluationFunction}

@@ -115,6 +115,8 @@ function onSelectSystem() {
     }
 
 
+    console.log(qualityModel);
+
     let systemEntityManager = toRaw(selectedSystem.entityManager);
     let currentSystemEntity = systemEntityManager.getSystemEntity();
 

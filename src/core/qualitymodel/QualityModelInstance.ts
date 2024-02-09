@@ -8,9 +8,10 @@ import { qualityModel } from "./specifications/qualitymodel";
 import { literature } from "./specifications/literature";
 import { LiteratureSource } from "./quamoco/LiteratureSource";
 import { Entity } from "./quamoco/Entity";
-import { productFactorEvaluationImplementation } from "./evaluation/evaluationImplementations";
+import { productFactorEvaluationImplementation, qualityAspectEvaluationImplementation } from "./evaluation/evaluationImplementations";
 import { ProductFactorEvaluation } from "./evaluation/ProductFactorEvaluation";
 import { measureImplementations } from "./evaluation/measureImplementations";
+import { QualityAspectEvaluation } from "./evaluation/QualityAspectEvaluation";
 
 
 function getQualityModel(): QualityModelInstance {
@@ -85,7 +86,7 @@ function getQualityModel(): QualityModelInstance {
                 throw Error("No measure with key " + measureKey + " could be found, please check the quality model definition.")
             }
         }
-        
+
         newQualityModel.productFactors.push(newProductFactor);
 
     }
@@ -154,6 +155,28 @@ function getQualityModel(): QualityModelInstance {
 
     }
 
+    // add all quality aspect evaluations
+    for (const qualityAspectEvaluation of qualityModel.qualityAspectEvaluations) {
+
+        let evaluatedQualityAspect = newQualityModel.findQualityAspect(qualityAspectEvaluation.targetAspect);
+        if (evaluatedQualityAspect) {
+
+            let newEvaluation = new QualityAspectEvaluation(evaluatedQualityAspect, qualityAspectEvaluation.evaluation, qualityAspectEvaluation.reasoning);
+            let availableImplementation = qualityAspectEvaluationImplementation[newEvaluation.getEvaluationId]
+            if (availableImplementation) {
+                newEvaluation.addEvaluation(availableImplementation);
+                evaluatedQualityAspect.addEvaluation(newEvaluation);
+            } else {
+                throw new Error(`No evaluation implementation found with id ${newEvaluation.getEvaluationId}`);
+            }
+        } else {
+            throw new Error(`There is no quality aspect with key ${qualityAspectEvaluation.targetAspect}`);
+        }
+
+    }
+
+
+
     return newQualityModel;
 }
 
@@ -166,7 +189,7 @@ class QualityModelInstance {
 
     productFactors: ProductFactor[];
 
-    factorCategories: {categoryKey: string, categoryName: string}[];
+    factorCategories: { categoryKey: string, categoryName: string }[];
 
     impacts: Impact[];
 

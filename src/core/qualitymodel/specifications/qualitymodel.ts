@@ -1618,10 +1618,15 @@ export const qualityModel: QualityModelSpec = {
         },
         {
             "targetFactor": "replication",
-            "evaluation": "replication", // TODO more general evaluation, like aggregate?
+            "evaluation": "aggregateImpacts", // TODO more general evaluation, like aggregate?
             "reasoning": "TODO write a suitable reasoning"
         },
     ],
     "qualityAspectEvaluations": [
+        {
+            "targetAspect": "timeBehaviour",
+            "evaluation": "aggregateImpacts",
+            "reasoning": "TODO"
+        }
     ]
 }

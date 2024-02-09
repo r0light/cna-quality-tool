@@ -10,12 +10,12 @@ export function describeNodeStyleClasses(): string {
 
 export function describeFactor(factor: EvaluatedProductFactor | EvaluatedQualityAspect): string {
     let result = "";
-    if (factor.result.constructor === Array) {
-        result = `${factor.result.join(" #124; ")}`;
-    } else if (typeof factor.result === "string") {
+    if (typeof factor.result === "string") {
         result = factor.result;
-    } else {
+    } else if (typeof factor.result === "number") {
         result = factor.result.toString();
+    } else if (factor.result.tendency && factor.result.impacts) {
+        result = `${factor.result.impacts.join(" #124; ")}`;
     }
     return `\n\t${factor.id}[${factor.name}\n\t<span class="evaluation-result">${result}</span>]`;
 }
@@ -40,11 +40,27 @@ export function describeFactorStyle(factor: EvaluatedProductFactor | EvaluatedQu
                 styleClass = "factor-not-applicable";
                 break;
         }
-    } else if (factor.result.constructor === Array) {
-        styleClass = "factor-applicable"; // TODO better solution?
+    } else if (typeof factor.result === "number") {
+        styleClass = "factor-applicable"; // TODO better solution
+    } else if (factor.result.tendency) {
+        switch (factor.result.tendency) {
+            case "negative":
+                styleClass = "factor-negative";
+                break;
+            case "neutral":
+                styleClass = "factor-applicable";
+                break;
+            case "positive":
+                styleClass = "factor-positive";
+                break;
+            case "n/a":
+            default:
+                styleClass = "factor-not-applicable";
+                break;
+        }
     }
 
-    return `\n\tclass ${factor.id} ${styleClass}`; 
+    return `\n\tclass ${factor.id} ${styleClass}`;
 }
 
 

@@ -1,6 +1,5 @@
 import { System } from "@/core/entities";
 import { QualityModelInstance } from "../QualityModelInstance";
-import { QualityAspectEvaluationResult } from "./QualityAspectEvaluation";
 import { QualityAspect } from "../quamoco/QualityAspect";
 import { ProductFactor } from "../quamoco/ProductFactor";
 import { ImpactType } from "../quamoco/Impact";
@@ -13,9 +12,9 @@ type CalculatedMeasure = {
 
 type NumericEvaluationResult = number;
 type OrdinalEvaluationResult = "none" | "low" | "high";
-type AggregateResult = string[];
+type AggregateResult = { tendency: string, impacts: string[] };
 type ProductFactorEvaluationResult = NumericEvaluationResult | OrdinalEvaluationResult | "n/a" | AggregateResult;
-
+type QualityAspectEvaluationResult = NumericEvaluationResult | OrdinalEvaluationResult | "n/a" | AggregateResult;
 
 type ImpactWeight = "negative" | "slightly negative" | "neutral" | "slightly positive" | "positive" | "n/a";
 
@@ -175,7 +174,7 @@ class EvaluatedSystemModel {
                 name: qualityAspect.getName,
                 factorType: "qualityAspect",
                 qualityAspect: qualityAspect,
-                result: "n/a",
+                result: qualityAspect.isEvaluationAvailable() ? qualityAspect.evaluate(this) : "n/a",
                 backwardImpacts: []
             }
 
@@ -193,9 +192,9 @@ class EvaluatedSystemModel {
                     })
 
                     this.#evaluatedProductFactors.get(incomingImpact.getSourceFactor.getId)
-                    .forwardImpacts
-                    .find(impact => impact.impactedFactorKey === evaluatedQualityAspect.id)
-                    .impactedFactor = evaluatedQualityAspect;
+                        .forwardImpacts
+                        .find(impact => impact.impactedFactorKey === evaluatedQualityAspect.id)
+                        .impactedFactor = evaluatedQualityAspect;
                 }
             }
 
@@ -219,7 +218,7 @@ class EvaluatedSystemModel {
 // TODO: how to specify this and where to put it?
 function deriveImpactWeight(evaluationResult: ProductFactorEvaluationResult, impactType: ImpactType): ImpactWeight {
     if (evaluationResult === "n/a") {
-        return "n/a"
+        return "n/a";
     }
     if (typeof evaluationResult === "string") {
         switch (evaluationResult) {
@@ -263,8 +262,19 @@ function deriveImpactWeight(evaluationResult: ProductFactorEvaluationResult, imp
 
         // else
         throw new Error("A numeric evaluation result for a product factor should be between 0 and 1, here it is: " + evaluationResult);
-
+    } else if (evaluationResult.tendency && evaluationResult.impacts) {
+        switch (evaluationResult.tendency) {
+            case "positive":
+                return "slightly positive" //TODO more specific
+            case "neutral":
+                return "neutral"
+            case "negative":
+                return "slightly negative"
+            case "n/a":
+            default:
+                return "n/a";
+        }
     }
 }
 
-export { EvaluatedSystemModel, CalculatedMeasure, ProductFactorEvaluationResult, EvaluatedProductFactor, OrdinalEvaluationResult, NumericEvaluationResult, ImpactWeight, EvaluatedQualityAspect, ForwardImpactingPath }
+export { EvaluatedSystemModel, CalculatedMeasure, ProductFactorEvaluationResult, QualityAspectEvaluationResult, EvaluatedProductFactor, OrdinalEvaluationResult, NumericEvaluationResult, ImpactWeight, EvaluatedQualityAspect, ForwardImpactingPath }
