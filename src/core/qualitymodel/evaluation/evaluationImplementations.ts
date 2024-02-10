@@ -88,9 +88,6 @@ const qualityAspectEvaluationImplementation: {
 } = {
     "aggregateImpacts": (factor, incomingPaths, evaluatedProductFactors) => {
 
-
-        console.log({executingFor: factor.getId});
-
         let aggregateResult: ImpactWeight[] = incomingPaths.map(impact => impact.weight);
         
         if (aggregateResult.length === 0) {

@@ -44,8 +44,6 @@ function renderImpactGraph() {
 
     graphDefinition = graphDefinition.concat(mermaidBuffer.getElementSection, "\n", mermaidBuffer.getStylingSection);
 
-    //console.log(graphDefinition);
-
     mermaid.render(`${graphId}-svg`, graphDefinition).then(result => {
         let element = $(`#${graphId}`)[0];
         element.innerHTML = result.svg;
