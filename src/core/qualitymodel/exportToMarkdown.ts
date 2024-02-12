@@ -1,9 +1,9 @@
 // This script is not intended to be used within the web app, but locally to generate a nice looking markdown representation of the quality model.
 
 import * as fs from 'fs';
-import { getQualityModel } from './QualityModelInstance';
-import { ProductFactor} from './quamoco/ProductFactor';
-import { QualityAspect } from './quamoco/QualityAspect';
+import { getQualityModel } from './QualityModelInstance.js';
+import { ProductFactor} from './quamoco/ProductFactor.js';
+import { QualityAspect } from './quamoco/QualityAspect.js';
 
 const qualityModel = getQualityModel();
 

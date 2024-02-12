@@ -1,5 +1,4 @@
-import { TOSCA_Metadata } from "../../totypa/tosca-types/core-types"
-import { DataAggregate } from "../entities"
+import { TOSCA_Metadata } from "../../totypa/tosca-types/core-types.js"
 
 export type MetaData = {
     label: string,

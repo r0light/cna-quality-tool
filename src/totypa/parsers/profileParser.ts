@@ -35,10 +35,10 @@ export async function startParsing() {
             })
             results.push(Promise.all(profileJsonResults).then(profileInfos => {
                 let importStatements = profileInfos.map(info => {
-                    return `import { ${info.profileName} } from "./${info.profileName}";`
+                    return `import { ${info.profileName} } from "./${info.profileName}.js";`
                 })
 
-                let preparedData = `import { TOSCA_Service_Template } from '../tosca-types/template-types';\n${importStatements.join("\n")}\n\nexport const all_profiles: TOSCA_Service_Template[] = [\n${profileInfos.map(info => info.profileName).join(",\n")}\n];`
+                let preparedData = `import { TOSCA_Service_Template } from '../tosca-types/template-types.js';\n${importStatements.join("\n")}\n\nexport const all_profiles: TOSCA_Service_Template[] = [\n${profileInfos.map(info => info.profileName).join(",\n")}\n];`
 
                 fs.writeFile(`../parsedProfiles/all_profiles.ts`, `${hint}\n${preparedData}`, (err) => {
                     if (err) {
@@ -294,7 +294,7 @@ async function saveGeneratedProfileAsJson(profileInfo: ProfileInfo): Promise<Pro
 
     let hint = "/* \n   Caution!!! This code is generated!!!! Do not modify, but instead regenerate it based on the .yaml Profile descriptions \n*/\n";
 
-    let preparedData = `import { TOSCA_Service_Template } from '../tosca-types/template-types';\n\nexport const ${profileInfo.profileName}: TOSCA_Service_Template = ${JSON.stringify(profileInfo.profile, null, 2)};`
+    let preparedData = `import { TOSCA_Service_Template } from '../tosca-types/template-types.js';\n\nexport const ${profileInfo.profileName}: TOSCA_Service_Template = ${JSON.stringify(profileInfo.profile, null, 2)};`
 
     fs.writeFile(`../parsedProfiles/${profileInfo.jsonFileName}`, `${hint}\n${preparedData}`, (err) => {
         if (err) {
@@ -333,7 +333,7 @@ class ImportManager {
         let statement = "";
         for (const [sourceFile, imports] of this.#requiredImports.entries()) {
             let fileWithoutEnding = sourceFile.includes(".ts") ? sourceFile.substring(0, sourceFile.indexOf(".ts")) : sourceFile;
-            statement = statement.concat(`import { ${[...imports].join(", ")} } from './${fileWithoutEnding}'\n`);
+            statement = statement.concat(`import { ${[...imports].join(", ")} } from './${fileWithoutEnding}.js'\n`);
         }
         return statement;
     }
@@ -426,8 +426,8 @@ class TypescriptTypeGenerator {
         // write file
         let hint = "/* \n   Caution!!! This code is generated!!!! Do not modify, but instead regenerate it based on the .yaml Profile descriptions \n*/\n";
 
-        let imports = 'import { TOSCA_Requirement_Assignment } from "../tosca-types/template-types"\n'
-            .concat('import { TOSCA_Metadata, TOSCA_Interface, TOSCA_Artifact } from "../tosca-types/core-types"\n')
+        let imports = 'import { TOSCA_Requirement_Assignment } from "../tosca-types/template-types.js"\n'
+            .concat('import { TOSCA_Metadata, TOSCA_Interface, TOSCA_Artifact } from "../tosca-types/core-types.js"\n')
             .concat(this.#importManager.generateImportStatement());
 
         let preparedData = generatedTypeDefinitions.join("\n");

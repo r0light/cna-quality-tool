@@ -1,13 +1,13 @@
-import { BackingData } from "./backingData";
-import { BackingService } from "./backingService";
-import { Component } from "./component";
-import { DataAggregate } from "./dataAggregate";
-import { DeploymentMapping } from "./deploymentMapping";
-import { Infrastructure } from "./infrastructure";
-import { Link } from "./link";
-import { RequestTrace } from "./requestTrace";
-import { Service } from "./service";
-import { StorageBackingService } from "./storageBackingService";
+import { BackingData } from "./backingData.js";
+import { BackingService } from "./backingService.js";
+import { Component } from "./component.js";
+import { DataAggregate } from "./dataAggregate.js";
+import { DeploymentMapping } from "./deploymentMapping.js";
+import { Infrastructure } from "./infrastructure.js";
+import { Link } from "./link.js";
+import { RequestTrace } from "./requestTrace.js";
+import { Service } from "./service.js";
+import { StorageBackingService } from "./storageBackingService.js";
 
 /**
  * The module for aspects related to a Component quality model Entity.

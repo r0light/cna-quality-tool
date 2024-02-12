@@ -2,7 +2,7 @@
    Caution!!! This code is generated!!!! Do not modify, but instead regenerate it based on the .yaml Profile descriptions 
 */
 
-import { TOSCA_Service_Template } from '../tosca-types/template-types';
+import { TOSCA_Service_Template } from '../tosca-types/template-types.js';
 
 export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
   "tosca_definitions_version": "tosca_simple_yaml_1_3",

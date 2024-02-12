@@ -1,8 +1,8 @@
-import { BackingData } from "./backingData";
-import { EntityProperty, loadAllProperties } from "../common/entityProperty";
-import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_modeling_tosca_profile'
-import { MetaData } from "../common/entityDataTypes";
-import { RelationToBackingData } from "./RelationToBackingData";
+import { BackingData } from "./backingData.js";
+import { EntityProperty, loadAllProperties } from "../common/entityProperty.js";
+import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_modeling_tosca_profile.js'
+import { MetaData } from "../common/entityDataTypes.js";
+import { RelationToBackingData } from "./RelationToBackingData.js";
 
 
 /**

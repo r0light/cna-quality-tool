@@ -1,9 +1,8 @@
-import { EntityProperty, loadAllProperties } from '../common/entityProperty'
-import { Component } from './component'
-import { Infrastructure } from './infrastructure'
-import { parseProperties } from '../common/entityProperty'
-import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_modeling_tosca_profile'
-import { MetaData } from '../common/entityDataTypes'
+import { EntityProperty, loadAllProperties } from '../common/entityProperty.js'
+import { Component } from './component.js'
+import { Infrastructure } from './infrastructure.js'
+import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_modeling_tosca_profile.js'
+import { MetaData } from '../common/entityDataTypes.js'
 
 /**
  * The module for aspects related to a Backing Service quality model entity.

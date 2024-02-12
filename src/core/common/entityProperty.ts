@@ -3,9 +3,9 @@
  * @module entities/entityProperty
  */
 
-import { all_profiles } from "../../totypa/parsedProfiles/all_profiles";
-import { TOSCA_Property } from "../../totypa/tosca-types/core-types";
-import { TOSCA_Node } from "../../totypa/tosca-types/entity-types";
+import { all_profiles } from "../../totypa/parsedProfiles/all_profiles.js";
+import { TOSCA_Property } from "../../totypa/tosca-types/core-types.js";
+import { TOSCA_Node } from "../../totypa/tosca-types/entity-types.js";
 import { parse } from "path";
 
 type propertyDatatype = "text" | "select" | "textarea" | "number" | "boolean" | "bounded" | "list" | "map" //TODO | "timestamp" | "version"

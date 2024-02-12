@@ -1,7 +1,7 @@
-import { Component } from './component'
-import { Infrastructure } from './infrastructure'
-import { tosca_simple_profile_for_yaml_v1_3 } from '../../totypa/parsedProfiles/tosca_simple_profile_for_yaml_v1_3'
-import { EntityProperty, loadAllProperties } from '../common/entityProperty';
+import { Component } from './component.js'
+import { Infrastructure } from './infrastructure.js'
+import { tosca_simple_profile_for_yaml_v1_3 } from '../../totypa/parsedProfiles/tosca_simple_profile_for_yaml_v1_3.js'
+import { EntityProperty, loadAllProperties } from '../common/entityProperty.js';
 
 
 /**

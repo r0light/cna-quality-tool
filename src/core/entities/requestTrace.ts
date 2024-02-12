@@ -1,9 +1,9 @@
 
-import { ExternalEndpoint } from "./externalEndpoint";
-import { Link } from "./link";
-import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_modeling_tosca_profile'
-import { MetaData } from "../common/entityDataTypes";
-import { EntityProperty, parseProperties } from "../common/entityProperty";
+import { ExternalEndpoint } from "./externalEndpoint.js";
+import { Link } from "./link.js";
+import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_modeling_tosca_profile.js'
+import { MetaData } from "../common/entityDataTypes.js";
+import { EntityProperty, parseProperties } from "../common/entityProperty.js";
 
 
 

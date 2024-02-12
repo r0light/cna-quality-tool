@@ -1,11 +1,11 @@
-import { BackingService } from './backingService';
-import { Component } from './component'
-import { Endpoint } from './endpoint'
-import { ExternalEndpoint } from './externalEndpoint';
-import { Service } from './service';
-import { StorageBackingService } from './storageBackingService';
-import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_modeling_tosca_profile'
-import { EntityProperty, loadAllProperties } from '../common/entityProperty';
+import { BackingService } from './backingService.js';
+import { Component } from './component.js'
+import { Endpoint } from './endpoint.js'
+import { ExternalEndpoint } from './externalEndpoint.js';
+import { Service } from './service.js';
+import { StorageBackingService } from './storageBackingService.js';
+import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_modeling_tosca_profile.js'
+import { EntityProperty, loadAllProperties } from '../common/entityProperty.js';
 
 
 /**

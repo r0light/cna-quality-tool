@@ -1,17 +1,17 @@
-import { HighLevelAspect } from "./quamoco/HighLevelAspect";
-import { Impact, ImpactType } from "./quamoco/Impact";
-import { Measure } from "./quamoco/Measure";
-import { ProductFactor } from "./quamoco/ProductFactor";
-import { QualityAspect } from "./quamoco/QualityAspect";
-import { entities } from "./specifications/entities";
-import { qualityModel } from "./specifications/qualitymodel";
-import { literature } from "./specifications/literature";
-import { LiteratureSource } from "./quamoco/LiteratureSource";
-import { Entity } from "./quamoco/Entity";
-import { productFactorEvaluationImplementation, qualityAspectEvaluationImplementation } from "./evaluation/evaluationImplementations";
-import { ProductFactorEvaluation } from "./evaluation/ProductFactorEvaluation";
-import { measureImplementations } from "./evaluation/measureImplementations";
-import { QualityAspectEvaluation } from "./evaluation/QualityAspectEvaluation";
+import { HighLevelAspect } from "./quamoco/HighLevelAspect.js";
+import { Impact, ImpactType } from "./quamoco/Impact.js";
+import { Measure } from "./quamoco/Measure.js";
+import { ProductFactor } from "./quamoco/ProductFactor.js";
+import { QualityAspect } from "./quamoco/QualityAspect.js";
+import { entities } from "./specifications/entities.js";
+import { qualityModel } from "./specifications/qualitymodel.js";
+import { literature } from "./specifications/literature.js";
+import { LiteratureSource } from "./quamoco/LiteratureSource.js";
+import { Entity } from "./quamoco/Entity.js";
+import { productFactorEvaluationImplementation, qualityAspectEvaluationImplementation } from "./evaluation/evaluationImplementations.js";
+import { ProductFactorEvaluation } from "./evaluation/ProductFactorEvaluation.js";
+import { measureImplementations } from "./evaluation/measureImplementations.js";
+import { QualityAspectEvaluation } from "./evaluation/QualityAspectEvaluation.js";
 
 
 function getQualityModel(): QualityModelInstance {

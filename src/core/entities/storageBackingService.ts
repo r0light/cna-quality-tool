@@ -1,8 +1,8 @@
-import { Component } from './component'
-import { loadAllProperties, parseProperties } from '../common/entityProperty';
-import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_modeling_tosca_profile'
-import { MetaData } from '../common/entityDataTypes';
-import { Infrastructure } from './infrastructure';
+import { Component } from './component.js'
+import { loadAllProperties, parseProperties } from '../common/entityProperty.js';
+import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_modeling_tosca_profile.js'
+import { MetaData } from '../common/entityDataTypes.js';
+import { Infrastructure } from './infrastructure.js';
 
 
 /**

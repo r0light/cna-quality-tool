@@ -1,7 +1,7 @@
-import { EntityProperty, TextEntityProperty, parseProperties } from "../common/entityProperty";
-import { tosca_simple_profile_for_yaml_v1_3 } from '../../totypa/parsedProfiles/tosca_simple_profile_for_yaml_v1_3'
-import { MetaData } from "../common/entityDataTypes";
-import { cna_modeling_tosca_profile } from "../../totypa/parsedProfiles/cna_modeling_tosca_profile";
+import { EntityProperty, TextEntityProperty, parseProperties } from "../common/entityProperty.js";
+import { tosca_simple_profile_for_yaml_v1_3 } from '../../totypa/parsedProfiles/tosca_simple_profile_for_yaml_v1_3.js'
+import { MetaData } from "../common/entityDataTypes.js";
+import { cna_modeling_tosca_profile } from "../../totypa/parsedProfiles/cna_modeling_tosca_profile.js";
 
 const ENDPOINT_TOSCA_KEY = "cna.qualityModel.entities.Endpoint";
 const ENDPOINT_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types[ENDPOINT_TOSCA_KEY];
