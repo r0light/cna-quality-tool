@@ -22,6 +22,7 @@ import EntityTypes from "../config/entityTypes";
 import { DeploymentMapping, Link, entityShapes } from "../config/entityShapes";
 import { DialogSize } from '../config/actionDialogConfig';
 import ModalConfirmationDialog, { ConfirmationModalProps, getDefaultConfirmationDialogData } from './components/ModalConfirmationDialog.vue';
+import { ensureCorrectRendering } from '../renderingUtilities';
 
 
 const props = defineProps<{
@@ -206,6 +207,8 @@ onMounted(() => {
 
 
     paper.render();
+    props.graph.resetCells(props.graph.getCells());
+    ensureCorrectRendering(props.graph.getCells(), paper);
     // convention to update a value in the parent (https://vuejs.org/guide/components/v-model.html#v-model-arguments)
     emit("update:paper", paper);
 })

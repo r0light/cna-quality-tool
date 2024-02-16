@@ -39,6 +39,7 @@ import { addSelectionToolToEntity } from './views/tools/entitySelectionTools';
 import { ImportData, ModelingData } from '@/App.vue';
 import EntityTypes from './config/entityTypes';
 import { entityShapes } from './config/entityShapes';
+import { ensureCorrectRendering } from './renderingUtilities';
 
 const props = defineProps<{
     systemName: string,
@@ -48,8 +49,8 @@ const props = defineProps<{
 
 
 const emit = defineEmits<{
-    (e: "update:systemName", newName: string): void;
-    (e: "store:modelingData", systemEntitManager: SystemEntityManager, toImport: ImportData, importDone: boolean): void;
+    (e: "update:systemName", newName: string, id: number): void;
+    (e: "store:modelingData", id: number, systemEntitManager: SystemEntityManager, toImport: ImportData, importDone: boolean): void;
 }>()
 
 const currentSystemName = ref(props.systemName);
@@ -59,10 +60,13 @@ function setCurrentSystemName(systemName: string) {
         return;
     }
     currentSystemName.value = systemName;
-    emit("update:systemName", currentSystemName.value);
+    emit("update:systemName", currentSystemName.value, props.pageId);
 }
 
 const currentSystemGraph = ref<dia.Graph>((() => {
+
+    console.log({"setCurrentSystemGraph": "true",
+"props.modelingData.entityManager": props.modelingData.entityManager})
 
     if (props.modelingData.entityManager) {
         return props.modelingData.entityManager.getGraph() as dia.Graph;
@@ -78,7 +82,7 @@ const systemEntityManager: SystemEntityManager = (() => {
         return props.modelingData.entityManager;
     } else {
         const newEntityManager = new SystemEntityManager(currentSystemGraph.value as dia.Graph);
-        emit("store:modelingData", newEntityManager, props.modelingData.toImport, true);
+        emit("store:modelingData", props.modelingData.id, newEntityManager, props.modelingData.toImport, true);
         return new SystemEntityManager(currentSystemGraph.value as dia.Graph);
     }
 })();
@@ -119,6 +123,9 @@ onMounted(() => {
     let loaded;
 
     if (props.modelingData.toImport.fileName) {
+        console.log("loading new data");
+        console.log(props.modelingData)
+
         if (props.modelingData.toImport.fileName.endsWith("json")) {
             loaded = loadFromJson(props.modelingData.toImport.fileContent, props.modelingData.toImport.fileName);
         } else if (props.modelingData.toImport.fileName.endsWith("yaml")
@@ -128,7 +135,8 @@ onMounted(() => {
         }
 
         loaded.then(() => {
-            emit("store:modelingData", systemEntityManager, { fileName: '', fileContent: '' }, true);
+            console.log("trigger modelingData storage");
+            emit("store:modelingData", props.modelingData.id, systemEntityManager, { fileName: '', fileContent: '' }, true);
         })
     }
 
@@ -166,7 +174,7 @@ function loadFromJson(jsonString: string, fileName: string): Promise<void> {
 
     setCurrentSystemName(systemEntityManager.getSystemEntity().getSystemName);
 
-    return ensureCorrectRendering(createdCells);
+    return ensureCorrectRendering(createdCells, mainPaper.value);
 }
 
 function saveToJson() {
@@ -188,7 +196,7 @@ function loadFromTosca(yamlString: string, fileName: string): Promise<void> {
 
     setCurrentSystemName(systemEntityManager.getSystemEntity().getSystemName);
 
-    return ensureCorrectRendering(createdCells);
+    return ensureCorrectRendering(createdCells, mainPaper.value);
 
 }
 
@@ -201,64 +209,6 @@ function waitForCellToBeVisible(cell: dia.CellView, resolve: () => void) {
     }
 }
 */
-
-function ensureCorrectRendering(createdCells: dia.Cell[]): Promise<void> {
-    return new Promise<void>((outerResolve, outerReject) => {
-
-        let cellsRendered = [];
-
-        for (const cell of createdCells) {
-
-            let cellRendered = Promise.resolve();
-
-            if (cell.isElement()) {
-
-                // resize element to a different size and that to the wanted size again, to rerender the bounding box and ensure that it has the right size
-                let wantedWidth = cell.prop("size/width");
-                let wantedHeight = cell.prop("size/height");
-                cellsRendered.push(
-                    cellRendered.then(() => {
-                        return new Promise<void>((resolve, reject) => {
-                            //element.resize(element.prop("defaults/size").width, element.prop("defaults/size").height);
-                            (cell as dia.Element).resize(wantedWidth + 10, wantedHeight + 10);
-                            setTimeout(() => {
-                                resolve();
-                            }, 100)
-                        })
-                    }).then(() => {
-                        return new Promise<void>((resolve, reject) => {
-                            (cell as dia.Element).resize(wantedWidth, wantedHeight);
-                            setTimeout(() => {
-                                resolve();
-                            }, 100)
-                        });
-                    }).then(() => {
-                        return new Promise<void>((resolve, reject) => {
-                            addSelectionToolToEntity(mainPaper.value.requireView(cell as dia.Element).model, mainPaper.value);
-                            setTimeout(() => {
-                                resolve();
-                            }, 100)
-                        });
-                    })
-                );
-            } /*else if (cell.isLink) {
-                cellsRendered.push(
-                    cellRendered.then(() => {
-                        return new Promise<void>((resolve, reject) => {
-                            waitForCellToBeVisible(cell.findView(mainPaper.value), resolve);
-                        })
-                    })  
-                )
-            } */
-        }
-
-        Promise.all(cellsRendered).then(() => {
-            //mainPaper.value.updateViews();
-            mainPaper.value.hideTools();
-            outerResolve();
-        })
-    });
-}
 
 function saveToTosca() {
     let asYaml = systemEntityManager.convertToCustomTosca();
