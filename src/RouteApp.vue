@@ -177,14 +177,6 @@ const sharedSystemsData: ComputedRef<ModelingData[]> = computed(() => {
 
 function storeModelingData(id: number, toImport: ImportData, systemEntityManager: SystemEntityManager, importDone: boolean) {
 
-  console.log({"storeModelingData": storeModelingData,
-          "id": id,
-          "toImport": toImport,
-          "systemEntityManager": systemEntityManager,
-          "importDone": importDone,
-          "modeledSystemsData": modeledSystemsData
-})
-
   for (let i = 0; i < modeledSystemsData.value.length; i++) {
     if (modeledSystemsData.value[i].id === id) {
       modeledSystemsData.value[i] = {
@@ -233,8 +225,6 @@ function waitForLoadedToResolve(modelingDataId: number, resolve: () => void) {
 
   for (let i = 0; i < modeledSystemsData.value.length; i++) {
     if (modeledSystemsData.value[i].id === modelingDataId) {
-      console.log({checking: modelingDataId,
-      importDone: modeledSystemsData.value[i].importDone});
       if (modeledSystemsData.value[i].importDone) {
         resolve();
         return;
@@ -281,7 +271,6 @@ onMounted(() => {
   })
 
   router.beforeEach((to, from) => {
-    console.log("Entering: " + to.path)
 
     // set current page active
     for (const page of pages.value) {
@@ -353,7 +342,6 @@ onMounted(() => {
 
     importDone.then(() => {
       if (sessionStorage.getItem("lastRoute")) {
-        console.log("entering page now");
         router.push(sessionStorage.getItem("lastRoute"));
       }
     })
@@ -369,7 +357,6 @@ onMounted(() => {
 
   window.onbeforeunload = function () {
     let modelingDataToStore = modeledSystemsData.value.map((modelingData: ModelingData): ModelingData => {
-      console.log(modelingData);
 
       return {
         id: modelingData.id,

@@ -1,5 +1,5 @@
 import { createApp } from 'vue'
-import { createRouter, createWebHashHistory } from 'vue-router';
+import { createRouter, createWebHashHistory, createWebHistory } from 'vue-router';
 import RouteApp from './RouteApp.vue'
 import Home from './Home.vue';
 
@@ -14,13 +14,12 @@ window.onerror = (error) => {
 }
 
 const routes = [
-    { path: '/', component: Home }
 ];
 
 const router = createRouter({
     // 4. Provide the history implementation to use. We
     // are using the hash history for simplicity here.
-    history: createWebHashHistory(),
+    history: createWebHistory(),
     routes, // short for `routes: routes`
 })
 

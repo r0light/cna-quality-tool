@@ -65,9 +65,6 @@ function setCurrentSystemName(systemName: string) {
 
 const currentSystemGraph = ref<dia.Graph>((() => {
 
-    console.log({"setCurrentSystemGraph": "true",
-"props.modelingData.entityManager": props.modelingData.entityManager})
-
     if (props.modelingData.entityManager) {
         return props.modelingData.entityManager.getGraph() as dia.Graph;
     } else {
@@ -123,8 +120,6 @@ onMounted(() => {
     let loaded;
 
     if (props.modelingData.toImport.fileName) {
-        console.log("loading new data");
-        console.log(props.modelingData)
 
         if (props.modelingData.toImport.fileName.endsWith("json")) {
             loaded = loadFromJson(props.modelingData.toImport.fileContent, props.modelingData.toImport.fileName);
@@ -135,7 +130,6 @@ onMounted(() => {
         }
 
         loaded.then(() => {
-            console.log("trigger modelingData storage");
             emit("store:modelingData", props.modelingData.id, systemEntityManager, { fileName: '', fileContent: '' }, true);
         })
     }

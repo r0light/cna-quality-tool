@@ -111,8 +111,6 @@ const selectedFactor: ComputedRef<ProductFactor | QualityAspect> = computed(() =
 
 onMounted(() => {
 
-    console.log("Quality Model app mounted with: " + props.active);
-
     paperRef.value = new dia.Paper({
         el: $('#qmPaper'),
         model: graph,
