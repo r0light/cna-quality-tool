@@ -281,11 +281,14 @@ onMounted(() => {
 
   router.beforeEach(async (to, from) => {
 
-    console.log("request: " + to.path);
-
     // set current page active
     for (const page of pages.value) {
-      if (page.path !== to.path) {
+      if (page.path === "/" && to.path !== "/") {
+        page.active = false;
+        continue;
+      }
+      // use startsWith here to ensure quality model tab is also active, if a subpath is used
+      if (!to.path.startsWith(page.path)) {
         page.active = false;
         continue;
       }
@@ -353,12 +356,8 @@ onMounted(() => {
   }
 
   importDone.then(() => {
-    // reload page when router is ready to be sure all components are rendered
+    // workaround: reload page when router is ready to be sure all components are rendered
     router.isReady().then(() => {
-      console.log({
-        router: "ready",
-        "router.currentRoute.value": router.currentRoute.value
-      });
       router.push(router.currentRoute.value.path);
     })
 
@@ -374,17 +373,33 @@ onMounted(() => {
   });
 
   window.onbeforeunload = function () {
+
     let modelingDataToStore = modeledSystemsData.value.map((modelingData: ModelingData): ModelingData => {
-      return {
-        id: modelingData.id,
-        name: modelingData.name,
-        toImport: {
-          fileName: `${modelingData.name}.json`,
-          fileContent: modelingData.entityManager.convertToJson()
-        },
-        entityManager: null,
-        importDone: false
+
+      if (modelingData.importDone) {
+        return {
+          id: modelingData.id,
+          name: modelingData.name,
+          toImport: {
+            fileName: `${modelingData.name}.json`,
+            fileContent: modelingData.entityManager.convertToJson()
+          },
+          entityManager: null,
+          importDone: false
+        }
+      } else {
+        return {
+          id: modelingData.id,
+          name: modelingData.name,
+          toImport: {
+            fileName: `${modelingData.name}.json`,
+            fileContent: JSON.parse(modelingData.toImport.fileContent)
+          },
+          entityManager: null,
+          importDone: false
+        }
       }
+
     })
 
     sessionStorage.setItem("modelingData", JSON.stringify(modelingDataToStore));
@@ -420,7 +435,7 @@ function addNewModelingPage(name: string, toImport: ImportData) {
     path: `/modeling-${newId}`,
     component: ModelingApp,
     props: route => ({
-      systemName: name,
+      systemName: (modeledSystemsData.value.find(systemData => systemData.id === newId) as ModelingData).name,
       pageId: newId,
       modelingData: (modeledSystemsData.value.find(systemData => systemData.id === newId) as ModelingData)
     })
@@ -433,6 +448,7 @@ function addNewModelingPage(name: string, toImport: ImportData) {
 }
 
 function updatePageName(newName: string, id: number) {
+
   for (const page of pages.value) {
     if (page.id === id) {
       page.name = newName;

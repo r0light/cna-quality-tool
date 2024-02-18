@@ -146,13 +146,6 @@ onMounted(() => {
 
     updateViewIfPossible();
 
-    console.log({
-        "qualityModelApp": "onMounted",
-        "router.currentRoute.value": router.currentRoute.value,
-        "router.currentRoute.value.params": router.currentRoute.value.params
-    }
-    );
-
     if (router.currentRoute.value.params["factorKey"]) {
         let factorKey = router.currentRoute.value.params["factorKey"];
         let factorElement = qualityAspectElements.find(element => element.id === factorKey);

@@ -92,6 +92,7 @@ class SystemEntityManager {
     }
 
     loadFromJson(stringifiedJson: string, fileName: string): dia.Cell[] {
+
         try {
             let jsonGraph: any = JSON.parse(stringifiedJson);
             this.#currentSystemGraph.clear();
