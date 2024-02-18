@@ -48,6 +48,9 @@ import { CalculatedMeasure, EvaluatedProductFactor, EvaluatedQualityAspect, Eval
 import ProductFactorViewpoint from './ProductFactorViewpoint.vue';
 import QualityAspectViewpoint from './QualityAspectViewpoint.vue';
 import FilterToolbar, { ItemFilter, createFactorCategoryFilter, createHighLevelAspectFilter, getActiveElements, getActiveFilterItems } from '../qualitymodel/FilterToolbar.vue';
+import SystemEntityManager from '@/modeling/systemEntityManager';
+import { entityShapes } from '@/modeling/config/entityShapes';
+import { dia } from 'jointjs';
 
 const props = defineProps<{
     systemsData: ModelingData[],
@@ -114,7 +117,7 @@ function onSelectSystem() {
         return;
     }
 
-    let systemEntityManager = toRaw(selectedSystem.entityManager);
+    let systemEntityManager = selectedSystem.entityManager ? toRaw(selectedSystem.entityManager) : createTemporaryEntityManager(selectedSystem);
     let currentSystemEntity = systemEntityManager.getSystemEntity();
 
     let evaluatedSystem = new EvaluatedSystemModel(currentSystemEntity, qualityModel);
@@ -142,6 +145,15 @@ function onSelectSystem() {
 
     console.timeEnd('evaluation');
 
+}
+
+function createTemporaryEntityManager(selectedSystem: ModelingData): SystemEntityManager {
+    // workaround to fix the problem that if the page has been reloaded and the modeled system in question has not been opened in the modeling tab, then it has not been imported yet and the entityManager has not been created yet
+    // not the best solution, because the evaluation now depends on jointjs
+
+    let newEntityManager = new SystemEntityManager(new dia.Graph({}, { cellNamespace: entityShapes }));
+    newEntityManager.loadFromJson(selectedSystem.toImport.fileContent, selectedSystem.toImport.fileName);
+    return newEntityManager;
 }
 
 </script>

@@ -95,6 +95,7 @@ type PropertyGroupSection = {
 
 const relationshipPath = new RegExp("^relationship\/.*");
 
+var selectedEntity: dia.CellView | dia.LinkView = null;
 const selectedEntityId = ref<string>("")
 const selectedEntityPropertyGroups = ref<PropertyGroupSection[]>([]);
 
@@ -217,6 +218,12 @@ onUpdated(() => {
 
     // if no entity is selected / an entity was deselected, clear the current values
     if (!props.selectedEntity) {
+
+        if (selectedEntity) {
+            selectedEntity.model.off(null, null, "detailsSidebar");
+            selectedEntity = null;
+        }
+
         selectedEntityId.value = "";
         selectedEntityPropertyGroups.value.length = 0;
         return;
@@ -226,6 +233,8 @@ onUpdated(() => {
         return;
     }
 
+    selectedEntity = props.selectedEntity;
+
     //console.log(props.selectedEntity.model.id);
     // selected entity has changed! only now update the values
     selectedEntityId.value = props.selectedEntity.model.id.toString();
@@ -234,7 +243,7 @@ onUpdated(() => {
     selectedEntityPropertyGroups.value.length = 0;
 
     let excludePropertySections = [];
-    if (props.selectedEntity.model.prop("entity/type") === EntityTypes.LINK || props.selectedEntity.model.prop("entity/type") === EntityTypes.DEPLOYMENT_MAPPING) {
+    if (selectedEntity.model.prop("entity/type") === EntityTypes.LINK || props.selectedEntity.model.prop("entity/type") === EntityTypes.DEPLOYMENT_MAPPING) {
         // exclude sections if the entity is a link or a deployment mapping
         excludePropertySections.push(...["label", "size", "position"]);
     }
@@ -247,7 +256,7 @@ onUpdated(() => {
 
     //add entity specific properties for current entity
     const entityConfig: { type: string, specificProperties: PropertyConfig[] } = Object.entries(EntityDetailsConfig).find(entry => {
-        return entry[1].type === props.selectedEntity.model.prop("entity/type")
+        return entry[1].type === selectedEntity.model.prop("entity/type")
     }
     )[1];
     const currentOptions: EditPropertySection[] = selectedEntityPropertyGroups.value.find(propertyGroup => propertyGroup.groupId === "entity").options;
@@ -258,9 +267,9 @@ onUpdated(() => {
 
             let valueToSet: any = "";
             if (option.jointJsConfig.propertyType === "attribute") {
-                valueToSet = props.selectedEntity.model.attr(option.jointJsConfig.modelPath);
+                valueToSet = selectedEntity.model.attr(option.jointJsConfig.modelPath);
             } else if (option.jointJsConfig.propertyType === "property" || option.jointJsConfig.propertyType === "providedMethod") {
-                valueToSet = props.selectedEntity.model.prop(option.jointJsConfig.modelPath);
+                valueToSet = selectedEntity.model.prop(option.jointJsConfig.modelPath);
 
                 if (option.providedFeature === "entity-aspect-ratio" && valueToSet) {
                     valueToSet = "(h ~ " + (valueToSet.height / valueToSet.width).toFixed(2) + " * w)";
@@ -272,7 +281,7 @@ onUpdated(() => {
         }
     }
 
-    switch (props.selectedEntity.model.prop("entity/type")) {
+    switch (selectedEntity.model.prop("entity/type")) {
         case EntityTypes.DATA_AGGREGATE:
 
             for (let propertyOption of currentOptions) {
@@ -283,7 +292,7 @@ onUpdated(() => {
 
                     // special case for parent relation, because we want a custom label for the field
                     if (propertyOption.providedFeature === "usage_relation") {
-                        propertyOption.label = getParentRelationLabel(props.selectedEntity.model.prop("entity/embedded"));
+                        propertyOption.label = getParentRelationLabel(selectedEntity.model.prop("entity/embedded"));
                     }
                 }
             }
@@ -320,7 +329,7 @@ onUpdated(() => {
                 let isSameFamily = dataAggregate.prop(assignedFamilyOption.jointJsConfig.modelPath).length !== 0 && dataAggregate.prop(assignedFamilyOption.jointJsConfig.modelPath).localeCompare(props.selectedEntity.model.prop(assignedFamilyOption.jointJsConfig.modelPath)) === 0;
                 familyTableConfig.tableRows.push({
                     attributes: {
-                        isTheCurrentEntity: props.selectedEntity.model.id === dataAggregate.id,
+                        isTheCurrentEntity: selectedEntity.model.id === dataAggregate.id,
                         representationClass: isValid ? "validOption" : "invalidOption",
                         disabled: !isValid
                     },
@@ -350,7 +359,7 @@ onUpdated(() => {
 
                     // special case for parent relation, because we want a custom label for the field
                     if (propertyOption.providedFeature === "usage_relation") {
-                        propertyOption.label = getParentRelationLabel(props.selectedEntity.model.prop("entity/embedded"));
+                        propertyOption.label = getParentRelationLabel(selectedEntity.model.prop("entity/embedded"));
                     }
                 }
             }
@@ -383,7 +392,7 @@ onUpdated(() => {
                 return asArray;
             }
 
-            includedDataOption.value = toArray(props.selectedEntity.model.prop("entity/properties/included_data"), includedDataOption.listElementFields[0].key, includedDataOption.listElementFields[1].key);
+            includedDataOption.value = toArray(selectedEntity.model.prop("entity/properties/included_data"), includedDataOption.listElementFields[0].key, includedDataOption.listElementFields[1].key);
 
             let backingDataAssignedFamilyOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "backingData-assignedFamily");
             backingDataAssignedFamilyOption.show = computed(() => {
@@ -415,7 +424,7 @@ onUpdated(() => {
                 let isSameFamily = backingData.prop(backingDataAssignedFamilyOption.jointJsConfig.modelPath).length !== 0 && backingData.prop(backingDataAssignedFamilyOption.jointJsConfig.modelPath).localeCompare(props.selectedEntity.model.prop(backingDataAssignedFamilyOption.jointJsConfig.modelPath)) === 0;
                 backingDataFamilyTableConfig.tableRows.push({
                     attributes: {
-                        isTheCurrentEntity: props.selectedEntity.model.id === backingData.id,
+                        isTheCurrentEntity: selectedEntity.model.id === backingData.id,
                         representationClass: isValid ? "validOption" : "invalidOption",
                         disabled: !isValid
                     },
@@ -438,7 +447,7 @@ onUpdated(() => {
         case EntityTypes.REQUEST_TRACE:
             const externalEndpoints = props.graph.getElements().filter(element => element.prop("entity/type") === EntityTypes.EXTERNAL_ENDPOINT);
             let externalEndpointOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "referred_endpoint");
-            const selectedExternalEndpoint = props.selectedEntity.model.prop(externalEndpointOption.jointJsConfig.modelPath);
+            const selectedExternalEndpoint = selectedEntity.model.prop(externalEndpointOption.jointJsConfig.modelPath);
             const dropdownOptions = externalEndpoints.map((endpoint) => {
 
                 let parentName = "";
@@ -472,7 +481,7 @@ onUpdated(() => {
             involvedLinksConfig.includeFormCheck = false;
 
             const existingLinks = props.graph.getLinks().filter((link) => { return link.prop("entity/type") === EntityTypes.LINK });
-            const selectedLinks: Set<dia.Cell.ID> = new Set(props.selectedEntity.model.prop(involvedLinksConfig.jointJsConfig.modelPath));
+            const selectedLinks: Set<dia.Cell.ID> = new Set(selectedEntity.model.prop(involvedLinksConfig.jointJsConfig.modelPath));
 
             // clear table rows
             involvedLinksConfig.tableRows.length = 0;
@@ -520,40 +529,40 @@ onUpdated(() => {
     }
 
     // remove previously registered event callbacks
-    props.selectedEntity.model.off(null, null, "detailsSidebar");
+    selectedEntity.model.off(null, null, "detailsSidebar");
 
-    props.selectedEntity.model.on("change:parent", (cell: dia.Cell) => {
+    selectedEntity.model.on("change:parent", (cell: dia.Cell) => {
 
-        if (!props.selectedEntity) {
+        if (!selectedEntity) {
             return;
         }
 
-        if (cell.id !== props.selectedEntity.model.id) {
+        if (cell.id !== selectedEntity.model.id) {
             return;
         }
         //update only if the cell is still selected
 
-        let parent: dia.Cell = props.selectedEntity.model.getParentCell();
+        let parent: dia.Cell = selectedEntity.model.getParentCell();
         let parentId: string = "";
         if (parent) {
             parentId = parent.id.toString();
         }
 
         findInSectionsByFeature(selectedEntityPropertyGroups.value, "embedded").value = parentId;
-        props.selectedEntity.model.prop("entity/embedded", parentId);
-        if (props.selectedEntity.model.prop("entity/type") === EntityTypes.DATA_AGGREGATE) {
+        selectedEntity.model.prop("entity/embedded", parentId);
+        if (selectedEntity.model.prop("entity/type") === EntityTypes.DATA_AGGREGATE) {
             let parentRelationOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "usage_relation");
-            parentRelationOption.label = getParentRelationLabel(props.selectedEntity.model.prop("entity/embedded"));
+            parentRelationOption.label = getParentRelationLabel(selectedEntity.model.prop("entity/embedded"));
         }
 
     }, "detailsSidebar");
 
     // update position properties when entity is moved
-    props.selectedEntity.model.on("change:position", () => {
+    selectedEntity.model.on("change:position", () => {
         let xOption = findInSectionsByFeature(selectedEntityPropertyGroups.value, "entity-x-position");
-        xOption.value = props.selectedEntity.model.prop(xOption.jointJsConfig.modelPath);
+        xOption.value = selectedEntity.model.prop(xOption.jointJsConfig.modelPath);
         let yOption = findInSectionsByFeature(selectedEntityPropertyGroups.value, "entity-y-position");
-        yOption.value = props.selectedEntity.model.prop(yOption.jointJsConfig.modelPath);
+        yOption.value = selectedEntity.model.prop(yOption.jointJsConfig.modelPath);
     }, "detailsSidebar")
 
 })
