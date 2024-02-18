@@ -282,7 +282,9 @@ onMounted(() => {
   router.beforeEach(async (to, from) => {
 
     // redirect if path does not exist
-    if (!router.getRoutes().find(route => route.path === to.path)) {
+    if (to.path !== "/" && !router.getRoutes().find(route => {
+      return route.path !== "/" && to.path.startsWith(route.path)
+    })) {
       router.replace({ path: "/" });
     }
 
