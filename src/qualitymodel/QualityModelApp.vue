@@ -66,13 +66,17 @@ import { QualityAspect } from '@/core/qualitymodel/quamoco/QualityAspect';
 import { entities } from '@/core/qualitymodel/specifications/entities';
 import { orderQualityAspects, placeProductFactors, placeQualityAspects } from './placementAlgorithm';
 import FilterToolbar, { createFactorCategoryFilter, createHighLevelAspectFilter, getActiveElements, getActiveFilterItems } from './FilterToolbar.vue';
+import { useRouter } from 'vue-router';
 
 let initialized = true;
 let doRearrange = false;
 const props = defineProps<{
     active: boolean,
+    path: string,
 }>()
 const watchInView = computed(() => props.active);
+
+const router = useRouter();
 
 const qmContainer = ref<HTMLElement>(null);
 const qmPaper = ref<HTMLElement>(null)
@@ -132,33 +136,36 @@ onMounted(() => {
 
     paperRef.value.on({
         'element:pointerdown': function (cellView: dia.ElementView, evt, x, y) {
-            selectedElement.value = cellView;
-            //let currentPaper = this;
-            this.model.getLinks().forEach(function (link) {
-                highlighters.stroke.remove(link.findView(paperRef.value));
-                link.toBack();
-            });
-            graph.getConnectedLinks(cellView.model).forEach(link => {
-                highlighters.stroke.add(link.findView(paperRef.value as dia.Paper), { selector: 'line' }, 'my-element-highlight', {
-                    layer: 'back',
-                    attrs: {
-                        'stroke': '#feb663',
-                        'stroke-width': 5,
-                    }
-                });
-                //link.toFront();
-            });
+            selectElement(cellView);
         },
         'blank:pointerdown': function (evt, x, y) {
-            selectedElement.value = null;
-            this.model.getLinks().forEach(function (link) {
-                highlighters.stroke.remove(link.findView(paperRef.value));
-            });
+            unselectElement();
         },
 
     });
 
     updateViewIfPossible();
+
+    console.log({
+        "qualityModelApp": "onMounted",
+        "router.currentRoute.value": router.currentRoute.value,
+        "router.currentRoute.value.params": router.currentRoute.value.params
+    }
+    );
+
+    if (router.currentRoute.value.params["factorKey"]) {
+        let factorKey = router.currentRoute.value.params["factorKey"];
+        let factorElement = qualityAspectElements.find(element => element.id === factorKey);
+        if (!factorElement) {
+            factorElement = productFactorElements.find(element => element.id === factorKey);
+        }
+        if (factorElement) {
+            selectElement(factorElement.findView(paperRef.value as dia.Paper) as dia.ElementView);
+        } else {
+            router.replace({ path: props.path })
+        }
+    }
+
 });
 
 
@@ -342,6 +349,44 @@ function redrawWithFilter() {
     drawQualityModelElements(getActiveFilterItems(highLevelAspectFilter), getActiveFilterItems(factorCategoryFilter));
     arrangeQualityModelElements();
 }
+
+function selectElement(element: dia.ElementView) {
+    selectedElement.value = element;
+    //router.replace({ path: `${props.path}/${element.model.id}` });
+
+    history.pushState(
+        {},
+        null,
+        `${props.path}/${element.model.id}`
+    )
+
+
+    //let currentPaper = this;
+    graph.getLinks().forEach(function (link) {
+        highlighters.stroke.remove(link.findView(paperRef.value as dia.Paper));
+        link.toBack();
+    });
+    graph.getConnectedLinks(element.model).forEach(link => {
+        highlighters.stroke.add(link.findView(paperRef.value as dia.Paper), { selector: 'line' }, 'my-element-highlight', {
+            layer: 'back',
+            attrs: {
+                'stroke': '#feb663',
+                'stroke-width': 5,
+            }
+        });
+        //link.toFront();
+    });
+}
+
+
+function unselectElement() {
+    selectedElement.value = null;
+    router.replace({ path: props.path });
+    graph.getLinks().forEach(function (link) {
+        highlighters.stroke.remove(link.findView(paperRef.value as dia.Paper));
+    });
+}
+
 
 </script>
 

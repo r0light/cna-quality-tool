@@ -8,10 +8,10 @@
         <ul class="navbar-nav mr-auto">
           <li v-for="page of pages" class="nav-item" :class="{ active: page.active }">
             <div class="nav-link d-flex flex-row">
-              <a class="text-white" @click="selectPage(page.id)">
+              <router-link class="text-white" :to="`${page.path}`">
                 <i :class="page.iconClass"></i>
                 {{ page.name }}
-              </a>
+              </router-link>
               <button class="btn d-flex p-1 closeModelBtn" v-if="page.pageType === 'modeling'"
                 @click="deleteModelingPage(page.id)"><i class="fa fa-fw fa-x text-white"></i></button>
             </div>
@@ -26,10 +26,10 @@
       <div class="navbar-collapse collapse">
         <ul class="navbar-nav ml-auto">
           <li class="nav-item p-2">
-            <a class="text-white" @click="showImprint">
+            <router-link class="text-white" to="/imprint">
               <i class="fa-solid fa-scale-balanced"></i>
               Imprint
-            </a>
+            </router-link>
           </li>
         </ul>
       </div>
@@ -92,22 +92,10 @@
       </div>
     </div>
     <div class="pagesContainer">
-      <div v-show="currentPage > 0" v-for="pageContent of pages" class="pageWrapper">
-        <Home v-if="pageContent.pageType === 'home'" v-show="currentPage === pageContent.id"></Home>
-        <QualityModelApp v-if="pageContent.pageType === 'qualityModel'" v-show="currentPage === pageContent.id"
-          :active="pageContent.active"></QualityModelApp>
-        <EvaluationApp v-if="pageContent.pageType === 'evaluation'" v-show="currentPage === pageContent.id"
-          :systemsData="sharedSystemsData" :active="pageContent.active"></EvaluationApp>
-        <ModelingApp v-if="pageContent.pageType === 'modeling'"
-          v-show="pageContent.pageType === 'modeling' && currentPage === pageContent.id" :systemName="pageContent.name"
-          :pageId="pageContent.id"
-          :modelingData="(modeledSystemsData.find(systemData => systemData.id === pageContent.id) as ModelingData)"
-          @store:modelingData="(id, systemEntityManager, toImport, importDone) => storeModelingData(pageContent.id, toImport, systemEntityManager, pageContent.name, importDone)"
-          @update:systemName="event => updatePageName(event, pageContent.id)"></ModelingApp>
-      </div>
-      <div v-show="currentPage === 0" class="pageWrapper">
-        <Legal></Legal>
-      </div>
+      <router-view :key="$route.path"
+        @store:modelingData="(id, systemEntityManager, toImport, importDone) => storeModelingData(id, toImport, systemEntityManager, importDone)"
+        @update:systemName="(newName, id) => updatePageName(newName, id)">
+      </router-view>
     </div>
   </main>
   <div id="modalBackground"></div>
@@ -117,6 +105,7 @@
 <script lang="ts" setup>
 import $ from 'jquery';
 import { ref, onMounted, computed, ComputedRef } from 'vue';
+import { RouteRecordRaw, Router, createRouter, createWebHashHistory, useRouter } from 'vue-router';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import Home from './Home.vue';
 import Legal from './Legal.vue';
@@ -127,6 +116,7 @@ import SystemEntityManager from './modeling/systemEntityManager';
 
 type Page = {
   id: number;
+  path: string;
   active: boolean;
   pageType: "home" | "qualityModel" | "evaluation" | "modeling"
   iconClass: string;
@@ -148,9 +138,12 @@ export type ModelingData = {
 
 const CLOUNAQ = "Clounaq";
 
+const router = useRouter();
+
 const pages = ref<Page[]>([
   {
     id: 1,
+    path: "/",
     active: false,
     pageType: "home",
     iconClass: "fa fa-fw fa-home",
@@ -158,6 +151,7 @@ const pages = ref<Page[]>([
   },
   {
     id: 2,
+    path: "/quality-model",
     active: false,
     pageType: "qualityModel",
     iconClass: "fa-solid fa-sitemap",
@@ -165,6 +159,7 @@ const pages = ref<Page[]>([
   },
   {
     id: 3,
+    path: "/evaluation",
     active: false,
     pageType: "evaluation",
     iconClass: "fa-solid fa-gauge-high",
@@ -180,13 +175,13 @@ const sharedSystemsData: ComputedRef<ModelingData[]> = computed(() => {
   return modeledSystemsData.value.reduce((initial, b) => initial + b.name, "");
 });*/
 
-function storeModelingData(id: number, toImport: ImportData, systemEntityManager: SystemEntityManager, pageName: string, importDone: boolean) {
+function storeModelingData(id: number, toImport: ImportData, systemEntityManager: SystemEntityManager, importDone: boolean) {
 
   for (let i = 0; i < modeledSystemsData.value.length; i++) {
     if (modeledSystemsData.value[i].id === id) {
       modeledSystemsData.value[i] = {
         id: id,
-        name: pageName,
+        name: modeledSystemsData.value[i].name,
         toImport: toImport,
         entityManager: systemEntityManager,
         importDone: importDone
@@ -194,8 +189,6 @@ function storeModelingData(id: number, toImport: ImportData, systemEntityManager
     }
   }
 }
-
-const currentPage = ref(1);
 
 const overlayState = ref<"none" | "initial" | "startNew" | "startImport">("none");
 const newSystemName = ref<string>("");
@@ -246,7 +239,80 @@ function waitForLoadedToResolve(modelingDataId: number, resolve: () => void) {
 
 onMounted(() => {
 
+  for (const page of pages.value) {
+    if (page.pageType === "home") {
+      router.addRoute({
+        path: page.path,
+        component: Home
+      })
+    } else if (page.pageType === "qualityModel") {
+      router.addRoute({
+        path: page.path,
+        component: QualityModelApp,
+        props: route => ({
+          active: page.active,
+          path: page.path
+        })
+      })
+      router.addRoute({
+        path: `${page.path}/:factorKey`,
+        component: QualityModelApp,
+        props: route => ({
+          active: page.active,
+          path: page.path
+        })
+      })
+    } else if (page.pageType === "evaluation") {
+      router.addRoute({
+        path: page.path,
+        component: EvaluationApp,
+        props: route => ({
+          active: page.active,
+          systemsData: sharedSystemsData.value
+        })
+      })
+    }
+  }
+
+  router.addRoute({
+    path: "/imprint",
+    component: Legal
+  })
+
+  router.beforeEach(async (to, from) => {
+
+    console.log("request: " + to.path);
+
+    // set current page active
+    for (const page of pages.value) {
+      if (page.path !== to.path) {
+        page.active = false;
+        continue;
+      }
+      page.active = true;
+      switch (page.pageType) {
+        case "home":
+          document.title = CLOUNAQ + ": Home";
+          break;
+        case "qualityModel":
+          document.title = CLOUNAQ + ": Quality Model";
+          break;
+        case "evaluation":
+          document.title = CLOUNAQ + ": Evaluation";
+          break;
+        case "modeling":
+          document.title = CLOUNAQ + `: Modeling ${page.name}`;
+          break;
+        default:
+          document.title = CLOUNAQ + ": Home";
+      }
+    }
+    return true;
+  })
+
   let importDone: Promise<void> = Promise.resolve();
+
+  let lastRoute = sessionStorage.getItem("lastRoute") ? sessionStorage.getItem("lastRoute") : "";
 
   if (sessionStorage.getItem("modelingData")) {
     let modelingDataToImport: ModelingData[] = JSON.parse(sessionStorage.getItem("modelingData"));
@@ -258,29 +324,46 @@ onMounted(() => {
           modeledSystemsData.value.push(modelingData);
           pages.value.push({
             id: modelingData.id,
+            path: `/modeling-${modelingData.id}`,
             active: false,
             pageType: "modeling",
             iconClass: "fa-solid fa-pencil",
             name: modelingData.name
           })
-          currentPage.value = modelingData.id;
 
-          waitForLoadedToResolve(modelingData.id, resolve);
+          router.addRoute({
+            path: `/modeling-${modelingData.id}`,
+            component: ModelingApp,
+            props: route => ({
+              systemName: modeledSystemsData.value.find(data => data.id === modelingData.id).name,
+              pageId: modelingData.id,
+              modelingData: modeledSystemsData.value.find(data => data.id === modelingData.id),
+            })
+          })
+
+          if (lastRoute.startsWith("modeling")) {
+            router.push(`/modeling-${modelingData.id}`);
+            waitForLoadedToResolve(modelingData.id, resolve);
+          } else {
+            resolve();
+          }
         });
       });
     }
-
-    importDone.then(() => {
-      if (sessionStorage.getItem("currentPage")) {
-        currentPage.value = parseInt(sessionStorage.getItem("currentPage"));
-      }
-
-      for (const page of pages.value) {
-        page.active = page.id === currentPage.value ? true : false;
-      }
-
-    })
   }
+
+  importDone.then(() => {
+    // reload page when router is ready to be sure all components are rendered
+    router.isReady().then(() => {
+      console.log({
+        router: "ready",
+        "router.currentRoute.value": router.currentRoute.value
+      });
+      router.push(router.currentRoute.value.path);
+    })
+
+
+  })
 
 
   document.getElementById("applicationNameInputField").addEventListener("keydown", (event) => {
@@ -305,37 +388,11 @@ onMounted(() => {
     })
 
     sessionStorage.setItem("modelingData", JSON.stringify(modelingDataToStore));
-    sessionStorage.setItem("currentPage", `${currentPage.value}`);
+    sessionStorage.setItem("lastRoute", router.currentRoute.value.path);
   }
 
 });
 
-function selectPage(id: number) {
-  currentPage.value = id;
-
-  // set current page active
-  for (const page of pages.value) {
-    page.active = page.id === currentPage.value ? true : false;
-    if (page.active) {
-      switch (page.pageType) {
-        case "home":
-          document.title = CLOUNAQ + ": Home";
-          break;
-        case "qualityModel":
-          document.title = CLOUNAQ + ": Quality Model";
-          break;
-        case "evaluation":
-          document.title = CLOUNAQ + ": Evaluation";
-          break;
-        case "modeling":
-          document.title = CLOUNAQ + `: Modeling ${page.name}`;
-          break;
-        default:
-          document.title = CLOUNAQ + ": Home";
-      }
-    }
-  }
-}
 
 function addNewModelingPage(name: string, toImport: ImportData) {
 
@@ -352,13 +409,27 @@ function addNewModelingPage(name: string, toImport: ImportData) {
 
   pages.value.push({
     id: newId,
+    path: `/modeling-${newId}`,
     active: true,
     pageType: "modeling",
     iconClass: "fa-solid fa-pencil",
     name: name
   })
 
-  selectPage(newId);
+  router.addRoute({
+    path: `/modeling-${newId}`,
+    component: ModelingApp,
+    props: route => ({
+      systemName: name,
+      pageId: newId,
+      modelingData: (modeledSystemsData.value.find(systemData => systemData.id === newId) as ModelingData)
+    })
+  })
+
+  router.isReady().then(() => {
+    router.push(`/modeling-${newId}`);
+  });
+
 }
 
 function updatePageName(newName: string, id: number) {
@@ -384,6 +455,7 @@ function deleteModelingPage(id: number) {
 
   for (let i = 0; i < pages.value.length; i++) {
     if (pages.value[i].id === id) {
+      router.removeRoute(pages.value[i].path);
       pages.value.splice(i, 1);
       break;
     }
@@ -397,11 +469,7 @@ function deleteModelingPage(id: number) {
     }
   }
 
-  selectPage(highestIdBefore);
-}
-
-function showImprint() {
-  selectPage(0);
+  router.push(pages.value.find(page => page.id === highestIdBefore).path);
 }
 
 </script>

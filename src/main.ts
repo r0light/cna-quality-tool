@@ -1,6 +1,6 @@
 import { createApp } from 'vue'
 import { createRouter, createWebHashHistory, createWebHistory } from 'vue-router';
-import RouteApp from './RouteApp.vue'
+import App from './App.vue'
 import Home from './Home.vue';
 
 // TODO workaround to avoid crashing error, seems to be a JointJS bug...
@@ -23,8 +23,7 @@ const router = createRouter({
     routes, // short for `routes: routes`
 })
 
-
-const app = createApp(RouteApp)
+const app = createApp(App)
 
 app.use(router)
 
