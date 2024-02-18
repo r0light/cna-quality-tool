@@ -281,6 +281,11 @@ onMounted(() => {
 
   router.beforeEach(async (to, from) => {
 
+    // redirect if path does not exist
+    if (!router.getRoutes().find(route => route.path === to.path)) {
+      router.replace({ path: "/" });
+    }
+
     // set current page active
     for (const page of pages.value) {
       if (page.path === "/" && to.path !== "/") {
