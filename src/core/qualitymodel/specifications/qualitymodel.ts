@@ -534,7 +534,7 @@ export const qualityModel: QualityModelSpec = {
             "sources": [{ "key": "Davis2019", "section": "8.3" }, { "key": "Ibryam2020", "section": "12 Service Discovery" }, { "key": "Richardson2019", "section": "Using service discovery" }, { "key": "Garrison2017", "section": "7 Service Discovery" }, { "key": "Indrasiri2021", "section": "3 Service Registry and Discovery Pattern" }, { "key": "Bastani2017", "section": "7 Routing (Use service discovery with support for health checks and respect varying workloads)" }, { "key": "Indrasiri2021", "section": "3 Service Abstraction Pattern (Use an abstraction layer in front of services (for example Kubernetes Service))" }, { "key": "Goniwada2021", "section": "4 Service Discovery" }],
             "measures": ["serviceDiscoveryUsage"]
         },
-        "sparcity": {
+        "sparsity": {
             "name": "Sparsity",
             "description": "The more sparse a system is, the less components there are which need to be operated and maintained by the developers of a system. This covers all types of components, such as services, backing services, storage backing services, and also the infrastructure.",
             "categories": ["applicationAdministration", "businessDomain"],
@@ -854,7 +854,7 @@ export const qualityModel: QualityModelSpec = {
         { "impactedFactor": "serviceIndependence", "sourceFactor": "backingServiceDecentralization", "impactType": "positive" },
         { "impactedFactor": "modifiability", "sourceFactor": "addressingAbstraction", "impactType": "positive" },
         { "impactedFactor": "replaceability", "sourceFactor": "addressingAbstraction", "impactType": "positive" },
-        { "impactedFactor": "simplicity", "sourceFactor": "sparcity", "impactType": "positive" },
+        { "impactedFactor": "simplicity", "sourceFactor": "sparsity", "impactType": "positive" },
         { "impactedFactor": "simplicity", "sourceFactor": "operationOutsourcing", "impactType": "positive" },
         { "impactedFactor": "operationOutsourcing", "sourceFactor": "managedInfrastructure", "impactType": "positive" },
         { "impactedFactor": "operationOutsourcing", "sourceFactor": "managedBackingServices", "impactType": "positive" },
