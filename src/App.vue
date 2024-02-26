@@ -43,20 +43,15 @@
       <div class="init-overlay-content">
         <button class="btn d-flex ml-auto" @click="overlayState = 'none'"><i
             class="fa fa-fw fa-x text-white"></i></button>
-        <h2 class="user-select-none text-center">Welcome to the CNA Modeling Application!</h2>
+        <h2 class="user-select-none text-center">Start Modeling Software Architectures!</h2>
         <div id="init-firstInformation" v-show="overlayState === 'initial'">
-          <p class="user-select-none">The modeling application allows you to model cloud-native application (CNA)
-            architectures using thirteen different entities. It is based on the CNA quality model
-            as introduced here:
-            https://github.com/r0light/cna-quality-model/tree/9058f6236e8e0b1cceee9abf67a96e927140d0fa. In addition,
-            the application supports exporting the graphical model into an
-            extended version of the TOSCA architecture description language. The extended TOSCA version is being
-            introduced here: https://github.com/KarolinDuerr/MA-CNA-ModelingSupport/tree/main/TOSCA_Extension.</p>
+          <p class="user-select-none">The modeling feature allows you to model cloud-native application (CNA)
+            architectures using different entities. It is based on the <a href="https://r0light.github.io/cna-quality-model/" target="_blank">Cloud-native Quality Model </a>. You can either start with a new architectural model or import a previously created and exported model.</p>
           <div class="d-flex flex-row justify-content-around">
             <button type="button" class="btn btn-outline-dark btn-light" @click="overlayState = 'startNew'"> <i
-                class="fa-solid fa-pencil"></i> Create new diagram </button>
+                class="fa-solid fa-pencil"></i> Create new model </button>
             <button type="button" class="btn btn-outline-dark btn-light" @click="overlayState = 'startImport'"> <i
-                class="fa-solid fa-pencil"></i> Import existing diagram</button>
+                class="fa-solid fa-pencil"></i> Import existing model</button>
           </div>
 
         </div>
