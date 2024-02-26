@@ -77,13 +77,18 @@ class SystemEntityManager {
         }
     }
 
-    loadFromCustomTosca(stringifiedTOSCA: string, fileName: string): dia.Cell[] {
-        let system = importFromServiceTemplate(fileName, stringifiedTOSCA);
+    loadFromCustomTosca(stringifiedTOSCA: string, fileName: string): { createdCells: dia.Cell[], error: string } {
+        let system = new Entities.System("imported");
+        try {
+            system = importFromServiceTemplate(fileName, stringifiedTOSCA);
+        } catch (err) {
+            return { createdCells: [], error: err.toString() }
+        }
         this.overwriteSystemEntity(system);
         this.convertToGraph();
         this.#currentSystemGraph.trigger("reloaded");
 
-        return this.#currentSystemGraph.getCells();
+        return { createdCells: this.#currentSystemGraph.getCells(), error: null};
     }
 
     convertToJson(): string {
@@ -91,7 +96,7 @@ class SystemEntityManager {
         return jsonSerializedGraph;
     }
 
-    loadFromJson(stringifiedJson: string, fileName: string): dia.Cell[] {
+    loadFromJson(stringifiedJson: string, fileName: string): { createdCells: dia.Cell[], error: string } {
 
         try {
             let jsonGraph: any = JSON.parse(stringifiedJson);
@@ -99,15 +104,14 @@ class SystemEntityManager {
             this.#currentSystemGraph.fromJSON(jsonGraph);
             this.#currentSystemGraph.trigger("reloaded");
         } catch (e) {
-            //TODO provide error message to user
-            console.log(e)
+            return { createdCells: [], error: e.toString() }
         }
 
         // update system entity
         this.#convertToSystemEntity();
         this.#currentSystemEntity.setSystemName = fileName.replace(/\..*$/g, "");
 
-        return this.#currentSystemGraph.getCells();
+        return { createdCells: this.#currentSystemGraph.getCells(), error: null }
     }
 
 
@@ -318,7 +322,7 @@ class SystemEntityManager {
                     let referencedBackingData = [...(this.#currentSystemEntity.getBackingDataEntities)].filter(([id, backingData]) => backingData.getName === backingDataName);
                     if (referencedBackingData.length > 0) {
                         let relation = new RelationToBackingData(embeddedCell.id.toString(), this.#parseMetaDataFromElement(embeddedCell as dia.Element));
-                    
+
                         for (let property of relation.getProperties()) {
                             property.value = embeddedCell.prop("relationship/properties/" + property.getKey)
                         }

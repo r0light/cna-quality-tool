@@ -153,11 +153,16 @@ function resetAllHighlighting() {
 function loadFromJson(jsonString: string, fileName: string): Promise<void> {
     resetAllHighlighting();
 
-    let createdCells = systemEntityManager.loadFromJson(jsonString, fileName);
+    let loadResult = systemEntityManager.loadFromJson(jsonString, fileName);
+
+    if (loadResult.error) {
+        showError("Import from JSON failed", loadResult.error);
+        return Promise.resolve();
+    }
 
     setCurrentSystemName(systemEntityManager.getSystemEntity().getSystemName);
 
-    return ensureCorrectRendering(createdCells, mainPaper.value);
+    return ensureCorrectRendering(loadResult.createdCells, mainPaper.value);
 }
 
 function saveToJson() {
@@ -175,13 +180,44 @@ function saveToJson() {
 function loadFromTosca(yamlString: string, fileName: string): Promise<void> {
     resetAllHighlighting();
 
-    let createdCells = systemEntityManager.loadFromCustomTosca(yamlString, fileName);
+    let loadResult = systemEntityManager.loadFromCustomTosca(yamlString, fileName);
+
+    if (loadResult.error) {
+        showError("Import from TOSCA failed", loadResult.error);
+        return Promise.resolve();
+    }
 
     setCurrentSystemName(systemEntityManager.getSystemEntity().getSystemName);
 
-    return ensureCorrectRendering(createdCells, mainPaper.value);
+    return ensureCorrectRendering(loadResult.createdCells, mainPaper.value);
 
 }
+
+function showError(errorTitle, errorMessage) {
+    confirmationModalManager.value = {
+        show: true,
+        dialogMetaData: {
+            dialogSize: DialogSize.DEFAULT,
+            header: {
+                iconClass: "fa-solid fa-triangle-exclamation",
+                svgRepresentation: "",
+                text: errorTitle
+            },
+            footer: {
+                showCancelButton: false,
+                cancelButtonText: "Cancel",
+                saveButtonIconClass: "",
+                saveButtonText: "OK"
+            },
+        },
+        confirmationPrompt: errorMessage,
+        onCancel: () => confirmationModalManager.value.show = false,
+        onConfirm: () => {
+            confirmationModalManager.value.show = false;
+        }
+    }
+}
+
 
 /*
 function waitForCellToBeVisible(cell: dia.CellView, resolve: () => void) {
