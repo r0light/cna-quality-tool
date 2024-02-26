@@ -14,6 +14,7 @@ export type DialogMetaData = {
         text: string
     },
     footer: {
+        showCancelButton: boolean,
         cancelButtonText: string,
         saveButtonIconClass: string,
         saveButtonText: string

@@ -3,8 +3,9 @@
         <Toolbar :system-name="currentSystemName" :key="currentSystemName" :paper="(mainPaper as dia.Paper)"
             :graph="(currentSystemGraph as dia.Graph)" :selectedRequestTrace="currentRequestTraceViewSelection"
             @update:systemName="setCurrentSystemName" @click:exit-request-trace-view="resetRequestTraceSelection"
-            @click:print-active-paper="onPrintRequested" @click:exportSvg="onSvgExportRequested" @load:fromJson="loadFromJson" @save:toJson="saveToJson"
-            @load:fromTosca="loadFromTosca" @save:toTosca="saveToTosca"></Toolbar>
+            @click:print-active-paper="onPrintRequested" @click:exportSvg="onSvgExportRequested"
+            @load:fromJson="loadFromJson" @save:toJson="saveToJson" @load:fromTosca="loadFromTosca"
+            @save:toTosca="saveToTosca"></Toolbar>
         <div class="app-body">
             <div :id="`entity-sidebar-${pageId}`" class="entityShapes-sidebar-container d-print-none">
                 <EntitySidebar :paper="mainPaper" :pageId="`model${pageId}`" :wrapperElementId="`entity-sidebar-${pageId}`">
@@ -23,6 +24,7 @@
                 :selectedDataAggregate="currentDataAggregateHighlight" :selectedBackingData="currentBackingDataHightlight">
             </DetailsSidebar>
         </div>
+        <ModalConfirmationDialog v-bind="confirmationModalManager"></ModalConfirmationDialog>
     </div>
 </template>
 
@@ -40,6 +42,8 @@ import { ImportData, ModelingData } from '@/App.vue';
 import EntityTypes from './config/entityTypes';
 import { entityShapes } from './config/entityShapes';
 import { ensureCorrectRendering } from './renderingUtilities';
+import ModalConfirmationDialog, { ConfirmationModalProps, getDefaultConfirmationDialogData } from './views/components/ModalConfirmationDialog.vue';
+import { DialogSize } from './config/actionDialogConfig';
 
 const props = defineProps<{
     systemName: string,
@@ -92,23 +96,8 @@ const printing = ref(false);
 const currentDataAggregateHighlight = ref<string>("none");
 const currentBackingDataHightlight = ref<string>("none");
 
-/*
-function startWaitingForPaperToBeVisible(): Promise<void> {
-    return new Promise((resolve, reject) => {
-        waitForPaperToBeVisible(resolve);
-    })
-}
+const confirmationModalManager = ref<ConfirmationModalProps>(getDefaultConfirmationDialogData());
 
-function waitForPaperToBeVisible(resolve: () => void) {
-
-    console.log(`paper of ${props.systemName} is visible? ${mainPaper.value.$el.is(':visible')}`);
-    if (mainPaper.value.$el.is(':visible')) {
-        resolve();
-    } else {
-        setTimeout(waitForPaperToBeVisible.bind(this, resolve), 100);
-    }
-}
-*/
 
 onMounted(() => {
 
@@ -205,6 +194,7 @@ function waitForCellToBeVisible(cell: dia.CellView, resolve: () => void) {
 */
 
 function saveToTosca() {
+
     let asYaml = systemEntityManager.convertToCustomTosca();
 
     // download created yaml taken from https://stackoverflow.com/a/22347908
@@ -212,6 +202,32 @@ function saveToTosca() {
     downloadElement.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(asYaml));
     downloadElement.setAttribute('download', `${currentSystemName.value}.yaml`);
     downloadElement.click();
+}
+
+function warnBeforeExport(exportConfirmed: Function) {
+    confirmationModalManager.value = {
+        show: true,
+        dialogMetaData: {
+            dialogSize: DialogSize.DEFAULT,
+            header: {
+                iconClass: "fa-solid fa-triangle-exclamation",
+                svgRepresentation: "",
+                text: "Problems with TOSCA Export"
+            },
+            footer: {
+                showCancelButton: true,
+                cancelButtonText: "Cancel",
+                saveButtonIconClass: "fa-solid fa-check",
+                saveButtonText: "Ok, understood"
+            },
+        },
+        confirmationPrompt: "There might be problems",
+        onCancel: () => confirmationModalManager.value.show = false,
+        onConfirm: () => {
+            confirmationModalManager.value.show = false;
+            exportConfirmed();
+        }
+    }
 }
 
 function onSelectRequestTrace(element: dia.Element) {

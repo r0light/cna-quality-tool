@@ -20,6 +20,7 @@ export function getDefaultConfirmationDialogData(): ConfirmationModalProps {
                 text: ""
             },
             footer: {
+                showCancelButton: true,
                 cancelButtonText: "Cancel",
                 saveButtonIconClass: "",
                 saveButtonText: "Save"

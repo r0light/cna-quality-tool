@@ -181,7 +181,7 @@
 import $, { data } from 'jquery';
 import { ref, computed, onMounted, Ref, ComputedRef, nextTick } from "vue";
 import { dia, util, highlighters, routers } from "jointjs";
-import { DialogSize } from "../../config/actionDialogConfig";
+import { DialogMetaData, DialogSize } from "../../config/actionDialogConfig";
 import EntityTypes from "../../config/entityTypes";
 import ToolbarConfig from "../../config/toolbarConfiguration";
 import ButtonGroup from './ButtonGroup.vue';
@@ -235,7 +235,7 @@ const isFullScreen = ref<boolean>(false);
 const confirmationModalManager = ref<ConfirmationModalProps>(getDefaultConfirmationDialogData());
 
 const showAppSettings = ref<boolean>(false);
-const settingsModalMetaData = {
+const settingsModalMetaData: DialogMetaData = {
     dialogSize: DialogSize.DEFAULT,
     header: {
         iconClass: "fa-solid fa-gear",
@@ -243,6 +243,7 @@ const settingsModalMetaData = {
         text: "Application Settings"
     },
     footer: {
+        showCancelButton: true,
         cancelButtonText: "Cancel",
         saveButtonIconClass: "fa-regular fa-floppy-disk",
         saveButtonText: "Apply changes"
@@ -515,6 +516,7 @@ function clearActivePaper() {
                 text: "Warning"
             },
             footer: {
+                showCancelButton: true,
                 cancelButtonText: "No, Cancel",
                 saveButtonIconClass: "fa-solid fa-trash-can",
                 saveButtonText: "Yes, clear paper"
@@ -575,6 +577,7 @@ function askForConversionToTosca() {
                 text: "Warning"
             },
             footer: {
+                showCancelButton: true,
                 cancelButtonText: "No, Cancel",
                 saveButtonIconClass: "fa-solid fa-download",
                 saveButtonText: "Yes, start TOSCA transformation."

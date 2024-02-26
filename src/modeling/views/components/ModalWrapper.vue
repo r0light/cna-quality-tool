@@ -23,7 +23,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" tabindex="0"
+                        <button v-show="dialogMetaData.footer.showCancelButton" type="button" class="btn btn-secondary" tabindex="0"
                             @click="requestClose">
                             {{ dialogMetaData.footer.cancelButtonText }}
                         </button>

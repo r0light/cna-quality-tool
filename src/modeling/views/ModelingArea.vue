@@ -338,6 +338,7 @@ function provideConnectionWarningDialog() {
                 text: "Deployment Mapping Connection"
             },
             footer: {
+                showCancelButton: true,
                 cancelButtonText: "Cancel",
                 saveButtonIconClass: "fa-solid fa-trash-can",
                 saveButtonText: "Ok, understood"
