@@ -43,9 +43,9 @@
       <div class="init-overlay-content">
         <button class="btn d-flex ml-auto" @click="overlayState = 'none'"><i
             class="fa fa-fw fa-x text-white"></i></button>
-        <h2 class="user-select-none text-center">Start Modeling Software Architectures!</h2>
+        <h2 class="text-center">Start Modeling Software Architectures!</h2>
         <div id="init-firstInformation" v-show="overlayState === 'initial'">
-          <p class="user-select-none">The modeling feature allows you to model cloud-native application (CNA)
+          <p>The modeling feature allows you to model cloud-native application (CNA)
             architectures using different entities. It is based on the <a href="https://r0light.github.io/cna-quality-model/" target="_blank">Cloud-native Quality Model </a>. You can either start with a new architectural model or import a previously created and exported model.</p>
           <div class="d-flex flex-row justify-content-around">
             <button type="button" class="btn btn-outline-dark btn-light" @click="overlayState = 'startNew'"> <i
@@ -56,13 +56,13 @@
 
         </div>
         <div id="startModelingForm" v-show="overlayState === 'startNew'">
-          <p class="user-select-none">Please type the application name of the System entity you want to model
+          <p>Please type the application name of the System entity you want to model
             in the following form. Afterwards, you can start modeling your application's architecture.</p>
           <form class="needs-validation" novalidate>
             <div class="form-row">
               <div class="input-group has-validation">
                 <div class="input-group-prepend">
-                  <span class="user-select-none input-group-text">Application Name</span>
+                  <span class="input-group-text">Application Name</span>
                 </div>
                 <input name="systemName" type="text" class="form-control" id="applicationNameInputField"
                   placeholder="Application name of your System" v-model="newSystemName" required>

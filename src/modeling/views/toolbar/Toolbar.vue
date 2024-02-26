@@ -392,7 +392,7 @@ function onToolbarButtonClick(buttonId: string, event) {
             //convertToJson();
             break;
         case "convertModeledSystemEntityToTosca-dropdownItemButton":
-            askForConversionToTosca();
+            emit("save:toTosca");
             break;
         case "loadModeledSystemEntityFromJson-dropdownItemButton":
             loadFromJson();

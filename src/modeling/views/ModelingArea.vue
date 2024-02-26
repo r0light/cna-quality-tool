@@ -295,7 +295,7 @@ function configureLink(linkView, evt, elementViewConnected, magnet, arrowhead) {
         return;
     }
 
-    checkIfStorageBackingServiceConnected(linkView, elementViewConnected);
+    //checkIfStorageBackingServiceConnected(linkView, elementViewConnected);
 }
 
 function checkIfStorageBackingServiceConnected(linkView, elementViewConnected) {
