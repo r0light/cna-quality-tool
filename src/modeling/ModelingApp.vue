@@ -350,6 +350,11 @@ function onSvgExportRequested() {
     let svgElement = paperDiv.find("svg").clone()[0];
     svgElement.setAttribute("xmlns", "http://www.w3.org/2000/svg");
 
+    let layersElement = paperDiv.find(".joint-layers")[0];
+    let boundingBox = layersElement.getBoundingClientRect();
+
+    svgElement.setAttribute("viewBox", `0 0 ${boundingBox.x + boundingBox.width} ${boundingBox.y + boundingBox.height}` );
+
     let asString = svgElement.outerHTML;
     asString = asString.replaceAll("&nbsp;", " ");
 
