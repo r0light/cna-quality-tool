@@ -510,7 +510,7 @@ function deleteModelingPage(id: number) {
 }
 
 .mainElement {
-  overflow: scroll;
+  overflow: auto;
 }
 
 .hide {

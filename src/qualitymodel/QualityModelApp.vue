@@ -395,13 +395,13 @@ function unselectElement() {
 .qualityModelView {
     display: flex;
     flex-direction: row;
-    overflow: scroll;
+    overflow: auto;
     justify-content: center;
 }
 
 .paperContainer {
     display: flex;
-    overflow: scroll;
+    overflow: auto;
     border-left: 4px solid var(--menu-background-colour);
     border-bottom: 4px solid var(--menu-background-colour);
 }
@@ -434,7 +434,7 @@ function unselectElement() {
 }
 
 .detailsBody {
-    overflow: scroll;
+    overflow: auto;
 }
 
 .factorDetails {
