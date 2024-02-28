@@ -17,7 +17,7 @@ import { BACKING_SERVICE_TOSCA_KEY } from '../entities/backingService';
 import { STORAGE_BACKING_SERVICE_TOSCA_KEY } from '../entities/storageBackingService';
 import { COMPONENT_TOSCA_KEY } from '../entities/component';
 import { EXTERNAL_ENDPOINT_TOSCA_KEY } from '../entities/externalEndpoint';
-import { CnaQualityModelEntitiesEndpoint, CnaQualityModelEntitiesEndpointExternal } from '@/totypa/parsedProfiles/cna_modeling_tosca_profile_ts_types';
+import { data } from 'jquery';
 
 const TOSCA_DEFINITIONS_VERSION = "tosca_simple_yaml_1_3"
 const MATCH_WHITESPACES = new RegExp(/\s/g);
@@ -110,6 +110,19 @@ class EntitiesToToscaConverter {
                     const endpointNodeKey = this.#uniqueKeyManager.ensureUniqueness(this.#transformToYamlKey(endpoint.getName))
                     let endpointNode = this.#createEndpointTemplate(endpoint);
 
+                    for (const usedDataAggregate of endpoint.getDataAggregateEntities) {
+
+                        let dataAggregateKey = this.#keyIdMap.getKey(usedDataAggregate.data.getId);
+
+                        if (!endpointNode["requirements"]) {
+                            endpointNode["requirements"] = [];
+                        }
+    
+                        endpointNode.requirements.push({
+                            "uses_data": dataAggregateKey
+                        });
+                    }
+
                     this.#keyIdMap.add(endpointNodeKey, endpoint.getId);
                     topologyTemplate.node_templates[endpointNodeKey] = endpointNode;
                     node.requirements.push({
@@ -131,6 +144,19 @@ class EntitiesToToscaConverter {
                 for (const externalEndpoint of component.getExternalEndpointEntities) {
                     const endpointNodeKey = this.#uniqueKeyManager.ensureUniqueness(this.#transformToYamlKey(externalEndpoint.getName))
                     let endpointNode = this.#createExternalEndpointTemplate(externalEndpoint);
+
+                    for (const usedDataAggregate of externalEndpoint.getDataAggregateEntities) {
+
+                        let dataAggregateKey = this.#keyIdMap.getKey(usedDataAggregate.data.getId);
+
+                        if (!endpointNode["requirements"]) {
+                            endpointNode["requirements"] = [];
+                        }
+    
+                        endpointNode.requirements.push({
+                            "uses_data": dataAggregateKey
+                        });
+                    }
 
                     this.#keyIdMap.add(endpointNodeKey, externalEndpoint.getId);
                     topologyTemplate.node_templates[endpointNodeKey] = endpointNode;
@@ -377,8 +403,8 @@ class EntitiesToToscaConverter {
     }
 
 
-    #createEndpointTemplate(endpoint: Entities.Endpoint): CnaQualityModelEntitiesEndpoint {
-        let template: CnaQualityModelEntitiesEndpoint = {
+    #createEndpointTemplate(endpoint: Entities.Endpoint): TOSCA_Node_Template {
+        let template: TOSCA_Node_Template = {
             type: ENDPOINT_TOSCA_KEY,
             metadata: flatMetaData(endpoint.getMetaData),
             capabilities: {}
@@ -390,8 +416,8 @@ class EntitiesToToscaConverter {
         return template;
     }
 
-    #createExternalEndpointTemplate(endpoint: Entities.ExternalEndpoint): CnaQualityModelEntitiesEndpointExternal {
-        let template: CnaQualityModelEntitiesEndpointExternal = {
+    #createExternalEndpointTemplate(endpoint: Entities.ExternalEndpoint): TOSCA_Node_Template {
+        let template: TOSCA_Node_Template = {
             type: EXTERNAL_ENDPOINT_TOSCA_KEY,
             metadata: flatMetaData(endpoint.getMetaData),
             capabilities: {}
@@ -400,7 +426,6 @@ class EntitiesToToscaConverter {
         template.capabilities.external_endpoint = {
             properties: this.#parsePropertiesForYaml(endpoint.getProperties())
         }
-
 
         return template;
     }

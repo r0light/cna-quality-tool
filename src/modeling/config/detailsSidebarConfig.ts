@@ -664,6 +664,103 @@ const EntityDetailsConfig: {
                     min: ""
                 }
             },
+            {
+                providedFeature: "usesData-wrapper",
+                contentType: PropertyContentType.TABLE_DIALOG,
+                label: "Data Aggregates used:",
+                inputProperties: {
+                    disabled: false,
+                    required: true,
+                    checked: false,
+                    selected: false,
+                    readonly: false,
+                },
+                helpText: "The data aggregates used when this endpoint is invoked",
+                show: true,
+                attributes: {
+                    svgRepresentation: '<svg width="35" height="20">' + dataAggregateSvgRepresentation() + '</svg>',
+                    buttonText: "Add Data Aggregates",
+                    buttonIconClass: "bi bi-window-plus"
+                },
+                provideEnterButton: false,
+                jointJsConfig: {
+                    propertyType: "free",
+                    modelPath: "",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
+                buttonActionContent: {
+                    // contentType: PropertyContentType // TODO modalDialog,
+                    dialogMetaData: {
+                        dialogSize: DialogSize.LARGE,
+                        header: {
+                            // iconClass: "bi bi-window-plus", // TODO decide if this or SVG
+                            iconClass: "",
+                            svgRepresentation: '<svg width="35" height="20"><polygon points="0,0 28,0 35,7 28,14 0,14 7,7" transform="translate(0,1)" stroke-width="2" stroke="black" fill="white"></polygon></svg>',
+                            text: "Endpoint: ",
+                        },
+                        footer: {
+                            showCancelButton: true,
+                            cancelButtonText: "Cancel",
+                            saveButtonIconClass: "fa-regular fa-floppy-disk",
+                            saveButtonText: "Save"
+                        },
+                    },
+                    dialogContent: {
+                        contentType: UIContentType.GROUP_FORMS,
+                        groups: [
+                            {
+                                contentGroupMetaData: {
+                                    id: "used-data-table",
+                                    headline: "Data Aggregates used" + '  ( <svg width="35" height="20">' + dataAggregateSvgRepresentation() + '</svg>)',
+                                    text: `The following table shows all Data Aggregate entities associated with this component. By selecting the respective 
+                                        checkbox the Data Aggregate entity will be added to this Endpoint. The selection at the beginning 
+                                        shows the currently saved state for this entity. Your changes won't be adopted until you 
+                                        clicked "Save". In case you cancel and change your entity selection, all your changes will be 
+                                        lost. While you keep the selection of this Endpoint entity, your changes will be remembered.`,
+                                },
+                                contentItems: [
+                                    {
+                                        providedFeature: "uses_data",
+                                        contentType: PropertyContentType.TABLE,
+                                        label: "",
+                                        helpText: "",
+                                        inputProperties: {
+                                            disabled: false,
+                                            readonly: false,
+                                            required: false,
+                                            checked: false,
+                                            selected: false,
+                                        },
+                                        provideEnterButton: false,
+                                        show: true,
+                                        jointJsConfig: {
+                                            propertyType: "customProperty",
+                                            modelPath: "entity/properties/uses_data",
+                                            defaultPropPath: "",
+                                            minPath: "",
+                                            min: ""
+                                        },
+                                        tableColumnHeaders: [
+                                            {
+                                                text: "Data Aggregate"
+                                            },
+                                            {
+                                                text: "Usage relation"
+                                            },
+                                            {
+                                                text: "Include"
+                                            }
+                                        ],
+                                    }
+
+                                ]
+                            }
+                        ]
+                    }
+                }
+            }
         ])
     },
     ExternalEndpoint: {
@@ -699,6 +796,103 @@ const EntityDetailsConfig: {
                     min: ""
                 }
             },
+            {
+                providedFeature: "usesData-wrapper",
+                contentType: PropertyContentType.TABLE_DIALOG,
+                label: "Data Aggregates used:",
+                inputProperties: {
+                    disabled: false,
+                    required: true,
+                    checked: false,
+                    selected: false,
+                    readonly: false,
+                },
+                helpText: "The data aggregates used when this endpoint is invoked",
+                show: true,
+                attributes: {
+                    svgRepresentation: '<svg width="35" height="20">' + dataAggregateSvgRepresentation() + '</svg>',
+                    buttonText: "Add Data Aggregates",
+                    buttonIconClass: "bi bi-window-plus"
+                },
+                provideEnterButton: false,
+                jointJsConfig: {
+                    propertyType: "free",
+                    modelPath: "",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
+                buttonActionContent: {
+                    // contentType: PropertyContentType // TODO modalDialog,
+                    dialogMetaData: {
+                        dialogSize: DialogSize.LARGE,
+                        header: {
+                            // iconClass: "bi bi-window-plus", // TODO decide if this or SVG
+                            iconClass: "",
+                            svgRepresentation: '<svg width="35" height="20"><polygon points="0,0 28,0 35,7 28,14 0,14 7,7" transform="translate(0,1)" stroke-width="2" stroke="black" fill="white"></polygon></svg>',
+                            text: "Endpoint: ",
+                        },
+                        footer: {
+                            showCancelButton: true,
+                            cancelButtonText: "Cancel",
+                            saveButtonIconClass: "fa-regular fa-floppy-disk",
+                            saveButtonText: "Save"
+                        },
+                    },
+                    dialogContent: {
+                        contentType: UIContentType.GROUP_FORMS,
+                        groups: [
+                            {
+                                contentGroupMetaData: {
+                                    id: "used-data-table",
+                                    headline: "Data Aggregates used" + '  ( <svg width="35" height="20">' + dataAggregateSvgRepresentation() + '</svg>)',
+                                    text: `The following table shows all Data Aggregate entities associated with this component. By selecting the respective 
+                                        checkbox the Data Aggregate entity will be added to this Endpoint. The selection at the beginning 
+                                        shows the currently saved state for this entity. Your changes won't be adopted until you 
+                                        clicked "Save". In case you cancel and change your entity selection, all your changes will be 
+                                        lost. While you keep the selection of this Endpoint entity, your changes will be remembered.`,
+                                },
+                                contentItems: [
+                                    {
+                                        providedFeature: "uses_data",
+                                        contentType: PropertyContentType.TABLE,
+                                        label: "",
+                                        helpText: "",
+                                        inputProperties: {
+                                            disabled: false,
+                                            readonly: false,
+                                            required: false,
+                                            checked: false,
+                                            selected: false,
+                                        },
+                                        provideEnterButton: false,
+                                        show: true,
+                                        jointJsConfig: {
+                                            propertyType: "customProperty",
+                                            modelPath: "entity/properties/uses_data",
+                                            defaultPropPath: "",
+                                            minPath: "",
+                                            min: ""
+                                        },
+                                        tableColumnHeaders: [
+                                            {
+                                                text: "Data Aggregate"
+                                            },
+                                            {
+                                                text: "Usage relation"
+                                            },
+                                            {
+                                                text: "Include"
+                                            }
+                                        ],
+                                    }
+
+                                ]
+                            }
+                        ]
+                    }
+                }
+            }
         ])
     },
     Link: {

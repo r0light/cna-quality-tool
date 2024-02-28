@@ -152,6 +152,13 @@ node_types:
       endpoint:
         type: tosca.capabilities.Endpoint
         occurrences: [1, 1]
+    requirements:
+      # Allow the definition of Data Aggregate usage
+      - uses_data:
+          capability: tosca.capabilities.Attachment
+          node: cna.qualityModel.entities.DataAggregate
+          relationship: cna.qualityModel.relationships.AttachesTo.DataAggregate
+          occurrences: [0, UNBOUNDED]
 
   cna.qualityModel.entities.Endpoint.External:
     derived_from: tosca.nodes.Root
@@ -161,6 +168,13 @@ node_types:
       external_endpoint:
         type: tosca.capabilities.Endpoint.Public
         occurrences: [1, 1]
+    requirements:
+      # Allow the definition of Data Aggregate usage
+      - uses_data:
+          capability: tosca.capabilities.Attachment
+          node: cna.qualityModel.entities.DataAggregate
+          relationship: cna.qualityModel.relationships.AttachesTo.DataAggregate
+          occurrences: [0, UNBOUNDED]
 
   cna.qualityModel.entities.Compute.Infrastructure:
     derived_from: tosca.nodes.Compute

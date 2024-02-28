@@ -28,6 +28,10 @@ function getDataAggregateRelationshipProperties(): EntityProperty[] {
                             value: "usage"
                         },
                         {
+                            text: "Cached usage",
+                            value: "cachedUsage"
+                        },
+                        {
                             text: "Persistence",
                             value: "persistence"
                         }

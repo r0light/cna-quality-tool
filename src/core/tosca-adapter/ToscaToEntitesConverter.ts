@@ -154,6 +154,33 @@ class ToscaToEntitesConverter {
                         endpoint.setPropertyValue(key, value);
                     }
                 }
+                if (node.requirements) {
+                    for (const requirementAssignment of node.requirements) {
+                        for (const [requirementKey, requirement] of Object.entries(requirementAssignment)) {
+                            if (requirementKey === "uses_data") { // TODO no hard coded Key
+
+                                if (typeof requirement === "string") {
+                                    endpoint.addDataAggregateEntity(this.#importedSystem.getDataAggregateEntities.get(this.#keyIdMap.getId(requirement)), new RelationToDataAggregate(`${endpoint.getId}_uses_data_${this.#keyIdMap.getId(requirement)}`, getEmptyMetaData()));
+                                } else if (typeof requirement === "object") {
+                                    // TODO requirement is of type TOSCA_Requirement_Assignment
+                                    if (requirement.node && requirement.relationship && typeof requirement.relationship === "string") {
+                                        let relationship = this.#topologyTemplate.relationship_templates[requirement.relationship];
+    
+                                        let metaData = !!relationship.metadata ? readToscaMetaData(relationship.metadata) : getEmptyMetaData(); 
+                                        let relation = new RelationToDataAggregate(requirement.relationship, metaData);
+    
+                                        for (const [key, value] of Object.entries(relationship.properties)) {
+                                            relation.setPropertyValue(key, value);
+                                        }
+    
+                                        endpoint.addDataAggregateEntity(this.#importedSystem.getDataAggregateEntities.get(this.#keyIdMap.getId(requirement.node)), relation);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
                 endpoints.set(uuid, endpoint);
                 this.#keyIdMap.add(key, uuid);
             } else if (node.type === EXTERNAL_ENDPOINT_TOSCA_KEY) {
@@ -169,6 +196,33 @@ class ToscaToEntitesConverter {
                         externalEndpoint.setPropertyValue(key, value);
                     }
                 }
+                if (node.requirements) {
+                    for (const requirementAssignment of node.requirements) {
+                        for (const [requirementKey, requirement] of Object.entries(requirementAssignment)) {
+                            if (requirementKey === "uses_data") { // TODO no hard coded Key
+
+                                if (typeof requirement === "string") {
+                                    externalEndpoint.addDataAggregateEntity(this.#importedSystem.getDataAggregateEntities.get(this.#keyIdMap.getId(requirement)), new RelationToDataAggregate(`${externalEndpoint.getId}_uses_data_${this.#keyIdMap.getId(requirement)}`, getEmptyMetaData()));
+                                } else if (typeof requirement === "object") {
+                                    // TODO requirement is of type TOSCA_Requirement_Assignment
+                                    if (requirement.node && requirement.relationship && typeof requirement.relationship === "string") {
+                                        let relationship = this.#topologyTemplate.relationship_templates[requirement.relationship];
+    
+                                        let metaData = !!relationship.metadata ? readToscaMetaData(relationship.metadata) : getEmptyMetaData(); 
+                                        let relation = new RelationToDataAggregate(requirement.relationship, metaData);
+    
+                                        for (const [key, value] of Object.entries(relationship.properties)) {
+                                            relation.setPropertyValue(key, value);
+                                        }
+    
+                                        externalEndpoint.addDataAggregateEntity(this.#importedSystem.getDataAggregateEntities.get(this.#keyIdMap.getId(requirement.node)), relation);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
                 endpoints.set(uuid, externalEndpoint);
                 this.#keyIdMap.add(key, uuid);
             }

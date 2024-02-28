@@ -136,7 +136,7 @@ capabilities?: {
     endpoint?: ToscaCapabilitiesEndpoint,
     feature?: ToscaCapabilitiesNode,
 },
-requirements?: {dependency: TOSCA_Requirement_Assignment | string}[],
+requirements?: {uses_data: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[],
 interfaces?: {
     Standard?: TOSCA_Interface,
     [interfaceKey: string]: TOSCA_Interface
@@ -157,7 +157,7 @@ capabilities?: {
     external_endpoint?: ToscaCapabilitiesEndpointPublic,
     feature?: ToscaCapabilitiesNode,
 },
-requirements?: {dependency: TOSCA_Requirement_Assignment | string}[],
+requirements?: {uses_data: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[],
 interfaces?: {
     Standard?: TOSCA_Interface,
     [interfaceKey: string]: TOSCA_Interface

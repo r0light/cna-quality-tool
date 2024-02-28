@@ -127,7 +127,8 @@ const entityHighlighting = ref((() => {
                         return props.selectedBackingData;
                     default:
                         return "none";
-                }})(entityType.type)
+                }
+            })(entityType.type)
         })
     }
     return highlightOptions;
@@ -526,6 +527,45 @@ onUpdated(() => {
             })
 
             break;
+        case EntityTypes.ENDPOINT:
+        case EntityTypes.EXTERNAL_ENDPOINT:
+            // prepare used data aggregate selection
+            let usesDataWrapperConfig: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "usesData-wrapper");
+            let usesDataConfig = findInDialogByFeature(usesDataWrapperConfig.buttonActionContent, "uses_data");
+            usesDataConfig.includeFormCheck = false;
+
+            const associatedDataAggregates: dia.Cell[] = [];
+
+            let parentComponent = selectedEntity.model.getParentCell();
+            if (parentComponent) {
+                associatedDataAggregates.push(...parentComponent.getEmbeddedCells().filter(embedded => embedded.prop("entity/type") === EntityTypes.DATA_AGGREGATE));
+            }
+
+            const selectedDataAggregates: Set<dia.Cell.ID> = new Set(selectedEntity.model.prop(usesDataConfig.jointJsConfig.modelPath));
+
+            // clear table rows
+            usesDataConfig.tableRows.length = 0;
+            associatedDataAggregates.sort((a, b) => {
+                return a.attr("label/textWrap/text").localeCompare(b.attr("label/textWrap/text"));
+            }).forEach((dataAggregate) => {
+
+                usesDataConfig.tableRows.push({
+                    columns: {
+                        dataAggregateName: dataAggregate.attr("label/textWrap/text"),
+                        usageRelation: dataAggregate.prop("relationship/properties/usage_relation"),
+                        included: {
+                            contentType: PropertyContentType.CHECKBOX_WITHOUT_LABEL,
+                            disabled: false,
+                            checked: selectedDataAggregates.has(dataAggregate.id),
+                            id: dataAggregate.id
+                        }
+                    },
+                    attributes: {
+                        representationClass: "validOption",
+                        disabled: false
+                    }
+                });
+            })
     }
 
     // remove previously registered event callbacks
@@ -736,6 +776,15 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                         }
 
                         selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, toObject(propertyOption.value as any[]), { rewrite: true });
+                    }
+                    break;
+                case EntityTypes.ENDPOINT:
+                case EntityTypes.EXTERNAL_ENDPOINT:
+                    if (propertyOption.providedFeature === "uses_data") {
+                        let selectedDataAggregateIDs = propertyOption.tableRows.filter(row => row.columns["included"]["checked"])
+                            .map(row => row.columns["included"]["id"]);
+                        selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, selectedDataAggregateIDs);
+                        continue;
                     }
                     break;
                 case EntityTypes.REQUEST_TRACE:

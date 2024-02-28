@@ -4,7 +4,7 @@ import EntityTypes from './config/entityTypes';
 import * as Entities from '../core/entities';
 import ErrorMessage, { ErrorType } from './errorMessage'
 import { EntityDetailsConfig, TableDialogPropertyConfig } from './config/detailsSidebarConfig';
-import { MetaData } from "../core/common/entityDataTypes";
+import { MetaData, getEmptyMetaData } from "../core/common/entityDataTypes";
 import { convertToServiceTemplate, importFromServiceTemplate } from "../core/tosca-adapter/ToscaAdapter";
 import {
     Component as ComponentElement, Service as ServiceElement, BackingService as BackingServiceElement, StorageBackingService as StorageBackingServiceElement,
@@ -77,6 +77,7 @@ class SystemEntityManager {
         }
     }
 
+    
     loadFromCustomTosca(stringifiedTOSCA: string, fileName: string): { createdCells: dia.Cell[], error: string } {
         let system = new Entities.System("imported");
         try {
@@ -88,7 +89,7 @@ class SystemEntityManager {
         this.convertToGraph();
         this.#currentSystemGraph.trigger("reloaded");
 
-        return { createdCells: this.#currentSystemGraph.getCells(), error: null};
+        return { createdCells: this.#currentSystemGraph.getCells(), error: null };
     }
 
     convertToJson(): string {
@@ -291,12 +292,18 @@ class SystemEntityManager {
             property.value = graphElement.prop("entity/properties/" + property.getKey)
         }
 
-        let embeddedCells = graphElement.getEmbeddedCells();
+        let embeddedCells = graphElement.getEmbeddedCells().sort((a, b) => {
+            let prioA = this.#getEntityPrio(a.prop("entity/type"));
+            let prioB = this.#getEntityPrio(b.prop("entity/type"));
+
+            return prioA - prioB;
+        });
+
         for (const embeddedCell of embeddedCells) {
             switch (embeddedCell.prop("entity/type")) {
                 case EntityTypes.ENDPOINT:
                 case EntityTypes.EXTERNAL_ENDPOINT:
-                    const endpoint = this.#createEndpointEntity(embeddedCell);
+                    const endpoint = this.#createEndpointEntity(embeddedCell, graphElement, componentModelEntity);
                     if (!endpoint) {
                         // ErrorMessages already created while creating entity 
                         break;
@@ -338,6 +345,19 @@ class SystemEntityManager {
         }
 
         return componentModelEntity;
+    }
+
+    #getEntityPrio(entityType: string) {
+        switch (entityType) {
+            case EntityTypes.DATA_AGGREGATE:
+            case EntityTypes.BACKING_DATA:
+                return 1;
+            case EntityTypes.ENDPOINT:
+            case EntityTypes.EXTERNAL_ENDPOINT:
+                return 2;
+            default:
+                return 3;
+        }
     }
 
     #createInfrastructureEntity(graphElement) {
@@ -508,7 +528,7 @@ class SystemEntityManager {
         }
     }
 
-    #createEndpointEntity(graphElement) {
+    #createEndpointEntity(graphElement, parentElement: dia.Element, parentEntity: Entities.Component | Entities.Service | Entities.BackingService | Entities.StorageBackingService) {
         let endpointEntity: Entities.Endpoint | Entities.ExternalEndpoint;
         switch (graphElement.prop("entity/type")) {
             case EntityTypes.EXTERNAL_ENDPOINT:
@@ -521,6 +541,24 @@ class SystemEntityManager {
         for (let property of endpointEntity.getProperties()) {
             property.value = graphElement.prop("entity/properties/" + property.getKey);
         }
+
+        if (graphElement.prop("entity/properties/uses_data")) {
+
+            let dataAggregateIds = graphElement.prop("entity/properties/uses_data");
+
+
+            for (const dataAggregateId of dataAggregateIds) {
+
+                let dataAggregateCell = this.getGraph().getCell(dataAggregateId);
+
+                let dataAggregateName: string = dataAggregateCell.attr("label/textWrap/text");
+
+                let referencedDataAggregate = parentEntity.getDataAggregateEntities.find(dataAggregateRelation => dataAggregateRelation.data.getName === dataAggregateName);
+
+                endpointEntity.addDataAggregateEntity(referencedDataAggregate.data, referencedDataAggregate.relation);
+            }
+        }
+
         return endpointEntity;
     }
 
@@ -1127,6 +1165,13 @@ class SystemEntityManager {
                 }
             }
         }
+
+        if (endpoint.getDataAggregateEntities.length > 0) {
+            newEndpoint.prop("entity/properties/uses_data", endpoint.getDataAggregateEntities.map(usedData =>{
+                return parent.getEmbeddedCells().find(cell => cell.prop("entity/assignedFamily") ===  usedData.data.getName).id;
+            }));
+        }
+
         return newEndpoint;
     }
 
@@ -1163,6 +1208,13 @@ class SystemEntityManager {
                 }
             }
         }
+
+        if (externalEndpoint.getDataAggregateEntities.length > 0) {
+            newExternalEndpoint.prop("entity/properties/uses_data", externalEndpoint.getDataAggregateEntities.map(usedData =>{
+                return parent.getEmbeddedCells().find(cell => cell.prop("entity/assignedFamily") ===  usedData.data.getName).id;
+            }));
+        }
+
         return newExternalEndpoint;
     }
 

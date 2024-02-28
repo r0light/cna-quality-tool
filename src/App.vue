@@ -100,7 +100,7 @@
 <script lang="ts" setup>
 import $ from 'jquery';
 import { ref, onMounted, computed, ComputedRef } from 'vue';
-import { RouteRecordRaw, Router, createRouter, createWebHashHistory, useRouter } from 'vue-router';
+import { useRouter } from 'vue-router';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import Home from './Home.vue';
 import Legal from './Legal.vue';

@@ -2,6 +2,8 @@ import { EntityProperty, TextEntityProperty, parseProperties } from "../common/e
 import { tosca_simple_profile_for_yaml_v1_3 } from '../../totypa/parsedProfiles/tosca_simple_profile_for_yaml_v1_3.js'
 import { MetaData } from "../common/entityDataTypes.js";
 import { cna_modeling_tosca_profile } from "../../totypa/parsedProfiles/cna_modeling_tosca_profile.js";
+import { DataAggregate } from "./dataAggregate.js";
+import { RelationToDataAggregate } from "./relationToDataAggregate.js";
 
 const ENDPOINT_TOSCA_KEY = "cna.qualityModel.entities.Endpoint";
 const ENDPOINT_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types[ENDPOINT_TOSCA_KEY];
@@ -66,6 +68,8 @@ class Endpoint {
 
     #metaData: MetaData;
 
+    #dataAggregateEntities = new Array<{ data: DataAggregate, relation: RelationToDataAggregate }>();
+
     #properties: EntityProperty[];
 
     // TODO ref Component here?
@@ -105,6 +109,17 @@ class Endpoint {
      */
     get getMetaData() {
         return this.#metaData;
+    }
+
+    /**
+     * Returns the {@link DataAggregate} entities this endpoint is relying on
+     */
+    get getDataAggregateEntities() {
+        return this.#dataAggregateEntities;
+    }
+
+    addDataAggregateEntity(dataEntityToAdd: DataAggregate, relation: RelationToDataAggregate) {
+        this.#dataAggregateEntities.push({ data: dataEntityToAdd, relation });
     }
 
     /**

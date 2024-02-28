@@ -40,7 +40,7 @@ relationship_types:
       usage_relation:
         type: string
         required: true
-        description: Describes how a component uses attached data, that means whether it just uses (reads) it for its functionality or if it also updates and persists (writes) it; possible values are usage and persistence
+        description: Describes how a component uses attached data, that means whether it just uses (reads) it for its functionality or if it also updates and persists (writes) it; possible values are usage, cached usage, and persistence
       sharding_level:
         type: integer
         required: true

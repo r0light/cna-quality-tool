@@ -66,7 +66,7 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
         "usage_relation": {
           "type": "string",
           "required": true,
-          "description": "Describes how a component uses attached data, that means whether it just uses (reads) it for its functionality or if it also updates and persists (writes) it; possible values are usage and persistence"
+          "description": "Describes how a component uses attached data, that means whether it just uses (reads) it for its functionality or if it also updates and persists (writes) it; possible values are usage, cached usage, and persistence"
         },
         "sharding_level": {
           "type": "integer",
@@ -336,7 +336,20 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
             1
           ]
         }
-      }
+      },
+      "requirements": [
+        {
+          "uses_data": {
+            "capability": "tosca.capabilities.Attachment",
+            "node": "cna.qualityModel.entities.DataAggregate",
+            "relationship": "cna.qualityModel.relationships.AttachesTo.DataAggregate",
+            "occurrences": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
+        }
+      ]
     },
     "cna.qualityModel.entities.Endpoint.External": {
       "derived_from": "tosca.nodes.Root",
@@ -349,7 +362,20 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
             1
           ]
         }
-      }
+      },
+      "requirements": [
+        {
+          "uses_data": {
+            "capability": "tosca.capabilities.Attachment",
+            "node": "cna.qualityModel.entities.DataAggregate",
+            "relationship": "cna.qualityModel.relationships.AttachesTo.DataAggregate",
+            "occurrences": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
+        }
+      ]
     },
     "cna.qualityModel.entities.Compute.Infrastructure": {
       "derived_from": "tosca.nodes.Compute",
