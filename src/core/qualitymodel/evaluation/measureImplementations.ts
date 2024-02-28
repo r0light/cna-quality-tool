@@ -35,6 +35,19 @@ const measureImplementations: { [measureKey: string]: Calculation } = {
     },
     "externallyAvailableEndpoints": (system) => {
         return [...system.getComponentEntities.entries()].map(entry => entry[1].getExternalEndpointEntities.length).reduce((e1, e2) => e1 + e2, 0);
+    },
+    "dataShardingLevel": (system) => {
+        let storageBackingServices = [...system.getComponentEntities.entries()]
+            .map(entry => entry[1])
+            .filter(entity => entity.constructor.name === StorageBackingService.name);
+        if (storageBackingServices.length === 0) {
+            return "n/a";
+        } else {
+            return average(storageBackingServices
+                .map(storageService => storageService.getProperties()
+                    .find(prop => prop.getKey === "shards").value)
+            );
+        }
     }
 }
 

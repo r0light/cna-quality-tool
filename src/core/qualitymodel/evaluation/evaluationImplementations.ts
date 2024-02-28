@@ -2,6 +2,7 @@ import { ProductFactorEvaluationFunction } from "./ProductFactorEvaluation";
 import { QualityAspectEvaluationFunction } from "./QualityAspectEvaluation";
 import { ProductFactor } from "../quamoco/ProductFactor";
 import { CalculatedMeasure, EvaluatedProductFactor, ImpactWeight } from "./EvaluatedSystemModel";
+import { data } from "jquery";
 
 const average: (list: number[]) => number = list => {
     return list.reduce((e1, e2) => e1 + e2, 0) / list.length
@@ -40,6 +41,22 @@ const productFactorEvaluationImplementation: {
             }
         } else {
             throw new Error(`storageReplicationLevel is of type ${typeof storageReplicationLevel}, but should be of type number`);
+        }
+    },
+    "shardedDataStoreReplication": (factor, incomingPaths, calculatedMeasures, evaluatedProductFactors) => {
+        let dataShardingLevel = calculatedMeasures.get("dataShardingLevel").value;
+        if (dataShardingLevel === "n/a") {
+            return "n/a";
+        } else if (typeof dataShardingLevel === "number") {
+            if (dataShardingLevel <= 1) {
+                return "none";
+            } else if (dataShardingLevel > 1 && dataShardingLevel < 10) {
+                return "low";
+            } else {
+                return "high";
+            }
+        } else {
+            throw new Error(`dataShardingLevel is of type ${typeof dataShardingLevel}, but should be of type number`);
         }
     },
     "aggregateImpacts": (factor, incomingPaths, calculatedMeasures, evaluatedProductFactors) => {

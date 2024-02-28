@@ -41,7 +41,8 @@
                                     <span class="font-italics">{{ measure.getName }}</span>
                                     <span> (</span>
                                     <span v-for="source of measure.getSources">
-                                        <a :href="source.getUrl"><span>{{ source.getKey }}, </span></a>
+                                        <a v-if="!!source.getUrl" :href="source.getUrl"><span>{{ source.getKey }}, </span></a>
+                                        <span v-else="!source.getUrl.length">{{ source.getKey }}</span>
                                     </span>
                                     <span> )</span>
                                 </li>

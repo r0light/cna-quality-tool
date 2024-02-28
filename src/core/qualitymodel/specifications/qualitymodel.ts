@@ -604,7 +604,7 @@ export const qualityModel: QualityModelSpec = {
             "categories": ["applicationAdministration", "dataManagement"],
             "relevantEntities": ["storageBackingService", "dataAggregate"],
             "sources": [{ "key": "Indrasiri2014", "section": "4 Data Sharding Pattern" }, { "key": "Goniwada2021", "section": "4 Data Partitioning Pattern" }],
-            "measures": []
+            "measures": ["dataShardingLevel"]
         },
         "enforcementOfAppropriateResourceBoundaries": {
             "name": "Enforcement of appropriate resource boundaries",
@@ -1432,17 +1432,17 @@ export const qualityModel: QualityModelSpec = {
         "serviceReplicationLevel": {
             "name": "Service Replication level",
             "calculation": "",
-            "sources": ["Guerron2020", "SOUZA-2016-ISCC"]
+            "sources": ["Guerron2020", "Souza2016"]
         },
         "storageReplicationLevel": {
             "name": "Storage Replication level",
             "calculation": "",
-            "sources": ["Guerron2020", "SOUZA-2016-ISCC"]
+            "sources": ["Guerron2020", "Souza2016"]
         },
         "servicePortability": {
             "name": "Service portability",
             "calculation": "",
-            "sources": ["Guerron2020", "SINGH-2015-COMPELECENG"]
+            "sources": ["Guerron2020", "Singh2015"]
         },
         "configurationExternalization": {
             "name": "Configuration externalization",
@@ -1462,12 +1462,12 @@ export const qualityModel: QualityModelSpec = {
         "componentDensity": {
             "name": "Component density",
             "calculation": "",
-            "sources": ["Guerron2020", "RIZVI-2017-JPROCS"]
+            "sources": ["Guerron2020", "Rizvi2017"]
         },
         "numberOfAvailabilityZonesUsed": {
             "name": "Number of Availability Zones used",
             "calculation": "",
-            "sources": ["Guerron2020", "BARANWAL-2014-IACC"]
+            "sources": ["Guerron2020", "Baranwal2014"]
         },
         "rollingUpdateOption": {
             "name": "Rolling Update Option",
@@ -1603,6 +1603,11 @@ export const qualityModel: QualityModelSpec = {
             "name": "Ratio of request traces containing a frontend component",
             "calculation": "",
             "sources": ["Zdun2023a"]
+        },
+        "dataShardingLevel": {
+            "name" : "Level of sharding across storage backing services",
+            "calculation": "",
+            "sources": ["new"]
         }
     },
     "productFactorEvaluations": [
@@ -1621,6 +1626,11 @@ export const qualityModel: QualityModelSpec = {
             "evaluation": "aggregateImpacts", // TODO more general evaluation, like aggregate?
             "reasoning": "TODO write a suitable reasoning"
         },
+        {
+            "targetFactor": "shardedDataStoreReplication",
+            "evaluation": "shardedDataStoreReplication",
+            "reasoning": ""
+        }
     ],
     "qualityAspectEvaluations": [
         {
