@@ -14,8 +14,8 @@ import {
 } from './config/entityShapes'
 import { DataAggregate } from "../core/entities";
 import { FormContentConfig } from "./config/actionDialogConfig";
-import { RelationToDataAggregate } from "@/core/entities/RelationToDataAggregate";
-import { RelationToBackingData } from "@/core/entities/RelationToBackingData";
+import { RelationToDataAggregate } from "@/core/entities/relationToDataAggregate";
+import { RelationToBackingData } from "@/core/entities/relationToBackingData";
 
 class SystemEntityManager {
 
@@ -853,7 +853,7 @@ class SystemEntityManager {
                 label: {
                     fontSize: infrastructure.getMetaData.fontSize,
                     textWrap: {
-                        text: infrastructure.getName
+                        text: infrastructure.getMetaData.label ? infrastructure.getMetaData.label : infrastructure.getName
                     }
                 }
             }
@@ -882,7 +882,7 @@ class SystemEntityManager {
                 label: {
                     fontSize: service.getMetaData.fontSize,
                     textWrap: {
-                        text: service.getName
+                        text: service.getMetaData.label ? service.getMetaData.label : service.getName
                     }
                 }
             }
@@ -910,7 +910,7 @@ class SystemEntityManager {
                 label: {
                     fontSize: backingService.getMetaData.fontSize,
                     textWrap: {
-                        text: backingService.getName
+                        text: backingService.getMetaData.label ? backingService.getMetaData.label : backingService.getName
                     }
                 }
             }
@@ -938,7 +938,7 @@ class SystemEntityManager {
                 label: {
                     fontSize: storageBackingService.getMetaData.fontSize,
                     textWrap: {
-                        text: storageBackingService.getName
+                        text: storageBackingService.getMetaData.label ? storageBackingService.getMetaData.label : storageBackingService.getName
                     }
                 }
             }
@@ -966,7 +966,7 @@ class SystemEntityManager {
                 label: {
                     fontSize: component.getMetaData.fontSize,
                     textWrap: {
-                        text: component.getName
+                        text: component.getMetaData.label ? component.getMetaData.label : component.getName
                     }
                 }
             }
@@ -1001,7 +1001,7 @@ class SystemEntityManager {
                 label: {
                     fontSize: dataAggregate.relation.getMetaData.fontSize !== dataAggregate.data.getMetaData.fontSize ? dataAggregate.relation.getMetaData.fontSize : dataAggregate.data.getMetaData.fontSize,
                     textWrap: {
-                        text: dataAggregate.data.getName,
+                        text: dataAggregate.data.getMetaData.label ? dataAggregate.data.getMetaData.label : dataAggregate.data.getName
                     }
                 }
             }
@@ -1055,7 +1055,7 @@ class SystemEntityManager {
                 label: {
                     fontSize: backingData.relation.getMetaData.fontSize !== backingData.backingData.getMetaData.fontSize ? backingData.relation.getMetaData.fontSize : backingData.backingData.getMetaData.fontSize,
                     textWrap: {
-                        text: backingData.backingData.getName,
+                        text: backingData.backingData.getMetaData.label ? backingData.backingData.getMetaData.label : backingData.backingData.getName
                     }
                 }
             }
@@ -1110,7 +1110,7 @@ class SystemEntityManager {
                 label: {
                     fontSize: endpoint.getMetaData.fontSize,
                     textWrap: {
-                        text: endpoint.getName
+                        text: endpoint.getMetaData.label ? endpoint.getMetaData.label : endpoint.getName
                     }
                 }
             }
@@ -1146,7 +1146,7 @@ class SystemEntityManager {
                 label: {
                     fontSize: externalEndpoint.getMetaData.fontSize,
                     textWrap: {
-                        text: externalEndpoint.getName
+                        text: externalEndpoint.getMetaData.label ? externalEndpoint.getMetaData.label : externalEndpoint.getName
                     }
                 }
             }
@@ -1180,7 +1180,7 @@ class SystemEntityManager {
                 label: {
                     fontSize: requestTrace.getMetaData.fontSize,
                     textWrap: {
-                        text: requestTrace.getName,
+                        text: requestTrace.getMetaData.label ? requestTrace.getMetaData.label : requestTrace.getName,
                     }
                 }
             }

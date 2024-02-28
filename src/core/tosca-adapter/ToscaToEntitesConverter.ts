@@ -15,8 +15,8 @@ import { BACKING_SERVICE_TOSCA_KEY } from '../entities/backingService';
 import { STORAGE_BACKING_SERVICE_TOSCA_KEY } from '../entities/storageBackingService';
 import { COMPONENT_TOSCA_KEY } from '../entities/component';
 import { REQUEST_TRACE_TOSCA_KEY } from '../entities/requestTrace';
-import { RelationToDataAggregate } from '../entities/RelationToDataAggregate';
-import { RelationToBackingData } from '../entities/RelationToBackingData';
+import { RelationToDataAggregate } from '../entities/relationToDataAggregate';
+import { RelationToBackingData } from '../entities/relationToBackingData';
 
 const MATCH_UNDERSCORE = new RegExp(/_/g);
 const MATCH_FIRST_CHARACTER = new RegExp(/^./g);

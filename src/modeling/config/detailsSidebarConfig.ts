@@ -2,8 +2,8 @@ import EntityTypes from "./entityTypes";
 import { getComponentProperties, getBackingServiceProperties, getStorageBackingServiceProperties, getEndpointProperties, getExternalEndpointProperties, getInfrastructureProperties, getRequestTraceProperties, getBackingDataProperties, getDataAggregateProperties, getDeploymentMappingProperties, getLinkProperties, getServiceProperties } from "../../core/entities";
 import { DialogConfig, DialogSize, FormContentConfig, UIContentType } from "./actionDialogConfig";
 import { EntityProperty, NumberEntityProperty, SelectEntityProperty, TextEntityProperty } from "../../core/common/entityProperty";
-import { getDataAggregateRelationshipProperties } from "@/core/entities/RelationToDataAggregate";
-import { getBackingDataRelationshipProperties } from "@/core/entities/RelationToBackingData";
+import { getDataAggregateRelationshipProperties } from "@/core/entities/relationToDataAggregate";
+import { getBackingDataRelationshipProperties } from "@/core/entities/relationToBackingData";
 
 export type DatalistItem = {
     value: string,
@@ -837,6 +837,7 @@ const EntityDetailsConfig: {
                         text: "Data Aggregate Family Config",
                     },
                     footer: {
+                        showCancelButton: true,
                         cancelButtonText: "Cancel",
                         saveButtonIconClass: "fa-regular fa-floppy-disk",
                         saveButtonText: "Save"
@@ -994,6 +995,7 @@ const EntityDetailsConfig: {
                             text: "Backing Data Included Data: "
                         },
                         footer: {
+                            showCancelButton: true,
                             cancelButtonText: "Cancel",
                             saveButtonIconClass: "fa-regular fa-floppy-disk",
                             saveButtonText: "Save"
@@ -1125,6 +1127,7 @@ const EntityDetailsConfig: {
                             text: "Backing Data Family Config "
                         },
                         footer: {
+                            showCancelButton: true,
                             cancelButtonText: "Cancel",
                             saveButtonIconClass: "fa-regular fa-floppy-disk",
                             saveButtonText: "Save"
@@ -1256,6 +1259,7 @@ const EntityDetailsConfig: {
                             text: "Request Trace: ",
                         },
                         footer: {
+                            showCancelButton: true,
                             cancelButtonText: "Cancel",
                             saveButtonIconClass: "fa-regular fa-floppy-disk",
                             saveButtonText: "Save"

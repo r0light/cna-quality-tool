@@ -147,7 +147,7 @@ i[data-type=error] {
     right: 0;
     /* TODO prefer 250px? */
     /* width: 15%; */
-    width: 260px;
+    width: 350px;
     height: 100%;
     border-top: var(--app-frame);
     border-left: var(--app-frame);
@@ -165,7 +165,7 @@ i[data-type=error] {
     /* left: 13%;
     right: 15%; */
     left: 250px;
-    right: 260px;
+    right: 350px;
     border-top: var(--app-frame);
 }
 

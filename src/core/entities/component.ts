@@ -1,12 +1,12 @@
-import { EntityProperty, loadAllProperties, parseProperties } from '../common/entityProperty.js'
+import { EntityProperty, SelectEntityProperty, TextEntityProperty, loadAllProperties, parseProperties } from '../common/entityProperty.js'
 import { Endpoint } from './endpoint.js'
 import { ExternalEndpoint } from './externalEndpoint.js'
 import { DataAggregate } from './dataAggregate.js'
 import { BackingData } from './backingData.js'
 import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_modeling_tosca_profile.js'
 import { MetaData } from '../common/entityDataTypes.js'
-import { RelationToDataAggregate } from './RelationToDataAggregate.js'
-import { RelationToBackingData } from './RelationToBackingData.js'
+import { RelationToDataAggregate } from './relationToDataAggregate.js'
+import { RelationToBackingData } from './relationToBackingData.js'
 
 
 /**
@@ -19,15 +19,39 @@ const COMPONENT_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types[COMPONE
 function getComponentProperties(): EntityProperty[] {
     let parsed = loadAllProperties(COMPONENT_TOSCA_EQUIVALENT);
 
-    for (const prop of parsed) {
+    return parsed.map((prop) => {
         switch (prop.getKey) {
             case "managed":
                 prop.setName = "Managed cloud service?";
                 prop.setExample = "e.g. yes";
-                break;
+                return prop;
+            case "software_type":
+                let changedProp = new SelectEntityProperty(prop.getKey,
+                    "Type of software",
+                    prop.getDescription,
+                    prop.getExample,
+                    prop.getRequired,
+                    [
+                        {
+                            value: "custom",
+                            text: "custom"
+                        },
+                        {
+                            value: "open-source",
+                            text: "open-source"
+                        },
+                        {
+                            value: "proprietary",
+                            text: "proprietary"
+                        }
+                    ],
+                    prop.getDefaultValue,
+                    prop.value)
+                return changedProp;
+            default:
+                return prop;
         }
-    }
-    return parsed;
+    })
 }
 
 /**
