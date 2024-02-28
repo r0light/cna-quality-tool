@@ -89,7 +89,7 @@
     <div class="pagesContainer">
       <router-view :key="$route.path"
         @store:modelingData="(id, systemEntityManager, toImport, importDone) => storeModelingData(id, toImport, systemEntityManager, importDone)"
-        @update:systemName="(newName, id) => updatePageName(newName, id)">
+        @update:systemName="(newName, id) => updatePageName(newName, id)" @update:evaluatedSystem="(systemId) => storeSelectedSystemToEvaluate(systemId)">
       </router-view>
     </div>
   </main>
@@ -166,9 +166,6 @@ const modeledSystemsData = ref<ModelingData[]>([]);
 const sharedSystemsData: ComputedRef<ModelingData[]> = computed(() => {
   return modeledSystemsData.value.filter(data => data.id !== -1) as ModelingData[];
 });
-/*const sharedSystemsKey: ComputedRef<string> = computed(() => {
-  return modeledSystemsData.value.reduce((initial, b) => initial + b.name, "");
-});*/
 
 function storeModelingData(id: number, toImport: ImportData, systemEntityManager: SystemEntityManager, importDone: boolean) {
 
@@ -183,6 +180,12 @@ function storeModelingData(id: number, toImport: ImportData, systemEntityManager
       }
     }
   }
+}
+
+const selectedSystemToEvaluate = ref<number>(-1);
+
+function storeSelectedSystemToEvaluate(systemId: number) {
+  selectedSystemToEvaluate.value = systemId;
 }
 
 const overlayState = ref<"none" | "initial" | "startNew" | "startImport">("none");
@@ -262,8 +265,8 @@ onMounted(() => {
         path: page.path,
         component: EvaluationApp,
         props: route => ({
-          active: page.active,
-          systemsData: sharedSystemsData.value
+          systemsData: sharedSystemsData.value,
+          evaluatedSystemId: selectedSystemToEvaluate.value
         })
       })
     }

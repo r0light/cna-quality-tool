@@ -4,11 +4,11 @@
             <h2>Evaluation</h2>
             <p class="font-weight-bold">The evaluation feature is still in development...</p>
             <FilterToolbar :highLevelAspectFilter="highLevelAspectFilter" :factorCategoryFilter="factorCategoryFilter"
-                @update:filters="onSelectFilter"></FilterToolbar>
+                @update:filters="evaluateSystem"></FilterToolbar>
             <div class="d-flex flex-row">
                 <div class="m-1">
                     <span>Select the evaluation viewpoint: </span>
-                    <select @change="onSelectViewpoint" v-model="selectedViewpoint">
+                    <select v-model="selectedViewpoint">
                         <option value="perQualityAspect">per Quality Aspect</option>
                         <option value="perProductFactor">per Product Factor</option>
                     </select>
@@ -41,7 +41,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onUpdated, ref, toRaw } from 'vue';
+import { onMounted, onUpdated, ref, toRaw } from 'vue';
 import { ModelingData } from '../App.vue';
 import { QualityModelInstance, getQualityModel } from '@/core/qualitymodel/QualityModelInstance';
 import { CalculatedMeasure, EvaluatedProductFactor, EvaluatedQualityAspect, EvaluatedSystemModel, ForwardImpactingPath } from '@/core/qualitymodel/evaluation/EvaluatedSystemModel';
@@ -54,7 +54,11 @@ import { dia } from 'jointjs';
 
 const props = defineProps<{
     systemsData: ModelingData[],
-    active: boolean
+    evaluatedSystemId: number
+}>()
+
+const emit = defineEmits<{
+    (e: "update:evaluatedSystem", systemId: number): void;
 }>()
 
 const qualityModel: QualityModelInstance = getQualityModel();
@@ -77,37 +81,46 @@ const evaluatedProductFactors = ref<Map<string, EvaluatedProductFactor>>(new Map
 
 const evaluatedQualityAspects = ref<Map<string, EvaluatedQualityAspect>>(new Map());
 
-var refresh = true;
+onMounted(() => {
+
+    if (props.evaluatedSystemId && props.systemsData.find(system => system.id === props.evaluatedSystemId)) {
+        selectedSystemId.value = props.evaluatedSystemId;
+        evaluateSystem();
+    }
+
+});
 
 onUpdated(() => {
-    if (props.active) {
-        if (refresh) {
-            refresh = false;
-            onSelectSystem();
-        }
-    } else {
-        refresh = true;
+
+    if (!props.systemsData.find(system => system.id === selectedSystemId.value)) {
+        selectedSystemId.value = -1;
+        clearEvaluation();
     }
-})
 
-function onSelectViewpoint() {
-    // TODO reorder display of evaluation
-}
-
-function onSelectFilter() {
-    onSelectSystem();
-}
+});
 
 function onSelectSystem() {
-    //TODO split in different functions (depending on system or filter select) for better performance?
 
+    if (selectedSystemId.value == -1) {
+        clearEvaluation();
+        return;
+    } else {
+        emit("update:evaluatedSystem", selectedSystemId.value);
+        evaluateSystem();
+    }
+
+}
+
+function clearEvaluation() {
     calculatedMeasures.value.clear();
     evaluatedProductFactors.value.clear();
     evaluatedQualityAspects.value.clear();
+}
 
-    if (selectedSystemId.value == -1) {
-        return
-    }
+function evaluateSystem() {
+    //TODO split in different functions (depending on system or filter select) for better performance?
+
+    clearEvaluation();
 
     let selectedSystem = props.systemsData.find(system => system.id === selectedSystemId.value);
 
