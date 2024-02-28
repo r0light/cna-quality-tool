@@ -237,6 +237,8 @@ function waitForLoadedToResolve(modelingDataId: number, resolve: () => void) {
 
 onMounted(() => {
 
+  console.log("onMounted")
+
   for (const page of pages.value) {
     if (page.pageType === "home") {
       router.addRoute({
@@ -341,9 +343,10 @@ onMounted(() => {
 
           router.addRoute({
             path: `/modeling-${modelingData.id}`,
+            name: `modeling-${modelingData.id}`,
             component: ModelingApp,
             props: route => ({
-              systemName: modeledSystemsData.value.find(data => data.id === modelingData.id).name,
+              systemName: modeledSystemsData.value.find(data => data.id === modelingData.id) ? modeledSystemsData.value.find(data => data.id === modelingData.id).name : "",
               pageId: modelingData.id,
               modelingData: modeledSystemsData.value.find(data => data.id === modelingData.id),
             })
@@ -438,9 +441,10 @@ function addNewModelingPage(name: string, toImport: ImportData) {
 
   router.addRoute({
     path: `/modeling-${newId}`,
+    name: `modeling-${newId}`,
     component: ModelingApp,
     props: route => ({
-      systemName: (modeledSystemsData.value.find(systemData => systemData.id === newId) as ModelingData).name,
+      systemName: modeledSystemsData.value.find(systemData => systemData.id === newId) ? modeledSystemsData.value.find(systemData => systemData.id === newId).name : "",
       pageId: newId,
       modelingData: (modeledSystemsData.value.find(systemData => systemData.id === newId) as ModelingData)
     })
@@ -476,7 +480,7 @@ function deleteModelingPage(id: number) {
 
   for (let i = 0; i < pages.value.length; i++) {
     if (pages.value[i].id === id) {
-      router.removeRoute(pages.value[i].path);
+      router.removeRoute(`modeling-${pages.value[i].id }`);
       pages.value.splice(i, 1);
       break;
     }
