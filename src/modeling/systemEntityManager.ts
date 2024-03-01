@@ -33,11 +33,13 @@ class SystemEntityManager {
         this.#currentSystemEntity = new Entities.System("test");
 
         // needed because javascript (https://stackoverflow.com/questions/67416881/es6-proxied-class-access-private-property-cannot-read-private-member-hidden-f)
+        this.getSystemEntity = this.getSystemEntity.bind(this);
         this.overwriteSystemEntity = this.overwriteSystemEntity.bind(this);
         this.convertToGraph = this.convertToGraph.bind(this);
         this.convertToJson = this.convertToJson.bind(this);
+        this.loadFromJson = this.loadFromJson.bind(this);
         this.getGraph = this.getGraph.bind(this);
-    }
+    }   
 
     getSystemEntity(): Entities.System {
         this.#convertToSystemEntity();
