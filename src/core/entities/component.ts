@@ -99,11 +99,10 @@ class Component {
      */
     addEndpoint(endpointToAdd: Endpoint | ExternalEndpoint) {
 
-        // TODO necessary?
         let endpointAlreadyIncluded = (endpointToAdd) => {
-            if (this.getEndpointEntities.some(endpoint => JSON.stringify(endpoint) === JSON.stringify(endpointToAdd))) {
+            if (this.getEndpointEntities.some(endpoint => endpoint.getId === endpointToAdd.getId)) {
                 return true;
-            } else if (this.getExternalEndpointEntities.some(externalEndpoint => JSON.stringify(externalEndpoint) === JSON.stringify(endpointToAdd))) {
+            } else if (this.getExternalEndpointEntities.some(endpoint => endpoint.getId === endpointToAdd.getId)) {
                 return true;
             }
             return false;
