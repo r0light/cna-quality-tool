@@ -51,13 +51,14 @@ class SystemEntityManager {
         return this.#currentSystemGraph;
     }
 
-    convertToCustomTosca(): string {
+    convertToCustomTosca(): {tosca: string, errors: string[]} {
         this.#errorMessages = new Map();
         this.#includedDataAggregateEntities = new Map();
         this.#currentSystemEntity.resetAllIncludedSystemEntities();
 
         this.#convertToSystemEntity();
 
+        let errors = this.#validateSystemEntity();
 
         /* TODO check for errors?
         if (this.#errorMessages?.size > 0) {
@@ -73,7 +74,7 @@ class SystemEntityManager {
                     '!!null': 'empty'
                 }
             });
-            return asYaml;
+            return {tosca: asYaml, errors: errors};
         } catch (err) {
             console.error(err);
         }
@@ -110,8 +111,6 @@ class SystemEntityManager {
             return { createdCells: [], error: e.toString() }
         }
 
-        // update system entity
-        this.#convertToSystemEntity();
         this.#currentSystemEntity.setSystemName = fileName.replace(/\..*$/g, "");
 
         return { createdCells: this.#currentSystemGraph.getCells(), error: null }
@@ -154,9 +153,8 @@ class SystemEntityManager {
             this.#addTraceEntity(graphElement);
         }
 
-        // now, validate the created system
-        this.#validateSystemEntity();
-        this.#checkValidityOfDataAggregates();
+        // now, validate the created system TODO here or independently?
+        let errors: string[] = this.#validateSystemEntity();
     }
 
     #addDataEntity(graphElement: dia.Element) {
@@ -223,44 +221,12 @@ class SystemEntityManager {
 
     #createDataAggregateEntity(graphElement, returnDataAggregateAnyway = false) {
 
-        // TODO allow for now
-        /*
-        if (!graphElement || !(graphElement.getParentCell())) {
-            const message = `A Data Aggregate entity is only valid if it is embedded in one of the component type entities. However, the Data Aggregate "${graphElement.attr("label/textWrap/text")}" has no parent entity 
-            and is, therefore, invalid.`;
-            const error = new ErrorMessage(EntityTypes.DATA_AGGREGATE, ErrorType.INVALID_MODEL_ENTIY, graphElement.attr("label/textWrap/text"), "Embedded Relation", message);
-            this.#errorMessages.set(graphElement.id, error);
-            return null;
-        }
-        */
-
         const dataAggregate = new Entities.DataAggregate(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement));
 
         return dataAggregate;
     }
 
     #createBackingDataEntity(graphElement) {
-        // TODO allow for now
-        /*
-        if (!graphElement || !(graphElement.getParentCell())) {
-            const message = `A Backing Data entity is only valid if it is embedded in one of the component type or infrastructure entities. However, the Backing Data "${graphElement.attr("label/textWrap/text")}" 
-            has no parent entity and is, therefore, invalid.`;
-            const error = new ErrorMessage(EntityTypes.BACKING_DATA, ErrorType.INVALID_MODEL_ENTIY, graphElement.attr("label/textWrap/text"), "Embedded Relation", message);
-            this.#errorMessages.set(graphElement.id, error);
-            return null;
-        }
-        */
-
-        // TODO allow for now
-        /*
-        if (includedData.length <= 0) {
-            const message = `A Backing Data entity has to include at least one data item. However, the Backing Data "${graphElement.attr("label/textWrap/text")}" 
-            has information included and is, therefore, invalid.`;
-            const error = new ErrorMessage(EntityTypes.BACKING_DATA, ErrorType.MISSING_INFORMATION, graphElement.attr("label/textWrap/text"), "Included Data", message);
-            this.#errorMessages.set(graphElement.id, error);
-            return null;
-        }
-        */
 
         const backingData = new Entities.BackingData(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement));
 
@@ -430,7 +396,25 @@ class SystemEntityManager {
 
 
 
-    #validateSystemEntity() {
+    #validateSystemEntity(): string[] {
+
+        let errors = [];
+
+        let mappingToDeployment = new Map<string, string>();
+
+        for (const [mappingId, deploymentMapping] of this.#currentSystemEntity.getDeploymentMappingEntities.entries()) {
+            if (deploymentMapping.getDeployedEntity) {
+                mappingToDeployment.set(deploymentMapping.getDeployedEntity.getId, mappingId);
+            }
+        } 
+
+        for (let [componentId, component] of this.#currentSystemEntity.getComponentEntities.entries()) {
+
+            if (!mappingToDeployment.has(componentId)) {
+                errors.push(`${component.constructor.name} ${component.getName} is not deployed on any infrastructure.`)
+            } 
+        }
+
         //TODO validate Storage Service specifics 
         /*
         let infrastructureEntity = this.#checkIfStorageBackingServiceConnected(graphElement);
@@ -443,6 +427,39 @@ class SystemEntityManager {
         }
         */
 
+
+                // TODO validate data aggregate
+        /*
+        if (!graphElement || !(graphElement.getParentCell())) {
+            const message = `A Data Aggregate entity is only valid if it is embedded in one of the component type entities. However, the Data Aggregate "${graphElement.attr("label/textWrap/text")}" has no parent entity 
+            and is, therefore, invalid.`;
+            const error = new ErrorMessage(EntityTypes.DATA_AGGREGATE, ErrorType.INVALID_MODEL_ENTIY, graphElement.attr("label/textWrap/text"), "Embedded Relation", message);
+            this.#errorMessages.set(graphElement.id, error);
+            return null;
+        }
+        */
+
+                // TODO validate backing data
+        /*
+        if (!graphElement || !(graphElement.getParentCell())) {
+            const message = `A Backing Data entity is only valid if it is embedded in one of the component type or infrastructure entities. However, the Backing Data "${graphElement.attr("label/textWrap/text")}" 
+            has no parent entity and is, therefore, invalid.`;
+            const error = new ErrorMessage(EntityTypes.BACKING_DATA, ErrorType.INVALID_MODEL_ENTIY, graphElement.attr("label/textWrap/text"), "Embedded Relation", message);
+            this.#errorMessages.set(graphElement.id, error);
+            return null;
+        }
+        */
+
+        // TODO validate backing data
+        /*
+        if (includedData.length <= 0) {
+            const message = `A Backing Data entity has to include at least one data item. However, the Backing Data "${graphElement.attr("label/textWrap/text")}" 
+            has information included and is, therefore, invalid.`;
+            const error = new ErrorMessage(EntityTypes.BACKING_DATA, ErrorType.MISSING_INFORMATION, graphElement.attr("label/textWrap/text"), "Included Data", message);
+            this.#errorMessages.set(graphElement.id, error);
+            return null;
+        }
+        */
 
         //TODO validate deployment mappings:
         /*
@@ -500,6 +517,8 @@ class SystemEntityManager {
             return null;
         }
         */
+
+        return errors;
     }
 
     // ensure that Data Aggregate is persisted at least once by another entity

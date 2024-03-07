@@ -231,13 +231,43 @@ function waitForCellToBeVisible(cell: dia.CellView, resolve: () => void) {
 
 function saveToTosca() {
 
-    let asYaml = systemEntityManager.convertToCustomTosca();
+    let result = systemEntityManager.convertToCustomTosca();
 
+    function continueExport() {
     // download created yaml taken from https://stackoverflow.com/a/22347908
     let downloadElement = document.createElement("a");
-    downloadElement.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(asYaml));
+    downloadElement.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(result.tosca));
     downloadElement.setAttribute('download', `${currentSystemName.value}.yaml`);
     downloadElement.click();
+    }
+
+    if (result.errors.length > 0) {
+        confirmationModalManager.value = {
+        show: true,
+        dialogMetaData: {
+            dialogSize: DialogSize.DEFAULT,
+            header: {
+                iconClass: "fa-solid fa-triangle-exclamation",
+                svgRepresentation: "",
+                text: "Validation errors"
+            },
+            footer: {
+                showCancelButton: true,
+                cancelButtonText: "Cancel export",
+                saveButtonIconClass: "",
+                saveButtonText: "Export anyway"
+            },
+        },
+        confirmationPrompt: result.errors.join(","),
+        onCancel: () => confirmationModalManager.value.show = false,
+        onConfirm: () => {
+            confirmationModalManager.value.show = false;
+            continueExport();
+        }
+    }
+    } else {
+        continueExport();
+    }
 }
 
 function warnBeforeExport(exportConfirmed: Function) {
