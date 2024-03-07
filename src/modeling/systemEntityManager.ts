@@ -553,11 +553,14 @@ class SystemEntityManager {
 
                 let dataAggregateCell = this.getGraph().getCell(dataAggregateId);
 
-                let dataAggregateName: string = dataAggregateCell.attr("label/textWrap/text");
+                if (dataAggregateCell) {
+                    let dataAggregateName: string = dataAggregateCell.attr("label/textWrap/text");
 
-                let referencedDataAggregate = parentEntity.getDataAggregateEntities.find(dataAggregateRelation => dataAggregateRelation.data.getName === dataAggregateName);
+                    let referencedDataAggregate = parentEntity.getDataAggregateEntities.find(dataAggregateRelation => dataAggregateRelation.data.getName === dataAggregateName);
+    
+                    endpointEntity.addDataAggregateEntity(referencedDataAggregate.data, referencedDataAggregate.relation);
+                }
 
-                endpointEntity.addDataAggregateEntity(referencedDataAggregate.data, referencedDataAggregate.relation);
             }
         }
 
