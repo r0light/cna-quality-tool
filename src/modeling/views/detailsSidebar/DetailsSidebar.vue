@@ -213,6 +213,10 @@ onMounted(() => {
         refreshHighlightOptions();
     })
 
+    props.graph.on("change", () => {
+        refreshHighlightOptions();
+    })
+
 })
 
 onUpdated(() => {
