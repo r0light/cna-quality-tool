@@ -8,7 +8,8 @@
             @save:toTosca="saveToTosca"></Toolbar>
         <div class="app-body">
             <div :id="`entity-sidebar-${pageId}`" class="entityShapes-sidebar-container d-print-none">
-                <EntitySidebar :paper="mainPaper" :pageId="`model${pageId}`" :wrapperElementId="`entity-sidebar-${pageId}`">
+                <EntitySidebar :paper="mainPaper" :pageId="`model${pageId}`"
+                    :wrapperElementId="`entity-sidebar-${pageId}`">
                 </EntitySidebar>
             </div>
             <div class="visible-modeling-area">
@@ -20,8 +21,9 @@
                     @deselect:RequestTrace="resetRequestTraceSelection">
                 </ModelingArea>
             </div>
-            <DetailsSidebar :paper="mainPaper" :graph="(currentSystemGraph as dia.Graph)" :selectedEntity="currentSelection"
-                :selectedDataAggregate="currentDataAggregateHighlight" :selectedBackingData="currentBackingDataHightlight">
+            <DetailsSidebar :paper="mainPaper" :graph="(currentSystemGraph as dia.Graph)"
+                :selectedEntity="currentSelection" :selectedDataAggregate="currentDataAggregateHighlight"
+                :selectedBackingData="currentBackingDataHightlight">
             </DetailsSidebar>
         </div>
         <ModalConfirmationDialog v-bind="confirmationModalManager"></ModalConfirmationDialog>
@@ -234,65 +236,44 @@ function saveToTosca() {
     let result = systemEntityManager.convertToCustomTosca();
 
     function continueExport() {
-    // download created yaml taken from https://stackoverflow.com/a/22347908
-    let downloadElement = document.createElement("a");
-    downloadElement.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(result.tosca));
-    downloadElement.setAttribute('download', `${currentSystemName.value}.yaml`);
-    downloadElement.click();
+        // download created yaml taken from https://stackoverflow.com/a/22347908
+        let downloadElement = document.createElement("a");
+        downloadElement.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(result.tosca));
+        downloadElement.setAttribute('download', `${currentSystemName.value}.yaml`);
+        downloadElement.click();
     }
 
     if (result.errors.length > 0) {
         confirmationModalManager.value = {
-        show: true,
-        dialogMetaData: {
-            dialogSize: DialogSize.DEFAULT,
-            header: {
-                iconClass: "fa-solid fa-triangle-exclamation",
-                svgRepresentation: "",
-                text: "Validation errors"
+            show: true,
+            dialogMetaData: {
+                dialogSize: DialogSize.DEFAULT,
+                header: {
+                    iconClass: "fa-solid fa-triangle-exclamation",
+                    svgRepresentation: "",
+                    text: "Warning"
+                },
+                footer: {
+                    showCancelButton: true,
+                    cancelButtonText: "No, cancel export",
+                    saveButtonIconClass: "",
+                    saveButtonText: "Yes, export anyway"
+                },
             },
-            footer: {
-                showCancelButton: true,
-                cancelButtonText: "Cancel export",
-                saveButtonIconClass: "",
-                saveButtonText: "Export anyway"
-            },
-        },
-        confirmationPrompt: result.errors.join(","),
-        onCancel: () => confirmationModalManager.value.show = false,
-        onConfirm: () => {
-            confirmationModalManager.value.show = false;
-            continueExport();
+            confirmationPrompt: `Problems detected while preparing the export:
+            <ul>
+                <li> ${result.errors.join("</li>\n<li>")} </li>
+            </ul>
+            Are you sure you want to export?
+            `,
+            onCancel: () => confirmationModalManager.value.show = false,
+            onConfirm: () => {
+                confirmationModalManager.value.show = false;
+                continueExport();
+            }
         }
-    }
     } else {
         continueExport();
-    }
-}
-
-function warnBeforeExport(exportConfirmed: Function) {
-    confirmationModalManager.value = {
-        show: true,
-        dialogMetaData: {
-            dialogSize: DialogSize.DEFAULT,
-            header: {
-                iconClass: "fa-solid fa-triangle-exclamation",
-                svgRepresentation: "",
-                text: "Problems with TOSCA Export"
-            },
-            footer: {
-                showCancelButton: true,
-                cancelButtonText: "Cancel",
-                saveButtonIconClass: "fa-solid fa-check",
-                saveButtonText: "Ok, understood"
-            },
-        },
-        confirmationPrompt: "There might be problems",
-        onCancel: () => confirmationModalManager.value.show = false,
-        onConfirm: () => {
-            confirmationModalManager.value.show = false;
-            exportConfirmed();
-        }
     }
 }
 
@@ -383,7 +364,7 @@ function onSvgExportRequested() {
     let layersElement = paperDiv.find(".joint-layers")[0];
     let boundingBox = layersElement.getBoundingClientRect();
 
-    svgElement.setAttribute("viewBox", `0 0 ${boundingBox.x + boundingBox.width} ${boundingBox.y + boundingBox.height}` );
+    svgElement.setAttribute("viewBox", `0 0 ${boundingBox.x + boundingBox.width} ${boundingBox.y + boundingBox.height}`);
 
     let asString = svgElement.outerHTML;
     asString = asString.replaceAll("&nbsp;", " ");

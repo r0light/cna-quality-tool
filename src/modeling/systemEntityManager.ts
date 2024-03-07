@@ -52,20 +52,14 @@ class SystemEntityManager {
     }
 
     convertToCustomTosca(): {tosca: string, errors: string[]} {
-        this.#errorMessages = new Map();
-        this.#includedDataAggregateEntities = new Map();
+
+        let graphErrors = this.#validateGraph();
+
         this.#currentSystemEntity.resetAllIncludedSystemEntities();
 
         this.#convertToSystemEntity();
 
-        let errors = this.#validateSystemEntity();
-
-        /* TODO check for errors?
-        if (this.#errorMessages?.size > 0) {
-            this.#provideConnectionWarningDialog();
-            return;
-        }
-        */
+        let systemErrors = this.#validateSystemEntity();
 
         let serviceTemplate = convertToServiceTemplate(this.#currentSystemEntity);
         try {
@@ -74,7 +68,7 @@ class SystemEntityManager {
                     '!!null': 'empty'
                 }
             });
-            return {tosca: asYaml, errors: errors};
+            return {tosca: asYaml, errors: graphErrors.concat(systemErrors)};
         } catch (err) {
             console.error(err);
         }
@@ -395,6 +389,25 @@ class SystemEntityManager {
     */
 
 
+    #validateGraph(): string[] {
+
+        let errors = []
+
+
+        this.#currentSystemGraph.getElements().forEach(element => {
+            switch(element.prop("entity/type")){
+                case EntityTypes.ENDPOINT:
+                    if (!element.isEmbedded()) {
+                        errors.push(`Endpoint ${element.attr("label/textWrap/text")} is not added to any component; It will be ignored when exporting`)
+                    }
+                break;
+            }
+        })
+
+        return errors;
+
+    }
+
 
     #validateSystemEntity(): string[] {
 
@@ -414,6 +427,8 @@ class SystemEntityManager {
                 errors.push(`${component.constructor.name} ${component.getName} is not deployed on any infrastructure.`)
             } 
         }
+
+
 
         //TODO validate Storage Service specifics 
         /*

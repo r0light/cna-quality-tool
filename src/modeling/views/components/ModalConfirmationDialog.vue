@@ -2,7 +2,7 @@
 <template>
     <ModalWrapper :show="show" :dialogMetaData="dialogMetaData" @close:Modal="onCancel" @save:Modal="onConfirm">
         <template v-slot:modalContent>
-            <p>{{ confirmationPrompt }}</p>
+            <div v-html="confirmationPrompt"></div>
         </template>
     </ModalWrapper>
 </template>
