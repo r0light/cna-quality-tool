@@ -1,10 +1,15 @@
 <template>
   <header>
-    <nav class="navbar navbar-expand navbar-light bg-dark text-white">
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <div class="navbar-header">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark text-white">
+      <div class="navbar-header">
           <a class="navbar-brand text-muted"><i class="fa-solid fa-cube"></i> Clounaq</a>
         </div>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+
         <ul class="navbar-nav mr-auto">
           <li v-for="page of pages" class="nav-item" :class="{ active: page.active }">
             <div class="nav-link d-flex flex-row">
@@ -22,11 +27,9 @@
               New Application Model</a>
           </li>
         </ul>
-      </div>
-      <div class="navbar-collapse collapse">
         <ul class="navbar-nav ml-auto">
-          <li class="nav-item p-2">
-            <router-link class="text-white" to="/imprint">
+          <li class="nav-item">
+            <router-link class="nav-link text-white" to="/imprint">
               <i class="fa-solid fa-scale-balanced"></i>
               Imprint
             </router-link>
@@ -46,7 +49,9 @@
         <h2 class="text-center">Start Modeling Software Architectures!</h2>
         <div id="init-firstInformation" v-show="overlayState === 'initial'">
           <p>The modeling feature allows you to model cloud-native application (CNA)
-            architectures using different entities. It is based on the <a href="https://r0light.github.io/cna-quality-model/" target="_blank">Cloud-native Quality Model </a>. You can either start with a new architectural model or import a previously created and exported model.</p>
+            architectures using different entities. It is based on the <a
+              href="https://r0light.github.io/cna-quality-model/" target="_blank">Cloud-native Quality Model </a>. You
+            can either start with a new architectural model or import a previously created and exported model.</p>
           <div class="d-flex flex-row justify-content-around">
             <button type="button" class="btn btn-outline-dark btn-light" @click="overlayState = 'startNew'"> <i
                 class="fa-solid fa-pencil"></i> Create new model </button>
@@ -89,7 +94,8 @@
     <div class="pagesContainer">
       <router-view :key="$route.path"
         @store:modelingData="(id, systemEntityManager, toImport, importDone) => storeModelingData(id, toImport, systemEntityManager, importDone)"
-        @update:systemName="(newName, id) => updatePageName(newName, id)" @update:evaluatedSystem="(systemId) => storeSelectedSystemToEvaluate(systemId)">
+        @update:systemName="(newName, id) => updatePageName(newName, id)"
+        @update:evaluatedSystem="(systemId) => storeSelectedSystemToEvaluate(systemId)">
       </router-view>
     </div>
   </main>
@@ -480,7 +486,7 @@ function deleteModelingPage(id: number) {
 
   for (let i = 0; i < pages.value.length; i++) {
     if (pages.value[i].id === id) {
-      router.removeRoute(`modeling-${pages.value[i].id }`);
+      router.removeRoute(`modeling-${pages.value[i].id}`);
       pages.value.splice(i, 1);
       break;
     }

@@ -1,5 +1,6 @@
 :root {
-    --menu-item-active-colour: #3db4f4;;
+    --menu-item-active-colour: #3db4f4;
+    ;
 }
 
 html {
@@ -23,18 +24,23 @@ main {
 
 .navbar {
     padding: 0;
-  }
+}
 
 .navbar .navbar-nav .nav-link {
     padding: 1em;
-  }
+}
+
+.navbar .navbar-header .navbar-brand {
+    padding-top: 0.7em;
+    padding-bottom: 0.7em;
+}
 
 .nav-item:hover {
     background-color: #57596B;
     cursor: pointer;
 }
 
-.navbar-nav > li {
+.navbar-nav>li {
     float: left;
     position: relative;
 }
@@ -43,15 +49,15 @@ main {
     color: #3db4f4; --> problem text-white
 } */
 
-.nav-item.active > a.nav-link > i {
+.nav-item.active>a.nav-link>i {
     color: var(--menu-item-active-colour);
 }
 
-.navbar-light .navbar-nav .nav-item.active > .nav-item {
+.navbar-dark .navbar-nav .nav-item.active>.nav-item {
     color: var(--menu-item-active-colour);
 }
 
-.navbar-light .navbar-nav .active::after {
+.navbar-dark .navbar-nav .active::after {
     height: 4px;
     position: absolute;
     bottom: 0;
