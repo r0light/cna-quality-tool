@@ -147,6 +147,7 @@ function onFilterSelected() {
     column-gap: 0.5em; 
     border-top: 2px solid var(--menu-background-colour);
     border-bottom: 2px solid var(--menu-background-colour);
+    background-color: #fff;
 }
 
 .filterTool{

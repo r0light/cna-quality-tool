@@ -1,14 +1,34 @@
 <template>
-    <div v-for="factorGroup of factorGroups">
-        <ForwardImpactVisualization :rootFactors="(factorGroup as EvaluatedProductFactor[])"></ForwardImpactVisualization>
-        <div v-for="productFactor of factorGroup">
-            <p>
-            <span>{{ productFactor.name }}</span>: <span> {{ productFactor.result }}</span><br>
-            <span v-if="productFactor.measures.size > 0">Relevant measures:</span><br>
-            <div v-for="[key, measure] of productFactor.measures">
-                <span>{{ measure.name }}</span>: <span> {{ measure.value }}</span>
+    <div v-for="factorGroup of factorGroups" class="factorGroup d-flex flex-column">
+        <ForwardImpactVisualization :rootFactors="(factorGroup as EvaluatedProductFactor[])">
+        </ForwardImpactVisualization>
+        <div class="accordion">
+            <div v-for="productFactor of factorGroup" class="card">
+                <h3 class="card-header">
+                    <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse"
+                        :data-target="`#${productFactor.id}-details`" aria-expanded="true"
+                        :aria-controls="`${productFactor.id}-details`">
+                        Details for {{ productFactor.name }}
+                    </button>
+                </h3>
+                <div :id="`${productFactor.id}-details`" class="collapse" aria-labelledby="headingOne"
+                    data-bs-parent="#accordionExample">
+                    <div class="card-body d-flex flex-column factorDetails">
+                        <div>
+                            <span class="font-weight-bold">{{ productFactor.name }}</span> <span>evaluation
+                                result</span>: <span> {{ productFactor.result }}</span>
+                        </div>
+                        <div>
+                            <span v-if="productFactor.measures.size > 0">Relevant measures:</span>
+                            <ul>
+                                <li v-for="[key, measure] of productFactor.measures">
+                                    <span>{{ measure.name }}</span>: <span> {{ measure.value }}</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
             </div>
-            </p>
         </div>
     </div>
 </template>
@@ -17,6 +37,7 @@
 import { EvaluatedProductFactor } from '@/core/qualitymodel/evaluation/EvaluatedSystemModel';
 import ForwardImpactVisualization from './ForwardImpactVisualization.vue';
 import { ComputedRef, computed } from 'vue';
+import { ProductFactor } from '@/core/qualitymodel/quamoco/ProductFactor';
 
 const props = defineProps<{
     evaluatedProductFactors: Map<string, EvaluatedProductFactor>,
@@ -94,4 +115,17 @@ function searchForImpactedFactors(evaluatedProductFactor: EvaluatedProductFactor
 
 </script>
 
-<style></style>
+<style>
+.factorGroup {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #fff;
+    border-radius: 5px;
+    border: 1px solid #343a40;
+    row-gap: 5px;
+}
+
+.factorDetails {
+    row-gap: 5px;
+}
+</style>

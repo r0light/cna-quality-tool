@@ -1,11 +1,11 @@
 <template>
     <div class="full-width">
-        <div class="d-flex flex-column p-1">
+        <div class="d-flex flex-column p-1 evaluation-background">
             <h2>Evaluation</h2>
             <p class="font-weight-bold">The evaluation feature is still in development...</p>
             <FilterToolbar :highLevelAspectFilter="highLevelAspectFilter" :factorCategoryFilter="factorCategoryFilter"
                 @update:filters="evaluateSystem"></FilterToolbar>
-            <div class="d-flex flex-row">
+            <div class="d-flex flex-row selection-bar">
                 <div class="m-1">
                     <span>Select the evaluation viewpoint: </span>
                     <select v-model="selectedViewpoint">
@@ -32,9 +32,9 @@
                         :evaluatedQualityAspects="(evaluatedQualityAspects as Map<string, EvaluatedQualityAspect>)">
                     </QualityAspectViewpoint>
                 </div>
-                <div v-for="[key, calculatedMeasure] of calculatedMeasures">
+                <!--<div v-for="[key, calculatedMeasure] of calculatedMeasures">
                     <span>{{ calculatedMeasure.name }}</span>: <span> {{ calculatedMeasure.value }}</span>
-                </div>
+                </div>-->
             </div>
         </div>
     </div>
@@ -175,4 +175,13 @@ function createTemporaryEntityManager(selectedSystem: ModelingData): SystemEntit
 .full-width {
     width: 100%;
 }
+
+.evaluation-background {
+    background-color: #e9ecef;
+}
+
+.selection-bar {
+    background-color: #fff;
+}
+
 </style>
