@@ -422,11 +422,19 @@ function adjustVertices(graph: dia.Graph, cell: dia.Cell | dia.CellView) {
         sameSource.forEach(link => {
             otherWayPoints.push(...link.vertices());
         })
+
+        let maximumTries = 100;
         for (let vertex of cell.vertices()) {
+            let tries = 0;
             while (hasConflictingWaypoint(vertex, otherWayPoints)) {
+                if (tries >= maximumTries) {
+                    break;
+                }
                 adjustVertexPosition(vertex, closestToTarget, cell.getTargetPoint());
+                tries = tries + 1;
             }
         }
+
     }
 }
 
@@ -441,7 +449,11 @@ function moveOnLine(lineStart: g.Point, lineTarget: g.Point, distanceToMove): g.
 }
 
 function hasConflictingWaypoint(vertex: Vertex, others: Vertex[]) {
-    return others.map(other => other.x === vertex.x && other.y === vertex.y).reduce((accumulator, conflict) => accumulator || conflict, false);
+    let tolerance = 8;
+    return others.map(other => {
+        return (Math.abs(other.x - vertex.x) < tolerance) || (Math.abs(other.y - vertex.y) < tolerance)
+    }
+    ).reduce((accumulator, conflict) => accumulator || conflict, false);
 }
 
 function adjustVertexPosition(currentVertex: Vertex, closestToTarget: g.Point, targetPoint: Vertex) {
