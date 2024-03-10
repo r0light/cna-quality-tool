@@ -397,7 +397,8 @@ function adjustVertices(graph: dia.Graph, cell: dia.Cell | dia.CellView) {
         } else {
             console.log("source cell currently not available for" + cell.id);
         }
-        closestToTarget = moveOnLine(closestToTarget, cell.getTargetPoint(), PADDING_TO_SOURCE_ELEMENT);
+        //closestToTarget = moveOnLine(closestToTarget, cell.getTargetPoint(), PADDING_TO_SOURCE_ELEMENT);
+        closestToTarget = moveOnLine(closestToTarget, cell.getTargetPoint(), closestToTarget.distance(cell.getTargetPoint()) * 0.4);
 
         // initialize vertices
         cell.vertices([closestToTarget]);
