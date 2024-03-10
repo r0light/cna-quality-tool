@@ -376,66 +376,106 @@ function adjustVertices(graph: dia.Graph, cell: dia.Cell | dia.CellView) {
     } else if (cell instanceof dia.Link) {
 
         // reset own vertices
-        let closestToTarget = cell.getSourcePoint();
-        var lineToTarget = new g.Line(cell.getSourcePoint(), cell.getTargetPoint());
-
+        //let closestToTarget = cell.getSourcePoint();
+        
         var sourceCell = cell.getSourceCell();
+        /*
         if (sourceCell) {
-            var intersectionPoints = lineToTarget.intersect(sourceCell.getBBox());
-            if (intersectionPoints && intersectionPoints.length > 0) {
-                closestToTarget = intersectionPoints[0];
-                let smallestDistance = intersectionPoints[0].distance(cell.getTargetPoint());
-
-                for (const intersectionPoint of intersectionPoints) {
-                    if (intersectionPoint.distance(cell.getTargetPoint()) < smallestDistance) {
-                        closestToTarget = intersectionPoint;
-                    }
-                }
-            } else {
-                console.log("NO intersection points");
-            }
+            closestToTarget = getFirstIntersectionPoint(sourceCell, cell.getSourcePoint(), cell.getTargetPoint());
         } else {
             console.log("source cell currently not available for" + cell.id);
         }
+        */
         //closestToTarget = moveOnLine(closestToTarget, cell.getTargetPoint(), PADDING_TO_SOURCE_ELEMENT);
-        closestToTarget = moveOnLine(closestToTarget, cell.getTargetPoint(), closestToTarget.distance(cell.getTargetPoint()) * 0.4);
+        let closestToTarget = getOutboundPointInSuitableDirection(sourceCell, cell.getSourcePoint(), cell.getTargetPoint(), 20);
+        //let closestToTarget = getOutboundPointInSuitableDirection(cell.getSourceCell(), cell.getSourcePoint(), cell.getTargetPoint(), cell.getSourcePoint().distance(cell.getTargetPoint()) * 0.5);
 
         // initialize vertices
-        cell.vertices([closestToTarget]);
+        cell.vertices([closestToTarget], { rewrite: true } );
 
-        /*
-        console.log({
-            "target": cell.getTargetPoint(),
-            "source": cell.getSourcePoint(),
-            "new vertice": closestToTarget
-        })
-        */
 
         // try to avoid conflicts
         var sourceId: dia.Cell.ID = cell.get('source').id || cell.previous('source').id;
-        var sameSource = graph.getLinks().filter(function (otherLink: dia.Link) {
+        var linksWithSameSource = graph.getConnectedLinks(graph.getCell(sourceId)).filter(function (otherLink: dia.Link) {
             if (cell.id === otherLink.id) {
                 return false;
             }
             return sourceId === otherLink.source().id;
         });
+
         let otherWayPoints: Vertex[] = [];
-        sameSource.forEach(link => {
+        linksWithSameSource.forEach(link => {
             otherWayPoints.push(...link.vertices());
         })
 
         let maximumTries = 100;
-        for (let vertex of cell.vertices()) {
+        for (let [index, vertex] of cell.vertices().entries()) {
             let tries = 0;
             while (hasConflictingWaypoint(vertex, otherWayPoints)) {
-                if (tries >= maximumTries) {
+                if (tries >= maximumTries) {    
                     break;
                 }
-                adjustVertexPosition(vertex, closestToTarget, cell.getTargetPoint());
+                //adjustVertexPosition(vertex, closestToTarget, cell.getTargetPoint());
+                let newPoint = moveOnLine(new g.Point(vertex.x, vertex.y), cell.getTargetPoint(), 10);
+                cell.vertex(index, {x: newPoint.x, y: newPoint.y});
+                vertex.x = newPoint.x;
+                vertex.y = newPoint.y;
                 tries = tries + 1;
             }
         }
+        
 
+    }
+}
+
+function getFirstIntersectionPoint(sourceCell: dia.Cell, sourcePoint: g.Point, targetPoint: g.Point): g.Point {
+
+    var lineToTarget = new g.Line(sourcePoint, targetPoint).setLength(3000);
+
+    let closestIntersectionPoint: g.Point = sourcePoint; // use sourcePoint as default
+    var intersectionPoints = lineToTarget.intersect(sourceCell.getBBox());
+
+    if (intersectionPoints && intersectionPoints.length > 0) {
+        closestIntersectionPoint = intersectionPoints[0];
+
+        let smallestDistance = intersectionPoints[0].distance(targetPoint);
+        for (const intersectionPoint of intersectionPoints) {
+            if (intersectionPoint.distance(targetPoint) < smallestDistance) {
+                closestIntersectionPoint = intersectionPoint;
+            }
+        }
+    } else {
+        console.log("NO intersection points");
+    }
+    return closestIntersectionPoint;
+}
+
+function getOutboundPointInSuitableDirection(sourceCell: dia.Cell, sourcePoint: g.Point, targetPoint: g.Point, buffer: number) {
+
+    var lineToTarget = new g.Line(sourcePoint, targetPoint);
+    if (lineToTarget.isDifferentiable()) {
+        let angle = lineToTarget.angle();
+        if (angle >= 315 || angle < 45) {
+            // outbound point should be to the right
+            let intersectionPoint = getFirstIntersectionPoint(sourceCell, sourcePoint, new g.Point(sourcePoint.x + 1, sourcePoint.y));
+            return new g.Point(intersectionPoint.x + buffer, intersectionPoint.y);
+        } else if (angle >= 45 && angle < 135) {
+            // outbound point should be to the bottom
+            let intersectionPoint = getFirstIntersectionPoint(sourceCell, sourcePoint, new g.Point(sourcePoint.x, sourcePoint.y + 1));
+            return new g.Point(intersectionPoint.x, intersectionPoint.y + buffer);
+        } else if (angle >= 135 && angle < 225) {
+            // outbound point should be to the left
+            let intersectionPoint = getFirstIntersectionPoint(sourceCell, sourcePoint, new g.Point(sourcePoint.x - 1, sourcePoint.y));
+            return new g.Point(intersectionPoint.x - buffer, intersectionPoint.y);
+        } else {
+            // angle > 225 && angle < 315
+            // outbound point should be to the top
+            let intersectionPoint = getFirstIntersectionPoint(sourceCell, sourcePoint, new g.Point(sourcePoint.x, sourcePoint.y - 1));
+            return new g.Point(intersectionPoint.x, intersectionPoint.y - buffer);
+        }
+    } else {
+        console.log("sourcePoint and targetPoint should not be the same")
+        return sourcePoint;
     }
 }
 
