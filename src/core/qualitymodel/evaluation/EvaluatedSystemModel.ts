@@ -7,7 +7,8 @@ import { MeasureValue } from "../quamoco/Measure";
 
 type CalculatedMeasure = {
     name: string,
-    value: MeasureValue
+    value: MeasureValue,
+    description: string
 }
 
 type NumericEvaluationResult = number;
@@ -113,7 +114,7 @@ class EvaluatedSystemModel {
                     return;
                 }
                 if (measure.isCalculationAvailable()) {
-                    let calculatedMeasure = { name: measure.getName, value: measure.calculate(this.#system) };
+                    let calculatedMeasure = { name: measure.getName, value: measure.calculate(this.#system), description: measure.getCalculationDescription };
 
                     measuresForThisFactor.set(measure.getId, calculatedMeasure)
                     this.#calculatedMeasures.set(measure.getId, calculatedMeasure);
@@ -206,7 +207,7 @@ class EvaluatedSystemModel {
                 return;
             }
             if (measure.isCalculationAvailable()) {
-                let calculatedMeasure = { name: measure.getName, value: measure.calculate(this.#system) };
+                let calculatedMeasure = { name: measure.getName, value: measure.calculate(this.#system), description: measure.getCalculationDescription };
                 this.#calculatedMeasures.set(measure.getId, calculatedMeasure);
             }
         })

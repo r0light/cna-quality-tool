@@ -44,18 +44,12 @@ class RequestTrace {
      * @param {string} id The unique id for this entity.
      * @param {string} name The name of the Request Trace entity.
      * @param {MetaData} metaData The meta data for this entity, needed for displaying it in a diagram. 
-     * @param {ExternalEndpoint} externalEndpoint The {@link ExternalEndpoint} entity for which the Request Trace is being defined.
-     * @param {string} linkEntityOrEntities The Id {@link Link} entity or entities that take part in this Request Trace (1...N)
      * @throws {TypeError} If a wrong entity type is being provided
      */
-    constructor(id: string, name: string, metaData: MetaData, externalEndpoint: ExternalEndpoint, links: Link[]) {
-        for (const linkEntity of links) {
-            this.#links.add(linkEntity);
-        }
+    constructor(id: string, name: string, metaData: MetaData) {
         this.#id = id;
         this.#name = name;
         this.#metaData = metaData;
-        this.#externalEndpoint = externalEndpoint;
         this.#properties = getRequestTraceProperties();
     }
 
@@ -107,11 +101,22 @@ class RequestTrace {
     }
 
     /**
-     * Returns the IDs of the {@link Link} entities involved in this RequestTrace entity.
+     * Returns the {@link Link} entities involved in this RequestTrace entity.
      * @returns {Link[]}
      */
     get getLinks() {
         return this.#links;
+    }
+
+
+    /**
+     * Sets the {@link Link} entities involved in this RequestTrace entity.
+     */
+    set setLinks(links: Link[]) {
+        this.#links.clear();
+        for (const link of links) {
+            this.#links.add(link);
+        }
     }
 
     /**

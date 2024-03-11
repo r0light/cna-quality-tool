@@ -37,6 +37,7 @@ class SystemEntityManager {
         this.overwriteSystemEntity = this.overwriteSystemEntity.bind(this);
         this.convertToGraph = this.convertToGraph.bind(this);
         this.convertToJson = this.convertToJson.bind(this);
+        this.convertToCustomTosca = this.convertToCustomTosca.bind(this);
         this.loadFromJson = this.loadFromJson.bind(this);
         this.getGraph = this.getGraph.bind(this);
     }
@@ -382,6 +383,26 @@ class SystemEntityManager {
             }
         })
 
+        /*
+        const externalEndpointId = graphElement.prop("entity/properties/referred_endpoint");
+        if (!externalEndpointId || !(externalEndpointId.trim())) {
+            const message = `A Request Trace entity is only valid if it specifies its referred External Endpoint entity. However, for the Request Trace "${graphElement.attr("label/textWrap/text")}" 
+            no External Endpoint was selected and it is, therefore, invalid.`;
+            const error = new ErrorMessage(EntityTypes.REQUEST_TRACE, ErrorType.INVALID_MODEL_ENTIY, graphElement.attr("label/textWrap/text"), "External Endpoint", message);
+            this.#errorMessages.set(graphElement.id, error);
+            return null;
+        }
+
+        const involvedLinkIds = graphElement.prop("entity/properties/involved_links");
+        if (!involvedLinkIds || !involvedLinkIds[0] || involvedLinkIds[0].length <= 0) {
+            const message = `A Request Trace entity is only valid if it specifies its involved Link entities. However, the Request Trace "${graphElement.attr("label/textWrap/text")}" 
+            does not provide any information about its involved Links and it is, therefore, invalid.`;
+            const error = new ErrorMessage(EntityTypes.REQUEST_TRACE, ErrorType.INVALID_MODEL_ENTIY, graphElement.attr("label/textWrap/text"), "Involved Links", message);
+            this.#errorMessages.set(graphElement.id, error);
+            return null;
+        }
+*/
+
         return errors;
 
     }
@@ -409,7 +430,7 @@ class SystemEntityManager {
         let dataAggregateRelations: Map<string, RelationToDataAggregate[]> = new Map();
         for (let [componentId, component] of this.#currentSystemEntity.getComponentEntities.entries()) {
             component.getDataAggregateEntities.forEach(dataAggregateRelation => {
-                let relations =  dataAggregateRelations.get(dataAggregateRelation.data.getId);
+                let relations = dataAggregateRelations.get(dataAggregateRelation.data.getId);
                 if (relations) {
                     relations.push(dataAggregateRelation.relation);
                     dataAggregateRelations.set(dataAggregateRelation.data.getId, relations);
@@ -417,13 +438,22 @@ class SystemEntityManager {
                     dataAggregateRelations.set(dataAggregateRelation.data.getId, [dataAggregateRelation.relation]);
                 }
             })
-        } 
+        }
         for (let [dataAggregateId, dataAggregate] of this.#currentSystemEntity.getDataAggregateEntities.entries()) {
             if (!dataAggregateRelations.get(dataAggregateId).some(relation => relation.getProperties().find(prop => prop.getKey === "usage_relation").value === "persistence")) {
                 errors.push(`Data Aggregate ${dataAggregate.getName} is not persisted by any entity.`)
             }
         }
 
+        // validate that teach request trace has a referred endpoint and associated links
+        for (let [requestTraceId, requestTrace] of this.#currentSystemEntity.getRequestTraceEntities.entries()) {
+            if (!requestTrace.getExternalEndpoint) {
+                errors.push(`Request Trace ${requestTrace.getName} has no external endpoint to which it refers.`);
+            }
+            if (requestTrace.getLinks.size === 0) {
+                errors.push(`Request Trace ${requestTrace.getName} has no links added to it.`);
+            }
+        }
 
         return errors;
     }
@@ -571,33 +601,22 @@ class SystemEntityManager {
     }
 
     #createRequestTraceEntity(graphElement) {
+
+        const requestTrace = new Entities.RequestTrace(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement));
+
         const externalEndpointId = graphElement.prop("entity/properties/referred_endpoint");
-        if (!externalEndpointId || !(externalEndpointId.trim())) {
-            const message = `A Request Trace entity is only valid if it specifies its referred External Endpoint entity. However, for the Request Trace "${graphElement.attr("label/textWrap/text")}" 
-            no External Endpoint was selected and it is, therefore, invalid.`;
-            const error = new ErrorMessage(EntityTypes.REQUEST_TRACE, ErrorType.INVALID_MODEL_ENTIY, graphElement.attr("label/textWrap/text"), "External Endpoint", message);
-            this.#errorMessages.set(graphElement.id, error);
-            return null;
+        const externalEndpoint = [...(this.#currentSystemEntity.getComponentEntities)].map(([id, component]) => component).flatMap(component => component.getExternalEndpointEntities).find(endpoint => endpoint.getId === externalEndpointId);
+        if (externalEndpoint) {
+            requestTrace.setExternalEndpoint = externalEndpoint;
+        } else {
+            console.log(`External Endpoint ${externalEndpointId} not found in any component`)
         }
 
         const involvedLinkIds = graphElement.prop("entity/properties/involved_links");
-        if (!involvedLinkIds || !involvedLinkIds[0] || involvedLinkIds[0].length <= 0) {
-            const message = `A Request Trace entity is only valid if it specifies its involved Link entities. However, the Request Trace "${graphElement.attr("label/textWrap/text")}" 
-            does not provide any information about its involved Links and it is, therefore, invalid.`;
-            const error = new ErrorMessage(EntityTypes.REQUEST_TRACE, ErrorType.INVALID_MODEL_ENTIY, graphElement.attr("label/textWrap/text"), "Involved Links", message);
-            this.#errorMessages.set(graphElement.id, error);
-            return null;
-        }
-
-        const externalEndpoint = [...(this.#currentSystemEntity.getComponentEntities)].map(([id, component]) => component).flatMap(component => component.getExternalEndpointEntities).find(endpoint => endpoint.getId === externalEndpointId);
-        if (!externalEndpoint) {
-            // ErrorMessages already created while creating entity
-            throw new Error(`External Endpoint ${externalEndpointId} not found in any component`)
-        }
 
         const involvedLinks = involvedLinkIds.map(linkId => this.#currentSystemEntity.getLinkEntities.get(linkId));
 
-        const requestTrace = new Entities.RequestTrace(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement), externalEndpoint, involvedLinks);
+        requestTrace.setLinks = involvedLinks;
 
         // set entity properties
         for (let property of requestTrace.getProperties()) {
@@ -1112,7 +1131,11 @@ class SystemEntityManager {
         for (const property of EntityDetailsConfig.RequestTrace.specificProperties) {
             switch (property.providedFeature) {
                 case "referred_endpoint":
-                    newRequestTrace.prop(property.jointJsConfig.modelPath, requestTrace.getExternalEndpoint.getId);
+                    if (requestTrace.getExternalEndpoint) {
+                        newRequestTrace.prop(property.jointJsConfig.modelPath, requestTrace.getExternalEndpoint.getId);
+                    } else {
+                        newRequestTrace.prop(property.jointJsConfig.modelPath, "");
+                    }
                     break;
                 case "involvedLinks-wrapper":
                     let tmp = (property as TableDialogPropertyConfig).buttonActionContent.dialogContent as FormContentConfig;

@@ -21,7 +21,7 @@
                             <span v-if="productFactor.measures.size > 0">Relevant measures:</span>
                             <ul>
                                 <li v-for="[key, measure] of productFactor.measures">
-                                    <span>{{ measure.name }}</span>: <span> {{ measure.value }}</span>
+                                    <span>{{ measure.name }}</span>: <span class="font-weight-bold"> {{ measure.value }}</span><span> ({{ measure.description }})</span>
                                 </li>
                             </ul>
                         </div>

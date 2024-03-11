@@ -1431,7 +1431,7 @@ export const qualityModel: QualityModelSpec = {
         },
         "serviceReplicationLevel": {
             "name": "Service Replication level",
-            "calculation": "",
+            "calculation": "The average value of replicas per service",
             "sources": ["Guerron2020", "Souza2016"]
         },
         "storageReplicationLevel": {

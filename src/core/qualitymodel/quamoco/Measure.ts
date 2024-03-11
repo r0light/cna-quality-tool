@@ -8,15 +8,13 @@ class Measure {
 
     #id: string;
     #name: string;
-    #description: string;
     #calculationDescription: string;
     #calculation: Calculation;
     #sources: LiteratureSource[];
 
-    constructor(id: string, name: string, description: string, calculationDescription: string) {
+    constructor(id: string, name: string, calculationDescription: string) {
         this.#id = id;
         this.#name = name;
-        this.#description = description;
         this.#calculationDescription = calculationDescription;
         this.#calculation = undefined;
         this.#sources = [];
@@ -28,10 +26,6 @@ class Measure {
 
     get getName() {
         return this.#name;
-    }
-
-    get getDescription() {
-        return this.#description
     }
 
     get getCalculationDescription() {

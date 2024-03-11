@@ -314,10 +314,17 @@ class ToscaToEntitesConverter {
             if (node.type === REQUEST_TRACE_TOSCA_KEY) {
                 let uuid = uuidv4();
 
+                let requestTrace = new Entities.RequestTrace(uuid, this.#transformYamlKeyToLabel(key), readToscaMetaData(node.metadata));
+
                 let externalEndpoint = node.properties && node.properties["referred_endpoint"] ? endpoints.get(this.#keyIdMap.getId(node.properties["referred_endpoint"])) : null; // TODO something better than null?
+
+                if (externalEndpoint) {
+                    requestTrace.setExternalEndpoint = externalEndpoint;
+                }
+
                 let links = node.properties && node.properties["involved_links"] ? node.properties["involved_links"].map(linkKey => this.#importedSystem.getLinkEntities.get(this.#keyIdMap.getId(linkKey))) : [];
 
-                let requestTrace = new Entities.RequestTrace(uuid, this.#transformYamlKeyToLabel(key), readToscaMetaData(node.metadata), externalEndpoint, links);
+                requestTrace.setLinks = links;
 
                 if (node.properties) {
                     for (const [key, value] of Object.entries(node.properties)) {

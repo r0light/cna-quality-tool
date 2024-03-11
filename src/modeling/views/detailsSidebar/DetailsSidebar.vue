@@ -696,7 +696,7 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                 case EntityTypes.DATA_AGGREGATE:
                     if (propertyOption.providedFeature === "entity-text" && selectedEntityElement.prop("entity/assignedFamily")) {
 
-                        selectedEntityElement.prop("entity/assignedFamily", propertyOption.value);
+                        selectedEntityElement.prop("entity/assignedFamily", propertyOption.value, { rewrite: true });
 
                         const relatedDataAggregateEntities = props.graph.getElements().filter((entityElement) => {
                             return entityElement.prop("entity/type") === EntityTypes.DATA_AGGREGATE && entityElement.attr(propertyOption.jointJsConfig.modelPath).localeCompare(selectedEntityElement.attr(propertyOption.jointJsConfig.modelPath)) === 0;
@@ -704,7 +704,7 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
 
                         for (const relatedDataAggregateEntity of relatedDataAggregateEntities) {
                             relatedDataAggregateEntity.attr(propertyOption.jointJsConfig.modelPath, propertyOption.value);
-                            relatedDataAggregateEntity.prop("entity/assignedFamily", propertyOption.value);
+                            relatedDataAggregateEntity.prop("entity/assignedFamily", propertyOption.value, { rewrite: true });
                         }
                         continue;
                     }
@@ -712,14 +712,14 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                 case EntityTypes.BACKING_DATA:
                     if (propertyOption.providedFeature === "entity-text" && selectedEntityElement.prop("entity/assignedFamily")) {
 
-                        selectedEntityElement.prop("entity/assignedFamily", propertyOption.value);
+                        selectedEntityElement.prop("entity/assignedFamily", propertyOption.value, { rewrite: true });
                         // also change all other backing data elements of the same family
                         const relatedBackingDataEntities = props.graph.getElements().filter((entityElement) => {
                             return entityElement.prop("entity/type") === EntityTypes.BACKING_DATA && entityElement.attr(propertyOption.jointJsConfig.modelPath).localeCompare(selectedEntityElement.attr(propertyOption.jointJsConfig.modelPath)) === 0;
                         });
                         for (const relatedBackingDataEntity of relatedBackingDataEntities) {
                             relatedBackingDataEntity.attr(propertyOption.jointJsConfig.modelPath, propertyOption.value);
-                            relatedBackingDataEntity.prop("entity/assignedFamily", propertyOption.value);
+                            relatedBackingDataEntity.prop("entity/assignedFamily", propertyOption.value, { rewrite: true });
                         }
                         continue;
                     }
@@ -740,13 +740,13 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                         let currentFamilyName = selectedEntityElement.attr("label/textWrap/text");
                         for (let otherDataAggregate of propertyOption.tableRows) {
                             if (otherDataAggregate.columns["included"]["checked"]) {
-                                (props.graph.getCell(otherDataAggregate.columns["included"]["id"]) as dia.Element).attr("label/textWrap/text", currentFamilyName);
-                                (props.graph.getCell(otherDataAggregate.columns["included"]["id"]) as dia.Element).prop("entity/assignedFamily", currentFamilyName);
+                                (props.graph.getCell(otherDataAggregate.columns["included"]["id"]) as dia.Element).attr("label/textWrap/text", currentFamilyName, { rewrite: true });
+                                (props.graph.getCell(otherDataAggregate.columns["included"]["id"]) as dia.Element).prop("entity/assignedFamily", currentFamilyName, { rewrite: true });
                             } else {
                                 // reset name if it was previously in the same family
                                 if ((props.graph.getCell(otherDataAggregate.columns["included"]["id"]) as dia.Element).prop("entity/assignedFamily").localeCompare(currentFamilyName) === 0) {
-                                    (props.graph.getCell(otherDataAggregate.columns["included"]["id"]) as dia.Element).attr("label/textWrap/text", "Data Aggregate");
-                                    (props.graph.getCell(otherDataAggregate.columns["included"]["id"]) as dia.Element).prop("entity/assignedFamily", "");
+                                    (props.graph.getCell(otherDataAggregate.columns["included"]["id"]) as dia.Element).attr("label/textWrap/text", "Data Aggregate", { rewrite: true });
+                                    (props.graph.getCell(otherDataAggregate.columns["included"]["id"]) as dia.Element).prop("entity/assignedFamily", "", { rewrite: true });
                                 }
                             }
                         }
@@ -758,14 +758,14 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                         let currentFamilyName = selectedEntityElement.attr("label/textWrap/text");
                         for (let otherBackingData of propertyOption.tableRows) {
                             if (otherBackingData.columns["included"]["checked"]) {
-                                (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).attr("label/textWrap/text", currentFamilyName);
-                                (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).prop("entity/assignedFamily", currentFamilyName);
+                                (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).attr("label/textWrap/text", currentFamilyName, { rewrite: true });
+                                (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).prop("entity/assignedFamily", currentFamilyName, { rewrite: true });
                             } else {
                                 // TODO reset name or not?
                                 // reset name if it was previously in the same family
                                 if ((props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).prop("entity/assignedFamily").localeCompare(currentFamilyName) === 0) {
-                                    (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).attr("label/textWrap/text", "Backing Data");
-                                    (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).prop("entity/assignedFamily", "");
+                                    (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).attr("label/textWrap/text", "Backing Data", { rewrite: true });
+                                    (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).prop("entity/assignedFamily", "", { rewrite: true });
                                 }
                             }
                         }
@@ -787,7 +787,7 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                     if (propertyOption.providedFeature === "uses_data") {
                         let selectedDataAggregateIDs = propertyOption.tableRows.filter(row => row.columns["included"]["checked"])
                             .map(row => row.columns["included"]["id"]);
-                        selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, selectedDataAggregateIDs);
+                        selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, selectedDataAggregateIDs, { rewrite: true });
                         continue;
                     }
                     break;
@@ -795,7 +795,7 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                     if (propertyOption.providedFeature === "involved_links") {
                         let selectedLinkIDs = propertyOption.tableRows.filter(row => row.columns["included"]["checked"])
                             .map(row => row.columns["included"]["id"]);
-                        selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, selectedLinkIDs);
+                        selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, selectedLinkIDs, { rewrite: true });
                         continue;
                     }
                     break;

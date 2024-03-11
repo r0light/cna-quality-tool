@@ -439,7 +439,9 @@ class EntitiesToToscaConverter {
         }
 
         // overwrite with keys
-        template.properties.referred_endpoint = keyIdMap.getKey(requestTrace.getExternalEndpoint.getId);
+        if (requestTrace.getExternalEndpoint) {
+            template.properties.referred_endpoint = keyIdMap.getKey(requestTrace.getExternalEndpoint.getId);
+        }
 
         let linkKeys = new Set<string>();
         let nodeKeys = new Set<string>();

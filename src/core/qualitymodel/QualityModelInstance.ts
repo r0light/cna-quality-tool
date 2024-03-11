@@ -44,7 +44,7 @@ function getQualityModel(): QualityModelInstance {
 
     // add all Measures
     for (const [measureKey, measure] of Object.entries(qualityModel.measures)) {
-        let newMeasure = new Measure(measureKey, measure.name, "", measure.calculation);
+        let newMeasure = new Measure(measureKey, measure.name, measure.calculation);
         measure.sources.forEach(sourceKey => {
             let url = literature[sourceKey] ? literature[sourceKey].url : "";
             newMeasure.addSource(new LiteratureSource(sourceKey, "", url));
