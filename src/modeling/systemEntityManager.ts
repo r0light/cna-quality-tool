@@ -40,6 +40,7 @@ class SystemEntityManager {
         this.convertToCustomTosca = this.convertToCustomTosca.bind(this);
         this.loadFromJson = this.loadFromJson.bind(this);
         this.getGraph = this.getGraph.bind(this);
+        this.validateModeledSystem = this.validateModeledSystem.bind(this);
     }
 
     getSystemEntity(): Entities.System {
@@ -111,6 +112,18 @@ class SystemEntityManager {
         return { createdCells: this.#currentSystemGraph.getCells(), error: null }
     }
 
+    validateModeledSystem(): string[] {
+
+        let graphErrors = this.#validateGraph();
+
+        this.#currentSystemEntity.resetAllIncludedSystemEntities();
+
+        this.#convertToSystemEntity();
+
+        let systemErrors = this.#validateSystemEntity();
+
+        return graphErrors.concat(systemErrors);
+    }
 
 
     #convertToSystemEntity() {

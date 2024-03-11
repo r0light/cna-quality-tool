@@ -3,7 +3,7 @@
         <Toolbar :system-name="currentSystemName" :key="currentSystemName" :paper="(mainPaper as dia.Paper)"
             :graph="(currentSystemGraph as dia.Graph)" :selectedRequestTrace="currentRequestTraceViewSelection" :appSettings="modelingData.appSettings"
             @update:systemName="setCurrentSystemName" @update:appSettings="setCurrentAppSettings" @click:exit-request-trace-view="resetRequestTraceSelection"
-            @click:print-active-paper="onPrintRequested" @click:exportSvg="onSvgExportRequested"
+            @click:print-active-paper="onPrintRequested" @click:exportSvg="onSvgExportRequested" @click:validate="triggerValidation"
             @load:fromJson="loadFromJson" @save:toJson="saveToJson" @load:fromTosca="loadFromTosca"
             @save:toTosca="saveToTosca"></Toolbar>
         <div class="app-body">
@@ -379,6 +379,63 @@ function onSvgExportRequested() {
     downloadElement.setAttribute('href', 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(asString));
     downloadElement.setAttribute('download', `${currentSystemName.value}.svg`);
     downloadElement.click();
+}
+
+function triggerValidation() {
+    let errors = systemEntityManager.validateModeledSystem();
+
+    if (errors.length > 0) {
+        confirmationModalManager.value = {
+            show: true,
+            dialogMetaData: {
+                dialogSize: DialogSize.DEFAULT,
+                header: {
+                    iconClass: "fa-solid fa-triangle-exclamation",
+                    svgRepresentation: "",
+                    text: "Warning"
+                },
+                footer: {
+                    showCancelButton: false,
+                    cancelButtonText: "",
+                    saveButtonIconClass: "",
+                    saveButtonText: "OK"
+                },
+            },
+            confirmationPrompt: `The following problems were detected while validating the modeled system:
+            <ul>
+                <li> ${errors.join("</li>\n<li>")} </li>
+            </ul>
+            `,
+            onCancel: () => confirmationModalManager.value.show = false,
+            onConfirm: () => {
+                confirmationModalManager.value.show = false;
+            }
+        }
+    } else {
+        confirmationModalManager.value = {
+            show: true,
+            dialogMetaData: {
+                dialogSize: DialogSize.DEFAULT,
+                header: {
+                    iconClass: "fa-solid fa-circle-check",
+                    svgRepresentation: "",
+                    text: "Validation passed."
+                },
+                footer: {
+                    showCancelButton: false,
+                    cancelButtonText: "",
+                    saveButtonIconClass: "",
+                    saveButtonText: "OK"
+                },
+            },
+            confirmationPrompt: `No problems were detected while validating the modeled system!`,
+            onCancel: () => confirmationModalManager.value.show = false,
+            onConfirm: () => {
+                confirmationModalManager.value.show = false;
+            }
+        }
+    }
+
 }
 
 </script>

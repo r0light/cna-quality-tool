@@ -86,6 +86,14 @@ const ToolbarConfig = {
                     buttonType: ToolbarElementType.BUTTON
                 },
                 {
+                    providedFeature: "validateModel",
+                    tooltipText: "Validate the current model for problems",
+                    text: "",
+                    iconClass: "fa-solid fa-file-circle-check",
+                    additionalCssClass: "",
+                    buttonType: ToolbarElementType.BUTTON
+                },
+                {
                     providedFeature: "convertModeledSystemEntity",
                     tooltipText: "Export modeled System",
                     text: "",
