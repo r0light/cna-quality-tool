@@ -47,6 +47,7 @@ import { ensureCorrectRendering } from './renderingUtilities';
 import ModalConfirmationDialog, { ConfirmationModalProps, getDefaultConfirmationDialogData } from './views/components/ModalConfirmationDialog.vue';
 import { DialogSize } from './config/actionDialogConfig';
 import { ModelingAppSettings } from './config/appSettings';
+import { request } from 'http';
 
 const props = defineProps<{
     systemName: string,
@@ -169,7 +170,7 @@ function loadFromJson(jsonString: string, fileName: string): Promise<void> {
 
     setCurrentSystemName(systemEntityManager.getSystemEntity().getSystemName);
 
-    return ensureCorrectRendering(loadResult.createdCells, mainPaper.value);
+    return ensureCorrectRendering(loadResult.createdCells, mainPaper.value).then(done => resetAllHighlighting());
 }
 
 function saveToJson() {
@@ -196,7 +197,7 @@ function loadFromTosca(yamlString: string, fileName: string): Promise<void> {
 
     setCurrentSystemName(systemEntityManager.getSystemEntity().getSystemName);
 
-    return ensureCorrectRendering(loadResult.createdCells, mainPaper.value);
+    return ensureCorrectRendering(loadResult.createdCells, mainPaper.value).then(done => resetAllHighlighting());
 
 }
 
@@ -205,7 +206,7 @@ function showError(errorTitle, errorMessage) {
         show: true,
         dialogMetaData: {
             dialogSize: DialogSize.DEFAULT,
-            header: {
+            header: {   
                 iconClass: "fa-solid fa-triangle-exclamation",
                 svgRepresentation: "",
                 text: errorTitle
@@ -303,6 +304,11 @@ function onSelectRequestTrace(element: dia.Element) {
             allInvolvedEntities.add(linkEntity.getTargetElement().id);
             allInvolvedEntities.add(linkEntity.getTargetElement().parent());
             allInvolvedEntities.add(linkEntity.getSourceElement().id);
+            if (linkEntity.getTargetElement().prop("entity/properties/uses_data")) {
+                for (const usedData of linkEntity.getTargetElement().prop("entity/properties/uses_data")) {
+                    allInvolvedEntities.add(currentSystemGraph.value.getCell(usedData).id);
+                }
+            }
         }
     }
 
@@ -322,6 +328,9 @@ function resetRequestTraceSelection() {
     //TODO unhighlight all request traces so that this function can be used for the reload
     if (currentRequestTraceViewSelection.value) {
         unhighlightRequestTrace(currentRequestTraceViewSelection.value);
+    } else {
+        currentSystemGraph.value.getElements().filter(element => element.prop("entity/type") === EntityTypes.REQUEST_TRACE).forEach(requestTrace => {
+            unhighlightRequestTrace(requestTrace)});
     }
 
     currentRequestTraceViewSelection.value = null
