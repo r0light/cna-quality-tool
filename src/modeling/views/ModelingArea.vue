@@ -161,6 +161,31 @@ onMounted(() => {
         'element:contextmenu': function (cellView, evt, x, y) {
             cellView.showTools();
         },
+        "element:pointerup": function (elementView, evt) {
+
+            if (elementView.model.isEmbedded()) {
+                // make sure there is enough space for embedded elements
+                let parent = elementView.model.getParentCell() as dia.Element;
+                
+                let availableArea = parent.size().height * parent.size().width;
+                let childrenArea = parent.getEmbeddedCells().map(cell  => (cell as dia.Element).size().height * (cell as dia.Element).size().width * 1.5).reduce((accumulator, currentValue) => { return accumulator + currentValue},0);
+
+                if (childrenArea >= availableArea * 0.3) {
+                    let newWidth = parent.size().width + 100;
+                    let oldHeight = parent.size().height;
+                    let newHeight = oldHeight;
+                    if (parent.prop("entity/type") !== EntityTypes.INFRASTRUCTURE) {
+                        // ensure aspect ratio except for infrastructure
+                        const defaultEntitySize = parent.prop("defaults/size");
+                        const aspectRatio = defaultEntitySize.height / defaultEntitySize.width;
+                        newHeight = Number((aspectRatio * (newWidth as number)).toFixed(2));
+                    }
+                    parent.resize(newWidth as number, newHeight, { deep: true });
+                    parent.position(parent.position().x - 50, parent.position().y - (newHeight - oldHeight) * 0.5);
+                }
+            }
+
+        },
         "link:pointerclick": function (linkView: dia.LinkView, evt) {
 
             removeHighlightingFromAllLinks();

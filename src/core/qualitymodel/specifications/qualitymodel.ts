@@ -1436,7 +1436,7 @@ export const qualityModel: QualityModelSpec = {
         },
         "storageReplicationLevel": {
             "name": "Storage Replication level",
-            "calculation": "",
+            "calculation": "The average value of replicas per storage backing service",
             "sources": ["Guerron2020", "Souza2016"]
         },
         "servicePortability": {

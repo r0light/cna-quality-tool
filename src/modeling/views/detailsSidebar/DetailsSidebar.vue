@@ -671,15 +671,18 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                     selectedEntityElement.position(selectedEntityElement.position().x, propertyOption.value as number, { deep: true, restrictedArea: props.paper.getArea() });
                     break;
                 case "entity-width":
-                    let newWidth = propertyOption.value;
+                    let currentWidth = selectedEntityElement.size().width;
+                    let newWidth = propertyOption.value as number;
                     let oldHeight = selectedEntityElement.size().height;
+                    let updatedHeight = oldHeight;
                     if (selectedEntityElement.prop("entity/type") !== EntityTypes.INFRASTRUCTURE) {
                         // ensure aspect ratio except for infrastructure
                         const defaultEntitySize = selectedEntityElement.prop("defaults/size");
                         const aspectRatio = defaultEntitySize.height / defaultEntitySize.width;
-                        oldHeight = Number((aspectRatio * (newWidth as number)).toFixed(2));
+                        updatedHeight = Number((aspectRatio * (newWidth as number)).toFixed(2));
                     }
-                    selectedEntityElement.resize(newWidth as number, oldHeight, { deep: true });
+                    selectedEntityElement.resize(newWidth as number, updatedHeight, { deep: true });
+                    selectedEntityElement.position(selectedEntityElement.position().x - (newWidth - currentWidth) * 0.5, selectedEntityElement.position().y - (updatedHeight - oldHeight) * 0.5);
                     break;
                 case "entity-height":
                     let newHeight = propertyOption.value;
