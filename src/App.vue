@@ -513,7 +513,7 @@ function deleteModelingPage(id: number) {
 
 <style lang="scss">
 .pagesContainer {
-  display: flex;
+  display: flex;  
   height: 100%;
   width: 100%;
 }

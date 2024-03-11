@@ -1,7 +1,7 @@
 <template>
     <div id="app">
         <Toolbar :system-name="currentSystemName" :key="currentSystemName" :paper="(mainPaper as dia.Paper)"
-            :graph="(currentSystemGraph as dia.Graph)" :selectedRequestTrace="currentRequestTraceViewSelection" :appSettings="modelingData.appSettings"
+            :graph="(currentSystemGraph as dia.Graph)" :selectedRequestTrace="currentRequestTraceViewSelection" :appSettings="modelingData ? modelingData.appSettings : getDefaultAppSettings()"
             @update:systemName="setCurrentSystemName" @update:appSettings="setCurrentAppSettings" @click:exit-request-trace-view="resetRequestTraceSelection"
             @click:print-active-paper="onPrintRequested" @click:exportSvg="onSvgExportRequested" @click:validate="triggerValidation"
             @load:fromJson="loadFromJson" @save:toJson="saveToJson" @load:fromTosca="loadFromTosca"
@@ -15,7 +15,7 @@
             <div class="visible-modeling-area">
                 <ModelingArea :pageId="`model${pageId}`" :graph="(currentSystemGraph as dia.Graph)"
                     v-model:paper="mainPaper" :currentElementSelection="currentSelection"
-                    :currentRequestTraceSelection="currentRequestTraceViewSelection" :printing="printing" :appSettings="modelingData.appSettings"
+                    :currentRequestTraceSelection="currentRequestTraceViewSelection" :printing="printing" :appSettings="modelingData ? modelingData.appSettings : getDefaultAppSettings()"
                     @select:Element="(element: dia.CellView | dia.LinkView) => currentSelection = element"
                     @select:RequestTrace="onSelectRequestTrace" @deselect:Element="currentSelection = null"
                     @deselect:RequestTrace="resetRequestTraceSelection">
@@ -46,7 +46,7 @@ import { entityShapes } from './config/entityShapes';
 import { ensureCorrectRendering } from './renderingUtilities';
 import ModalConfirmationDialog, { ConfirmationModalProps, getDefaultConfirmationDialogData } from './views/components/ModalConfirmationDialog.vue';
 import { DialogSize } from './config/actionDialogConfig';
-import { ModelingAppSettings } from './config/appSettings';
+import { ModelingAppSettings, getDefaultAppSettings } from './config/appSettings';
 import { request } from 'http';
 
 const props = defineProps<{
@@ -253,7 +253,7 @@ function saveToTosca() {
         confirmationModalManager.value = {
             show: true,
             dialogMetaData: {
-                dialogSize: DialogSize.DEFAULT,
+                dialogSize: DialogSize.LARGE,
                 header: {
                     iconClass: "fa-solid fa-triangle-exclamation",
                     svgRepresentation: "",
@@ -397,7 +397,7 @@ function triggerValidation() {
         confirmationModalManager.value = {
             show: true,
             dialogMetaData: {
-                dialogSize: DialogSize.DEFAULT,
+                dialogSize: DialogSize.LARGE,
                 header: {
                     iconClass: "fa-solid fa-triangle-exclamation",
                     svgRepresentation: "",
