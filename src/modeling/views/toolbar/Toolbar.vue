@@ -714,6 +714,13 @@ function updateAppSettings() {
     }
 
     if (appSettings.value.routerType !== (props.paper.options.defaultRouter as routers.Router).name) {
+
+        // unset all routers of links to ensure new default router is applied
+        props.graph.getLinks().forEach(link => {
+            link.unset("router");
+
+        })
+
         switch (appSettings.value.routerType) {
             case "normal":
                 props.paper.options.defaultRouter = {

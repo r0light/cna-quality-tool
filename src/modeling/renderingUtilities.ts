@@ -40,15 +40,9 @@ export function ensureCorrectRendering(createdCells: dia.Cell[], paper: dia.Pape
                         });
                     })
                 );
-            } /*else if (cell.isLink) {
-                cellsRendered.push(
-                    cellRendered.then(() => {
-                        return new Promise<void>((resolve, reject) => {
-                            waitForCellToBeVisible(cell.findView(mainPaper.value), resolve);
-                        })
-                    })  
-                )
-            } */
+            } else if (cell.isLink) {
+                (cell.findView(paper) as dia.LinkView).requestConnectionUpdate();
+            } 
         }
 
         Promise.all(cellsRendered).then(() => {

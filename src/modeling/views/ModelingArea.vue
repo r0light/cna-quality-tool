@@ -69,8 +69,8 @@ onMounted(() => {
         defaultRouter: {
             name: "manhattan",
             args: {
-                step: 10,
-                padding: 15,
+                step: 5,
+                padding: 10,
                 maximumLoops: 5000,
                 maxAllowedDirectionChange: 100,
             }
@@ -199,7 +199,7 @@ onMounted(() => {
 
 
     // bind `graph` to the `adjustVertices` function
-    var adjustGraphVertices = partial(adjustVertices, props.graph);
+    var adjustGraphVertices = partial(adjustVertices, props.graph, paper);
     // adjust vertices when a cell is removed or its source/target was changed
     props.graph.on('add remove change:source change:target', adjustGraphVertices);
     // adjust vertices when the user stops interacting with an element
@@ -268,7 +268,11 @@ function configureLink(linkView, evt, elementViewConnected, magnet, arrowhead) {
     if ((linkView.model.prop("entity/type") === EntityTypes.LINK) && (elementViewConnected.model.prop("entity/type") === EntityTypes.INFRASTRUCTURE)) {
         let deploymentMappingLink = new DeploymentMapping();
 
-        linkView.model.source(linkSource);
+        linkView.model.source(linkSource, {
+            anchor: {
+                name: 'perpendicular',
+            }
+        });
         linkView.model.target(linkTarget);
         linkView.model.set("type", deploymentMappingLink.prop("type"));
         linkView.model.attr("root", deploymentMappingLink.attr("root"));
@@ -280,7 +284,11 @@ function configureLink(linkView, evt, elementViewConnected, magnet, arrowhead) {
         (elementViewConnected.model.prop("entity/type") === EntityTypes.ENDPOINT || elementViewConnected.model.prop("entity/type") === EntityTypes.EXTERNAL_ENDPOINT)) {
         let link = new Link();
 
-        linkView.model.source(linkSource);
+        linkView.model.source(linkSource, {
+            anchor: {
+                name: 'perpendicular',
+            }
+        });
         linkView.model.target(linkTarget);
         linkView.model.set("type", link.prop("type"));
         linkView.model.attr("root", link.attr("root"));
@@ -358,9 +366,7 @@ function provideConnectionWarningDialog() {
 
 type Vertex = { x: number, y: number };
 
-function adjustVertices(graph: dia.Graph, cell: dia.Cell | dia.CellView) {
-
-    const PADDING_TO_SOURCE_ELEMENT = 30;
+function adjustVertices(graph: dia.Graph, paper: dia.Paper, cell: dia.Cell | dia.CellView) {
 
     // if `cell` is a view, find its model
     if (cell instanceof dia.CellView) {
@@ -369,62 +375,48 @@ function adjustVertices(graph: dia.Graph, cell: dia.Cell | dia.CellView) {
 
     if (cell instanceof dia.Element) {
         // `cell` is an element
-
-        graph.getConnectedLinks(cell).forEach(link => adjustVertices(graph, link));
-        cell.getEmbeddedCells().forEach(child => graph.getConnectedLinks(child).forEach(link => adjustVertices(graph, link)));
+        graph.getConnectedLinks(cell).forEach(link => adjustVertices(graph, paper, link));
+        cell.getEmbeddedCells().forEach(child => graph.getConnectedLinks(child).forEach(link => adjustVertices(graph, paper, link)));
         return;
     } else if (cell instanceof dia.Link) {
 
-        // reset own vertices
-        //let closestToTarget = cell.getSourcePoint();
-        
         var sourceCell = cell.getSourceCell();
-        /*
-        if (sourceCell) {
-            closestToTarget = getFirstIntersectionPoint(sourceCell, cell.getSourcePoint(), cell.getTargetPoint());
-        } else {
-            console.log("source cell currently not available for" + cell.id);
-        }
-        */
-        //closestToTarget = moveOnLine(closestToTarget, cell.getTargetPoint(), PADDING_TO_SOURCE_ELEMENT);
-        let closestToTarget = getOutboundPointInSuitableDirection(sourceCell, cell.getSourcePoint(), cell.getTargetPoint(), 20);
-        //let closestToTarget = getOutboundPointInSuitableDirection(cell.getSourceCell(), cell.getSourcePoint(), cell.getTargetPoint(), cell.getSourcePoint().distance(cell.getTargetPoint()) * 0.5);
 
+        // earlier approaches
+        // let closestToTarget = getOutboundPointInSuitableDirection(sourceCell, cell.getSourcePoint(), cell.getTargetPoint(), 30);
+        // let closestToTarget = getOutboundPointInSuitableDirection(cell.getSourceCell(), cell.getSourcePoint(), cell.getTargetPoint(), cell.getSourcePoint().distance(cell.getTargetPoint()) * 0.5);
         // initialize vertices
-        cell.vertices([closestToTarget], { rewrite: true } );
+        //cell.vertices([closestToTarget], { rewrite: true });
 
+        if (sourceCell) {
+            if (paper.options.defaultRouter) {
+                if (paper.options.defaultRouter.name === "manhattan") {
+                    var linksWithSameSource = graph.getConnectedLinks(sourceCell);
+                    var indexOfThisLink = 0;
+                    for (const [index, link] of linksWithSameSource.entries()) {
+                        if (link.id === cell.id) {
+                            indexOfThisLink = index;
+                            break;
+                        }
+                    }
 
-        // try to avoid conflicts
-        var sourceId: dia.Cell.ID = cell.get('source').id || cell.previous('source').id;
-        var linksWithSameSource = graph.getConnectedLinks(graph.getCell(sourceId)).filter(function (otherLink: dia.Link) {
-            if (cell.id === otherLink.id) {
-                return false;
-            }
-            return sourceId === otherLink.source().id;
-        });
+                    let padding = 10 + indexOfThisLink * 5;
 
-        let otherWayPoints: Vertex[] = [];
-        linksWithSameSource.forEach(link => {
-            otherWayPoints.push(...link.vertices());
-        })
-
-        let maximumTries = 100;
-        for (let [index, vertex] of cell.vertices().entries()) {
-            let tries = 0;
-            while (hasConflictingWaypoint(vertex, otherWayPoints)) {
-                if (tries >= maximumTries) {    
-                    break;
+                    cell.router({
+                        name: "manhattan",
+                        args: {
+                            step: 5,
+                            padding: padding,
+                            maximumLoops: 5000,
+                            maxAllowedDirectionChange: 100,
+                        }
+                    });
+                } else {
+                    cell.router(paper.options.defaultRouter);
                 }
-                //adjustVertexPosition(vertex, closestToTarget, cell.getTargetPoint());
-                let newPoint = moveOnLine(new g.Point(vertex.x, vertex.y), cell.getTargetPoint(), 10);
-                cell.vertex(index, {x: newPoint.x, y: newPoint.y});
-                vertex.x = newPoint.x;
-                vertex.y = newPoint.y;
-                tries = tries + 1;
             }
         }
-        
-
+        (cell.findView(paper) as dia.LinkView).requestConnectionUpdate();
     }
 }
 
