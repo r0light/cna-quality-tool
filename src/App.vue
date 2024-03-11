@@ -93,7 +93,7 @@
     </div>
     <div class="pagesContainer">
       <router-view :key="$route.path"
-        @store:modelingData="(id, systemEntityManager, toImport, importDone) => storeModelingData(id, toImport, systemEntityManager, importDone)"
+        @store:modelingData="(id, systemEntityManager, toImport, importDone, appSettings) => storeModelingData(id, toImport, systemEntityManager, importDone, appSettings)"
         @update:systemName="(newName, id) => updatePageName(newName, id)"
         @update:evaluatedSystem="(systemId) => storeSelectedSystemToEvaluate(systemId)">
       </router-view>
@@ -114,6 +114,7 @@ import ModelingApp from './modeling/ModelingApp.vue';
 import QualityModelApp from './qualitymodel/QualityModelApp.vue';
 import EvaluationApp from './evaluation/EvaluationApp.vue';
 import SystemEntityManager from './modeling/systemEntityManager';
+import { ModelingAppSettings, getDefaultAppSettings } from './modeling/config/appSettings';
 
 type Page = {
   id: number;
@@ -134,7 +135,8 @@ export type ModelingData = {
   name: string,
   toImport: ImportData,
   entityManager: SystemEntityManager,
-  importDone: boolean
+  importDone: boolean,
+  appSettings: ModelingAppSettings
 }
 
 const CLOUNAQ = "Clounaq";
@@ -173,7 +175,7 @@ const sharedSystemsData: ComputedRef<ModelingData[]> = computed(() => {
   return modeledSystemsData.value.filter(data => data.id !== -1) as ModelingData[];
 });
 
-function storeModelingData(id: number, toImport: ImportData, systemEntityManager: SystemEntityManager, importDone: boolean) {
+function storeModelingData(id: number, toImport: ImportData, systemEntityManager: SystemEntityManager, importDone: boolean, appSettings: ModelingAppSettings) {
 
   for (let i = 0; i < modeledSystemsData.value.length; i++) {
     if (modeledSystemsData.value[i].id === id) {
@@ -182,7 +184,8 @@ function storeModelingData(id: number, toImport: ImportData, systemEntityManager
         name: modeledSystemsData.value[i].name,
         toImport: toImport,
         entityManager: systemEntityManager,
-        importDone: importDone
+        importDone: importDone,
+        appSettings: appSettings
       }
     }
   }
@@ -399,7 +402,8 @@ onMounted(() => {
             fileContent: modelingData.entityManager.convertToJson()
           },
           entityManager: null,
-          importDone: false
+          importDone: false,
+          appSettings: modelingData.appSettings
         }
       } else {
         return {
@@ -410,7 +414,8 @@ onMounted(() => {
             fileContent: JSON.parse(modelingData.toImport.fileContent)
           },
           entityManager: null,
-          importDone: false
+          importDone: false,
+          appSettings: modelingData.appSettings
         }
       }
 
@@ -433,7 +438,8 @@ function addNewModelingPage(name: string, toImport: ImportData) {
     name: name,
     toImport: toImport,
     entityManager: null,
-    importDone: true
+    importDone: true,
+    appSettings: getDefaultAppSettings()
   });
 
   pages.value.push({

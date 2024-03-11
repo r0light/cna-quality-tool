@@ -23,7 +23,7 @@ import { DeploymentMapping, Link, entityShapes } from "../config/entityShapes";
 import { DialogSize } from '../config/actionDialogConfig';
 import ModalConfirmationDialog, { ConfirmationModalProps, getDefaultConfirmationDialogData } from './components/ModalConfirmationDialog.vue';
 import { ensureCorrectRendering } from '../renderingUtilities';
-
+import { ModelingAppSettings, getRouterConfig } from '../config/appSettings';
 
 const props = defineProps<{
     pageId: string,
@@ -32,6 +32,7 @@ const props = defineProps<{
     currentElementSelection: dia.CellView | null,
     currentRequestTraceSelection: dia.Element | null
     printing: boolean,
+    appSettings: ModelingAppSettings
 }>()
 
 const emit = defineEmits<{
@@ -49,9 +50,9 @@ onMounted(() => {
     var modelingValidator = new ModelingValidator(props.graph);
     var paper = new dia.Paper({
         el: $(`#${props.pageId}`),
-        width: 3000,
-        height: 3000,
-        gridSize: 10,
+        width: props.appSettings.paperWidth,
+        height: props.appSettings.paperHeight,
+        gridSize: props.appSettings.paperGridSize,
         drawGrid: true,
         model: props.graph as dia.Graph,
         embeddingMode: true,
@@ -66,15 +67,7 @@ onMounted(() => {
 
         // defaults:
         defaultLink: (cellView, magnet) => modelingValidator.defaultLink(cellView, magnet),
-        defaultRouter: {
-            name: "manhattan",
-            args: {
-                step: 5,
-                padding: 10,
-                maximumLoops: 5000,
-                maxAllowedDirectionChange: 100,
-            }
-        },
+        defaultRouter: getRouterConfig(props.appSettings.routerType),
         defaultConnector: {
             name: "jumpover",
             args: {

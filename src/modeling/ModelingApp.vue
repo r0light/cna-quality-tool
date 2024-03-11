@@ -1,8 +1,8 @@
 <template>
     <div id="app">
         <Toolbar :system-name="currentSystemName" :key="currentSystemName" :paper="(mainPaper as dia.Paper)"
-            :graph="(currentSystemGraph as dia.Graph)" :selectedRequestTrace="currentRequestTraceViewSelection"
-            @update:systemName="setCurrentSystemName" @click:exit-request-trace-view="resetRequestTraceSelection"
+            :graph="(currentSystemGraph as dia.Graph)" :selectedRequestTrace="currentRequestTraceViewSelection" :appSettings="modelingData.appSettings"
+            @update:systemName="setCurrentSystemName" @update:appSettings="setCurrentAppSettings" @click:exit-request-trace-view="resetRequestTraceSelection"
             @click:print-active-paper="onPrintRequested" @click:exportSvg="onSvgExportRequested"
             @load:fromJson="loadFromJson" @save:toJson="saveToJson" @load:fromTosca="loadFromTosca"
             @save:toTosca="saveToTosca"></Toolbar>
@@ -15,7 +15,7 @@
             <div class="visible-modeling-area">
                 <ModelingArea :pageId="`model${pageId}`" :graph="(currentSystemGraph as dia.Graph)"
                     v-model:paper="mainPaper" :currentElementSelection="currentSelection"
-                    :currentRequestTraceSelection="currentRequestTraceViewSelection" :printing="printing"
+                    :currentRequestTraceSelection="currentRequestTraceViewSelection" :printing="printing" :appSettings="modelingData.appSettings"
                     @select:Element="(element: dia.CellView | dia.LinkView) => currentSelection = element"
                     @select:RequestTrace="onSelectRequestTrace" @deselect:Element="currentSelection = null"
                     @deselect:RequestTrace="resetRequestTraceSelection">
@@ -46,6 +46,7 @@ import { entityShapes } from './config/entityShapes';
 import { ensureCorrectRendering } from './renderingUtilities';
 import ModalConfirmationDialog, { ConfirmationModalProps, getDefaultConfirmationDialogData } from './views/components/ModalConfirmationDialog.vue';
 import { DialogSize } from './config/actionDialogConfig';
+import { ModelingAppSettings } from './config/appSettings';
 
 const props = defineProps<{
     systemName: string,
@@ -56,7 +57,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
     (e: "update:systemName", newName: string, id: number): void;
-    (e: "store:modelingData", id: number, systemEntitManager: SystemEntityManager, toImport: ImportData, importDone: boolean): void;
+    (e: "store:modelingData", id: number, systemEntitManager: SystemEntityManager, toImport: ImportData, importDone: boolean, appSettings: ModelingAppSettings): void;
 }>()
 
 const currentSystemName = ref(props.systemName);
@@ -67,6 +68,10 @@ function setCurrentSystemName(systemName: string) {
     }
     currentSystemName.value = systemName;
     emit("update:systemName", currentSystemName.value, props.pageId);
+}
+
+function setCurrentAppSettings(appSettings: ModelingAppSettings) {
+    emit("store:modelingData", props.modelingData.id, systemEntityManager, props.modelingData.toImport, props.modelingData.importDone, appSettings);
 }
 
 const currentSystemGraph = ref<dia.Graph>((() => {
@@ -85,7 +90,7 @@ const systemEntityManager: SystemEntityManager = (() => {
         return props.modelingData.entityManager;
     } else {
         const newEntityManager = new SystemEntityManager(currentSystemGraph.value as dia.Graph);
-        emit("store:modelingData", props.modelingData.id, newEntityManager, props.modelingData.toImport, true);
+        emit("store:modelingData", props.modelingData.id, newEntityManager, props.modelingData.toImport, true, props.modelingData.appSettings);
         return new SystemEntityManager(currentSystemGraph.value as dia.Graph);
     }
 })();
@@ -121,7 +126,7 @@ onMounted(() => {
         }
 
         loaded.then(() => {
-            emit("store:modelingData", props.modelingData.id, systemEntityManager, { fileName: '', fileContent: '' }, true);
+            emit("store:modelingData", props.modelingData.id, systemEntityManager, { fileName: '', fileContent: '' }, true, props.modelingData.appSettings);
         })
     }
 

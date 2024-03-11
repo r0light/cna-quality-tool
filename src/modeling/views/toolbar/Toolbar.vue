@@ -7,22 +7,23 @@
             <div class="input-group-append" id="app-title-description">
                 <span class="user-select-none input-group-text">Current System</span>
 
-                <button id="editApplicationNameBtn" class="btn btn-outline-secondary" type="button" data-toggle="tooltip"
-                    data-placement="bottom" title="Edit name of System entity" v-show="nameEditMode === 'none'"
-                    @click="onToolbarButtonClick('editApplicationNameBtn', $event)">
+                <button id="editApplicationNameBtn" class="btn btn-outline-secondary" type="button"
+                    data-toggle="tooltip" data-placement="bottom" title="Edit name of System entity"
+                    v-show="nameEditMode === 'none'" @click="onToolbarButtonClick('editApplicationNameBtn', $event)">
                     <i class="fa-solid fa-pen-to-square"></i>
                 </button>
 
-                <button id="cancelEditApplicationNameBtn" class="btn btn-outline-danger submitEditApplicationNameBtnGroup"
-                    type="button" data-toggle="tooltip" data-placement="bottom" title="Cancel editing"
-                    v-show="nameEditMode === 'editing'"
+                <button id="cancelEditApplicationNameBtn"
+                    class="btn btn-outline-danger submitEditApplicationNameBtnGroup" type="button" data-toggle="tooltip"
+                    data-placement="bottom" title="Cancel editing" v-show="nameEditMode === 'editing'"
                     @click="onToolbarButtonClick('cancelEditApplicationNameBtn', $event)">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
 
 
-                <button id="submitEditApplicationNameBtn" class="btn btn-outline-success submitEditApplicationNameBtnGroup"
-                    type="button" data-toggle="tooltip" data-placement="bottom" title="Submit name of System entity"
+                <button id="submitEditApplicationNameBtn"
+                    class="btn btn-outline-success submitEditApplicationNameBtnGroup" type="button"
+                    data-toggle="tooltip" data-placement="bottom" title="Submit name of System entity"
                     v-show="nameEditMode === 'editing'"
                     @click="onToolbarButtonClick('submitEditApplicationNameBtn', $event)">
                     <i class="fa-solid fa-check"></i>
@@ -58,8 +59,8 @@
                         <input :id="filterTool.filterInput" @change="onFilterSelection(filterTool.viewKey)"
                             :data-entity-type="filterTool.viewKey" v-model="filterTool.filterState"
                             class="entityCheckBox form-check-input" type="checkbox" :value="filterTool.viewKey" checked>
-                        <label :id="filterTool.entityLabel" class="user-select-none entityCheckBoxLabel form-check-label"
-                            :for="filterTool.filterInput">
+                        <label :id="filterTool.entityLabel"
+                            class="user-select-none entityCheckBoxLabel form-check-label" :for="filterTool.filterInput">
                             {{ filterTool.labelText }}
                         </label>
 
@@ -94,7 +95,8 @@
                                     v-model="appSettings.paperWidth" aria-describedby="paperWidth-helpText" min="26">
                                 <button id="paperWidth-resetButton" class="btn btn-outline-secondary" type="reset"
                                     @click="appSettings.paperWidth = 3000">Reset</button>
-                                <small id="paperWidth-helpText" class="form-text text-muted">Due to the included content the
+                                <small id="paperWidth-helpText" class="form-text text-muted">Due to the included content
+                                    the
                                     value has to be greater than 26</small>
                             </div>
                         </form>
@@ -110,7 +112,8 @@
                                     v-model="appSettings.paperHeight" aria-describedby="paperHeight-helpText" min="26">
                                 <button class="btn btn-outline-secondary" type="reset"
                                     @click="appSettings.paperHeight = 3000">Reset</button>
-                                <small id="paperHeight-helpText" class="form-text text-muted">Due to the included content
+                                <small id="paperHeight-helpText" class="form-text text-muted">Due to the included
+                                    content
                                     the
                                     value has to be greater than 26</small>
                             </div>
@@ -125,7 +128,7 @@
                             <div>
                                 <label for="gridSize" class="align-baseline">Size:<span
                                         class="rangeBoxCurrentValue ml-2 align-baseline badge badge-primary badge-pill">{{
-                                            appSettings.paperGridSize }}</span></label>
+                appSettings.paperGridSize }}</span></label>
                                 <div class="inputRow form-row">
                                     <input class="col px-md-2 form-control-range" id="gridSize" type="range" min="1"
                                         max="50" v-model="appSettings.paperGridSize" step="1">
@@ -139,7 +142,7 @@
                                 <label for="gridThickness" class="align-baseline">Thickness:
                                     <span id="gridThickness-currentValue"
                                         class="rangeBoxCurrentValue ml-2 align-baseline badge badge-primary badge-pill">{{
-                                            appSettings.paperGridThickness }}</span></label>
+                appSettings.paperGridThickness }}</span></label>
                                 <div class="inputRow form-row"><input class="col px-md-2 form-control-range"
                                         id="gridThickness" type="range" min="1" max="10"
                                         v-model="appSettings.paperGridThickness" step="1">
@@ -176,10 +179,9 @@
     </ModalWrapper>
 </template>
 
-
 <script lang="ts" setup>
 import $, { data } from 'jquery';
-import { ref, computed, onMounted, Ref, ComputedRef, nextTick } from "vue";
+import { ref, computed, onMounted, Ref, ComputedRef } from "vue";
 import { dia, util, highlighters, routers } from "jointjs";
 import { DialogMetaData, DialogSize } from "../../config/actionDialogConfig";
 import EntityTypes from "../../config/entityTypes";
@@ -187,9 +189,8 @@ import ToolbarConfig from "../../config/toolbarConfiguration";
 import ButtonGroup from './ButtonGroup.vue';
 import ModalConfirmationDialog, { ConfirmationModalProps, getDefaultConfirmationDialogData } from '../components/ModalConfirmationDialog.vue';
 import ModalWrapper from '../components/ModalWrapper.vue';
-import { filter } from 'lodash';
-import { EntitiesToToscaConverter } from '@/core/tosca-adapter/EntitiesToToscaConverter';
 import { getAffectedBackingViewCells, getAffectedCommunicationViewCells, getAffectedDataViewCells, getAffectedDeploymentViewCells } from './viewfilter';
+import { ModelingAppSettings, getRouterConfig } from '@/modeling/config/appSettings';
 
 export type ToolbarButton = {
     buttonType: string,
@@ -211,6 +212,7 @@ export type ToolbarButtonGroup = {
 
 const props = defineProps<{
     systemName: string;
+    appSettings: ModelingAppSettings;
     paper: dia.Paper;
     graph: dia.Graph;
     selectedRequestTrace: dia.Element
@@ -218,6 +220,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
     (e: "update:systemName", newName: string): void;
+    (e: "update:appSettings", appSettings: ModelingAppSettings): void;
     (e: "click:exitRequestTraceView"): void;
     (e: "click:printActivePaper"): void;
     (e: "click:exportSvg"): void;
@@ -249,13 +252,6 @@ const settingsModalMetaData: DialogMetaData = {
         saveButtonText: "Apply changes"
     }
 };
-const appSettings = ref({
-    paperWidth: 3000,
-    paperHeight: 3000,
-    paperGridSize: 10,
-    paperGridThickness: 1,
-    routerType: "manhattan"
-})
 
 function configureToolbarButtons(config: any[]): ToolbarButtonGroup[] {
     let toolbarGroups: ToolbarButtonGroup[] = [];
@@ -691,29 +687,29 @@ function toggleEntityExpansion(event) {
 
 function editApplicationSettings() {
     // load current values
-    appSettings.value.paperWidth = props.paper.options.width as number;
-    appSettings.value.paperHeight = props.paper.options.height as number;
-    appSettings.value.paperGridSize = props.paper.options.gridSize;
-    appSettings.value.paperGridThickness = props.paper["_gridSettings"][0].thickness;
-    appSettings.value.routerType = (props.paper.options.defaultRouter as routers.Router).name;
+    props.appSettings.paperWidth = props.paper.options.width as number;
+    props.appSettings.paperHeight = props.paper.options.height as number;
+    props.appSettings.paperGridSize = props.paper.options.gridSize;
+    props.appSettings.paperGridThickness = props.paper["_gridSettings"][0].thickness;
+    props.appSettings.routerType = (props.paper.options.defaultRouter as routers.Router).name as "manhattan" | "metro" | "normal"; 
 
     showAppSettings.value = true;
 }
 
 function updateAppSettings() {
-    if (appSettings.value.paperWidth !== props.paper.options.width as number || appSettings.value.paperHeight !== props.paper.options.height as number) {
-        props.paper.setDimensions(appSettings.value.paperWidth, appSettings.value.paperHeight);
+    if ( props.appSettings.paperWidth !== props.paper.options.width as number ||  props.appSettings.paperHeight !== props.paper.options.height as number) {
+        props.paper.setDimensions( props.appSettings.paperWidth,  props.appSettings.paperHeight);
     }
 
-    if (appSettings.value.paperGridSize !== props.paper["_gridSettings"][0].thickness) {
-        props.paper.setGridSize(appSettings.value.paperGridSize);
+    if ( props.appSettings.paperGridSize !== props.paper["_gridSettings"][0].thickness) {
+        props.paper.setGridSize( props.appSettings.paperGridSize);
     }
 
-    if (appSettings.value.paperGridThickness !== props.paper["_gridSettings"][0].thickness) {
-        props.paper.drawGrid({ thickness: appSettings.value.paperGridThickness });
+    if ( props.appSettings.paperGridThickness !== props.paper["_gridSettings"][0].thickness) {
+        props.paper.drawGrid({ thickness:  props.appSettings.paperGridThickness });
     }
 
-    if (appSettings.value.routerType !== (props.paper.options.defaultRouter as routers.Router).name) {
+    if ( props.appSettings.routerType !== (props.paper.options.defaultRouter as routers.Router).name) {
 
         // unset all routers of links to ensure new default router is applied
         props.graph.getLinks().forEach(link => {
@@ -721,42 +717,15 @@ function updateAppSettings() {
 
         })
 
-        switch (appSettings.value.routerType) {
-            case "normal":
-                props.paper.options.defaultRouter = {
-                    name: "normal"
-                }
-                break;
-            case "metro":
-                props.paper.options.defaultRouter = {
-                    name: "metro",
-                    args: {
-                        step: 10,
-                        padding: 15,
-                        maximumLoops: 5000,
-                        maxAllowedDirectionChange: 100,
-                    }
-                }
-                break;
-            case "manhattan":
-            default:
-                props.paper.options.defaultRouter = {
-                    name: "manhattan",
-                    args: {
-                        step: 10,
-                        padding: 15,
-                        maximumLoops: 5000,
-                        maxAllowedDirectionChange: 100,
-                    }
-                }
-                break;
-        }
+        props.paper.options.defaultRouter = getRouterConfig(props.appSettings.routerType);
+
         // redraw
         let currentGraph = JSON.stringify(props.graph.toJSON());
         let currentName = props.systemName;
         props.paper.render();
         emit("load:fromJson", currentGraph, currentName);
     }
+    emit("update:appSettings", props.appSettings);
     showAppSettings.value = false;
 }
 
