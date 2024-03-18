@@ -307,8 +307,6 @@ onUpdated(() => {
             let supportedArtifactsOption = findInDialogByFeature(editSupportedArtifacts.buttonActionContent, "supported_artifacts");
             supportedArtifactsOption.includeFormCheck = false;
 
-            console.log(selectedEntity.model.prop(supportedArtifactsOption.jointJsConfig.modelPath))
-
             supportedArtifactsOption.value = selectedEntity.model.prop(supportedArtifactsOption.jointJsConfig.modelPath);
             break;
         case EntityTypes.DATA_AGGREGATE:
@@ -764,7 +762,6 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
             switch (selectedEntityElement.prop("entity/type")) {
                 case EntityTypes.INFRASTRUCTURE:
                     if (propertyOption.providedFeature === "supported_artifacts") {
-                        console.log(propertyOption.value)
                         selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, propertyOption.value);
                     }
                     break;

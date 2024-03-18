@@ -1,5 +1,6 @@
 <template>
-    <div v-for="option of propertyOptions" :data-group-context="groupId" :data-group-id="cardBodyId" v-show="option.show">
+    <div v-for="option of propertyOptions" :data-group-context="groupId" :data-group-id="cardBodyId"
+        v-show="option.show">
         <form :id="option.providedFeature" class="form-group"
             :class="[{ 'needs-validation': option.includeFormCheck }, { 'form-check': (option.contentType === PropertyContentType.CHECKBOX) }, { 'novalidate': option.includeFormCheck }]">
             <!--TODO separation line?-->
@@ -10,7 +11,7 @@
                 <span v-html="option.label"></span>
                 <span v-if="option.contentType === PropertyContentType.INPUT_RANGE"
                     class="rangeBoxCurrentValue ml-2 align-baseline badge badge-primary badge-pill">{{
-                        option.value }} px</span>
+        option.value }} px</span>
             </label>
             <div :class="['input-group', { 'has-validation': option.includeFormCheck }]">
                 <!--TODO group item-->
@@ -31,8 +32,8 @@
                     class="form-control" type="number" :class="option.validationState"
                     :disabled="option.inputProperties.disabled" :required="option.inputProperties.required"
                     :min="option.attributes.min" :max="option.attributes.max" :step="option.attributes.step"
-                    :maxlength="option.attributes.maxlength" v-model="option.value" :aria-describedby="option.helpTextId"
-                    :data-property-type="groupId"
+                    :maxlength="option.attributes.maxlength" v-model="option.value"
+                    :aria-describedby="option.helpTextId" :data-property-type="groupId"
                     v-on:keydown.enter.prevent="onEnterProperties([option])">
                 <div v-if="option.contentType === PropertyContentType.INPUT_TEXTBOX" class="input-group">
                     <div v-if="option.attributes.inputLabelIcon" class="input-group-prepend">
@@ -47,9 +48,10 @@
                         :aria-describedby="option.helpTextId" :data-property-type="groupId"
                         :list="option.providedFeature + '-datalist'"
                         v-on:keydown.enter.prevent="onEnterProperties([option])">
-                        <datalist :id="option.providedFeature + '-datalist'">
-                            <option v-for="suggestOption of option.attributes.suggestedValues" :value="suggestOption.value">{{ suggestOption.text }}</option>
-                        </datalist>
+                    <datalist :id="option.providedFeature + '-datalist'">
+                        <option v-for="suggestOption of option.attributes.suggestedValues" :value="suggestOption.value">
+                            {{ suggestOption.text }}</option>
+                    </datalist>
                 </div>
                 <input v-if="option.contentType === PropertyContentType.CHECKBOX" :id="option.providedFeature"
                     class="form-check-input" type="checkbox" :class="option.validationState"
@@ -57,13 +59,14 @@
                     :checked="option.inputProperties.checked" :aria-describedby="option.helpTextId"
                     :data-property-type="groupId" v-model="option.value" @change="onEnterProperties([option])">
                 <select v-if="option.contentType === PropertyContentType.DROPDOWN" class="custom-select"
-                    :id="option.providedFeature" :class="option.validationState" :disabled="option.inputProperties.disabled"
-                    :required="option.inputProperties.required" :size="option.attributes.size"
-                    :multiple="option.attributes.multiple" :data-property-type="groupId" v-model="option.value"
-                    @change="onEnterProperties([option])">
-                    <option v-for="selectOption of option.dropdownOptions" :value="selectOption.optionValue" :class="selectOption.representationClass"
-                        :key="selectOption.optionValue" :placeholder="option.attributes.placeholder"
-                        :title="selectOption.optionTitle" :disabled="selectOption.disabled">
+                    :id="option.providedFeature" :class="option.validationState"
+                    :disabled="option.inputProperties.disabled" :required="option.inputProperties.required"
+                    :size="option.attributes.size" :multiple="option.attributes.multiple" :data-property-type="groupId"
+                    v-model="option.value" @change="onEnterProperties([option])">
+                    <option v-for="selectOption of option.dropdownOptions" :value="selectOption.optionValue"
+                        :class="selectOption.representationClass" :key="selectOption.optionValue"
+                        :placeholder="option.attributes.placeholder" :title="selectOption.optionTitle"
+                        :disabled="selectOption.disabled">
                         {{ selectOption.optionText }}
                     </option>
                 </select>
@@ -71,7 +74,7 @@
                     @click="() => { option.checked = !option.checked }">
                     <label class="detailsSidebar-toggle-leftLabel user-select-none"
                         :class="{ 'text-muted': option.checked }" :for="option.providedFeature">{{
-                            option.attributes.labels.leftLabel }}</label>
+        option.attributes.labels.leftLabel }}</label>
                     <div class="custom-control custom-switch toggle-group">
                         <input :id="option.providedFeature" class="custom-control-input detailsSidebar-toggle"
                             type="checkbox" :aria-describedby="option.helpTextId" :data-property-type="groupId"
@@ -79,8 +82,8 @@
                             v-model="option.checked">
                         <label class="detailsSidebar-toggle-rightLabel custom-control-label user-select-none"
                             :class="{ 'text-muted': !option.checked }" :for="option.providedFeature">{{
-                                option.attributes.labels.rightLabel
-                            }}</label>
+        option.attributes.labels.rightLabel
+    }}</label>
                     </div>
                 </div>
                 <div v-if="option.contentType === PropertyContentType.TABLE_DIALOG">
@@ -93,10 +96,10 @@
                     </button>
 
                     <Teleport to="#modals" v-show="option.showDialog">
-                        <ModalEditDialog :context="'entity'"  :titleId="option.providedFeature"
+                        <ModalEditDialog :context="'entity'" :titleId="option.providedFeature"
                             :header-data-type="'normal'" :dialog-config="option.buttonActionContent"
                             :show="option.showDialog" @close:Modal="option.showDialog = false"
-                            @save:Modal="onEnterProperties((option.buttonActionContent.dialogContent as FormContentData).groups.map(group => {return group.contentItems}).flat(1)); option.showDialog = false">
+                            @save:Modal="onEnterProperties((option.buttonActionContent.dialogContent as FormContentData).groups.map(group => { return group.contentItems }).flat(1)); option.showDialog = false">
                         </ModalEditDialog>
                     </Teleport>
                 </div>
@@ -116,7 +119,7 @@
                                     :data-table-context="columnKey">
                                     <span v-if="typeof columnValue === 'string'"
                                         :class="{ 'font-weight-bold': row.attributes.isTheCurrentEntity }"> {{
-                                            columnValue }}</span>
+        columnValue }}</span>
                                     <div v-if="typeof columnValue === 'object' && columnValue.contentType === PropertyContentType.CHECKBOX_WITHOUT_LABEL"
                                         class="form-check">
                                         <input class="dialogCheckBox form-check-input position-static" type="checkbox"
@@ -141,12 +144,19 @@
                             </thead>
                             <tbody>
                                 <tr v-for="[index, row] of (option.value as any[]).entries()" class="tableRow">
-                                    <td v-for="[columnKey, columnValue] of Object.entries(row)"
+                                    <td v-if="typeof row === 'object'"
+                                        v-for="[columnKey, columnValue] of Object.entries(row)"
                                         :data-table-context="columnKey">
+                                        <!-- list with objects -->
                                         <span v-if="typeof columnValue === 'string'"> {{ columnValue }}</span>
                                     </td>
+                                    <td v-else>
+                                        <!-- list with literals -->
+                                        <span>{{ row }}</span>
+                                    </td>
                                     <td>
-                                        <button type="button" class="btn btn-outline-dark" @click="onRemoveFromDynamicList(option, index)">
+                                        <button type="button" class="btn btn-outline-dark"
+                                            @click="onRemoveFromDynamicList(option, index)">
                                             <i class="fa-solid fa-trash-can"></i>
                                         </button>
                                     </td>
@@ -164,7 +174,8 @@
                                 </span>
                             </div>
                             <input :id="elementField.key" class="form-control" type="text"
-                                :placeholder="elementField.placeholder" v-model="option.newElementData[elementField.key]">
+                                :placeholder="elementField.placeholder"
+                                v-model="option.newElementData[elementField.key]">
                         </div>
                     </div>
                     <button type="button" class="btn btn-outline-dark" @click="onAddToDynamicList(option)">
@@ -185,7 +196,7 @@
 
             </div>
             <small :id="option.helpTextId" class="form-text text-muted" v-if="option.helpText">{{
-                option.helpText }}</small>
+        option.helpText }}</small>
             <!--TODO dynamic show-->
             <div v-show="option.validationState === 'is-invalid'" class="invalid-feedback">Reset:
                 Invalid input provided</div>
@@ -199,6 +210,7 @@
 import type { ComputedRef, } from 'vue';
 import type { dia } from 'jointjs';
 import { PropertyContentType, CheckboxPropertyConfig, DropdownPropertyConfig, InputProperties, JointJsConfig, NumberPropertyConfig, NumberRangePropertyConfig, PropertyConfig, TextAreaPropertyConfig, TextPropertyConfig, TogglePropertyConfig, TableDialogPropertyConfig, TablePropertyConfig, DynamicListPropertyConfig, ListElementField } from '../../config/detailsSidebarConfig';
+import { prop } from 'vue-class-component';
 
 export type EditPropertySection = {
     providedFeature: string,
@@ -353,11 +365,17 @@ export function toPropertySections(propertyConfigs: PropertyConfig[]): EditPrope
                 options.push({
                     ...preparedProperty, ...{
                         addElementButton: dynamicListOption.addElementButton,
-                        listElementFields: dynamicListOption.listElementFields,
+                        listElementFields: Array.isArray(dynamicListOption.listElementFields) ? dynamicListOption.listElementFields as ListElementField[] : [dynamicListOption.listElementFields],
                         newElementData: (() => {
                             let dataHolder = {};
-                            for (const elementField of dynamicListOption.listElementFields) {
-                                dataHolder[elementField.key] = ""
+                            if (Array.isArray(dynamicListOption.listElementFields)) {
+                                // list with objects
+                                for (const elementField of dynamicListOption.listElementFields) {
+                                    dataHolder[elementField.key] = "";
+                                }
+                            } else {
+                                // list with literals
+                                dataHolder[dynamicListOption.listElementFields.key] = "";
                             }
                             return dataHolder;
                         })(),
@@ -396,11 +414,20 @@ function onOpenDialog(propertyOption: EditPropertySection) {
 
 function onAddToDynamicList(propertyOption: EditPropertySection) {
     // TODO validation?
-    let newElement = {};
-    for (const [key, value] of Object.entries(propertyOption.newElementData)) {
-        newElement[key] = value;
+    
+    if (Object.entries(propertyOption.newElementData).length === 1) {
+        for (const [key, value] of Object.entries(propertyOption.newElementData)) {
+            (propertyOption.value as any[]).push(value);
+        }
+    } else {
+        let newElement = {};
+        for (const [key, value] of Object.entries(propertyOption.newElementData)) {
+            newElement[key] = value;
+        }
+        (propertyOption.value as any[]).push(newElement);
     }
-    (propertyOption.value as any[]).push(newElement);
+
+    // clear new data input
     for (const key of Object.keys(propertyOption.newElementData)) {
         propertyOption.newElementData[key] = "";
     }
@@ -424,5 +451,4 @@ function onRemoveFromDynamicList(propertyOption: EditPropertySection, listIndex:
 .dynamic-list-wrapper button {
     width: fit-content;
 }
-
 </style>

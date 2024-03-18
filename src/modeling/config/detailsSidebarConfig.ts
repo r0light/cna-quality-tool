@@ -140,12 +140,11 @@ export type TogglePropertyConfig = BasicPropertyConfig & {
 
 export type DynamicListPropertyConfig = BasicPropertyConfig & {
     contentType: "dynamic-list",
-    listElementFields: ListElementField[],
+    listElementFields: ListElementField | ListElementField[],
     addElementButton: {
         label: string,
         labelIcon: string
     }
-
 }
 
 export type ListElementField = {
@@ -975,7 +974,7 @@ const EntityDetailsConfig: {
                                             minPath: "",
                                             min: ""
                                         },
-                                        listElementFields: [
+                                        listElementFields:
                                             {
                                                 key: "kind",
                                                 label: "Kind of artifact",
@@ -983,7 +982,7 @@ const EntityDetailsConfig: {
                                                 labelIcon: "fa-regular fa-file-code",
                                                 placeholder: "e.g. OCI Image"
                                             }
-                                        ],
+                                        ,
                                         addElementButton: {
                                             label: "Submit",
                                             labelIcon: "fa-solid fa-plus"

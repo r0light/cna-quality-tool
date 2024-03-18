@@ -805,8 +805,14 @@ class SystemEntityManager {
             }
         });
         for (const property of EntityDetailsConfig.Infrastructure.specificProperties) {
-            if (property.jointJsConfig.modelPath) {
-                newInfrastructure.prop(property.jointJsConfig.modelPath, infrastructure.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
+            switch (property.providedFeature) {
+                case "supportedArtifacts-wrapper":
+                    let tmp = (property as TableDialogPropertyConfig).buttonActionContent.dialogContent as FormContentConfig;
+                    let actualProperty = tmp.groups[0].contentItems[0];
+                    newInfrastructure.prop(actualProperty.jointJsConfig.modelPath, infrastructure.getProperties().find(entityProperty => entityProperty.getKey === actualProperty.providedFeature).value);
+                    break;
+                default:
+                    newInfrastructure.prop(property.jointJsConfig.modelPath, infrastructure.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
             }
         }
         return newInfrastructure;
