@@ -9,7 +9,7 @@ import { Infrastructure } from './infrastructure.js';
  * The module for aspects related to a Component quality model Entity.
  * @module entities/storageBackingService
  */
-const STORAGE_BACKING_SERVICE_TOSCA_KEY = "cna.qualityModel.entities.DBMS.StorageService";
+const STORAGE_BACKING_SERVICE_TOSCA_KEY = "cna.qualityModel.entities.StorageBackingService";
 const STORAGE_BACKING_SERVICE_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types[STORAGE_BACKING_SERVICE_TOSCA_KEY];
 
 function getStorageBackingServiceProperties() {

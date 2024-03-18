@@ -339,6 +339,11 @@ class SystemEntityManager {
     #createInfrastructureEntity(graphElement) {
         let infrastructureEntity = new Entities.Infrastructure(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement));
 
+        // set entity properties
+        for (let property of infrastructureEntity.getProperties()) {
+            property.value = graphElement.prop("entity/properties/" + property.getKey)
+        }
+
         const backingDataEntities = graphElement.getEmbeddedCells();
 
         for (const embeddedBackingData of backingDataEntities) {

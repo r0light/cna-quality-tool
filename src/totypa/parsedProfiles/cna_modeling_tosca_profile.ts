@@ -94,13 +94,13 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
     }
   },
   "node_types": {
-    "cna.qualityModel.entities.Root.Component": {
-      "derived_from": "tosca.nodes.Root",
+    "cna.qualityModel.entities.Component": {
+      "derived_from": "tosca.nodes.SoftwareComponent",
       "description": "Node Type to model Component entities",
       "properties": {
         "managed": {
           "type": "boolean",
-          "description": "A component is managed if it is exclusively operated by someone else, e.g. a cloud provider and the source code of the component instance is inaccessible. If the source code of a component can be changed by yourself, the component is not managed",
+          "description": "A component is managed if it is exclusively operated by someone else, e.g. a cloud provider and the source code of the component instance is inaccessible. If the source code of a component can be changed by yourself, the component is not managed.",
           "required": true
         },
         "software_type": {
@@ -118,16 +118,6 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
       },
       "requirements": [
         {
-          "host": {
-            "capability": "tosca.capabilities.Compute",
-            "relationship": "tosca.relationships.HostedOn",
-            "occurrences": [
-              1,
-              "UNBOUNDED"
-            ]
-          }
-        },
-        {
           "provides_endpoint": {
             "capability": "tosca.capabilities.Endpoint",
             "relationship": "cna.qualityModel.relationships.Provides.Endpoint",
@@ -182,8 +172,8 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
         }
       ]
     },
-    "cna.qualityModel.entities.SoftwareComponent.Service": {
-      "derived_from": "tosca.nodes.SoftwareComponent",
+    "cna.qualityModel.entities.Service": {
+      "derived_from": "cna.qualityModel.entities.Component",
       "description": "Node Type to model Service entities",
       "properties": {
         "replicas": {
@@ -192,65 +182,10 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
           "required": true,
           "default": 1
         }
-      },
-      "requirements": [
-        {
-          "provides_endpoint": {
-            "capability": "tosca.capabilities.Endpoint",
-            "relationship": "cna.qualityModel.relationships.Provides.Endpoint",
-            "occurrences": [
-              0,
-              "UNBOUNDED"
-            ]
-          }
-        },
-        {
-          "provides_external_endpoint": {
-            "capability": "tosca.capabilities.Endpoint.Public",
-            "relationship": "cna.qualityModel.relationships.Provides.Endpoint",
-            "occurrences": [
-              0,
-              "UNBOUNDED"
-            ]
-          }
-        },
-        {
-          "endpoint_link": {
-            "capability": "tosca.capabilities.Endpoint",
-            "node": "cna.qualityModel.entities.Endpoint",
-            "relationship": "cna.qualityModel.relationships.ConnectsTo.Link",
-            "occurrences": [
-              0,
-              "UNBOUNDED"
-            ]
-          }
-        },
-        {
-          "uses_data": {
-            "capability": "tosca.capabilities.Attachment",
-            "node": "cna.qualityModel.entities.DataAggregate",
-            "relationship": "cna.qualityModel.relationships.AttachesTo.DataAggregate",
-            "occurrences": [
-              0,
-              "UNBOUNDED"
-            ]
-          }
-        },
-        {
-          "uses_backing_data": {
-            "capability": "tosca.capabilities.Attachment",
-            "node": "cna.qualityModel.entities.BackingData",
-            "relationship": "cna.qualityModel.relationships.AttachesTo.BackingData",
-            "occurrences": [
-              0,
-              "UNBOUNDED"
-            ]
-          }
-        }
-      ]
+      }
     },
     "cna.qualityModel.entities.BackingService": {
-      "derived_from": "tosca.nodes.Root",
+      "derived_from": "cna.qualityModel.entities.Component",
       "description": "Node Type to model Backing Service entities",
       "properties": {
         "providedFunctionality": {
@@ -258,54 +193,87 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
           "description": "A short description of the provided functionality.",
           "required": false
         }
+      }
+    },
+    "cna.qualityModel.entities.StorageBackingService": {
+      "derived_from": "cna.qualityModel.entities.Component",
+      "description": "Node Type to model Storage Backing Service entities",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "the logical name of the database",
+          "required": true
+        },
+        "stateless": {
+          "type": "boolean",
+          "description": "Storage Backing Service are per default stateful (not stateless)",
+          "default": false,
+          "required": true
+        },
+        "replicas": {
+          "type": "integer",
+          "description": "The minimum number of replicated instances for this storage service when it is running",
+          "required": true,
+          "default": 1
+        },
+        "shards": {
+          "type": "integer",
+          "description": "The number of shards this storage service is configured with, the default of 1 means no sharding is used.",
+          "required": true,
+          "default": 1
+        }
+      }
+    },
+    "cna.qualityModel.entities.Compute.Infrastructure": {
+      "derived_from": "tosca.nodes.Compute",
+      "description": "Node Type to model Infrastructure entities",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "description": "The kind of infrastructure. Possible kinds are \"physical hardware\", \"virtual hardware\", \"software platform\", or \"cloud service\".",
+          "required": true,
+          "default": "virtual hardware"
+        },
+        "environment_access": {
+          "type": "string",
+          "description": "Describes the extend of available access to the environment in which the infrastructure is operated. With full access, one can control all aspects of the infrastructure. Limited access means that infrastructure is under control of a provider and only certain things are allowed, such as configuration. With no access infrastructure is completely managed by a cloud provider.",
+          "default": "full"
+        },
+        "maintenance": {
+          "type": "string",
+          "description": "How infrastructure is maintained, that means for example how updates are installed or how certificates are regenerated.",
+          "default": "manual"
+        },
+        "provisioning": {
+          "type": "string",
+          "description": "How infrastructure is initially provisioned. This can be done manually (for example through the web interface of a cloud provider), automatically (for example through an IaC tool), or transparent, if it is not explicitly provisioned by a consumer, but done on-demand by a provider."
+        },
+        "supported_artifacts": {
+          "type": "list",
+          "description": "Which kind of artifacts can be deployed on this infrastructure, e.g. VM images, container images, jar archives, native executables, ...",
+          "entry_schema": {
+            "description": "An artifact type that this infrastructure supports.",
+            "type": "string"
+          }
+        },
+        "availability_zone": {
+          "type": "string",
+          "required": true,
+          "description": "The name of the availability zone in which this infrastructure is provided. If it is running in multiple availability zones, provide their names as a comma-separated list.",
+          "default": "default-zone"
+        },
+        "region": {
+          "type": "string",
+          "required": true,
+          "description": "The name of the region in which this infrastructure is provided.",
+          "default": "default-region"
+        }
       },
       "requirements": [
         {
           "host": {
             "capability": "tosca.capabilities.Compute",
             "relationship": "tosca.relationships.HostedOn",
-            "occurrences": [
-              1,
-              "UNBOUNDED"
-            ]
-          }
-        },
-        {
-          "provides_endpoint": {
-            "capability": "tosca.capabilities.Endpoint",
-            "relationship": "cna.qualityModel.relationships.Provides.Endpoint",
-            "occurrences": [
-              0,
-              "UNBOUNDED"
-            ]
-          }
-        },
-        {
-          "provides_external_endpoint": {
-            "capability": "tosca.capabilities.Endpoint.Public",
-            "relationship": "cna.qualityModel.relationships.Provides.Endpoint",
-            "occurrences": [
-              0,
-              "UNBOUNDED"
-            ]
-          }
-        },
-        {
-          "endpoint_link": {
-            "capability": "tosca.capabilities.Endpoint",
-            "node": "cna.qualityModel.entities.Endpoint",
-            "relationship": "cna.qualityModel.relationships.ConnectsTo.Link",
-            "occurrences": [
-              0,
-              "UNBOUNDED"
-            ]
-          }
-        },
-        {
-          "uses_data": {
-            "capability": "tosca.capabilities.Attachment",
-            "node": "cna.qualityModel.entities.DataAggregate",
-            "relationship": "cna.qualityModel.relationships.AttachesTo.DataAggregate",
             "occurrences": [
               0,
               "UNBOUNDED"
@@ -377,53 +345,6 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
         }
       ]
     },
-    "cna.qualityModel.entities.Compute.Infrastructure": {
-      "derived_from": "tosca.nodes.Compute",
-      "description": "Node Type to model Infrastructure entities",
-      "properties": {
-        "managed": {
-          "type": "boolean",
-          "description": "Infrastructure is managed if it is exclusively operated by someone else, e.g. a cloud provider and the source code of the infrastructure instance is inaccessible. If the source code of an infrastructure can be changed by yourself, the infrastructure is not managed.",
-          "required": true,
-          "default": false
-        },
-        "availability_zone": {
-          "type": "string",
-          "required": true,
-          "description": "The name of the availability zone in which this infrastructure is provided. If it is running in multiple availability zones, provide their names as a comma-separated list.",
-          "default": "default-zone"
-        },
-        "region": {
-          "type": "string",
-          "required": true,
-          "description": "The name of the region in which this infrastructure is provided.",
-          "default": "default-region"
-        }
-      },
-      "requirements": [
-        {
-          "host": {
-            "capability": "tosca.capabilities.Compute",
-            "relationship": "tosca.relationships.HostedOn",
-            "occurrences": [
-              0,
-              "UNBOUNDED"
-            ]
-          }
-        },
-        {
-          "uses_backing_data": {
-            "capability": "tosca.capabilities.Attachment",
-            "node": "cna.qualityModel.entities.BackingData",
-            "relationship": "cna.qualityModel.relationships.AttachesTo.BackingData",
-            "occurrences": [
-              0,
-              "UNBOUNDED"
-            ]
-          }
-        }
-      ]
-    },
     "cna.qualityModel.entities.BackingData": {
       "derived_from": "tosca.nodes.Root",
       "description": "Node Type to model Backing Data entities",
@@ -482,97 +403,6 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
             "cna.qualityModel.entities.SoftwareComponent.Service",
             "cna.qualityModel.entities.BackingService",
             "cna.qualityModel.entities.DBMS.StorageService"
-          ],
-          "occurrences": [
-            1,
-            "UNBOUNDED"
-          ]
-        }
-      }
-    },
-    "cna.qualityModel.entities.DBMS.StorageService": {
-      "derived_from": "tosca.nodes.DBMS",
-      "description": "Node Type to model Storage Backing Service entities",
-      "properties": {
-        "name": {
-          "type": "string",
-          "description": "the logical name of the database",
-          "required": true
-        },
-        "stateless": {
-          "type": "boolean",
-          "description": "Storage Backing Service are per default stateful (not stateless)",
-          "default": false,
-          "required": true
-        },
-        "replicas": {
-          "type": "integer",
-          "description": "The minimum number of replicated instances for this storage service when it is running",
-          "required": true,
-          "default": 1
-        },
-        "shards": {
-          "type": "integer",
-          "description": "The number of shards this storage service is configured with, the default of 1 means no sharding is used.",
-          "required": true,
-          "default": 1
-        }
-      },
-      "requirements": [
-        {
-          "endpoint_link": {
-            "capability": "tosca.capabilities.Endpoint",
-            "node": "cna.qualityModel.entities.Endpoint",
-            "relationship": "cna.qualityModel.relationships.ConnectsTo.Link",
-            "occurrences": [
-              0,
-              "UNBOUNDED"
-            ]
-          }
-        },
-        {
-          "uses_data": {
-            "capability": "tosca.capabilities.Attachment",
-            "node": "cna.qualityModel.entities.DataAggregate",
-            "relationship": "cna.qualityModel.relationships.AttachesTo.DataAggregate",
-            "occurrences": [
-              0,
-              "UNBOUNDED"
-            ]
-          }
-        },
-        {
-          "uses_backing_data": {
-            "capability": "tosca.capabilities.Attachment",
-            "node": "cna.qualityModel.entities.BackingData",
-            "relationship": "cna.qualityModel.relationships.AttachesTo.BackingData",
-            "occurrences": [
-              0,
-              "UNBOUNDED"
-            ]
-          }
-        }
-      ],
-      "capabilities": {
-        "endpoint": {
-          "type": "tosca.capabilities.Endpoint",
-          "occurrences": [
-            0,
-            "UNBOUNDED"
-          ]
-        },
-        "external_endpoint": {
-          "type": "tosca.capabilities.Endpoint.Public",
-          "occurrences": [
-            0,
-            "UNBOUNDED"
-          ]
-        },
-        "persist_data": {
-          "type": "cna.qualityModel.capabilities.DataStorage",
-          "description": "The ability to persist Data Aggregates like Business Objects",
-          "valid_source_types": [
-            "cna.qualityModel.entities.DataAggregate"
           ],
           "occurrences": [
             1,

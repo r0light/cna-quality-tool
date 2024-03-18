@@ -901,7 +901,101 @@ const EntityDetailsConfig: {
     },
     Infrastructure: {
         type: EntityTypes.INFRASTRUCTURE,
-        specificProperties: parseProperties(getInfrastructureProperties(), "entity")
+        specificProperties: customizePropertyConfigs(parseProperties(getInfrastructureProperties(), "entity"), [
+            {
+                providedFeature: "supportedArtifacts-wrapper",
+                contentType: PropertyContentType.TABLE_DIALOG,
+                label: "Supported Artifacts:",
+                helpText: "",
+                inputProperties: {
+                    disabled: false,
+                    required: false,
+                    checked: false,
+                    selected: false,
+                    readonly: false
+                },
+                attributes: {
+                    svgRepresentation: "",
+                    buttonText: "Edit supported artifacts",
+                    buttonIconClass: "fa-solid fa-pencil"
+                },
+                provideEnterButton: false,
+                show: true,
+                jointJsConfig: {
+                    propertyType: "free",
+                    modelPath: "",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
+                buttonActionContent: {
+                    // contentType: PropertyContentType // TODO modalDialog,
+                    dialogMetaData: {
+                        dialogSize: DialogSize.LARGE,
+                        header: {
+                            iconClass: "fa-regular fa-file-code",
+                            svgRepresentation: "",
+                            text: "Supported artifacts: "
+                        },
+                        footer: {
+                            showCancelButton: true,
+                            cancelButtonText: "Cancel",
+                            saveButtonIconClass: "fa-regular fa-floppy-disk",
+                            saveButtonText: "Save"
+                        }
+                    },
+                    dialogContent: {
+                        contentType: UIContentType.GROUP_FORMS,
+                        groups: [
+                            {
+                                contentGroupMetaData: {
+                                    id: "supported-artifacts-data",
+                                    headline: "Supported artifacts",
+                                    text: `TODO ...and then add it using the plus button. However, your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all your changes will be lost. While you keep the selection of this Backing Data entity, your changes will be remembered.`,
+                                },
+                                contentItems: [
+                                    {
+                                        providedFeature: "supported_artifacts",
+                                        contentType: PropertyContentType.DYNAMIC_LIST,
+                                        label: "",
+                                        helpText: "",
+                                        inputProperties: {
+                                            disabled: false,
+                                            readonly: false,
+                                            required: false,
+                                            checked: false,
+                                            selected: false,
+                                        },
+                                        provideEnterButton: false,
+                                        show: true,
+                                        jointJsConfig: {
+                                            propertyType: "customProperty",
+                                            modelPath: "entity/properties/supported_artifacts",
+                                            defaultPropPath: "",
+                                            minPath: "",
+                                            min: ""
+                                        },
+                                        listElementFields: [
+                                            {
+                                                key: "kind",
+                                                label: "Kind of artifact",
+                                                helpText: "The kind of artifact that is supported",
+                                                labelIcon: "fa-regular fa-file-code",
+                                                placeholder: "e.g. OCI Image"
+                                            }
+                                        ],
+                                        addElementButton: {
+                                            label: "Submit",
+                                            labelIcon: "fa-solid fa-plus"
+                                        }
+                                    }
+                                ]
+                            },
+                        ]
+                    }
+                }
+            },
+        ])
     },
     DeploymentMapping: {
         type: EntityTypes.DEPLOYMENT_MAPPING,

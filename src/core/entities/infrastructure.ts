@@ -1,5 +1,5 @@
 import { BackingData } from "./backingData.js";
-import { EntityProperty, loadAllProperties } from "../common/entityProperty.js";
+import { EntityProperty, SelectEntityProperty, loadAllProperties } from "../common/entityProperty.js";
 import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_modeling_tosca_profile.js'
 import { MetaData } from "../common/entityDataTypes.js";
 import { RelationToBackingData } from "./relationToBackingData.js";
@@ -16,7 +16,104 @@ const INFRASTRUCTURE_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types[IN
 function getInfrastructureProperties() {
     let parsed = loadAllProperties(INFRASTRUCTURE_TOSCA_EQUIVALENT);
 
-    return parsed;
+    return parsed.map((prop) => {
+        switch (prop.getKey) {
+            case "kind":
+                return new SelectEntityProperty(prop.getKey,
+                    "Kind of infrastructure",
+                    prop.getDescription,
+                    prop.getExample,
+                    prop.getRequired,
+                    [
+                        {
+                            value: "physical-hardware",
+                            text: "physical hardware"
+                        },
+                        {
+                            value: "virtual-hardware",
+                            text: "virtual hardware"
+                        },
+                        {
+                            value: "software-platform",
+                            text: "software platform"
+                        },
+                        {
+                            value: "cloud-service",
+                            text: "cloud service"
+                        }
+                    ],
+                    prop.getDefaultValue,
+                    prop.value);
+            case "environment_access":
+                return new SelectEntityProperty(prop.getKey,
+                    "Environment access",
+                    prop.getDescription,
+                    prop.getExample,
+                    prop.getRequired,
+                    [
+                        {
+                            value: "full",
+                            text: "full"
+                        },
+                        {
+                            value: "limited",
+                            text: "limited"
+                        },
+                        {
+                            value: "none",
+                            text: "none"
+                        }
+                    ],
+                    prop.getDefaultValue,
+                    prop.value);
+            case "maintenance":
+                return new SelectEntityProperty(prop.getKey,
+                    "Maintenance",
+                    prop.getDescription,
+                    prop.getExample,
+                    prop.getRequired,
+                    [
+                        {
+                            value: "manual",
+                            text: "manual"
+                        },
+                        {
+                            value: "automated",
+                            text: "automated"
+                        },
+                        {
+                            value: "transparent",
+                            text: "transparent"
+                        }
+                    ],
+                    prop.getDefaultValue,
+                    prop.value);
+            case "provisioning":
+                return new SelectEntityProperty(prop.getKey,
+                    "Provisioning",
+                    prop.getDescription,
+                    prop.getExample,
+                    prop.getRequired,
+                    [
+                        {
+                            value: "manual",
+                            text: "manual"
+                        },
+                        {
+                            value: "automated",
+                            text: "automated"
+                        },
+                        {
+                            value: "transparent",
+                            text: "transparent"
+                        }
+                    ],
+                    prop.getDefaultValue,
+                    prop.value);
+            default:
+                return prop;
+        }
+    })
 }
 
 /**
@@ -54,7 +151,7 @@ class Infrastructure {
      * @throws {TypeError} If the provided parameter is neither an instance of External Endpoint, Endpoint, Data Aggregate or Backing Data.  
      */
     addBackingDataEntity(backingDataEntity: BackingData, relation: RelationToBackingData) {
-        this.#backingDataEntities.push({backingData: backingDataEntity, relation: relation });
+        this.#backingDataEntities.push({ backingData: backingDataEntity, relation: relation });
 
         /*
         const errorMessage = "The provided entity cannot be added. Only BackingData entities are allowed. However, the object to add was: " + Object.getPrototypeOf(backingDataEntity) + JSON.stringify(backingDataEntity);

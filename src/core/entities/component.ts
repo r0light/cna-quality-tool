@@ -13,7 +13,7 @@ import { RelationToBackingData } from './relationToBackingData.js'
  * The module for aspects related to a Component quality model entity.
  * @module entities/component
  */
-const COMPONENT_TOSCA_KEY = "cna.qualityModel.entities.Root.Component"
+const COMPONENT_TOSCA_KEY = "cna.qualityModel.entities.Component"
 const COMPONENT_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types[COMPONENT_TOSCA_KEY];
 
 function getComponentProperties(): EntityProperty[] {

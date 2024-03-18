@@ -7,13 +7,14 @@
             <form class="sameEntityHighlighting-Form">
                 <fieldset v-for="highlightOption in entityHighlighting" :id="highlightOption.entityType">
                     <div class="form-group">
-                        <label :for="highlightOption.entityType"><span v-html="highlightOption.svgRepresentation"></span>{{
-                            highlightOption.labelText }}</label>
+                        <label :for="highlightOption.entityType"><span
+                                v-html="highlightOption.svgRepresentation"></span>{{
+                    highlightOption.labelText }}</label>
                         <select class="entityHighlightingOption custom-select" :id="highlightOption.selectId"
                             :disabled="highlightOption.options.length == 1" v-model="highlightOption.selectedOption"
                             @change="onSelectHighlighOption(highlightOption)">
                             <option v-for="option of highlightOption.options" :value="option.optionValue">{{
-                                option.optionText }}</option>
+                    option.optionText }}</option>
                         </select>
                     </div>
 
@@ -66,6 +67,19 @@ import PropertiesEditor from './PropertiesEditor.vue';
 import type { EditPropertySection } from './PropertiesEditor.vue';
 import { toPropertySections } from './PropertiesEditor.vue';
 import { FormContentData, findInDialogByFeature } from '../components/ModalEditDialog.vue';
+import { prop } from 'vue-class-component';
+
+const toArray = (o: object, keyName: string, valueName: string) => {
+    let asArray = [];
+    for (const [attributeKey, attributeValue] of Object.entries(o)) {
+        let element = {};
+        element[keyName] = attributeKey;
+        element[valueName] = attributeValue;
+        asArray.push(element);
+    };
+    return asArray;
+}
+
 
 const props = defineProps<{
     graph: dia.Graph;
@@ -287,6 +301,16 @@ onUpdated(() => {
     }
 
     switch (selectedEntity.model.prop("entity/type")) {
+        case EntityTypes.INFRASTRUCTURE:
+
+            let editSupportedArtifacts: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "supportedArtifacts-wrapper");
+            let supportedArtifactsOption = findInDialogByFeature(editSupportedArtifacts.buttonActionContent, "supported_artifacts");
+            supportedArtifactsOption.includeFormCheck = false;
+
+            console.log(selectedEntity.model.prop(supportedArtifactsOption.jointJsConfig.modelPath))
+
+            supportedArtifactsOption.value = selectedEntity.model.prop(supportedArtifactsOption.jointJsConfig.modelPath);
+            break;
         case EntityTypes.DATA_AGGREGATE:
 
             for (let propertyOption of currentOptions) {
@@ -738,6 +762,12 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
         } else if (propertyOption.jointJsConfig.propertyType === "customProperty") {
 
             switch (selectedEntityElement.prop("entity/type")) {
+                case EntityTypes.INFRASTRUCTURE:
+                    if (propertyOption.providedFeature === "supported_artifacts") {
+                        console.log(propertyOption.value)
+                        selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, propertyOption.value);
+                    }
+                    break;
                 case EntityTypes.DATA_AGGREGATE:
                     if (propertyOption.providedFeature === "dataAggregate-familyConfig") {
                         let currentFamilyName = selectedEntityElement.attr("label/textWrap/text");

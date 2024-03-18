@@ -10,7 +10,7 @@ import { loadAllProperties } from '../common/entityProperty.js';
  * @module entities/service
  */
 
-const SERVICE_TOSCA_KEY = "cna.qualityModel.entities.SoftwareComponent.Service";
+const SERVICE_TOSCA_KEY = "cna.qualityModel.entities.Service";
 const SERVICE_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types[SERVICE_TOSCA_KEY];
 
 function getServiceProperties() {
