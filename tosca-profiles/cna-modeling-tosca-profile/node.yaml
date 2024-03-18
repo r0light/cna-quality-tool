@@ -28,7 +28,15 @@ node_types:
         description: True if this component is stateless, that means it requires no disk storage space where data is persisted between executions. That means it can store data to disk, but should not rely on this data to be available for following executions. Instead it should be able to restore required data after a restart in a different environment. 
         default: true
         required: true
+      artifact:
+        type: string
+        description: The kind of artifact which is produced for deploying this component. This can for example be a container image, a native executable, a jar file, or some custom packaging format for specific cloud services.
+        required: true
     requirements:
+      - host:
+          capability: tosca.capabilities.Compute
+          node: cna.qualityModel.entities.Compute.Infrastructure
+          relationship: cna.qualityModel.entities.HostedOn.DeploymentMapping
       # Allow the definition of endpoints provided by this Component
       - provides_endpoint:
           capability: tosca.capabilities.Endpoint

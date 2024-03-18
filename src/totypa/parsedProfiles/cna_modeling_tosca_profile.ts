@@ -46,6 +46,21 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
         "tosca.capabilities.Endpoint.Public"
       ]
     },
+    "cna.qualityModel.entities.HostedOn.DeploymentMapping": {
+      "derived_from": "tosca.relationships.HostedOn",
+      "description": "Relationship Type to model DeploymentMapping entities",
+      "properties": {
+        "deployment": {
+          "type": "string",
+          "required": true,
+          "description": "How this deployment mapping is described or ensured. Valid values can be manual, automated imperative, or automated declarative",
+          "default": "manual"
+        }
+      },
+      "valid_target_types": [
+        "tosca.capabilities.Compute"
+      ]
+    },
     "cna.qualityModel.relationships.Provides.Endpoint": {
       "derived_from": "tosca.relationships.Root",
       "description": "Relationship Type to connect Endpoints to the Components which provide them",
@@ -114,9 +129,21 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
           "description": "True if this component is stateless, that means it requires no disk storage space where data is persisted between executions. That means it can store data to disk, but should not rely on this data to be available for following executions. Instead it should be able to restore required data after a restart in a different environment.",
           "default": true,
           "required": true
+        },
+        "artifact": {
+          "type": "string",
+          "description": "The kind of artifact which is produced for deploying this component. This can for example be a container image, a native executable, a jar file, or some custom packaging format for specific cloud services.",
+          "required": true
         }
       },
       "requirements": [
+        {
+          "host": {
+            "capability": "tosca.capabilities.Compute",
+            "node": "cna.qualityModel.entities.Compute.Infrastructure",
+            "relationship": "cna.qualityModel.entities.HostedOn.DeploymentMapping"
+          }
+        },
         {
           "provides_endpoint": {
             "capability": "tosca.capabilities.Endpoint",
@@ -246,7 +273,8 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
         },
         "provisioning": {
           "type": "string",
-          "description": "How infrastructure is initially provisioned. This can be done manually (for example through the web interface of a cloud provider), automatically (for example through an IaC tool), or transparent, if it is not explicitly provisioned by a consumer, but done on-demand by a provider."
+          "description": "How infrastructure is initially provisioned. This can be done manually (for example through the web interface of a cloud provider), automatically (for example through an IaC tool), or transparent, if it is not explicitly provisioned by a consumer, but done on-demand by a provider.",
+          "default": "manual"
         },
         "supported_artifacts": {
           "type": "list",

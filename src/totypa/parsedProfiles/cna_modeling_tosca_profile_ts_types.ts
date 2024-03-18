@@ -19,6 +19,16 @@ attributes?: {
     state?: string,
 },
 }
+export type CnaQualityModelEntitiesHostedOnDeploymentMapping = {
+    properties?: {
+    deployment: string,
+},
+attributes?: {
+    tosca_id?: string,
+    tosca_name?: string,
+    state?: string,
+},
+}
 export type CnaQualityModelRelationshipsProvidesEndpoint = {
     attributes?: {
     tosca_id?: string,
@@ -58,6 +68,7 @@ export type CnaQualityModelEntitiesComponent = {
     managed: boolean,
     software_type: string,
     stateless: boolean,
+    artifact: string,
     component_version?: string,
     admin_credential?: ToscaDatatypesCredential,
 },
@@ -69,7 +80,7 @@ attributes?: {
 capabilities?: {
     feature?: ToscaCapabilitiesNode,
 },
-requirements?: {provides_endpoint: TOSCA_Requirement_Assignment | string} | {provides_external_endpoint: TOSCA_Requirement_Assignment | string} | {endpoint_link: TOSCA_Requirement_Assignment | string} | {uses_data: TOSCA_Requirement_Assignment | string} | {uses_backing_data: TOSCA_Requirement_Assignment | string} | {host: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[],
+requirements?: {host: TOSCA_Requirement_Assignment | string} | {provides_endpoint: TOSCA_Requirement_Assignment | string} | {provides_external_endpoint: TOSCA_Requirement_Assignment | string} | {endpoint_link: TOSCA_Requirement_Assignment | string} | {uses_data: TOSCA_Requirement_Assignment | string} | {uses_backing_data: TOSCA_Requirement_Assignment | string} | {host: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[],
 interfaces?: {
     Standard?: TOSCA_Interface,
     [interfaceKey: string]: TOSCA_Interface
@@ -86,6 +97,7 @@ export type CnaQualityModelEntitiesService = {
     managed: boolean,
     software_type: string,
     stateless: boolean,
+    artifact: string,
     component_version?: string,
     admin_credential?: ToscaDatatypesCredential,
 },
@@ -97,7 +109,7 @@ attributes?: {
 capabilities?: {
     feature?: ToscaCapabilitiesNode,
 },
-requirements?: {provides_endpoint: TOSCA_Requirement_Assignment | string} | {provides_external_endpoint: TOSCA_Requirement_Assignment | string} | {endpoint_link: TOSCA_Requirement_Assignment | string} | {uses_data: TOSCA_Requirement_Assignment | string} | {uses_backing_data: TOSCA_Requirement_Assignment | string} | {host: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[],
+requirements?: {host: TOSCA_Requirement_Assignment | string} | {provides_endpoint: TOSCA_Requirement_Assignment | string} | {provides_external_endpoint: TOSCA_Requirement_Assignment | string} | {endpoint_link: TOSCA_Requirement_Assignment | string} | {uses_data: TOSCA_Requirement_Assignment | string} | {uses_backing_data: TOSCA_Requirement_Assignment | string} | {host: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[],
 interfaces?: {
     Standard?: TOSCA_Interface,
     [interfaceKey: string]: TOSCA_Interface
@@ -114,6 +126,7 @@ export type CnaQualityModelEntitiesBackingService = {
     managed: boolean,
     software_type: string,
     stateless: boolean,
+    artifact: string,
     component_version?: string,
     admin_credential?: ToscaDatatypesCredential,
 },
@@ -125,7 +138,7 @@ attributes?: {
 capabilities?: {
     feature?: ToscaCapabilitiesNode,
 },
-requirements?: {provides_endpoint: TOSCA_Requirement_Assignment | string} | {provides_external_endpoint: TOSCA_Requirement_Assignment | string} | {endpoint_link: TOSCA_Requirement_Assignment | string} | {uses_data: TOSCA_Requirement_Assignment | string} | {uses_backing_data: TOSCA_Requirement_Assignment | string} | {host: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[],
+requirements?: {host: TOSCA_Requirement_Assignment | string} | {provides_endpoint: TOSCA_Requirement_Assignment | string} | {provides_external_endpoint: TOSCA_Requirement_Assignment | string} | {endpoint_link: TOSCA_Requirement_Assignment | string} | {uses_data: TOSCA_Requirement_Assignment | string} | {uses_backing_data: TOSCA_Requirement_Assignment | string} | {host: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[],
 interfaces?: {
     Standard?: TOSCA_Interface,
     [interfaceKey: string]: TOSCA_Interface
@@ -144,6 +157,7 @@ export type CnaQualityModelEntitiesStorageBackingService = {
     shards: number,
     managed: boolean,
     software_type: string,
+    artifact: string,
     component_version?: string,
     admin_credential?: ToscaDatatypesCredential,
 },
@@ -155,7 +169,7 @@ attributes?: {
 capabilities?: {
     feature?: ToscaCapabilitiesNode,
 },
-requirements?: {provides_endpoint: TOSCA_Requirement_Assignment | string} | {provides_external_endpoint: TOSCA_Requirement_Assignment | string} | {endpoint_link: TOSCA_Requirement_Assignment | string} | {uses_data: TOSCA_Requirement_Assignment | string} | {uses_backing_data: TOSCA_Requirement_Assignment | string} | {host: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[],
+requirements?: {host: TOSCA_Requirement_Assignment | string} | {provides_endpoint: TOSCA_Requirement_Assignment | string} | {provides_external_endpoint: TOSCA_Requirement_Assignment | string} | {endpoint_link: TOSCA_Requirement_Assignment | string} | {uses_data: TOSCA_Requirement_Assignment | string} | {uses_backing_data: TOSCA_Requirement_Assignment | string} | {host: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[],
 interfaces?: {
     Standard?: TOSCA_Interface,
     [interfaceKey: string]: TOSCA_Interface

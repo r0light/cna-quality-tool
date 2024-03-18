@@ -1,20 +1,48 @@
 import { Component } from './component.js'
 import { Infrastructure } from './infrastructure.js'
-import { tosca_simple_profile_for_yaml_v1_3 } from '../../totypa/parsedProfiles/tosca_simple_profile_for_yaml_v1_3.js'
-import { EntityProperty, loadAllProperties } from '../common/entityProperty.js';
+import { EntityProperty, SelectEntityProperty, loadAllProperties } from '../common/entityProperty.js';
+import { cna_modeling_tosca_profile } from '@/totypa/parsedProfiles/cna_modeling_tosca_profile.js';
 
 
 /**
  * The module for aspects related to a Deployment Mapping quality model entity.
  * @module entities/deploymentMapping
  */
-const DEPLOYMENT_MAPPING_TOSCA_KEY = "tosca.relationships.HostedOn";
-const DEPLOYMENT_MAPPING_TOSCA_EQUIVALENT = tosca_simple_profile_for_yaml_v1_3.relationship_types[DEPLOYMENT_MAPPING_TOSCA_KEY];
+const DEPLOYMENT_MAPPING_TOSCA_KEY = "cna.qualityModel.entities.HostedOn.DeploymentMapping";
+const DEPLOYMENT_MAPPING_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.relationship_types[DEPLOYMENT_MAPPING_TOSCA_KEY];
 
 function getDeploymentMappingProperties(): EntityProperty[] {
     let parsed = loadAllProperties(DEPLOYMENT_MAPPING_TOSCA_EQUIVALENT);
 
-    return parsed;
+    return parsed.map((prop) => {
+        switch (prop.getKey) {
+            case "deployment":
+                return new SelectEntityProperty(prop.getKey,
+                    "Deployment process",
+                    prop.getDescription,
+                    prop.getExample,
+                    prop.getRequired,
+                    [
+                        {
+                            value: "manual",
+                            text: "Manual"
+                        },
+                        {
+                            value: "automated-imperative",
+                            text: "Automated imperative"
+                        },
+                        {
+                            value: "automated-declarative",
+                            text: "Automated declarative"
+                        }
+                    ],
+                    prop.getDefaultValue,
+                    prop.value);
+                break;
+            default:
+                return prop;
+        }
+    })
 }
 
 /**

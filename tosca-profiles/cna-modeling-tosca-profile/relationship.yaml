@@ -25,6 +25,17 @@ relationship_types:
         required: true
     valid_target_types: [ tosca.capabilities.Endpoint, tosca.capabilities.Endpoint.Public]
 
+  cna.qualityModel.entities.HostedOn.DeploymentMapping:
+    derived_from: tosca.relationships.HostedOn
+    description: Relationship Type to model DeploymentMapping entities
+    properties:
+      deployment:
+        type: string
+        required: true
+        description: How this deployment mapping is described or ensured. Valid values can be manual, automated imperative, or automated declarative
+        default: manual
+    valid_target_types: [ tosca.capabilities.Compute ]
+
   cna.qualityModel.relationships.Provides.Endpoint:
     derived_from: tosca.relationships.Root
     description: Relationship Type to connect Endpoints to the Components which provide them
