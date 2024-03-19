@@ -167,6 +167,10 @@ class Infrastructure {
         return this.#id;
     }
 
+    set setId(newId: string) {
+        this.#id = newId;
+    }
+
     /**
      * Return the meta data for this node entity.
      * @returns {MetaData}

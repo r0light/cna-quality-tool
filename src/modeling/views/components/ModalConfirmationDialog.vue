@@ -1,6 +1,6 @@
 
 <template>
-    <ModalWrapper :show="show" :dialogMetaData="dialogMetaData" @close:Modal="onCancel" @save:Modal="onConfirm">
+    <ModalWrapper :show="show" :dialogMetaData="dialogMetaData" @close:Modal="onCancel" @action:Modal="actionIndex => onAction(actionIndex)">
         <template v-slot:modalContent>
             <div v-html="confirmationPrompt"></div>
         </template>
@@ -22,13 +22,12 @@ export function getDefaultConfirmationDialogData(): ConfirmationModalProps {
             footer: {
                 showCancelButton: true,
                 cancelButtonText: "Cancel",
-                saveButtonIconClass: "",
-                saveButtonText: "Save"
+                actionButtons: [{ buttonIconClass: "", buttonText: "Save"}]
             }
         }, 
         confirmationPrompt: "",
         onCancel: () => {},
-        onConfirm: () => {}
+        actions: []
     }
 }
 
@@ -43,7 +42,7 @@ export type ConfirmationModalProps = {
     dialogMetaData: DialogMetaData,
     confirmationPrompt: string,
     onCancel: () => void,
-    onConfirm: () => void
+    actions: (() => void)[]
 }
 
 const props = defineProps<{
@@ -51,7 +50,15 @@ const props = defineProps<{
     dialogMetaData: DialogMetaData,
     confirmationPrompt: string,
     onCancel: () => void,
-    onConfirm: () => void
+    actions: (() => void)[]
 }>();
+
+function onAction(actionIndex: number) {
+    if (actionIndex < props.actions.length) {
+        props.actions[actionIndex]();
+    } else {
+        throw new Error(`There exists no action with index ${actionIndex} in ${props.actions}`);
+    }
+}
 
 </script>

@@ -77,7 +77,7 @@
     </div>
     <ModalConfirmationDialog v-bind="confirmationModalManager"></ModalConfirmationDialog>
     <ModalWrapper :show="showAppSettings" :dialogMetaData="settingsModalMetaData" @close:Modal="showAppSettings = false"
-        @save:Modal="updateAppSettings">
+        @action:Modal="updateAppSettings">
         <template v-slot:modalContent>
             <div class="modalDialogActionContainer container-fluid">
                 <div id="modeling-area-size-row">
@@ -249,8 +249,7 @@ const settingsModalMetaData: DialogMetaData = {
     footer: {
         showCancelButton: true,
         cancelButtonText: "Cancel",
-        saveButtonIconClass: "fa-regular fa-floppy-disk",
-        saveButtonText: "Apply changes"
+        actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Apply changes" }]
     }
 };
 
@@ -518,16 +517,15 @@ function clearActivePaper() {
             footer: {
                 showCancelButton: true,
                 cancelButtonText: "No, Cancel",
-                saveButtonIconClass: "fa-solid fa-trash-can",
-                saveButtonText: "Yes, clear paper"
+                actionButtons: [{ buttonIconClass: "fa-solid fa-trash-can", buttonText: "Yes, clear paper" }]
             },
         },
         confirmationPrompt: "Are you sure you want to clear the entire paper? You won't be able to undo this action.",
         onCancel: () => confirmationModalManager.value.show = false,
-        onConfirm: () => {
+        actions: [function onConfirm() {
             props.graph.clear();
             confirmationModalManager.value.show = false;
-        }
+        }]
     }
 }
 
@@ -564,32 +562,6 @@ function zoomOutPaper() {
         minWidth: dimensionsBeforeZoom.width,
         minHeight: dimensionsBeforeZoom.height
     });
-}
-
-function askForConversionToTosca() {
-    confirmationModalManager.value = {
-        show: true,
-        dialogMetaData: {
-            dialogSize: DialogSize.DEFAULT,
-            header: {
-                iconClass: "fa-solid fa-triangle-exclamation",
-                svgRepresentation: "",
-                text: "Warning"
-            },
-            footer: {
-                showCancelButton: true,
-                cancelButtonText: "No, Cancel",
-                saveButtonIconClass: "fa-solid fa-download",
-                saveButtonText: "Yes, start TOSCA transformation."
-            },
-        },
-        confirmationPrompt: `The TOSCA export uses the labels of the respective entities as keys for the node_templates that represent the modeled entities. Therefore, please make sure, each entity has a unique label name, otherwise an entity might be missing in the export. Are you sure, you want to continue?`,
-        onCancel: () => confirmationModalManager.value.show = false,
-        onConfirm: () => {
-            emit("save:toTosca");
-            confirmationModalManager.value.show = false;
-        }
-    }
 }
 
 function loadFromJson() {

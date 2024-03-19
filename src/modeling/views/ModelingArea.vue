@@ -387,8 +387,7 @@ function provideConnectionWarningDialog() {
             footer: {
                 showCancelButton: true,
                 cancelButtonText: "Cancel",
-                saveButtonIconClass: "fa-solid fa-trash-can",
-                saveButtonText: "Ok, understood"
+                actionButtons: [{ buttonIconClass: "fa-solid fa-trash-can", buttonText: "Ok, understood" }]
             },
         },
         confirmationPrompt: "You are currently deploying at least one Storage Backing Service entity with Component, Service or Backing Service entities"
@@ -396,9 +395,9 @@ function provideConnectionWarningDialog() {
             + " If you want to transform it into the TOSCA format, you have to introduce a new Infrastructure entity between the Storage Backing Service"
             + " and the current Infrastructure entity.",
         onCancel: () => confirmationModalManager.value.show = false,
-        onConfirm: () => {
+        actions: [function onConfirm() {
             confirmationModalManager.value.show = false;
-        }
+        }]
     }
 }
 

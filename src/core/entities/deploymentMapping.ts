@@ -97,6 +97,10 @@ class DeploymentMapping {
         return this.#id;
     }
 
+    set setId(newId: string) {
+        this.#id = newId;
+    }
+
     /**
      * Returns the {@link Component} entity included in this DeploymentMapping.
      * @returns {Component}

@@ -61,6 +61,10 @@ class RequestTrace {
         return this.#id;
     }
 
+    set setId(newId: string) {
+        this.#id = newId;
+    }
+
     /**
      * Returns the name of this Request Trace entity.
      * @returns {string}

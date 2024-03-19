@@ -53,6 +53,10 @@ class DataAggregate {
         return this.#id;
     }
 
+    set setId(newId: string) {
+        this.#id = newId;
+    }
+
     /**
      * Return the name of this Data Aggregate entity.
      * @returns {string}

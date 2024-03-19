@@ -27,9 +27,9 @@
                             @click="requestClose">
                             {{ dialogMetaData.footer.cancelButtonText }}
                         </button>
-                        <button type="button" class="btn btn-primary" tabindex="0" @click="requestSave">
-                            <i class="mr-1" :class="dialogMetaData.footer.saveButtonIconClass" v-if="dialogMetaData.footer.saveButtonIconClass"></i>
-                            <span>{{ dialogMetaData.footer.saveButtonText }}</span>
+                        <button v-for="[index, buttonConfig] of dialogMetaData.footer.actionButtons.entries()" type="button" class="btn btn-primary" :tabindex="index" @click="requestAction(index)">
+                            <i class="mr-1" :class="buttonConfig.buttonIconClass" v-if="buttonConfig.buttonIconClass"></i>
+                            <span>{{ buttonConfig.buttonText }}</span>
                         </button>
                     </div>
                 </div>
@@ -54,15 +54,15 @@ const props = defineProps<{
 
 const emit = defineEmits<{
     (e: "close:Modal"): void;
-    (e: "save:Modal"): void;
+    (e: "action:Modal", actionIndex: number): void;
 }>()
 
 function requestClose() {
     emit("close:Modal")
 }
 
-function requestSave() {
-    emit("save:Modal")
+function requestAction(index: number) {
+    emit("action:Modal", index);
 }
 
 </script>

@@ -75,6 +75,10 @@ class Link {
         return this.#id;
     }
 
+    set setId(newId: string) {
+        this.#id = newId;
+    }
+
     /**
      * Returns the {@link Component}, {@link Service}, {@link BackingService} or {@link StorageBackingService} entity, which the Link connects to the targetEndpoint.
      * @returns {Component}

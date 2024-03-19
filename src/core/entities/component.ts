@@ -143,6 +143,10 @@ class Component {
         return this.#id;
     }
 
+    set setId(newId: string) {
+        this.#id = newId;
+    }
+
     /**
      * Return the name of this Component entity.
      * @returns {string}

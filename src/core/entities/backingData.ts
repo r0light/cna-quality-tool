@@ -50,6 +50,10 @@ class BackingData {
         return this.#id;
     }
 
+    set setId(newId: string) {
+        this.#id = newId;
+    }
+
     /**
      * Return the name of this Backing Data entity.
      * @returns {string}

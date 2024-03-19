@@ -702,8 +702,7 @@ const EntityDetailsConfig: {
                         footer: {
                             showCancelButton: true,
                             cancelButtonText: "Cancel",
-                            saveButtonIconClass: "fa-regular fa-floppy-disk",
-                            saveButtonText: "Save"
+                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save"}]
                         },
                     },
                     dialogContent: {
@@ -834,8 +833,7 @@ const EntityDetailsConfig: {
                         footer: {
                             showCancelButton: true,
                             cancelButtonText: "Cancel",
-                            saveButtonIconClass: "fa-regular fa-floppy-disk",
-                            saveButtonText: "Save"
+                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save"}]
                         },
                     },
                     dialogContent: {
@@ -939,8 +937,7 @@ const EntityDetailsConfig: {
                         footer: {
                             showCancelButton: true,
                             cancelButtonText: "Cancel",
-                            saveButtonIconClass: "fa-regular fa-floppy-disk",
-                            saveButtonText: "Save"
+                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save"}]
                         }
                     },
                     dialogContent: {
@@ -1126,8 +1123,7 @@ const EntityDetailsConfig: {
                     footer: {
                         showCancelButton: true,
                         cancelButtonText: "Cancel",
-                        saveButtonIconClass: "fa-regular fa-floppy-disk",
-                        saveButtonText: "Save"
+                        actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save"}]
                     },
                 },
                 dialogContent: {
@@ -1284,8 +1280,7 @@ const EntityDetailsConfig: {
                         footer: {
                             showCancelButton: true,
                             cancelButtonText: "Cancel",
-                            saveButtonIconClass: "fa-regular fa-floppy-disk",
-                            saveButtonText: "Save"
+                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save"}]
                         }
                     },
                     dialogContent: {
@@ -1416,8 +1411,7 @@ const EntityDetailsConfig: {
                         footer: {
                             showCancelButton: true,
                             cancelButtonText: "Cancel",
-                            saveButtonIconClass: "fa-regular fa-floppy-disk",
-                            saveButtonText: "Save"
+                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save"}]
                         }
                     },
                     dialogContent: {
@@ -1548,8 +1542,7 @@ const EntityDetailsConfig: {
                         footer: {
                             showCancelButton: true,
                             cancelButtonText: "Cancel",
-                            saveButtonIconClass: "fa-regular fa-floppy-disk",
-                            saveButtonText: "Save"
+                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save"}]
                         },
                     },
                     dialogContent: {

@@ -1,5 +1,5 @@
 <template>
-    <ModalWrapper :show="show" :dialogMetaData="dialogConfig.dialogMetaData" @close:Modal="emit('close:Modal')" @save:Modal="emit('save:Modal')">
+    <ModalWrapper :show="show" :dialogMetaData="dialogConfig.dialogMetaData" @close:Modal="emit('close:Modal')" @action:Modal="emit('save:Modal')">
         <template v-slot:modalContent>
             <p v-if="dialogConfig.dialogContent.contentType === UIContentType.SINGLE_TEXTBLOCK">
                 {{ dialogConfig.dialogContent.text }}

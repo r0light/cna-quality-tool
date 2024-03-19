@@ -1,5 +1,6 @@
 import { dia, util } from "jointjs";
 import * as yaml from 'js-yaml';
+import { v4 as uuidv4 } from 'uuid';
 import EntityTypes from './config/entityTypes';
 import * as Entities from '../core/entities';
 import ErrorMessage, { ErrorType } from './errorMessage'
@@ -38,6 +39,7 @@ class SystemEntityManager {
         this.convertToGraph = this.convertToGraph.bind(this);
         this.convertToJson = this.convertToJson.bind(this);
         this.convertToCustomTosca = this.convertToCustomTosca.bind(this);
+        this.loadFromCustomTosca = this.loadFromCustomTosca.bind(this);
         this.loadFromJson = this.loadFromJson.bind(this);
         this.getGraph = this.getGraph.bind(this);
         this.validateModeledSystem = this.validateModeledSystem.bind(this);
@@ -77,14 +79,87 @@ class SystemEntityManager {
     }
 
 
-    loadFromCustomTosca(stringifiedTOSCA: string, fileName: string): { createdCells: dia.Cell[], error: string } {
+    loadFromCustomTosca(stringifiedTOSCA: string, fileName: string, strategy: "replace" | "merge"): { createdCells: dia.Cell[], error: string } {
         let system = new Entities.System("imported");
         try {
             system = importFromServiceTemplate(fileName, stringifiedTOSCA);
         } catch (err) {
             return { createdCells: [], error: err.toString() }
         }
-        this.overwriteSystemEntity(system);
+        if (strategy === "replace") {
+            this.overwriteSystemEntity(system);
+        } else if (strategy === "merge") {
+
+            for (const [id, dataAggregate] of system.getDataAggregateEntities.entries()) {
+                if (this.#currentSystemEntity.getDataAggregateEntities.get(id)) {
+                    let newId = uuidv4();
+                    dataAggregate.setId = newId;
+                } 
+                this.#currentSystemEntity.addEntity(dataAggregate);
+            }
+
+            for (const [id, backingData] of system.getBackingDataEntities.entries()) {
+                if (this.#currentSystemEntity.getBackingDataEntities.get(id)) {
+                    let newId = uuidv4();
+                    backingData.setId = newId;
+                } 
+                this.#currentSystemEntity.addEntity(backingData);
+            }
+
+            for (const [id, infrastructure] of system.getInfrastructureEntities.entries()) {
+                if (this.#currentSystemEntity.getInfrastructureEntities.get(id)) {
+                    let newId = uuidv4();
+                    infrastructure.setId = newId;
+                } 
+                this.#currentSystemEntity.addEntity(infrastructure);
+            }
+
+            for (const [id, component] of system.getComponentEntities.entries()) {
+                if (this.#currentSystemEntity.getComponentEntities.get(id)) {
+                    let newId = uuidv4();
+                    component.setId = newId;
+                } 
+
+                for (const endpoint of component.getEndpointEntities) {
+                    if (this.#currentSystemEntity.searchComponentOfEndpoint(endpoint.getId)) {
+                        endpoint.setId = uuidv4();
+                    }
+                }
+
+                for (const endpoint of component.getExternalEndpointEntities) {
+                    // TODO check for external endpoints
+                }
+
+                this.#currentSystemEntity.addEntity(component);
+            }
+
+            for (const [id, deploymentMapping] of system.getDeploymentMappingEntities.entries()) {
+                if (this.#currentSystemEntity.getDeploymentMappingEntities.get(id)) {
+                    let newId = uuidv4();
+                    deploymentMapping.setId = newId;
+                } 
+                this.#currentSystemEntity.addEntity(deploymentMapping);
+            }
+
+            for (const [id, link] of system.getLinkEntities.entries()) {
+                if (this.#currentSystemEntity.getLinkEntities.get(id)) {
+                    let newId = uuidv4();
+                    link.setId = newId;
+                } 
+                this.#currentSystemEntity.addEntity(link);
+            }
+
+            for (const [id, requestTrace] of system.getRequestTraceEntities.entries()) {
+                if (this.#currentSystemEntity.getRequestTraceEntities.get(id)) {
+                    let newId = uuidv4();
+                    requestTrace.setId = newId;
+                } 
+                this.#currentSystemEntity.addEntity(requestTrace);
+            }
+
+        }
+
+
         this.convertToGraph();
         this.#currentSystemGraph.trigger("reloaded");
 

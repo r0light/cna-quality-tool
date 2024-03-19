@@ -1,11 +1,12 @@
 <template>
     <div id="app">
         <Toolbar :system-name="currentSystemName" :key="currentSystemName" :paper="(mainPaper as dia.Paper)"
-            :graph="(currentSystemGraph as dia.Graph)" :selectedRequestTrace="currentRequestTraceViewSelection" :appSettings="modelingData ? modelingData.appSettings : getDefaultAppSettings()"
-            @update:systemName="setCurrentSystemName" @update:appSettings="setCurrentAppSettings" @click:exit-request-trace-view="resetRequestTraceSelection"
-            @click:print-active-paper="onPrintRequested" @click:exportSvg="onSvgExportRequested" @click:validate="triggerValidation"
-            @load:fromJson="loadFromJson" @save:toJson="saveToJson" @load:fromTosca="loadFromTosca"
-            @save:toTosca="saveToTosca"></Toolbar>
+            :graph="(currentSystemGraph as dia.Graph)" :selectedRequestTrace="currentRequestTraceViewSelection"
+            :appSettings="modelingData ? modelingData.appSettings : getDefaultAppSettings()"
+            @update:systemName="setCurrentSystemName" @update:appSettings="setCurrentAppSettings"
+            @click:exit-request-trace-view="resetRequestTraceSelection" @click:print-active-paper="onPrintRequested"
+            @click:exportSvg="onSvgExportRequested" @click:validate="triggerValidation" @load:fromJson="loadFromJson"
+            @save:toJson="saveToJson" @load:fromTosca="requestLoadFromTosca" @save:toTosca="saveToTosca"></Toolbar>
         <div class="app-body">
             <div :id="`entity-sidebar-${pageId}`" class="entityShapes-sidebar-container d-print-none">
                 <EntitySidebar :paper="mainPaper" :pageId="`model${pageId}`"
@@ -15,7 +16,8 @@
             <div class="visible-modeling-area">
                 <ModelingArea :pageId="`model${pageId}`" :graph="(currentSystemGraph as dia.Graph)"
                     v-model:paper="mainPaper" :currentElementSelection="currentSelection"
-                    :currentRequestTraceSelection="currentRequestTraceViewSelection" :printing="printing" :appSettings="modelingData ? modelingData.appSettings : getDefaultAppSettings()"
+                    :currentRequestTraceSelection="currentRequestTraceViewSelection" :printing="printing"
+                    :appSettings="modelingData ? modelingData.appSettings : getDefaultAppSettings()"
                     @select:Element="(element: dia.CellView | dia.LinkView) => currentSelection = element"
                     @select:RequestTrace="onSelectRequestTrace" @deselect:Element="currentSelection = null"
                     @deselect:RequestTrace="resetRequestTraceSelection">
@@ -123,7 +125,7 @@ onMounted(() => {
         } else if (props.modelingData.toImport.fileName.endsWith("yaml")
             || props.modelingData.toImport.fileName.endsWith("yml")
             || props.modelingData.toImport.fileName.endsWith("tosca")) {
-            loaded = loadFromTosca(props.modelingData.toImport.fileContent, props.modelingData.toImport.fileName);
+            loaded = loadFromTosca(props.modelingData.toImport.fileContent, props.modelingData.toImport.fileName, "replace");
         }
 
         loaded.then(() => {
@@ -185,10 +187,43 @@ function saveToJson() {
     downloadElement.click();
 }
 
-function loadFromTosca(yamlString: string, fileName: string): Promise<void> {
+function requestLoadFromTosca(yamlString: string, fileName: string) {
+    
+    confirmationModalManager.value = {
+        show: true,
+        dialogMetaData: {
+            dialogSize: DialogSize.DEFAULT,
+            header: {   
+                iconClass: "fa-solid fa-question",
+                svgRepresentation: "",
+                text: "Replace or merge?"
+            },
+            footer: {
+                showCancelButton: true,
+                cancelButtonText: "Cancel",
+                actionButtons: [{ buttonIconClass: "", buttonText: "Merge"}, { buttonIconClass: "", buttonText: "Replace"}]
+            },
+        },
+        confirmationPrompt: "Do you want to replace the current model with the imported model or merge the imported model into the current model?",
+        onCancel: () => confirmationModalManager.value.show = false,
+        actions: [
+            function decideToMerge() {
+                confirmationModalManager.value.show = false;
+                systemEntityManager.getSystemEntity;
+                loadFromTosca(yamlString, fileName, "merge");
+            },
+            function decideToReplace() {
+                confirmationModalManager.value.show = false;
+                loadFromTosca(yamlString, fileName, "replace");
+            },
+        ]
+    }
+}
+
+function loadFromTosca(yamlString: string, fileName: string, strategy: "replace" | "merge"): Promise<void> {
     resetAllHighlighting();
 
-    let loadResult = systemEntityManager.loadFromCustomTosca(yamlString, fileName);
+    let loadResult = systemEntityManager.loadFromCustomTosca(yamlString, fileName, strategy);
 
     if (loadResult.error) {
         showError("Import from TOSCA failed", loadResult.error);
@@ -206,7 +241,7 @@ function showError(errorTitle, errorMessage) {
         show: true,
         dialogMetaData: {
             dialogSize: DialogSize.DEFAULT,
-            header: {   
+            header: {
                 iconClass: "fa-solid fa-triangle-exclamation",
                 svgRepresentation: "",
                 text: errorTitle
@@ -214,15 +249,14 @@ function showError(errorTitle, errorMessage) {
             footer: {
                 showCancelButton: false,
                 cancelButtonText: "Cancel",
-                saveButtonIconClass: "",
-                saveButtonText: "OK"
+                actionButtons: [{ buttonIconClass: "", buttonText: "OK" }]
             },
         },
         confirmationPrompt: errorMessage,
         onCancel: () => confirmationModalManager.value.show = false,
-        onConfirm: () => {
+        actions: [function onConfirm() {
             confirmationModalManager.value.show = false;
-        }
+        }]
     }
 }
 
@@ -262,8 +296,7 @@ function saveToTosca() {
                 footer: {
                     showCancelButton: true,
                     cancelButtonText: "No, cancel export",
-                    saveButtonIconClass: "",
-                    saveButtonText: "Yes, export anyway"
+                    actionButtons: [{ buttonIconClass: "", buttonText: "Yes, export anyway" }]
                 },
             },
             confirmationPrompt: `Problems detected while preparing the export:
@@ -273,10 +306,10 @@ function saveToTosca() {
             Are you sure you want to export?
             `,
             onCancel: () => confirmationModalManager.value.show = false,
-            onConfirm: () => {
+            actions: [function onConfirm() {
                 confirmationModalManager.value.show = false;
                 continueExport();
-            }
+            }]
         }
     } else {
         continueExport();
@@ -330,7 +363,8 @@ function resetRequestTraceSelection() {
         unhighlightRequestTrace(currentRequestTraceViewSelection.value);
     } else {
         currentSystemGraph.value.getElements().filter(element => element.prop("entity/type") === EntityTypes.REQUEST_TRACE).forEach(requestTrace => {
-            unhighlightRequestTrace(requestTrace)});
+            unhighlightRequestTrace(requestTrace)
+        });
     }
 
     currentRequestTraceViewSelection.value = null
@@ -406,8 +440,7 @@ function triggerValidation() {
                 footer: {
                     showCancelButton: false,
                     cancelButtonText: "",
-                    saveButtonIconClass: "",
-                    saveButtonText: "OK"
+                    actionButtons: [{ buttonIconClass: "", buttonText: "OK" }]
                 },
             },
             confirmationPrompt: `The following problems were detected while validating the modeled system:
@@ -416,9 +449,9 @@ function triggerValidation() {
             </ul>
             `,
             onCancel: () => confirmationModalManager.value.show = false,
-            onConfirm: () => {
+            actions: [function onConfirm() {
                 confirmationModalManager.value.show = false;
-            }
+            }]
         }
     } else {
         confirmationModalManager.value = {
@@ -433,15 +466,14 @@ function triggerValidation() {
                 footer: {
                     showCancelButton: false,
                     cancelButtonText: "",
-                    saveButtonIconClass: "",
-                    saveButtonText: "OK"
+                    actionButtons: [{ buttonIconClass: "", buttonText: "OK" }]
                 },
             },
             confirmationPrompt: `No problems were detected while validating the modeled system!`,
             onCancel: () => confirmationModalManager.value.show = false,
-            onConfirm: () => {
+            actions: [function onConfirm() {
                 confirmationModalManager.value.show = false;
-            }
+            }]
         }
     }
 
