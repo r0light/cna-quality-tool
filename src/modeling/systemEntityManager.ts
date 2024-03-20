@@ -94,7 +94,7 @@ class SystemEntityManager {
                 if (this.#currentSystemEntity.getDataAggregateEntities.get(id)) {
                     let newId = uuidv4();
                     dataAggregate.setId = newId;
-                } 
+                }
                 this.#currentSystemEntity.addEntity(dataAggregate);
             }
 
@@ -102,7 +102,7 @@ class SystemEntityManager {
                 if (this.#currentSystemEntity.getBackingDataEntities.get(id)) {
                     let newId = uuidv4();
                     backingData.setId = newId;
-                } 
+                }
                 this.#currentSystemEntity.addEntity(backingData);
             }
 
@@ -110,7 +110,7 @@ class SystemEntityManager {
                 if (this.#currentSystemEntity.getInfrastructureEntities.get(id)) {
                     let newId = uuidv4();
                     infrastructure.setId = newId;
-                } 
+                }
                 this.#currentSystemEntity.addEntity(infrastructure);
             }
 
@@ -118,7 +118,7 @@ class SystemEntityManager {
                 if (this.#currentSystemEntity.getComponentEntities.get(id)) {
                     let newId = uuidv4();
                     component.setId = newId;
-                } 
+                }
 
                 for (const endpoint of component.getEndpointEntities) {
                     if (this.#currentSystemEntity.searchComponentOfEndpoint(endpoint.getId)) {
@@ -137,7 +137,7 @@ class SystemEntityManager {
                 if (this.#currentSystemEntity.getDeploymentMappingEntities.get(id)) {
                     let newId = uuidv4();
                     deploymentMapping.setId = newId;
-                } 
+                }
                 this.#currentSystemEntity.addEntity(deploymentMapping);
             }
 
@@ -145,7 +145,7 @@ class SystemEntityManager {
                 if (this.#currentSystemEntity.getLinkEntities.get(id)) {
                     let newId = uuidv4();
                     link.setId = newId;
-                } 
+                }
                 this.#currentSystemEntity.addEntity(link);
             }
 
@@ -153,7 +153,7 @@ class SystemEntityManager {
                 if (this.#currentSystemEntity.getRequestTraceEntities.get(id)) {
                     let newId = uuidv4();
                     requestTrace.setId = newId;
-                } 
+                }
                 this.#currentSystemEntity.addEntity(requestTrace);
             }
 
@@ -514,7 +514,20 @@ class SystemEntityManager {
         }
         for (let [componentId, component] of this.#currentSystemEntity.getComponentEntities.entries()) {
             if (!mappingToDeployment.has(componentId)) {
-                errors.push(`${component.constructor.name} ${component.getName} is not deployed on any infrastructure.`)
+                let entityType = ((component) => {
+                    switch (component.constructor) {
+                        case Entities.Service:
+                            return "Service";
+                        case Entities.BackingService:
+                            return "Backing Service";
+                        case Entities.StorageBackingService:
+                            return "Storage Backing Service";
+                        case Entities.Component:
+                        default:
+                            return "Component";
+                    }
+                })();
+                errors.push(`${entityType} ${component.getName} is not deployed on any infrastructure.`)
             }
         }
 
