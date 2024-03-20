@@ -526,7 +526,7 @@ class SystemEntityManager {
                         default:
                             return "Component";
                     }
-                })();
+                })(component);
                 errors.push(`${entityType} ${component.getName} is not deployed on any infrastructure.`)
             }
         }
