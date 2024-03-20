@@ -414,6 +414,32 @@ function onSvgExportRequested() {
 
     svgElement.setAttribute("viewBox", `0 0 ${boundingBox.x + boundingBox.width} ${boundingBox.y + boundingBox.height}`);
 
+    // remove tools layer
+    svgElement.getElementsByClassName("joint-tools-layer")[0].remove();
+
+    let elements = svgElement.getElementsByTagName("g");
+
+    let toDelete = [];
+
+    // remove all hidden elements
+    for (const element of elements) {
+        if (element.getAttribute("id") && element.getAttribute("visibility") === "hidden") {
+            toDelete.push(element.getAttribute("id"));
+        }
+    }
+
+    // also remove all images (problematic because they reference another file which is not available after export)
+    toDelete.push(...Array.from(svgElement.getElementsByTagName("image")).filter(element => element.getAttribute("id")).map(element => element.getAttribute("id")));
+
+    console.log(toDelete);
+
+    for (const idToDelete of toDelete) {
+        if (svgElement.getElementById(idToDelete)) {
+            svgElement.getElementById(idToDelete).remove();
+        }
+    }
+
+
     let asString = svgElement.outerHTML;
     asString = asString.replaceAll("&nbsp;", " ");
 
