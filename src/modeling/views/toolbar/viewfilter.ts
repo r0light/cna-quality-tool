@@ -103,7 +103,7 @@ export function getAffectedDeploymentViewCells(graph: dia.Graph, backingShown: b
     return affectedEntities;
 }
 
-export function getAffectedCommunicationViewCells(graph: dia.Graph, backingShown: boolean): dia.Cell[] {
+export function getAffectedCommunicationViewCells(graph: dia.Graph, backingShown: boolean, requestTracesShown): dia.Cell[] {
     let affectedEntities = graph
         .getCells()
         .filter(cell => {
@@ -137,6 +137,10 @@ export function getAffectedCommunicationViewCells(graph: dia.Graph, backingShown
             }
             index = index + 1;
         }
+    }
+
+    if (!requestTracesShown) {
+        return affectedEntities.filter(cell => cell.attributes.entity.type !== EntityTypes.REQUEST_TRACE);
     }
 
     return affectedEntities;
@@ -187,6 +191,21 @@ export function getAffectedDataViewCells(graph: dia.Graph, deploymentShown: bool
             index = index + 1;
         }
     }
+
+    return affectedEntities;
+}
+
+export function getAffectedRequestTraceCells(graph: dia.Graph, communicationShown: boolean): dia.Cell[] {
+
+    if (!communicationShown) {
+        return [];
+    }
+
+    let affectedEntities = graph
+        .getCells()
+        .filter(cell => {
+            return cell.attributes.entity.type === EntityTypes.REQUEST_TRACE
+        });
 
     return affectedEntities;
 }

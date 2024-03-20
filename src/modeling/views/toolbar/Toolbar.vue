@@ -185,11 +185,11 @@ import { ref, computed, onMounted, Ref, ComputedRef } from "vue";
 import { dia, util, highlighters, routers } from "jointjs";
 import { DialogMetaData, DialogSize } from "../../config/actionDialogConfig";
 import EntityTypes from "../../config/entityTypes";
-import ToolbarConfig from "../../config/toolbarConfiguration";
+import { FilterKey, ToolbarConfig } from "../../config/toolbarConfiguration";
 import ButtonGroup from './ButtonGroup.vue';
 import ModalConfirmationDialog, { ConfirmationModalProps, getDefaultConfirmationDialogData } from '../components/ModalConfirmationDialog.vue';
 import ModalWrapper from '../components/ModalWrapper.vue';
-import { getAffectedBackingViewCells, getAffectedCommunicationViewCells, getAffectedDataViewCells, getAffectedDeploymentViewCells } from './viewfilter';
+import { getAffectedBackingViewCells, getAffectedCommunicationViewCells, getAffectedDataViewCells, getAffectedDeploymentViewCells, getAffectedRequestTraceCells } from './viewfilter';
 import { ModelingAppSettings, getRouterConfig } from '@/modeling/config/appSettings';
 
 export type ToolbarButton = {
@@ -705,7 +705,7 @@ function updateAppSettings() {
     showAppSettings.value = false;
 }
 
-function getFilterState(viewKey: string): boolean {
+function getFilterState(viewKey: FilterKey): boolean {
     return filterTools.value.find(filter => filter.viewKey === viewKey).filterState;
 }
 
@@ -722,13 +722,16 @@ function onFilterSelection(viewKey: string) {
             filteredGraphCells.push(...getAffectedDeploymentViewCells(props.graph, getFilterState("backingView"), getFilterState("dataView")));
             break;
         case "communicationView":
-            filteredGraphCells.push(...getAffectedCommunicationViewCells(props.graph, getFilterState("backingView")))
+            filteredGraphCells.push(...getAffectedCommunicationViewCells(props.graph, getFilterState("backingView"), getFilterState("traceView")));
             break;
         case "backingView":
             filteredGraphCells.push(...getAffectedBackingViewCells(props.graph, getFilterState("communicationView"), getFilterState("deploymentView"), getFilterState("dataView")));
             break;
         case "dataView":
             filteredGraphCells.push(...getAffectedDataViewCells(props.graph, getFilterState("deploymentView"), getFilterState("backingView")));
+            break;
+        case "traceView":
+            filteredGraphCells.push(...getAffectedRequestTraceCells(props.graph, getFilterState("communicationView")));
             break;
         default:
             break;

@@ -10,8 +10,43 @@ const ItemType = Object.freeze({
     CHECKBOX: "checkbox"
 });
 
+export type BasicToolConfig = {
+    providedFeature: string,
+    tooltipText: string,
+    text: string,
+    iconClass: string,
+    additionalCssClass: string,
+};
 
-const ToolbarConfig = {
+export type SingleToolConfig = BasicToolConfig & {
+    buttonType: "button"
+}
+
+export type DropdownToolConfig = BasicToolConfig & {
+    buttonType: "button-dropdown",
+    dropdownButtons: BasicToolConfig[]
+}
+
+export type ToolGroupConfig = {
+    buttonGroupId: string, 
+    content: (SingleToolConfig | DropdownToolConfig)[]
+}
+
+export type FilterKey = "deploymentView" | "communicationView" | "backingView" | "dataView" | "traceView";
+
+export type FilterConfig = {
+    key: FilterKey,
+    labelText: string,
+    tooltipText: string
+}
+
+export type ToolbarConfiguration = {
+    Tools: ToolGroupConfig[],
+    FilterConfig: FilterConfig[],
+    ToolbarRowConfig: { rowIndex: number, tools: ToolGroupConfig[]}[]
+}
+
+export const ToolbarConfig: ToolbarConfiguration = {
     Tools: [
         {
             buttonGroupId: "general-paper-actions",
@@ -219,6 +254,7 @@ const ToolbarConfig = {
                 {
                     providedFeature: "exitRequestTraceView",
                     tooltipText: "Exit current Request Trace view",
+                    text: "",
                     iconClass: "fa-solid fa-arrow-right-from-bracket",
                     additionalCssClass: "buttonInitialHide btn-danger exitRequestTraceView",
                     buttonType: ToolbarElementType.BUTTON
@@ -247,6 +283,11 @@ const ToolbarConfig = {
             key: "dataView",
             labelText: "Data View",
             tooltipText: "Show/Hide Data Aggregates and Backing Data"
+        },
+        {
+            key: "traceView",
+            labelText: "Request Trace View",
+            tooltipText: "Show/Hide Request Trace entities"
         },
     ],
     ToolbarRowConfig: [
@@ -301,5 +342,3 @@ const ToolbarConfig = {
         }
     ]
 }
-
-export default ToolbarConfig;
