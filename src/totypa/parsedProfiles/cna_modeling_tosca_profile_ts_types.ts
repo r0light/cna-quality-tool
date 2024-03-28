@@ -22,6 +22,9 @@ attributes?: {
 export type CnaQualityModelEntitiesHostedOnDeploymentMapping = {
     properties?: {
     deployment: string,
+    deployment_unit: string,
+    update_strategy: string,
+    automated_restart_policy: string,
 },
 attributes?: {
     tosca_id?: string,
@@ -189,6 +192,9 @@ export type CnaQualityModelEntitiesComputeInfrastructure = {
     supported_artifacts?: string[],
     availability_zone: string,
     region: string,
+    supported_update_strategies?: string[],
+    deployed_entities_scaling: string,
+    self_scaling: string,
 },
 attributes?: {
     private_address?: string,

@@ -4,6 +4,8 @@ import { EntityProperty, SelectEntityProperty, loadAllProperties } from '../comm
 import { cna_modeling_tosca_profile } from '@/totypa/parsedProfiles/cna_modeling_tosca_profile.js';
 
 
+const DEPLOYMENT_UPDATE_STRATEGIES = [{key: "in-place", name: "In place"},{ key: "replace", name: "Replace" }, { key: "rolling", name: "Rolling" }, { key: "blue-green", name: "Blue-Green" }];
+
 /**
  * The module for aspects related to a Deployment Mapping quality model entity.
  * @module entities/deploymentMapping
@@ -38,7 +40,37 @@ function getDeploymentMappingProperties(): EntityProperty[] {
                     ],
                     prop.getDefaultValue,
                     prop.value);
-                break;
+            case "update_strategy":
+                return new SelectEntityProperty(prop.getKey,
+                    "Update strategy",
+                    prop.getDescription,
+                    prop.getExample,
+                    prop.getRequired,
+                    DEPLOYMENT_UPDATE_STRATEGIES.map(strategy => { return { value: strategy.key, text: strategy.name } }),
+                    prop.getDefaultValue,
+                    prop.value);
+            case "automated_restart_policy":
+                return new SelectEntityProperty(prop.getKey,
+                    "Automated restart policy",
+                    prop.getDescription,
+                    prop.getExample,
+                    prop.getRequired,
+                    [
+                        {
+                            value: "never",
+                            text: "never"
+                        },
+                        {
+                            value: "onProcessFailure",
+                            text: "on process failure"
+                        },
+                        {
+                            value: "onHealthFailure",
+                            text: "on health failure"
+                        }
+                    ],
+                    prop.getDefaultValue,
+                    prop.value);
             default:
                 return prop;
         }
@@ -179,4 +211,4 @@ class DeploymentMapping {
     }
 }
 
-export { DeploymentMapping, DEPLOYMENT_MAPPING_TOSCA_KEY, getDeploymentMappingProperties };
+export { DeploymentMapping, DEPLOYMENT_MAPPING_TOSCA_KEY, DEPLOYMENT_UPDATE_STRATEGIES, getDeploymentMappingProperties };

@@ -147,6 +147,22 @@ node_types:
         required: true
         description: The name of the region in which this infrastructure is provided.
         default: default-region
+      supported_update_strategies:
+        type: list
+        description: Which update strategies are supported for entities deployed on this infrastructure
+        entry_schema:
+          description: An update strategy supported by this infrastructure
+          type: string
+      deployed_entities_scaling:
+        type: string
+        required: true
+        description: Whether and how entities deployed on this infrastructure can be scaled horizontally
+        default: none
+      self_scaling:
+        type: string
+        required: true
+        description: Whether and how this entity scales itself, either horizontally or vertically.
+        default: none  
     requirements:
       # Allow the deployment on another Infrastructure entity
       - host:

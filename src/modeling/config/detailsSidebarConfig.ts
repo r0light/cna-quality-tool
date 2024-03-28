@@ -991,6 +991,93 @@ const EntityDetailsConfig: {
                     }
                 }
             },
+            {
+                providedFeature: "supportedUpdateStrategies-wrapper",
+                contentType: PropertyContentType.TABLE_DIALOG,
+                label: "Supported Update Strategies:",
+                helpText: "",
+                inputProperties: {
+                    disabled: false,
+                    required: false,
+                    checked: false,
+                    selected: false,
+                    readonly: false
+                },
+                attributes: {
+                    svgRepresentation: "",
+                    buttonText: "Edit supported update strategies",
+                    buttonIconClass: "fa-solid fa-pencil"
+                },
+                provideEnterButton: false,
+                show: true,
+                jointJsConfig: {
+                    propertyType: "free",
+                    modelPath: "",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
+                buttonActionContent: {
+                    // contentType: PropertyContentType // TODO modalDialog,
+                    dialogMetaData: {
+                        dialogSize: DialogSize.LARGE,
+                        header: {
+                            iconClass: "fa-solid fa-arrow-up-from-bracket",
+                            svgRepresentation: "",
+                            text: "Supported update strategies: "
+                        },
+                        footer: {
+                            showCancelButton: true,
+                            cancelButtonText: "Cancel",
+                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save"}]
+                        }
+                    },
+                    dialogContent: {
+                        contentType: UIContentType.GROUP_FORMS,
+                        groups: [
+                            {
+                                contentGroupMetaData: {
+                                    id: "supported-update-strategies-data",
+                                    headline: "Supported update strategies",
+                                    text: `Check all update strategies supported by this infrastructure. Your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all your changes will be lost.`,
+                                },
+                                contentItems: [
+                                    {
+                                        providedFeature: "supported_update_strategies",
+                                        contentType: PropertyContentType.TABLE,
+                                        label: "",
+                                        helpText: "",
+                                        inputProperties: {
+                                            disabled: false,
+                                            readonly: false,
+                                            required: false,
+                                            checked: false,
+                                            selected: false,
+                                        },
+                                        provideEnterButton: false,
+                                        show: true,
+                                        jointJsConfig: {
+                                            propertyType: "customProperty",
+                                            modelPath: "entity/properties/supported_update_strategies",
+                                            defaultPropPath: "",
+                                            minPath: "",
+                                            min: ""
+                                        },
+                                        tableColumnHeaders: [
+                                            {
+                                                text: "Update strategy"
+                                            },
+                                            {
+                                                text: "Supported"
+                                            },
+                                        ]
+                                    }
+                                ]
+                            },
+                        ]
+                    }
+                }
+            }
         ])
     },
     DeploymentMapping: {

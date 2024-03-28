@@ -68,6 +68,7 @@ import type { EditPropertySection } from './PropertiesEditor.vue';
 import { toPropertySections } from './PropertiesEditor.vue';
 import { FormContentData, findInDialogByFeature } from '../components/ModalEditDialog.vue';
 import { prop } from 'vue-class-component';
+import { DEPLOYMENT_UPDATE_STRATEGIES } from '@/core/entities/deploymentMapping';
 
 const toArray = (o: object, keyName: string, valueName: string) => {
     let asArray = [];
@@ -308,6 +309,35 @@ onUpdated(() => {
             supportedArtifactsOption.includeFormCheck = false;
 
             supportedArtifactsOption.value = selectedEntity.model.prop(supportedArtifactsOption.jointJsConfig.modelPath);
+
+            // prepare involved links selection
+            let supportedUpdateStrategiesWrapperConfig: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "supportedUpdateStrategies-wrapper");
+            let supportedUpdateStrategiesConfig = findInDialogByFeature(supportedUpdateStrategiesWrapperConfig.buttonActionContent, "supported_update_strategies");
+            supportedUpdateStrategiesConfig.includeFormCheck = false;
+
+            const currentlySupportedStrategies = selectedEntity.model.prop(supportedUpdateStrategiesConfig.jointJsConfig.modelPath) ? selectedEntity.model.prop(supportedUpdateStrategiesConfig.jointJsConfig.modelPath) : [];
+
+            // clear table rows
+            supportedUpdateStrategiesConfig.tableRows.length = 0;
+            DEPLOYMENT_UPDATE_STRATEGIES.forEach((strategy) => {
+
+                supportedUpdateStrategiesConfig.tableRows.push({
+                    columns: {
+                        name: strategy.name,
+                        supported: {
+                            contentType: PropertyContentType.CHECKBOX_WITHOUT_LABEL,
+                            disabled: false,
+                            checked: currentlySupportedStrategies.includes(strategy.key),
+                            id: strategy.key
+                        }
+                    },
+                    attributes: {
+                        representationClass: "validOption",
+                        disabled: false
+                    }
+                });
+            })
+
             break;
         case EntityTypes.DATA_AGGREGATE:
 
@@ -763,6 +793,14 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                 case EntityTypes.INFRASTRUCTURE:
                     if (propertyOption.providedFeature === "supported_artifacts") {
                         selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, propertyOption.value);
+                    } else if (propertyOption.providedFeature === "supported_update_strategies") {
+                        let supportedStrategies = [];
+                        propertyOption.tableRows.forEach(strategy => {
+                            if (strategy.columns["supported"]["checked"]) {
+                                supportedStrategies.push(strategy.columns["supported"]["id"]);
+                            }
+                        })
+                        selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, supportedStrategies, { rewrite: true });
                     }
                     break;
                 case EntityTypes.DATA_AGGREGATE:

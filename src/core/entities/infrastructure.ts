@@ -110,6 +110,58 @@ function getInfrastructureProperties() {
                     ],
                     prop.getDefaultValue,
                     prop.value);
+            case "deployed_entities_scaling":
+                return new SelectEntityProperty(prop.getKey,
+                    "Deployed entities scaling",
+                    prop.getDescription,
+                    prop.getExample,
+                    prop.getRequired,
+                    [
+                        {
+                            value: "none",
+                            text: "none"
+                        },
+                        {
+                            value: "manual",
+                            text: "manual"
+                        },
+                        {
+                            value: "automated-built-in",
+                            text: "automated built-in"
+                        },
+                        {
+                            value: "automated-separate",
+                            text: "automated separate"
+                        }
+                    ],
+                    prop.getDefaultValue,
+                    prop.value);
+            case "self_scaling":
+                return new SelectEntityProperty(prop.getKey,
+                    "Self scaling",
+                    prop.getDescription,
+                    prop.getExample,
+                    prop.getRequired,
+                    [
+                        {
+                            value: "none",
+                            text: "none"
+                        },
+                        {
+                            value: "manual",
+                            text: "manual"
+                        },
+                        {
+                            value: "automated-built-in",
+                            text: "automated built-in"
+                        },
+                        {
+                            value: "automated-separate",
+                            text: "automated separate"
+                        }
+                    ],
+                    prop.getDefaultValue,
+                    prop.value);
             default:
                 return prop;
         }

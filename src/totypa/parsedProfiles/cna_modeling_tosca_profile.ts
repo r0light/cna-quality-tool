@@ -55,6 +55,24 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
           "required": true,
           "description": "How this deployment mapping is described or ensured. Valid values can be manual, automated imperative, or automated declarative",
           "default": "manual"
+        },
+        "deployment_unit": {
+          "type": "string",
+          "required": true,
+          "description": "When this deployment mapping can be described as a specific unit of deployment (e.g. a Kubernetes Pod), state it here. Otherwise it is custom.",
+          "default": "custom"
+        },
+        "update_strategy": {
+          "type": "string",
+          "required": true,
+          "description": "How the deployed entity is updated in case a new version is deployed. It can simply be replaced by an instance of the new version, or specific strategies like \"rolling upgrade\" or \"blue-green\" can be used.",
+          "default": "replace"
+        },
+        "automated_restart_policy": {
+          "type": "string",
+          "required": true,
+          "description": "If the deployed entity is automatically restarted in case of failure.",
+          "default": "never"
         }
       },
       "valid_target_types": [
@@ -295,6 +313,26 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
           "required": true,
           "description": "The name of the region in which this infrastructure is provided.",
           "default": "default-region"
+        },
+        "supported_update_strategies": {
+          "type": "list",
+          "description": "Which update strategies are supported for entities deployed on this infrastructure",
+          "entry_schema": {
+            "description": "An update strategy supported by this infrastructure",
+            "type": "string"
+          }
+        },
+        "deployed_entities_scaling": {
+          "type": "string",
+          "required": true,
+          "description": "Whether and how entities deployed on this infrastructure can be scaled horizontally",
+          "default": "none"
+        },
+        "self_scaling": {
+          "type": "string",
+          "required": true,
+          "description": "Whether and how this entity scales itself, either horizontally or vertically.",
+          "default": "none"
         }
       },
       "requirements": [

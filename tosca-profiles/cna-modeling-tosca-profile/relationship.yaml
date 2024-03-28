@@ -34,6 +34,21 @@ relationship_types:
         required: true
         description: How this deployment mapping is described or ensured. Valid values can be manual, automated imperative, or automated declarative
         default: manual
+      deployment_unit:
+        type: string
+        required: true
+        description: When this deployment mapping can be described as a specific unit of deployment (e.g. a Kubernetes Pod), state it here. Otherwise it is custom.
+        default: custom
+      update_strategy:
+        type: string
+        required: true
+        description: How the deployed entity is updated in case a new version is deployed. It can simply be replaced by an instance of the new version, or specific strategies like "rolling upgrade" or "blue-green" can be used.
+        default: in-place 
+      automated_restart_policy:
+        type: string
+        required: true
+        description: If the deployed entity is automatically restarted in case of failure.
+        default: never
     valid_target_types: [ tosca.capabilities.Compute ]
 
   cna.qualityModel.relationships.Provides.Endpoint:
