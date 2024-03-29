@@ -100,8 +100,12 @@ function getInfrastructureProperties() {
                             text: "manual"
                         },
                         {
-                            value: "automated",
-                            text: "automated"
+                            value: "automated-coded",
+                            text: "automated coded"
+                        },
+                        {
+                            value: "automated-inferred",
+                            text: "automated inferred"
                         },
                         {
                             value: "transparent",

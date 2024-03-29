@@ -49,6 +49,16 @@ relationship_types:
         required: true
         description: If the deployed entity is automatically restarted in case of failure.
         default: never
+      assigned_account:
+        type: string
+        required: true
+        description: The name of the account under which this component is deployed (e.g. a service account from a cloud provider)
+        default: default-account
+      resource_requirements:
+        type: string
+        required: true
+        description: Explicitly stated resource requirements for this deployment. If stated the infrastructure can schedule an entity accordingly.
+        default: unstated
     valid_target_types: [ tosca.capabilities.Compute ]
 
   cna.qualityModel.relationships.Provides.Endpoint:

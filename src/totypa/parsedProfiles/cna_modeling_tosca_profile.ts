@@ -66,13 +66,25 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
           "type": "string",
           "required": true,
           "description": "How the deployed entity is updated in case a new version is deployed. It can simply be replaced by an instance of the new version, or specific strategies like \"rolling upgrade\" or \"blue-green\" can be used.",
-          "default": "replace"
+          "default": "in-place"
         },
         "automated_restart_policy": {
           "type": "string",
           "required": true,
           "description": "If the deployed entity is automatically restarted in case of failure.",
           "default": "never"
+        },
+        "assigned_account": {
+          "type": "string",
+          "required": true,
+          "description": "The name of the account under which this component is deployed (e.g. a service account from a cloud provider)",
+          "default": "default-account"
+        },
+        "resource_requirements": {
+          "type": "string",
+          "required": true,
+          "description": "Explicitly stated resource requirements for this deployment. If stated the infrastructure can schedule an entity accordingly.",
+          "default": "unstated"
         }
       },
       "valid_target_types": [
@@ -152,6 +164,12 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
           "type": "string",
           "description": "The kind of artifact which is produced for deploying this component. This can for example be a container image, a native executable, a jar file, or some custom packaging format for specific cloud services.",
           "required": true
+        },
+        "load_shedding": {
+          "type": "boolean",
+          "description": "Whether or not this component applies load shedding. That means whether the component rejects incoming load based on certain thresholds (resource usage, concurrent requests).",
+          "required": true,
+          "default": false
         }
       },
       "requirements": [
@@ -291,7 +309,7 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
         },
         "provisioning": {
           "type": "string",
-          "description": "How infrastructure is initially provisioned. This can be done manually (for example through the web interface of a cloud provider), automatically (for example through an IaC tool), or transparent, if it is not explicitly provisioned by a consumer, but done on-demand by a provider.",
+          "description": "How infrastructure is initially provisioned. This can be done manually (for example through the web interface of a cloud provider), automatically coded (for example through an IaC tool), automatically inferred, if it is inferred based on deployed components, or transparent, if it is not explicitly provisioned by a consumer, but done on-demand by a provider.",
           "default": "manual"
         },
         "supported_artifacts": {
@@ -333,6 +351,12 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
           "required": true,
           "description": "Whether and how this entity scales itself, either horizontally or vertically.",
           "default": "none"
+        },
+        "enforced_resource_bounds": {
+          "type": "boolean",
+          "required": true,
+          "description": "Set to true if the infrastructure enforces resource bounds on deployed components, for example regarding cpu shares or memory size. Deployed entities can then only use resources up to a certain bound. Otherwise entities can use resources as available.",
+          "default": false
         }
       },
       "requirements": [
@@ -362,6 +386,14 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
     "cna.qualityModel.entities.Endpoint": {
       "derived_from": "tosca.nodes.Root",
       "description": "Endpoint type to explicitly model endpoints as entities",
+      "properties": {
+        "rate_limiting": {
+          "type": "string",
+          "required": true,
+          "description": "If for this endpoint rate limiting is enforced, the limit can be stated here, otherwise it is \"none\".",
+          "default": "none"
+        }
+      },
       "capabilities": {
         "endpoint": {
           "type": "tosca.capabilities.Endpoint",

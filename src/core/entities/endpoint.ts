@@ -17,7 +17,7 @@ const ENDPOINT_CAPABILITY_EQUIVALENT = tosca_simple_profile_for_yaml_v1_3.capabi
  */
 
 function getEndpointProperties(): EntityProperty[] {
-    let parsed = parseProperties(ENDPOINT_CAPABILITY_EQUIVALENT.properties);
+    let parsed = parseProperties(ENDPOINT_CAPABILITY_EQUIVALENT.properties).concat(parseProperties(ENDPOINT_TOSCA_EQUIVALENT.properties));
 
     for (const prop of parsed) {
         switch (prop.getKey) {

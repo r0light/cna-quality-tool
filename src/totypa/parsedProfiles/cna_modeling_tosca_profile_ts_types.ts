@@ -25,6 +25,8 @@ export type CnaQualityModelEntitiesHostedOnDeploymentMapping = {
     deployment_unit: string,
     update_strategy: string,
     automated_restart_policy: string,
+    assigned_account: string,
+    resource_requirements: string,
 },
 attributes?: {
     tosca_id?: string,
@@ -72,6 +74,7 @@ export type CnaQualityModelEntitiesComponent = {
     software_type: string,
     stateless: boolean,
     artifact: string,
+    load_shedding: boolean,
     component_version?: string,
     admin_credential?: ToscaDatatypesCredential,
 },
@@ -101,6 +104,7 @@ export type CnaQualityModelEntitiesService = {
     software_type: string,
     stateless: boolean,
     artifact: string,
+    load_shedding: boolean,
     component_version?: string,
     admin_credential?: ToscaDatatypesCredential,
 },
@@ -130,6 +134,7 @@ export type CnaQualityModelEntitiesBackingService = {
     software_type: string,
     stateless: boolean,
     artifact: string,
+    load_shedding: boolean,
     component_version?: string,
     admin_credential?: ToscaDatatypesCredential,
 },
@@ -161,6 +166,7 @@ export type CnaQualityModelEntitiesStorageBackingService = {
     managed: boolean,
     software_type: string,
     artifact: string,
+    load_shedding: boolean,
     component_version?: string,
     admin_credential?: ToscaDatatypesCredential,
 },
@@ -195,6 +201,7 @@ export type CnaQualityModelEntitiesComputeInfrastructure = {
     supported_update_strategies?: string[],
     deployed_entities_scaling: string,
     self_scaling: string,
+    enforced_resource_bounds: boolean,
 },
 attributes?: {
     private_address?: string,
@@ -225,7 +232,10 @@ artifacts?: {
 export type CnaQualityModelEntitiesEndpoint = {
     type: "cna.qualityModel.entities.Endpoint",
                        metadata?: TOSCA_Metadata,
-                       attributes?: {
+                       properties?: {
+    rate_limiting: string,
+},
+attributes?: {
     tosca_id?: string,
     tosca_name?: string,
     state?: string,
