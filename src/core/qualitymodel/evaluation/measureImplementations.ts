@@ -7,29 +7,46 @@ const average: (list: number[]) => number = list => {
 
 const measureImplementations: { [measureKey: string]: Calculation } = {
     "serviceReplicationLevel": (system) => {
-        let services = [...system.getComponentEntities.entries()]
-            .map(entry => entry[1])
-            .filter(entity => entity.constructor.name === Service.name);
-        if (services.length === 0) {
+        let replicasPerService: Map<String, number> = new Map();
+        for (const [id, deploymentMapping] of system.getDeploymentMappingEntities.entries()) {
+            let deployedEntity = deploymentMapping.getDeployedEntity
+            if (deployedEntity.constructor.name === Service.name) {
+                let noOfReplicas = deploymentMapping.getProperties().find(prop => prop.getKey === "replicas").value
+                if (replicasPerService.has(deployedEntity.getId)) {
+                    replicasPerService.set(deployedEntity.getId, replicasPerService.get(deployedEntity.getId) + noOfReplicas);
+                } else {
+                    replicasPerService.set(deployedEntity.getId, noOfReplicas);
+                }
+            }
+        }
+
+        if (replicasPerService.size === 0) {
             return "n/a";
         } else {
             return average(
-                services
-                    .map(service => service.getProperties()
-                        .find(prop => prop.getKey === "replicas").value)
+                Array.from(replicasPerService.values())
             );
         }
     },
     "storageReplicationLevel": (system) => {
-        let storageBackingServices = [...system.getComponentEntities.entries()]
-            .map(entry => entry[1])
-            .filter(entity => entity.constructor.name === StorageBackingService.name);
-        if (storageBackingServices.length === 0) {
+        let replicasPerStorageService: Map<String, number> = new Map();
+        for (const [id, deploymentMapping] of system.getDeploymentMappingEntities.entries()) {
+            let deployedEntity = deploymentMapping.getDeployedEntity
+            if (deployedEntity.constructor.name === StorageBackingService.name) {
+                let noOfReplicas = deploymentMapping.getProperties().find(prop => prop.getKey === "replicas").value
+                if (replicasPerStorageService.has(deployedEntity.getId)) {
+                    replicasPerStorageService.set(deployedEntity.getId, replicasPerStorageService.get(deployedEntity.getId) + noOfReplicas);
+                } else {
+                    replicasPerStorageService.set(deployedEntity.getId, noOfReplicas);
+                }
+            }
+        }
+
+        if (replicasPerStorageService.size === 0) {
             return "n/a";
         } else {
-            return average(storageBackingServices
-                .map(storageService => storageService.getProperties()
-                    .find(prop => prop.getKey === "replicas").value)
+            return average(
+                Array.from(replicasPerStorageService.values())
             );
         }
     },

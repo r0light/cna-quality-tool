@@ -11,6 +11,8 @@ export type CnaQualityModelEntitiesConnectsToLink = {
     properties?: {
     relation_type: string,
     timeout: number,
+    retries: number,
+    circuit_breaker?: string,
     credential?: ToscaDatatypesCredential,
 },
 attributes?: {
@@ -23,6 +25,7 @@ export type CnaQualityModelEntitiesHostedOnDeploymentMapping = {
     properties?: {
     deployment: string,
     deployment_unit: string,
+    replicas: number,
     update_strategy: string,
     automated_restart_policy: string,
     assigned_account: string,
@@ -99,7 +102,6 @@ export type CnaQualityModelEntitiesService = {
     type: "cna.qualityModel.entities.Service",
                        metadata?: TOSCA_Metadata,
                        properties?: {
-    replicas: number,
     managed: boolean,
     software_type: string,
     stateless: boolean,
@@ -161,7 +163,6 @@ export type CnaQualityModelEntitiesStorageBackingService = {
                        properties?: {
     name: string,
     stateless: boolean,
-    replicas: number,
     shards: number,
     managed: boolean,
     software_type: string,
@@ -234,6 +235,7 @@ export type CnaQualityModelEntitiesEndpoint = {
                        metadata?: TOSCA_Metadata,
                        properties?: {
     rate_limiting: string,
+    idempotent: boolean,
 },
 attributes?: {
     tosca_id?: string,

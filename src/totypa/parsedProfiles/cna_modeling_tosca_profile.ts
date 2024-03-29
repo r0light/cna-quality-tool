@@ -39,6 +39,17 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
           "description": "If a timeout is applied for this link, specify it's length here. If no timeout is applied, use 0.",
           "default": 0,
           "required": true
+        },
+        "retries": {
+          "type": "integer",
+          "description": "Number of times this invocation is retried, if it fails.",
+          "default": 0,
+          "required": true
+        },
+        "circuit_breaker": {
+          "type": "string",
+          "description": "Whether or not this invocation is protected by a circuit breaker",
+          "default": "none"
         }
       },
       "valid_target_types": [
@@ -61,6 +72,12 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
           "required": true,
           "description": "When this deployment mapping can be described as a specific unit of deployment (e.g. a Kubernetes Pod), state it here. Otherwise it is custom.",
           "default": "custom"
+        },
+        "replicas": {
+          "type": "integer",
+          "description": "The minimum number of replicated instances for the deployed component when it is running",
+          "required": true,
+          "default": 1
         },
         "update_strategy": {
           "type": "string",
@@ -237,15 +254,7 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
     },
     "cna.qualityModel.entities.Service": {
       "derived_from": "cna.qualityModel.entities.Component",
-      "description": "Node Type to model Service entities",
-      "properties": {
-        "replicas": {
-          "type": "integer",
-          "description": "The minimum number of replicated instances for this service when it is running",
-          "required": true,
-          "default": 1
-        }
-      }
+      "description": "Node Type to model Service entities"
     },
     "cna.qualityModel.entities.BackingService": {
       "derived_from": "cna.qualityModel.entities.Component",
@@ -272,12 +281,6 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
           "description": "Storage Backing Service are per default stateful (not stateless)",
           "default": false,
           "required": true
-        },
-        "replicas": {
-          "type": "integer",
-          "description": "The minimum number of replicated instances for this storage service when it is running",
-          "required": true,
-          "default": 1
         },
         "shards": {
           "type": "integer",
@@ -392,6 +395,12 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
           "required": true,
           "description": "If for this endpoint rate limiting is enforced, the limit can be stated here, otherwise it is \"none\".",
           "default": "none"
+        },
+        "idempotent": {
+          "type": "boolean",
+          "required": true,
+          "description": "Flag to specify whether this endpoint is idempotent, meaning that the effect of a successful invocation is independent of the number of times it is invoked.",
+          "default": false
         }
       },
       "capabilities": {

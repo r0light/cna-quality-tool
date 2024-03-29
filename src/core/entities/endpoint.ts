@@ -1,4 +1,4 @@
-import { EntityProperty, TextEntityProperty, parseProperties } from "../common/entityProperty.js";
+import { EntityProperty, TextEntityProperty, loadAllProperties, parseProperties } from "../common/entityProperty.js";
 import { tosca_simple_profile_for_yaml_v1_3 } from '../../totypa/parsedProfiles/tosca_simple_profile_for_yaml_v1_3.js'
 import { MetaData } from "../common/entityDataTypes.js";
 import { cna_modeling_tosca_profile } from "../../totypa/parsedProfiles/cna_modeling_tosca_profile.js";
@@ -17,7 +17,7 @@ const ENDPOINT_CAPABILITY_EQUIVALENT = tosca_simple_profile_for_yaml_v1_3.capabi
  */
 
 function getEndpointProperties(): EntityProperty[] {
-    let parsed = parseProperties(ENDPOINT_CAPABILITY_EQUIVALENT.properties).concat(parseProperties(ENDPOINT_TOSCA_EQUIVALENT.properties));
+    let parsed = loadAllProperties(ENDPOINT_CAPABILITY_EQUIVALENT).concat(loadAllProperties(ENDPOINT_TOSCA_EQUIVALENT));
 
     for (const prop of parsed) {
         switch (prop.getKey) {
