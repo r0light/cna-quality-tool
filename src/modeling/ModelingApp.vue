@@ -209,7 +209,7 @@ function requestLoadFromTosca(yamlString: string, fileName: string) {
         actions: [
             function decideToMerge() {
                 confirmationModalManager.value.show = false;
-                systemEntityManager.getSystemEntity;
+                systemEntityManager.getSystemEntity();
                 loadFromTosca(yamlString, fileName, "merge");
             },
             function decideToReplace() {
