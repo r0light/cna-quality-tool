@@ -616,19 +616,391 @@ const EntityDetailsConfig: {
 } = {
     Component: {
         type: EntityTypes.COMPONENT,
-        specificProperties: parseProperties(getComponentProperties(), "entity")
+        specificProperties: customizePropertyConfigs(parseProperties(getComponentProperties(), "entity"), [
+            {
+                providedFeature: "assigned-networks-wrapper",
+                contentType: PropertyContentType.TABLE_DIALOG,
+                label: "Assigned Networks:",
+                helpText: "",
+                inputProperties: {
+                    disabled: false,
+                    required: false,
+                    checked: false,
+                    selected: false,
+                    readonly: false
+                },
+                attributes: {
+                    svgRepresentation: "",
+                    buttonText: "Edit assigned networks",
+                    buttonIconClass: "fa-solid fa-pencil"
+                },
+                provideEnterButton: false,
+                show: true,
+                jointJsConfig: {
+                    propertyType: "free",
+                    modelPath: "",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
+                buttonActionContent: {
+                    // contentType: PropertyContentType // TODO modalDialog,
+                    dialogMetaData: {
+                        dialogSize: DialogSize.LARGE,
+                        header: {
+                            iconClass: "fa-solid fa-network-wired",
+                            svgRepresentation: "",
+                            text: "Assigned networks: "
+                        },
+                        footer: {
+                            showCancelButton: true,
+                            cancelButtonText: "Cancel",
+                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save"}]
+                        }
+                    },
+                    dialogContent: {
+                        contentType: UIContentType.GROUP_FORMS,
+                        groups: [
+                            {
+                                contentGroupMetaData: {
+                                    id: "assigned-networks-data",
+                                    headline: "Assigned networks",
+                                    text: `Type in the id or subnet mask of a network and then add it using the plus button. However, your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all your changes will be lost. While you keep the selection of this Backing Data entity, your changes will be remembered.`,
+                                },
+                                contentItems: [
+                                    {
+                                        providedFeature: "assigned_networks",
+                                        contentType: PropertyContentType.DYNAMIC_LIST,
+                                        label: "",
+                                        helpText: "",
+                                        inputProperties: {
+                                            disabled: false,
+                                            readonly: false,
+                                            required: false,
+                                            checked: false,
+                                            selected: false,
+                                        },
+                                        provideEnterButton: false,
+                                        show: true,
+                                        jointJsConfig: {
+                                            propertyType: "customProperty",
+                                            modelPath: "entity/properties/assigned_networks",
+                                            defaultPropPath: "",
+                                            minPath: "",
+                                            min: ""
+                                        },
+                                        listElementFields:
+                                            {
+                                                key: "network-id",
+                                                label: "Network Name",
+                                                helpText: "The name of the network to assign",
+                                                labelIcon: "fa-solid fa-network-wired",
+                                                placeholder: "e.g. my-private-network"
+                                            }
+                                        ,
+                                        addElementButton: {
+                                            label: "Submit",
+                                            labelIcon: "fa-solid fa-plus"
+                                        }
+                                    }
+                                ]
+                            },
+                        ]
+                    }
+                }
+            }
+        ])
     },
     Service: {
         type: EntityTypes.SERVICE, 
-        specificProperties: concatInOrder(parseProperties(getServiceProperties(), "entity"), parseProperties(getComponentProperties(), "entity"))
+        specificProperties: customizePropertyConfigs(concatInOrder(parseProperties(getServiceProperties(), "entity"), parseProperties(getComponentProperties(), "entity")), [
+            {
+                providedFeature: "assigned-networks-wrapper",
+                contentType: PropertyContentType.TABLE_DIALOG,
+                label: "Assigned Networks:",
+                helpText: "",
+                inputProperties: {
+                    disabled: false,
+                    required: false,
+                    checked: false,
+                    selected: false,
+                    readonly: false
+                },
+                attributes: {
+                    svgRepresentation: "",
+                    buttonText: "Edit assigned networks",
+                    buttonIconClass: "fa-solid fa-pencil"
+                },
+                provideEnterButton: false,
+                show: true,
+                jointJsConfig: {
+                    propertyType: "free",
+                    modelPath: "",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
+                buttonActionContent: {
+                    // contentType: PropertyContentType // TODO modalDialog,
+                    dialogMetaData: {
+                        dialogSize: DialogSize.LARGE,
+                        header: {
+                            iconClass: "fa-solid fa-network-wired",
+                            svgRepresentation: "",
+                            text: "Assigned networks: "
+                        },
+                        footer: {
+                            showCancelButton: true,
+                            cancelButtonText: "Cancel",
+                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save"}]
+                        }
+                    },
+                    dialogContent: {
+                        contentType: UIContentType.GROUP_FORMS,
+                        groups: [
+                            {
+                                contentGroupMetaData: {
+                                    id: "assigned-networks-data",
+                                    headline: "Assigned networks",
+                                    text: `Type in the id or subnet mask of a network and then add it using the plus button. However, your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all your changes will be lost. While you keep the selection of this Backing Data entity, your changes will be remembered.`,
+                                },
+                                contentItems: [
+                                    {
+                                        providedFeature: "assigned_networks",
+                                        contentType: PropertyContentType.DYNAMIC_LIST,
+                                        label: "",
+                                        helpText: "",
+                                        inputProperties: {
+                                            disabled: false,
+                                            readonly: false,
+                                            required: false,
+                                            checked: false,
+                                            selected: false,
+                                        },
+                                        provideEnterButton: false,
+                                        show: true,
+                                        jointJsConfig: {
+                                            propertyType: "customProperty",
+                                            modelPath: "entity/properties/assigned_networks",
+                                            defaultPropPath: "",
+                                            minPath: "",
+                                            min: ""
+                                        },
+                                        listElementFields:
+                                            {
+                                                key: "network-id",
+                                                label: "Network Name",
+                                                helpText: "The name of the network to assign",
+                                                labelIcon: "fa-solid fa-network-wired",
+                                                placeholder: "e.g. my-private-network"
+                                            }
+                                        ,
+                                        addElementButton: {
+                                            label: "Submit",
+                                            labelIcon: "fa-solid fa-plus"
+                                        }
+                                    }
+                                ]
+                            },
+                        ]
+                    }
+                }
+            }
+        ])
     },
     BackingService: {
         type: EntityTypes.BACKING_SERVICE,
-        specificProperties: concatInOrder(parseProperties(getBackingServiceProperties(), "entity"), parseProperties(getComponentProperties(), "entity"))
+        specificProperties: customizePropertyConfigs(concatInOrder(parseProperties(getBackingServiceProperties(), "entity"), parseProperties(getComponentProperties(), "entity")), [
+            {
+                providedFeature: "assigned-networks-wrapper",
+                contentType: PropertyContentType.TABLE_DIALOG,
+                label: "Assigned Networks:",
+                helpText: "",
+                inputProperties: {
+                    disabled: false,
+                    required: false,
+                    checked: false,
+                    selected: false,
+                    readonly: false
+                },
+                attributes: {
+                    svgRepresentation: "",
+                    buttonText: "Edit assigned networks",
+                    buttonIconClass: "fa-solid fa-pencil"
+                },
+                provideEnterButton: false,
+                show: true,
+                jointJsConfig: {
+                    propertyType: "free",
+                    modelPath: "",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
+                buttonActionContent: {
+                    // contentType: PropertyContentType // TODO modalDialog,
+                    dialogMetaData: {
+                        dialogSize: DialogSize.LARGE,
+                        header: {
+                            iconClass: "fa-solid fa-network-wired",
+                            svgRepresentation: "",
+                            text: "Assigned networks: "
+                        },
+                        footer: {
+                            showCancelButton: true,
+                            cancelButtonText: "Cancel",
+                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save"}]
+                        }
+                    },
+                    dialogContent: {
+                        contentType: UIContentType.GROUP_FORMS,
+                        groups: [
+                            {
+                                contentGroupMetaData: {
+                                    id: "assigned-networks-data",
+                                    headline: "Assigned networks",
+                                    text: `Type in the id or subnet mask of a network and then add it using the plus button. However, your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all your changes will be lost. While you keep the selection of this Backing Data entity, your changes will be remembered.`,
+                                },
+                                contentItems: [
+                                    {
+                                        providedFeature: "assigned_networks",
+                                        contentType: PropertyContentType.DYNAMIC_LIST,
+                                        label: "",
+                                        helpText: "",
+                                        inputProperties: {
+                                            disabled: false,
+                                            readonly: false,
+                                            required: false,
+                                            checked: false,
+                                            selected: false,
+                                        },
+                                        provideEnterButton: false,
+                                        show: true,
+                                        jointJsConfig: {
+                                            propertyType: "customProperty",
+                                            modelPath: "entity/properties/assigned_networks",
+                                            defaultPropPath: "",
+                                            minPath: "",
+                                            min: ""
+                                        },
+                                        listElementFields:
+                                            {
+                                                key: "network-id",
+                                                label: "Network Name",
+                                                helpText: "The name of the network to assign",
+                                                labelIcon: "fa-solid fa-network-wired",
+                                                placeholder: "e.g. my-private-network"
+                                            }
+                                        ,
+                                        addElementButton: {
+                                            label: "Submit",
+                                            labelIcon: "fa-solid fa-plus"
+                                        }
+                                    }
+                                ]
+                            },
+                        ]
+                    }
+                }
+            }
+        ])
     },
     StorageBackingService: {
         type: EntityTypes.STORAGE_BACKING_SERVICE,
-        specificProperties: concatInOrder(parseProperties(getStorageBackingServiceProperties(), "entity"), parseProperties(getComponentProperties(), "entity"))
+        specificProperties: customizePropertyConfigs(concatInOrder(parseProperties(getStorageBackingServiceProperties(), "entity"), parseProperties(getComponentProperties(), "entity")), [
+            {
+                providedFeature: "assigned-networks-wrapper",
+                contentType: PropertyContentType.TABLE_DIALOG,
+                label: "Assigned Networks:",
+                helpText: "",
+                inputProperties: {
+                    disabled: false,
+                    required: false,
+                    checked: false,
+                    selected: false,
+                    readonly: false
+                },
+                attributes: {
+                    svgRepresentation: "",
+                    buttonText: "Edit assigned networks",
+                    buttonIconClass: "fa-solid fa-pencil"
+                },
+                provideEnterButton: false,
+                show: true,
+                jointJsConfig: {
+                    propertyType: "free",
+                    modelPath: "",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
+                buttonActionContent: {
+                    // contentType: PropertyContentType // TODO modalDialog,
+                    dialogMetaData: {
+                        dialogSize: DialogSize.LARGE,
+                        header: {
+                            iconClass: "fa-solid fa-network-wired",
+                            svgRepresentation: "",
+                            text: "Assigned networks: "
+                        },
+                        footer: {
+                            showCancelButton: true,
+                            cancelButtonText: "Cancel",
+                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save"}]
+                        }
+                    },
+                    dialogContent: {
+                        contentType: UIContentType.GROUP_FORMS,
+                        groups: [
+                            {
+                                contentGroupMetaData: {
+                                    id: "assigned-networks-data",
+                                    headline: "Assigned networks",
+                                    text: `Type in the id or subnet mask of a network and then add it using the plus button. However, your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all your changes will be lost. While you keep the selection of this Backing Data entity, your changes will be remembered.`,
+                                },
+                                contentItems: [
+                                    {
+                                        providedFeature: "assigned_networks",
+                                        contentType: PropertyContentType.DYNAMIC_LIST,
+                                        label: "",
+                                        helpText: "",
+                                        inputProperties: {
+                                            disabled: false,
+                                            readonly: false,
+                                            required: false,
+                                            checked: false,
+                                            selected: false,
+                                        },
+                                        provideEnterButton: false,
+                                        show: true,
+                                        jointJsConfig: {
+                                            propertyType: "customProperty",
+                                            modelPath: "entity/properties/assigned_networks",
+                                            defaultPropPath: "",
+                                            minPath: "",
+                                            min: ""
+                                        },
+                                        listElementFields:
+                                            {
+                                                key: "network-id",
+                                                label: "Network Name",
+                                                helpText: "The name of the network to assign",
+                                                labelIcon: "fa-solid fa-network-wired",
+                                                placeholder: "e.g. my-private-network"
+                                            }
+                                        ,
+                                        addElementButton: {
+                                            label: "Submit",
+                                            labelIcon: "fa-solid fa-plus"
+                                        }
+                                    }
+                                ]
+                            },
+                        ]
+                    }
+                }
+            }
+        ])
     },
     Endpoint: {
         type: EntityTypes.ENDPOINT,
@@ -947,7 +1319,7 @@ const EntityDetailsConfig: {
                                 contentGroupMetaData: {
                                     id: "supported-artifacts-data",
                                     headline: "Supported artifacts",
-                                    text: `TODO ...and then add it using the plus button. However, your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all your changes will be lost. While you keep the selection of this Backing Data entity, your changes will be remembered.`,
+                                    text: `Type in the name of an artifact type and then add it using the plus button. However, your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all your changes will be lost. While you keep the selection of this Backing Data entity, your changes will be remembered.`,
                                 },
                                 contentItems: [
                                     {
@@ -1071,6 +1443,98 @@ const EntityDetailsConfig: {
                                                 text: "Supported"
                                             },
                                         ]
+                                    }
+                                ]
+                            },
+                        ]
+                    }
+                }
+            },
+            {
+                providedFeature: "assigned-networks-wrapper",
+                contentType: PropertyContentType.TABLE_DIALOG,
+                label: "Assigned Networks:",
+                helpText: "",
+                inputProperties: {
+                    disabled: false,
+                    required: false,
+                    checked: false,
+                    selected: false,
+                    readonly: false
+                },
+                attributes: {
+                    svgRepresentation: "",
+                    buttonText: "Edit assigned networks",
+                    buttonIconClass: "fa-solid fa-pencil"
+                },
+                provideEnterButton: false,
+                show: true,
+                jointJsConfig: {
+                    propertyType: "free",
+                    modelPath: "",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
+                buttonActionContent: {
+                    // contentType: PropertyContentType // TODO modalDialog,
+                    dialogMetaData: {
+                        dialogSize: DialogSize.LARGE,
+                        header: {
+                            iconClass: "fa-solid fa-network-wired",
+                            svgRepresentation: "",
+                            text: "Assigned networks: "
+                        },
+                        footer: {
+                            showCancelButton: true,
+                            cancelButtonText: "Cancel",
+                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save"}]
+                        }
+                    },
+                    dialogContent: {
+                        contentType: UIContentType.GROUP_FORMS,
+                        groups: [
+                            {
+                                contentGroupMetaData: {
+                                    id: "assigned-networks-data",
+                                    headline: "Assigned networks",
+                                    text: `Type in the id or subnet mask of a network and then add it using the plus button. However, your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all your changes will be lost. While you keep the selection of this Backing Data entity, your changes will be remembered.`,
+                                },
+                                contentItems: [
+                                    {
+                                        providedFeature: "assigned_networks",
+                                        contentType: PropertyContentType.DYNAMIC_LIST,
+                                        label: "",
+                                        helpText: "",
+                                        inputProperties: {
+                                            disabled: false,
+                                            readonly: false,
+                                            required: false,
+                                            checked: false,
+                                            selected: false,
+                                        },
+                                        provideEnterButton: false,
+                                        show: true,
+                                        jointJsConfig: {
+                                            propertyType: "customProperty",
+                                            modelPath: "entity/properties/assigned_networks",
+                                            defaultPropPath: "",
+                                            minPath: "",
+                                            min: ""
+                                        },
+                                        listElementFields:
+                                            {
+                                                key: "network-id",
+                                                label: "Network Name",
+                                                helpText: "The name of the network to assign",
+                                                labelIcon: "fa-solid fa-network-wired",
+                                                placeholder: "e.g. my-private-network"
+                                            }
+                                        ,
+                                        addElementButton: {
+                                            label: "Submit",
+                                            labelIcon: "fa-solid fa-plus"
+                                        }
                                     }
                                 ]
                             },

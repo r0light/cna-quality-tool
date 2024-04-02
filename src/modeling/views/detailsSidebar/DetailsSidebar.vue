@@ -302,6 +302,15 @@ onUpdated(() => {
     }
 
     switch (selectedEntity.model.prop("entity/type")) {
+        case EntityTypes.COMPONENT:
+        case EntityTypes.SERVICE:
+        case EntityTypes.BACKING_SERVICE:
+        case EntityTypes.STORAGE_BACKING_SERVICE:
+            let editComponentAssignedNetworks: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "assigned-networks-wrapper");
+            let componentAssignedNetworksOption = findInDialogByFeature(editComponentAssignedNetworks.buttonActionContent, "assigned_networks");
+            componentAssignedNetworksOption.includeFormCheck = false;
+            componentAssignedNetworksOption.value = selectedEntity.model.prop(componentAssignedNetworksOption.jointJsConfig.modelPath);
+            break;
         case EntityTypes.INFRASTRUCTURE:
 
             let editSupportedArtifacts: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "supportedArtifacts-wrapper");
@@ -337,6 +346,12 @@ onUpdated(() => {
                     }
                 });
             })
+
+            let editAssignedNetworks: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "assigned-networks-wrapper");
+            let assignedNetworksOption = findInDialogByFeature(editAssignedNetworks.buttonActionContent, "assigned_networks");
+            assignedNetworksOption.includeFormCheck = false;
+
+            assignedNetworksOption.value = selectedEntity.model.prop(assignedNetworksOption.jointJsConfig.modelPath);
 
             break;
         case EntityTypes.DATA_AGGREGATE:
@@ -790,8 +805,16 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
         } else if (propertyOption.jointJsConfig.propertyType === "customProperty") {
 
             switch (selectedEntityElement.prop("entity/type")) {
+                case EntityTypes.COMPONENT:
+                case EntityTypes.SERVICE:
+                case EntityTypes.BACKING_SERVICE:
+                case EntityTypes.STORAGE_BACKING_SERVICE:
+                    if (propertyOption.providedFeature === "assigned_networks") {
+                        selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, propertyOption.value);
+                    }
+                    break;
                 case EntityTypes.INFRASTRUCTURE:
-                    if (propertyOption.providedFeature === "supported_artifacts") {
+                    if (propertyOption.providedFeature === "supported_artifacts" || propertyOption.providedFeature === "assigned_networks") {
                         selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, propertyOption.value);
                     } else if (propertyOption.providedFeature === "supported_update_strategies") {
                         let supportedStrategies = [];

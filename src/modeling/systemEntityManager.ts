@@ -896,6 +896,7 @@ class SystemEntityManager {
             switch (property.providedFeature) {
                 case "supportedArtifacts-wrapper":
                 case "supportedUpdateStrategies-wrapper":
+                case "assigned-networks-wrapper":
                     let tmp = (property as TableDialogPropertyConfig).buttonActionContent.dialogContent as FormContentConfig;
                     let actualProperty = tmp.groups[0].contentItems[0];
                     newInfrastructure.prop(actualProperty.jointJsConfig.modelPath, infrastructure.getProperties().find(entityProperty => entityProperty.getKey === actualProperty.providedFeature).value);
@@ -931,8 +932,16 @@ class SystemEntityManager {
             }
         })
         for (const property of EntityDetailsConfig.Service.specificProperties) {
-            if (property.jointJsConfig.modelPath) {
-                newService.prop(property.jointJsConfig.modelPath, service.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
+            switch (property.providedFeature) {
+                case "assigned-networks-wrapper":
+                    let tmp = (property as TableDialogPropertyConfig).buttonActionContent.dialogContent as FormContentConfig;
+                    let actualProperty = tmp.groups[0].contentItems[0];
+                    newService.prop(actualProperty.jointJsConfig.modelPath, service.getProperties().find(entityProperty => entityProperty.getKey === actualProperty.providedFeature).value);
+                    break;
+                default:
+                    if (property.jointJsConfig.modelPath) {
+                        newService.prop(property.jointJsConfig.modelPath, service.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
+                    }
             }
         }
         return newService;
@@ -958,11 +967,21 @@ class SystemEntityManager {
                 }
             }
         })
-        for (const property of EntityDetailsConfig.BackingService.specificProperties) {
-            if (property.jointJsConfig.modelPath) {
-                newBackingService.prop(property.jointJsConfig.modelPath, backingService.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
+
+        for (const property of EntityDetailsConfig.Service.specificProperties) {
+            switch (property.providedFeature) {
+                case "assigned-networks-wrapper":
+                    let tmp = (property as TableDialogPropertyConfig).buttonActionContent.dialogContent as FormContentConfig;
+                    let actualProperty = tmp.groups[0].contentItems[0];
+                    newBackingService.prop(actualProperty.jointJsConfig.modelPath, backingService.getProperties().find(entityProperty => entityProperty.getKey === actualProperty.providedFeature).value);
+                    break;
+                default:
+                    if (property.jointJsConfig.modelPath) {
+                        newBackingService.prop(property.jointJsConfig.modelPath, backingService.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
+                    }
             }
         }
+
         return newBackingService;
     }
 
@@ -986,11 +1005,21 @@ class SystemEntityManager {
                 }
             }
         })
-        for (const property of EntityDetailsConfig.StorageBackingService.specificProperties) {
-            if (property.jointJsConfig.modelPath) {
-                newStorageBackingService.prop(property.jointJsConfig.modelPath, storageBackingService.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
+
+        for (const property of EntityDetailsConfig.Service.specificProperties) {
+            switch (property.providedFeature) {
+                case "assigned-networks-wrapper":
+                    let tmp = (property as TableDialogPropertyConfig).buttonActionContent.dialogContent as FormContentConfig;
+                    let actualProperty = tmp.groups[0].contentItems[0];
+                    newStorageBackingService.prop(actualProperty.jointJsConfig.modelPath, storageBackingService.getProperties().find(entityProperty => entityProperty.getKey === actualProperty.providedFeature).value);
+                    break;
+                default:
+                    if (property.jointJsConfig.modelPath) {
+                        newStorageBackingService.prop(property.jointJsConfig.modelPath, storageBackingService.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
+                    }
             }
         }
+
         return newStorageBackingService;
     }
 
@@ -1014,11 +1043,21 @@ class SystemEntityManager {
                 }
             }
         })
-        for (const property of EntityDetailsConfig.Component.specificProperties) {
-            if (property.jointJsConfig.modelPath) {
-                newComponent.prop(property.jointJsConfig.modelPath, component.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
+
+        for (const property of EntityDetailsConfig.Service.specificProperties) {
+            switch (property.providedFeature) {
+                case "assigned-networks-wrapper":
+                    let tmp = (property as TableDialogPropertyConfig).buttonActionContent.dialogContent as FormContentConfig;
+                    let actualProperty = tmp.groups[0].contentItems[0];
+                    newComponent.prop(actualProperty.jointJsConfig.modelPath, component.getProperties().find(entityProperty => entityProperty.getKey === actualProperty.providedFeature).value);
+                    break;
+                default:
+                    if (property.jointJsConfig.modelPath) {
+                        newComponent.prop(property.jointJsConfig.modelPath, component.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
+                    }
             }
         }
+
         return newComponent;
     }
 

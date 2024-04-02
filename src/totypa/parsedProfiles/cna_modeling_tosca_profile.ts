@@ -187,6 +187,14 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
           "description": "Whether or not this component applies load shedding. That means whether the component rejects incoming load based on certain thresholds (resource usage, concurrent requests).",
           "required": true,
           "default": false
+        },
+        "assigned_networks": {
+          "type": "list",
+          "description": "A list of networks to which this component is assigned to.",
+          "entry_schema": {
+            "description": "Either a network id or subnet mask",
+            "type": "string"
+          }
         }
       },
       "requirements": [
@@ -360,6 +368,14 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
           "required": true,
           "description": "Set to true if the infrastructure enforces resource bounds on deployed components, for example regarding cpu shares or memory size. Deployed entities can then only use resources up to a certain bound. Otherwise entities can use resources as available.",
           "default": false
+        },
+        "assigned_networks": {
+          "type": "list",
+          "description": "A list of networks to which this infrastructure is assigned to.",
+          "entry_schema": {
+            "description": "Either a network id or subnet mask",
+            "type": "string"
+          }
         }
       },
       "requirements": [
