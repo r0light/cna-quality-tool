@@ -221,7 +221,12 @@ class SystemEntityManager {
             || element.prop("entity/type") === EntityTypes.STORAGE_BACKING_SERVICE
             || element.prop("entity/type") === EntityTypes.INFRASTRUCTURE
         );
-        for (const graphElement of componentEntities) {
+        let sortedComponentEntities = componentEntities.sort((a, b) => {
+            let prioA = this.#getEntityPrio(a.prop("entity/type"));
+            let prioB = this.#getEntityPrio(b.prop("entity/type"));
+            return prioA - prioB;
+        });
+        for (const graphElement of sortedComponentEntities) {
             this.#addComponentEntity(graphElement);
         }
 
@@ -238,6 +243,20 @@ class SystemEntityManager {
 
         // now, validate the created system TODO here or independently?
         let errors: string[] = this.#validateSystemEntity();
+    }
+
+
+    #getEntityPrio(entityType: string) {
+        switch (entityType) {
+            case EntityTypes.INFRASTRUCTURE:
+                return 1;
+            case EntityTypes.BACKING_SERVICE:
+                return 2;
+            case EntityTypes.STORAGE_BACKING_SERVICE:
+                return 3;
+            default:
+                return 4;
+        }
     }
 
     #addDataEntity(graphElement: dia.Element) {
@@ -344,8 +363,8 @@ class SystemEntityManager {
         }
 
         let embeddedCells = graphElement.getEmbeddedCells().sort((a, b) => {
-            let prioA = this.#getEntityPrio(a.prop("entity/type"));
-            let prioB = this.#getEntityPrio(b.prop("entity/type"));
+            let prioA = this.#getEntityPrioForEmbeddedCells(a.prop("entity/type"));
+            let prioB = this.#getEntityPrioForEmbeddedCells(b.prop("entity/type"));
 
             return prioA - prioB;
         });
@@ -395,10 +414,20 @@ class SystemEntityManager {
             }
         }
 
+        const proxyId = graphElement.prop("entity/properties/proxied_by");
+        if (proxyId) {
+            const backingService = [...(this.#currentSystemEntity.getComponentEntities)].find(([id, component]) => { return id === proxyId });
+            if (backingService) {
+                componentModelEntity.setProxiedBy = backingService[1];
+            } else {
+                console.log(`Backing Service ${proxyId} not found`)
+            }
+        }
+
         return componentModelEntity;
     }
 
-    #getEntityPrio(entityType: string) {
+    #getEntityPrioForEmbeddedCells(entityType: string) {
         switch (entityType) {
             case EntityTypes.DATA_AGGREGATE:
             case EntityTypes.BACKING_DATA:
@@ -551,7 +580,7 @@ class SystemEntityManager {
             }
         }
 
-        // validate that teach request trace has a referred endpoint and associated links
+        // validate that each request trace has a referred endpoint and associated links
         for (let [requestTraceId, requestTrace] of this.#currentSystemEntity.getRequestTraceEntities.entries()) {
             if (!requestTrace.getExternalEndpoint) {
                 errors.push(`Request Trace ${requestTrace.getName} has no external endpoint to which it refers.`);
@@ -938,12 +967,20 @@ class SystemEntityManager {
                     let actualProperty = tmp.groups[0].contentItems[0];
                     newService.prop(actualProperty.jointJsConfig.modelPath, service.getProperties().find(entityProperty => entityProperty.getKey === actualProperty.providedFeature).value);
                     break;
+                case "proxiedBy":
+                    if (service.getProxiedBy) {
+                        newService.prop("entity/properties/proxied_by", service.getProxiedBy.getId);
+                    }
+                    break;
                 default:
                     if (property.jointJsConfig.modelPath) {
                         newService.prop(property.jointJsConfig.modelPath, service.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
                     }
             }
         }
+
+
+
         return newService;
     }
 
@@ -975,12 +1012,19 @@ class SystemEntityManager {
                     let actualProperty = tmp.groups[0].contentItems[0];
                     newBackingService.prop(actualProperty.jointJsConfig.modelPath, backingService.getProperties().find(entityProperty => entityProperty.getKey === actualProperty.providedFeature).value);
                     break;
+                case "proxiedBy":
+                    if (backingService.getProxiedBy) {
+                        newBackingService.prop("entity/properties/proxied_by", backingService.getProxiedBy.getId);
+                    }
+                    break;
                 default:
                     if (property.jointJsConfig.modelPath) {
                         newBackingService.prop(property.jointJsConfig.modelPath, backingService.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
                     }
             }
         }
+
+
 
         return newBackingService;
     }
@@ -1013,12 +1057,19 @@ class SystemEntityManager {
                     let actualProperty = tmp.groups[0].contentItems[0];
                     newStorageBackingService.prop(actualProperty.jointJsConfig.modelPath, storageBackingService.getProperties().find(entityProperty => entityProperty.getKey === actualProperty.providedFeature).value);
                     break;
+                case "proxiedBy":
+                    if (storageBackingService.getProxiedBy) {
+                        newStorageBackingService.prop("entity/properties/proxied_by", storageBackingService.getProxiedBy.getId);
+                    }
+                    break;
                 default:
                     if (property.jointJsConfig.modelPath) {
                         newStorageBackingService.prop(property.jointJsConfig.modelPath, storageBackingService.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
                     }
             }
         }
+
+
 
         return newStorageBackingService;
     }
@@ -1050,6 +1101,11 @@ class SystemEntityManager {
                     let tmp = (property as TableDialogPropertyConfig).buttonActionContent.dialogContent as FormContentConfig;
                     let actualProperty = tmp.groups[0].contentItems[0];
                     newComponent.prop(actualProperty.jointJsConfig.modelPath, component.getProperties().find(entityProperty => entityProperty.getKey === actualProperty.providedFeature).value);
+                    break;
+                case "proxiedBy":
+                    if (component.getProxiedBy) {
+                        newComponent.prop("entity/properties/proxied_by", component.getProxiedBy.getId);
+                    }
                     break;
                 default:
                     if (property.jointJsConfig.modelPath) {

@@ -6,7 +6,7 @@ import { TOSCA_Requirement_Assignment } from "../tosca-types/template-types.js"
 import { TOSCA_Metadata, TOSCA_Interface, TOSCA_Artifact } from "../tosca-types/core-types.js"
 import { ToscaDatatypesCredential, ToscaCapabilitiesNode, ToscaDatatypesNetworkNetworkInfo, ToscaDatatypesNetworkPortInfo, ToscaCapabilitiesCompute, ToscaCapabilitiesOperatingSystem, ToscaCapabilitiesEndpointAdmin, ToscaCapabilitiesScalable, ToscaCapabilitiesNetworkBindable, ToscaCapabilitiesEndpoint, ToscaCapabilitiesEndpointPublic, ToscaCapabilitiesAttachment } from './tosca_simple_profile_for_yaml_v1_3_ts_types.js'
 
-export type CnaQualityModelCapabilitiesDataStorage = any
+export type CnaQualityModelCapabilitiesProxy = any
 export type CnaQualityModelEntitiesConnectsToLink = {
     properties?: {
     relation_type: string,
@@ -69,6 +69,13 @@ attributes?: {
     state?: string,
 },
 }
+export type CnaQualityModelRelationshipsProxiedByBackingService = {
+    attributes?: {
+    tosca_id?: string,
+    tosca_name?: string,
+    state?: string,
+},
+}
 export type CnaQualityModelEntitiesComponent = {
     type: "cna.qualityModel.entities.Component",
                        metadata?: TOSCA_Metadata,
@@ -90,7 +97,7 @@ attributes?: {
 capabilities?: {
     feature?: ToscaCapabilitiesNode,
 },
-requirements?: {host: TOSCA_Requirement_Assignment | string} | {provides_endpoint: TOSCA_Requirement_Assignment | string} | {provides_external_endpoint: TOSCA_Requirement_Assignment | string} | {endpoint_link: TOSCA_Requirement_Assignment | string} | {uses_data: TOSCA_Requirement_Assignment | string} | {uses_backing_data: TOSCA_Requirement_Assignment | string} | {host: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[],
+requirements?: {host: TOSCA_Requirement_Assignment | string} | {provides_endpoint: TOSCA_Requirement_Assignment | string} | {provides_external_endpoint: TOSCA_Requirement_Assignment | string} | {endpoint_link: TOSCA_Requirement_Assignment | string} | {uses_data: TOSCA_Requirement_Assignment | string} | {uses_backing_data: TOSCA_Requirement_Assignment | string} | {proxied_by: TOSCA_Requirement_Assignment | string} | {host: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[],
 interfaces?: {
     Standard?: TOSCA_Interface,
     [interfaceKey: string]: TOSCA_Interface
@@ -120,7 +127,7 @@ attributes?: {
 capabilities?: {
     feature?: ToscaCapabilitiesNode,
 },
-requirements?: {host: TOSCA_Requirement_Assignment | string} | {provides_endpoint: TOSCA_Requirement_Assignment | string} | {provides_external_endpoint: TOSCA_Requirement_Assignment | string} | {endpoint_link: TOSCA_Requirement_Assignment | string} | {uses_data: TOSCA_Requirement_Assignment | string} | {uses_backing_data: TOSCA_Requirement_Assignment | string} | {host: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[],
+requirements?: {host: TOSCA_Requirement_Assignment | string} | {provides_endpoint: TOSCA_Requirement_Assignment | string} | {provides_external_endpoint: TOSCA_Requirement_Assignment | string} | {endpoint_link: TOSCA_Requirement_Assignment | string} | {uses_data: TOSCA_Requirement_Assignment | string} | {uses_backing_data: TOSCA_Requirement_Assignment | string} | {proxied_by: TOSCA_Requirement_Assignment | string} | {host: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[],
 interfaces?: {
     Standard?: TOSCA_Interface,
     [interfaceKey: string]: TOSCA_Interface
@@ -149,9 +156,10 @@ attributes?: {
     state?: string,
 },
 capabilities?: {
+    proxy?: CnaQualityModelCapabilitiesProxy,
     feature?: ToscaCapabilitiesNode,
 },
-requirements?: {host: TOSCA_Requirement_Assignment | string} | {provides_endpoint: TOSCA_Requirement_Assignment | string} | {provides_external_endpoint: TOSCA_Requirement_Assignment | string} | {endpoint_link: TOSCA_Requirement_Assignment | string} | {uses_data: TOSCA_Requirement_Assignment | string} | {uses_backing_data: TOSCA_Requirement_Assignment | string} | {host: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[],
+requirements?: {host: TOSCA_Requirement_Assignment | string} | {provides_endpoint: TOSCA_Requirement_Assignment | string} | {provides_external_endpoint: TOSCA_Requirement_Assignment | string} | {endpoint_link: TOSCA_Requirement_Assignment | string} | {uses_data: TOSCA_Requirement_Assignment | string} | {uses_backing_data: TOSCA_Requirement_Assignment | string} | {proxied_by: TOSCA_Requirement_Assignment | string} | {host: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[],
 interfaces?: {
     Standard?: TOSCA_Interface,
     [interfaceKey: string]: TOSCA_Interface
@@ -183,7 +191,7 @@ attributes?: {
 capabilities?: {
     feature?: ToscaCapabilitiesNode,
 },
-requirements?: {host: TOSCA_Requirement_Assignment | string} | {provides_endpoint: TOSCA_Requirement_Assignment | string} | {provides_external_endpoint: TOSCA_Requirement_Assignment | string} | {endpoint_link: TOSCA_Requirement_Assignment | string} | {uses_data: TOSCA_Requirement_Assignment | string} | {uses_backing_data: TOSCA_Requirement_Assignment | string} | {host: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[],
+requirements?: {host: TOSCA_Requirement_Assignment | string} | {provides_endpoint: TOSCA_Requirement_Assignment | string} | {provides_external_endpoint: TOSCA_Requirement_Assignment | string} | {endpoint_link: TOSCA_Requirement_Assignment | string} | {uses_data: TOSCA_Requirement_Assignment | string} | {uses_backing_data: TOSCA_Requirement_Assignment | string} | {proxied_by: TOSCA_Requirement_Assignment | string} | {host: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[],
 interfaces?: {
     Standard?: TOSCA_Interface,
     [interfaceKey: string]: TOSCA_Interface
@@ -317,7 +325,7 @@ capabilities?: {
     provides_data?: ToscaCapabilitiesAttachment,
     feature?: ToscaCapabilitiesNode,
 },
-requirements?: {persistence: TOSCA_Requirement_Assignment | string} | {dependency: TOSCA_Requirement_Assignment | string}[],
+requirements?: {dependency: TOSCA_Requirement_Assignment | string}[],
 interfaces?: {
     Standard?: TOSCA_Interface,
     [interfaceKey: string]: TOSCA_Interface

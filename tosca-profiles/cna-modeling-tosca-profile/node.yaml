@@ -76,6 +76,11 @@ node_types:
           node: cna.qualityModel.entities.BackingData
           relationship: cna.qualityModel.relationships.AttachesTo.BackingData
           occurrences: [0, UNBOUNDED]
+      - proxied_by:
+          capability: cna.qualityModel.capabilities.Proxy
+          node: cna.qualityModel.entities.BackingService
+          relationship: cna.qualityModel.relationships.ProxiedBy.BackingService
+          ocurrences: [0,1]
 
   cna.qualityModel.entities.Service:
     derived_from: cna.qualityModel.entities.Component
@@ -90,6 +95,15 @@ node_types:
         type: string
         description: "A short description of the provided functionality."
         required: false
+    capabilities:
+      proxy:
+        type: cna.qualityModel.capabilities.Proxy
+        valid_source_types:
+          - cna.qualityModel.entities.Component
+          - cna.qualityModel.entities.Service
+          - cna.qualityModel.entities.BackingService
+          - cna.qualityModel.entities.StorageBackingService
+        occurrences: [0, UNBOUNDED]
 
   cna.qualityModel.entities.StorageBackingService:
     derived_from: cna.qualityModel.entities.Component
@@ -248,31 +262,25 @@ node_types:
       provides_data:
           type: tosca.capabilities.Attachment
           valid_source_types:
-            - cna.qualityModel.entities.Root.Component
-            - cna.qualityModel.entities.SoftwareComponent.Service
+            - cna.qualityModel.entities.Component
+            - cna.qualityModel.entities.Service
             - cna.qualityModel.entities.BackingService
-            - cna.qualityModel.entities.DBMS.StorageService
+            - cna.qualityModel.entities.StorageBackingService
             - cna.qualityModel.entities.Compute.Infrastructure
           occurrences: [1, UNBOUNDED]
 
   cna.qualityModel.entities.DataAggregate:
     derived_from: tosca.nodes.Root
     description: Node Type to model Data Aggregate entities
-    requirements:
-      # Allows Data Aggregate to be persisted by Storage Backing Service entity
-      - persistence:
-          capability: cna.qualityModel.capabilities.DataStorage
-          node: cna.qualityModel.entities.DBMS.StorageService
-          relationship: cna.qualityModel.relationships.AttachesTo.Data
-          occurrences: [1, UNBOUNDED]
     capabilities:
       # Allows Data Aggregate to be used by other entities
       provides_data:
         type: tosca.capabilities.Attachment
         valid_source_types:
-          - cna.qualityModel.entities.Root.Component
-          - cna.qualityModel.entities.SoftwareComponent.Service
+          - cna.qualityModel.entities.Component
+          - cna.qualityModel.entities.Service
           - cna.qualityModel.entities.BackingService
+          - cna.qualityModel.entities.StorageBackingService
           - cna.qualityModel.entities.DBMS.StorageService
         occurrences: [1, UNBOUNDED]
 

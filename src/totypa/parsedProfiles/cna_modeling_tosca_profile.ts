@@ -18,9 +18,9 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
   "artifact_types": {},
   "data_types": {},
   "capability_types": {
-    "cna.qualityModel.capabilities.DataStorage": {
-      "derived_from": "tosca.capabilities.Root",
-      "description": "When included, the Node is able to store Data Aggregate entities"
+    "cna.qualityModel.capabilities.Proxy": {
+      "derived_from": "tosca.capabilities.Node",
+      "description": "When included, the Node is able to act as a proxy. This covers all communication to the endpoints of the proxied component."
     }
   },
   "interface_types": {},
@@ -153,6 +153,13 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
           "description": "Describes how a component uses attached data, that means whether it just uses (reads) it for its functionality or if it also updates and persists (writes) it; possible values are usage and persistence"
         }
       }
+    },
+    "cna.qualityModel.relationships.ProxiedBy.BackingService": {
+      "derived_from": "tosca.relationships.Root",
+      "description": "Relationship Type to connect Components to Backing Services which act as a proxy for them",
+      "valid_target_types": [
+        "cna.qualityModel.entities.BackingService"
+      ]
     }
   },
   "node_types": {
@@ -257,6 +264,17 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
               "UNBOUNDED"
             ]
           }
+        },
+        {
+          "proxied_by": {
+            "capability": "cna.qualityModel.capabilities.Proxy",
+            "node": "cna.qualityModel.entities.BackingService",
+            "relationship": "cna.qualityModel.relationships.ProxiedBy.BackingService",
+            "ocurrences": [
+              0,
+              1
+            ]
+          }
         }
       ]
     },
@@ -272,6 +290,21 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
           "type": "string",
           "description": "A short description of the provided functionality.",
           "required": false
+        }
+      },
+      "capabilities": {
+        "proxy": {
+          "type": "cna.qualityModel.capabilities.Proxy",
+          "valid_source_types": [
+            "cna.qualityModel.entities.Component",
+            "cna.qualityModel.entities.Service",
+            "cna.qualityModel.entities.BackingService",
+            "cna.qualityModel.entities.StorageBackingService"
+          ],
+          "occurrences": [
+            0,
+            "UNBOUNDED"
+          ]
         }
       }
     },
@@ -489,10 +522,10 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
         "provides_data": {
           "type": "tosca.capabilities.Attachment",
           "valid_source_types": [
-            "cna.qualityModel.entities.Root.Component",
-            "cna.qualityModel.entities.SoftwareComponent.Service",
+            "cna.qualityModel.entities.Component",
+            "cna.qualityModel.entities.Service",
             "cna.qualityModel.entities.BackingService",
-            "cna.qualityModel.entities.DBMS.StorageService",
+            "cna.qualityModel.entities.StorageBackingService",
             "cna.qualityModel.entities.Compute.Infrastructure"
           ],
           "occurrences": [
@@ -505,26 +538,14 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
     "cna.qualityModel.entities.DataAggregate": {
       "derived_from": "tosca.nodes.Root",
       "description": "Node Type to model Data Aggregate entities",
-      "requirements": [
-        {
-          "persistence": {
-            "capability": "cna.qualityModel.capabilities.DataStorage",
-            "node": "cna.qualityModel.entities.DBMS.StorageService",
-            "relationship": "cna.qualityModel.relationships.AttachesTo.Data",
-            "occurrences": [
-              1,
-              "UNBOUNDED"
-            ]
-          }
-        }
-      ],
       "capabilities": {
         "provides_data": {
           "type": "tosca.capabilities.Attachment",
           "valid_source_types": [
-            "cna.qualityModel.entities.Root.Component",
-            "cna.qualityModel.entities.SoftwareComponent.Service",
+            "cna.qualityModel.entities.Component",
+            "cna.qualityModel.entities.Service",
             "cna.qualityModel.entities.BackingService",
+            "cna.qualityModel.entities.StorageBackingService",
             "cna.qualityModel.entities.DBMS.StorageService"
           ],
           "occurrences": [

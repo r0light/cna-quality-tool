@@ -228,8 +228,15 @@ class ToscaToEntitesConverter {
             }
         }
 
+
+        let sortedNodes = [...Object.entries(this.#topologyTemplate.node_templates)].sort((a,b) => {
+            let prioA = this.#getNodePrio(a[1]);
+            let prioB = this.#getNodePrio(b[1]);
+            return prioA - prioB;
+        });
+
         // continue with components
-        for (const [key, node] of Object.entries(this.#topologyTemplate.node_templates)) {
+        for (const [key, node] of sortedNodes) {
             if (node.type === SERVICE_TOSCA_KEY) {
                 let uuid = uuidv4();
                 let service = new Entities.Service(uuid, this.#transformYamlKeyToLabel(key), readToscaMetaData(node.metadata));
@@ -361,6 +368,19 @@ class ToscaToEntitesConverter {
         return key.replace(MATCH_UNDERSCORE, " ").replace(MATCH_FIRST_CHARACTER, (match) => match.toUpperCase()).replace(MATCH_CHARACTER_AFTER_SPACE, (match, p1, p2) => `${p1}${p2.toUpperCase()}`)
     }
 
+    #getNodePrio(node: TOSCA_Node_Template) {
+        switch (node.type) {
+            case INFRASTRUCTURE_TOSCA_KEY:
+                return 1;
+            case BACKING_SERVICE_TOSCA_KEY:
+                return 2;
+            case STORAGE_BACKING_SERVICE_TOSCA_KEY:
+                return 3;
+            default:
+                return 4;
+        }
+    }
+
 
     #parseRequirements(node: TOSCA_Node_Template, component: Entities.Component, endpoints: Map<string, Entities.Endpoint>) {
         if (node.requirements) {
@@ -439,6 +459,13 @@ class ToscaToEntitesConverter {
                                 this.#importedSystem.addEntity(link);
                                 // TODO add to Component (includedLinks?)
                             }
+                            break;
+                        case "proxied_by":
+                            if (typeof requirement === "string") {
+                                // TODO requirement is of type string
+                            } else if (typeof requirement === "object") {
+                                component.setProxiedBy = this.#importedSystem.getComponentEntities.get(this.#keyIdMap.getId(requirement.node));
+                            }                            
                             break;
                     }
                 }

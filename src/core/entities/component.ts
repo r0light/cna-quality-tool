@@ -7,6 +7,7 @@ import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_mode
 import { MetaData } from '../common/entityDataTypes.js'
 import { RelationToDataAggregate } from './relationToDataAggregate.js'
 import { RelationToBackingData } from './relationToBackingData.js'
+import { BackingService } from './backingService.js'
 
 
 /**
@@ -75,6 +76,8 @@ class Component {
     #dataAggregateEntities = new Array<{ data: DataAggregate, relation: RelationToDataAggregate }>();
 
     #includedLinkEntities = new Array();
+
+    #proxiedBy: BackingService;
 
     #properties: EntityProperty[] = new Array();
 
@@ -201,6 +204,15 @@ class Component {
     */
     get getIncludedLinkEntities() {
         return this.#includedLinkEntities;
+    }
+
+
+    get getProxiedBy() {
+        return this.#proxiedBy;
+    }
+
+    set setProxiedBy(proxy: BackingService) {
+        this.#proxiedBy = proxy;
     }
 
     /**

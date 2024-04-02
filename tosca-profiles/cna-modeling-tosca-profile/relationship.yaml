@@ -109,3 +109,8 @@ relationship_types:
         required: true
         description: Describes how a component uses attached data, that means whether it just uses (reads) it for its functionality or if it also updates and persists (writes) it; possible values are usage and persistence
         
+  cna.qualityModel.relationships.ProxiedBy.BackingService:
+    derived_from: tosca.relationships.Root
+    description: Relationship Type to connect Components to Backing Services which act as a proxy for them
+    valid_target_types: [cna.qualityModel.entities.BackingService]
+    

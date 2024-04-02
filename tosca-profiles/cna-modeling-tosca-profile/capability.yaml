@@ -10,6 +10,6 @@ description: >-
 
 capability_types:
 
-  cna.qualityModel.capabilities.DataStorage:
-    derived_from: tosca.capabilities.Root
-    description: When included, the Node is able to store Data Aggregate entities
+  cna.qualityModel.capabilities.Proxy:
+    derived_from: tosca.capabilities.Node
+    description: When included, the Node is able to act as a proxy. This covers all communication to the endpoints of the proxied component.

@@ -100,7 +100,15 @@ class EntitiesToToscaConverter {
         }
 
 
-        for (const [id, component] of this.#systemEntity.getComponentEntities.entries()) {
+        // sort to make sure backing service are considered first, because other components can refer to backing services as proxy
+        // TODO: what if a backing service is proxied by a backing service? Improvement: assign proxied by in a second step
+        let sortedComponentEntites = [...(this.#systemEntity.getComponentEntities.entries())].sort((a,b) => {
+            let prioA = this.#getEntityPrio(a[1]);
+            let prioB = this.#getEntityPrio(b[1]);
+            return prioA - prioB;
+        });
+
+        for (const [id, component] of sortedComponentEntites) {
             const nodeKey: string = this.#uniqueKeyManager.ensureUniqueness(this.#transformToYamlKey(component.getName));
             let node = this.#createComponentTemplate(component);
 
@@ -226,6 +234,21 @@ class EntitiesToToscaConverter {
                 }
             }
 
+            if (component.getProxiedBy) {
+                if (!node.requirements) {
+                    node.requirements = [];
+                }
+
+                node.requirements.push({
+                    "proxied_by": {
+                        node: this.#keyIdMap.getKey(component.getProxiedBy.getId),
+                        relationship: {
+                            type: "cna.qualityModel.relationships.ProxiedBy.BackingService"
+                        }
+                    }
+                });
+            }
+
             this.#keyIdMap.add(nodeKey, id);
             topologyTemplate.node_templates[nodeKey] = node;
         }
@@ -320,6 +343,18 @@ class EntitiesToToscaConverter {
             .toLocaleLowerCase();
     }
 
+    #getEntityPrio(component: Entities.Component) {
+        switch (component.constructor) {
+            case Entities.Infrastructure:
+                return 1;
+            case Entities.BackingService:
+                return 2;
+            case Entities.StorageBackingService:
+                return 3;
+            default:
+                return 4;
+        }
+    }
 
 
     #parsePropertiesForYaml(properties: EntityProperty[]): { [propertyKey: string]: TOSCA_Property_Assignment | string } {

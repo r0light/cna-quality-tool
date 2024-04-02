@@ -310,6 +310,22 @@ onUpdated(() => {
             let componentAssignedNetworksOption = findInDialogByFeature(editComponentAssignedNetworks.buttonActionContent, "assigned_networks");
             componentAssignedNetworksOption.includeFormCheck = false;
             componentAssignedNetworksOption.value = selectedEntity.model.prop(componentAssignedNetworksOption.jointJsConfig.modelPath);
+
+            const backingServices = props.graph.getElements().filter(element => element.prop("entity/type") === EntityTypes.BACKING_SERVICE);
+            let proxyOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "proxiedBy");
+            const selectedBackingService = selectedEntity.model.prop(proxyOption.jointJsConfig.modelPath);
+            const proxyDropdownOptions = backingServices.map((backingService) => {
+                return {
+                    optionValue: backingService.id,
+                    optionText: backingService.attr("label/textWrap/text"),
+                    optionTitle: backingService.attr("label/textWrap/text"),
+                    optionRepresentationClass: "validOption",
+                    disabled: false,
+                };
+            })
+            proxyOption.dropdownOptions = proxyDropdownOptions;
+            proxyOption.value = selectedBackingService;
+
             break;
         case EntityTypes.INFRASTRUCTURE:
 
@@ -894,7 +910,7 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                     console.error("no custom handling for this property defined: " + propertyOption.providedFeature);
             }
         } else {
-            console.error("unknow property type for: " + propertyOption.providedFeature);
+            console.error("unknown property type for: " + propertyOption.providedFeature);
         }
     }
 }

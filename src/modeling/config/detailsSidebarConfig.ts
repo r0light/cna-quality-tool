@@ -708,7 +708,36 @@ const EntityDetailsConfig: {
                         ]
                     }
                 }
-            }
+            },
+            {
+                providedFeature: "proxiedBy",
+                contentType: PropertyContentType.DROPDOWN,
+                label: "Proxied by:",
+                inputProperties: {
+                    disabled: false,
+                    required: true,
+                    checked: false,
+                    selected: false,
+                    readonly: false,
+                },
+                helpText: "The backing service acting as a proxy for this component.",
+                show: true,
+                attributes: {
+                    placeholder: "Choose Backing Service...",
+                    svgRepresentation: "",
+                    defaultValue: ""
+
+                },
+                provideEnterButton: false,
+                jointJsConfig: {
+                    propertyType: "property",
+                    modelPath: "entity/properties/proxied_by",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
+                dropdownOptions: []
+            },
         ])
     },
     Service: {
@@ -805,7 +834,36 @@ const EntityDetailsConfig: {
                         ]
                     }
                 }
-            }
+            },
+            {
+                providedFeature: "proxiedBy",
+                contentType: PropertyContentType.DROPDOWN,
+                label: "Proxied by:",
+                inputProperties: {
+                    disabled: false,
+                    required: true,
+                    checked: false,
+                    selected: false,
+                    readonly: false,
+                },
+                helpText: "The backing service acting as a proxy for this component.",
+                show: true,
+                attributes: {
+                    placeholder: "Choose Backing Service...",
+                    svgRepresentation: "",
+                    defaultValue: ""
+
+                },
+                provideEnterButton: false,
+                jointJsConfig: {
+                    propertyType: "property",
+                    modelPath: "entity/properties/proxied_by",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
+                dropdownOptions: []
+            },
         ])
     },
     BackingService: {
@@ -902,7 +960,36 @@ const EntityDetailsConfig: {
                         ]
                     }
                 }
-            }
+            },
+            {
+                providedFeature: "proxiedBy",
+                contentType: PropertyContentType.DROPDOWN,
+                label: "Proxied by:",
+                inputProperties: {
+                    disabled: false,
+                    required: true,
+                    checked: false,
+                    selected: false,
+                    readonly: false,
+                },
+                helpText: "The backing service acting as a proxy for this component.",
+                show: true,
+                attributes: {
+                    placeholder: "Choose Backing Service...",
+                    svgRepresentation: "",
+                    defaultValue: ""
+
+                },
+                provideEnterButton: false,
+                jointJsConfig: {
+                    propertyType: "property",
+                    modelPath: "entity/properties/proxied_by",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
+                dropdownOptions: []
+            },
         ])
     },
     StorageBackingService: {
@@ -999,7 +1086,36 @@ const EntityDetailsConfig: {
                         ]
                     }
                 }
-            }
+            },
+            {
+                providedFeature: "proxiedBy",
+                contentType: PropertyContentType.DROPDOWN,
+                label: "Proxied by:",
+                inputProperties: {
+                    disabled: false,
+                    required: true,
+                    checked: false,
+                    selected: false,
+                    readonly: false,
+                },
+                helpText: "The backing service acting as a proxy for this component.",
+                show: true,
+                attributes: {
+                    placeholder: "Choose Backing Service...",
+                    svgRepresentation: "",
+                    defaultValue: ""
+
+                },
+                provideEnterButton: false,
+                jointJsConfig: {
+                    propertyType: "property",
+                    modelPath: "entity/properties/proxied_by",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
+                dropdownOptions: []
+            },
         ])
     },
     Endpoint: {
