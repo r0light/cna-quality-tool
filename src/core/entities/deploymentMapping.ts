@@ -36,6 +36,10 @@ function getDeploymentMappingProperties(): EntityProperty[] {
                         {
                             value: "automated-declarative",
                             text: "Automated declarative"
+                        },
+                        {
+                            value: "transparent",
+                            text: "Transparent"
                         }
                     ],
                     prop.getDefaultValue,
