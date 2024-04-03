@@ -77,6 +77,9 @@ class ToscaToEntitesConverter {
                 let uuid = uuidv4();
                 let infrastructure = new Entities.Infrastructure(uuid, this.#transformYamlKeyToLabel(key), readToscaMetaData(node.metadata));
 
+                // remember deployment mappings to create and only commit, when all requirements are processed. Necessary, because an infrastructure might have several deployment mappings, but not all might be already created
+                let deploymentMappingsToCommit = new Map<string, Entities.DeploymentMapping>();
+
                 if (node.requirements) {
                     for (const requirementAssignment of node.requirements) {
                         for (const [requirementKey, requirement] of Object.entries(requirementAssignment)) {
@@ -109,8 +112,7 @@ class ToscaToEntitesConverter {
                                     // only create DeploymentMapping if referenced infrastructure entity has already been added, otherwise put current entity at the end of the list
                                     if (this.#keyIdMap.getId(requirement.node)) {
                                         let deploymentMapping = new Entities.DeploymentMapping(linkId, infrastructure, this.#importedSystem.getInfrastructureEntities.get(this.#keyIdMap.getId(requirement.node)));
-                                        this.#keyIdMap.add(requirement.relationship as string, linkId) // TODO requirement.relationship is object
-                                        this.#importedSystem.addEntity(deploymentMapping);
+                                        deploymentMappingsToCommit.set(requirement.relationship as string, deploymentMapping); // TODO requirement.relationship is object
                                     } else {
                                         // add current infrastructure entity at the end of the list
                                         infrastructureTemplates.push(infrastructureTemplates.splice(0,1)[0]);
@@ -121,6 +123,12 @@ class ToscaToEntitesConverter {
                         }
                     }
                 }
+
+                deploymentMappingsToCommit.forEach((deploymentMapping, key) => {
+                    this.#keyIdMap.add(key, deploymentMapping.getId);
+                    this.#importedSystem.addEntity(deploymentMapping);
+                })
+
 
                 if (node.properties) {
                     for (const [key, value] of Object.entries(node.properties)) {
