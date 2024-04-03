@@ -450,6 +450,18 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
           "required": true,
           "description": "Flag to specify whether this endpoint is idempotent, meaning that the effect of a successful invocation is independent of the number of times it is invoked.",
           "default": false
+        },
+        "readiness_check": {
+          "type": "boolean",
+          "required": true,
+          "description": "Flag to specify whether this endpoint is used as a readiness check",
+          "default": false
+        },
+        "health_check": {
+          "type": "boolean",
+          "required": true,
+          "description": "Flag to specify whether this endpoint is used as a health check",
+          "default": false
         }
       },
       "capabilities": {

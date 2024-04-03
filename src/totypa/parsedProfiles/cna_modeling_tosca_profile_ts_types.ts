@@ -249,6 +249,8 @@ export type CnaQualityModelEntitiesEndpoint = {
                        properties?: {
     rate_limiting: string,
     idempotent: boolean,
+    readiness_check: boolean,
+    health_check: boolean,
 },
 attributes?: {
     tosca_id?: string,

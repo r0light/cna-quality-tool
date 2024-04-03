@@ -65,6 +65,10 @@ function getDeploymentMappingProperties(): EntityProperty[] {
                             text: "never"
                         },
                         {
+                            value: "onReboot",
+                            text: "on reboot"
+                        },
+                        {
                             value: "onProcessFailure",
                             text: "on process failure"
                         },
