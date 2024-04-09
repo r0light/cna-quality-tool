@@ -5,7 +5,7 @@
             :appSettings="modelingData ? modelingData.appSettings : getDefaultAppSettings()"
             @update:systemName="setCurrentSystemName" @update:appSettings="setCurrentAppSettings"
             @click:exit-request-trace-view="resetRequestTraceSelection" @click:print-active-paper="onPrintRequested"
-            @click:exportSvg="onSvgExportRequested" @click:validate="triggerValidation" @load:fromJson="loadFromJson"
+            @click:exportSvg="onSvgExportRequested" @click:validate="triggerValidation" @load:fromJson="requestLoadFromJson"
             @save:toJson="saveToJson" @load:fromTosca="requestLoadFromTosca" @save:toTosca="saveToTosca"></Toolbar>
         <div class="app-body">
             <div :id="`entity-sidebar-${pageId}`" class="entityShapes-sidebar-container d-print-none">
@@ -121,7 +121,7 @@ onMounted(() => {
     if (props.modelingData.toImport.fileName) {
 
         if (props.modelingData.toImport.fileName.endsWith("json")) {
-            loaded = loadFromJson(props.modelingData.toImport.fileContent, props.modelingData.toImport.fileName);
+            loaded = loadFromJson(props.modelingData.toImport.fileContent, props.modelingData.toImport.fileName, "replace");
         } else if (props.modelingData.toImport.fileName.endsWith("yaml")
             || props.modelingData.toImport.fileName.endsWith("yml")
             || props.modelingData.toImport.fileName.endsWith("tosca")) {
@@ -160,10 +160,43 @@ function resetAllHighlighting() {
     resetRequestTraceSelection();
 }
 
-function loadFromJson(jsonString: string, fileName: string): Promise<void> {
+function requestLoadFromJson(jsonString: string, fileName: string) {
+    
+    confirmationModalManager.value = {
+        show: true,
+        dialogMetaData: {
+            dialogSize: DialogSize.DEFAULT,
+            header: {   
+                iconClass: "fa-solid fa-question",
+                svgRepresentation: "",
+                text: "Replace or merge?"
+            },
+            footer: {
+                showCancelButton: true,
+                cancelButtonText: "Cancel",
+                actionButtons: [{ buttonIconClass: "", buttonText: "Merge"}, { buttonIconClass: "", buttonText: "Replace"}]
+            },
+        },
+        confirmationPrompt: "Do you want to replace the current model with the imported model or merge the imported model into the current model?",
+        onCancel: () => confirmationModalManager.value.show = false,
+        actions: [
+            function decideToMerge() {
+                confirmationModalManager.value.show = false;
+                systemEntityManager.getSystemEntity();
+                loadFromJson(jsonString, fileName, "merge");
+            },
+            function decideToReplace() {
+                confirmationModalManager.value.show = false;
+                loadFromJson(jsonString, fileName, "replace");
+            },
+        ]
+    }
+}
+
+function loadFromJson(jsonString: string, fileName: string, strategy: "replace" | "merge"): Promise<void> {
     resetAllHighlighting();
 
-    let loadResult = systemEntityManager.loadFromJson(jsonString, fileName);
+    let loadResult = systemEntityManager.loadFromJson(jsonString, fileName, strategy);
 
     if (loadResult.error) {
         showError("Import from JSON failed", loadResult.error);

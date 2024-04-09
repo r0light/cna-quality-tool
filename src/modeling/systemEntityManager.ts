@@ -11,7 +11,8 @@ import {
     Component as ComponentElement, Service as ServiceElement, BackingService as BackingServiceElement, StorageBackingService as StorageBackingServiceElement,
     Endpoint as EndpointElement, ExternalEndpoint as ExternalEndpointElement, Link as LinkElement,
     Infrastructure as InfrastructureElement, DeploymentMapping as DeploymentMappingElement,
-    RequestTrace as RequestTraceElement, DataAggregate as DataAggregateElement, BackingData as BackingDataElement
+    RequestTrace as RequestTraceElement, DataAggregate as DataAggregateElement, BackingData as BackingDataElement,
+    entityShapes
 } from './config/entityShapes'
 import { DataAggregate } from "../core/entities";
 import { FormContentConfig } from "./config/actionDialogConfig";
@@ -171,19 +172,28 @@ class SystemEntityManager {
         return jsonSerializedGraph;
     }
 
-    loadFromJson(stringifiedJson: string, fileName: string): { createdCells: dia.Cell[], error: string } {
-
+    loadFromJson(stringifiedJson: string, fileName: string, strategy: "replace" | "merge"): { createdCells: dia.Cell[], error: string } {
+        let jsonGraph = {};
         try {
-            let jsonGraph: any = JSON.parse(stringifiedJson);
-            this.#currentSystemGraph.clear();
-            this.#currentSystemGraph.fromJSON(jsonGraph);
-            this.#currentSystemGraph.trigger("reloaded");
+            jsonGraph = JSON.parse(stringifiedJson);
         } catch (e) {
             return { createdCells: [], error: e.toString() }
         }
 
-        this.#currentSystemEntity.setSystemName = fileName.replace(/\..*$/g, "");
+        if (strategy === "replace") {
+            this.#currentSystemGraph.clear();
+            this.#currentSystemGraph.fromJSON(jsonGraph);
+        } else if (strategy === "merge") {
+            let newGraph: dia.Graph = new dia.Graph({}, { cellNamespace: entityShapes });
+            newGraph.fromJSON(jsonGraph);
+            newGraph.getCells().forEach(cell => {
+                this.#currentSystemGraph.addCell(cell);
+            });
+        }
 
+        this.#currentSystemGraph.trigger("reloaded");
+
+        this.#currentSystemEntity.setSystemName = fileName.replace(/\..*$/g, "");
         return { createdCells: this.#currentSystemGraph.getCells(), error: null }
     }
 
