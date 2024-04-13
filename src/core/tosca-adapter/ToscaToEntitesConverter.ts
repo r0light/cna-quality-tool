@@ -39,52 +39,89 @@ class ToscaToEntitesConverter {
 
     convert(): Entities.System {
 
+        // first pass: create ids for nodes and add them to the system
+
+        // store endpoints separately, because they are no first-class entities
+        let endpoints: Map<string, Entities.Endpoint> = new Map();
+
+        for (const [key, node] of Object.entries(this.#topologyTemplate.node_templates)) {
+            let uuid = uuidv4();
+            this.#keyIdMap.add(key, uuid);
+            switch (node.type) {
+                case DATA_AGGREGATE_TOSCA_KEY:
+                    let dataAggregate = new Entities.DataAggregate(this.#keyIdMap.getId(key), this.#transformYamlKeyToLabel(key), readToscaMetaData(node.metadata));
+                    this.#importedSystem.addEntity(dataAggregate);
+                    break;
+                case BACKING_DATA_TOSCA_KEY:
+                    let backingData = new Entities.BackingData(this.#keyIdMap.getId(key), this.#transformYamlKeyToLabel(key), readToscaMetaData(node.metadata));
+                    this.#importedSystem.addEntity(backingData);
+                    break;
+                case INFRASTRUCTURE_TOSCA_KEY:
+                    let infrastructure = new Entities.Infrastructure(this.#keyIdMap.getId(key), this.#transformYamlKeyToLabel(key), readToscaMetaData(node.metadata));
+                    this.#importedSystem.addEntity(infrastructure);
+                    break;
+                case ENDPOINT_TOSCA_KEY:
+                    let endpoint = new Entities.Endpoint(this.#keyIdMap.getId(key), this.#transformYamlKeyToLabel(key), readToscaMetaData(node.metadata));
+                    endpoints.set(this.#keyIdMap.getId(key), endpoint);
+                    break;
+                case EXTERNAL_ENDPOINT_TOSCA_KEY:
+                    let externalEndpoint = new Entities.ExternalEndpoint(this.#keyIdMap.getId(key), this.#transformYamlKeyToLabel(key), readToscaMetaData(node.metadata));
+                    endpoints.set(this.#keyIdMap.getId(key), externalEndpoint);
+                    break;
+                case SERVICE_TOSCA_KEY:
+                    let service = new Entities.Service(uuid, this.#transformYamlKeyToLabel(key), readToscaMetaData(node.metadata));
+                    this.#importedSystem.addEntity(service);
+                    break;
+                case BACKING_SERVICE_TOSCA_KEY:
+                    let backingService = new Entities.BackingService(uuid, this.#transformYamlKeyToLabel(key), readToscaMetaData(node.metadata));
+                    this.#importedSystem.addEntity(backingService);
+                    break;
+                case STORAGE_BACKING_SERVICE_TOSCA_KEY:
+                    let storageBackingService = new Entities.StorageBackingService(uuid, this.#transformYamlKeyToLabel(key), readToscaMetaData(node.metadata));
+                    this.#importedSystem.addEntity(storageBackingService);
+                    break;
+                case COMPONENT_TOSCA_KEY:
+                    let component = new Entities.Component(uuid, this.#transformYamlKeyToLabel(key), readToscaMetaData(node.metadata));
+                    this.#importedSystem.addEntity(component);
+                    break;
+                case REQUEST_TRACE_TOSCA_KEY:
+                    let requestTrace = new Entities.RequestTrace(uuid, this.#transformYamlKeyToLabel(key), readToscaMetaData(node.metadata));
+                    this.#importedSystem.addEntity(requestTrace);
+                    break;
+            }
+        }
+
+        // second pass: parse properties and requirements
+
         // start with DataAggregates and BackingData
         for (const [key, node] of Object.entries(this.#topologyTemplate.node_templates)) {
             if (node.type === DATA_AGGREGATE_TOSCA_KEY) {
-                let uuid = uuidv4();
-                let dataAggregate = new Entities.DataAggregate(uuid, this.#transformYamlKeyToLabel(key), readToscaMetaData(node.metadata))
-
+                let dataAggregate = this.#importedSystem.getDataAggregateEntities.get(this.#keyIdMap.getId(key));
                 if (node.properties) {
                     for (const [key, value] of Object.entries(node.properties)) {
                         dataAggregate.setPropertyValue(key, value);
                     }
                 }
-
-                this.#importedSystem.addEntity(dataAggregate);
-                this.#keyIdMap.add(key, uuid);
             } else if (node.type === BACKING_DATA_TOSCA_KEY) {
-                let uuid = uuidv4();
-                let backingData = new Entities.BackingData(uuid, this.#transformYamlKeyToLabel(key), readToscaMetaData(node.metadata));
-
+                let backingData = this.#importedSystem.getBackingDataEntities.get(this.#keyIdMap.getId(key));
                 if (node.properties) {
                     for (const [key, value] of Object.entries(node.properties)) {
                         backingData.setPropertyValue(key, value);
                     }
                 }
-
-                this.#importedSystem.addEntity(backingData);
-                this.#keyIdMap.add(key, uuid);
             }
         }
 
         // continue with Infrastructure
-        let infrastructureTemplates =  Object.entries(this.#topologyTemplate.node_templates).filter(([key, node]) => node.type === INFRASTRUCTURE_TOSCA_KEY);
-        outerLoop: while (infrastructureTemplates.length > 0) {
-            const [key, node] = infrastructureTemplates[0];
-
+        for (const [key, node] of Object.entries(this.#topologyTemplate.node_templates)) {
             if (node.type === INFRASTRUCTURE_TOSCA_KEY) {
-                let uuid = uuidv4();
-                let infrastructure = new Entities.Infrastructure(uuid, this.#transformYamlKeyToLabel(key), readToscaMetaData(node.metadata));
 
-                // remember deployment mappings to create and only commit, when all requirements are processed. Necessary, because an infrastructure might have several deployment mappings, but not all might be already created
-                let deploymentMappingsToCommit = new Map<string, Entities.DeploymentMapping>();
+                let infrastructure = this.#importedSystem.getInfrastructureEntities.get(this.#keyIdMap.getId(key));
 
                 if (node.requirements) {
                     for (const requirementAssignment of node.requirements) {
                         for (const [requirementKey, requirement] of Object.entries(requirementAssignment)) {
                             if (requirementKey === "uses_backing_data") { // TODO no hard coded Key
-
 
                                 if (typeof requirement === "string") {
                                     infrastructure.addBackingDataEntity(this.#importedSystem.getBackingDataEntities.get(this.#keyIdMap.getId(requirement)), new RelationToBackingData(`${infrastructure.getId}_uses_backing_data_${this.#keyIdMap.getId(requirement)}`, getEmptyMetaData()));
@@ -92,14 +129,14 @@ class ToscaToEntitesConverter {
                                     // TODO requirement is of type TOSCA_Requirement_Assignment
                                     if (requirement.node && requirement.relationship && typeof requirement.relationship === "string") {
                                         let relationship = this.#topologyTemplate.relationship_templates[requirement.relationship];
-    
-                                        let metaData = !!relationship.metadata ? readToscaMetaData(relationship.metadata) : getEmptyMetaData(); 
+
+                                        let metaData = !!relationship.metadata ? readToscaMetaData(relationship.metadata) : getEmptyMetaData();
                                         let relation = new RelationToBackingData(requirement.relationship, metaData);
-    
+
                                         for (const [key, value] of Object.entries(relationship.properties)) {
                                             relation.setPropertyValue(key, value);
                                         }
-    
+
                                         infrastructure.addBackingDataEntity(this.#importedSystem.getBackingDataEntities.get(this.#keyIdMap.getId(requirement.node)), relation);
                                     }
                                 }
@@ -108,50 +145,29 @@ class ToscaToEntitesConverter {
                                     // TODO requirement is of type string
                                 } else {
                                     let linkId = uuidv4();
-
-                                    // only create DeploymentMapping if referenced infrastructure entity has already been added, otherwise put current entity at the end of the list
-                                    if (this.#keyIdMap.getId(requirement.node)) {
-                                        let deploymentMapping = new Entities.DeploymentMapping(linkId, infrastructure, this.#importedSystem.getInfrastructureEntities.get(this.#keyIdMap.getId(requirement.node)));
-                                        deploymentMappingsToCommit.set(requirement.relationship as string, deploymentMapping); // TODO requirement.relationship is object
-                                    } else {
-                                        // add current infrastructure entity at the end of the list
-                                        infrastructureTemplates.push(infrastructureTemplates.splice(0,1)[0]);
-                                        continue outerLoop;
-                                    }
+                                    let hostInfrastructure = this.#importedSystem.getInfrastructureEntities.get(this.#keyIdMap.getId(requirement.node))
+                                    let deploymentMapping = new Entities.DeploymentMapping(linkId, infrastructure, hostInfrastructure);
+                                    this.#keyIdMap.add(key, deploymentMapping.getId);
+                                    this.#importedSystem.addEntity(deploymentMapping);
                                 }
                             }
                         }
                     }
                 }
 
-                deploymentMappingsToCommit.forEach((deploymentMapping, key) => {
-                    this.#keyIdMap.add(key, deploymentMapping.getId);
-                    this.#importedSystem.addEntity(deploymentMapping);
-                })
-
-
                 if (node.properties) {
                     for (const [key, value] of Object.entries(node.properties)) {
                         infrastructure.setPropertyValue(key, value);
                     }
                 }
-
-                this.#importedSystem.addEntity(infrastructure);
-                this.#keyIdMap.add(key, uuid);
-
-                infrastructureTemplates.splice(0,1);
             }
-
         }
 
 
-
-        let endpoints: Map<string, Entities.Endpoint> = new Map();
         // continue with Endpoints
         for (const [key, node] of Object.entries(this.#topologyTemplate.node_templates)) {
             if (node.type === ENDPOINT_TOSCA_KEY) {
-                let uuid = uuidv4();
-                let endpoint = new Entities.Endpoint(uuid, this.#transformYamlKeyToLabel(key), readToscaMetaData(node.metadata));
+                let endpoint = endpoints.get(this.#keyIdMap.getId(key));
                 if (node.properties) {
                     for (const [key, value] of Object.entries(node.properties)) {
                         endpoint.setPropertyValue(key, value);
@@ -173,14 +189,14 @@ class ToscaToEntitesConverter {
                                     // TODO requirement is of type TOSCA_Requirement_Assignment
                                     if (requirement.node && requirement.relationship && typeof requirement.relationship === "string") {
                                         let relationship = this.#topologyTemplate.relationship_templates[requirement.relationship];
-    
-                                        let metaData = !!relationship.metadata ? readToscaMetaData(relationship.metadata) : getEmptyMetaData(); 
+
+                                        let metaData = !!relationship.metadata ? readToscaMetaData(relationship.metadata) : getEmptyMetaData();
                                         let relation = new RelationToDataAggregate(requirement.relationship, metaData);
-    
+
                                         for (const [key, value] of Object.entries(relationship.properties)) {
                                             relation.setPropertyValue(key, value);
                                         }
-    
+
                                         endpoint.addDataAggregateEntity(this.#importedSystem.getDataAggregateEntities.get(this.#keyIdMap.getId(requirement.node)), relation);
                                     }
                                 }
@@ -189,11 +205,8 @@ class ToscaToEntitesConverter {
                     }
                 }
 
-                endpoints.set(uuid, endpoint);
-                this.#keyIdMap.add(key, uuid);
             } else if (node.type === EXTERNAL_ENDPOINT_TOSCA_KEY) {
-                let uuid = uuidv4();
-                let externalEndpoint = new Entities.ExternalEndpoint(uuid, this.#transformYamlKeyToLabel(key), readToscaMetaData(node.metadata));
+                let externalEndpoint = endpoints.get(this.#keyIdMap.getId(key));
                 if (node.properties) {
                     for (const [key, value] of Object.entries(node.properties)) {
                         externalEndpoint.setPropertyValue(key, value);
@@ -215,14 +228,14 @@ class ToscaToEntitesConverter {
                                     // TODO requirement is of type TOSCA_Requirement_Assignment
                                     if (requirement.node && requirement.relationship && typeof requirement.relationship === "string") {
                                         let relationship = this.#topologyTemplate.relationship_templates[requirement.relationship];
-    
-                                        let metaData = !!relationship.metadata ? readToscaMetaData(relationship.metadata) : getEmptyMetaData(); 
+
+                                        let metaData = !!relationship.metadata ? readToscaMetaData(relationship.metadata) : getEmptyMetaData();
                                         let relation = new RelationToDataAggregate(requirement.relationship, metaData);
-    
+
                                         for (const [key, value] of Object.entries(relationship.properties)) {
                                             relation.setPropertyValue(key, value);
                                         }
-    
+
                                         externalEndpoint.addDataAggregateEntity(this.#importedSystem.getDataAggregateEntities.get(this.#keyIdMap.getId(requirement.node)), relation);
                                     }
                                 }
@@ -230,66 +243,16 @@ class ToscaToEntitesConverter {
                         }
                     }
                 }
-
-                endpoints.set(uuid, externalEndpoint);
-                this.#keyIdMap.add(key, uuid);
             }
         }
 
-
-        let sortedNodes = [...Object.entries(this.#topologyTemplate.node_templates)].sort((a,b) => {
-            let prioA = this.#getNodePrio(a[1]);
-            let prioB = this.#getNodePrio(b[1]);
-            return prioA - prioB;
-        });
-
         // continue with components
-        for (const [key, node] of sortedNodes) {
-            if (node.type === SERVICE_TOSCA_KEY) {
-                let uuid = uuidv4();
-                let service = new Entities.Service(uuid, this.#transformYamlKeyToLabel(key), readToscaMetaData(node.metadata));
-
-                this.#parseRequirements(node, service, endpoints);
-
-                if (node.properties) {
-                    for (const [key, value] of Object.entries(node.properties)) {
-                        service.setPropertyValue(key, value);
-                    }
-                }
-
-                this.#keyIdMap.add(key, uuid);
-                this.#importedSystem.addEntity(service);
-            } else if (node.type === BACKING_SERVICE_TOSCA_KEY) {
-                let uuid = uuidv4();
-                let backingService = new Entities.BackingService(uuid, this.#transformYamlKeyToLabel(key), readToscaMetaData(node.metadata));
-
-                this.#parseRequirements(node, backingService, endpoints);
-
-                if (node.properties) {
-                    for (const [key, value] of Object.entries(node.properties)) {
-                        backingService.setPropertyValue(key, value);
-                    }
-                }
-
-                this.#keyIdMap.add(key, uuid);
-                this.#importedSystem.addEntity(backingService);
-            } else if (node.type === STORAGE_BACKING_SERVICE_TOSCA_KEY) {
-                let uuid = uuidv4();
-                let storageBackingService = new Entities.StorageBackingService(uuid, this.#transformYamlKeyToLabel(key), readToscaMetaData(node.metadata));
-
-                this.#parseRequirements(node, storageBackingService, endpoints);
-
-                if (node.properties) {
-                    for (const [key, value] of Object.entries(node.properties)) {
-                        storageBackingService.setPropertyValue(key, value);
-                    }
-                }
-
-                this.#keyIdMap.add(key, uuid);
-                this.#importedSystem.addEntity(storageBackingService);
-            } else if (node.type === COMPONENT_TOSCA_KEY) {
-                let uuid = uuidv4();
-                let component = new Entities.Component(uuid, this.#transformYamlKeyToLabel(key), readToscaMetaData(node.metadata));
+        for (const [key, node] of Object.entries(this.#topologyTemplate.node_templates)) {
+            if (node.type === SERVICE_TOSCA_KEY || 
+                node.type === BACKING_SERVICE_TOSCA_KEY || 
+                node.type === STORAGE_BACKING_SERVICE_TOSCA_KEY ||
+                node.type === COMPONENT_TOSCA_KEY ) {
+                let component = this.#importedSystem.getComponentEntities.get(this.#keyIdMap.getId(key));
 
                 this.#parseRequirements(node, component, endpoints);
 
@@ -298,9 +261,6 @@ class ToscaToEntitesConverter {
                         component.setPropertyValue(key, value);
                     }
                 }
-
-                this.#keyIdMap.add(key, uuid);
-                this.#importedSystem.addEntity(component);
             }
         }
 
@@ -327,9 +287,8 @@ class ToscaToEntitesConverter {
         // finally add request traces
         for (const [key, node] of Object.entries(this.#topologyTemplate.node_templates)) {
             if (node.type === REQUEST_TRACE_TOSCA_KEY) {
-                let uuid = uuidv4();
 
-                let requestTrace = new Entities.RequestTrace(uuid, this.#transformYamlKeyToLabel(key), readToscaMetaData(node.metadata));
+                let requestTrace = this.#importedSystem.getRequestTraceEntities.get(this.#keyIdMap.getId(key));
 
                 let externalEndpoint = node.properties && node.properties["referred_endpoint"] ? endpoints.get(this.#keyIdMap.getId(node.properties["referred_endpoint"])) : null; // TODO something better than null?
 
@@ -358,9 +317,6 @@ class ToscaToEntitesConverter {
                         }
                     }
                 }
-
-                this.#keyIdMap.add(key, uuid);
-                this.#importedSystem.addEntity(requestTrace);
             }
         }
 
@@ -376,20 +332,6 @@ class ToscaToEntitesConverter {
         return key.replace(MATCH_UNDERSCORE, " ").replace(MATCH_FIRST_CHARACTER, (match) => match.toUpperCase()).replace(MATCH_CHARACTER_AFTER_SPACE, (match, p1, p2) => `${p1}${p2.toUpperCase()}`)
     }
 
-    #getNodePrio(node: TOSCA_Node_Template) {
-        switch (node.type) {
-            case INFRASTRUCTURE_TOSCA_KEY:
-                return 1;
-            case BACKING_SERVICE_TOSCA_KEY:
-                return 2;
-            case STORAGE_BACKING_SERVICE_TOSCA_KEY:
-                return 3;
-            default:
-                return 4;
-        }
-    }
-
-
     #parseRequirements(node: TOSCA_Node_Template, component: Entities.Component, endpoints: Map<string, Entities.Endpoint>) {
         if (node.requirements) {
             for (const requirementAssignment of node.requirements) {
@@ -403,7 +345,7 @@ class ToscaToEntitesConverter {
                                 // TODO requirement is of type TOSCA_Requirement_Assignment
                                 if (requirement.node && requirement.relationship && typeof requirement.relationship === "string") {
                                     let relationship = this.#topologyTemplate.relationship_templates[requirement.relationship];
-                                    let metaData = !!relationship.metadata ? readToscaMetaData(relationship.metadata) : getEmptyMetaData(); 
+                                    let metaData = !!relationship.metadata ? readToscaMetaData(relationship.metadata) : getEmptyMetaData();
                                     let relation = new RelationToDataAggregate(requirement.relationship, metaData);
 
                                     for (const [key, value] of Object.entries(relationship.properties)) {
@@ -422,7 +364,7 @@ class ToscaToEntitesConverter {
                                 if (requirement.node && requirement.relationship && typeof requirement.relationship === "string") {
                                     let relationship = this.#topologyTemplate.relationship_templates[requirement.relationship];
 
-                                    let metaData = !!relationship.metadata ? readToscaMetaData(relationship.metadata) : getEmptyMetaData(); 
+                                    let metaData = !!relationship.metadata ? readToscaMetaData(relationship.metadata) : getEmptyMetaData();
                                     let relation = new RelationToBackingData(requirement.relationship, metaData);
 
                                     for (const [key, value] of Object.entries(relationship.properties)) {
@@ -473,7 +415,7 @@ class ToscaToEntitesConverter {
                                 // TODO requirement is of type string
                             } else if (typeof requirement === "object") {
                                 component.setProxiedBy = this.#importedSystem.getComponentEntities.get(this.#keyIdMap.getId(requirement.node));
-                            }                            
+                            }
                             break;
                     }
                 }
