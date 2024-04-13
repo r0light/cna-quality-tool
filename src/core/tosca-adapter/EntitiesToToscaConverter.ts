@@ -99,18 +99,19 @@ class EntitiesToToscaConverter {
             topologyTemplate.node_templates[nodeKey] = node;
         }
 
-
-        // sort to make sure backing service are considered first, because other components can refer to backing services as proxy
-        // TODO: what if a backing service is proxied by a backing service? Improvement: assign proxied by in a second step
-        let sortedComponentEntites = [...(this.#systemEntity.getComponentEntities.entries())].sort((a,b) => {
-            let prioA = this.#getEntityPrio(a[1]);
-            let prioB = this.#getEntityPrio(b[1]);
-            return prioA - prioB;
-        });
-
-        for (const [id, component] of sortedComponentEntites) {
+        // first pass for components: only add basic component templates
+        for (const [id, component] of this.#systemEntity.getComponentEntities.entries()) {
             const nodeKey: string = this.#uniqueKeyManager.ensureUniqueness(this.#transformToYamlKey(component.getName));
             let node = this.#createComponentTemplate(component);
+            this.#keyIdMap.add(nodeKey, id);
+            topologyTemplate.node_templates[nodeKey] = node;
+        }
+
+        // second pass for components: add embedded entites and requirements
+        for (const [id, component] of this.#systemEntity.getComponentEntities.entries()) {
+
+            const nodeKey = this.#keyIdMap.getKey(id);
+            const node = topologyTemplate.node_templates[nodeKey];
 
             if (component.getEndpointEntities.length > 0) {
                 node.requirements = [];
@@ -248,9 +249,6 @@ class EntitiesToToscaConverter {
                     }
                 });
             }
-
-            this.#keyIdMap.add(nodeKey, id);
-            topologyTemplate.node_templates[nodeKey] = node;
         }
 
         for (const [id, deploymentMapping] of this.#systemEntity.getDeploymentMappingEntities.entries()) {
@@ -342,20 +340,6 @@ class EntitiesToToscaConverter {
             .replace(MATCH_MULTIPLE_UNDERSCORES, "_")
             .toLocaleLowerCase();
     }
-
-    #getEntityPrio(component: Entities.Component) {
-        switch (component.constructor) {
-            case Entities.Infrastructure:
-                return 1;
-            case Entities.BackingService:
-                return 2;
-            case Entities.StorageBackingService:
-                return 3;
-            default:
-                return 4;
-        }
-    }
-
 
     #parsePropertiesForYaml(properties: EntityProperty[]): { [propertyKey: string]: TOSCA_Property_Assignment | string } {
         let yamlProperties: { [propertyKey: string]: TOSCA_Property_Assignment | string } = {};

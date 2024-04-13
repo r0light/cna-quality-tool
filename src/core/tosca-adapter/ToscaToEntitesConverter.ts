@@ -147,7 +147,7 @@ class ToscaToEntitesConverter {
                                     let linkId = uuidv4();
                                     let hostInfrastructure = this.#importedSystem.getInfrastructureEntities.get(this.#keyIdMap.getId(requirement.node))
                                     let deploymentMapping = new Entities.DeploymentMapping(linkId, infrastructure, hostInfrastructure);
-                                    this.#keyIdMap.add(key, deploymentMapping.getId);
+                                    this.#keyIdMap.add(requirement.relationship as string, deploymentMapping.getId);
                                     this.#importedSystem.addEntity(deploymentMapping);
                                 }
                             }

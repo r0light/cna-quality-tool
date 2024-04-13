@@ -176,20 +176,20 @@ class SystemEntityManager {
         let jsonGraph = {};
         try {
             jsonGraph = JSON.parse(stringifiedJson);
+            if (strategy === "replace") {
+                this.#currentSystemGraph.clear();
+                this.#currentSystemGraph.fromJSON(jsonGraph);
+            } else if (strategy === "merge") {
+                let newGraph: dia.Graph = new dia.Graph({}, { cellNamespace: entityShapes });
+                newGraph.fromJSON(jsonGraph);
+                newGraph.getCells().forEach(cell => {
+                    this.#currentSystemGraph.addCell(cell);
+                });
+            }
         } catch (e) {
             return { createdCells: [], error: e.toString() }
         }
 
-        if (strategy === "replace") {
-            this.#currentSystemGraph.clear();
-            this.#currentSystemGraph.fromJSON(jsonGraph);
-        } else if (strategy === "merge") {
-            let newGraph: dia.Graph = new dia.Graph({}, { cellNamespace: entityShapes });
-            newGraph.fromJSON(jsonGraph);
-            newGraph.getCells().forEach(cell => {
-                this.#currentSystemGraph.addCell(cell);
-            });
-        }
 
         this.#currentSystemGraph.trigger("reloaded");
 
@@ -231,13 +231,45 @@ class SystemEntityManager {
             || element.prop("entity/type") === EntityTypes.STORAGE_BACKING_SERVICE
             || element.prop("entity/type") === EntityTypes.INFRASTRUCTURE
         );
-        let sortedComponentEntities = componentEntities.sort((a, b) => {
-            let prioA = this.#getEntityPrio(a.prop("entity/type"));
-            let prioB = this.#getEntityPrio(b.prop("entity/type"));
-            return prioA - prioB;
-        });
-        for (const graphElement of sortedComponentEntities) {
-            this.#addComponentEntity(graphElement);
+
+        for (const graphElement of componentEntities) {
+
+            let addedEntity: Entities.Component | Entities.Infrastructure;
+           
+            switch (graphElement.prop("entity/type")) {
+                case EntityTypes.COMPONENT:
+                case EntityTypes.SERVICE:
+                case EntityTypes.BACKING_SERVICE:
+                case EntityTypes.STORAGE_BACKING_SERVICE:
+                    addedEntity = this.#createComponentEntity(graphElement);
+                    break;
+                case EntityTypes.INFRASTRUCTURE:
+                    addedEntity = this.#createInfrastructureEntity(graphElement);
+                    break;
+                default:
+                    throw new TypeError("Unsuitable Element provided! No corresponding Entity type is known for: " + JSON.stringify(graphElement));
+            }
+    
+            this.#currentSystemEntity.addEntity(addedEntity);
+        }
+
+        for (const graphElement of componentEntities) {
+
+            switch (graphElement.prop("entity/type")) {
+                case EntityTypes.COMPONENT:
+                case EntityTypes.SERVICE:
+                case EntityTypes.BACKING_SERVICE:
+                case EntityTypes.STORAGE_BACKING_SERVICE:
+                    let addedEntity = this.#currentSystemEntity.getComponentEntities.get(graphElement.id.toString());
+                    this.#configureComponentEntity(addedEntity, graphElement);
+                    break;
+                case EntityTypes.INFRASTRUCTURE:
+                    let addedInfrastructure = this.#currentSystemEntity.getInfrastructureEntities.get(graphElement.id.toString());
+                    this.#configureInfrastructureEntity(addedInfrastructure, graphElement);
+                    break;
+                default:
+                    throw new TypeError("Unsuitable Element provided! No corresponding Entity type is known for: " + JSON.stringify(graphElement));
+            }
         }
 
         // next are Links and Deployment Mappings
@@ -253,20 +285,6 @@ class SystemEntityManager {
 
         // now, validate the created system TODO here or independently?
         let errors: string[] = this.#validateSystemEntity();
-    }
-
-
-    #getEntityPrio(entityType: string) {
-        switch (entityType) {
-            case EntityTypes.INFRASTRUCTURE:
-                return 1;
-            case EntityTypes.BACKING_SERVICE:
-                return 2;
-            case EntityTypes.STORAGE_BACKING_SERVICE:
-                return 3;
-            default:
-                return 4;
-        }
     }
 
     #addDataEntity(graphElement: dia.Element) {
@@ -289,25 +307,6 @@ class SystemEntityManager {
             default:
                 throw new TypeError("Unsuitable Data Element provided! No corresponding Data Entity type is known for: " + JSON.stringify(graphElement));
         }
-    }
-
-    #addComponentEntity(graphElement: dia.Element) {
-        let addedEntity: Entities.Component | Entities.Infrastructure;
-        switch (graphElement.prop("entity/type")) {
-            case EntityTypes.COMPONENT:
-            case EntityTypes.SERVICE:
-            case EntityTypes.BACKING_SERVICE:
-            case EntityTypes.STORAGE_BACKING_SERVICE:
-                addedEntity = this.#createComponentEntity(graphElement);
-                break;
-            case EntityTypes.INFRASTRUCTURE:
-                addedEntity = this.#createInfrastructureEntity(graphElement);
-                break;
-            default:
-                throw new TypeError("Unsuitable Element provided! No corresponding Entity type is known for: " + JSON.stringify(graphElement));
-        }
-
-        this.#currentSystemEntity.addEntity(addedEntity);
     }
 
     #addConnectionEntity(graphLink: dia.Link) {
@@ -367,28 +366,37 @@ class SystemEntityManager {
             default:
                 componentModelEntity = new Entities.Component(graphElement.id.toString(), graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement));
         }
+
+        
+        return componentModelEntity;
+
+    }
+
+    #configureComponentEntity(entity: Entities.Component | Entities.Service | Entities.BackingService | Entities.StorageBackingService, graphElement: dia.Element) {
         // set entity properties
-        for (let property of componentModelEntity.getProperties()) {
+        for (let property of entity.getProperties()) {
             property.value = graphElement.prop("entity/properties/" + property.getKey)
         }
 
+        /*
         let embeddedCells = graphElement.getEmbeddedCells().sort((a, b) => {
             let prioA = this.#getEntityPrioForEmbeddedCells(a.prop("entity/type"));
             let prioB = this.#getEntityPrioForEmbeddedCells(b.prop("entity/type"));
 
             return prioA - prioB;
         });
+        */
 
-        for (const embeddedCell of embeddedCells) {
+        for (const embeddedCell of graphElement.getEmbeddedCells()) {
             switch (embeddedCell.prop("entity/type")) {
                 case EntityTypes.ENDPOINT:
                 case EntityTypes.EXTERNAL_ENDPOINT:
-                    const endpoint = this.#createEndpointEntity(embeddedCell, graphElement, componentModelEntity);
+                    const endpoint = this.#createEndpointEntity(embeddedCell, graphElement, entity);
                     if (!endpoint) {
                         // ErrorMessages already created while creating entity 
                         break;
                     }
-                    componentModelEntity.addEndpoint(endpoint);
+                    entity.addEndpoint(endpoint);
                     break;
                 case EntityTypes.DATA_AGGREGATE:
                     let dataAggregateName: string = embeddedCell.attr("label/textWrap/text");
@@ -399,7 +407,7 @@ class SystemEntityManager {
                             property.value = embeddedCell.prop("relationship/properties/" + property.getKey)
                         }
                         // TODO parse data aggregate properties and use single data aggregate only?
-                        componentModelEntity.addDataAggregateEntity(referencedDataAggregate[0][1], relation);
+                        entity.addDataAggregateEntity(referencedDataAggregate[0][1], relation);
                     } else {
                         throw new Error(`Data Aggregate with name ${dataAggregateName} should be there, but could not be found in ${this.#currentSystemEntity.getDataAggregateEntities}`);
                     }
@@ -414,7 +422,7 @@ class SystemEntityManager {
                             property.value = embeddedCell.prop("relationship/properties/" + property.getKey)
                         }
 
-                        componentModelEntity.addBackingDataEntity(referencedBackingData[0][1], relation);
+                        entity.addBackingDataEntity(referencedBackingData[0][1], relation);
                     } else {
                         throw new Error(`Backing Data with name ${backingDataName} should be there, but could not be found in ${this.#currentSystemEntity.getBackingDataEntities}`);
                     }
@@ -428,13 +436,12 @@ class SystemEntityManager {
         if (proxyId) {
             const backingService = [...(this.#currentSystemEntity.getComponentEntities)].find(([id, component]) => { return id === proxyId });
             if (backingService) {
-                componentModelEntity.setProxiedBy = backingService[1];
+                entity.setProxiedBy = backingService[1];
             } else {
                 console.log(`Backing Service ${proxyId} not found`)
             }
         }
 
-        return componentModelEntity;
     }
 
     #getEntityPrioForEmbeddedCells(entityType: string) {
@@ -453,12 +460,17 @@ class SystemEntityManager {
     #createInfrastructureEntity(graphElement) {
         let infrastructureEntity = new Entities.Infrastructure(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement));
 
+        return infrastructureEntity;
+    }
+    
+    #configureInfrastructureEntity(infrastructureEntity: Entities.Infrastructure, infrastructureElement: dia.Element) {
+
         // set entity properties
         for (let property of infrastructureEntity.getProperties()) {
-            property.value = graphElement.prop("entity/properties/" + property.getKey)
+            property.value = infrastructureElement.prop("entity/properties/" + property.getKey)
         }
 
-        const backingDataEntities = graphElement.getEmbeddedCells();
+        const backingDataEntities = infrastructureElement.getEmbeddedCells();
 
         for (const embeddedBackingData of backingDataEntities) {
             switch (embeddedBackingData.prop("entity/type")) {
@@ -481,7 +493,7 @@ class SystemEntityManager {
                     break;
             }
         }
-        return infrastructureEntity;
+
     }
 
 
