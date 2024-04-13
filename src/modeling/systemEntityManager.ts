@@ -821,30 +821,51 @@ class SystemEntityManager {
             }
         }
 
+        // first pass: only create entities
+        for (const [id, component] of this.#currentSystemEntity.getComponentEntities) {
+            switch (component.constructor.name) {
+                case Entities.Service.name:
+                    let newService = this.#createServiceCell(component);
+                    this.#currentSystemGraph.addCell(newService);
+                    break;
+                case Entities.BackingService.name:
+                    let newBackingService = this.#createBackingServiceCell(component);
+                    this.#currentSystemGraph.addCell(newBackingService);
+                    break;
+                case Entities.StorageBackingService.name:
+                    let newStorageBackingService = this.#createStorageBackingServiceCell(component);
+                    this.#currentSystemGraph.addCell(newStorageBackingService);
+                    break;
+                case Entities.Component.name:
+                    let newComponent = this.#createComponentCell(component);
+                    this.#currentSystemGraph.addCell(newComponent);
+                    break;
+            }
+        }
+
+
+        // second pass: configure entities and set relations
         for (const [id, component] of this.#currentSystemEntity.getComponentEntities) {
 
-            let newComponent: dia.Element;
+            let componentElement: dia.Element = this.#currentSystemGraph.getCell(id) as dia.Element;
+
             if (component.constructor.name === Entities.Service.name) {
-                newComponent = this.#createServiceCell(component);
-                this.#currentSystemGraph.addCell(newComponent);
-                createdCells.push(newComponent);
+                this.#configureServiceCell(component, componentElement);
+                createdCells.push(componentElement);
             } else if (component.constructor.name === Entities.BackingService.name) {
-                newComponent = this.#createBackingServiceCell(component);
-                this.#currentSystemGraph.addCell(newComponent);
-                createdCells.push(newComponent);
+                this.#configureBackingServiceCell(component, componentElement);
+                createdCells.push(componentElement);
             } else if (component.constructor.name === Entities.StorageBackingService.name) {
-                newComponent = this.#createStorageBackingServiceCell(component);
-                this.#currentSystemGraph.addCell(newComponent);
-                createdCells.push(newComponent);
+                this.#configureStorageBackingServiceCell(component, componentElement);
+                createdCells.push(componentElement);
             } else if (component.constructor.name === Entities.Component.name) {
-                newComponent = this.#createComponentCell(component);
-                this.#currentSystemGraph.addCell(newComponent);
-                createdCells.push(newComponent);
+                this.#configureComponentCell(component, componentElement);
+                createdCells.push(componentElement);
             }
 
             let index = 0;
             for (const usedDataAggregate of component.getDataAggregateEntities) {
-                let newDataAggregate = this.#createDataAggregateCell(usedDataAggregate, newComponent, index);
+                let newDataAggregate = this.#createDataAggregateCell(usedDataAggregate, componentElement, index);
                 index++;
                 this.#currentSystemGraph.addCell(newDataAggregate);
                 createdCells.push(newDataAggregate);
@@ -852,20 +873,20 @@ class SystemEntityManager {
 
             index = 0;
             for (const usedBackingData of component.getBackingDataEntities) {
-                let newBackingData = this.#createBackingDataCell(usedBackingData, newComponent, index);
+                let newBackingData = this.#createBackingDataCell(usedBackingData, componentElement, index);
                 index++;
                 this.#currentSystemGraph.addCell(newBackingData);
                 createdCells.push(newBackingData);
             }
 
             for (const providedEndpoint of component.getEndpointEntities) {
-                let newEndpoint = this.#createEndpointCell(providedEndpoint, newComponent);
+                let newEndpoint = this.#createEndpointCell(providedEndpoint, componentElement);
                 this.#currentSystemGraph.addCell(newEndpoint);
                 createdCells.push(newEndpoint);
             }
 
             for (const providedExternalEndpoint of component.getExternalEndpointEntities) {
-                let newExternalEndpoint = this.#createExternalEndpointCell(providedExternalEndpoint, newComponent);
+                let newExternalEndpoint = this.#createExternalEndpointCell(providedExternalEndpoint, componentElement);
                 this.#currentSystemGraph.addCell(newExternalEndpoint);
                 createdCells.push(newExternalEndpoint);
             }
@@ -970,28 +991,29 @@ class SystemEntityManager {
                 }
             }
         })
+        return newService;
+    }
+
+    #configureServiceCell(service: Entities.Service, serviceElement: dia.Element) {
         for (const property of EntityDetailsConfig.Service.specificProperties) {
             switch (property.providedFeature) {
                 case "assigned-networks-wrapper":
                     let tmp = (property as TableDialogPropertyConfig).buttonActionContent.dialogContent as FormContentConfig;
                     let actualProperty = tmp.groups[0].contentItems[0];
-                    newService.prop(actualProperty.jointJsConfig.modelPath, service.getProperties().find(entityProperty => entityProperty.getKey === actualProperty.providedFeature).value);
+                    serviceElement.prop(actualProperty.jointJsConfig.modelPath, service.getProperties().find(entityProperty => entityProperty.getKey === actualProperty.providedFeature).value);
                     break;
                 case "proxiedBy":
                     if (service.getProxiedBy) {
-                        newService.prop("entity/properties/proxied_by", service.getProxiedBy.getId);
+                        serviceElement.prop("entity/properties/proxied_by", service.getProxiedBy.getId);
                     }
                     break;
                 default:
                     if (property.jointJsConfig.modelPath) {
-                        newService.prop(property.jointJsConfig.modelPath, service.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
+                        serviceElement.prop(property.jointJsConfig.modelPath, service.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
                     }
             }
         }
-
-
-
-        return newService;
+        return serviceElement;
     }
 
     #createBackingServiceCell(backingService: Entities.BackingService) {
@@ -1014,29 +1036,30 @@ class SystemEntityManager {
                 }
             }
         })
+        return newBackingService;
+    }
 
+    #configureBackingServiceCell(backingService: Entities.BackingService, backingServiceElement: dia.Element) {
         for (const property of EntityDetailsConfig.Service.specificProperties) {
             switch (property.providedFeature) {
                 case "assigned-networks-wrapper":
                     let tmp = (property as TableDialogPropertyConfig).buttonActionContent.dialogContent as FormContentConfig;
                     let actualProperty = tmp.groups[0].contentItems[0];
-                    newBackingService.prop(actualProperty.jointJsConfig.modelPath, backingService.getProperties().find(entityProperty => entityProperty.getKey === actualProperty.providedFeature).value);
+                    backingServiceElement.prop(actualProperty.jointJsConfig.modelPath, backingService.getProperties().find(entityProperty => entityProperty.getKey === actualProperty.providedFeature).value);
                     break;
                 case "proxiedBy":
                     if (backingService.getProxiedBy) {
-                        newBackingService.prop("entity/properties/proxied_by", backingService.getProxiedBy.getId);
+                        backingServiceElement.prop("entity/properties/proxied_by", backingService.getProxiedBy.getId);
                     }
                     break;
                 default:
                     if (property.jointJsConfig.modelPath) {
-                        newBackingService.prop(property.jointJsConfig.modelPath, backingService.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
+                        backingServiceElement.prop(property.jointJsConfig.modelPath, backingService.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
                     }
             }
         }
 
-
-
-        return newBackingService;
+        return backingServiceElement;
     }
 
     #createStorageBackingServiceCell(storageBackingService: Entities.StorageBackingService) {
@@ -1059,29 +1082,30 @@ class SystemEntityManager {
                 }
             }
         })
+        return newStorageBackingService;
+    }
 
+    #configureStorageBackingServiceCell(storageBackingService: Entities.StorageBackingService, storageBackingServiceElement: dia.Element) {
         for (const property of EntityDetailsConfig.Service.specificProperties) {
             switch (property.providedFeature) {
                 case "assigned-networks-wrapper":
                     let tmp = (property as TableDialogPropertyConfig).buttonActionContent.dialogContent as FormContentConfig;
                     let actualProperty = tmp.groups[0].contentItems[0];
-                    newStorageBackingService.prop(actualProperty.jointJsConfig.modelPath, storageBackingService.getProperties().find(entityProperty => entityProperty.getKey === actualProperty.providedFeature).value);
+                    storageBackingServiceElement.prop(actualProperty.jointJsConfig.modelPath, storageBackingService.getProperties().find(entityProperty => entityProperty.getKey === actualProperty.providedFeature).value);
                     break;
                 case "proxiedBy":
                     if (storageBackingService.getProxiedBy) {
-                        newStorageBackingService.prop("entity/properties/proxied_by", storageBackingService.getProxiedBy.getId);
+                        storageBackingServiceElement.prop("entity/properties/proxied_by", storageBackingService.getProxiedBy.getId);
                     }
                     break;
                 default:
                     if (property.jointJsConfig.modelPath) {
-                        newStorageBackingService.prop(property.jointJsConfig.modelPath, storageBackingService.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
+                        storageBackingServiceElement.prop(property.jointJsConfig.modelPath, storageBackingService.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
                     }
             }
         }
 
-
-
-        return newStorageBackingService;
+        return storageBackingServiceElement;
     }
 
     #createComponentCell(component: Entities.Component) {
@@ -1104,27 +1128,31 @@ class SystemEntityManager {
                 }
             }
         })
+        return newComponent;
+    }
+
+    #configureComponentCell(component: Entities.Component, componentElement: dia.Element) {
 
         for (const property of EntityDetailsConfig.Service.specificProperties) {
             switch (property.providedFeature) {
                 case "assigned-networks-wrapper":
                     let tmp = (property as TableDialogPropertyConfig).buttonActionContent.dialogContent as FormContentConfig;
                     let actualProperty = tmp.groups[0].contentItems[0];
-                    newComponent.prop(actualProperty.jointJsConfig.modelPath, component.getProperties().find(entityProperty => entityProperty.getKey === actualProperty.providedFeature).value);
+                    componentElement.prop(actualProperty.jointJsConfig.modelPath, component.getProperties().find(entityProperty => entityProperty.getKey === actualProperty.providedFeature).value);
                     break;
                 case "proxiedBy":
                     if (component.getProxiedBy) {
-                        newComponent.prop("entity/properties/proxied_by", component.getProxiedBy.getId);
+                        componentElement.prop("entity/properties/proxied_by", component.getProxiedBy.getId);
                     }
                     break;
                 default:
                     if (property.jointJsConfig.modelPath) {
-                        newComponent.prop(property.jointJsConfig.modelPath, component.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
+                        componentElement.prop(property.jointJsConfig.modelPath, component.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
                     }
             }
         }
 
-        return newComponent;
+        return componentElement;
     }
 
 
