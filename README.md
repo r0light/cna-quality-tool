@@ -33,19 +33,17 @@ The application uses:
 
 The totypa (TOSCA Typescript parser) library provides Typescript type definitions for the TOSCA standard and parsers for generating Javascript objects out of TOSCA Profile definitions so that they can be used within the app.
 
-To be able to directly run Typescript files, install `ts-node`:
+To be able to directly run Typescript files, install `tsx`:
 
 ```sh
-npm install -g ts-node
+npm install tsx
 ```
-
-*Note: this installs ts-node globally on your system, if you do not want that, look for local installation possibilites.*
 
 Then run the profileParser in the following way:
 
 ```sh
 cd src/totypa/parsers
-ts-node profileParser.ts
+npx tsx profileParser.ts
 ```
 
 ## Modifying and extending the quality model
@@ -81,5 +79,5 @@ To generate a markdown representation of the quality model (based on [src/core/q
 
 ```sh
 cd src/core/qualitymodel
-ts-node exportToMarkdown.ts
+npx tsx exportToMarkdown.ts
 ```

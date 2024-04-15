@@ -464,8 +464,6 @@ function onSvgExportRequested() {
     // also remove all images (problematic because they reference another file which is not available after export)
     toDelete.push(...Array.from(svgElement.getElementsByTagName("image")).filter(element => element.getAttribute("id")).map(element => element.getAttribute("id")));
 
-    console.log(toDelete);
-
     for (const idToDelete of toDelete) {
         if (svgElement.getElementById(idToDelete)) {
             svgElement.getElementById(idToDelete).remove();

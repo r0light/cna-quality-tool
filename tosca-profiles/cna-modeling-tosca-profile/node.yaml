@@ -80,7 +80,7 @@ node_types:
           capability: cna.qualityModel.capabilities.Proxy
           node: cna.qualityModel.entities.BackingService
           relationship: cna.qualityModel.relationships.ProxiedBy.BackingService
-          ocurrences: [0,1]
+          occurrences: [0,1]
 
   cna.qualityModel.entities.Service:
     derived_from: cna.qualityModel.entities.Component

@@ -270,7 +270,7 @@ export const cna_modeling_tosca_profile: TOSCA_Service_Template = {
             "capability": "cna.qualityModel.capabilities.Proxy",
             "node": "cna.qualityModel.entities.BackingService",
             "relationship": "cna.qualityModel.relationships.ProxiedBy.BackingService",
-            "ocurrences": [
+            "occurrences": [
               0,
               1
             ]
