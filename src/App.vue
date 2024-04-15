@@ -2,7 +2,7 @@
   <header>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark text-white">
       <div class="navbar-header">
-          <a class="navbar-brand text-muted"><i class="fa-solid fa-cube"></i> Clounaq</a>
+          <a class="navbar-brand text-muted no-line-space"><i class="fa-solid fa-cube"></i> Clounaq <br><span class="versionInfo">v{{ version }}</span></a>
         </div>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
         aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -140,6 +140,7 @@ export type ModelingData = {
 }
 
 const CLOUNAQ = "Clounaq";
+const version = APP_VERSION;
 
 const router = useRouter();
 
@@ -520,6 +521,16 @@ function deleteModelingPage(id: number) {
 
 .pageWrapper {
   display: contents;
+}
+
+.no-line-space {
+  line-height: 0.4em;
+}
+
+.versionInfo {
+  font-size: x-small;
+  margin-left: 6.5em;
+  color: white;
 }
 
 #vapp {

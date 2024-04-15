@@ -11,5 +11,8 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
   },
-  publicDir: "public"
+  publicDir: "public",
+  define: {
+    APP_VERSION: JSON.stringify(process.env.npm_package_version),
+  },
 })
