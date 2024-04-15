@@ -1,4 +1,3 @@
-import { System } from "@/core/entities";
 import { ProductFactor } from "../quamoco/ProductFactor";
 import { CalculatedMeasure, EvaluatedProductFactor, ForwardImpactingPath, ProductFactorEvaluationResult } from "./EvaluatedSystemModel";
 

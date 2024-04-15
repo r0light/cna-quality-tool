@@ -8,7 +8,6 @@ import { REQUEST_TRACE_TOSCA_KEY } from '../entities/requestTrace';
 import { DEPLOYMENT_MAPPING_TOSCA_KEY } from '../entities/deploymentMapping';
 import { LINK_TOSCA_KEY } from '../entities/link';
 import { EntityProperty } from '../common/entityProperty';
-import { TOSCA_Property_Assignment } from '@/totypa/tosca-types/core-types';
 import { DATA_AGGREGATE_TOSCA_KEY } from '../entities/dataAggregate';
 import { BACKING_DATA_TOSCA_KEY } from '../entities/backingData';
 import { INFRASTRUCTURE_TOSCA_KEY } from '../entities/infrastructure';
@@ -18,6 +17,7 @@ import { STORAGE_BACKING_SERVICE_TOSCA_KEY } from '../entities/storageBackingSer
 import { COMPONENT_TOSCA_KEY } from '../entities/component';
 import { EXTERNAL_ENDPOINT_TOSCA_KEY } from '../entities/externalEndpoint';
 import { data } from 'jquery';
+import { TOSCA_Property_Assignment } from '../../totypa/tosca-types/core-types';
 
 const TOSCA_DEFINITIONS_VERSION = "tosca_simple_yaml_1_3"
 const MATCH_WHITESPACES = new RegExp(/\s/g);

@@ -1,4 +1,4 @@
-import { System } from "@/core/entities";
+import { System } from "../../entities";
 import { QualityModelInstance } from "../QualityModelInstance";
 import { QualityAspect } from "../quamoco/QualityAspect";
 import { ProductFactor } from "../quamoco/ProductFactor";

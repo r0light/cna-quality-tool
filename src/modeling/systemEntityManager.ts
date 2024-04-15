@@ -16,8 +16,8 @@ import {
 } from './config/entityShapes'
 import { DataAggregate } from "../core/entities";
 import { FormContentConfig } from "./config/actionDialogConfig";
-import { RelationToDataAggregate } from "@/core/entities/relationToDataAggregate";
-import { RelationToBackingData } from "@/core/entities/relationToBackingData";
+import { RelationToDataAggregate } from "../core/entities/relationToDataAggregate";
+import { RelationToBackingData } from "../core/entities/relationToBackingData";
 
 class SystemEntityManager {
 

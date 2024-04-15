@@ -1,4 +1,4 @@
-import { System } from "@/core/entities";
+import { System } from "../../entities";
 import { LiteratureSource } from "./LiteratureSource";
 
 type MeasureValue = number | string | "n/a";

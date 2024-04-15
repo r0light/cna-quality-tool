@@ -1,7 +1,7 @@
 import { Component } from './component.js'
 import { Infrastructure } from './infrastructure.js'
 import { EntityProperty, SelectEntityProperty, loadAllProperties } from '../common/entityProperty.js';
-import { cna_modeling_tosca_profile } from '@/totypa/parsedProfiles/cna_modeling_tosca_profile.js';
+import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_modeling_tosca_profile.js';
 
 
 const DEPLOYMENT_UPDATE_STRATEGIES = [{key: "in-place", name: "In place"},{ key: "replace", name: "Replace" }, { key: "rolling", name: "Rolling" }, { key: "blue-green", name: "Blue-Green" }];
