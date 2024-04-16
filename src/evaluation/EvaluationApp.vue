@@ -50,7 +50,7 @@ import QualityAspectViewpoint from './QualityAspectViewpoint.vue';
 import FilterToolbar, { ItemFilter, createFactorCategoryFilter, createHighLevelAspectFilter, getActiveElements, getActiveFilterItems } from '../qualitymodel/FilterToolbar.vue';
 import SystemEntityManager from '@/modeling/systemEntityManager';
 import { entityShapes } from '@/modeling/config/entityShapes';
-import { dia } from 'jointjs';
+import { dia } from '@joint/core';
 
 const props = defineProps<{
     systemsData: ModelingData[],

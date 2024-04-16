@@ -1,4 +1,4 @@
-import { util } from 'jointjs'
+import { util } from '@joint/core'
 import { Component, Service, BackingService, StorageBackingService,
     Endpoint, ExternalEndpoint, Link,
     Infrastructure, DeploymentMapping,

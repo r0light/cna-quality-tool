@@ -59,7 +59,7 @@
 <script lang="ts" setup>
 import $ from 'jquery';
 import { ref, onMounted, onUpdated, watch, Ref, ComputedRef, computed } from 'vue';
-import { dia, shapes, util, highlighters } from "jointjs";
+import { dia, shapes, util, highlighters } from '@joint/core';
 import { QualityAspectElement, ProductFactorElement, ImpactElement, quamocoShapes } from './config/elementShapes';
 import { getQualityModel } from '@/core/qualitymodel/QualityModelInstance';
 import { ProductFactor } from '@/core/qualitymodel/quamoco/ProductFactor';

@@ -1,4 +1,4 @@
-import { dia } from 'jointjs'
+import { dia } from '@joint/core'
 import EntityTypes from "./config/entityTypes";
 import { DeploymentMapping, Link } from "./config/entityShapes";
 

@@ -18,7 +18,7 @@
 <script lang="ts" setup>
 import $ from 'jquery';
 import { ref, onMounted } from 'vue'
-import { dia } from "jointjs";
+import { dia } from '@joint/core';
 import SidebarEntityShapes from '../config/entitySidebarShape.config';
 import ConnectionSelectionTools from "./tools/connectionSelectionTools";
 import { addSelectionToolToEntity } from "./tools/entitySelectionTools";

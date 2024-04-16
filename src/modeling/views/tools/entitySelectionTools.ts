@@ -1,4 +1,4 @@
-import { dia, elementTools } from "jointjs";
+import { dia, elementTools } from '@joint/core';
 import EntityTypes from "../../config/entityTypes";
 
 let CloneButton = elementTools.Button.extend({

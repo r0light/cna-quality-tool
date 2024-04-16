@@ -182,7 +182,7 @@
 <script lang="ts" setup>
 import $, { data } from 'jquery';
 import { ref, computed, onMounted, Ref, ComputedRef } from "vue";
-import { dia, util, highlighters, routers } from "jointjs";
+import { dia, util, highlighters, routers } from '@joint/core';
 import { DialogMetaData, DialogSize } from "../../config/actionDialogConfig";
 import EntityTypes from "../../config/entityTypes";
 import { FilterKey, ToolbarConfig } from "../../config/toolbarConfiguration";

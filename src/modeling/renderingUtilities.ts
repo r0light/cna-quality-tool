@@ -1,4 +1,4 @@
-import { dia } from "jointjs";
+import { dia } from '@joint/core';
 import { addSelectionToolToEntity } from "./views/tools/entitySelectionTools";
 
 export function ensureCorrectRendering(createdCells: dia.Cell[], paper: dia.Paper): Promise<void> {

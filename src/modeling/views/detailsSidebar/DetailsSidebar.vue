@@ -60,7 +60,7 @@
 
 <script lang="ts" setup>
 import { PropertyContentType, DetailsSidebarConfig, EntityDetailsConfig, PropertyConfig, } from '../../config/detailsSidebarConfig';
-import { dia } from 'jointjs';
+import { dia } from '@joint/core';
 import { ref, computed, onUpdated, onMounted } from 'vue';
 import EntityTypes from '@/modeling/config/entityTypes';
 import PropertiesEditor from './PropertiesEditor.vue';

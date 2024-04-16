@@ -1,5 +1,5 @@
 import { QualityModelInstance } from "../core/qualitymodel/QualityModelInstance";
-import { dia } from "jointjs";
+import { dia } from '@joint/core';
 import { QualityAspectElement } from "./config/elementShapes";
 import { QualityAspect } from "../core/qualitymodel/quamoco/QualityAspect";
 

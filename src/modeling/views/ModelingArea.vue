@@ -15,7 +15,7 @@
 import $ from 'jquery';
 import { partial } from 'lodash';
 import { onMounted, ref } from 'vue';
-import { g, dia, routers, shapes, highlighters } from "jointjs";
+import { g, dia, routers, shapes, highlighters } from '@joint/core';
 import { ModelingValidator } from '../modelingValidator';
 import ConnectionSelectionTools from "./tools/connectionSelectionTools";
 import EntityTypes from "../config/entityTypes";

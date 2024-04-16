@@ -1,4 +1,4 @@
-import { dia, util } from "jointjs";
+import { dia, util } from '@joint/core';
 import * as yaml from 'js-yaml';
 import { v4 as uuidv4 } from 'uuid';
 import EntityTypes from './config/entityTypes';

@@ -1,5 +1,5 @@
 import EntityTypes from "@/modeling/config/entityTypes";
-import { dia } from "jointjs";
+import { dia } from '@joint/core';
 
 export function getAffectedBackingViewCells(graph: dia.Graph, communicationShown: boolean, deploymentShown: boolean, dataShown: boolean): dia.Cell[] {
 

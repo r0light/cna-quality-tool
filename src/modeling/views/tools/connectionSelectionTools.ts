@@ -1,4 +1,4 @@
-import { dia, linkTools } from 'jointjs'
+import { dia, linkTools } from '@joint/core'
 
 let CustomRemoveLinkButton = linkTools.Remove.extend({
     name: "remove",

@@ -1,4 +1,4 @@
-import { dia, shapes } from 'jointjs'
+import { dia, shapes } from '@joint/core'
 import { getComponentProperties, getBackingServiceProperties, getStorageBackingServiceProperties, getEndpointProperties, getInfrastructureProperties, getDataAggregateProperties, getBackingDataProperties, getDeploymentMappingProperties, getExternalEndpointProperties, getServiceProperties, getRequestTraceProperties } from "../../core/entities";
 import EntityTypes from "./entityTypes";
 import { getLinkProperties } from '@/core/entities/link';
@@ -352,7 +352,7 @@ const StorageBackingService = shapes.standard.Cylinder.define("qualityModel.Stor
             strokeWidth: 0,
             textAnchor: "middle",
             textVerticalAnchor: "top",
-            refY: "12%",
+            refY: "-85%", // TODO Fix me
             textWrap: {
                 width: "95%",
                 text: "Storage Backing Service",
@@ -447,6 +447,7 @@ const Endpoint = shapes.standard.Circle.define("qualityModel.Endpoint", {
             textAnchor: "middle",
             textVerticalAnchor: "middle",
             textWrap: {
+                width: "150%",
                 text: "Endpoint"
             }
         }
@@ -520,6 +521,7 @@ const ExternalEndpoint = shapes.standard.Circle.define("qualityModel.ExternalEnd
             textAnchor: "middle",
             textVerticalAnchor: "middle",
             textWrap: {
+                width: "150%",
                 text: "External Endpoint",
             },
         }

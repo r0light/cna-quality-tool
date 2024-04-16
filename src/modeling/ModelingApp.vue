@@ -34,8 +34,7 @@
 
 <script lang="ts" setup>
 import $ from 'jquery';
-import { ref, onMounted, nextTick } from 'vue'
-import { dia } from "jointjs";
+import { ref, onMounted, nextTick } from 'vue';
 import SystemEntityManager from './systemEntityManager';
 import Toolbar from './views/toolbar/Toolbar.vue';
 import ModelingArea from './views/ModelingArea.vue';
@@ -50,6 +49,7 @@ import ModalConfirmationDialog, { ConfirmationModalProps, getDefaultConfirmation
 import { DialogSize } from './config/actionDialogConfig';
 import { ModelingAppSettings, getDefaultAppSettings } from './config/appSettings';
 import { request } from 'http';
+import { dia } from '@joint/core';
 
 const props = defineProps<{
     systemName: string,

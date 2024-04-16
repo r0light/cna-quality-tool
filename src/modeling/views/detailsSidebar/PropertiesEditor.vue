@@ -208,7 +208,7 @@
 
 <script lang="ts">
 import type { ComputedRef, } from 'vue';
-import type { dia } from 'jointjs';
+import type { dia } from '@joint/core';
 import { PropertyContentType, CheckboxPropertyConfig, DropdownPropertyConfig, InputProperties, JointJsConfig, NumberPropertyConfig, NumberRangePropertyConfig, PropertyConfig, TextAreaPropertyConfig, TextPropertyConfig, TogglePropertyConfig, TableDialogPropertyConfig, TablePropertyConfig, DynamicListPropertyConfig, ListElementField } from '../../config/detailsSidebarConfig';
 import { prop } from 'vue-class-component';
 

@@ -1,4 +1,4 @@
-import { dia, shapes } from 'jointjs'
+import { dia, shapes } from '@joint/core'
 
 const defaultTextFont = "sans-serif";
 
