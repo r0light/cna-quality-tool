@@ -5,8 +5,10 @@
             :appSettings="modelingData ? modelingData.appSettings : getDefaultAppSettings()"
             @update:systemName="setCurrentSystemName" @update:appSettings="setCurrentAppSettings"
             @click:exit-request-trace-view="resetRequestTraceSelection" @click:print-active-paper="onPrintRequested"
-            @click:exportSvg="onSvgExportRequested" @click:validate="triggerValidation" @load:fromJson="requestLoadFromJson"
-            @save:toJson="saveToJson" @load:fromTosca="requestLoadFromTosca" @save:toTosca="saveToTosca" @request:reloadFromJson="(json, name) => {loadFromJson(json, name, 'replace') }"></Toolbar>
+            @click:exportSvg="onSvgExportRequested" @click:validate="triggerValidation"
+            @load:fromJson="requestLoadFromJson" @save:toJson="saveToJson" @load:fromTosca="requestLoadFromTosca"
+            @save:toTosca="saveToTosca"
+            @request:reloadFromJson="(json, name) => { loadFromJson(json, name, 'replace') }"></Toolbar>
         <div class="app-body">
             <div :id="`entity-sidebar-${pageId}`" class="entityShapes-sidebar-container d-print-none">
                 <EntitySidebar :paper="mainPaper" :pageId="`model${pageId}`"
@@ -161,12 +163,12 @@ function resetAllHighlighting() {
 }
 
 function requestLoadFromJson(jsonString: string, fileName: string) {
-    
+
     confirmationModalManager.value = {
         show: true,
         dialogMetaData: {
             dialogSize: DialogSize.DEFAULT,
-            header: {   
+            header: {
                 iconClass: "fa-solid fa-question",
                 svgRepresentation: "",
                 text: "Replace or merge?"
@@ -174,7 +176,7 @@ function requestLoadFromJson(jsonString: string, fileName: string) {
             footer: {
                 showCancelButton: true,
                 cancelButtonText: "Cancel",
-                actionButtons: [{ buttonIconClass: "", buttonText: "Merge"}, { buttonIconClass: "", buttonText: "Replace"}]
+                actionButtons: [{ buttonIconClass: "", buttonText: "Merge" }, { buttonIconClass: "", buttonText: "Replace" }]
             },
         },
         confirmationPrompt: "Do you want to replace the current model with the imported model or merge the imported model into the current model?",
@@ -221,12 +223,12 @@ function saveToJson() {
 }
 
 function requestLoadFromTosca(yamlString: string, fileName: string) {
-    
+
     confirmationModalManager.value = {
         show: true,
         dialogMetaData: {
             dialogSize: DialogSize.DEFAULT,
-            header: {   
+            header: {
                 iconClass: "fa-solid fa-question",
                 svgRepresentation: "",
                 text: "Replace or merge?"
@@ -234,7 +236,7 @@ function requestLoadFromTosca(yamlString: string, fileName: string) {
             footer: {
                 showCancelButton: true,
                 cancelButtonText: "Cancel",
-                actionButtons: [{ buttonIconClass: "", buttonText: "Merge"}, { buttonIconClass: "", buttonText: "Replace"}]
+                actionButtons: [{ buttonIconClass: "", buttonText: "Merge" }, { buttonIconClass: "", buttonText: "Replace" }]
             },
         },
         confirmationPrompt: "Do you want to replace the current model with the imported model or merge the imported model into the current model?",
@@ -442,11 +444,13 @@ function onSvgExportRequested() {
     let svgElement = paperDiv.find("svg").clone()[0];
     svgElement.setAttribute("xmlns", "http://www.w3.org/2000/svg");
 
-    let layersElement = paperDiv.find(".joint-layers")[0];
+    let layersElement = paperDiv.find(".joint-cells-layer")[0];
     let boundingBox = layersElement.getBoundingClientRect();
 
     svgElement.setAttribute("viewBox", `0 0 ${boundingBox.x + boundingBox.width} ${boundingBox.y + boundingBox.height}`);
 
+    // remove grid layer
+    svgElement.getElementsByClassName("joint-grid-layer")[0].remove();
     // remove tools layer
     svgElement.getElementsByClassName("joint-tools-layer")[0].remove();
 
