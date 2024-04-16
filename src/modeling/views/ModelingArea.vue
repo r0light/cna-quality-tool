@@ -53,7 +53,12 @@ onMounted(() => {
         width: props.appSettings.paperWidth,
         height: props.appSettings.paperHeight,
         gridSize: props.appSettings.paperGridSize,
-        drawGrid: true,
+        drawGrid: {
+            name: 'dot',
+            args: [
+                { thickness: props.appSettings.paperGridThickness }
+            ]
+        },
         model: props.graph as dia.Graph,
         embeddingMode: true,
         background: {
@@ -166,9 +171,9 @@ onMounted(() => {
             if (elementView.model.isEmbedded()) {
                 // make sure there is enough space for embedded elements
                 let parent = elementView.model.getParentCell() as dia.Element;
-                
+
                 let availableArea = parent.size().height * parent.size().width;
-                let childrenArea = parent.getEmbeddedCells().map(cell  => (cell as dia.Element).size().height * (cell as dia.Element).size().width * 1.5).reduce((accumulator, currentValue) => { return accumulator + currentValue},0);
+                let childrenArea = parent.getEmbeddedCells().map(cell => (cell as dia.Element).size().height * (cell as dia.Element).size().width * 1.5).reduce((accumulator, currentValue) => { return accumulator + currentValue }, 0);
 
                 if (childrenArea >= availableArea * 0.3) {
                     let newWidth = parent.size().width + 100;

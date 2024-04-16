@@ -6,7 +6,7 @@
             @update:systemName="setCurrentSystemName" @update:appSettings="setCurrentAppSettings"
             @click:exit-request-trace-view="resetRequestTraceSelection" @click:print-active-paper="onPrintRequested"
             @click:exportSvg="onSvgExportRequested" @click:validate="triggerValidation" @load:fromJson="requestLoadFromJson"
-            @save:toJson="saveToJson" @load:fromTosca="requestLoadFromTosca" @save:toTosca="saveToTosca"></Toolbar>
+            @save:toJson="saveToJson" @load:fromTosca="requestLoadFromTosca" @save:toTosca="saveToTosca" @request:reloadFromJson="(json, name) => {loadFromJson(json, name, 'replace') }"></Toolbar>
         <div class="app-body">
             <div :id="`entity-sidebar-${pageId}`" class="entityShapes-sidebar-container d-print-none">
                 <EntitySidebar :paper="mainPaper" :pageId="`model${pageId}`"

@@ -190,7 +190,7 @@ import ButtonGroup from './ButtonGroup.vue';
 import ModalConfirmationDialog, { ConfirmationModalProps, getDefaultConfirmationDialogData } from '../components/ModalConfirmationDialog.vue';
 import ModalWrapper from '../components/ModalWrapper.vue';
 import { getAffectedBackingViewCells, getAffectedCommunicationViewCells, getAffectedDataViewCells, getAffectedDeploymentViewCells, getAffectedRequestTraceCells } from './viewfilter';
-import { ModelingAppSettings, getRouterConfig } from '@/modeling/config/appSettings';
+import { ModelingAppSettings, getDefaultAppSettings, getRouterConfig } from '@/modeling/config/appSettings';
 
 export type ToolbarButton = {
     buttonType: string,
@@ -227,6 +227,7 @@ const emit = defineEmits<{
     (e: "click:validate"): void;
     (e: "load:fromJson", stringifiedJson: string, fileName: string);
     (e: "save:toJson");
+    (e: "request:reloadFromJson", stringifiedJson: string, fileName: string);
     (e: "load:fromTosca", stringifiedYaml: string, fileName: string);
     (e: "save:toTosca");
 }>();
@@ -531,7 +532,18 @@ function clearActivePaper() {
 
 function changeGrid() {
     // TODO for options
-    props.paper.clearGrid();
+    if (props.appSettings.paperGridThickness > 0) {
+        props.appSettings.paperGridThickness = 0;  
+        props.paper.setGrid(false);
+    } else {
+        props.appSettings.paperGridThickness = 1;
+        props.paper.setGrid({
+            name: 'dot',
+            args: [
+                { thickness: props.appSettings.paperGridThickness }
+            ]
+        });
+    }
 }
 
 function zoomInPaper() {
@@ -662,27 +674,34 @@ function toggleEntityExpansion(event) {
 }
 
 function editApplicationSettings() {
+    
     // load current values
     props.appSettings.paperWidth = props.paper.options.width as number;
     props.appSettings.paperHeight = props.paper.options.height as number;
     props.appSettings.paperGridSize = props.paper.options.gridSize;
-    props.appSettings.paperGridThickness = props.paper["_gridSettings"][0].thickness;
+    props.appSettings.paperGridThickness = props.paper.options.drawGrid ? (props.paper.options.drawGrid as dia.Paper.GridOptions).thickness : getDefaultAppSettings().paperGridThickness;
     props.appSettings.routerType = (props.paper.options.defaultRouter as routers.Router).name as "manhattan" | "metro" | "normal"; 
 
     showAppSettings.value = true;
 }
 
 function updateAppSettings() {
+
     if ( props.appSettings.paperWidth !== props.paper.options.width as number ||  props.appSettings.paperHeight !== props.paper.options.height as number) {
         props.paper.setDimensions( props.appSettings.paperWidth,  props.appSettings.paperHeight);
     }
 
-    if ( props.appSettings.paperGridSize !== props.paper["_gridSettings"][0].thickness) {
+    if ( props.appSettings.paperGridSize !== props.paper.options.gridSize) {
         props.paper.setGridSize( props.appSettings.paperGridSize);
     }
 
-    if ( props.appSettings.paperGridThickness !== props.paper["_gridSettings"][0].thickness) {
-        props.paper.drawGrid({ thickness:  props.appSettings.paperGridThickness });
+    if ( props.appSettings.paperGridThickness !== (props.paper.options.drawGrid as dia.Paper.GridOptions).thickness) {
+        props.paper.setGrid({
+            name: 'dot',
+            args: [
+                { thickness: props.appSettings.paperGridThickness }
+            ]
+        });
     }
 
     if ( props.appSettings.routerType !== (props.paper.options.defaultRouter as routers.Router).name) {
@@ -699,7 +718,7 @@ function updateAppSettings() {
         let currentGraph = JSON.stringify(props.graph.toJSON());
         let currentName = props.systemName;
         props.paper.render();
-        emit("load:fromJson", currentGraph, currentName);
+        emit("request:reloadFromJson", currentGraph, currentName);
     }
     emit("update:appSettings", props.appSettings);
     showAppSettings.value = false;
