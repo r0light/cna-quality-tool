@@ -105,7 +105,8 @@ class ConnectionSelectionTools extends dia.ToolsView {
     createVerticesTools() {
         let verticesTool = new linkTools.Vertices({
             focusOpacity: 0.5,
-            vertexAdding: false
+            vertexAdding: true,
+            vertexRemoving: true
         });
 
         return verticesTool;

@@ -99,14 +99,14 @@ onMounted(() => {
         validateUnembedding: (chieldView) => modelingValidator.validateUnembedding(chieldView),
         allowLink: (linkView, paper) => modelingValidator.checkCreatedLink(linkView, paper),
 
-        interactive: { labelMove: false, addLinkFromMagnet: true, linkMove: true, vertexAdd: false },
+        interactive: { labelMove: false, addLinkFromMagnet: true, linkMove: true },
         // Restricts modeling area to defined paper width and height with a small padding because of tools
         restrictTranslate: true,
         // TODO fix Data Aggregate entity + FIX me for zoom
         // restrictTranslate: (elementView, x0, y0) => {
         //     let restrictedWidth = elementView.paper.options.width - 20 - 25;
         //     let restrictedHeight = elementView.paper.options.height - 20 - 15;
-        //     console.log(restrictedWidth)
+        //     console.log(restrictedWidth) 
         //     console.log(elementView.paper.options.height)
         //     console.log(elementView.paper.getComputedSize())
         //     return { x: 20, y: 20, width: restrictedWidth, height: restrictedHeight };
