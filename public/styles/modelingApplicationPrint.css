@@ -1,7 +1,4 @@
 @media print {
-    body * {
-        visibility: hidden;
-    }
 
     /* #jointPaper,
     #jointPaper * { */
@@ -12,8 +9,9 @@
 
     /* #jointPaper { */
     .system-container-modeling-area {
-        position: absolute;
-        left: 0;
-        top: 0;
+        display:block;
+        overflow: visible !important;
+        width: fit-content !important;
+        height: fit-content !important;
     }
 }
