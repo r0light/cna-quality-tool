@@ -447,7 +447,7 @@ const Endpoint = shapes.standard.Circle.define("qualityModel.Endpoint", {
             textAnchor: "middle",
             textVerticalAnchor: "middle",
             textWrap: {
-                width: "150%",
+                width: "90%",
                 text: "Endpoint"
             }
         }
@@ -521,7 +521,7 @@ const ExternalEndpoint = shapes.standard.Circle.define("qualityModel.ExternalEnd
             textAnchor: "middle",
             textVerticalAnchor: "middle",
             textWrap: {
-                width: "150%",
+                width: "90%",
                 text: "External Endpoint",
             },
         }

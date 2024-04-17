@@ -112,6 +112,7 @@ const SidebarEntityShapes = {
                 label: {
                     fontSize: 11,
                     textWrap: {
+                        width: "115%",
                         text: "Endpoint",
                     }
                 }
@@ -134,6 +135,7 @@ const SidebarEntityShapes = {
                 label: {
                     fontSize: 11,
                     textWrap: {
+                        width: "115%",
                         text: 'External Endpoint',
                     }
                 }
