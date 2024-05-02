@@ -1,6 +1,6 @@
 import * as yaml from 'js-yaml';
 import * as Entities from '../entities'
-import { TOSCA_Service_Template } from '@/totypa/tosca-types/template-types';
+import { TOSCA_Service_Template } from '@/totypa/tosca-types/v1dot3-types/template-types';
 import { EntitiesToToscaConverter } from './EntitiesToToscaConverter';
 import { ToscaToEntitesConverter } from './ToscaToEntitesConverter';
 

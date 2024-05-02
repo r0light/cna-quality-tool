@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { TOSCA_Node_Template, TOSCA_Service_Template, TOSCA_Topology_Template } from '@/totypa/tosca-types/template-types';
+import { TOSCA_Node_Template, TOSCA_Service_Template, TOSCA_Topology_Template } from '@/totypa/tosca-types/v1dot3-types/template-types';
 import * as Entities from '../entities'
 import { TwoWayKeyIdMap } from "./TwoWayKeyIdMap";
 import { DATA_AGGREGATE_TOSCA_KEY } from '../entities/dataAggregate';

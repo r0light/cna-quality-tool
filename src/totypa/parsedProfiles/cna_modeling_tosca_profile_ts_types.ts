@@ -2,8 +2,8 @@
    Caution!!! This code is generated!!!! Do not modify, but instead regenerate it based on the .yaml Profile descriptions 
 */
 
-import { TOSCA_Requirement_Assignment } from "../tosca-types/template-types.js"
-import { TOSCA_Metadata, TOSCA_Interface, TOSCA_Artifact } from "../tosca-types/core-types.js"
+import { TOSCA_Requirement_Assignment } from "../tosca-types/v1dot3-types/template-types.js"
+import { TOSCA_Metadata, TOSCA_Interface, TOSCA_Artifact } from "../tosca-types/v1dot3-types/core-types.js"
 import { ToscaDatatypesCredential, ToscaCapabilitiesNode, ToscaDatatypesNetworkNetworkInfo, ToscaDatatypesNetworkPortInfo, ToscaCapabilitiesCompute, ToscaCapabilitiesOperatingSystem, ToscaCapabilitiesEndpointAdmin, ToscaCapabilitiesScalable, ToscaCapabilitiesNetworkBindable, ToscaCapabilitiesEndpoint, ToscaCapabilitiesEndpointPublic, ToscaCapabilitiesAttachment } from './tosca_simple_profile_for_yaml_v1_3_ts_types.js'
 
 export type CnaQualityModelCapabilitiesProxy = any

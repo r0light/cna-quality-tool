@@ -1,12 +1,12 @@
 import * as yaml from 'js-yaml';
 import * as fs from 'fs';
-import { TOSCA_Service_Template } from '../tosca-types/template-types.js';
+import { TOSCA_Service_Template } from '../tosca-types/v1dot3-types/template-types.js';
 import { readdir } from 'node:fs/promises';
 import path from 'node:path';
-import { TOSCA_Artifact, TOSCA_Attribute, TOSCA_Datatype, TOSCA_Interface, TOSCA_Property } from '../tosca-types/core-types.js';
+import { TOSCA_Artifact, TOSCA_Attribute, TOSCA_Datatype, TOSCA_Interface, TOSCA_Property } from '../tosca-types/v1dot3-types/core-types.js';
 import { TwoWayKeyTypeMap } from './TwoWayKeyTypeMap.js';
-import { TOSCA_Capability, TOSCA_Capability_Type, TOSCA_Node, TOSCA_Relationship, TOSCA_Requirement } from '../tosca-types/entity-types.js';
-import { TOSCA_Capability_Type_Key } from '../tosca-types/alias-types.js';
+import { TOSCA_Capability, TOSCA_Capability_Type, TOSCA_Node, TOSCA_Relationship, TOSCA_Requirement } from '../tosca-types/v1dot3-types/entity-types.js';
+import { TOSCA_Capability_Type_Key } from '../tosca-types/v1dot3-types/alias-types.js';
 
 const YAML_KEY_PATTERN = new RegExp(/\.([A-z])/g);
 const MATCH_FIRST_CHARACTER = new RegExp(/^./g);
