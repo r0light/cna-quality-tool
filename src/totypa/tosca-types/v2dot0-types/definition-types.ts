@@ -1,17 +1,17 @@
-import { TOSCA_Artifact_Type_Key, TOSCA_Capability_Type_Key, TOSCA_Condition_Clause, TOSCA_Datatype_Type_Key, TOSCA_Group_Type_Key, TOSCA_Interface_Type_Key, TOSCA_Node_Type_Key, TOSCA_Policy_Type_Key, TOSCA_Relationship_Type_Key, TOSCA_Repository_Definition_Key, TOSCA_Requirement_Type_Key, TOSCA_Validation_Clause, TOSCA_Version } from "./alias-types"
+import { TOSCA_Artifact_Type_Key, TOSCA_Attribute_Name, TOSCA_Capability_Type_Key, TOSCA_Condition_Clause, TOSCA_Datatype_Type_Key, TOSCA_Function_Name, TOSCA_Group_Type_Key, TOSCA_Interface_Type_Key, TOSCA_Node_Type_Key, TOSCA_Notification_Name, TOSCA_Operation_Name, TOSCA_Parameter_Assignment, TOSCA_Parameter_Name, TOSCA_Policy_Type_Key, TOSCA_Profile_Name, TOSCA_Property_Name, TOSCA_Relationship_Type_Key, TOSCA_Repository_Name, TOSCA_Requirement_Type_Key, TOSCA_Trigger_Name, TOSCA_Validation_Clause, TOSCA_Version, TOSCA_Workflow_Name } from "./alias-types"
 import { TOSCA_Service_Template } from "./template-types"
 
 // 5.2.1 TOSCA file definition
 export type TOSCA_File = {
     tosca_definitions_version: "tosca_2_0",
-    profile?: string,
+    profile?: TOSCA_Profile_Name,
     metadata?: {
         [key: string]: any
     },
     description?: string,
     dsl_definitions?: any,
     repositories?: {
-        [repositoryKey: TOSCA_Repository_Definition_Key]: TOSCA_Repository_Definition 
+        [repositoryKey: TOSCA_Repository_Name]: TOSCA_Repository_Definition 
     },
     imports?: TOSCA_Import_Definition[],
     artifact_types?: {
@@ -40,7 +40,7 @@ export type TOSCA_File = {
     },
     service_template?: TOSCA_Service_Template,
     functions?: {
-        [functionKey: string]: any // TODO
+        [functionKey: TOSCA_Function_Name]: TOSCA_Function_Definition
     }
 }
 
@@ -68,8 +68,8 @@ export type TOSCA_Repository_Definition = {
 // 5.2.3.1 Import definition
 export type TOSCA_Import_Definition = {
     url?: string,
-    profile?: string,
-    repository?: string,
+    profile?: TOSCA_Profile_Name,
+    repository?: TOSCA_Repository_Name,
     namespace?: string
 }
 
@@ -78,7 +78,7 @@ export type TOSCA_Artifact_Type_Definition = {
     mime_type?: string,
     file_ext?: string[],
     properties?: {
-        [TOSCA_Property_Definition_Key: string]: TOSCA_Property_Definition
+        [TOSCA_Property_Definition_Key: TOSCA_Property_Name]: TOSCA_Property_Definition
     }    
 }
 
@@ -89,7 +89,7 @@ export type TOSCA_Property_Definition = {
     required?: boolean,
     default?: any,
     value?: any,
-    status?: string,
+    status?: TOSCA_Property_Status,
     validation?: TOSCA_Validation_Clause,
     key_schema?: TOSCA_Schema_Definition,
     entry_schema?: TOSCA_Schema_Definition,
@@ -97,12 +97,15 @@ export type TOSCA_Property_Definition = {
     metadata?: TOSCA_Metadata
 }
 
+// 5.4.7.3 Status values
+export type TOSCA_Property_Status = "supported" | "unsupported" | "experimental" | "deprecated"
+
 
 // 5.4.5 Schema definition
 export type TOSCA_Schema_Definition = {
     type: string,
     description?: string,
-    validation: TOSCA_Validation_Clause,
+    validation?: TOSCA_Validation_Clause,
     key_schema?: TOSCA_Schema_Definition,
     entry_schema?: TOSCA_Schema_Definition
 }
@@ -112,7 +115,7 @@ export type TOSCA_Schema_Definition = {
 export type TOSCA_Datatype_Definition = TOSCA_Type_Definition_Commons & {
     validation?: TOSCA_Validation_Clause,
     properties?: {
-        [TOSCA_Property_Definition_Key: string]: TOSCA_Property_Definition
+        [propertyKey: TOSCA_Property_Name]: TOSCA_Property_Definition
     },
     key_schema?: TOSCA_Schema_Definition,
     entry_schema?: TOSCA_Schema_Definition,
@@ -121,10 +124,10 @@ export type TOSCA_Datatype_Definition = TOSCA_Type_Definition_Commons & {
 // 5.3.5.1 Capability Type
 export type TOSCA_Capability_Definition = TOSCA_Type_Definition_Commons & {
     properties?: {
-        [TOSCA_Property_Definition_Key: string]: TOSCA_Property_Definition
+        [propertyKey: TOSCA_Property_Name]: TOSCA_Property_Definition
     },
     attributes?: {
-        [TOSCA_Attribute_Definition_Key: string]: TOSCA_Attribute_Definition
+        [attributeKey: TOSCA_Attribute_Name]: TOSCA_Attribute_Definition
     },
     valid_source_node_types?: string[],
     valid_relationship_types?: string[]
@@ -136,7 +139,7 @@ export type TOSCA_Attribute_Definition = {
     description?: string,
     default?: any,
     value?: any,
-    status?: string,
+    status?: TOSCA_Property_Status,
     validation?: TOSCA_Validation_Clause,
     key_schema?: TOSCA_Schema_Definition,
     entry_schema?: TOSCA_Schema_Definition,
@@ -149,13 +152,13 @@ export type TOSCA_Attribute_Definition = {
 // 5.3.6.1 Interface Type
 export type TOSCA_Interface_Definition = TOSCA_Type_Definition_Commons &  {
     inputs?: {
-        [parameterKey: string]: TOSCA_Parameter_Definition
+        [parameterKey: TOSCA_Parameter_Name]: TOSCA_Parameter_Definition
     },
     operations?: {
-        [operationKey: string]: TOSCA_Operation_Definition
+        [operationKey: TOSCA_Operation_Name]: TOSCA_Operation_Definition
     },
     notifications?: {
-        [notificationKey: string]: TOSCA_Notification_Definition
+        [notificationKey: TOSCA_Notification_Name]: TOSCA_Notification_Definition
     }
 }
 
@@ -172,10 +175,10 @@ export type TOSCA_Operation_Definition = {
     description?: string,
     implementation: TOSCA_Implementation_Definition,
     inputs?: {
-        [parameterKey: string]: TOSCA_Parameter_Definition
+        [parameterKey: TOSCA_Parameter_Name]: TOSCA_Parameter_Definition
     },
     outputs?: {
-        [parameterKey: string]: TOSCA_Parameter_Definition
+        [parameterKey: TOSCA_Parameter_Name]: TOSCA_Parameter_Definition
     }
 
 }
@@ -185,7 +188,7 @@ export type TOSCA_Notification_Definition = {
     description?: string,
     implementation: TOSCA_Implementation_Definition,
     outputs?: {
-        [parameterKey: string]: TOSCA_Parameter_Definition
+        [parameterKey: TOSCA_Parameter_Name]: TOSCA_Parameter_Definition
     }
 }
 
@@ -199,10 +202,10 @@ export type TOSCA_Implementation_Definition = {
 // 5.3.3 Relationship Type
 export type TOSCA_Relationship_Definition = TOSCA_Type_Definition_Commons & {
     properties?: {
-        [TOSCA_Property_Definition_Key: string]: TOSCA_Property_Definition
+        [propertyKey: TOSCA_Property_Name]: TOSCA_Property_Definition
     },
     attributes?: {
-        [TOSCA_Attribute_Definition_Key: string]: TOSCA_Attribute_Definition
+        [attributeKey: TOSCA_Attribute_Name]: TOSCA_Attribute_Definition
     },
     interfaces?: {
         [interfaceTypeKey: TOSCA_Interface_Type_Key]: TOSCA_Interface_Definition
@@ -225,10 +228,10 @@ export type TOSCA_Requirement_Definition = {
 // 5.3.1 Node Type
 export type TOSCA_Node_Definition = TOSCA_Type_Definition_Commons & {
     properties?: {
-        [TOSCA_Property_Definition_Key: string]: TOSCA_Property_Definition
+        [propertyKey: TOSCA_Property_Name]: TOSCA_Property_Definition
     },
     attributes?: {
-        [TOSCA_Attribute_Definition_Key: string]: TOSCA_Attribute_Definition
+        [attributeKey: TOSCA_Attribute_Name]: TOSCA_Attribute_Definition
     },
     capabilities?: {
         [capabilityTypeKey: TOSCA_Capability_Type_Key]: TOSCA_Capability_Definition
@@ -247,10 +250,10 @@ export type TOSCA_Node_Definition = TOSCA_Type_Definition_Commons & {
 // 5.6.1 Group Type
 export type TOSCA_Group_Type_Definition = TOSCA_Type_Definition_Commons & {
     properties?: {
-        [TOSCA_Property_Definition_Key: string]: TOSCA_Property_Definition
+        [propertyKey: TOSCA_Property_Name]: TOSCA_Property_Definition
     },
     attributes?: {
-        [TOSCA_Attribute_Definition_Key: string]: TOSCA_Attribute_Definition
+        [attributeKey: TOSCA_Attribute_Name]: TOSCA_Attribute_Definition
     },
     members?: TOSCA_Node_Type_Key[];
 }
@@ -258,11 +261,11 @@ export type TOSCA_Group_Type_Definition = TOSCA_Type_Definition_Commons & {
 // 5.6.3 Policy Type
 export type TOSCA_Policy_Type_Definition = TOSCA_Type_Definition_Commons & {
     properties?: {
-        [TOSCA_Property_Definition_Key: string]: TOSCA_Property_Definition
+        [propertyKey: TOSCA_Property_Name]: TOSCA_Property_Definition
     },
     targets?: (TOSCA_Node_Type_Key | TOSCA_Group_Type_Key)[],
     triggers?: {
-        [triggerKey: string]: TOSCA_Trigger_Definition
+        [triggerKey: TOSCA_Trigger_Name]: TOSCA_Trigger_Definition
     }
 
 }
@@ -275,12 +278,29 @@ export type TOSCA_Trigger_Definition = {
     action: TOSCA_Activity_Definition[]
 }
 
-
 // 5.6.6 Activity definitions
 export type TOSCA_Activity_Definition = {
-    delegate: string,
-    workflow?: string,
+    delegate: TOSCA_Workflow_Name | { workflow: TOSCA_Workflow_Name, inputs: { [parameterKey: TOSCA_Parameter_Name]: TOSCA_Parameter_Assignment } },
+    workflow?: TOSCA_Workflow_Name,
     inputs?: {
-        [parameterKey: string]: TOSCA_Parameter_Definition
+        [parameterKey: TOSCA_Parameter_Name]: TOSCA_Parameter_Assignment
     },
 }
+
+// 5.4.15 Function definitions
+export type TOSCA_Function_Definition = {
+    signatures: TOSCA_Function_Signature_Definition[],
+    description?: string,
+    metadata?: TOSCA_Metadata
+}
+
+// 5.4.15 Function definitions
+export type TOSCA_Function_Signature_Definition = {
+    arguments?: TOSCA_Schema_Definition[],
+    optional_arguments?: TOSCA_Schema_Definition[],
+    variadic?: boolean,
+    result?: TOSCA_Schema_Definition,
+    implementation?: TOSCA_Implementation_Definition
+}
+
+

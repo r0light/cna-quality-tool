@@ -1,4 +1,4 @@
-import { TOSCA_Artifact_Type_Key, TOSCA_Attribute_Name, TOSCA_Capability_Type_Key, TOSCA_Condition_Clause, TOSCA_Group_Template_Key, TOSCA_Group_Type_Key, TOSCA_Interface_Type_Key, TOSCA_Node_Template_Key, TOSCA_Node_Type_Key, TOSCA_Operation_Instance_Key, TOSCA_Parameter_Name, TOSCA_Policy_Type_Key, TOSCA_Property_Name, TOSCA_Relationship_Template_Key, TOSCA_Relationship_Type_Key, TOSCA_Repository_Definition_Key, TOSCA_Requirement_Instance_Key, TOSCA_Trigger_Type_Key, TOSCA_Validation_Clause, TOSCA_Workflow_Instance_Key, TOSCA_Workflow_Step_Definition_Key } from "./alias-types"
+import { TOSCA_Artifact_Type_Key, TOSCA_Attribute_Assignment, TOSCA_Attribute_Name, TOSCA_Capability_Type_Key, TOSCA_Condition_Clause, TOSCA_Function_Call, TOSCA_Group_Template_Key, TOSCA_Group_Type_Key, TOSCA_Interface_Type_Key, TOSCA_Node_Template_Key, TOSCA_Node_Type_Key, TOSCA_Operation_Name, TOSCA_Parameter_Assignment, TOSCA_Parameter_Name, TOSCA_Policy_Type_Key, TOSCA_Property_Assignment, TOSCA_Property_Name, TOSCA_Relationship_Template_Key, TOSCA_Relationship_Type_Key, TOSCA_Repository_Name, TOSCA_Requirement_Type_Key, TOSCA_Trigger_Type_Key, TOSCA_Validation_Clause, TOSCA_Workflow_Name, TOSCA_Workflow_Step_Name } from "./alias-types"
 import { TOSCA_Directive, TOSCA_Implementation_Definition, TOSCA_Metadata, TOSCA_Parameter_Definition, TOSCA_Relationship_Definition } from "./definition-types"
 
 // 5.2.6 Service template definition
@@ -16,22 +16,15 @@ export type TOSCA_Service_Template = {
     groups?: {
         [groupKey: TOSCA_Group_Template_Key]: TOSCA_Group_Definition
     },
-    policies?: TOSCA_Policy_Definition[],
+    policies?: TOSCA_Policy_Definition[], // should this also be an object with policy names? Standard is ambiguous
     outputs?: {
-        [outputKey: TOSCA_Parameter_Name]: any
+        [outputKey: TOSCA_Parameter_Name]: TOSCA_Parameter_Definition
     },
     substitution_mappings?: TOSCA_Substitution_Mapping,
     workflows?: {
-        [workflowKey: TOSCA_Workflow_Instance_Key]: TOSCA_Workflow_Definition
+        [workflowKey: TOSCA_Workflow_Name]: TOSCA_Workflow_Definition
     }
 }
-
-// 5.4.8
-export type TOSCA_Property_Assignment = any
-
-
-// 5.4.10 Attribute assignment
-export type TOSCA_Attribute_Assignment = any
 
 
 // 5.3.2 Node Template
@@ -47,7 +40,7 @@ export type TOSCA_Node_Template = {
         [attributeKey: TOSCA_Attribute_Name]: TOSCA_Attribute_Assignment
     },
     requirements?: {
-        [requirementKey: TOSCA_Requirement_Instance_Key]: TOSCA_Requirement_Assignment | TOSCA_Node_Template_Key | TOSCA_Relationship_Template_Key | TOSCA_Relationship_Type_Key
+        [requirementKey: TOSCA_Requirement_Type_Key]: TOSCA_Requirement_Assignment | TOSCA_Node_Template_Key | TOSCA_Relationship_Template_Key | TOSCA_Relationship_Type_Key
     }[],
     capabilities?: {
         [capabilityKey: TOSCA_Capability_Type_Key]: TOSCA_Capability_Assignment
@@ -92,7 +85,7 @@ export type TOSCA_Capability_Assignment = {
 // 5.3.6.3 Interface assignment
 export type TOSCA_Interface_Assignment = {
     inputs?: {
-        [parameterKey: TOSCA_Parameter_Name]: any
+        [parameterKey: TOSCA_Parameter_Name]: TOSCA_Parameter_Assignment
     },
     operations?: {
         [operationKey: string]: TOSCA_Operation_Assignment
@@ -106,7 +99,7 @@ export type TOSCA_Interface_Assignment = {
 export type TOSCA_Operation_Assignment = {
     implementation?: TOSCA_Implementation_Definition,
     inputs?: {
-        [parameterKey: TOSCA_Parameter_Name]: any
+        [parameterKey: TOSCA_Parameter_Name]: TOSCA_Parameter_Assignment
     },
     outputs?: {
         [parameterKey: TOSCA_Parameter_Name]: string
@@ -125,7 +118,7 @@ export type TOSCA_Notification_Assignment = {
 export type TOSCA_Artifact_Definition = {
     type: TOSCA_Artifact_Type_Key,
     file: string,
-    repository?: TOSCA_Repository_Definition_Key,
+    repository?: TOSCA_Repository_Name,
     description?: string,
     deploy_path?: string,
     artifact_version?: string,
@@ -201,11 +194,11 @@ export type TOSCA_Activity = TOSCA_Activity_Delegate |
     TOSCA_Activity_Inline
 
 // 5.6.6.1 Delegate workflow activity definition
-export type TOSCA_Activity_Delegate = { delegate: TOSCA_Workflow_Instance_Key } | {
+export type TOSCA_Activity_Delegate = { delegate: TOSCA_Workflow_Name } | {
     delegate: {
-        workflow?: TOSCA_Workflow_Instance_Key,
+        workflow?: TOSCA_Workflow_Name,
         inputs?: {
-            [parameterKey: TOSCA_Parameter_Name]: any
+            [parameterKey: TOSCA_Parameter_Name]: TOSCA_Parameter_Assignment
         }
     }
 }
@@ -216,11 +209,11 @@ export type TOSCA_Activity_SetState = {
 }
 
 // 5.6.6.3 Call operation activity definition
-export type TOSCA_Activity_Call = { call_operation: TOSCA_Operation_Instance_Key } | {
+export type TOSCA_Activity_Call = { call_operation: `${TOSCA_Interface_Type_Key}.${TOSCA_Operation_Name}`} | {
     call_operation: {
-        operation?: TOSCA_Operation_Instance_Key,
+        operation?: `${TOSCA_Interface_Type_Key}.${TOSCA_Operation_Name}`,
         inputs?: {
-            [parameterKey: TOSCA_Parameter_Name]: any
+            [parameterKey: TOSCA_Parameter_Name]: TOSCA_Parameter_Assignment
         }
     }
 }
@@ -230,12 +223,10 @@ export type TOSCA_Activity_Inline = { inline: string } | {
     inline: {
         workflow?: string,
         inputs?: {
-            [parameterKey: TOSCA_Parameter_Name]: any
+            [parameterKey: TOSCA_Parameter_Name]: TOSCA_Parameter_Assignment
         }
     }
 }
-
-
 
 // 5.5.1 Substitution mapping
 export type TOSCA_Substitution_Mapping = {
@@ -251,7 +242,7 @@ export type TOSCA_Substitution_Mapping = {
         [capabilityKey: TOSCA_Capability_Type_Key]: TOSCA_Capability_Mapping
     },
     requirements?: {
-        [requirementKey: TOSCA_Requirement_Instance_Key]: TOSCA_Requirement_Mapping
+        [requirementKey: TOSCA_Requirement_Type_Key]: TOSCA_Requirement_Mapping
     },
     interfaces?: {
         [interfaceKey: TOSCA_Interface_Type_Key]: TOSCA_Interface_Mapping
@@ -295,9 +286,8 @@ export type TOSCA_Requirement_Mapping = {
 
 // 5.5.6 Interface mapping
 export type TOSCA_Interface_Mapping = {
-    [operationKey: TOSCA_Operation_Instance_Key]: TOSCA_Workflow_Instance_Key
+    [operationKey: TOSCA_Operation_Name]: TOSCA_Workflow_Name
 }
-
 
 // 5.7.1 Imperative Workflow definition
 export type TOSCA_Workflow_Definition = {
@@ -308,7 +298,7 @@ export type TOSCA_Workflow_Definition = {
     },
     precondition?: TOSCA_Condition_Clause,
     steps?: {
-        [stepKey: TOSCA_Workflow_Step_Definition_Key]: TOSCA_Workflow_Step
+        [stepKey: TOSCA_Workflow_Step_Name]: TOSCA_Workflow_Step_Definition
     },
     implementation?: TOSCA_Implementation_Definition,
     outputs?: {
@@ -318,7 +308,7 @@ export type TOSCA_Workflow_Definition = {
 
 
 // 5.7.3 Workflow step definition
-export type TOSCA_Workflow_Step = {
+export type TOSCA_Workflow_Step_Definition = {
     target: TOSCA_Node_Template_Key | TOSCA_Group_Template_Key,
     target_relationship?: string,
     operation_host?: string,
