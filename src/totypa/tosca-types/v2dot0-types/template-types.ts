@@ -1,5 +1,5 @@
 import { TOSCA_Artifact_Type_Key, TOSCA_Attribute_Assignment, TOSCA_Attribute_Name, TOSCA_Capability_Type_Key, TOSCA_Condition_Clause, TOSCA_Function_Call, TOSCA_Group_Template_Key, TOSCA_Group_Type_Key, TOSCA_Interface_Type_Key, TOSCA_Node_Template_Key, TOSCA_Node_Type_Key, TOSCA_Operation_Name, TOSCA_Parameter_Assignment, TOSCA_Parameter_Name, TOSCA_Policy_Type_Key, TOSCA_Property_Assignment, TOSCA_Property_Name, TOSCA_Relationship_Template_Key, TOSCA_Relationship_Type_Key, TOSCA_Repository_Name, TOSCA_Requirement_Type_Key, TOSCA_Trigger_Type_Key, TOSCA_Validation_Clause, TOSCA_Workflow_Name, TOSCA_Workflow_Step_Name } from "./alias-types"
-import { TOSCA_Directive, TOSCA_Implementation_Definition, TOSCA_Metadata, TOSCA_Parameter_Definition, TOSCA_Relationship_Definition } from "./definition-types"
+import { TOSCA_Directive, TOSCA_Implementation_Definition, TOSCA_Metadata, TOSCA_Parameter_Definition, TOSCA_Relationship_Definition, TOSCA_Type_Definition_Commons } from "./definition-types"
 
 // 5.2.6 Service template definition
 export type TOSCA_Service_Template = {
@@ -281,6 +281,20 @@ export type TOSCA_Requirement_Mapping = {
         attributes?: {
             [attributeKey: TOSCA_Attribute_Name]: TOSCA_Attribute_Assignment
         },
+    }
+}
+
+// 5.3.6.2 Interface Definition
+export type TOSCA_Interface_Type_Definition =  {
+    type: TOSCA_Interface_Type_Key,
+    inputs?: {
+        [parameterKey: TOSCA_Parameter_Name]: TOSCA_Parameter_Definition
+    },
+    operations?: {
+        [operationKey: TOSCA_Operation_Name]: TOSCA_Operation_Definition
+    },
+    notifications?: {
+        [notificationKey: TOSCA_Notification_Name]: TOSCA_Notification_Definition
     }
 }
 
