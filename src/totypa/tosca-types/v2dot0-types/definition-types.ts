@@ -98,6 +98,22 @@ export type TOSCA_Property_Definition = string | number | boolean | {
     metadata?: TOSCA_Metadata
 }
 
+// 5.4.7.5 Property Refinement rules
+// string can be used when a fixed value is provided
+export type TOSCA_Property_Refinement = string | number | boolean | {
+    type?: string,
+    description?: string,
+    required?: boolean,
+    default?: any,
+    value?: any,
+    status?: TOSCA_Property_Status,
+    validation?: TOSCA_Validation_Clause,
+    key_schema?: TOSCA_Schema_Definition,
+    entry_schema?: TOSCA_Schema_Definition,
+    external_schema?: string,
+    metadata?: TOSCA_Metadata
+}
+
 // 5.4.7.3 Status values
 export type TOSCA_Property_Status = "supported" | "unsupported" | "experimental" | "deprecated"
 
@@ -105,6 +121,15 @@ export type TOSCA_Property_Status = "supported" | "unsupported" | "experimental"
 // 5.4.5 Schema definition
 export type TOSCA_Schema_Definition = {
     type: string,
+    description?: string,
+    validation?: TOSCA_Validation_Clause,
+    key_schema?: TOSCA_Schema_Definition,
+    entry_schema?: TOSCA_Schema_Definition
+}
+
+// 5.4.5.3 Refinement rules
+export type TOSCA_Schema_Refinement = {
+    type?: string,
     description?: string,
     validation?: TOSCA_Validation_Clause,
     key_schema?: TOSCA_Schema_Definition,
@@ -148,10 +173,39 @@ export type TOSCA_Capability_Definition = TOSCA_Capability_Type_Key | {
     valid_relationship_types?: string[]
 }
 
+// 5.3.5.2.3 Capability Refinement rules
+export type TOSCA_Capability_Refinement = {
+    type?: TOSCA_Capability_Type_Key,
+    description?: string,
+    properties?: {
+        [propertyKey: TOSCA_Property_Name]: TOSCA_Property_Definition
+    },
+    attributes?: {
+        [attributeKey: TOSCA_Attribute_Name]: TOSCA_Attribute_Definition
+    },
+    valid_source_node_types?: string[],
+    valid_relationship_types?: string[]
+}
+
 
 // 5.4.9 Attribute definition
 export type TOSCA_Attribute_Definition = {
     type: string,
+    description?: string,
+    default?: any,
+    value?: any,
+    status?: TOSCA_Property_Status,
+    validation?: TOSCA_Validation_Clause,
+    key_schema?: TOSCA_Schema_Definition,
+    entry_schema?: TOSCA_Schema_Definition,
+    metadata?: {
+        [metadataKey: string]: string
+    }
+}
+
+// 5.4.9.4 Attribute Refinement rules
+export type TOSCA_Attribute_Refinement = {
+    type?: string,
     description?: string,
     default?: any,
     value?: any,
@@ -179,7 +233,7 @@ export type TOSCA_Interface_Type_Definition = TOSCA_Type_Definition_Commons &  {
 }
 
 // 5.3.6.2 Interface Definition
-export type TOSCA_Interface_Definition =  {
+export type TOSCA_Interface_Definition = {
     type: TOSCA_Interface_Type_Key,
     description?: string
     inputs?: {
@@ -195,7 +249,7 @@ export type TOSCA_Interface_Definition =  {
 
 
 // 5.4.11 Parameter definition
-export type TOSCA_Parameter_Definition = {
+export type TOSCA_Parameter_Definition = TOSCA_Property_Definition & {
     type?: string,
     value?: any,
     mapping?: string[]
@@ -256,19 +310,29 @@ export type TOSCA_Requirement_Definition = {
     count_range?: (string| number)[],
 }
 
+// 5.3.5.5.3 Requirement Refinement rules
+export type TOSCA_Requirement_Refinement = {
+    description?: string,
+    capability?: TOSCA_Capability_Type_Key,
+    node?: TOSCA_Node_Type_Key,
+    relationship?: TOSCA_Relationship_Type_Key,
+    node_filter?: TOSCA_Condition_Clause,
+    count_range?: (string| number)[],
+}
+
 // 5.3.1 Node Type
 export type TOSCA_Node_Definition = TOSCA_Type_Definition_Commons & {
     properties?: {
-        [propertyKey: TOSCA_Property_Name]: TOSCA_Property_Definition
+        [propertyKey: TOSCA_Property_Name]: TOSCA_Property_Definition | TOSCA_Property_Refinement
     },
     attributes?: {
-        [attributeKey: TOSCA_Attribute_Name]: TOSCA_Attribute_Definition
+        [attributeKey: TOSCA_Attribute_Name]: TOSCA_Attribute_Definition | TOSCA_Attribute_Refinement
     },
     capabilities?: {
-        [capabilityTypeKey: TOSCA_Capability_Type_Key]: TOSCA_Capability_Definition
+        [capabilityTypeKey: TOSCA_Capability_Type_Key]: TOSCA_Capability_Definition | TOSCA_Capability_Refinement
     },
     requirements?: {
-        [requirementTypeKey: TOSCA_Requirement_Type_Key]: TOSCA_Requirement_Definition
+        [requirementTypeKey: TOSCA_Requirement_Type_Key]: TOSCA_Requirement_Definition | TOSCA_Requirement_Refinement
     }[]
     interfaces?: {
         [interfaceTypeKey: TOSCA_Interface_Type_Key]: TOSCA_Interface_Definition

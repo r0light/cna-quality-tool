@@ -284,19 +284,7 @@ export type TOSCA_Requirement_Mapping = {
     }
 }
 
-// 5.3.6.2 Interface Definition
-export type TOSCA_Interface_Type_Definition =  {
-    type: TOSCA_Interface_Type_Key,
-    inputs?: {
-        [parameterKey: TOSCA_Parameter_Name]: TOSCA_Parameter_Definition
-    },
-    operations?: {
-        [operationKey: TOSCA_Operation_Name]: TOSCA_Operation_Definition
-    },
-    notifications?: {
-        [notificationKey: TOSCA_Notification_Name]: TOSCA_Notification_Definition
-    }
-}
+
 
 // 5.5.6 Interface mapping
 export type TOSCA_Interface_Mapping = {
