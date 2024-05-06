@@ -7,6 +7,7 @@ import { TwoWayKeyTypeMap } from '../TwoWayKeyTypeMap.js';
 import { TOSCA_Capability_Type_Key, TOSCA_Property_Name } from '../../tosca-types/v2dot0-types/alias-types.js';
 import { TOSCA_Attribute_Definition, TOSCA_Capability_Definition, TOSCA_File, TOSCA_Node_Definition, TOSCA_Property_Definition, TOSCA_Relationship_Definition } from '@/totypa/tosca-types/v2dot0-types/definition-types.js';
 import { TOSCA_Relationship_Template } from '@/totypa/tosca-types/v1dot3-types/template-types.js';
+import { TwoWayKeyTypeDefinitionMap } from '../TwoWayKeyTypeDefinitionMap.js';
 
 const YAML_KEY_PATTERN = new RegExp(/\.([A-z])/g);
 const MATCH_FIRST_CHARACTER = new RegExp(/^./g);
@@ -61,6 +62,18 @@ export async function startParsing() {
 
 function parseAllProfiles(profilesFolder: string): Promise<Promise<ProfileInfo>[]> {
     return readdir(profilesFolder).then(entries => {
+
+        let typeMaps = {
+            artifactTypesMap: new TwoWayKeyTypeDefinitionMap(),
+            dataTypesMap: new TwoWayKeyTypeDefinitionMap(),
+            capabilityTypesMap: new TwoWayKeyTypeDefinitionMap(),
+            interfaceTypesMap: new TwoWayKeyTypeDefinitionMap(),
+            relationshipTypesMap: new TwoWayKeyTypeDefinitionMap(),
+            nodeTypesMap: new TwoWayKeyTypeDefinitionMap(),
+            groupTypesMap: new TwoWayKeyTypeDefinitionMap(),
+            policyTypesMap: new TwoWayKeyTypeDefinitionMap(),
+        }
+
         return entries.sort((entryA, entryB) => {
             // make sure the tosca simple profile is always parsed first so that types are available
 
@@ -75,7 +88,7 @@ function parseAllProfiles(profilesFolder: string): Promise<Promise<ProfileInfo>[
             const fullDirectoryPath = path.join(profilesFolder, entry)
             return fs.promises.lstat(fullDirectoryPath).then(stats => {
                 if (stats.isDirectory) {
-                    return generateFromProfile(fullDirectoryPath).then(profile => {
+                    return generateFromProfile(fullDirectoryPath, typeMaps).then(profile => {
                         let generatedName = entry.replace(/\s/g, "").replace(/[\.-]/g, "_");
                         return {
                             jsonFileName: `${generatedName}.ts`,
@@ -90,7 +103,7 @@ function parseAllProfiles(profilesFolder: string): Promise<Promise<ProfileInfo>[
     });
 }
 
-async function generateFromProfile(profileDirectory: string): Promise<TOSCA_File> {
+async function generateFromProfile(profileDirectory: string, typeMaps: {[mapName: string]: TwoWayKeyTypeDefinitionMap}): Promise<TOSCA_File> {
 
     const profile: TOSCA_File = {
         tosca_definitions_version: "tosca_2_0",
@@ -131,7 +144,7 @@ async function generateFromProfile(profileDirectory: string): Promise<TOSCA_File
                 profile.metadata = profileDocument.metadata;
                 profile.description = profileDocument.description;
             }
-            
+
             if (profileDocument.dsl_definitions) {
                 for (let [key, value] of Object.entries(profileDocument.dsl_definitions)) {
                     profile.dsl_definitions[key] = value;
@@ -146,48 +159,56 @@ async function generateFromProfile(profileDirectory: string): Promise<TOSCA_File
 
             if (profileDocument.artifact_types) {
                 for (let [key, value] of Object.entries(profileDocument.artifact_types)) {
+                    typeMaps.artifactTypesMap.add(value, key);
                     profile.artifact_types[key] = value;
                 }
             }
 
             if (profileDocument.data_types) {
                 for (let [key, value] of Object.entries(profileDocument.data_types)) {
+                    typeMaps.dataTypesMap.add(value, key);
                     profile.data_types[key] = value;
                 }
             }
 
             if (profileDocument.capability_types) {
                 for (let [key, value] of Object.entries(profileDocument.capability_types)) {
+                    typeMaps.capabilityTypesMap.add(value, key);
                     profile.capability_types[key] = value;
                 }
             }
 
             if (profileDocument.interface_types) {
                 for (let [key, value] of Object.entries(profileDocument.interface_types)) {
+                    typeMaps.interfaceTypesMap.add(value, key);
                     profile.interface_types[key] = value;
                 }
             }
 
             if (profileDocument.relationship_types) {
                 for (let [key, value] of Object.entries(profileDocument.relationship_types)) {
+                    typeMaps.relationshipTypesMap.add(value, key);
                     profile.relationship_types[key] = value;
                 }
             }
 
             if (profileDocument.node_types) {
                 for (let [key, value] of Object.entries(profileDocument.node_types)) {
+                    typeMaps.nodeTypesMap.add(value, key);
                     profile.node_types[key] = value;
                 }
             }
 
             if (profileDocument.group_types) {
                 for (let [key, value] of Object.entries(profileDocument.group_types)) {
+                    typeMaps.groupTypesMap.add(value, key);
                     profile.group_types[key] = value;
                 }
             }
 
             if (profileDocument.policy_types) {
                 for (let [key, value] of Object.entries(profileDocument.policy_types)) {
+                    typeMaps.policyTypesMap.add(value, key)
                     profile.policy_types[key] = value;
                 }
             }
