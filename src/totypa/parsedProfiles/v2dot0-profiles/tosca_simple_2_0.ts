@@ -228,6 +228,184 @@ export const tosca_simple_2_0: TOSCA_File = {
     },
     "Endpoint": {
       "description": "The Endpoint capability is the default TOSCA type for defining a network endpoint capability.",
+      "attributes": {
+        "ip_address": {
+          "description": "The Endpoint's IP address as propagated up by the associated node’s host (Compute) container.",
+          "type": "string"
+        }
+      },
+      "properties": {
+        "protocol": {
+          "description": "The name of the (Layer 4 through 7) protocol that the endpoint accepts.",
+          "type": "string",
+          "default": "tcp"
+        },
+        "port": {
+          "description": "The optional port of the endpoint.",
+          "type": "PortDef",
+          "required": false
+        },
+        "secure": {
+          "description": "If set, the endpoint accepts only secure connections (using credentials supplied on the ConnectsTo relationship).",
+          "type": "boolean",
+          "required": false,
+          "default": false
+        },
+        "url_path": {
+          "description": "The optional URL path of the endpoint’s address if applicable for the protocol.",
+          "type": "string",
+          "required": false
+        },
+        "port_name": {
+          "description": "The optional name (or ID) of the network port to which this endpoint should be bound.",
+          "type": "string",
+          "required": false
+        },
+        "network_name": {
+          "description": "The optional name (or ID) of the network to which this endpoint should be bound.",
+          "type": "string",
+          "required": false,
+          "default": "PRIVATE"
+        },
+        "initiator": {
+          "description": "The optional indicator of the direction of the connection.",
+          "type": "string",
+          "default": "source"
+        },
+        "ports": {
+          "description": "The optional map of ports the Endpoint supports (if more than one).",
+          "type": "map",
+          "required": false,
+          "entry_schema": {
+            "type": "PortSpec"
+          }
+        }
+      }
+    },
+    "Endpoint.Public": {
+      "description": "The Endpoint.Public capability represents a public endpoint that is accessible from the general internet (and its public IP address ranges).",
+      "attributes": {
+        "ip_address": {
+          "description": "The Endpoint's IP address as propagated up by the associated node’s host (Compute) container.",
+          "type": "string"
+        }
+      },
+      "properties": {
+        "protocol": {
+          "description": "The name of the (Layer 4 through 7) protocol that the endpoint accepts.",
+          "type": "string",
+          "default": "tcp"
+        },
+        "port": {
+          "description": "The optional port of the endpoint.",
+          "type": "PortDef",
+          "required": false
+        },
+        "secure": {
+          "description": "If set, the endpoint accepts only secure connections (using credentials supplied on the ConnectsTo relationship).",
+          "type": "boolean",
+          "required": false,
+          "default": false
+        },
+        "url_path": {
+          "description": "The optional URL path of the endpoint’s address if applicable for the protocol.",
+          "type": "string",
+          "required": false
+        },
+        "port_name": {
+          "description": "The optional name (or ID) of the network port to which this endpoint should be bound.",
+          "type": "string",
+          "required": false
+        },
+        "network_name": "PUBLIC",
+        "initiator": {
+          "description": "The optional indicator of the direction of the connection.",
+          "type": "string",
+          "default": "source"
+        },
+        "ports": {
+          "description": "The optional map of ports the Endpoint supports (if more than one).",
+          "type": "map",
+          "required": false,
+          "entry_schema": {
+            "type": "PortSpec"
+          }
+        },
+        "floating": {
+          "description": "Indicates that the public address should be allocated from the pool of floating IPs that are associated with the PUBLIC network.\n",
+          "type": "boolean",
+          "default": false,
+          "status": "experimental"
+        },
+        "dns_name": {
+          "description": "The optional name to register with DNS.",
+          "type": "string",
+          "required": false,
+          "status": "experimental"
+        }
+      },
+      "derived_from": "Endpoint"
+    },
+    "Endpoint.Admin": {
+      "description": "The Endpoint.Admin capability is the default TOSCA type for defining a specialized administrator endpoint capability.",
+      "attributes": {
+        "ip_address": {
+          "description": "The Endpoint's IP address as propagated up by the associated node’s host (Compute) container.",
+          "type": "string"
+        }
+      },
+      "properties": {
+        "protocol": {
+          "description": "The name of the (Layer 4 through 7) protocol that the endpoint accepts.",
+          "type": "string",
+          "default": "tcp"
+        },
+        "port": {
+          "description": "The optional port of the endpoint.",
+          "type": "PortDef",
+          "required": false
+        },
+        "secure": true,
+        "url_path": {
+          "description": "The optional URL path of the endpoint’s address if applicable for the protocol.",
+          "type": "string",
+          "required": false
+        },
+        "port_name": {
+          "description": "The optional name (or ID) of the network port to which this endpoint should be bound.",
+          "type": "string",
+          "required": false
+        },
+        "network_name": {
+          "description": "The optional name (or ID) of the network to which this endpoint should be bound.",
+          "type": "string",
+          "required": false,
+          "default": "PRIVATE"
+        },
+        "initiator": {
+          "description": "The optional indicator of the direction of the connection.",
+          "type": "string",
+          "default": "source"
+        },
+        "ports": {
+          "description": "The optional map of ports the Endpoint supports (if more than one).",
+          "type": "map",
+          "required": false,
+          "entry_schema": {
+            "type": "PortSpec"
+          }
+        }
+      },
+      "derived_from": "Endpoint"
+    },
+    "Endpoint.Database": {
+      "description": "The Endpoint.Admin capability is the default TOSCA type for defining a specialized database endpoint capability.",
+      "attributes": {
+        "ip_address": {
+          "description": "The Endpoint's IP address as propagated up by the associated node’s host (Compute) container.",
+          "type": "string"
+        }
+      },
       "properties": {
         "protocol": {
           "description": "The name of the (Layer 4 through 7) protocol that the endpoint accepts.",
@@ -275,41 +453,6 @@ export const tosca_simple_2_0: TOSCA_File = {
           }
         }
       },
-      "attributes": {
-        "ip_address": {
-          "description": "The Endpoint's IP address as propagated up by the associated node’s host (Compute) container.",
-          "type": "string"
-        }
-      }
-    },
-    "Endpoint.Public": {
-      "description": "The Endpoint.Public capability represents a public endpoint that is accessible from the general internet (and its public IP address ranges).",
-      "derived_from": "Endpoint",
-      "properties": {
-        "network_name": "PUBLIC",
-        "floating": {
-          "description": "Indicates that the public address should be allocated from the pool of floating IPs that are associated with the PUBLIC network.\n",
-          "type": "boolean",
-          "default": false,
-          "status": "experimental"
-        },
-        "dns_name": {
-          "description": "The optional name to register with DNS.",
-          "type": "string",
-          "required": false,
-          "status": "experimental"
-        }
-      }
-    },
-    "Endpoint.Admin": {
-      "description": "The Endpoint.Admin capability is the default TOSCA type for defining a specialized administrator endpoint capability.",
-      "derived_from": "Endpoint",
-      "properties": {
-        "secure": true
-      }
-    },
-    "Endpoint.Database": {
-      "description": "The Endpoint.Admin capability is the default TOSCA type for defining a specialized database endpoint capability.",
       "derived_from": "Endpoint"
     },
     "Attachment": {
@@ -437,6 +580,11 @@ export const tosca_simple_2_0: TOSCA_File = {
     },
     "DependsOn": {
       "description": "The DependsOn type represents a general dependency relationship between two nodes.",
+      "interfaces": {
+        "Configure": {
+          "type": "Relationship.Configure"
+        }
+      },
       "derived_from": "Root",
       "valid_target_node_types": [
         "Node"
@@ -444,6 +592,11 @@ export const tosca_simple_2_0: TOSCA_File = {
     },
     "HostedOn": {
       "description": "The HostedOn type represents a hosting relationship between two nodes.",
+      "interfaces": {
+        "Configure": {
+          "type": "Relationship.Configure"
+        }
+      },
       "derived_from": "Root",
       "valid_target_node_types": [
         "Container"
@@ -451,24 +604,31 @@ export const tosca_simple_2_0: TOSCA_File = {
     },
     "ConnectsTo": {
       "description": "The ConnectsTo type represents a network connection relationship between two nodes.",
+      "interfaces": {
+        "Configure": {
+          "type": "Relationship.Configure"
+        }
+      },
       "derived_from": "Root",
-      "valid_target_node_types": [
-        "Endpoint"
-      ],
       "properties": {
         "credential": {
           "description": "The security credential to present to the target endpoint for either authentication or authorization purposes.",
           "type": "Credential",
           "required": false
         }
-      }
+      },
+      "valid_target_node_types": [
+        "Endpoint"
+      ]
     },
     "AttachesTo": {
       "description": "The AttachesTo type represents an attachment relationship between two nodes (e.g. for attaching a storage node to a Compute node).",
+      "interfaces": {
+        "Configure": {
+          "type": "Relationship.Configure"
+        }
+      },
       "derived_from": "Root",
-      "valid_target_node_types": [
-        "Attachment"
-      ],
       "properties": {
         "location": {
           "description": "The relative location (e.g., mount point on the file system) that provides the root location to address the attached node.",
@@ -479,25 +639,52 @@ export const tosca_simple_2_0: TOSCA_File = {
           "type": "string",
           "required": false
         }
-      }
+      },
+      "valid_target_node_types": [
+        "Attachment"
+      ]
     },
     "LinksTo": {
       "description": "The LinksTo type represents an association relationship between Port and Network node types.",
+      "interfaces": {
+        "Configure": {
+          "type": "Relationship.Configure"
+        }
+      },
       "derived_from": "DependsOn",
       "valid_target_node_types": [
+        "Node",
         "Linkable"
       ]
     },
     "BindsTo": {
       "description": "The BindsTo type represents an association relationship between Port and Compute node types.",
+      "interfaces": {
+        "Configure": {
+          "type": "Relationship.Configure"
+        }
+      },
       "derived_from": "DependsOn",
       "valid_target_node_types": [
+        "Node",
         "Bindable"
       ]
     },
     "RoutesTo": {
       "description": "The RoutesTo type represents an intentional network routing between two Endpoints in different networks.",
+      "interfaces": {
+        "Configure": {
+          "type": "Relationship.Configure"
+        }
+      },
       "derived_from": "ConnectsTo",
+      "properties": {
+        "credential": {
+          "description": "The security credential to present to the target endpoint for either authentication or authorization purposes.",
+          "type": "Credential",
+          "required": false
+        }
+      },
       "valid_target_node_types": [
         "Endpoint"
       ]
@@ -537,18 +724,46 @@ export const tosca_simple_2_0: TOSCA_File = {
     },
     "Abstract.Compute": {
       "description": "The TOSCA Abstract.Compute node represents an abstract compute resource without any requirements on storage or network resources.",
-      "derived_from": "Root",
+      "attributes": {
+        "state": {
+          "type": "string"
+        }
+      },
       "capabilities": {
+        "feature": {
+          "type": "Node"
+        },
         "host": {
           "type": "Compute",
           "valid_source_node_types": []
         }
-      }
+      },
+      "requirements": [
+        {
+          "dependency": {
+            "capability": "Node",
+            "node": "Root",
+            "relationship": "DependsOn",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
+        }
+      ],
+      "interfaces": {
+        "Standard": {
+          "type": "Lifecycle.Standard"
+        }
+      },
+      "derived_from": "Root"
     },
     "Compute": {
       "description": "The TOSCA Compute node represents one or more processors of software applications or services along with other essential local resources.  Collectively, the resources represented by a compute node can logically be viewed as a (real or virtual) “server”.\n",
-      "derived_from": "Abstract.Compute",
       "attributes": {
+        "state": {
+          "type": "string"
+        },
         "private_address": {
           "description": "The primary private IP address assigned by the cloud provider that applications may use to access the Compute node.\n",
           "type": "string"
@@ -572,20 +787,10 @@ export const tosca_simple_2_0: TOSCA_File = {
           }
         }
       },
-      "requirements": [
-        {
-          "local_storage": {
-            "capability": "Attachment",
-            "node": "Storage.BlockStorage",
-            "relationship": "AttachesTo",
-            "count_range": [
-              0,
-              "UNBOUNDED"
-            ]
-          }
-        }
-      ],
       "capabilities": {
+        "feature": {
+          "type": "Node"
+        },
         "host": {
           "type": "Compute",
           "valid_source_node_types": [
@@ -604,10 +809,79 @@ export const tosca_simple_2_0: TOSCA_File = {
         "binding": {
           "type": "Bindable"
         }
-      }
+      },
+      "requirements": [
+        {
+          "dependency": {
+            "capability": "Node",
+            "node": "Root",
+            "relationship": "DependsOn",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
+        },
+        {
+          "local_storage": {
+            "capability": "Attachment",
+            "node": "Storage.BlockStorage",
+            "relationship": "AttachesTo",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
+        }
+      ],
+      "interfaces": {
+        "Standard": {
+          "type": "Lifecycle.Standard"
+        }
+      },
+      "derived_from": "Abstract.Compute"
     },
     "SoftwareComponent": {
       "description": "The TOSCA SoftwareComponent node represents a generic software component that can be managed and run by a TOSCA compute node.\n",
+      "attributes": {
+        "state": {
+          "type": "string"
+        }
+      },
+      "capabilities": {
+        "feature": {
+          "type": "Node"
+        }
+      },
+      "requirements": [
+        {
+          "dependency": {
+            "capability": "Node",
+            "node": "Root",
+            "relationship": "DependsOn",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
+        },
+        {
+          "host": {
+            "capability": "Compute",
+            "node": "Compute",
+            "relationship": "HostedOn",
+            "count_range": [
+              0,
+              1
+            ]
+          }
+        }
+      ],
+      "interfaces": {
+        "Standard": {
+          "type": "Lifecycle.Standard"
+        }
+      },
       "derived_from": "Root",
       "properties": {
         "component_version": {
@@ -620,25 +894,19 @@ export const tosca_simple_2_0: TOSCA_File = {
           "type": "Credential",
           "required": false
         }
-      },
-      "requirements": [
-        {
-          "host": {
-            "capability": "Compute",
-            "node": "Compute",
-            "relationship": "HostedOn",
-            "count_range": [
-              0,
-              1
-            ]
-          }
-        }
-      ]
+      }
     },
     "WebServer": {
       "description": "The TOSCA WebServer Node Type represents an abstract software component or service that is capable of hosting and providing management operations for one or more WebApplication nodes.",
-      "derived_from": "SoftwareComponent",
+      "attributes": {
+        "state": {
+          "type": "string"
+        }
+      },
       "capabilities": {
+        "feature": {
+          "type": "Node"
+        },
         "data_endpoint": {
           "description": "Private layer 4 endpoints.",
           "type": "Endpoint"
@@ -650,22 +918,75 @@ export const tosca_simple_2_0: TOSCA_File = {
             "WebApplication"
           ]
         }
+      },
+      "requirements": [
+        {
+          "dependency": {
+            "capability": "Node",
+            "node": "Root",
+            "relationship": "DependsOn",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
+        },
+        {
+          "host": {
+            "capability": "Compute",
+            "node": "Compute",
+            "relationship": "HostedOn",
+            "count_range": [
+              0,
+              1
+            ]
+          }
+        }
+      ],
+      "interfaces": {
+        "Standard": {
+          "type": "Lifecycle.Standard"
+        }
+      },
+      "derived_from": "SoftwareComponent",
+      "properties": {
+        "component_version": {
+          "description": "Domain-specific software component version.\n",
+          "type": "version",
+          "required": false
+        },
+        "admin_credential": {
+          "description": "The optional credential that can be used to authenticate to the software component.",
+          "type": "Credential",
+          "required": false
+        }
       }
     },
     "WebApplication": {
       "description": "The TOSCA WebApplication node represents a software application that can be managed and run by a TOSCA WebServer node.  Specific types of web applications such as Java, etc. could be derived from this type.",
-      "derived_from": "Root",
-      "properties": {
-        "context_root": {
-          "description": "The web application’s context root which designates the application’s URL path within the web server on which it is hosted.",
-          "type": "string",
-          "required": false
+      "attributes": {
+        "state": {
+          "type": "string"
         }
       },
       "capabilities": {
+        "feature": {
+          "type": "Node"
+        },
         "app_endpoint": "Endpoint"
       },
       "requirements": [
+        {
+          "dependency": {
+            "capability": "Node",
+            "node": "Root",
+            "relationship": "DependsOn",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
+        },
         {
           "host": {
             "capability": "Compute",
@@ -673,12 +994,80 @@ export const tosca_simple_2_0: TOSCA_File = {
             "relationship": "HostedOn"
           }
         }
-      ]
+      ],
+      "interfaces": {
+        "Standard": {
+          "type": "Lifecycle.Standard"
+        }
+      },
+      "derived_from": "Root",
+      "properties": {
+        "context_root": {
+          "description": "The web application’s context root which designates the application’s URL path within the web server on which it is hosted.",
+          "type": "string",
+          "required": false
+        }
+      }
     },
     "DBMS": {
       "description": "The TOSCA DBMS node represents a typical relational SQL Database Management System software component or service.\n",
+      "attributes": {
+        "state": {
+          "type": "string"
+        }
+      },
+      "capabilities": {
+        "feature": {
+          "type": "Node"
+        },
+        "host": {
+          "type": "Compute",
+          "valid_source_node_types": [
+            "Database"
+          ]
+        }
+      },
+      "requirements": [
+        {
+          "dependency": {
+            "capability": "Node",
+            "node": "Root",
+            "relationship": "DependsOn",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
+        },
+        {
+          "host": {
+            "capability": "Compute",
+            "node": "Compute",
+            "relationship": "HostedOn",
+            "count_range": [
+              0,
+              1
+            ]
+          }
+        }
+      ],
+      "interfaces": {
+        "Standard": {
+          "type": "Lifecycle.Standard"
+        }
+      },
       "derived_from": "SoftwareComponent",
       "properties": {
+        "component_version": {
+          "description": "Domain-specific software component version.\n",
+          "type": "version",
+          "required": false
+        },
+        "admin_credential": {
+          "description": "The optional credential that can be used to authenticate to the software component.",
+          "type": "Credential",
+          "required": false
+        },
         "root_password": {
           "type": "string",
           "required": false,
@@ -689,18 +1078,48 @@ export const tosca_simple_2_0: TOSCA_File = {
           "required": false,
           "description": "The port on which the DBMS service will listen for data and requests.\n"
         }
-      },
-      "capabilities": {
-        "host": {
-          "type": "Compute",
-          "valid_source_node_types": [
-            "Database"
-          ]
-        }
       }
     },
     "Database": {
       "description": "The TOSCA Database node represents a logical database that can be managed and hosted by a TOSCA DBMS node.\n",
+      "attributes": {
+        "state": {
+          "type": "string"
+        }
+      },
+      "capabilities": {
+        "feature": {
+          "type": "Node"
+        },
+        "database_endpoint": {
+          "type": "Endpoint.Database"
+        }
+      },
+      "requirements": [
+        {
+          "dependency": {
+            "capability": "Node",
+            "node": "Root",
+            "relationship": "DependsOn",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
+        },
+        {
+          "host": {
+            "capability": "Compute",
+            "node": "DBMS",
+            "relationship": "HostedOn"
+          }
+        }
+      ],
+      "interfaces": {
+        "Standard": {
+          "type": "Lifecycle.Standard"
+        }
+      },
       "derived_from": "Root",
       "properties": {
         "name": {
@@ -721,24 +1140,38 @@ export const tosca_simple_2_0: TOSCA_File = {
           "description": "The password for the DB user account.\n",
           "required": false
         }
-      },
-      "requirements": [
-        {
-          "host": {
-            "capability": "Compute",
-            "node": "DBMS",
-            "relationship": "HostedOn"
-          }
-        }
-      ],
-      "capabilities": {
-        "database_endpoint": {
-          "type": "Endpoint.Database"
-        }
       }
     },
     "Abstract.Storage": {
       "description": "The TOSCA Abstract.Storage node represents an abstract storage resource without any requirements on compute or network resources.",
+      "attributes": {
+        "state": {
+          "type": "string"
+        }
+      },
+      "capabilities": {
+        "feature": {
+          "type": "Node"
+        }
+      },
+      "requirements": [
+        {
+          "dependency": {
+            "capability": "Node",
+            "node": "Root",
+            "relationship": "DependsOn",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
+        }
+      ],
+      "interfaces": {
+        "Standard": {
+          "type": "Lifecycle.Standard"
+        }
+      },
       "derived_from": "Root",
       "properties": {
         "size": {
@@ -748,8 +1181,42 @@ export const tosca_simple_2_0: TOSCA_File = {
     },
     "Storage.ObjectStorage": {
       "description": "The TOSCA ObjectStorage node represents storage that provides the ability to store data as objects (or BLOBs of data) without consideration for the underlying filesystem or devices.\n",
+      "attributes": {
+        "state": {
+          "type": "string"
+        }
+      },
+      "capabilities": {
+        "feature": {
+          "type": "Node"
+        },
+        "storage_endpoint": {
+          "type": "Endpoint"
+        }
+      },
+      "requirements": [
+        {
+          "dependency": {
+            "capability": "Node",
+            "node": "Root",
+            "relationship": "DependsOn",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
+        }
+      ],
+      "interfaces": {
+        "Standard": {
+          "type": "Lifecycle.Standard"
+        }
+      },
       "derived_from": "Abstract.Storage",
       "properties": {
+        "size": {
+          "type": "scalar-unit.size"
+        },
         "name": {
           "description": "The logical name of the object store (or container).\n",
           "type": "string"
@@ -758,18 +1225,45 @@ export const tosca_simple_2_0: TOSCA_File = {
           "description": "The requested maximum storage size.\n",
           "type": "scalar-unit.size"
         }
-      },
-      "capabilities": {
-        "storage_endpoint": {
-          "type": "Endpoint"
-        }
       }
     },
     "Storage.BlockStorage": {
       "description": "The TOSCA BlockStorage node represents a server-local block storage device (i.e., not shared) offering evenly sized blocks of data from which raw storage volumes can be created.\n",
+      "attributes": {
+        "state": {
+          "type": "string"
+        }
+      },
+      "capabilities": {
+        "feature": {
+          "type": "Node"
+        },
+        "attachment": {
+          "type": "Attachment"
+        }
+      },
+      "requirements": [
+        {
+          "dependency": {
+            "capability": "Node",
+            "node": "Root",
+            "relationship": "DependsOn",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
+        }
+      ],
+      "interfaces": {
+        "Standard": {
+          "type": "Lifecycle.Standard"
+        }
+      },
       "derived_from": "Abstract.Storage",
       "properties": {
         "size": {
+          "type": "scalar-unit.size",
           "description": "The requested storage size. Required when an existing volume_id is not provided. If volume_id is provided, size is ignored."
         },
         "volume_id": {
@@ -782,29 +1276,93 @@ export const tosca_simple_2_0: TOSCA_File = {
           "type": "string",
           "required": false
         }
-      },
-      "capabilities": {
-        "attachment": {
-          "type": "Attachment"
-        }
       }
     },
     "Container.Runtime": {
       "description": "The TOSCA Container Runtime node represents operating system-level virtualization technology used to run multiple application services on a single Compute host.\n",
-      "derived_from": "SoftwareComponent",
+      "attributes": {
+        "state": {
+          "type": "string"
+        }
+      },
       "capabilities": {
+        "feature": {
+          "type": "Node"
+        },
         "host": {
           "type": "Compute"
         },
         "scalable": {
           "type": "Scalable"
         }
+      },
+      "requirements": [
+        {
+          "dependency": {
+            "capability": "Node",
+            "node": "Root",
+            "relationship": "DependsOn",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
+        },
+        {
+          "host": {
+            "capability": "Compute",
+            "node": "Compute",
+            "relationship": "HostedOn",
+            "count_range": [
+              0,
+              1
+            ]
+          }
+        }
+      ],
+      "interfaces": {
+        "Standard": {
+          "type": "Lifecycle.Standard"
+        }
+      },
+      "derived_from": "SoftwareComponent",
+      "properties": {
+        "component_version": {
+          "description": "Domain-specific software component version.\n",
+          "type": "version",
+          "required": false
+        },
+        "admin_credential": {
+          "description": "The optional credential that can be used to authenticate to the software component.",
+          "type": "Credential",
+          "required": false
+        }
       }
     },
     "Container.Application": {
       "description": "The TOSCA Container Application node represents an application that requires Container-level virtualization technology.\n",
-      "derived_from": "Root",
+      "attributes": {
+        "state": {
+          "type": "string"
+        }
+      },
+      "capabilities": {
+        "feature": {
+          "type": "Node"
+        }
+      },
       "requirements": [
+        {
+          "dependency": {
+            "capability": "Node",
+            "node": "Root",
+            "relationship": "DependsOn",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
+        },
         {
           "host": {
             "capability": "Compute",
@@ -812,10 +1370,47 @@ export const tosca_simple_2_0: TOSCA_File = {
             "relationship": "HostedOn"
           }
         }
-      ]
+      ],
+      "interfaces": {
+        "Standard": {
+          "type": "Lifecycle.Standard"
+        }
+      },
+      "derived_from": "Root"
     },
     "Network": {
       "description": "The TOSCA Network node represents a simple, logical network service.\n",
+      "attributes": {
+        "state": {
+          "type": "string"
+        }
+      },
+      "capabilities": {
+        "feature": {
+          "type": "Node"
+        },
+        "link": {
+          "type": "Linkable"
+        }
+      },
+      "requirements": [
+        {
+          "dependency": {
+            "capability": "Node",
+            "node": "Root",
+            "relationship": "DependsOn",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
+        }
+      ],
+      "interfaces": {
+        "Standard": {
+          "type": "Lifecycle.Standard"
+        }
+      },
       "derived_from": "Root",
       "properties": {
         "ip_version": {
@@ -874,15 +1469,52 @@ export const tosca_simple_2_0: TOSCA_File = {
           "type": "boolean",
           "default": false
         }
-      },
-      "capabilities": {
-        "link": {
-          "type": "Linkable"
-        }
       }
     },
     "Port": {
       "description": "The TOSCA Port node represents a logical entity that associates between Compute and Network normative types. The Port node type effectively represents a single virtual NIC on the Compute node instance.\n",
+      "attributes": {
+        "state": {
+          "type": "string"
+        }
+      },
+      "capabilities": {
+        "feature": {
+          "type": "Node"
+        }
+      },
+      "requirements": [
+        {
+          "dependency": {
+            "capability": "Node",
+            "node": "Root",
+            "relationship": "DependsOn",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
+        },
+        {
+          "link": {
+            "description": "Expresses the relationship between Port and Network nodes. It indicates the network to which this port will connect.\n",
+            "capability": "Linkable",
+            "relationship": "LinksTo"
+          }
+        },
+        {
+          "binding": {
+            "description": "Expresses the relationship between Port and Compute nodes. Effectively it indicates that the Port will be attached to a specific Compute node instance.\n",
+            "capability": "Bindable",
+            "relationship": "BindsTo"
+          }
+        }
+      ],
+      "interfaces": {
+        "Standard": {
+          "type": "Lifecycle.Standard"
+        }
+      },
       "derived_from": "Root",
       "properties": {
         "ip_address": {
@@ -912,41 +1544,36 @@ export const tosca_simple_2_0: TOSCA_File = {
           "type": "string",
           "required": false
         }
-      },
-      "requirements": [
-        {
-          "link": {
-            "description": "Expresses the relationship between Port and Network nodes. It indicates the network to which this port will connect.\n",
-            "capability": "Linkable",
-            "relationship": "LinksTo"
-          }
-        },
-        {
-          "binding": {
-            "description": "Expresses the relationship between Port and Compute nodes. Effectively it indicates that the Port will be attached to a specific Compute node instance.\n",
-            "capability": "Bindable",
-            "relationship": "BindsTo"
-          }
-        }
-      ]
+      }
     },
     "LoadBalancer": {
       "description": "The TOSCA Load Balancer node represents logical function that can be used in conjunction with a Floating Address to distribute an application’s traffic (load) across a number of instances of the application (e.g., for a clustered or scaled application).\n",
-      "derived_from": "Root",
-      "properties": {
-        "algorithm": {
-          "type": "string",
-          "required": false,
-          "status": "experimental"
+      "attributes": {
+        "state": {
+          "type": "string"
         }
       },
       "capabilities": {
+        "feature": {
+          "type": "Node"
+        },
         "client": {
           "type": "Endpoint.Public",
           "description": "The floating IP to which clients on the public network can connect.\n"
         }
       },
       "requirements": [
+        {
+          "dependency": {
+            "capability": "Node",
+            "node": "Root",
+            "relationship": "DependsOn",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
+        },
         {
           "application": {
             "capability": "Endpoint",
@@ -958,7 +1585,20 @@ export const tosca_simple_2_0: TOSCA_File = {
             "description": "Connection to one or more load balanced applications.\n"
           }
         }
-      ]
+      ],
+      "interfaces": {
+        "Standard": {
+          "type": "Lifecycle.Standard"
+        }
+      },
+      "derived_from": "Root",
+      "properties": {
+        "algorithm": {
+          "type": "string",
+          "required": false,
+          "status": "experimental"
+        }
+      }
     }
   },
   "group_types": {

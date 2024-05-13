@@ -1,12 +1,9 @@
 import * as yaml from 'js-yaml';
 import * as fs from 'fs';
-import { TOSCA_Service_Template } from '../../tosca-types/v2dot0-types/template-types.js';
 import { readdir } from 'node:fs/promises';
 import path from 'node:path';
-import { TwoWayKeyTypeMap } from '../TwoWayKeyTypeMap.js';
-import { TOSCA_Capability_Type_Key, TOSCA_Property_Name } from '../../tosca-types/v2dot0-types/alias-types.js';
-import { TOSCA_Attribute_Definition, TOSCA_Capability_Definition, TOSCA_File, TOSCA_Node_Definition, TOSCA_Property_Definition, TOSCA_Relationship_Definition } from '@/totypa/tosca-types/v2dot0-types/definition-types.js';
-import { TOSCA_Relationship_Template } from '@/totypa/tosca-types/v1dot3-types/template-types.js';
+import { TOSCA_Artifact_Type_Key, TOSCA_Capability_Type_Key, TOSCA_Datatype_Type_Key, TOSCA_Group_Type_Key, TOSCA_Interface_Type_Key, TOSCA_Node_Type_Key, TOSCA_Policy_Type_Key, TOSCA_Relationship_Type_Key } from '../../tosca-types/v2dot0-types/alias-types.js';
+import { TOSCA_Artifact_Type_Definition, TOSCA_Capability_Type_Definition, TOSCA_Datatype_Definition, TOSCA_File, TOSCA_Group_Type_Definition, TOSCA_Interface_Type_Definition, TOSCA_Node_Definition, TOSCA_Policy_Type_Definition, TOSCA_Relationship_Definition, TOSCA_Type_Definition_Commons } from '@/totypa/tosca-types/v2dot0-types/definition-types.js';
 import { TwoWayKeyTypeDefinitionMap } from '../TwoWayKeyTypeDefinitionMap.js';
 
 const YAML_KEY_PATTERN = new RegExp(/\.([A-z])/g);
@@ -20,6 +17,81 @@ type ProfileInfo = {
 }
 
 const hint = "/* \n   Caution!!! This code is generated!!!! Do not modify, but instead regenerate it based on the .yaml Profile descriptions \n*/\n";
+
+const isDerivedFrom = (typeDefinition: TOSCA_Type_Definition_Commons) => {
+    if (typeDefinition.derived_from) {
+        return typeDefinition.derived_from;
+    }
+    return "";
+}
+
+type key = TOSCA_Artifact_Type_Key | TOSCA_Datatype_Type_Key | TOSCA_Capability_Type_Key | TOSCA_Interface_Type_Key | TOSCA_Relationship_Type_Key | TOSCA_Node_Type_Key | TOSCA_Group_Type_Key | TOSCA_Policy_Type_Key;
+type typeDefinition = TOSCA_Artifact_Type_Definition | TOSCA_Datatype_Definition | TOSCA_Capability_Type_Definition | TOSCA_Interface_Type_Definition | TOSCA_Relationship_Definition | TOSCA_Node_Definition | TOSCA_Group_Type_Definition | TOSCA_Policy_Type_Definition;
+
+const buildFromTypeHierarchy = (definition: typeDefinition, existingTypes: TwoWayKeyTypeDefinitionMap<key, typeDefinition>, overwriteKeys: string[], refineKeys: string[]) => {
+    let resultingDefinition: typeDefinition = {};
+    let hierarchy = [JSON.parse(JSON.stringify(definition))];
+    let nextDerivedFromType = definition.derived_from;
+    while (nextDerivedFromType) {
+        let nextDefinition = existingTypes.getType(nextDerivedFromType);
+        hierarchy.unshift(JSON.parse(JSON.stringify(nextDefinition)));
+        nextDerivedFromType = nextDefinition.derived_from;
+    }
+    for (let definitionPart of hierarchy) {
+        for (let keyToOverwrite of overwriteKeys) {
+            if (definitionPart[keyToOverwrite]) {
+                resultingDefinition[keyToOverwrite] = definitionPart[keyToOverwrite];
+            }
+        }
+        for (let keyToRefine of refineKeys) {
+            if (definitionPart[keyToRefine]) {
+                resultingDefinition[keyToRefine] = refineValue(resultingDefinition[keyToRefine], definitionPart[keyToRefine]);
+            }
+        }
+    }
+    return resultingDefinition;
+}
+
+const refineValue = (thingToRefine: any, thingWithRefinements: any) => {
+    if (["string", "boolean", "number"].includes(typeof thingWithRefinements)) {
+        return thingWithRefinements;
+    } else if (Array.isArray(thingWithRefinements)) {
+        if (Array.isArray(thingToRefine)) {
+            for (let element of thingWithRefinements) {
+                if (typeof element === "object" && Object.entries(element).length === 1) {
+                    // is a list of "complex" elements, which might already exist and need to be refined
+                    let elementKey = Object.entries(element)[0][0];
+                    let indexOfExistingElement = thingToRefine.findIndex(existingElement => {
+                        return typeof existingElement === "object" && Object.entries(existingElement).length === 1 && Object.entries(existingElement)[0][0] === elementKey;
+                    });
+                    if (~indexOfExistingElement) {
+                        thingToRefine[indexOfExistingElement] = element;
+                    } else {
+                        thingToRefine.push(element);
+                    }
+                } else if (!thingToRefine.includes(element)) {
+                    thingToRefine.push(element);
+                }
+            }
+            return thingToRefine;
+        } else {
+            return thingWithRefinements;
+        }
+    } else {
+        // thingWithRefinements is an object
+        if(!thingToRefine) {
+            thingToRefine = {};
+        }
+        for (let [attributeKey, attributeValue] of Object.entries(thingWithRefinements)) {
+            if (thingToRefine.hasOwnProperty(attributeKey)) {
+                thingToRefine[attributeKey] = refineValue(thingToRefine[attributeKey], attributeValue);
+            } else {
+                thingToRefine[attributeKey] = attributeValue;
+            }
+        }
+        return thingToRefine;
+    }
+}
 
 startParsing();
 
@@ -44,6 +116,7 @@ export async function startParsing() {
                 fs.writeFile(`../../parsedProfiles/v2dot0-profiles/all_profiles.ts`, `${hint}\n${preparedData}`, (err) => {
                     if (err) {
                         console.error(`Could not save all_profiles: ${err}`)
+                        console.trace();
                         return err;
                     }
                 })
@@ -57,6 +130,7 @@ export async function startParsing() {
         })
     }).catch(err => {
         console.error("Profile parsing failed!: " + err);
+        console.trace();
     })
 }
 
@@ -64,15 +138,18 @@ function parseAllProfiles(profilesFolder: string): Promise<Promise<ProfileInfo>[
     return readdir(profilesFolder).then(entries => {
 
         let typeMaps = {
-            artifactTypesMap: new TwoWayKeyTypeDefinitionMap(),
-            dataTypesMap: new TwoWayKeyTypeDefinitionMap(),
-            capabilityTypesMap: new TwoWayKeyTypeDefinitionMap(),
-            interfaceTypesMap: new TwoWayKeyTypeDefinitionMap(),
-            relationshipTypesMap: new TwoWayKeyTypeDefinitionMap(),
-            nodeTypesMap: new TwoWayKeyTypeDefinitionMap(),
-            groupTypesMap: new TwoWayKeyTypeDefinitionMap(),
-            policyTypesMap: new TwoWayKeyTypeDefinitionMap(),
+            artifactTypesMap: new TwoWayKeyTypeDefinitionMap<TOSCA_Artifact_Type_Key, TOSCA_Artifact_Type_Definition>(),
+            dataTypesMap: new TwoWayKeyTypeDefinitionMap<TOSCA_Datatype_Type_Key, TOSCA_Datatype_Definition>(),
+            capabilityTypesMap: new TwoWayKeyTypeDefinitionMap<TOSCA_Capability_Type_Key, TOSCA_Capability_Type_Definition>(),
+            interfaceTypesMap: new TwoWayKeyTypeDefinitionMap<TOSCA_Interface_Type_Key, TOSCA_Interface_Type_Definition>(),
+            relationshipTypesMap: new TwoWayKeyTypeDefinitionMap<TOSCA_Relationship_Type_Key, TOSCA_Relationship_Definition>(),
+            nodeTypesMap: new TwoWayKeyTypeDefinitionMap<TOSCA_Node_Type_Key, TOSCA_Node_Definition>(),
+            groupTypesMap: new TwoWayKeyTypeDefinitionMap<TOSCA_Group_Type_Key, TOSCA_Group_Type_Definition>(),
+            policyTypesMap: new TwoWayKeyTypeDefinitionMap<TOSCA_Policy_Type_Key, TOSCA_Policy_Type_Definition>(),
         }
+        // initialize basic types to avoid errors
+        typeMaps.dataTypesMap.add({ description: "basic YAML string type" }, "string");
+        typeMaps.dataTypesMap.add({ description: "basic YAML integer type" }, "integer");
 
         return entries.sort((entryA, entryB) => {
             // make sure the tosca simple profile is always parsed first so that types are available
@@ -103,9 +180,9 @@ function parseAllProfiles(profilesFolder: string): Promise<Promise<ProfileInfo>[
     });
 }
 
-async function generateFromProfile(profileDirectory: string, typeMaps: {[mapName: string]: TwoWayKeyTypeDefinitionMap}): Promise<TOSCA_File> {
+async function generateFromProfile(profileDirectory: string, typeMaps: { [mapName: string]: TwoWayKeyTypeDefinitionMap<string, any> }): Promise<TOSCA_File> {
 
-    const profile: TOSCA_File = {
+    let profile: TOSCA_File = {
         tosca_definitions_version: "tosca_2_0",
         profile: "",
         metadata: {
@@ -158,64 +235,161 @@ async function generateFromProfile(profileDirectory: string, typeMaps: {[mapName
             }
 
             if (profileDocument.artifact_types) {
-                for (let [key, value] of Object.entries(profileDocument.artifact_types)) {
-                    typeMaps.artifactTypesMap.add(value, key);
-                    profile.artifact_types[key] = value;
-                }
+                typeMaps.artifactTypesMap.iterateWithDependencyConstraint(Object.entries(profileDocument.artifact_types),
+                    isDerivedFrom,
+                    (element => {
+                        typeMaps.artifactTypesMap.add(element[1], element[0]);
+
+                        // see 5.3.7.1.3 Derivation rules
+                        let mergedType = buildFromTypeHierarchy(element[1],
+                            typeMaps.artifactTypesMap,
+                            ["derived_from", "version", "metadata", "description", "mime_type", "file_ext"],
+                            ["properties"]
+                        )
+
+                        profile.artifact_types[element[0]] = mergedType as TOSCA_Artifact_Type_Definition;
+                    })
+                )
             }
 
             if (profileDocument.data_types) {
-                for (let [key, value] of Object.entries(profileDocument.data_types)) {
-                    typeMaps.dataTypesMap.add(value, key);
-                    profile.data_types[key] = value;
-                }
+                typeMaps.dataTypesMap.iterateWithDependencyConstraint(Object.entries(profileDocument.data_types),
+                    isDerivedFrom,
+                    (element => {
+                        typeMaps.dataTypesMap.add(element[1], element[0]);
+
+                        // see 5.4.4.3 Derivation rules
+                        let mergedType = buildFromTypeHierarchy(element[1],
+                            typeMaps.dataTypesMap,
+                            ["derived_from", "version", "metadata", "description"],
+                            ["validation", "properties", "key_schema", "entry_schema"]
+                        )
+
+                        profile.data_types[element[0]] = mergedType as TOSCA_Datatype_Definition;
+                    })
+                )
             }
 
             if (profileDocument.capability_types) {
-                for (let [key, value] of Object.entries(profileDocument.capability_types)) {
-                    typeMaps.capabilityTypesMap.add(value, key);
-                    profile.capability_types[key] = value;
-                }
+                typeMaps.capabilityTypesMap.iterateWithDependencyConstraint(Object.entries(profileDocument.capability_types),
+                    isDerivedFrom,
+                    (element => {
+                        typeMaps.capabilityTypesMap.add(element[1], element[0]);
+
+                        // see 5.3.5.1.3 Derivation rules
+                        let mergedType = buildFromTypeHierarchy(element[1],
+                            typeMaps.capabilityTypesMap,
+                            ["derived_from", "version", "metadata", "description"],
+                            ["attributes", "properties", "valid_source_node_types", "valid_relationship_types"]
+                        )
+
+                        profile.capability_types[element[0]] = mergedType as TOSCA_Capability_Type_Definition;
+                    })
+                )
             }
 
             if (profileDocument.interface_types) {
-                for (let [key, value] of Object.entries(profileDocument.interface_types)) {
-                    typeMaps.interfaceTypesMap.add(value, key);
-                    profile.interface_types[key] = value;
-                }
+
+                typeMaps.interfaceTypesMap.iterateWithDependencyConstraint(Object.entries(profileDocument.interface_types),
+                    isDerivedFrom,
+                    (element => {
+                        typeMaps.interfaceTypesMap.add(element[1], element[0]);
+
+                        // see 5.3.6.1.3 Derivation rules
+                        let mergedType = buildFromTypeHierarchy(element[1],
+                            typeMaps.interfaceTypesMap,
+                            ["derived_from", "version", "metadata", "description"],
+                            ["inputs", "operations", "notifications",]
+                        )
+
+                        profile.interface_types[element[0]] = mergedType as TOSCA_Interface_Type_Definition;
+                    })
+                )
             }
 
             if (profileDocument.relationship_types) {
-                for (let [key, value] of Object.entries(profileDocument.relationship_types)) {
-                    typeMaps.relationshipTypesMap.add(value, key);
-                    profile.relationship_types[key] = value;
-                }
+
+                typeMaps.relationshipTypesMap.iterateWithDependencyConstraint(Object.entries(profileDocument.relationship_types),
+                    isDerivedFrom,
+                    (element => {
+                        typeMaps.relationshipTypesMap.add(element[1], element[0]);
+
+                        // see 5.3.3.3 Derivation rules
+                        let mergedType = buildFromTypeHierarchy(element[1],
+                            typeMaps.relationshipTypesMap,
+                            ["derived_from", "version", "metadata", "description"],
+                            ["properties", "attributes", "interfaces", "valid_capability_types", "valid_target_node_types", "valid_source_node_types"]
+                        )
+
+                        profile.relationship_types[element[0]] = mergedType as TOSCA_Relationship_Definition;
+                    })
+                )
             }
 
             if (profileDocument.node_types) {
-                for (let [key, value] of Object.entries(profileDocument.node_types)) {
-                    typeMaps.nodeTypesMap.add(value, key);
-                    profile.node_types[key] = value;
-                }
+
+                typeMaps.nodeTypesMap.iterateWithDependencyConstraint(Object.entries(profileDocument.node_types),
+                    isDerivedFrom,
+                    (element => {
+                        typeMaps.nodeTypesMap.add(element[1], element[0]);
+
+                        // see 5.3.1.3 Derivation rules
+                        let mergedType = buildFromTypeHierarchy(element[1],
+                            typeMaps.nodeTypesMap,
+                            ["derived_from", "version", "metadata", "description"],
+                            ["properties", "attributes", "capabilities", "requirements", "interfaces", "artifacts"]
+                        )
+
+                        profile.node_types[element[0]] = mergedType as TOSCA_Node_Definition;
+                    })
+
+                )
             }
 
             if (profileDocument.group_types) {
-                for (let [key, value] of Object.entries(profileDocument.group_types)) {
-                    typeMaps.groupTypesMap.add(value, key);
-                    profile.group_types[key] = value;
-                }
+
+                typeMaps.groupTypesMap.iterateWithDependencyConstraint(Object.entries(profileDocument.group_types),
+                    isDerivedFrom,
+                    (element => {
+                        typeMaps.groupTypesMap.add(element[1], element[0]);
+
+                        // see 5.6.1.3 Derivation rules
+                        let mergedType = buildFromTypeHierarchy(element[1],
+                            typeMaps.groupTypesMap,
+                            ["derived_from", "version", "metadata", "description"],
+                            ["properties", "attributes", "members"]
+                        )
+
+                        profile.group_types[element[0]] = mergedType as TOSCA_Group_Type_Definition;
+                    })
+
+                )
             }
 
             if (profileDocument.policy_types) {
-                for (let [key, value] of Object.entries(profileDocument.policy_types)) {
-                    typeMaps.policyTypesMap.add(value, key)
-                    profile.policy_types[key] = value;
-                }
-            }
 
+                typeMaps.policyTypesMap.iterateWithDependencyConstraint(Object.entries(profileDocument.policy_types),
+                    isDerivedFrom,
+                    (element => {
+                        typeMaps.policyTypesMap.add(element[1], element[0]);
+
+                        // see 5.6.3.3 Derivation rules
+                        let mergedType = buildFromTypeHierarchy(element[1],
+                            typeMaps.policyTypesMap,
+                            ["derived_from", "version", "metadata", "description"],
+                            ["properties", "targets", "triggers"]
+                        )
+
+                        profile.policy_types[element[0]] = mergedType as TOSCA_Policy_Type_Definition;
+                    })
+
+                )
+
+            }
         }
     } catch (err) {
         console.error("Could not read directory " + profileDirectory + " because of: " + err);
+        console.error(err.stack);
         return err;
     }
     return profile;
@@ -310,9 +484,12 @@ async function saveGeneratedProfileAsJson(profileInfo: ProfileInfo): Promise<Pro
 
     let preparedData = `import { TOSCA_File } from '../../tosca-types/v2dot0-types/definition-types.js';\n\nexport const ${profileInfo.profileName}: TOSCA_File = ${JSON.stringify(profileInfo.profile, null, 2)};`
 
+    //console.log("saving: " + JSON.stringify(profileInfo.profile.node_types));
+
     fs.writeFile(`../../parsedProfiles/v2dot0-profiles/${profileInfo.jsonFileName}`, `${hint}\n${preparedData}`, (err) => {
         if (err) {
-            console.error(`Could not save ${profileInfo.profileName} to file: ${err}`)
+            console.error(`Could not save ${profileInfo.profileName} to file: ${err}`);
+            console.trace();
             return err;
         }
     })
