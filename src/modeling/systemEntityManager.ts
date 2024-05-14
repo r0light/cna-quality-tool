@@ -85,6 +85,8 @@ class SystemEntityManager {
         try {
             system = importFromServiceTemplate(fileName, stringifiedTOSCA);
         } catch (err) {
+            console.trace();
+            console.log(err);
             return { createdCells: [], error: err.toString() }
         }
         if (strategy === "replace") {
