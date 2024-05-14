@@ -1,8 +1,7 @@
 import { Component } from './component.js'
 import { Infrastructure } from './infrastructure.js'
-import { EntityProperty, SelectEntityProperty, loadAllProperties } from '../common/entityProperty.js';
-import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_modeling_tosca_profile.js';
-
+import { EntityProperty, SelectEntityProperty, parseProperties } from '../common/entityProperty.js';
+import { cna_modeling_profile } from '../../totypa/parsedProfiles/v2dot0-profiles/cna_modeling_profile.js'
 
 const DEPLOYMENT_UPDATE_STRATEGIES = [{key: "in-place", name: "In place"},{ key: "replace", name: "Replace" }, { key: "rolling", name: "Rolling" }, { key: "blue-green", name: "Blue-Green" }];
 
@@ -10,11 +9,11 @@ const DEPLOYMENT_UPDATE_STRATEGIES = [{key: "in-place", name: "In place"},{ key:
  * The module for aspects related to a Deployment Mapping quality model entity.
  * @module entities/deploymentMapping
  */
-const DEPLOYMENT_MAPPING_TOSCA_KEY = "cna.qualityModel.entities.HostedOn.DeploymentMapping";
-const DEPLOYMENT_MAPPING_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.relationship_types[DEPLOYMENT_MAPPING_TOSCA_KEY];
+const DEPLOYMENT_MAPPING_TOSCA_KEY = "cna-modeling.entities.HostedOn.DeploymentMapping";
+const DEPLOYMENT_MAPPING_TOSCA_EQUIVALENT = cna_modeling_profile.relationship_types[DEPLOYMENT_MAPPING_TOSCA_KEY];
 
 function getDeploymentMappingProperties(): EntityProperty[] {
-    let parsed = loadAllProperties(DEPLOYMENT_MAPPING_TOSCA_EQUIVALENT);
+    let parsed = parseProperties(DEPLOYMENT_MAPPING_TOSCA_EQUIVALENT.properties);
 
     return parsed.map((prop) => {
         switch (prop.getKey) {

@@ -1,18 +1,18 @@
 import { EntityProperty, parseProperties } from "../common/entityProperty.js"
 import { Endpoint } from "./endpoint.js";
-import { tosca_simple_profile_for_yaml_v1_3 } from '../../totypa/parsedProfiles/tosca_simple_profile_for_yaml_v1_3.js'
+import { tosca_simple_2_0 } from '../../totypa/parsedProfiles/v2dot0-profiles/tosca_simple_2_0.js'
 import { MetaData } from "../common/entityDataTypes.js";
-import { cna_modeling_tosca_profile } from "../../totypa/parsedProfiles/cna_modeling_tosca_profile.js";
+import { cna_modeling_profile } from '../../totypa/parsedProfiles/v2dot0-profiles/cna_modeling_profile.js'
 
 /**
  * The module for aspects related to a External Endpoint quality model Entity.
  * @module entities/externalEndpoint
  */
 const EXTERNAL_ENDPOINT_TOSCA_KEY = "cna.qualityModel.entities.Endpoint.External";
-const EXTERNAL_ENDPOINT_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types[EXTERNAL_ENDPOINT_TOSCA_KEY];
+const EXTERNAL_ENDPOINT_TOSCA_EQUIVALENT = cna_modeling_profile.node_types[EXTERNAL_ENDPOINT_TOSCA_KEY];
 
 const EXTERNAL_ENDPOINT_CAPABILITY_KEY = "tosca.capabilities.Endpoint.Public";
-const EXTERNAL_ENDPOINT_CAPABILITY_EQUIVALENT = tosca_simple_profile_for_yaml_v1_3.capability_types[EXTERNAL_ENDPOINT_CAPABILITY_KEY];
+const EXTERNAL_ENDPOINT_CAPABILITY_EQUIVALENT = tosca_simple_2_0.capability_types[EXTERNAL_ENDPOINT_CAPABILITY_KEY];
 
 
 function getExternalEndpointProperties(): EntityProperty[] {

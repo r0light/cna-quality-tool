@@ -1,15 +1,15 @@
-import { EntityProperty, TextEntityProperty, loadAllProperties, parseProperties } from "../common/entityProperty.js";
-import { tosca_simple_profile_for_yaml_v1_3 } from '../../totypa/parsedProfiles/tosca_simple_profile_for_yaml_v1_3.js'
+import { EntityProperty, TextEntityProperty, parseProperties } from "../common/entityProperty.js";
+import { tosca_simple_2_0 } from '../../totypa/parsedProfiles/v2dot0-profiles/tosca_simple_2_0.js'
 import { MetaData } from "../common/entityDataTypes.js";
-import { cna_modeling_tosca_profile } from "../../totypa/parsedProfiles/cna_modeling_tosca_profile.js";
+import { cna_modeling_profile } from '../../totypa/parsedProfiles/v2dot0-profiles/cna_modeling_profile.js'
 import { DataAggregate } from "./dataAggregate.js";
 import { RelationToDataAggregate } from "./relationToDataAggregate.js";
 
-const ENDPOINT_TOSCA_KEY = "cna.qualityModel.entities.Endpoint";
-const ENDPOINT_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types[ENDPOINT_TOSCA_KEY];
+const ENDPOINT_TOSCA_KEY = "cna-modeling.entities.Endpoint";
+const ENDPOINT_TOSCA_EQUIVALENT = cna_modeling_profile.node_types[ENDPOINT_TOSCA_KEY];
 
-const ENDPOINT_CAPABILITY_KEY = "tosca.capabilities.Endpoint";
-const ENDPOINT_CAPABILITY_EQUIVALENT = tosca_simple_profile_for_yaml_v1_3.capability_types[ENDPOINT_CAPABILITY_KEY];
+const ENDPOINT_CAPABILITY_KEY = "Endpoint";
+const ENDPOINT_CAPABILITY_EQUIVALENT = tosca_simple_2_0.capability_types[ENDPOINT_CAPABILITY_KEY];
 
 /**
  * The module for aspects related to a Endpoint quality model Entity.
@@ -17,7 +17,7 @@ const ENDPOINT_CAPABILITY_EQUIVALENT = tosca_simple_profile_for_yaml_v1_3.capabi
  */
 
 function getEndpointProperties(): EntityProperty[] {
-    let parsed = loadAllProperties(ENDPOINT_CAPABILITY_EQUIVALENT).concat(loadAllProperties(ENDPOINT_TOSCA_EQUIVALENT));
+    let parsed = parseProperties(ENDPOINT_CAPABILITY_EQUIVALENT.properties).concat(parseProperties(ENDPOINT_TOSCA_EQUIVALENT.properties));
 
     for (const prop of parsed) {
         switch (prop.getKey) {

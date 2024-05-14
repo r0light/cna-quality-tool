@@ -1,5 +1,5 @@
-import { EntityProperty, SelectEntityProperty, loadAllProperties } from '../common/entityProperty.js'
-import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_modeling_tosca_profile.js'
+import { EntityProperty, SelectEntityProperty, parseProperties } from '../common/entityProperty.js'
+import { cna_modeling_profile } from '../../totypa/parsedProfiles/v2dot0-profiles/cna_modeling_profile.js'
 import { MetaData } from '../common/entityDataTypes.js'
 
 /**
@@ -7,12 +7,12 @@ import { MetaData } from '../common/entityDataTypes.js'
  * @module relationships/componentToBackingData
  */
 
-const ATTACHES_TO_BACKING_DATA_TOSCA_KEY = "cna.qualityModel.relationships.AttachesTo.BackingData";
-const ATTACHES_TO_BACKING_DATA_EQUIVALENT = cna_modeling_tosca_profile.relationship_types[ATTACHES_TO_BACKING_DATA_TOSCA_KEY];
+const ATTACHES_TO_BACKING_DATA_TOSCA_KEY = "cna-modeling.relationships.AttachesTo.BackingData";
+const ATTACHES_TO_BACKING_DATA_EQUIVALENT = cna_modeling_profile.relationship_types[ATTACHES_TO_BACKING_DATA_TOSCA_KEY];
 
 
 function getBackingDataRelationshipProperties(): EntityProperty[] {
-    let parsed = loadAllProperties(ATTACHES_TO_BACKING_DATA_EQUIVALENT);
+    let parsed = parseProperties(ATTACHES_TO_BACKING_DATA_EQUIVALENT.properties);
 
     return parsed.map((prop) => {
         switch (prop.getKey) {

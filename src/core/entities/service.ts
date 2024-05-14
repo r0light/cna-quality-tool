@@ -1,8 +1,8 @@
 import { Component } from './component.js'
 import { Infrastructure } from './infrastructure.js';
-import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_modeling_tosca_profile.js'
+import { cna_modeling_profile } from '../../totypa/parsedProfiles/v2dot0-profiles/cna_modeling_profile.js'
 import { MetaData } from '../common/entityDataTypes.js';
-import { loadAllProperties } from '../common/entityProperty.js';
+import { parseProperties } from '../common/entityProperty.js';
 
 
 /**
@@ -11,10 +11,10 @@ import { loadAllProperties } from '../common/entityProperty.js';
  */
 
 const SERVICE_TOSCA_KEY = "cna.qualityModel.entities.Service";
-const SERVICE_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types[SERVICE_TOSCA_KEY];
+const SERVICE_TOSCA_EQUIVALENT = cna_modeling_profile.node_types[SERVICE_TOSCA_KEY];
 
 function getServiceProperties() {
-    let parsed = loadAllProperties(SERVICE_TOSCA_EQUIVALENT);
+    let parsed = parseProperties(SERVICE_TOSCA_EQUIVALENT.properties);
 
     return parsed;
 }

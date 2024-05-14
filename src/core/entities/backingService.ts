@@ -1,7 +1,7 @@
-import { EntityProperty, loadAllProperties } from '../common/entityProperty.js'
+import { EntityProperty, parseProperties } from '../common/entityProperty.js'
 import { Component } from './component.js'
 import { Infrastructure } from './infrastructure.js'
-import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_modeling_tosca_profile.js'
+import { cna_modeling_profile } from '../../totypa/parsedProfiles/v2dot0-profiles/cna_modeling_profile.js'
 import { MetaData } from '../common/entityDataTypes.js'
 
 /**
@@ -9,12 +9,12 @@ import { MetaData } from '../common/entityDataTypes.js'
  * @module entities/backingService
  */
 
-const BACKING_SERVICE_TOSCA_KEY = "cna.qualityModel.entities.BackingService";
-const BACKING_SERVICE_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types[BACKING_SERVICE_TOSCA_KEY];
+const BACKING_SERVICE_TOSCA_KEY = "cna-modeling.entities.BackingService";
+const BACKING_SERVICE_TOSCA_EQUIVALENT = cna_modeling_profile.node_types[BACKING_SERVICE_TOSCA_KEY];
 
 
 function getBackingServiceProperties(): EntityProperty[] {
-    let parsed = loadAllProperties(BACKING_SERVICE_TOSCA_EQUIVALENT);
+    let parsed = parseProperties(BACKING_SERVICE_TOSCA_EQUIVALENT.properties);
 
     for (const prop of parsed) {
         switch (prop.getKey) {

@@ -4,8 +4,8 @@ import { Endpoint } from './endpoint.js'
 import { ExternalEndpoint } from './externalEndpoint.js';
 import { Service } from './service.js';
 import { StorageBackingService } from './storageBackingService.js';
-import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_modeling_tosca_profile.js'
-import { EntityProperty, loadAllProperties } from '../common/entityProperty.js';
+import { cna_modeling_profile } from '../../totypa/parsedProfiles/v2dot0-profiles/cna_modeling_profile.js'
+import { EntityProperty, parseProperties } from '../common/entityProperty.js';
 
 
 /**
@@ -13,11 +13,11 @@ import { EntityProperty, loadAllProperties } from '../common/entityProperty.js';
  * @module entities/link
  */
 
-const LINK_TOSCA_KEY = "cna.qualityModel.entities.ConnectsTo.Link";
-const LINK_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.relationship_types[LINK_TOSCA_KEY];
+const LINK_TOSCA_KEY = "cna-modeling.entities.ConnectsTo.Link";
+const LINK_TOSCA_EQUIVALENT = cna_modeling_profile.relationship_types[LINK_TOSCA_KEY];
 
 function getLinkProperties(): EntityProperty[] {
-    let parsed = loadAllProperties(LINK_TOSCA_EQUIVALENT);
+    let parsed = parseProperties(LINK_TOSCA_EQUIVALENT.properties);
 
     for (const prop of parsed) {
         switch (prop.getKey) {
