@@ -42,7 +42,7 @@ npm install tsx
 Then run the profileParser in the following way:
 
 ```sh
-cd src/totypa/parsers
+cd src/totypa/parsers/v2dot0-parsers
 npx tsx profileParser.ts
 ```
 
