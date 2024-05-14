@@ -272,6 +272,10 @@ function parseProperties(properties: { [propertyKey: string]: TOSCA_Property_Def
 
     let parsedProperties: EntityProperty[] = [];
 
+    if (!properties) {
+        return parsedProperties;
+    }
+
     for (const [key, property] of Object.entries(properties)) {
         if (typeof property === "string") {
             parsedProperties.push(new TextEntityProperty(key,

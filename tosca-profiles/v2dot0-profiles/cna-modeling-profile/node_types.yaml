@@ -297,6 +297,9 @@ node_types:
     derived_from: Root
     description: Node Type to model Request Trace entities
     properties:
+      referred_endpoint:
+        type: string
+        required: true
       nodes:
         type: list
         required: false

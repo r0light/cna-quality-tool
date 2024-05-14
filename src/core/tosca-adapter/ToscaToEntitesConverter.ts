@@ -1,5 +1,4 @@
 import { v4 as uuidv4 } from 'uuid';
-import { TOSCA_Node_Template, TOSCA_Service_Template, TOSCA_Topology_Template } from '@/totypa/tosca-types/v1dot3-types/template-types';
 import * as Entities from '../entities'
 import { TwoWayKeyIdMap } from "./TwoWayKeyIdMap";
 import { DATA_AGGREGATE_TOSCA_KEY } from '../entities/dataAggregate';
@@ -17,6 +16,8 @@ import { COMPONENT_TOSCA_KEY } from '../entities/component';
 import { REQUEST_TRACE_TOSCA_KEY } from '../entities/requestTrace';
 import { RelationToDataAggregate } from '../entities/relationToDataAggregate';
 import { RelationToBackingData } from '../entities/relationToBackingData';
+import { TOSCA_File } from '@/totypa/tosca-types/v2dot0-types/definition-types';
+import { TOSCA_Node_Template, TOSCA_Service_Template } from '@/totypa/tosca-types/v2dot0-types/template-types';
 
 const MATCH_UNDERSCORE = new RegExp(/_/g);
 const MATCH_FIRST_CHARACTER = new RegExp(/^./g);
@@ -28,12 +29,12 @@ class ToscaToEntitesConverter {
 
     #importedSystem: Entities.System;
 
+    #toscaFile: TOSCA_File;
     #serviceTemplate: TOSCA_Service_Template;
-    #topologyTemplate: TOSCA_Topology_Template;
 
-    constructor(serviceTemplate: TOSCA_Service_Template, systemName: string) {
-        this.#serviceTemplate = serviceTemplate;
-        this.#topologyTemplate = this.#serviceTemplate.topology_template;
+    constructor(toscaFile: TOSCA_File, systemName: string) {
+        this.#toscaFile = toscaFile;
+        this.#serviceTemplate = this.#toscaFile.service_template;
         this.#importedSystem = new Entities.System(systemName);
     }
 
@@ -44,7 +45,7 @@ class ToscaToEntitesConverter {
         // store endpoints separately, because they are no first-class entities
         let endpoints: Map<string, Entities.Endpoint> = new Map();
 
-        for (const [key, node] of Object.entries(this.#topologyTemplate.node_templates)) {
+        for (const [key, node] of Object.entries(this.#serviceTemplate.node_templates)) {
             let uuid = uuidv4();
             this.#keyIdMap.add(key, uuid);
             switch (node.type) {
@@ -94,7 +95,7 @@ class ToscaToEntitesConverter {
         // second pass: parse properties and requirements
 
         // start with DataAggregates and BackingData
-        for (const [key, node] of Object.entries(this.#topologyTemplate.node_templates)) {
+        for (const [key, node] of Object.entries(this.#serviceTemplate.node_templates)) {
             if (node.type === DATA_AGGREGATE_TOSCA_KEY) {
                 let dataAggregate = this.#importedSystem.getDataAggregateEntities.get(this.#keyIdMap.getId(key));
                 if (node.properties) {
@@ -113,7 +114,7 @@ class ToscaToEntitesConverter {
         }
 
         // continue with Infrastructure
-        for (const [key, node] of Object.entries(this.#topologyTemplate.node_templates)) {
+        for (const [key, node] of Object.entries(this.#serviceTemplate.node_templates)) {
             if (node.type === INFRASTRUCTURE_TOSCA_KEY) {
 
                 let infrastructure = this.#importedSystem.getInfrastructureEntities.get(this.#keyIdMap.getId(key));
@@ -128,7 +129,7 @@ class ToscaToEntitesConverter {
                                 } else if (typeof requirement === "object") {
                                     // TODO requirement is of type TOSCA_Requirement_Assignment
                                     if (requirement.node && requirement.relationship && typeof requirement.relationship === "string") {
-                                        let relationship = this.#topologyTemplate.relationship_templates[requirement.relationship];
+                                        let relationship = this.#serviceTemplate.relationship_templates[requirement.relationship];
 
                                         let metaData = !!relationship.metadata ? readToscaMetaData(relationship.metadata) : getEmptyMetaData();
                                         let relation = new RelationToBackingData(requirement.relationship, metaData);
@@ -165,7 +166,7 @@ class ToscaToEntitesConverter {
 
 
         // continue with Endpoints
-        for (const [key, node] of Object.entries(this.#topologyTemplate.node_templates)) {
+        for (const [key, node] of Object.entries(this.#serviceTemplate.node_templates)) {
             if (node.type === ENDPOINT_TOSCA_KEY) {
                 let endpoint = endpoints.get(this.#keyIdMap.getId(key));
                 if (node.properties) {
@@ -188,7 +189,7 @@ class ToscaToEntitesConverter {
                                 } else if (typeof requirement === "object") {
                                     // TODO requirement is of type TOSCA_Requirement_Assignment
                                     if (requirement.node && requirement.relationship && typeof requirement.relationship === "string") {
-                                        let relationship = this.#topologyTemplate.relationship_templates[requirement.relationship];
+                                        let relationship = this.#serviceTemplate.relationship_templates[requirement.relationship];
 
                                         let metaData = !!relationship.metadata ? readToscaMetaData(relationship.metadata) : getEmptyMetaData();
                                         let relation = new RelationToDataAggregate(requirement.relationship, metaData);
@@ -227,7 +228,7 @@ class ToscaToEntitesConverter {
                                 } else if (typeof requirement === "object") {
                                     // TODO requirement is of type TOSCA_Requirement_Assignment
                                     if (requirement.node && requirement.relationship && typeof requirement.relationship === "string") {
-                                        let relationship = this.#topologyTemplate.relationship_templates[requirement.relationship];
+                                        let relationship = this.#serviceTemplate.relationship_templates[requirement.relationship];
 
                                         let metaData = !!relationship.metadata ? readToscaMetaData(relationship.metadata) : getEmptyMetaData();
                                         let relation = new RelationToDataAggregate(requirement.relationship, metaData);
@@ -247,7 +248,7 @@ class ToscaToEntitesConverter {
         }
 
         // continue with components
-        for (const [key, node] of Object.entries(this.#topologyTemplate.node_templates)) {
+        for (const [key, node] of Object.entries(this.#serviceTemplate.node_templates)) {
             if (node.type === SERVICE_TOSCA_KEY || 
                 node.type === BACKING_SERVICE_TOSCA_KEY || 
                 node.type === STORAGE_BACKING_SERVICE_TOSCA_KEY ||
@@ -265,7 +266,7 @@ class ToscaToEntitesConverter {
         }
 
         // parse relationship_templates to add properties to links and deployment mappings
-        for (const [key, relationship] of Object.entries(this.#topologyTemplate.relationship_templates)) {
+        for (const [key, relationship] of Object.entries(this.#serviceTemplate.relationship_templates)) {
 
             if (relationship.type === LINK_TOSCA_KEY) {
                 if (relationship.properties) {
@@ -285,7 +286,7 @@ class ToscaToEntitesConverter {
         }
 
         // finally add request traces
-        for (const [key, node] of Object.entries(this.#topologyTemplate.node_templates)) {
+        for (const [key, node] of Object.entries(this.#serviceTemplate.node_templates)) {
             if (node.type === REQUEST_TRACE_TOSCA_KEY) {
 
                 let requestTrace = this.#importedSystem.getRequestTraceEntities.get(this.#keyIdMap.getId(key));
@@ -344,7 +345,7 @@ class ToscaToEntitesConverter {
                             } else if (typeof requirement === "object") {
                                 // TODO requirement is of type TOSCA_Requirement_Assignment
                                 if (requirement.node && requirement.relationship && typeof requirement.relationship === "string") {
-                                    let relationship = this.#topologyTemplate.relationship_templates[requirement.relationship];
+                                    let relationship = this.#serviceTemplate.relationship_templates[requirement.relationship];
                                     let metaData = !!relationship.metadata ? readToscaMetaData(relationship.metadata) : getEmptyMetaData();
                                     let relation = new RelationToDataAggregate(requirement.relationship, metaData);
 
@@ -362,7 +363,7 @@ class ToscaToEntitesConverter {
                             } else if (typeof requirement === "object") {
                                 // TODO requirement is of type TOSCA_Requirement_Assignment
                                 if (requirement.node && requirement.relationship && typeof requirement.relationship === "string") {
-                                    let relationship = this.#topologyTemplate.relationship_templates[requirement.relationship];
+                                    let relationship = this.#serviceTemplate.relationship_templates[requirement.relationship];
 
                                     let metaData = !!relationship.metadata ? readToscaMetaData(relationship.metadata) : getEmptyMetaData();
                                     let relation = new RelationToBackingData(requirement.relationship, metaData);

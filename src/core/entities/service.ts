@@ -10,7 +10,7 @@ import { parseProperties } from '../common/entityProperty.js';
  * @module entities/service
  */
 
-const SERVICE_TOSCA_KEY = "cna.qualityModel.entities.Service";
+const SERVICE_TOSCA_KEY = "cna-modeling.entities.Service";
 const SERVICE_TOSCA_EQUIVALENT = cna_modeling_profile.node_types[SERVICE_TOSCA_KEY];
 
 function getServiceProperties() {

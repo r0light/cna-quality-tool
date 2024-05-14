@@ -8,10 +8,10 @@ import { cna_modeling_profile } from '../../totypa/parsedProfiles/v2dot0-profile
  * The module for aspects related to a External Endpoint quality model Entity.
  * @module entities/externalEndpoint
  */
-const EXTERNAL_ENDPOINT_TOSCA_KEY = "cna.qualityModel.entities.Endpoint.External";
+const EXTERNAL_ENDPOINT_TOSCA_KEY = "cna-modeling.entities.Endpoint.External";
 const EXTERNAL_ENDPOINT_TOSCA_EQUIVALENT = cna_modeling_profile.node_types[EXTERNAL_ENDPOINT_TOSCA_KEY];
 
-const EXTERNAL_ENDPOINT_CAPABILITY_KEY = "tosca.capabilities.Endpoint.Public";
+const EXTERNAL_ENDPOINT_CAPABILITY_KEY = "Endpoint.Public";
 const EXTERNAL_ENDPOINT_CAPABILITY_EQUIVALENT = tosca_simple_2_0.capability_types[EXTERNAL_ENDPOINT_CAPABILITY_KEY];
 
 
