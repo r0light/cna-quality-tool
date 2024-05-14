@@ -1,0 +1,15 @@
+tosca_definitions_version: tosca_2_0
+
+metadata:
+  template_name: capability_types.yaml
+  template_author: Distributed Systems Group
+  template_version: 0.2
+
+description: >-
+  This TOSCA definitions document contains the CNA Modeling capability types.
+
+capability_types:
+
+  cna-modeling.capabilities.Proxy:
+    derived_from: Node
+    description: When included, the Node is able to act as a proxy. This covers all communication to the endpoints of the proxied component.

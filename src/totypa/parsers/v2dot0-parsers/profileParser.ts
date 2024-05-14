@@ -79,7 +79,7 @@ const refineValue = (thingToRefine: any, thingWithRefinements: any) => {
         }
     } else {
         // thingWithRefinements is an object
-        if(!thingToRefine) {
+        if (!thingToRefine) {
             thingToRefine = {};
         }
         for (let [attributeKey, attributeValue] of Object.entries(thingWithRefinements)) {
@@ -134,7 +134,7 @@ export async function startParsing() {
     })
 }
 
-function parseAllProfiles(profilesFolder: string): Promise<Promise<ProfileInfo>[]> {
+function parseAllProfiles(profilesFolder: string): Promise<ProfileInfo[]> {
     return readdir(profilesFolder).then(entries => {
 
         let typeMaps = {
@@ -151,36 +151,34 @@ function parseAllProfiles(profilesFolder: string): Promise<Promise<ProfileInfo>[
         typeMaps.dataTypesMap.add({ description: "basic YAML string type" }, "string");
         typeMaps.dataTypesMap.add({ description: "basic YAML integer type" }, "integer");
 
-        return entries.sort((entryA, entryB) => {
+        console.log(entries);
+        let sortedEntries = entries.sort((entryA, entryB) => {
             // make sure the tosca simple profile is always parsed first so that types are available
 
-            if (entryA.includes("simple-profile")) {
-                return -1
+            let valueA = entryA.includes("tosca-simple") ? 0 : 1;
+            let valueB = entryB.includes("tosca-simple") ? 0 : 1;
+            return valueA - valueB;
+        });
+        console.log(sortedEntries);
+        return sortedEntries.map(entry => {
+            const fullDirectoryPath = path.join(profilesFolder, entry);
+            const stats = fs.lstatSync(fullDirectoryPath);
+
+            if (stats.isDirectory) {
+                const generatedProfile = generateFromProfile(fullDirectoryPath, typeMaps);
+                const generatedName = entry.replace(/\s/g, "").replace(/[\.-]/g, "_");
+                return {
+                    jsonFileName: `${generatedName}.ts`,
+                    typesFileName: `${generatedName}_ts_types.ts`,
+                    profileName: generatedName,
+                    profile: generatedProfile
+                };
             }
-            if (entryB.includes("tosca-simple")) {
-                return 1;
-            }
-            return entryA.localeCompare(entryB);
-        }).map(entry => {
-            const fullDirectoryPath = path.join(profilesFolder, entry)
-            return fs.promises.lstat(fullDirectoryPath).then(stats => {
-                if (stats.isDirectory) {
-                    return generateFromProfile(fullDirectoryPath, typeMaps).then(profile => {
-                        let generatedName = entry.replace(/\s/g, "").replace(/[\.-]/g, "_");
-                        return {
-                            jsonFileName: `${generatedName}.ts`,
-                            typesFileName: `${generatedName}_ts_types.ts`,
-                            profileName: generatedName,
-                            profile: profile
-                        }
-                    })
-                }
-            });
         });
     });
 }
 
-async function generateFromProfile(profileDirectory: string, typeMaps: { [mapName: string]: TwoWayKeyTypeDefinitionMap<string, any> }): Promise<TOSCA_File> {
+function generateFromProfile(profileDirectory: string, typeMaps: { [mapName: string]: TwoWayKeyTypeDefinitionMap<string, any> }): TOSCA_File {
 
     let profile: TOSCA_File = {
         tosca_definitions_version: "tosca_2_0",
@@ -204,7 +202,7 @@ async function generateFromProfile(profileDirectory: string, typeMaps: { [mapNam
     }
 
     try {
-        const files = await readdir(profileDirectory);
+        const files = fs.readdirSync(profileDirectory);
         for (const file of files) {
             if (!(file.endsWith(".yaml") || file.endsWith(".yml") || file.endsWith(".tosca"))) {
                 continue;
