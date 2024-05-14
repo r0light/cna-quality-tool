@@ -1,7 +1,7 @@
 
 import { ExternalEndpoint } from "./externalEndpoint.js";
 import { Link } from "./link.js";
-import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_modeling_tosca_profile.js'
+import { cna_modeling_profile } from '../../totypa/parsedProfiles/v2dot0-profiles/cna_modeling_profile.js'
 import { MetaData } from "../common/entityDataTypes.js";
 import { EntityProperty, parseProperties } from "../common/entityProperty.js";
 
@@ -12,8 +12,8 @@ import { EntityProperty, parseProperties } from "../common/entityProperty.js";
  * @module entities/requestTrace
  */
 
-const REQUEST_TRACE_TOSCA_KEY = "cna.qualityModel.entities.RequestTrace";
-const REQUEST_TRACE_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types[REQUEST_TRACE_TOSCA_KEY];
+const REQUEST_TRACE_TOSCA_KEY = "cna-modeling.entities.RequestTrace";
+const REQUEST_TRACE_TOSCA_EQUIVALENT = cna_modeling_profile.node_types[REQUEST_TRACE_TOSCA_KEY];
 
 function getRequestTraceProperties(): EntityProperty[] {
     let parsed = parseProperties(REQUEST_TRACE_TOSCA_EQUIVALENT.properties);

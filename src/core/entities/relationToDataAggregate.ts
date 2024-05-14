@@ -1,5 +1,5 @@
-import { EntityProperty, SelectEntityProperty, loadAllProperties } from '../common/entityProperty.js'
-import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_modeling_tosca_profile.js'
+import { EntityProperty, SelectEntityProperty, parseProperties } from '../common/entityProperty.js'
+import { cna_modeling_profile } from '../../totypa/parsedProfiles/v2dot0-profiles/cna_modeling_profile.js'
 import { MetaData } from '../common/entityDataTypes.js'
 
 /**
@@ -7,12 +7,12 @@ import { MetaData } from '../common/entityDataTypes.js'
  * @module relationships/componentToDataAggregate
  */
 
-const ATTACHES_TO_DATA_AGGREGATE_TOSCA_KEY = "cna.qualityModel.relationships.AttachesTo.DataAggregate";
-const ATTACHES_TO_DATA_AGGREGATE_EQUIVALENT = cna_modeling_tosca_profile.relationship_types[ATTACHES_TO_DATA_AGGREGATE_TOSCA_KEY];
+const ATTACHES_TO_DATA_AGGREGATE_TOSCA_KEY = "cna-modeling.relationships.AttachesTo.DataAggregate";
+const ATTACHES_TO_DATA_AGGREGATE_EQUIVALENT = cna_modeling_profile.relationship_types[ATTACHES_TO_DATA_AGGREGATE_TOSCA_KEY];
 
 
 function getDataAggregateRelationshipProperties(): EntityProperty[] {
-    let parsed = loadAllProperties(ATTACHES_TO_DATA_AGGREGATE_EQUIVALENT);
+    let parsed = parseProperties(ATTACHES_TO_DATA_AGGREGATE_EQUIVALENT.properties);
 
     return parsed.map((prop) => {
         switch (prop.getKey) {

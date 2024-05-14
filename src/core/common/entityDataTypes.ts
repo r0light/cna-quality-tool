@@ -1,4 +1,4 @@
-import { TOSCA_Metadata } from "../../totypa/tosca-types/core-types.js"
+import { TOSCA_Metadata } from "../../totypa/tosca-types/v1dot3-types/core-types.js"
 
 export type MetaData = {
     label: string,

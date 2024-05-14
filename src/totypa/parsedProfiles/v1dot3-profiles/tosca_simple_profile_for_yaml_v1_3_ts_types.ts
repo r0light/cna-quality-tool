@@ -2,8 +2,8 @@
    Caution!!! This code is generated!!!! Do not modify, but instead regenerate it based on the .yaml Profile descriptions 
 */
 
-import { TOSCA_Requirement_Assignment } from "../tosca-types/template-types.js"
-import { TOSCA_Metadata, TOSCA_Interface, TOSCA_Artifact } from "../tosca-types/core-types.js"
+import { TOSCA_Requirement_Assignment } from "../../tosca-types/v1dot3-types/template-types.js"
+import { TOSCA_Metadata, TOSCA_Interface, TOSCA_Artifact } from "../../tosca-types/v1dot3-types/core-types.js"
 
 export type ToscaDatatypesRoot = any
 export type ToscaDatatypesJson = string

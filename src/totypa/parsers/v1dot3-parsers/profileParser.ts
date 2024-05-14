@@ -1,12 +1,12 @@
 import * as yaml from 'js-yaml';
 import * as fs from 'fs';
-import { TOSCA_Service_Template } from '../tosca-types/template-types.js';
+import { TOSCA_Service_Template } from '../../tosca-types/v1dot3-types/template-types.js';
 import { readdir } from 'node:fs/promises';
 import path from 'node:path';
-import { TOSCA_Artifact, TOSCA_Attribute, TOSCA_Datatype, TOSCA_Interface, TOSCA_Property } from '../tosca-types/core-types.js';
-import { TwoWayKeyTypeMap } from './TwoWayKeyTypeMap.js';
-import { TOSCA_Capability, TOSCA_Capability_Type, TOSCA_Node, TOSCA_Relationship, TOSCA_Requirement } from '../tosca-types/entity-types.js';
-import { TOSCA_Capability_Type_Key } from '../tosca-types/alias-types.js';
+import { TOSCA_Artifact, TOSCA_Attribute, TOSCA_Datatype, TOSCA_Interface, TOSCA_Property } from '../../tosca-types/v1dot3-types/core-types.js';
+import { TwoWayKeyTypeMap } from '../TwoWayKeyTypeMap.js';
+import { TOSCA_Capability, TOSCA_Capability_Type, TOSCA_Node, TOSCA_Relationship, TOSCA_Requirement } from '../../tosca-types/v1dot3-types/entity-types.js';
+import { TOSCA_Capability_Type_Key } from '../../tosca-types/v1dot3-types/alias-types.js';
 
 const YAML_KEY_PATTERN = new RegExp(/\.([A-z])/g);
 const MATCH_FIRST_CHARACTER = new RegExp(/^./g);
@@ -23,7 +23,7 @@ const hint = "/* \n   Caution!!! This code is generated!!!! Do not modify, but i
 startParsing();
 
 export async function startParsing() {
-    parseAllProfiles("../../../tosca-profiles").then(promises => {
+    parseAllProfiles("../../../../tosca-profiles/v1dot3-profiles/").then(promises => {
         return Promise.all(promises).then(profiles => {
 
             let results: Promise<void>[] = [];
@@ -38,9 +38,9 @@ export async function startParsing() {
                     return `import { ${info.profileName} } from "./${info.profileName}.js";`
                 })
 
-                let preparedData = `import { TOSCA_Service_Template } from '../tosca-types/template-types.js';\n${importStatements.join("\n")}\n\nexport const all_profiles: TOSCA_Service_Template[] = [\n${profileInfos.map(info => info.profileName).join(",\n")}\n];`
+                let preparedData = `import { TOSCA_Service_Template } from '../../tosca-types/v1dot3-types/template-types.js';\n${importStatements.join("\n")}\n\nexport const all_profiles: TOSCA_Service_Template[] = [\n${profileInfos.map(info => info.profileName).join(",\n")}\n];`
 
-                fs.writeFile(`../parsedProfiles/all_profiles.ts`, `${hint}\n${preparedData}`, (err) => {
+                fs.writeFile(`../../parsedProfiles/v1dot3-profiles/all_profiles.ts`, `${hint}\n${preparedData}`, (err) => {
                     if (err) {
                         console.error(`Could not save all_profiles: ${err}`)
                         return err;
@@ -294,9 +294,9 @@ async function saveGeneratedProfileAsJson(profileInfo: ProfileInfo): Promise<Pro
 
     let hint = "/* \n   Caution!!! This code is generated!!!! Do not modify, but instead regenerate it based on the .yaml Profile descriptions \n*/\n";
 
-    let preparedData = `import { TOSCA_Service_Template } from '../tosca-types/template-types.js';\n\nexport const ${profileInfo.profileName}: TOSCA_Service_Template = ${JSON.stringify(profileInfo.profile, null, 2)};`
+    let preparedData = `import { TOSCA_Service_Template } from '../../tosca-types/v1dot3-types/template-types.js';\n\nexport const ${profileInfo.profileName}: TOSCA_Service_Template = ${JSON.stringify(profileInfo.profile, null, 2)};`
 
-    fs.writeFile(`../parsedProfiles/${profileInfo.jsonFileName}`, `${hint}\n${preparedData}`, (err) => {
+    fs.writeFile(`../../parsedProfiles/v1dot3-profiles/${profileInfo.jsonFileName}`, `${hint}\n${preparedData}`, (err) => {
         if (err) {
             console.error(`Could not save ${profileInfo.profileName} to file: ${err}`)
             return err;
@@ -426,14 +426,14 @@ class TypescriptTypeGenerator {
         // write file
         let hint = "/* \n   Caution!!! This code is generated!!!! Do not modify, but instead regenerate it based on the .yaml Profile descriptions \n*/\n";
 
-        let imports = 'import { TOSCA_Requirement_Assignment } from "../tosca-types/template-types.js"\n'
-            .concat('import { TOSCA_Metadata, TOSCA_Interface, TOSCA_Artifact } from "../tosca-types/core-types.js"\n')
+        let imports = 'import { TOSCA_Requirement_Assignment } from "../../tosca-types/v1dot3-types/template-types.js"\n'
+            .concat('import { TOSCA_Metadata, TOSCA_Interface, TOSCA_Artifact } from "../../tosca-types/v1dot3-types/core-types.js"\n')
             .concat(this.#importManager.generateImportStatement());
 
         let preparedData = generatedTypeDefinitions.join("\n");
 
         let fileName = `${this.#currentProfile.profileName}_ts_types.ts`;
-        fs.writeFile(`../parsedProfiles/${fileName}`, `${hint}\n${imports}\n${preparedData}`, (err) => {
+        fs.writeFile(`../../parsedProfiles/v1dot3-profiles/${fileName}`, `${hint}\n${imports}\n${preparedData}`, (err) => {
             if (err) {
                 console.error(`Could not save ${this.#currentProfile.profileName} to file: ${err}`)
                 return err;

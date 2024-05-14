@@ -1,6 +1,6 @@
 import { BackingData } from "./backingData.js";
-import { EntityProperty, SelectEntityProperty, loadAllProperties } from "../common/entityProperty.js";
-import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/cna_modeling_tosca_profile.js'
+import { EntityProperty, SelectEntityProperty, parseProperties } from "../common/entityProperty.js";
+import { cna_modeling_profile } from '../../totypa/parsedProfiles/v2dot0-profiles/cna_modeling_profile.js'
 import { MetaData } from "../common/entityDataTypes.js";
 import { RelationToBackingData } from "./relationToBackingData.js";
 
@@ -10,11 +10,11 @@ import { RelationToBackingData } from "./relationToBackingData.js";
  * @module entities/infrastructure
  */
 
-const INFRASTRUCTURE_TOSCA_KEY = "cna.qualityModel.entities.Compute.Infrastructure";
-const INFRASTRUCTURE_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types[INFRASTRUCTURE_TOSCA_KEY];
+const INFRASTRUCTURE_TOSCA_KEY = "cna-modeling.entities.Infrastructure";
+const INFRASTRUCTURE_TOSCA_EQUIVALENT = cna_modeling_profile.node_types[INFRASTRUCTURE_TOSCA_KEY];
 
 function getInfrastructureProperties() {
-    let parsed = loadAllProperties(INFRASTRUCTURE_TOSCA_EQUIVALENT);
+    let parsed = parseProperties(INFRASTRUCTURE_TOSCA_EQUIVALENT.properties);
 
     return parsed.map((prop) => {
         switch (prop.getKey) {

@@ -3,10 +3,7 @@
  * @module entities/entityProperty
  */
 
-import { all_profiles } from "../../totypa/parsedProfiles/all_profiles.js";
-import { TOSCA_Property } from "../../totypa/tosca-types/core-types.js";
-import { TOSCA_Node } from "../../totypa/tosca-types/entity-types.js";
-import { parse } from "path";
+import { TOSCA_Property_Definition, TOSCA_Property_Refinement } from "@/totypa/tosca-types/v2dot0-types/definition-types";
 
 type propertyDatatype = "text" | "select" | "textarea" | "number" | "boolean" | "bounded" | "list" | "map" //TODO | "timestamp" | "version"
 
@@ -110,7 +107,7 @@ class TextEntityProperty extends EntityProperty {
     #proposedOptions: listOptions[]
 
     constructor(key: string, name: string, description: string, example: string, required: boolean, maxLength: number, options: listOptions[], defaultValue: string, value: string) {
-        super(key, name, description, example, required, "text", defaultValue,  value);
+        super(key, name, description, example, required, "text", defaultValue, value);
         this.#maxLength = maxLength;
         this.#proposedOptions = options;
     }
@@ -138,7 +135,7 @@ class SelectEntityProperty extends EntityProperty {
     #options: listOptions[]
 
     constructor(key: string, name: string, description: string, example: string, required: boolean, options: listOptions[], defaultValue: string, value: string) {
-        super(key, name, description, example, required, "select", defaultValue,  value);
+        super(key, name, description, example, required, "select", defaultValue, value);
         this.#options = options;
     }
 
@@ -266,107 +263,120 @@ class MapEntityProperty extends EntityProperty {
     }
 }
 
-function loadAllProperties(nodeDefinition: TOSCA_Node): EntityProperty[] {
-    let parsedProperties: EntityProperty[] = [];
-    let currentNode = nodeDefinition;
-    if (nodeDefinition.properties) {
-        parsedProperties.push(...parseProperties(nodeDefinition.properties));
-    }
-    while (currentNode.derived_from) {
-        let nextNode = all_profiles.flatMap(profile => Object.entries(profile.node_types)).find(([nodeName, nodeType]) => nodeName === currentNode.derived_from);
-        if (nextNode) {
-            currentNode = nextNode[1];
-            if (currentNode.properties) {
-                parsedProperties.push(...parseProperties(currentNode.properties)
-                    .filter(property => !parsedProperties.map(parsedProperty => parsedProperty.getKey).includes(property.getKey)));
-            }
-        } else {
-            break;
-        }
-    }
-    return parsedProperties;
-}
-
 function toReadableKey(yamlKey: string) {
     return yamlKey.replace(/^[-_]*(.)/, (_, c) => c.toUpperCase())       // Initial char (after -/_)
         .replace(/[-_]+(.)/g, (_, c) => ' ' + c.toUpperCase()) // First char after each -/_
 }
 
-function parseProperties(properties: { [propertyKey: string]: TOSCA_Property }): EntityProperty[] {
+function parseProperties(properties: { [propertyKey: string]: TOSCA_Property_Definition | TOSCA_Property_Refinement }): EntityProperty[] {
 
     let parsedProperties: EntityProperty[] = [];
 
+    if (!properties) {
+        return parsedProperties;
+    }
+
     for (const [key, property] of Object.entries(properties)) {
-        switch (property.type) {
-            case "string":
-            case "timestamp": // TODO more specific type?
-            case "version": // TODO more specific type?
-            case "scalar-unit": // TODO more specific type(s)!
-            default:
-                parsedProperties.push(new TextEntityProperty(key,
-                    toReadableKey(key),
-                    property.description ? property.description : "",
-                    "",
-                    property.required,
-                    255,
-                    [],
-                    property.default !== undefined ? property.default : "",
-                    property.default !== undefined ? property.default : ""));
-                break;
-            case "integer":
-            case "float": // TODO more specific property?
-                parsedProperties.push(new NumberEntityProperty(key, 
-                    toReadableKey(key), 
-                    property.description ? property.description : "", 
-                    "", 
-                    property.required, 
-                    Number.MAX_SAFE_INTEGER, 
-                    Number.MIN_SAFE_INTEGER, 
-                    property.default !== undefined ? property.default : "",
-                    property.default !== undefined ? property.default : ""));
-                break;
-            case "boolean":
-                parsedProperties.push(new BooleanEntityProperty(key, 
-                    toReadableKey(key), 
-                    property.description ? property.description : "",
-                    "", 
-                    property.required, 
-                    property.default !== undefined ? property.default : false,
-                    property.default !== undefined ? property.default : false));
-                break;
-            case "range":
-                parsedProperties.push(new BoundsEntityProperty(key, 
-                    toReadableKey(key), 
-                    property.description ? property.description : "",
-                    "",
-                    property.required,
-                    property.default !== undefined ? property.default : [Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER],
-                    property.default !== undefined ? property.default : [Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER], 
+        if (typeof property === "string") {
+            parsedProperties.push(new TextEntityProperty(key,
+                toReadableKey(key),
+                "",
+                "",
+                true,
+                property.length,
+                [],
+                property,
+                property));
+        } else if (typeof property === "number") {
+            parsedProperties.push(new NumberEntityProperty(key,
+                toReadableKey(key),
+                "",
+                "",
+                true,
+                property,
+                property,
+                property,
+                property));
+        } else if (typeof property === "boolean") {
+            parsedProperties.push(new BooleanEntityProperty(key,
+                toReadableKey(key),
+                "",
+                "",
+                true,
+                property,
+                property));
+        } else {
+            switch (property.type) {
+                case "string":
+                case "timestamp": // TODO more specific type?
+                case "version": // TODO more specific type?
+                case "scalar-unit": // TODO more specific type(s)!
+                default:
+                    parsedProperties.push(new TextEntityProperty(key,
+                        toReadableKey(key),
+                        property.description ? property.description : "",
+                        "",
+                        property.required,
+                        255,
+                        [],
+                        property.default !== undefined ? property.default : "",
+                        property.default !== undefined ? property.default : ""));
+                    break;
+                case "integer":
+                case "float": // TODO more specific property?
+                    parsedProperties.push(new NumberEntityProperty(key,
+                        toReadableKey(key),
+                        property.description ? property.description : "",
+                        "",
+                        property.required,
+                        Number.MAX_SAFE_INTEGER,
+                        Number.MIN_SAFE_INTEGER,
+                        property.default !== undefined ? property.default : "",
+                        property.default !== undefined ? property.default : ""));
+                    break;
+                case "boolean":
+                    parsedProperties.push(new BooleanEntityProperty(key,
+                        toReadableKey(key),
+                        property.description ? property.description : "",
+                        "",
+                        property.required,
+                        property.default !== undefined ? property.default : false,
+                        property.default !== undefined ? property.default : false));
+                    break;
+                case "range":
+                    parsedProperties.push(new BoundsEntityProperty(key,
+                        toReadableKey(key),
+                        property.description ? property.description : "",
+                        "",
+                        property.required,
+                        property.default !== undefined ? property.default : [Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER],
+                        property.default !== undefined ? property.default : [Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER],
                     ));
-                break;
-            case "list":
-                parsedProperties.push(new ListEntityProperty(key, 
-                    toReadableKey(key), 
-                    property.description ? property.description : "", 
-                    "", 
-                    property.required, 
-                    property.default !== undefined ? property.default : [],
-                    property.default !== undefined ? property.default : []))
-                break;
-            case "map":
-                parsedProperties.push(new MapEntityProperty(key, 
-                    toReadableKey(key), 
-                    property.description ? property.description : "",
-                    "", 
-                    property.required, 
-                    property.default !== undefined ? property.default : {}, 
-                    property.default !== undefined ? property.default : {}, 
-                    property.key_schema ? property.key_schema.type : "string",
-                    property.key_schema ? property.key_schema.description : "",
-                    property.entry_schema ? property.entry_schema.type : "string",
-                    property.entry_schema ? property.entry_schema.description : ""))
+                    break;
+                case "list":
+                    parsedProperties.push(new ListEntityProperty(key,
+                        toReadableKey(key),
+                        property.description ? property.description : "",
+                        "",
+                        property.required,
+                        property.default !== undefined ? property.default : [],
+                        property.default !== undefined ? property.default : []))
+                    break;
+                case "map":
+                    parsedProperties.push(new MapEntityProperty(key,
+                        toReadableKey(key),
+                        property.description ? property.description : "",
+                        "",
+                        property.required,
+                        property.default !== undefined ? property.default : {},
+                        property.default !== undefined ? property.default : {},
+                        property.key_schema ? property.key_schema.type : "string",
+                        property.key_schema ? property.key_schema.description : "",
+                        property.entry_schema ? property.entry_schema.type : "string",
+                        property.entry_schema ? property.entry_schema.description : ""))
                     //TODO handle case where a map does not have a key_schema
-                break;
+                    break;
+            }
         }
     }
 
@@ -374,4 +384,4 @@ function parseProperties(properties: { [propertyKey: string]: TOSCA_Property }):
 }
 
 
-export { EntityProperty, TextEntityProperty, SelectEntityProperty, TextAreaEntityProperty, NumberEntityProperty, BooleanEntityProperty, BoundsEntityProperty as BoundedEntityProperty, ListEntityProperty, MapEntityProperty, loadAllProperties, parseProperties };
+export { EntityProperty, TextEntityProperty, SelectEntityProperty, TextAreaEntityProperty, NumberEntityProperty, BooleanEntityProperty, BoundsEntityProperty as BoundedEntityProperty, ListEntityProperty, MapEntityProperty, parseProperties };
