@@ -1,6 +1,6 @@
 import EntityTypes from "./entityTypes";
 import { getComponentProperties, getBackingServiceProperties, getStorageBackingServiceProperties, getEndpointProperties, getExternalEndpointProperties, getInfrastructureProperties, getRequestTraceProperties, getBackingDataProperties, getDataAggregateProperties, getDeploymentMappingProperties, getLinkProperties, getServiceProperties } from "../../core/entities";
-import { DialogConfig, DialogSize, FormContentConfig, UIContentType } from "./actionDialogConfig";
+import { DialogConfig, DialogMetaData, DialogSize, FormContentConfig, UIContentType } from "./actionDialogConfig";
 import { EntityProperty, NumberEntityProperty, SelectEntityProperty, TextEntityProperty } from "../../core/common/entityProperty";
 import { getDataAggregateRelationshipProperties } from "@/core/entities/relationToDataAggregate";
 import { getBackingDataRelationshipProperties } from "@/core/entities/relationToBackingData";
@@ -114,19 +114,16 @@ export type DropdownOptionConfig = {
     disabled: boolean
 }
 
-export type TableDialogPropertyConfig = BasicPropertyConfig & {
-    contentType: "table-dialog",
+export type MultiSelectPropertyConfig = BasicPropertyConfig & {
+    contentType: "multi-select",
     attributes: {
         svgRepresentation: string,
         buttonText: string,
-        buttonIconClass: string
-    },
-    buttonActionContent: DialogConfig
-}
-
-export type TablePropertyConfig = BasicPropertyConfig & {
-    contentType: "table",
-    tableColumnHeaders: { text: string }[]
+        buttonIconClass: string,
+        dialogMetaData: DialogMetaData,
+        dialogInfo: string,
+        tableColumnHeaders: { text: string }[]
+    }
 }
 
 export type TogglePropertyConfig = BasicPropertyConfig & {
@@ -140,10 +137,17 @@ export type TogglePropertyConfig = BasicPropertyConfig & {
 
 export type DynamicListPropertyConfig = BasicPropertyConfig & {
     contentType: "dynamic-list",
-    listElementFields: ListElementField | ListElementField[],
-    addElementButton: {
-        label: string,
-        labelIcon: string
+    attributes: {
+        svgRepresentation: string,
+        buttonText: string,
+        buttonIconClass: string,
+        dialogMetaData: DialogMetaData,
+        dialogInfo: string,
+        listElementFields: ListElementField | ListElementField[],
+        addElementButton: {
+            label: string,
+            labelIcon: string
+        }
     }
 }
 
@@ -156,7 +160,7 @@ export type ListElementField = {
 }
 
 
-export type PropertyConfig = TextPropertyConfig | TextAreaPropertyConfig | NumberPropertyConfig | NumberRangePropertyConfig | CheckboxPropertyConfig | CheckboxWithoutLabelPropertyConfig | DropdownPropertyConfig | TableDialogPropertyConfig | TogglePropertyConfig | TablePropertyConfig | DynamicListPropertyConfig;
+export type PropertyConfig = TextPropertyConfig | TextAreaPropertyConfig | NumberPropertyConfig | NumberRangePropertyConfig | CheckboxPropertyConfig | CheckboxWithoutLabelPropertyConfig | DropdownPropertyConfig | MultiSelectPropertyConfig | TogglePropertyConfig | DynamicListPropertyConfig;
 
 function parseProperties(properties: EntityProperty[], path: "entity" | "relationship"): PropertyConfig[] {
     return properties.filter(property => {
@@ -268,12 +272,7 @@ function concatInOrder(...propertyConfigs: PropertyConfig[][]): PropertyConfig[]
 
 function customizePropertyConfigs(configs: PropertyConfig[], customConfigOverwrites: PropertyConfig[]): PropertyConfig[] {
     for (const customConfig of customConfigOverwrites) {
-        let propertyKey = "";
-        if (customConfig.providedFeature.includes("wrapper")) {
-            propertyKey = ((customConfig as TableDialogPropertyConfig).buttonActionContent.dialogContent as FormContentConfig).groups[0].contentItems[0].providedFeature;
-        } else {
-            propertyKey = customConfig.providedFeature;
-        }
+        let propertyKey = customConfig.providedFeature;
 
         let existingConfigIndex = configs.findIndex(config => config.providedFeature === propertyKey);
         if (~existingConfigIndex) {
@@ -285,9 +284,9 @@ function customizePropertyConfigs(configs: PropertyConfig[], customConfigOverwri
     return configs;
 }
 
-export type PropertyContentType = "checkbox" | "checkbox-without-label" | "text" | "number" | "range" | "textarea" | "select" | "table-dialog" | "table" | "toggle" | "formgroup" | "dynamic-list";
+export type PropertyContentType = "text" | "textarea" | "number" | "range" | "checkbox" | "checkbox-without-label" | "select" | "multi-select" | "toggle" | "dynamic-list";
 
-const PropertyContentType = Object.freeze({
+const PropertyContent = Object.freeze({
     INPUT_TEXTBOX: "text",
     TEXTAREA: "textarea",
     INPUT_NUMBERBOX: "number",
@@ -295,10 +294,8 @@ const PropertyContentType = Object.freeze({
     CHECKBOX: "checkbox",
     CHECKBOX_WITHOUT_LABEL: "checkbox-without-label",
     DROPDOWN: "select",
-    TABLE_DIALOG: "table-dialog",
-    TABLE: "table",
+    MULTI_SELECT: "multi-select",
     TOGGLE: "toggle",
-    FORMGROUP: "formgroup",
     DYNAMIC_LIST: "dynamic-list"
 });
 
@@ -359,7 +356,7 @@ const DetailsSidebarConfig: {
             options: [
                 {
                     providedFeature: "entity-text",
-                    contentType: PropertyContentType.TEXTAREA,
+                    contentType: PropertyContent.TEXTAREA,
                     label: "Text:",
                     inputProperties: {
                         disabled: false,
@@ -388,7 +385,7 @@ const DetailsSidebarConfig: {
                 },
                 {
                     providedFeature: "entity-font-size",
-                    contentType: PropertyContentType.INPUT_RANGE,
+                    contentType: PropertyContent.INPUT_RANGE,
                     label: "Font Size:",
                     inputProperties: {
                         disabled: false,
@@ -424,7 +421,7 @@ const DetailsSidebarConfig: {
             options: [
                 {
                     providedFeature: "entity-width",
-                    contentType: PropertyContentType.INPUT_NUMBERBOX,
+                    contentType: PropertyContent.INPUT_NUMBERBOX,
                     label: "Width:",
                     inputProperties: {
                         disabled: false,
@@ -451,7 +448,7 @@ const DetailsSidebarConfig: {
                 },
                 {
                     providedFeature: "entity-height",
-                    contentType: PropertyContentType.INPUT_NUMBERBOX,
+                    contentType: PropertyContent.INPUT_NUMBERBOX,
                     label: "Height:",
                     inputProperties: {
                         disabled: true,
@@ -478,7 +475,7 @@ const DetailsSidebarConfig: {
                 },
                 {
                     providedFeature: "keep-entity-aspect-ratio",
-                    contentType: PropertyContentType.CHECKBOX,
+                    contentType: PropertyContent.CHECKBOX,
                     label: "Preserve aspect ratio",
                     inputProperties: {
                         disabled: true,
@@ -503,7 +500,7 @@ const DetailsSidebarConfig: {
                 },
                 {
                     providedFeature: "entity-aspect-ratio",
-                    contentType: PropertyContentType.INPUT_TEXTBOX,
+                    contentType: PropertyContent.INPUT_TEXTBOX,
                     label: "Aspect ratio",
                     inputProperties: {
                         disabled: true,
@@ -544,7 +541,7 @@ const DetailsSidebarConfig: {
                 // },
                 {
                     providedFeature: "entity-x-position",
-                    contentType: PropertyContentType.INPUT_NUMBERBOX,
+                    contentType: PropertyContent.INPUT_NUMBERBOX,
                     label: "X-Coordinate:",
                     inputProperties: {
                         disabled: false,
@@ -571,7 +568,7 @@ const DetailsSidebarConfig: {
                 },
                 {
                     providedFeature: "entity-y-position",
-                    contentType: PropertyContentType.INPUT_NUMBERBOX,
+                    contentType: PropertyContent.INPUT_NUMBERBOX,
                     label: "Y-Coordinate:",
                     inputProperties: {
                         disabled: false,
@@ -618,9 +615,9 @@ const EntityDetailsConfig: {
         type: EntityTypes.COMPONENT,
         specificProperties: customizePropertyConfigs(parseProperties(getComponentProperties(), "entity"), [
             {
-                providedFeature: "assigned-networks-wrapper",
-                contentType: PropertyContentType.TABLE_DIALOG,
-                label: "Assigned Networks:",
+                providedFeature: "assigned_networks",
+                contentType: PropertyContent.DYNAMIC_LIST,
+                label: "Assigned networks:",
                 helpText: "",
                 inputProperties: {
                     disabled: false,
@@ -632,19 +629,7 @@ const EntityDetailsConfig: {
                 attributes: {
                     svgRepresentation: "",
                     buttonText: "Edit assigned networks",
-                    buttonIconClass: "fa-solid fa-pencil"
-                },
-                provideEnterButton: false,
-                show: true,
-                jointJsConfig: {
-                    propertyType: "free",
-                    modelPath: "",
-                    defaultPropPath: "",
-                    minPath: "",
-                    min: ""
-                },
-                buttonActionContent: {
-                    // contentType: PropertyContentType // TODO modalDialog,
+                    buttonIconClass: "fa-solid fa-pencil",
                     dialogMetaData: {
                         dialogSize: DialogSize.LARGE,
                         header: {
@@ -655,63 +640,37 @@ const EntityDetailsConfig: {
                         footer: {
                             showCancelButton: true,
                             cancelButtonText: "Cancel",
-                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save"}]
+                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
                         }
                     },
-                    dialogContent: {
-                        contentType: UIContentType.GROUP_FORMS,
-                        groups: [
-                            {
-                                contentGroupMetaData: {
-                                    id: "assigned-networks-data",
-                                    headline: "Assigned networks",
-                                    text: `Type in the id or subnet mask of a network and then add it using the plus button. However, your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all your changes will be lost. While you keep the selection of this Backing Data entity, your changes will be remembered.`,
-                                },
-                                contentItems: [
-                                    {
-                                        providedFeature: "assigned_networks",
-                                        contentType: PropertyContentType.DYNAMIC_LIST,
-                                        label: "",
-                                        helpText: "",
-                                        inputProperties: {
-                                            disabled: false,
-                                            readonly: false,
-                                            required: false,
-                                            checked: false,
-                                            selected: false,
-                                        },
-                                        provideEnterButton: false,
-                                        show: true,
-                                        jointJsConfig: {
-                                            propertyType: "customProperty",
-                                            modelPath: "entity/properties/assigned_networks",
-                                            defaultPropPath: "",
-                                            minPath: "",
-                                            min: ""
-                                        },
-                                        listElementFields:
-                                            {
-                                                key: "network-id",
-                                                label: "Network Name",
-                                                helpText: "The name of the network to assign",
-                                                labelIcon: "fa-solid fa-network-wired",
-                                                placeholder: "e.g. my-private-network"
-                                            }
-                                        ,
-                                        addElementButton: {
-                                            label: "Submit",
-                                            labelIcon: "fa-solid fa-plus"
-                                        }
-                                    }
-                                ]
-                            },
-                        ]
+                    dialogInfo: `Type in the id or subnet mask of a network and then add it using the plus button. However, your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all your changes will be lost. While you keep the selection of this entity, your changes will be remembered.`,
+                    listElementFields: [
+                        {
+                            key: "network-id",
+                            label: "Network Name",
+                            helpText: "The name of the network to assign",
+                            labelIcon: "fa-solid fa-network-wired",
+                            placeholder: "e.g. my-private-network"
+                        }
+                    ],
+                    addElementButton: {
+                        label: "Submit",
+                        labelIcon: "fa-solid fa-plus"
                     }
-                }
+                },
+                provideEnterButton: false,
+                show: true,
+                jointJsConfig: {
+                    propertyType: "customProperty",
+                    modelPath: "entity/properties/assigned_networks",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
             },
             {
                 providedFeature: "proxiedBy",
-                contentType: PropertyContentType.DROPDOWN,
+                contentType: PropertyContent.DROPDOWN,
                 label: "Proxied by:",
                 inputProperties: {
                     disabled: false,
@@ -741,12 +700,12 @@ const EntityDetailsConfig: {
         ])
     },
     Service: {
-        type: EntityTypes.SERVICE, 
+        type: EntityTypes.SERVICE,
         specificProperties: customizePropertyConfigs(concatInOrder(parseProperties(getServiceProperties(), "entity"), parseProperties(getComponentProperties(), "entity")), [
             {
-                providedFeature: "assigned-networks-wrapper",
-                contentType: PropertyContentType.TABLE_DIALOG,
-                label: "Assigned Networks:",
+                providedFeature: "assigned_networks",
+                contentType: PropertyContent.DYNAMIC_LIST,
+                label: "Assigned networks:",
                 helpText: "",
                 inputProperties: {
                     disabled: false,
@@ -758,19 +717,7 @@ const EntityDetailsConfig: {
                 attributes: {
                     svgRepresentation: "",
                     buttonText: "Edit assigned networks",
-                    buttonIconClass: "fa-solid fa-pencil"
-                },
-                provideEnterButton: false,
-                show: true,
-                jointJsConfig: {
-                    propertyType: "free",
-                    modelPath: "",
-                    defaultPropPath: "",
-                    minPath: "",
-                    min: ""
-                },
-                buttonActionContent: {
-                    // contentType: PropertyContentType // TODO modalDialog,
+                    buttonIconClass: "fa-solid fa-pencil",
                     dialogMetaData: {
                         dialogSize: DialogSize.LARGE,
                         header: {
@@ -781,63 +728,37 @@ const EntityDetailsConfig: {
                         footer: {
                             showCancelButton: true,
                             cancelButtonText: "Cancel",
-                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save"}]
+                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
                         }
                     },
-                    dialogContent: {
-                        contentType: UIContentType.GROUP_FORMS,
-                        groups: [
-                            {
-                                contentGroupMetaData: {
-                                    id: "assigned-networks-data",
-                                    headline: "Assigned networks",
-                                    text: `Type in the id or subnet mask of a network and then add it using the plus button. However, your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all your changes will be lost. While you keep the selection of this Backing Data entity, your changes will be remembered.`,
-                                },
-                                contentItems: [
-                                    {
-                                        providedFeature: "assigned_networks",
-                                        contentType: PropertyContentType.DYNAMIC_LIST,
-                                        label: "",
-                                        helpText: "",
-                                        inputProperties: {
-                                            disabled: false,
-                                            readonly: false,
-                                            required: false,
-                                            checked: false,
-                                            selected: false,
-                                        },
-                                        provideEnterButton: false,
-                                        show: true,
-                                        jointJsConfig: {
-                                            propertyType: "customProperty",
-                                            modelPath: "entity/properties/assigned_networks",
-                                            defaultPropPath: "",
-                                            minPath: "",
-                                            min: ""
-                                        },
-                                        listElementFields:
-                                            {
-                                                key: "network-id",
-                                                label: "Network Name",
-                                                helpText: "The name of the network to assign",
-                                                labelIcon: "fa-solid fa-network-wired",
-                                                placeholder: "e.g. my-private-network"
-                                            }
-                                        ,
-                                        addElementButton: {
-                                            label: "Submit",
-                                            labelIcon: "fa-solid fa-plus"
-                                        }
-                                    }
-                                ]
-                            },
-                        ]
+                    dialogInfo: `Type in the id or subnet mask of a network and then add it using the plus button. However, your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all your changes will be lost. While you keep the selection of this entity, your changes will be remembered.`,
+                    listElementFields: [
+                        {
+                            key: "network-id",
+                            label: "Network Name",
+                            helpText: "The name of the network to assign",
+                            labelIcon: "fa-solid fa-network-wired",
+                            placeholder: "e.g. my-private-network"
+                        }
+                    ],
+                    addElementButton: {
+                        label: "Submit",
+                        labelIcon: "fa-solid fa-plus"
                     }
-                }
+                },
+                provideEnterButton: false,
+                show: true,
+                jointJsConfig: {
+                    propertyType: "customProperty",
+                    modelPath: "entity/properties/assigned_networks",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
             },
             {
                 providedFeature: "proxiedBy",
-                contentType: PropertyContentType.DROPDOWN,
+                contentType: PropertyContent.DROPDOWN,
                 label: "Proxied by:",
                 inputProperties: {
                     disabled: false,
@@ -870,9 +791,9 @@ const EntityDetailsConfig: {
         type: EntityTypes.BACKING_SERVICE,
         specificProperties: customizePropertyConfigs(concatInOrder(parseProperties(getBackingServiceProperties(), "entity"), parseProperties(getComponentProperties(), "entity")), [
             {
-                providedFeature: "assigned-networks-wrapper",
-                contentType: PropertyContentType.TABLE_DIALOG,
-                label: "Assigned Networks:",
+                providedFeature: "assigned_networks",
+                contentType: PropertyContent.DYNAMIC_LIST,
+                label: "Assigned networks:",
                 helpText: "",
                 inputProperties: {
                     disabled: false,
@@ -884,19 +805,7 @@ const EntityDetailsConfig: {
                 attributes: {
                     svgRepresentation: "",
                     buttonText: "Edit assigned networks",
-                    buttonIconClass: "fa-solid fa-pencil"
-                },
-                provideEnterButton: false,
-                show: true,
-                jointJsConfig: {
-                    propertyType: "free",
-                    modelPath: "",
-                    defaultPropPath: "",
-                    minPath: "",
-                    min: ""
-                },
-                buttonActionContent: {
-                    // contentType: PropertyContentType // TODO modalDialog,
+                    buttonIconClass: "fa-solid fa-pencil",
                     dialogMetaData: {
                         dialogSize: DialogSize.LARGE,
                         header: {
@@ -907,63 +816,37 @@ const EntityDetailsConfig: {
                         footer: {
                             showCancelButton: true,
                             cancelButtonText: "Cancel",
-                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save"}]
+                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
                         }
                     },
-                    dialogContent: {
-                        contentType: UIContentType.GROUP_FORMS,
-                        groups: [
-                            {
-                                contentGroupMetaData: {
-                                    id: "assigned-networks-data",
-                                    headline: "Assigned networks",
-                                    text: `Type in the id or subnet mask of a network and then add it using the plus button. However, your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all your changes will be lost. While you keep the selection of this Backing Data entity, your changes will be remembered.`,
-                                },
-                                contentItems: [
-                                    {
-                                        providedFeature: "assigned_networks",
-                                        contentType: PropertyContentType.DYNAMIC_LIST,
-                                        label: "",
-                                        helpText: "",
-                                        inputProperties: {
-                                            disabled: false,
-                                            readonly: false,
-                                            required: false,
-                                            checked: false,
-                                            selected: false,
-                                        },
-                                        provideEnterButton: false,
-                                        show: true,
-                                        jointJsConfig: {
-                                            propertyType: "customProperty",
-                                            modelPath: "entity/properties/assigned_networks",
-                                            defaultPropPath: "",
-                                            minPath: "",
-                                            min: ""
-                                        },
-                                        listElementFields:
-                                            {
-                                                key: "network-id",
-                                                label: "Network Name",
-                                                helpText: "The name of the network to assign",
-                                                labelIcon: "fa-solid fa-network-wired",
-                                                placeholder: "e.g. my-private-network"
-                                            }
-                                        ,
-                                        addElementButton: {
-                                            label: "Submit",
-                                            labelIcon: "fa-solid fa-plus"
-                                        }
-                                    }
-                                ]
-                            },
-                        ]
+                    dialogInfo: `Type in the id or subnet mask of a network and then add it using the plus button. However, your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all your changes will be lost. While you keep the selection of this entity, your changes will be remembered.`,
+                    listElementFields: [
+                        {
+                            key: "network-id",
+                            label: "Network Name",
+                            helpText: "The name of the network to assign",
+                            labelIcon: "fa-solid fa-network-wired",
+                            placeholder: "e.g. my-private-network"
+                        }
+                    ],
+                    addElementButton: {
+                        label: "Submit",
+                        labelIcon: "fa-solid fa-plus"
                     }
-                }
+                },
+                provideEnterButton: false,
+                show: true,
+                jointJsConfig: {
+                    propertyType: "customProperty",
+                    modelPath: "entity/properties/assigned_networks",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
             },
             {
                 providedFeature: "proxiedBy",
-                contentType: PropertyContentType.DROPDOWN,
+                contentType: PropertyContent.DROPDOWN,
                 label: "Proxied by:",
                 inputProperties: {
                     disabled: false,
@@ -996,9 +879,9 @@ const EntityDetailsConfig: {
         type: EntityTypes.STORAGE_BACKING_SERVICE,
         specificProperties: customizePropertyConfigs(concatInOrder(parseProperties(getStorageBackingServiceProperties(), "entity"), parseProperties(getComponentProperties(), "entity")), [
             {
-                providedFeature: "assigned-networks-wrapper",
-                contentType: PropertyContentType.TABLE_DIALOG,
-                label: "Assigned Networks:",
+                providedFeature: "assigned_networks",
+                contentType: PropertyContent.DYNAMIC_LIST,
+                label: "Assigned networks:",
                 helpText: "",
                 inputProperties: {
                     disabled: false,
@@ -1010,19 +893,7 @@ const EntityDetailsConfig: {
                 attributes: {
                     svgRepresentation: "",
                     buttonText: "Edit assigned networks",
-                    buttonIconClass: "fa-solid fa-pencil"
-                },
-                provideEnterButton: false,
-                show: true,
-                jointJsConfig: {
-                    propertyType: "free",
-                    modelPath: "",
-                    defaultPropPath: "",
-                    minPath: "",
-                    min: ""
-                },
-                buttonActionContent: {
-                    // contentType: PropertyContentType // TODO modalDialog,
+                    buttonIconClass: "fa-solid fa-pencil",
                     dialogMetaData: {
                         dialogSize: DialogSize.LARGE,
                         header: {
@@ -1033,63 +904,37 @@ const EntityDetailsConfig: {
                         footer: {
                             showCancelButton: true,
                             cancelButtonText: "Cancel",
-                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save"}]
+                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
                         }
                     },
-                    dialogContent: {
-                        contentType: UIContentType.GROUP_FORMS,
-                        groups: [
-                            {
-                                contentGroupMetaData: {
-                                    id: "assigned-networks-data",
-                                    headline: "Assigned networks",
-                                    text: `Type in the id or subnet mask of a network and then add it using the plus button. However, your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all your changes will be lost. While you keep the selection of this Backing Data entity, your changes will be remembered.`,
-                                },
-                                contentItems: [
-                                    {
-                                        providedFeature: "assigned_networks",
-                                        contentType: PropertyContentType.DYNAMIC_LIST,
-                                        label: "",
-                                        helpText: "",
-                                        inputProperties: {
-                                            disabled: false,
-                                            readonly: false,
-                                            required: false,
-                                            checked: false,
-                                            selected: false,
-                                        },
-                                        provideEnterButton: false,
-                                        show: true,
-                                        jointJsConfig: {
-                                            propertyType: "customProperty",
-                                            modelPath: "entity/properties/assigned_networks",
-                                            defaultPropPath: "",
-                                            minPath: "",
-                                            min: ""
-                                        },
-                                        listElementFields:
-                                            {
-                                                key: "network-id",
-                                                label: "Network Name",
-                                                helpText: "The name of the network to assign",
-                                                labelIcon: "fa-solid fa-network-wired",
-                                                placeholder: "e.g. my-private-network"
-                                            }
-                                        ,
-                                        addElementButton: {
-                                            label: "Submit",
-                                            labelIcon: "fa-solid fa-plus"
-                                        }
-                                    }
-                                ]
-                            },
-                        ]
+                    dialogInfo: `Type in the id or subnet mask of a network and then add it using the plus button. However, your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all your changes will be lost. While you keep the selection of this entity, your changes will be remembered.`,
+                    listElementFields: [
+                        {
+                            key: "network-id",
+                            label: "Network Name",
+                            helpText: "The name of the network to assign",
+                            labelIcon: "fa-solid fa-network-wired",
+                            placeholder: "e.g. my-private-network"
+                        }
+                    ],
+                    addElementButton: {
+                        label: "Submit",
+                        labelIcon: "fa-solid fa-plus"
                     }
-                }
+                },
+                provideEnterButton: false,
+                show: true,
+                jointJsConfig: {
+                    propertyType: "customProperty",
+                    modelPath: "entity/properties/assigned_networks",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
             },
             {
                 providedFeature: "proxiedBy",
-                contentType: PropertyContentType.DROPDOWN,
+                contentType: PropertyContent.DROPDOWN,
                 label: "Proxied by:",
                 inputProperties: {
                     disabled: false,
@@ -1123,7 +968,7 @@ const EntityDetailsConfig: {
         specificProperties: customizePropertyConfigs(parseProperties(getEndpointProperties(), "entity"), [
             {
                 providedFeature: "embedded",
-                contentType: PropertyContentType.INPUT_TEXTBOX,
+                contentType: PropertyContent.INPUT_TEXTBOX,
                 label: "Parent",
                 helpText: "The parent of the endpoint if it is embedded",
                 inputProperties: {
@@ -1152,8 +997,8 @@ const EntityDetailsConfig: {
                 }
             },
             {
-                providedFeature: "usesData-wrapper",
-                contentType: PropertyContentType.TABLE_DIALOG,
+                providedFeature: "uses_data",
+                contentType: PropertyContent.MULTI_SELECT,
                 label: "Data Aggregates used:",
                 inputProperties: {
                     disabled: false,
@@ -1162,89 +1007,50 @@ const EntityDetailsConfig: {
                     selected: false,
                     readonly: false,
                 },
-                helpText: "The data aggregates used when this endpoint is invoked",
+                helpText: "",
                 show: true,
                 attributes: {
                     svgRepresentation: '<svg width="35" height="20">' + dataAggregateSvgRepresentation() + '</svg>',
                     buttonText: "Add Data Aggregates",
-                    buttonIconClass: "bi bi-window-plus"
-                },
-                provideEnterButton: false,
-                jointJsConfig: {
-                    propertyType: "free",
-                    modelPath: "",
-                    defaultPropPath: "",
-                    minPath: "",
-                    min: ""
-                },
-                buttonActionContent: {
-                    // contentType: PropertyContentType // TODO modalDialog,
+                    buttonIconClass: "bi bi-window-plus",
                     dialogMetaData: {
                         dialogSize: DialogSize.LARGE,
                         header: {
                             // iconClass: "bi bi-window-plus", // TODO decide if this or SVG
                             iconClass: "",
-                            svgRepresentation: '<svg width="35" height="20"><polygon points="0,0 28,0 35,7 28,14 0,14 7,7" transform="translate(0,1)" stroke-width="2" stroke="black" fill="white"></polygon></svg>',
-                            text: "Endpoint: ",
+                            svgRepresentation: '<svg width="35" height="20">' + dataAggregateSvgRepresentation() + '</svg>',
+                            text: "Data Aggregates used by Endpoint: ",
                         },
                         footer: {
                             showCancelButton: true,
                             cancelButtonText: "Cancel",
-                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save"}]
+                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
                         },
                     },
-                    dialogContent: {
-                        contentType: UIContentType.GROUP_FORMS,
-                        groups: [
-                            {
-                                contentGroupMetaData: {
-                                    id: "used-data-table",
-                                    headline: "Data Aggregates used" + '  ( <svg width="35" height="20">' + dataAggregateSvgRepresentation() + '</svg>)',
-                                    text: `The following table shows all Data Aggregate entities associated with this component. By selecting the respective 
-                                        checkbox the Data Aggregate entity will be added to this Endpoint. The selection at the beginning 
-                                        shows the currently saved state for this entity. Your changes won't be adopted until you 
-                                        clicked "Save". In case you cancel and change your entity selection, all your changes will be 
-                                        lost. While you keep the selection of this Endpoint entity, your changes will be remembered.`,
-                                },
-                                contentItems: [
-                                    {
-                                        providedFeature: "uses_data",
-                                        contentType: PropertyContentType.TABLE,
-                                        label: "",
-                                        helpText: "",
-                                        inputProperties: {
-                                            disabled: false,
-                                            readonly: false,
-                                            required: false,
-                                            checked: false,
-                                            selected: false,
-                                        },
-                                        provideEnterButton: false,
-                                        show: true,
-                                        jointJsConfig: {
-                                            propertyType: "customProperty",
-                                            modelPath: "entity/properties/uses_data",
-                                            defaultPropPath: "",
-                                            minPath: "",
-                                            min: ""
-                                        },
-                                        tableColumnHeaders: [
-                                            {
-                                                text: "Data Aggregate"
-                                            },
-                                            {
-                                                text: "Usage relation"
-                                            },
-                                            {
-                                                text: "Include"
-                                            }
-                                        ],
-                                    }
-
-                                ]
-                            }
-                        ]
-                    }
+                    dialogInfo: `The following table shows all Data Aggregate entities associated with this component. By selecting the respective 
+                    checkbox the Data Aggregate entity will be added to this Endpoint. The selection at the beginning 
+                    shows the currently saved state for this entity. Your changes won't be adopted until you 
+                    clicked "Save". In case you cancel and change your entity selection, all your changes will be 
+                    lost. While you keep the selection of this Endpoint entity, your changes will be remembered.`,
+                    tableColumnHeaders: [
+                        {
+                            text: "Data Aggregate"
+                        },
+                        {
+                            text: "Usage relation"
+                        },
+                        {
+                            text: "Include"
+                        }
+                    ]
+                },
+                provideEnterButton: false,
+                jointJsConfig: {
+                    propertyType: "customProperty",
+                    modelPath: "entity/properties/uses_data",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
                 }
             }
         ])
@@ -1254,7 +1060,7 @@ const EntityDetailsConfig: {
         specificProperties: customizePropertyConfigs(concatInOrder(parseProperties(getExternalEndpointProperties(), "entity"), parseProperties(getEndpointProperties(), "entity")), [
             {
                 providedFeature: "embedded",
-                contentType: PropertyContentType.INPUT_TEXTBOX,
+                contentType: PropertyContent.INPUT_TEXTBOX,
                 label: "Parent",
                 helpText: "The parent of the endpoint if it is embedded",
                 inputProperties: {
@@ -1283,8 +1089,8 @@ const EntityDetailsConfig: {
                 }
             },
             {
-                providedFeature: "usesData-wrapper",
-                contentType: PropertyContentType.TABLE_DIALOG,
+                providedFeature: "usesData",
+                contentType: PropertyContent.MULTI_SELECT,
                 label: "Data Aggregates used:",
                 inputProperties: {
                     disabled: false,
@@ -1293,89 +1099,50 @@ const EntityDetailsConfig: {
                     selected: false,
                     readonly: false,
                 },
-                helpText: "The data aggregates used when this endpoint is invoked",
+                helpText: "",
                 show: true,
                 attributes: {
                     svgRepresentation: '<svg width="35" height="20">' + dataAggregateSvgRepresentation() + '</svg>',
                     buttonText: "Add Data Aggregates",
-                    buttonIconClass: "bi bi-window-plus"
-                },
-                provideEnterButton: false,
-                jointJsConfig: {
-                    propertyType: "free",
-                    modelPath: "",
-                    defaultPropPath: "",
-                    minPath: "",
-                    min: ""
-                },
-                buttonActionContent: {
-                    // contentType: PropertyContentType // TODO modalDialog,
+                    buttonIconClass: "bi bi-window-plus",
                     dialogMetaData: {
                         dialogSize: DialogSize.LARGE,
                         header: {
                             // iconClass: "bi bi-window-plus", // TODO decide if this or SVG
                             iconClass: "",
-                            svgRepresentation: '<svg width="35" height="20"><polygon points="0,0 28,0 35,7 28,14 0,14 7,7" transform="translate(0,1)" stroke-width="2" stroke="black" fill="white"></polygon></svg>',
-                            text: "Endpoint: ",
+                            svgRepresentation: '<svg width="35" height="20">' + dataAggregateSvgRepresentation() + '</svg>',
+                            text: "Data Aggregates used by External Endpoint: ",
                         },
                         footer: {
                             showCancelButton: true,
                             cancelButtonText: "Cancel",
-                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save"}]
+                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
                         },
                     },
-                    dialogContent: {
-                        contentType: UIContentType.GROUP_FORMS,
-                        groups: [
-                            {
-                                contentGroupMetaData: {
-                                    id: "used-data-table",
-                                    headline: "Data Aggregates used" + '  ( <svg width="35" height="20">' + dataAggregateSvgRepresentation() + '</svg>)',
-                                    text: `The following table shows all Data Aggregate entities associated with this component. By selecting the respective 
-                                        checkbox the Data Aggregate entity will be added to this Endpoint. The selection at the beginning 
-                                        shows the currently saved state for this entity. Your changes won't be adopted until you 
-                                        clicked "Save". In case you cancel and change your entity selection, all your changes will be 
-                                        lost. While you keep the selection of this Endpoint entity, your changes will be remembered.`,
-                                },
-                                contentItems: [
-                                    {
-                                        providedFeature: "uses_data",
-                                        contentType: PropertyContentType.TABLE,
-                                        label: "",
-                                        helpText: "",
-                                        inputProperties: {
-                                            disabled: false,
-                                            readonly: false,
-                                            required: false,
-                                            checked: false,
-                                            selected: false,
-                                        },
-                                        provideEnterButton: false,
-                                        show: true,
-                                        jointJsConfig: {
-                                            propertyType: "customProperty",
-                                            modelPath: "entity/properties/uses_data",
-                                            defaultPropPath: "",
-                                            minPath: "",
-                                            min: ""
-                                        },
-                                        tableColumnHeaders: [
-                                            {
-                                                text: "Data Aggregate"
-                                            },
-                                            {
-                                                text: "Usage relation"
-                                            },
-                                            {
-                                                text: "Include"
-                                            }
-                                        ],
-                                    }
-
-                                ]
-                            }
-                        ]
-                    }
+                    dialogInfo: `The following table shows all Data Aggregate entities associated with this component. By selecting the respective 
+                    checkbox the Data Aggregate entity will be added to this Endpoint. The selection at the beginning 
+                    shows the currently saved state for this entity. Your changes won't be adopted until you 
+                    clicked "Save". In case you cancel and change your entity selection, all your changes will be 
+                    lost. While you keep the selection of this Endpoint entity, your changes will be remembered.`,
+                    tableColumnHeaders: [
+                        {
+                            text: "Data Aggregate"
+                        },
+                        {
+                            text: "Usage relation"
+                        },
+                        {
+                            text: "Include"
+                        }
+                    ]
+                },
+                provideEnterButton: false,
+                jointJsConfig: {
+                    propertyType: "customProperty",
+                    modelPath: "entity/properties/uses_data",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
                 }
             }
         ])
@@ -1388,8 +1155,8 @@ const EntityDetailsConfig: {
         type: EntityTypes.INFRASTRUCTURE,
         specificProperties: customizePropertyConfigs(parseProperties(getInfrastructureProperties(), "entity"), [
             {
-                providedFeature: "supportedArtifacts-wrapper",
-                contentType: PropertyContentType.TABLE_DIALOG,
+                providedFeature: "supported_artifacts",
+                contentType: PropertyContent.MULTI_SELECT,
                 label: "Supported Artifacts:",
                 helpText: "",
                 inputProperties: {
@@ -1402,19 +1169,7 @@ const EntityDetailsConfig: {
                 attributes: {
                     svgRepresentation: "",
                     buttonText: "Edit supported artifacts",
-                    buttonIconClass: "fa-solid fa-pencil"
-                },
-                provideEnterButton: false,
-                show: true,
-                jointJsConfig: {
-                    propertyType: "free",
-                    modelPath: "",
-                    defaultPropPath: "",
-                    minPath: "",
-                    min: ""
-                },
-                buttonActionContent: {
-                    // contentType: PropertyContentType // TODO modalDialog,
+                    buttonIconClass: "fa-solid fa-pencil",
                     dialogMetaData: {
                         dialogSize: DialogSize.LARGE,
                         header: {
@@ -1425,63 +1180,32 @@ const EntityDetailsConfig: {
                         footer: {
                             showCancelButton: true,
                             cancelButtonText: "Cancel",
-                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save"}]
+                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
                         }
                     },
-                    dialogContent: {
-                        contentType: UIContentType.GROUP_FORMS,
-                        groups: [
-                            {
-                                contentGroupMetaData: {
-                                    id: "supported-artifacts-data",
-                                    headline: "Supported artifacts",
-                                    text: `Type in the name of an artifact type and then add it using the plus button. However, your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all your changes will be lost. While you keep the selection of this Backing Data entity, your changes will be remembered.`,
-                                },
-                                contentItems: [
-                                    {
-                                        providedFeature: "supported_artifacts",
-                                        contentType: PropertyContentType.DYNAMIC_LIST,
-                                        label: "",
-                                        helpText: "",
-                                        inputProperties: {
-                                            disabled: false,
-                                            readonly: false,
-                                            required: false,
-                                            checked: false,
-                                            selected: false,
-                                        },
-                                        provideEnterButton: false,
-                                        show: true,
-                                        jointJsConfig: {
-                                            propertyType: "customProperty",
-                                            modelPath: "entity/properties/supported_artifacts",
-                                            defaultPropPath: "",
-                                            minPath: "",
-                                            min: ""
-                                        },
-                                        listElementFields:
-                                            {
-                                                key: "kind",
-                                                label: "Kind of artifact",
-                                                helpText: "The kind of artifact that is supported",
-                                                labelIcon: "fa-regular fa-file-code",
-                                                placeholder: "e.g. OCI Image"
-                                            }
-                                        ,
-                                        addElementButton: {
-                                            label: "Submit",
-                                            labelIcon: "fa-solid fa-plus"
-                                        }
-                                    }
-                                ]
-                            },
-                        ]
-                    }
-                }
+                    dialogInfo: `Type in the name of an artifact type and then add it using the plus button. However, your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all your changes will be lost. While you keep the selection of this Backing Data entity, your changes will be remembered.`,
+                    tableColumnHeaders: [
+                        {
+                            text: "Artifact type"
+                        },
+                        {
+                            text: "Include"
+                        }
+                    ]
+                },
+                provideEnterButton: false,
+                show: true,
+                jointJsConfig: {
+                    propertyType: "customProperty",
+                    modelPath: "entity/properties/supported_artifacts",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
             },
             {
-                providedFeature: "supportedUpdateStrategies-wrapper",
-                contentType: PropertyContentType.TABLE_DIALOG,
+                providedFeature: "supported_update_strategies",
+                contentType: PropertyContent.MULTI_SELECT,
                 label: "Supported Update Strategies:",
                 helpText: "",
                 inputProperties: {
@@ -1494,19 +1218,7 @@ const EntityDetailsConfig: {
                 attributes: {
                     svgRepresentation: "",
                     buttonText: "Edit supported update strategies",
-                    buttonIconClass: "fa-solid fa-pencil"
-                },
-                provideEnterButton: false,
-                show: true,
-                jointJsConfig: {
-                    propertyType: "free",
-                    modelPath: "",
-                    defaultPropPath: "",
-                    minPath: "",
-                    min: ""
-                },
-                buttonActionContent: {
-                    // contentType: PropertyContentType // TODO modalDialog,
+                    buttonIconClass: "fa-solid fa-pencil",
                     dialogMetaData: {
                         dialogSize: DialogSize.LARGE,
                         header: {
@@ -1517,59 +1229,33 @@ const EntityDetailsConfig: {
                         footer: {
                             showCancelButton: true,
                             cancelButtonText: "Cancel",
-                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save"}]
+                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
                         }
                     },
-                    dialogContent: {
-                        contentType: UIContentType.GROUP_FORMS,
-                        groups: [
-                            {
-                                contentGroupMetaData: {
-                                    id: "supported-update-strategies-data",
-                                    headline: "Supported update strategies",
-                                    text: `Check all update strategies supported by this infrastructure. Your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all your changes will be lost.`,
-                                },
-                                contentItems: [
-                                    {
-                                        providedFeature: "supported_update_strategies",
-                                        contentType: PropertyContentType.TABLE,
-                                        label: "",
-                                        helpText: "",
-                                        inputProperties: {
-                                            disabled: false,
-                                            readonly: false,
-                                            required: false,
-                                            checked: false,
-                                            selected: false,
-                                        },
-                                        provideEnterButton: false,
-                                        show: true,
-                                        jointJsConfig: {
-                                            propertyType: "customProperty",
-                                            modelPath: "entity/properties/supported_update_strategies",
-                                            defaultPropPath: "",
-                                            minPath: "",
-                                            min: ""
-                                        },
-                                        tableColumnHeaders: [
-                                            {
-                                                text: "Update strategy"
-                                            },
-                                            {
-                                                text: "Supported"
-                                            },
-                                        ]
-                                    }
-                                ]
-                            },
-                        ]
-                    }
-                }
+                    dialogInfo: `Check all update strategies supported by this infrastructure. Your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all your changes will be lost.`,
+                    tableColumnHeaders: [
+                        {
+                            text: "Update strategy"
+                        },
+                        {
+                            text: "Supported"
+                        },
+                    ]
+                },
+                provideEnterButton: false,
+                show: true,
+                jointJsConfig: {
+                    propertyType: "customProperty",
+                    modelPath: "entity/properties/supported_update_strategies",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
             },
             {
-                providedFeature: "assigned-networks-wrapper",
-                contentType: PropertyContentType.TABLE_DIALOG,
-                label: "Assigned Networks:",
+                providedFeature: "assigned_networks",
+                contentType: PropertyContent.DYNAMIC_LIST,
+                label: "Assigned networks:",
                 helpText: "",
                 inputProperties: {
                     disabled: false,
@@ -1581,19 +1267,7 @@ const EntityDetailsConfig: {
                 attributes: {
                     svgRepresentation: "",
                     buttonText: "Edit assigned networks",
-                    buttonIconClass: "fa-solid fa-pencil"
-                },
-                provideEnterButton: false,
-                show: true,
-                jointJsConfig: {
-                    propertyType: "free",
-                    modelPath: "",
-                    defaultPropPath: "",
-                    minPath: "",
-                    min: ""
-                },
-                buttonActionContent: {
-                    // contentType: PropertyContentType // TODO modalDialog,
+                    buttonIconClass: "fa-solid fa-pencil",
                     dialogMetaData: {
                         dialogSize: DialogSize.LARGE,
                         header: {
@@ -1604,59 +1278,33 @@ const EntityDetailsConfig: {
                         footer: {
                             showCancelButton: true,
                             cancelButtonText: "Cancel",
-                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save"}]
+                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
                         }
                     },
-                    dialogContent: {
-                        contentType: UIContentType.GROUP_FORMS,
-                        groups: [
-                            {
-                                contentGroupMetaData: {
-                                    id: "assigned-networks-data",
-                                    headline: "Assigned networks",
-                                    text: `Type in the id or subnet mask of a network and then add it using the plus button. However, your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all your changes will be lost. While you keep the selection of this Backing Data entity, your changes will be remembered.`,
-                                },
-                                contentItems: [
-                                    {
-                                        providedFeature: "assigned_networks",
-                                        contentType: PropertyContentType.DYNAMIC_LIST,
-                                        label: "",
-                                        helpText: "",
-                                        inputProperties: {
-                                            disabled: false,
-                                            readonly: false,
-                                            required: false,
-                                            checked: false,
-                                            selected: false,
-                                        },
-                                        provideEnterButton: false,
-                                        show: true,
-                                        jointJsConfig: {
-                                            propertyType: "customProperty",
-                                            modelPath: "entity/properties/assigned_networks",
-                                            defaultPropPath: "",
-                                            minPath: "",
-                                            min: ""
-                                        },
-                                        listElementFields:
-                                            {
-                                                key: "network-id",
-                                                label: "Network Name",
-                                                helpText: "The name of the network to assign",
-                                                labelIcon: "fa-solid fa-network-wired",
-                                                placeholder: "e.g. my-private-network"
-                                            }
-                                        ,
-                                        addElementButton: {
-                                            label: "Submit",
-                                            labelIcon: "fa-solid fa-plus"
-                                        }
-                                    }
-                                ]
-                            },
-                        ]
+                    dialogInfo: `Type in the id or subnet mask of a network and then add it using the plus button. However, your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all your changes will be lost. While you keep the selection of this entity, your changes will be remembered.`,
+                    listElementFields: [
+                        {
+                            key: "network-id",
+                            label: "Network Name",
+                            helpText: "The name of the network to assign",
+                            labelIcon: "fa-solid fa-network-wired",
+                            placeholder: "e.g. my-private-network"
+                        }
+                    ],
+                    addElementButton: {
+                        label: "Submit",
+                        labelIcon: "fa-solid fa-plus"
                     }
-                }
+                },
+                provideEnterButton: false,
+                show: true,
+                jointJsConfig: {
+                    propertyType: "customProperty",
+                    modelPath: "entity/properties/assigned_networks",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
             }
         ])
     },
@@ -1668,7 +1316,7 @@ const EntityDetailsConfig: {
         type: EntityTypes.DATA_AGGREGATE,
         specificProperties: customizePropertyConfigs(parseProperties(getDataAggregateProperties(), "entity").concat(parseProperties(getDataAggregateRelationshipProperties(), "relationship")), [{
             providedFeature: "dataAggregate-chooseEditMode",
-            contentType: PropertyContentType.TOGGLE,
+            contentType: PropertyContent.TOGGLE,
             label: "Edit Mode:",
             labels: {
                 headLabel: "<U>Edit Mode:</U>",
@@ -1695,7 +1343,7 @@ const EntityDetailsConfig: {
         },
         {
             providedFeature: "embedded",
-            contentType: PropertyContentType.INPUT_TEXTBOX,
+            contentType: PropertyContent.INPUT_TEXTBOX,
             label: "Parent",
             helpText: "The parent of the data aggregate if it is embedded",
             inputProperties: {
@@ -1725,7 +1373,7 @@ const EntityDetailsConfig: {
         },
         {
             providedFeature: "dataAggregate-assignedFamily",
-            contentType: PropertyContentType.INPUT_TEXTBOX,
+            contentType: PropertyContent.INPUT_TEXTBOX,
             label: "- Family assigned:",
             helpText: "The family of the Data Aggregate",
             inputProperties: {
@@ -1753,8 +1401,8 @@ const EntityDetailsConfig: {
                 min: ""
             }
         }, {
-            providedFeature: "dataAggregate-familyConfig-wrapper",
-            contentType: PropertyContentType.TABLE_DIALOG,
+            providedFeature: "dataAggregate-familyConfig",
+            contentType: PropertyContent.MULTI_SELECT,
             label: "- Family:",
             helpText: "",
             inputProperties: {
@@ -1767,84 +1415,48 @@ const EntityDetailsConfig: {
             attributes: {
                 svgRepresentation: `<svg width="30" height="20">${dataAggregateSvgRepresentation()}</svg>`,
                 buttonText: "Edit Family",
-                buttonIconClass: "fa-solid fa-pencil"
-            },
-            show: true,
-            provideEnterButton: false,
-            jointJsConfig: {
-                propertyType: "free",
-                modelPath: "",
-                defaultPropPath: "",
-                minPath: "",
-                min: ""
-            },
-            buttonActionContent: {
-                // contentType: PropertyContentType // TODO modalDialog,
+                buttonIconClass: "fa-solid fa-pencil",
                 dialogMetaData: {
                     dialogSize: DialogSize.LARGE,
                     header: {
                         iconClass: "",
                         svgRepresentation: `<svg width="30" height="20">${dataAggregateSvgRepresentation()}</svg>`,
-                        text: "Data Aggregate Family Config",
+                        text: "Included Data Aggregate entities",
                     },
                     footer: {
                         showCancelButton: true,
                         cancelButtonText: "Cancel",
-                        actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save"}]
+                        actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
                     },
+
                 },
-                dialogContent: {
-                    contentType: UIContentType.GROUP_FORMS,
-                    groups: [
-                        {
-                            contentGroupMetaData: {
-                                id: "dataAggregate-familyConfig-table",
-                                headline: "Included Data Aggregate entities" + '  ( <svg width="30" height="20">' + dataAggregateSvgRepresentation() + '</svg>)',
-                                text: `The following table shows all existing Data Aggregate entities within this System. You can select which ones of the following Data Aggregate entities you want to include in this
-                                    family. Note that if you select a Data Aggregate and save your changes, the labels of the selected Data Aggregate entities might change since they have to be equal to the family name.
-                                    Additionally, if you deselect entities that have previously been part of this family, their label will be reset to "Data Aggregate". However, your changes won't be adopted until you 
-                                    clicked "Save". In case you cancel and change your entity selection, all your changes will be lost. While you keep the selection of this Data Aggregate entity, your changes will be remembered.`
-                            },
-                            contentItems: [{
-                                providedFeature: "dataAggregate-familyConfig",
-                                contentType: PropertyContentType.TABLE,
-                                label: "",
-                                helpText: "",
-                                inputProperties: {
-                                    disabled: false,
-                                    readonly: false,
-                                    required: false,
-                                    checked: false,
-                                    selected: false,
-                                },
-                                provideEnterButton: false,
-                                show: true,
-                                jointJsConfig: {
-                                    propertyType: "customProperty",
-                                    modelPath: "",
-                                    defaultPropPath: "",
-                                    minPath: "",
-                                    min: ""
-                                },
-                                tableColumnHeaders: [
-                                    {
-                                        text: "Name"
-                                    },
-                                    {
-                                        text: "Family Name"
-                                    },
-                                    {
-                                        text: "Parent"
-                                    },
-                                    {
-                                        text: "Include"
-                                    }
-                                ]
-                            }
-                            ]
-                        }
-                    ]
-                }
+                dialogInfo: `The following table shows all existing Data Aggregate entities within this System. You can select which ones of the following Data Aggregate entities you want to include in this
+                family. Note that if you select a Data Aggregate and save your changes, the labels of the selected Data Aggregate entities might change since they have to be equal to the family name.
+                Additionally, if you deselect entities that have previously been part of this family, their label will be reset to "Data Aggregate". However, your changes won't be adopted until you 
+                clicked "Save". In case you cancel and change your entity selection, all your changes will be lost. While you keep the selection of this Data Aggregate entity, your changes will be remembered.`,
+                tableColumnHeaders: [
+                    {
+                        text: "Name"
+                    },
+                    {
+                        text: "Family Name"
+                    },
+                    {
+                        text: "Parent"
+                    },
+                    {
+                        text: "Include"
+                    }
+                ]
+            },
+            show: true,
+            provideEnterButton: false,
+            jointJsConfig: {
+                propertyType: "customProperty",
+                modelPath: "",
+                defaultPropPath: "",
+                minPath: "",
+                min: ""
             }
         }
         ])
@@ -1854,7 +1466,7 @@ const EntityDetailsConfig: {
         specificProperties: customizePropertyConfigs(parseProperties(getBackingDataProperties(), "entity").concat(parseProperties(getBackingDataRelationshipProperties(), "relationship")), [
             {
                 providedFeature: "backingData-chooseEditMode",
-                contentType: PropertyContentType.TOGGLE,
+                contentType: PropertyContent.TOGGLE,
                 label: "Edit Mode:",
                 labels: {
                     headLabel: "<U>Edit Mode:</U>",
@@ -1881,7 +1493,7 @@ const EntityDetailsConfig: {
             },
             {
                 providedFeature: "embedded",
-                contentType: PropertyContentType.INPUT_TEXTBOX,
+                contentType: PropertyContent.INPUT_TEXTBOX,
                 label: "Parent",
                 helpText: "The parent of the backing data if it is embedded",
                 inputProperties: {
@@ -1910,8 +1522,8 @@ const EntityDetailsConfig: {
                 }
             },
             {
-                providedFeature: "backingData-includedData-wrapper",
-                contentType: PropertyContentType.TABLE_DIALOG,
+                providedFeature: "backingData-includedData",
+                contentType: PropertyContent.DYNAMIC_LIST,
                 label: "Included Data:",
                 helpText: "",
                 inputProperties: {
@@ -1924,19 +1536,7 @@ const EntityDetailsConfig: {
                 attributes: {
                     svgRepresentation: `<svg width="30" height="20">${backingDataSvgRepresentation()}</svg>`,
                     buttonText: "Edit Included Data",
-                    buttonIconClass: "fa-solid fa-pencil"
-                },
-                provideEnterButton: false,
-                show: false,
-                jointJsConfig: {
-                    propertyType: "free",
-                    modelPath: "",
-                    defaultPropPath: "",
-                    minPath: "",
-                    min: ""
-                },
-                buttonActionContent: {
-                    // contentType: PropertyContentType // TODO modalDialog,
+                    buttonIconClass: "fa-solid fa-pencil",
                     dialogMetaData: {
                         dialogSize: DialogSize.LARGE,
                         header: {
@@ -1947,72 +1547,46 @@ const EntityDetailsConfig: {
                         footer: {
                             showCancelButton: true,
                             cancelButtonText: "Cancel",
-                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save"}]
+                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
                         }
                     },
-                    dialogContent: {
-                        contentType: UIContentType.GROUP_FORMS,
-                        groups: [
-                            {
-                                contentGroupMetaData: {
-                                    id: "backingData-includedData",
-                                    headline: "Included Data",
-                                    text: `The following table shows all data elements included in this Backing Data entity. In case you want to add a new entry, the following section provides two text element boxes you can use to 
-                                        provide the information and then add it using the plus button. However, your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all 
-                                        your changes will be lost. While you keep the selection of this Backing Data entity, your changes will be remembered.`,
-                                },
-                                contentItems: [
-                                    {
-                                        providedFeature: "backingData-includedData",
-                                        contentType: PropertyContentType.DYNAMIC_LIST,
-                                        label: "",
-                                        helpText: "",
-                                        inputProperties: {
-                                            disabled: false,
-                                            readonly: false,
-                                            required: false,
-                                            checked: false,
-                                            selected: false,
-                                        },
-                                        provideEnterButton: false,
-                                        show: true,
-                                        jointJsConfig: {
-                                            propertyType: "customProperty",
-                                            modelPath: "entity/properties/included_data",
-                                            defaultPropPath: "",
-                                            minPath: "",
-                                            min: ""
-                                        },
-                                        listElementFields: [
-                                            {
-                                                key: "key",
-                                                label: "Key",
-                                                helpText: "The key that identifies the following value item.",
-                                                labelIcon: "fa-solid fa-key",
-                                                placeholder: "e.g. My_SQL_Password"
-                                            },
-                                            {
-                                                key: "value",
-                                                label: "Value",
-                                                helpText: "The value of this data item.",
-                                                labelIcon: "bi bi-chat-square-text-fill",
-                                                placeholder: "e.g. mysqlpw"
-                                            }
-                                        ],
-                                        addElementButton: {
-                                            label: "Submit",
-                                            labelIcon: "fa-solid fa-plus"
-                                        }
-                                    }
-                                ]
-                            },
-                        ]
+                    dialogInfo: `The following table shows all data elements included in this Backing Data entity. In case you want to add a new entry, the following section provides two text element boxes you can use to 
+                    provide the information and then add it using the plus button. However, your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all 
+                    your changes will be lost. While you keep the selection of this Backing Data entity, your changes will be remembered.`,
+                    listElementFields: [
+                        {
+                            key: "key",
+                            label: "Key",
+                            helpText: "The key that identifies the following value item.",
+                            labelIcon: "fa-solid fa-key",
+                            placeholder: "e.g. My_SQL_Password"
+                        },
+                        {
+                            key: "value",
+                            label: "Value",
+                            helpText: "The value of this data item.",
+                            labelIcon: "bi bi-chat-square-text-fill",
+                            placeholder: "e.g. mysqlpw"
+                        }
+                    ],
+                    addElementButton: {
+                        label: "Submit",
+                        labelIcon: "fa-solid fa-plus"
                     }
+                },
+                provideEnterButton: false,
+                show: false,
+                jointJsConfig: {
+                    propertyType: "customProperty",
+                    modelPath: "entity/properties/included_data",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
                 }
             },
             {
                 providedFeature: "backingData-assignedFamily",
-                contentType: PropertyContentType.INPUT_TEXTBOX,
+                contentType: PropertyContent.INPUT_TEXTBOX,
                 label: `- Family assigned:`,
                 inputProperties: {
                     disabled: true,
@@ -2041,8 +1615,8 @@ const EntityDetailsConfig: {
                 }
             },
             {
-                providedFeature: "backingData-familyConfig-wrapper",
-                contentType: PropertyContentType.TABLE_DIALOG,
+                providedFeature: "backingData-familyConfig",
+                contentType: PropertyContent.MULTI_SELECT,
                 label: "– Family:",
                 helpText: "",
                 inputProperties: {
@@ -2055,86 +1629,48 @@ const EntityDetailsConfig: {
                 attributes: {
                     svgRepresentation: `<svg width="30" height="20">${backingDataSvgRepresentation()}</svg>`,
                     buttonText: "Edit Family",
-                    buttonIconClass: "fa-solid fa-pencil"
-                },
-                show: true,
-                provideEnterButton: false,
-                jointJsConfig: {
-                    propertyType: "free",
-                    modelPath: "",
-                    defaultPropPath: "",
-                    minPath: "",
-                    min: ""
-                },
-                buttonActionContent: {
-                    // contentType: PropertyContentType // TODO modalDialog,
+                    buttonIconClass: "fa-solid fa-pencil",
                     dialogMetaData: {
                         dialogSize: DialogSize.LARGE,
                         header: {
                             iconClass: "",
                             svgRepresentation: `<svg width="30" height="20">${backingDataSvgRepresentation()}</svg>`,
-                            text: "Backing Data Family Config "
+                            text: "Included Backing Data entities "
                         },
                         footer: {
                             showCancelButton: true,
                             cancelButtonText: "Cancel",
-                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save"}]
+                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
                         }
                     },
-                    dialogContent: {
-                        contentType: UIContentType.GROUP_FORMS,
-                        groups: [
-                            {
-                                contentGroupMetaData: {
-                                    id: "backingData-familyConfig-table",
-                                    headline: "Included Backing Data entities" + '  ( <svg width="30" height="20">' + backingDataSvgRepresentation() + '</svg>)',
-                                    text: `The following table shows all existing Backing Data entities within this System. You can select which ones of the following Backing Data entities you want to include in this
-                                    family. Note that if you select a Backing Data and save your changes, the labels of the selected Backing Data entities might change since they have to be equal to the family name.
-                                    Additionally, if you deselect entities that have previously been part of this family, their label will be reset to "Backing Data". However, your changes won't be adopted until you 
-                                    clicked "Save". In case you cancel and change your entity selection, all your changes will be lost. While you keep the selection of this Backing Data entity, your changes will be remembered.`,
-                                },
-                                contentItems: [
-                                    {
-                                        providedFeature: "backingData-familyConfig",
-                                        contentType: PropertyContentType.TABLE,
-                                        label: "",
-                                        helpText: "",
-                                        inputProperties: {
-                                            disabled: false,
-                                            readonly: false,
-                                            required: false,
-                                            checked: false,
-                                            selected: false,
-                                        },
-                                        provideEnterButton: false,
-                                        show: true,
-                                        jointJsConfig: {
-                                            propertyType: "customProperty",
-                                            modelPath: "",
-                                            defaultPropPath: "",
-                                            minPath: "",
-                                            min: ""
-                                        },
-                                        tableColumnHeaders: [
-                                            {
-                                                text: "Name"
-                                            },
-                                            {
-                                                text: "Family Name"
-                                            },
-                                            {
-                                                text: "Parent"
-                                            },
-                                            {
-                                                text: "Include"
-                                            }
-                                        ]
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                }
+                    dialogInfo: `The following table shows all existing Backing Data entities within this System. You can select which ones of the following Backing Data entities you want to include in this
+                    family. Note that if you select a Backing Data and save your changes, the labels of the selected Backing Data entities might change since they have to be equal to the family name.
+                    Additionally, if you deselect entities that have previously been part of this family, their label will be reset to "Backing Data". However, your changes won't be adopted until you 
+                    clicked "Save". In case you cancel and change your entity selection, all your changes will be lost. While you keep the selection of this Backing Data entity, your changes will be remembered.`,
+                    tableColumnHeaders: [
+                        {
+                            text: "Name"
+                        },
+                        {
+                            text: "Family Name"
+                        },
+                        {
+                            text: "Parent"
+                        },
+                        {
+                            text: "Include"
+                        }
+                    ]
+                },
+                show: true,
+                provideEnterButton: false,
+                jointJsConfig: {
+                    propertyType: "customProperty",
+                    modelPath: "",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
             }
         ])
     },
@@ -2143,7 +1679,7 @@ const EntityDetailsConfig: {
         specificProperties: customizePropertyConfigs(parseProperties(getRequestTraceProperties(), "entity"), [
             {
                 providedFeature: "referred_endpoint",
-                contentType: PropertyContentType.DROPDOWN,
+                contentType: PropertyContent.DROPDOWN,
                 label: "External Endpoint:",
                 inputProperties: {
                     disabled: false,
@@ -2171,8 +1707,8 @@ const EntityDetailsConfig: {
                 dropdownOptions: []
             },
             {
-                providedFeature: "involvedLinks-wrapper",
-                contentType: PropertyContentType.TABLE_DIALOG,
+                providedFeature: "involved_links",
+                contentType: PropertyContent.MULTI_SELECT,
                 label: "Involved Links:",
                 inputProperties: {
                     disabled: false,
@@ -2181,100 +1717,125 @@ const EntityDetailsConfig: {
                     selected: false,
                     readonly: false,
                 },
-                helpText: "The links involved in this request trace.",
+                helpText: "",
                 show: true,
                 attributes: {
                     svgRepresentation: '<svg width="35" height="20">' + linkSvgRepresentation() + '</svg>',
                     buttonText: "Add Link entities",
-                    buttonIconClass: "bi bi-window-plus"
-                },
-                provideEnterButton: false,
-                jointJsConfig: {
-                    propertyType: "free",
-                    modelPath: "",
-                    defaultPropPath: "",
-                    minPath: "",
-                    min: ""
-                },
-                buttonActionContent: {
-                    // contentType: PropertyContentType // TODO modalDialog,
+                    buttonIconClass: "bi bi-window-plus",
                     dialogMetaData: {
                         dialogSize: DialogSize.LARGE,
                         header: {
                             // iconClass: "bi bi-window-plus", // TODO decide if this or SVG
                             iconClass: "",
-                            svgRepresentation: '<svg width="35" height="20"><polygon points="0,0 28,0 35,7 28,14 0,14 7,7" transform="translate(0,1)" stroke-width="2" stroke="black" fill="white"></polygon></svg>',
-                            text: "Request Trace: ",
+                            svgRepresentation: '<svg width="35" height="20">' + linkSvgRepresentation() + '</svg>',
+                            text: "Links involved in Request Trace",
                         },
                         footer: {
                             showCancelButton: true,
                             cancelButtonText: "Cancel",
-                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save"}]
+                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
                         },
                     },
-                    dialogContent: {
-                        contentType: UIContentType.GROUP_FORMS,
-                        groups: [
-                            {
-                                contentGroupMetaData: {
-                                    id: "involved-links-table",
-                                    headline: "Involved Links" + '  ( <svg width="35" height="20">' + linkSvgRepresentation() + '</svg>)',
-                                    text: `The following table shows all Link entities that currently exist for this System. 
-                                        Invalid Links, such as non-connected ones or if they are connected to an Endpoint without
-                                        a parent entity cannot be selected and are thus deactived. By selecting the respective 
-                                        checkbox the Link entity will be added to this Request Trace. The selection at the beginning 
-                                        shows the currently saved state for this entity. Your changes won't be adopted until you 
-                                        clicked "Save". In case you cancel and change your entity selection, all your changes will be 
-                                        lost. While you keep the selection of this Request Trace entity, your changes will be remembered.`,
-                                },
-                                contentItems: [
-                                    {
-                                        providedFeature: "involved_links",
-                                        contentType: PropertyContentType.TABLE,
-                                        label: "",
-                                        helpText: "",
-                                        inputProperties: {
-                                            disabled: false,
-                                            readonly: false,
-                                            required: false,
-                                            checked: false,
-                                            selected: false,
-                                        },
-                                        provideEnterButton: false,
-                                        show: true,
-                                        jointJsConfig: {
-                                            propertyType: "customProperty",
-                                            modelPath: "entity/properties/involved_links",
-                                            defaultPropPath: "",
-                                            minPath: "",
-                                            min: ""
-                                        },
-                                        tableColumnHeaders: [
-                                            {
-                                                text: "From"
-                                            },
-                                            {
-                                                text: "To Endpoint"
-                                            },
-                                            {
-                                                text: "Endpoint Parent"
-                                            },
-                                            {
-                                                text: "Include"
-                                            }
-                                        ],
-                                    }
-
-                                ]
-                            }
-                        ]
-                    }
-                }
+                    dialogInfo: `The following table shows all Link entities that currently exist for this System. 
+                    Invalid Links, such as non-connected ones or if they are connected to an Endpoint without
+                    a parent entity cannot be selected and are thus deactivated. By selecting the respective 
+                    checkbox the Link entity will be added to this Request Trace. The selection at the beginning 
+                    shows the currently saved state for this entity. Your changes won't be adopted until you 
+                    clicked "Save". In case you cancel and change your entity selection, all your changes will be 
+                    lost. While you keep the selection of this Request Trace entity, your changes will be remembered.`,
+                    tableColumnHeaders: [
+                        {
+                            text: "From"
+                        },
+                        {
+                            text: "To Endpoint"
+                        },
+                        {
+                            text: "Endpoint Parent"
+                        },
+                        {
+                            text: "Include"
+                        }
+                    ],
+                },
+                provideEnterButton: false,
+                jointJsConfig: {
+                    propertyType: "customProperty",
+                    modelPath: "entity/properties/involved_links",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
             }
-
         ])
     }
 };
+
+const EditArtifactsConfig: PropertyConfig = {
+    providedFeature: "artifacts",
+    contentType: PropertyContent.DYNAMIC_LIST,
+    label: "Artifacts",
+    helpText: "",
+    inputProperties: {
+        disabled: false,
+        required: false,
+        checked: false,
+        selected: false,
+        readonly: false
+    },
+    attributes: {
+        svgRepresentation: "",
+        buttonText: "Edit Artifacts",
+        buttonIconClass: "fa-solid fa-pencil",
+        dialogMetaData: {
+            dialogSize: DialogSize.LARGE,
+            header: {
+                iconClass: "",
+                svgRepresentation: "",
+                text: "Artifacts of this entity: "
+            },
+
+            footer: {
+                showCancelButton: true,
+                cancelButtonText: "Cancel",
+                actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
+            }
+        },
+        dialogInfo: `The following table shows all data elements included in this Backing Data entity. In case you want to add a new entry, the following section provides two text element boxes you can use to 
+        provide the information and then add it using the plus button. However, your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all 
+        your changes will be lost. While you keep the selection of this Backing Data entity, your changes will be remembered.`,
+        listElementFields: [
+            {
+                key: "key",
+                label: "Key",
+                helpText: "The key that identifies the following value item.",
+                labelIcon: "fa-solid fa-key",
+                placeholder: "e.g. My_SQL_Password"
+            },
+            {
+                key: "value",
+                label: "Value",
+                helpText: "The value of this data item.",
+                labelIcon: "bi bi-chat-square-text-fill",
+                placeholder: "e.g. mysqlpw"
+            }
+        ],
+        addElementButton: {
+            label: "Submit",
+            labelIcon: "fa-solid fa-plus"
+        }
+    },
+    provideEnterButton: false,
+    show: true,
+    jointJsConfig: {
+        propertyType: "customProperty",
+        modelPath: "entity/artifacts",
+        defaultPropPath: "",
+        minPath: "",
+        min: ""
+    },
+}
 
 const ColourConfig = {
     // entityHighlighting: "aqua"
@@ -2284,7 +1845,7 @@ const ColourConfig = {
 }
 
 export {
-    PropertyContentType, ParentRelation, DetailsSidebarConfig,
+    PropertyContent, ParentRelation, DetailsSidebarConfig,
     EntityDetailsConfig, ColourConfig,
     dataAggregateSvgRepresentation, backingDataSvgRepresentation
 };

@@ -59,15 +59,13 @@
 
 
 <script lang="ts" setup>
-import { PropertyContentType, DetailsSidebarConfig, EntityDetailsConfig, PropertyConfig, } from '../../config/detailsSidebarConfig';
+import { PropertyContent, DetailsSidebarConfig, EntityDetailsConfig, PropertyConfig, } from '../../config/detailsSidebarConfig';
 import { dia } from '@joint/core';
 import { ref, computed, onUpdated, onMounted } from 'vue';
 import EntityTypes from '@/modeling/config/entityTypes';
 import PropertiesEditor from './PropertiesEditor.vue';
 import type { EditPropertySection } from './PropertiesEditor.vue';
 import { toPropertySections } from './PropertiesEditor.vue';
-import { FormContentData, findInDialogByFeature } from '../components/ModalEditDialog.vue';
-import { prop } from 'vue-class-component';
 import { DEPLOYMENT_UPDATE_STRATEGIES } from '@/core/entities/deploymentMapping';
 
 const toArray = (o: object, keyName: string, valueName: string) => {
@@ -306,8 +304,7 @@ onUpdated(() => {
         case EntityTypes.SERVICE:
         case EntityTypes.BACKING_SERVICE:
         case EntityTypes.STORAGE_BACKING_SERVICE:
-            let editComponentAssignedNetworks: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "assigned-networks-wrapper");
-            let componentAssignedNetworksOption = findInDialogByFeature(editComponentAssignedNetworks.buttonActionContent, "assigned_networks");
+            let componentAssignedNetworksOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "assigned_networks");
             componentAssignedNetworksOption.includeFormCheck = false;
             componentAssignedNetworksOption.value = selectedEntity.model.prop(componentAssignedNetworksOption.jointJsConfig.modelPath);
 
@@ -329,15 +326,13 @@ onUpdated(() => {
             break;
         case EntityTypes.INFRASTRUCTURE:
 
-            let editSupportedArtifacts: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "supportedArtifacts-wrapper");
-            let supportedArtifactsOption = findInDialogByFeature(editSupportedArtifacts.buttonActionContent, "supported_artifacts");
+            let supportedArtifactsOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "supported_artifacts");
             supportedArtifactsOption.includeFormCheck = false;
 
             supportedArtifactsOption.value = selectedEntity.model.prop(supportedArtifactsOption.jointJsConfig.modelPath);
 
             // prepare involved links selection
-            let supportedUpdateStrategiesWrapperConfig: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "supportedUpdateStrategies-wrapper");
-            let supportedUpdateStrategiesConfig = findInDialogByFeature(supportedUpdateStrategiesWrapperConfig.buttonActionContent, "supported_update_strategies");
+            let supportedUpdateStrategiesConfig: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "supported_update_strategies");
             supportedUpdateStrategiesConfig.includeFormCheck = false;
 
             const currentlySupportedStrategies = selectedEntity.model.prop(supportedUpdateStrategiesConfig.jointJsConfig.modelPath) ? selectedEntity.model.prop(supportedUpdateStrategiesConfig.jointJsConfig.modelPath) : [];
@@ -350,7 +345,7 @@ onUpdated(() => {
                     columns: {
                         name: strategy.name,
                         supported: {
-                            contentType: PropertyContentType.CHECKBOX_WITHOUT_LABEL,
+                            contentType: PropertyContent.CHECKBOX_WITHOUT_LABEL,
                             disabled: false,
                             checked: currentlySupportedStrategies.includes(strategy.key),
                             id: strategy.key
@@ -363,8 +358,7 @@ onUpdated(() => {
                 });
             })
 
-            let editAssignedNetworks: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "assigned-networks-wrapper");
-            let assignedNetworksOption = findInDialogByFeature(editAssignedNetworks.buttonActionContent, "assigned_networks");
+            let assignedNetworksOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "assigned_networks");
             assignedNetworksOption.includeFormCheck = false;
 
             assignedNetworksOption.value = selectedEntity.model.prop(assignedNetworksOption.jointJsConfig.modelPath);
@@ -396,7 +390,7 @@ onUpdated(() => {
                     return false;
                 }
             });
-            let familyConfigOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "dataAggregate-familyConfig-wrapper");
+            let familyConfigOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "dataAggregate-familyConfig");
             familyConfigOption.includeFormCheck = false;
             familyConfigOption.show = computed(() => {
                 if (findInSectionsByFeature(selectedEntityPropertyGroups.value, "embedded").value !== "") {
@@ -405,17 +399,15 @@ onUpdated(() => {
                     return true;
                 }
             });
-            let familyTableConfig = ((familyConfigOption.buttonActionContent.dialogContent as FormContentData).groups)[0].contentItems[0];
-            familyTableConfig.includeFormCheck = false;
             // clear table rows
-            familyTableConfig.tableRows.length = 0;
+            familyConfigOption.tableRows.length = 0;
             // TODO make sure this does not have to be cleared by avoiding that the original config is changed, which is currently the case
             props.graph.getElements().filter(element => element.prop("entity/type") === EntityTypes.DATA_AGGREGATE).forEach(dataAggregate => {
                 let parent = dataAggregate.getParentCell();
                 let isValid = !!parent
                 let parentName = isValid ? parent.attr("label/textWrap/text") : "-";
                 let isSameFamily = dataAggregate.prop(assignedFamilyOption.jointJsConfig.modelPath).length !== 0 && dataAggregate.prop(assignedFamilyOption.jointJsConfig.modelPath).localeCompare(props.selectedEntity.model.prop(assignedFamilyOption.jointJsConfig.modelPath)) === 0;
-                familyTableConfig.tableRows.push({
+                familyConfigOption.tableRows.push({
                     attributes: {
                         isTheCurrentEntity: selectedEntity.model.id === dataAggregate.id,
                         representationClass: isValid ? "validOption" : "invalidOption",
@@ -426,7 +418,7 @@ onUpdated(() => {
                         familyName: dataAggregate.prop(assignedFamilyOption.jointJsConfig.modelPath) ? dataAggregate.prop(assignedFamilyOption.jointJsConfig.modelPath) : "-",
                         parent: parentName,
                         included: {
-                            contentType: PropertyContentType.CHECKBOX_WITHOUT_LABEL,
+                            contentType: PropertyContent.CHECKBOX_WITHOUT_LABEL,
                             disabled: !isValid,
                             checked: isSameFamily,
                             id: dataAggregate.id
@@ -456,18 +448,15 @@ onUpdated(() => {
             chooseBDEditModeOption.show = computed(() => findInSectionsByFeature(selectedEntityPropertyGroups.value, "embedded").value !== "");
 
             //TODO included data always visible?
-            let includedDataOptionWrapper: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "backingData-includedData-wrapper");
-            includedDataOptionWrapper.includeFormCheck = false;
-            includedDataOptionWrapper.show = computed(() => {
+            let includedDataOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "backingData-includedData");
+            includedDataOption.includeFormCheck = false;
+            includedDataOption.show = computed(() => {
                 if (findInSectionsByFeature(selectedEntityPropertyGroups.value, "embedded").value !== "") {
                     return findInSectionsByFeature(selectedEntityPropertyGroups.value, "backingData-chooseEditMode").checked
                 } else {
                     return true;
                 }
             });
-
-            let includedDataOption = findInDialogByFeature(includedDataOptionWrapper.buttonActionContent, "backingData-includedData");
-            includedDataOption.includeFormCheck = false;
 
             const toArray = (o: object, keyName: string, valueName: string) => {
                 let asArray = [];
@@ -480,7 +469,7 @@ onUpdated(() => {
                 return asArray;
             }
 
-            includedDataOption.value = toArray(selectedEntity.model.prop("entity/properties/included_data"), includedDataOption.listElementFields[0].key, includedDataOption.listElementFields[1].key);
+            includedDataOption.value = toArray(selectedEntity.model.prop("entity/properties/included_data"), includedDataOption.attributes.listElementFields[0].key, includedDataOption.attributes.listElementFields[1].key);
 
             let backingDataAssignedFamilyOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "backingData-assignedFamily");
             backingDataAssignedFamilyOption.show = computed(() => {
@@ -491,7 +480,7 @@ onUpdated(() => {
                 }
             }
             );
-            let backingDataFamilyConfigOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "backingData-familyConfig-wrapper");
+            let backingDataFamilyConfigOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "backingData-familyConfig");
             backingDataFamilyConfigOption.includeFormCheck = false;
             backingDataFamilyConfigOption.show = computed(() => {
                 if (findInSectionsByFeature(selectedEntityPropertyGroups.value, "embedded").value !== "") {
@@ -500,17 +489,15 @@ onUpdated(() => {
                     return true;
                 }
             });
-            let backingDataFamilyTableConfig = (backingDataFamilyConfigOption.buttonActionContent.dialogContent as FormContentData).groups[0].contentItems[0];
-            backingDataFamilyTableConfig.includeFormCheck = false;
             // clear table rows
-            backingDataFamilyTableConfig.tableRows.length = 0;
+            backingDataFamilyConfigOption.tableRows.length = 0;
             // TODO make sure this does not have to be cleared by avoiding that the original config is changed, which is currently the case
             props.graph.getElements().filter(element => element.prop("entity/type") === EntityTypes.BACKING_DATA).forEach(backingData => {
                 let parent = backingData.getParentCell();
                 let isValid = !!parent
                 let parentName = isValid ? parent.attr("label/textWrap/text") : "-";
                 let isSameFamily = backingData.prop(backingDataAssignedFamilyOption.jointJsConfig.modelPath).length !== 0 && backingData.prop(backingDataAssignedFamilyOption.jointJsConfig.modelPath).localeCompare(props.selectedEntity.model.prop(backingDataAssignedFamilyOption.jointJsConfig.modelPath)) === 0;
-                backingDataFamilyTableConfig.tableRows.push({
+                backingDataFamilyConfigOption.tableRows.push({
                     attributes: {
                         isTheCurrentEntity: selectedEntity.model.id === backingData.id,
                         representationClass: isValid ? "validOption" : "invalidOption",
@@ -521,7 +508,7 @@ onUpdated(() => {
                         familyName: backingData.prop(backingDataAssignedFamilyOption.jointJsConfig.modelPath) ? backingData.prop(backingDataAssignedFamilyOption.jointJsConfig.modelPath) : "-",
                         parent: parentName,
                         included: {
-                            contentType: PropertyContentType.CHECKBOX_WITHOUT_LABEL,
+                            contentType: PropertyContent.CHECKBOX_WITHOUT_LABEL,
                             disabled: !isValid,
                             checked: isSameFamily,
                             id: backingData.id
@@ -564,8 +551,7 @@ onUpdated(() => {
             externalEndpointOption.value = selectedExternalEndpoint;
 
             // prepare involved links selection
-            let involvedLinksWrapperConfig: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "involvedLinks-wrapper");
-            let involvedLinksConfig = findInDialogByFeature(involvedLinksWrapperConfig.buttonActionContent, "involved_links");
+            let involvedLinksConfig: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "involved_links");
             involvedLinksConfig.includeFormCheck = false;
 
             const existingLinks = props.graph.getLinks().filter((link) => { return link.prop("entity/type") === EntityTypes.LINK });
@@ -600,7 +586,7 @@ onUpdated(() => {
                         to: toElement,
                         parent: parentName,
                         included: {
-                            contentType: PropertyContentType.CHECKBOX_WITHOUT_LABEL,
+                            contentType: PropertyContent.CHECKBOX_WITHOUT_LABEL,
                             disabled: isInvalid,
                             checked: selectedLinks.has(link.id),
                             id: link.id
@@ -617,8 +603,7 @@ onUpdated(() => {
         case EntityTypes.ENDPOINT:
         case EntityTypes.EXTERNAL_ENDPOINT:
             // prepare used data aggregate selection
-            let usesDataWrapperConfig: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "usesData-wrapper");
-            let usesDataConfig = findInDialogByFeature(usesDataWrapperConfig.buttonActionContent, "uses_data");
+            let usesDataConfig: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "uses_data");
             usesDataConfig.includeFormCheck = false;
 
             const associatedDataAggregates: dia.Cell[] = [];
@@ -641,7 +626,7 @@ onUpdated(() => {
                         dataAggregateName: dataAggregate.attr("label/textWrap/text"),
                         usageRelation: dataAggregate.prop("relationship/properties/usage_relation"),
                         included: {
-                            contentType: PropertyContentType.CHECKBOX_WITHOUT_LABEL,
+                            contentType: PropertyContent.CHECKBOX_WITHOUT_LABEL,
                             disabled: false,
                             checked: selectedDataAggregates.has(dataAggregate.id),
                             id: dataAggregate.id
@@ -881,7 +866,7 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                         const toObject = (a: object[]) => {
                             let asObject = {};
                             for (const element of a) {
-                                asObject[element[propertyOption.listElementFields[0].key]] = element[propertyOption.listElementFields[1].key];
+                                asObject[element[propertyOption.attributes.listElementFields[0].key]] = element[propertyOption.attributes.listElementFields[1].key];
                             }
                             return asObject;
                         }

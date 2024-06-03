@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import EntityTypes from './config/entityTypes';
 import * as Entities from '../core/entities';
 import ErrorMessage, { ErrorType } from './errorMessage'
-import { EntityDetailsConfig, TableDialogPropertyConfig } from './config/detailsSidebarConfig';
+import { EntityDetailsConfig } from './config/detailsSidebarConfig';
 import { MetaData, getEmptyMetaData } from "../core/common/entityDataTypes";
 import { convertToServiceTemplate, importFromServiceTemplate } from "../core/tosca-adapter/ToscaAdapter";
 import {
@@ -237,7 +237,7 @@ class SystemEntityManager {
         for (const graphElement of componentEntities) {
 
             let addedEntity: Entities.Component | Entities.Infrastructure;
-           
+
             switch (graphElement.prop("entity/type")) {
                 case EntityTypes.COMPONENT:
                 case EntityTypes.SERVICE:
@@ -251,7 +251,7 @@ class SystemEntityManager {
                 default:
                     throw new TypeError("Unsuitable Element provided! No corresponding Entity type is known for: " + JSON.stringify(graphElement));
             }
-    
+
             this.#currentSystemEntity.addEntity(addedEntity);
         }
 
@@ -369,7 +369,7 @@ class SystemEntityManager {
                 componentModelEntity = new Entities.Component(graphElement.id.toString(), graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement));
         }
 
-        
+
         return componentModelEntity;
 
     }
@@ -464,7 +464,7 @@ class SystemEntityManager {
 
         return infrastructureEntity;
     }
-    
+
     #configureInfrastructureEntity(infrastructureEntity: Entities.Infrastructure, infrastructureElement: dia.Element) {
 
         // set entity properties
@@ -967,18 +967,8 @@ class SystemEntityManager {
             }
         });
         for (const property of EntityDetailsConfig.Infrastructure.specificProperties) {
-            switch (property.providedFeature) {
-                case "supportedArtifacts-wrapper":
-                case "supportedUpdateStrategies-wrapper":
-                case "assigned-networks-wrapper":
-                    let tmp = (property as TableDialogPropertyConfig).buttonActionContent.dialogContent as FormContentConfig;
-                    let actualProperty = tmp.groups[0].contentItems[0];
-                    newInfrastructure.prop(actualProperty.jointJsConfig.modelPath, infrastructure.getProperties().find(entityProperty => entityProperty.getKey === actualProperty.providedFeature).value);
-                    break;
-                default:
-                    if (property.jointJsConfig.modelPath) {
-                        newInfrastructure.prop(property.jointJsConfig.modelPath, infrastructure.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
-                    }
+            if (property.jointJsConfig.modelPath) {
+                newInfrastructure.prop(property.jointJsConfig.modelPath, infrastructure.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
             }
         }
         return newInfrastructure;
@@ -1011,11 +1001,6 @@ class SystemEntityManager {
     #configureServiceCell(service: Entities.Service, serviceElement: dia.Element) {
         for (const property of EntityDetailsConfig.Service.specificProperties) {
             switch (property.providedFeature) {
-                case "assigned-networks-wrapper":
-                    let tmp = (property as TableDialogPropertyConfig).buttonActionContent.dialogContent as FormContentConfig;
-                    let actualProperty = tmp.groups[0].contentItems[0];
-                    serviceElement.prop(actualProperty.jointJsConfig.modelPath, service.getProperties().find(entityProperty => entityProperty.getKey === actualProperty.providedFeature).value);
-                    break;
                 case "proxiedBy":
                     if (service.getProxiedBy) {
                         serviceElement.prop("entity/properties/proxied_by", service.getProxiedBy.getId);
@@ -1056,11 +1041,6 @@ class SystemEntityManager {
     #configureBackingServiceCell(backingService: Entities.BackingService, backingServiceElement: dia.Element) {
         for (const property of EntityDetailsConfig.Service.specificProperties) {
             switch (property.providedFeature) {
-                case "assigned-networks-wrapper":
-                    let tmp = (property as TableDialogPropertyConfig).buttonActionContent.dialogContent as FormContentConfig;
-                    let actualProperty = tmp.groups[0].contentItems[0];
-                    backingServiceElement.prop(actualProperty.jointJsConfig.modelPath, backingService.getProperties().find(entityProperty => entityProperty.getKey === actualProperty.providedFeature).value);
-                    break;
                 case "proxiedBy":
                     if (backingService.getProxiedBy) {
                         backingServiceElement.prop("entity/properties/proxied_by", backingService.getProxiedBy.getId);
@@ -1102,11 +1082,6 @@ class SystemEntityManager {
     #configureStorageBackingServiceCell(storageBackingService: Entities.StorageBackingService, storageBackingServiceElement: dia.Element) {
         for (const property of EntityDetailsConfig.Service.specificProperties) {
             switch (property.providedFeature) {
-                case "assigned-networks-wrapper":
-                    let tmp = (property as TableDialogPropertyConfig).buttonActionContent.dialogContent as FormContentConfig;
-                    let actualProperty = tmp.groups[0].contentItems[0];
-                    storageBackingServiceElement.prop(actualProperty.jointJsConfig.modelPath, storageBackingService.getProperties().find(entityProperty => entityProperty.getKey === actualProperty.providedFeature).value);
-                    break;
                 case "proxiedBy":
                     if (storageBackingService.getProxiedBy) {
                         storageBackingServiceElement.prop("entity/properties/proxied_by", storageBackingService.getProxiedBy.getId);
@@ -1149,11 +1124,6 @@ class SystemEntityManager {
 
         for (const property of EntityDetailsConfig.Service.specificProperties) {
             switch (property.providedFeature) {
-                case "assigned-networks-wrapper":
-                    let tmp = (property as TableDialogPropertyConfig).buttonActionContent.dialogContent as FormContentConfig;
-                    let actualProperty = tmp.groups[0].contentItems[0];
-                    componentElement.prop(actualProperty.jointJsConfig.modelPath, component.getProperties().find(entityProperty => entityProperty.getKey === actualProperty.providedFeature).value);
-                    break;
                 case "proxiedBy":
                     if (component.getProxiedBy) {
                         componentElement.prop("entity/properties/proxied_by", component.getProxiedBy.getId);
@@ -1261,15 +1231,7 @@ class SystemEntityManager {
                 case "backingData-assignedFamily":
                     newBackingData.prop(property.jointJsConfig.modelPath, backingData.backingData.getName);
                     break;
-                case "backingData-includedData-wrapper":
-                    let tmp = (property as TableDialogPropertyConfig).buttonActionContent.dialogContent as FormContentConfig;
-                    let actualProperty = tmp.groups[0].contentItems[0];
-                    newBackingData.prop(actualProperty.jointJsConfig.modelPath, backingData.backingData.getProperties().find(entityProperty => entityProperty.getKey === "included_data").value);
-                    break;
                 case "backingData-chooseEditMode":
-                case "backingData-familyConfig-wrapper":
-                    // ignore
-                    break;
                 default:
                     // TODO handle additional attributes?; decide based on model path whether it can be found in data or relation    
                     if (property.jointJsConfig.modelPath) {
@@ -1398,11 +1360,6 @@ class SystemEntityManager {
                     } else {
                         newRequestTrace.prop(property.jointJsConfig.modelPath, "");
                     }
-                    break;
-                case "involvedLinks-wrapper":
-                    let tmp = (property as TableDialogPropertyConfig).buttonActionContent.dialogContent as FormContentConfig;
-                    let actualProperty = tmp.groups[0].contentItems[0];
-                    newRequestTrace.prop(actualProperty.jointJsConfig.modelPath, Array.from(requestTrace.getLinks).map(link => link.getId));
                     break;
                 default:
                     if (property.jointJsConfig.modelPath) {
