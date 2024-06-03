@@ -8,6 +8,7 @@ import { MetaData } from '../common/entityDataTypes.js'
 import { RelationToDataAggregate } from './relationToDataAggregate.js'
 import { RelationToBackingData } from './relationToBackingData.js'
 import { BackingService } from './backingService.js'
+import { Artifact } from '../common/artifact.js'
 
 
 /**
@@ -75,9 +76,9 @@ class Component {
 
     #dataAggregateEntities = new Array<{ data: DataAggregate, relation: RelationToDataAggregate }>();
 
-    #includedLinkEntities = new Array();
-
     #proxiedBy: BackingService;
+
+    #artifacts: Map<string, Artifact> = new Map<string, Artifact>();
 
     #properties: EntityProperty[] = new Array();
 
@@ -131,11 +132,6 @@ class Component {
 
     addBackingDataEntity(entityToAdd: BackingData, relation: RelationToBackingData) {
         this.#backingDataEntities.push({backingData: entityToAdd, relation: relation });
-    }
-
-    addLinkEntity(linkEntity) {
-        // TODO add check
-        this.#includedLinkEntities.push(linkEntity);
     }
 
     /**
@@ -198,21 +194,24 @@ class Component {
         return this.#backingDataEntities;
     }
 
-    /**
-    * Returns the {@link Link} entities included in this Component.
-    * @returns {Link[]}
-    */
-    get getIncludedLinkEntities() {
-        return this.#includedLinkEntities;
-    }
-
-
     get getProxiedBy() {
         return this.#proxiedBy;
     }
 
     set setProxiedBy(proxy: BackingService) {
         this.#proxiedBy = proxy;
+    }
+
+    get getArtifacts() {
+        return this.#artifacts;
+    }
+
+    setArtifact(artifactKey: string, artifact: Artifact) {
+        this.#artifacts.set(artifactKey, artifact)
+    }
+
+    removeArtifact(artifactKey: string) {
+        this.#artifacts.delete(artifactKey);
     }
 
     /**
