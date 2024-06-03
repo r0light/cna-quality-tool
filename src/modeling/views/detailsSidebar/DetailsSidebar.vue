@@ -59,7 +59,7 @@
 
 
 <script lang="ts" setup>
-import { PropertyContent, DetailsSidebarConfig, EntityDetailsConfig, PropertyConfig, } from '../../config/detailsSidebarConfig';
+import { PropertyContent, DetailsSidebarConfig, EntityDetailsConfig, PropertyConfig, EditArtifactsConfig, } from '../../config/detailsSidebarConfig';
 import { dia } from '@joint/core';
 import { ref, computed, onUpdated, onMounted } from 'vue';
 import EntityTypes from '@/modeling/config/entityTypes';
@@ -263,8 +263,12 @@ onUpdated(() => {
     let excludePropertySections = [];
     if (selectedEntity.model.prop("entity/type") === EntityTypes.LINK || props.selectedEntity.model.prop("entity/type") === EntityTypes.DEPLOYMENT_MAPPING) {
         // exclude sections if the entity is a link or a deployment mapping
-        excludePropertySections.push(...["label", "size", "position"]);
+        excludePropertySections.push(...["artifacts", "label", "size", "position"]);
     }
+    if ([EntityTypes.ENDPOINT, EntityTypes.EXTERNAL_ENDPOINT, EntityTypes.DATA_AGGREGATE, EntityTypes.BACKING_DATA, EntityTypes.REQUEST_TRACE].includes(selectedEntity.model.prop("entity/type"))) {
+        excludePropertySections.push("artifacts");
+    }
+
     // fill property sections
     const currentSections: PropertyGroupSection[] = selectedEntityPropertyGroups.value
     currentSections.push(...preparePropertyGroupSections(excludePropertySections));
@@ -322,6 +326,9 @@ onUpdated(() => {
             })
             proxyOption.dropdownOptions = proxyDropdownOptions;
             proxyOption.value = selectedBackingService;
+
+            const artifactOptions: EditPropertySection[] = selectedEntityPropertyGroups.value.find(group => group.groupId === "artifacts").options;
+            artifactOptions.push(...toPropertySections([EditArtifactsConfig]))
 
             break;
         case EntityTypes.INFRASTRUCTURE:

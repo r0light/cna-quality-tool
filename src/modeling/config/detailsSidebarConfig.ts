@@ -350,6 +350,11 @@ const DetailsSidebarConfig: {
             iconClass: "fa-solid fa-sliders",
             options: []
         },
+        artifacts: {
+            headline: "Artifacts",
+            iconClass: "fa-regular fa-file-code",
+            options: []
+        },
         label: {
             headline: "Entity Label",
             iconClass: "fa-solid fa-font",
@@ -1775,7 +1780,7 @@ const EntityDetailsConfig: {
 const EditArtifactsConfig: PropertyConfig = {
     providedFeature: "artifacts",
     contentType: PropertyContent.DYNAMIC_LIST,
-    label: "Artifacts",
+    label: "Deployment Artifacts",
     helpText: "",
     inputProperties: {
         disabled: false,
@@ -1791,34 +1796,39 @@ const EditArtifactsConfig: PropertyConfig = {
         dialogMetaData: {
             dialogSize: DialogSize.LARGE,
             header: {
-                iconClass: "",
+                iconClass: "fa-regular fa-file-code",
                 svgRepresentation: "",
                 text: "Artifacts of this entity: "
             },
-
             footer: {
                 showCancelButton: true,
                 cancelButtonText: "Cancel",
                 actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
             }
         },
-        dialogInfo: `The following table shows all data elements included in this Backing Data entity. In case you want to add a new entry, the following section provides two text element boxes you can use to 
-        provide the information and then add it using the plus button. However, your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all 
-        your changes will be lost. While you keep the selection of this Backing Data entity, your changes will be remembered.`,
+        dialogInfo: `The following table shows all artifacts included in this entity. In case you want to add a new entry, the following section provides the corresponding input elements which you can submit using the plus button. However, your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all 
+        your changes will be lost. While you keep the selection of this entity, your changes will be remembered.`,
         listElementFields: [
             {
                 key: "key",
                 label: "Key",
-                helpText: "The key that identifies the following value item.",
+                helpText: "The key that identifies the artifact",
                 labelIcon: "fa-solid fa-key",
-                placeholder: "e.g. My_SQL_Password"
+                placeholder: "e.g. deployment-script"
             },
             {
-                key: "value",
-                label: "Value",
-                helpText: "The value of this data item.",
-                labelIcon: "bi bi-chat-square-text-fill",
-                placeholder: "e.g. mysqlpw"
+                key: "artifactType",
+                label: "Type",
+                helpText: "The type of the artifact",
+                labelIcon: "fa-solid fa-tag",
+                placeholder: "e.g. Deployment.Image"
+            },
+            {
+                key: "file",
+                label: "File",
+                helpText: "The name of the file for this artifact",
+                labelIcon: "fa-regular fa-file",
+                placeholder: "e.g. entity-deployment.yml"
             }
         ],
         addElementButton: {
@@ -1846,6 +1856,6 @@ const ColourConfig = {
 
 export {
     PropertyContent, ParentRelation, DetailsSidebarConfig,
-    EntityDetailsConfig, ColourConfig,
+    EntityDetailsConfig, EditArtifactsConfig, ColourConfig,
     dataAggregateSvgRepresentation, backingDataSvgRepresentation
 };
