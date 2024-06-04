@@ -18,6 +18,7 @@ import { RelationToDataAggregate } from '../entities/relationToDataAggregate';
 import { RelationToBackingData } from '../entities/relationToBackingData';
 import { TOSCA_File } from '@/totypa/tosca-types/v2dot0-types/definition-types';
 import { TOSCA_Node_Template, TOSCA_Service_Template } from '@/totypa/tosca-types/v2dot0-types/template-types';
+import { Artifact } from '../common/artifact';
 
 const MATCH_UNDERSCORE = new RegExp(/_/g);
 const MATCH_FIRST_CHARACTER = new RegExp(/^./g);
@@ -161,6 +162,21 @@ class ToscaToEntitesConverter {
                         infrastructure.setPropertyValue(key, value);
                     }
                 }
+
+                if (node.artifacts) {
+                    for (const [key, value] of Object.entries(node.artifacts)) {
+                        infrastructure.setArtifact(key, new Artifact(
+                            value.type ? value.type : "",
+                            value.file ? value.file : "",
+                            value.repository ? value.repository : "",
+                            value.description ? value.description : "",
+                            value.deploy_path ? value.deploy_path : "",
+                            value.artifact_version ? value.artifact_version : "",
+                            value.checksum ? value.checksum : "",
+                            value.checksum_algorithm ? value.checksum_algorithm : ""
+                        ))
+                    }
+                }
             }
         }
 
@@ -260,6 +276,21 @@ class ToscaToEntitesConverter {
                 if (node.properties) {
                     for (const [key, value] of Object.entries(node.properties)) {
                         component.setPropertyValue(key, value);
+                    }
+                }
+
+                if (node.artifacts) {
+                    for (const [key, value] of Object.entries(node.artifacts)) {
+                        component.setArtifact(key, new Artifact(
+                            value.type ? value.type : "",
+                            value.file ? value.file : "",
+                            value.repository ? value.repository : "",
+                            value.description ? value.description : "",
+                            value.deploy_path ? value.deploy_path : "",
+                            value.artifact_version ? value.artifact_version : "",
+                            value.checksum ? value.checksum : "",
+                            value.checksum_algorithm ? value.checksum_algorithm : ""
+                        ))
                     }
                 }
             }

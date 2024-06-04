@@ -384,7 +384,6 @@ class SystemEntityManager {
         // set artifact(s)
         let artifactsData = graphElement.prop("entity/artifacts");
         for (const artifactData of artifactsData) {
-            console.log(artifactData)
             let artifact = new Artifact(artifactData.type,
                                         artifactData.file,
                                         artifactData.repository,
@@ -996,9 +995,11 @@ class SystemEntityManager {
             }
         }
 
+        let artifacts = [];
         for (const [artifactKey, artifact] of infrastructure.getArtifacts.entries()) {
-            infrastructureElement.prop(DetailsSidebarConfig.GeneralProperties.artifacts.options[0].jointJsConfig.modelPath, artifact.getAsSimpleObject(artifactKey))
+            artifacts.push(artifact.getAsSimpleObject(artifactKey));
         }
+        infrastructureElement.prop(DetailsSidebarConfig.GeneralProperties.artifacts.options[0].jointJsConfig.modelPath, artifacts)
     }
 
 
@@ -1040,9 +1041,11 @@ class SystemEntityManager {
             }
         }
 
+        let artifacts = [];
         for (const [artifactKey, artifact] of service.getArtifacts.entries()) {
-            serviceElement.prop(DetailsSidebarConfig.GeneralProperties.artifacts.options[0].jointJsConfig.modelPath, artifact.getAsSimpleObject(artifactKey))
+            artifacts.push(artifact.getAsSimpleObject(artifactKey));
         }
+        serviceElement.prop(DetailsSidebarConfig.GeneralProperties.artifacts.options[0].jointJsConfig.modelPath, artifacts)
 
         return serviceElement;
     }
@@ -1085,9 +1088,11 @@ class SystemEntityManager {
             }
         }
 
+        let artifacts = [];
         for (const [artifactKey, artifact] of backingService.getArtifacts.entries()) {
-            backingServiceElement.prop(DetailsSidebarConfig.GeneralProperties.artifacts.options[0].jointJsConfig.modelPath, artifact.getAsSimpleObject(artifactKey))
+            artifacts.push(artifact.getAsSimpleObject(artifactKey));
         }
+        backingServiceElement.prop(DetailsSidebarConfig.GeneralProperties.artifacts.options[0].jointJsConfig.modelPath, artifacts)
 
         return backingServiceElement;
     }
@@ -1130,9 +1135,12 @@ class SystemEntityManager {
             }
         }
 
+        let artifacts = [];
         for (const [artifactKey, artifact] of storageBackingService.getArtifacts.entries()) {
-            storageBackingServiceElement.prop(DetailsSidebarConfig.GeneralProperties.artifacts.options[0].jointJsConfig.modelPath, artifact.getAsSimpleObject(artifactKey))
+            artifacts.push(artifact.getAsSimpleObject(artifactKey));
         }
+        storageBackingServiceElement.prop(DetailsSidebarConfig.GeneralProperties.artifacts.options[0].jointJsConfig.modelPath, artifacts)
+
 
         return storageBackingServiceElement;
     }
@@ -1176,9 +1184,11 @@ class SystemEntityManager {
             }
         }
 
+        let artifacts = [];
         for (const [artifactKey, artifact] of component.getArtifacts.entries()) {
-            componentElement.prop(DetailsSidebarConfig.GeneralProperties.artifacts.options[0].jointJsConfig.modelPath, artifact.getAsSimpleObject(artifactKey))
+            artifacts.push(artifact.getAsSimpleObject(artifactKey));
         }
+        componentElement.prop(DetailsSidebarConfig.GeneralProperties.artifacts.options[0].jointJsConfig.modelPath, artifacts)
 
         return componentElement;
     }

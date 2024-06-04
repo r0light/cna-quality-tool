@@ -386,6 +386,7 @@ class EntitiesToToscaConverter {
         if (infrastructure.getArtifacts.size > 0) {
             template.artifacts = {};
             for (const [key, artifact] of infrastructure.getArtifacts.entries()) {
+                //TODO include only keys with a value
                 template.artifacts[key] = artifact.getAsSimpleObject("");
             }
         }
@@ -422,6 +423,7 @@ class EntitiesToToscaConverter {
         if (component.getArtifacts.size > 0) {
             template.artifacts = {};
             for (const [key, artifact] of component.getArtifacts.entries()) {
+                //TODO include only keys with a value
                 template.artifacts[key] = artifact.getAsSimpleObject("");
             }
         }

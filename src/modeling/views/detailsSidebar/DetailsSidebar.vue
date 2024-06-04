@@ -721,8 +721,6 @@ function getParentRelationLabel(parentId: string) {
 
 function onEnterProperty(propertyOptions: EditPropertySection[]) {
 
-    console.log(propertyOptions);
-
     for (const propertyOption of propertyOptions) {
 
         if (propertyOption.includeFormCheck && !isPropertyValueValid(propertyOption)) {
