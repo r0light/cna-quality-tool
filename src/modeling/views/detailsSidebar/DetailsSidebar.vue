@@ -330,7 +330,7 @@ onUpdated(() => {
 
             let artifactOption = findInSectionsByFeature(selectedEntityPropertyGroups.value,"artifacts");
             artifactOption.includeFormCheck = false;
-            artifactOption.attributes.listElementFields.find(field => field.key === "artifactType")["dropdownOptions"] = getAvailableArtifactTypes();
+            artifactOption.attributes.listElementFields.find(field => field.key === "type")["dropdownOptions"] = getAvailableArtifactTypes();
 
             break;
         case EntityTypes.INFRASTRUCTURE:
@@ -374,7 +374,7 @@ onUpdated(() => {
 
             let infrastructureArtifactOption = findInSectionsByFeature(selectedEntityPropertyGroups.value,"artifacts");
             infrastructureArtifactOption.includeFormCheck = false;
-            infrastructureArtifactOption.attributes.listElementFields.find(field => field.key === "artifactType")["dropdownOptions"] = getAvailableArtifactTypes();
+            infrastructureArtifactOption.attributes.listElementFields.find(field => field.key === "type")["dropdownOptions"] = getAvailableArtifactTypes();
             break;
         case EntityTypes.DATA_AGGREGATE:
 

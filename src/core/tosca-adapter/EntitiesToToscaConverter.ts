@@ -383,6 +383,13 @@ class EntitiesToToscaConverter {
             template.properties = this.#parsePropertiesForYaml(infrastructure.getProperties());
         }
 
+        if (infrastructure.getArtifacts.size > 0) {
+            template.artifacts = {};
+            for (const [key, artifact] of infrastructure.getArtifacts.entries()) {
+                template.artifacts[key] = artifact.getAsSimpleObject("");
+            }
+        }
+
         return template;
     }
 
@@ -410,6 +417,13 @@ class EntitiesToToscaConverter {
         let properties = this.#parsePropertiesForYaml(component.getProperties());
         if (this.#isNonEmpty(properties)) {
             template.properties = properties;
+        }
+
+        if (component.getArtifacts.size > 0) {
+            template.artifacts = {};
+            for (const [key, artifact] of component.getArtifacts.entries()) {
+                template.artifacts[key] = artifact.getAsSimpleObject("");
+            }
         }
 
         return template;

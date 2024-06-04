@@ -404,7 +404,7 @@ const DetailsSidebarConfig: {
                             },
                             {
                                 fieldType: "dropdown",
-                                key: "artifactType",
+                                key: "type",
                                 label: "Type",
                                 helpText: "The type of the artifact",
                                 labelIcon: "fa-solid fa-tag",
@@ -436,7 +436,7 @@ const DetailsSidebarConfig: {
                             },
                             {
                                 fieldType: "text",
-                                key: "deployPath",
+                                key: "deploy_path",
                                 label: "Deploy Path",
                                 helpText: "The file path the associated file will be deployed on within the target node's container.",
                                 labelIcon: "fa-solid fa-terminal",
@@ -1955,7 +1955,7 @@ const EditArtifactsConfig: PropertyConfig = {
             },
             {
                 fieldType: "dropdown",
-                key: "artifactType",
+                key: "type",
                 label: "Type",
                 helpText: "The type of the artifact",
                 labelIcon: "fa-solid fa-tag",
@@ -1987,7 +1987,7 @@ const EditArtifactsConfig: PropertyConfig = {
             },
             {
                 fieldType: "text",
-                key: "deployPath",
+                key: "deploy_path",
                 label: "Deploy Path",
                 helpText: "The file path the associated file will be deployed on within the target node's container.",
                 labelIcon: "fa-solid fa-terminal",

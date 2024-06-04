@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import EntityTypes from './config/entityTypes';
 import * as Entities from '../core/entities';
 import ErrorMessage, { ErrorType } from './errorMessage'
-import { EntityDetailsConfig } from './config/detailsSidebarConfig';
+import { DetailsSidebarConfig, EntityDetailsConfig } from './config/detailsSidebarConfig';
 import { MetaData, getEmptyMetaData } from "../core/common/entityDataTypes";
 import { convertToServiceTemplate, importFromServiceTemplate } from "../core/tosca-adapter/ToscaAdapter";
 import {
@@ -18,6 +18,7 @@ import { DataAggregate } from "../core/entities";
 import { FormContentConfig } from "./config/actionDialogConfig";
 import { RelationToDataAggregate } from "../core/entities/relationToDataAggregate";
 import { RelationToBackingData } from "../core/entities/relationToBackingData";
+import { Artifact } from '@/core/common/artifact';
 
 class SystemEntityManager {
 
@@ -370,7 +371,7 @@ class SystemEntityManager {
         }
 
 
-        return componentModelEntity;
+        return componentModelEntity; 
 
     }
 
@@ -380,14 +381,22 @@ class SystemEntityManager {
             property.value = graphElement.prop("entity/properties/" + property.getKey)
         }
 
-        /*
-        let embeddedCells = graphElement.getEmbeddedCells().sort((a, b) => {
-            let prioA = this.#getEntityPrioForEmbeddedCells(a.prop("entity/type"));
-            let prioB = this.#getEntityPrioForEmbeddedCells(b.prop("entity/type"));
+        // set artifact(s)
+        let artifactsData = graphElement.prop("entity/artifacts");
+        for (const artifactData of artifactsData) {
+            console.log(artifactData)
+            let artifact = new Artifact(artifactData.type,
+                                        artifactData.file,
+                                        artifactData.repository,
+                                        artifactData.description,
+                                        artifactData.deploy_path,
+                                        artifactData.artifact_version,
+                                        artifactData.checksum,
+                                        artifactData.checksum_algorithm,
+            )
+            entity.setArtifact(artifactData.key, artifact);
+        }
 
-            return prioA - prioB;
-        });
-        */
 
         for (const embeddedCell of graphElement.getEmbeddedCells()) {
             switch (embeddedCell.prop("entity/type")) {
@@ -446,19 +455,6 @@ class SystemEntityManager {
 
     }
 
-    #getEntityPrioForEmbeddedCells(entityType: string) {
-        switch (entityType) {
-            case EntityTypes.DATA_AGGREGATE:
-            case EntityTypes.BACKING_DATA:
-                return 1;
-            case EntityTypes.ENDPOINT:
-            case EntityTypes.EXTERNAL_ENDPOINT:
-                return 2;
-            default:
-                return 3;
-        }
-    }
-
     #createInfrastructureEntity(graphElement) {
         let infrastructureEntity = new Entities.Infrastructure(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement));
 
@@ -470,6 +466,21 @@ class SystemEntityManager {
         // set entity properties
         for (let property of infrastructureEntity.getProperties()) {
             property.value = infrastructureElement.prop("entity/properties/" + property.getKey)
+        }
+
+        // set artifact(s)
+        let artifactsData = infrastructureElement.prop("entity/artifacts");
+        for (const artifactData of artifactsData) {
+            let artifact = new Artifact(artifactData.type,
+                                        artifactData.file,
+                                        artifactData.repository,
+                                        artifactData.description,
+                                        artifactData.deploy_path,
+                                        artifactData.artifact_version,
+                                        artifactData.checksum,
+                                        artifactData.checksum_algorithm,
+            )
+            infrastructureEntity.setArtifact(artifactData.key, artifact);
         }
 
         const backingDataEntities = infrastructureElement.getEmbeddedCells();
@@ -826,14 +837,23 @@ class SystemEntityManager {
             this.#currentSystemGraph.addCell(newInfrastructure);
             createdCells.push(newInfrastructure);
 
+        }
+
+        for (const [id, infrastructure] of this.#currentSystemEntity.getInfrastructureEntities) {
+
+            let infrastructureElement: dia.Element = this.#currentSystemGraph.getCell(id) as dia.Element;
+
+            this.#configureInfrastructureCell(infrastructure, infrastructureElement);
+
             let index = 0;
             for (const usedBackingData of infrastructure.getBackingDataEntities) {
-                let newBackingData = this.#createBackingDataCell(usedBackingData, newInfrastructure, index);
+                let newBackingData = this.#createBackingDataCell(usedBackingData, infrastructureElement, index);
                 index++;
                 this.#currentSystemGraph.addCell(newBackingData);
                 createdCells.push(newBackingData);
             }
         }
+
 
         // first pass: only create entities
         for (const [id, component] of this.#currentSystemEntity.getComponentEntities) {
@@ -966,12 +986,19 @@ class SystemEntityManager {
                 }
             }
         });
+        return newInfrastructure;
+    }
+
+    #configureInfrastructureCell(infrastructure: Entities.Infrastructure, infrastructureElement: dia.Element) {
         for (const property of EntityDetailsConfig.Infrastructure.specificProperties) {
             if (property.jointJsConfig.modelPath) {
-                newInfrastructure.prop(property.jointJsConfig.modelPath, infrastructure.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
+                infrastructureElement.prop(property.jointJsConfig.modelPath, infrastructure.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
             }
         }
-        return newInfrastructure;
+
+        for (const [artifactKey, artifact] of infrastructure.getArtifacts.entries()) {
+            infrastructureElement.prop(DetailsSidebarConfig.GeneralProperties.artifacts.options[0].jointJsConfig.modelPath, artifact.getAsSimpleObject(artifactKey))
+        }
     }
 
 
@@ -1012,6 +1039,11 @@ class SystemEntityManager {
                     }
             }
         }
+
+        for (const [artifactKey, artifact] of service.getArtifacts.entries()) {
+            serviceElement.prop(DetailsSidebarConfig.GeneralProperties.artifacts.options[0].jointJsConfig.modelPath, artifact.getAsSimpleObject(artifactKey))
+        }
+
         return serviceElement;
     }
 
@@ -1051,6 +1083,10 @@ class SystemEntityManager {
                         backingServiceElement.prop(property.jointJsConfig.modelPath, backingService.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
                     }
             }
+        }
+
+        for (const [artifactKey, artifact] of backingService.getArtifacts.entries()) {
+            backingServiceElement.prop(DetailsSidebarConfig.GeneralProperties.artifacts.options[0].jointJsConfig.modelPath, artifact.getAsSimpleObject(artifactKey))
         }
 
         return backingServiceElement;
@@ -1094,6 +1130,10 @@ class SystemEntityManager {
             }
         }
 
+        for (const [artifactKey, artifact] of storageBackingService.getArtifacts.entries()) {
+            storageBackingServiceElement.prop(DetailsSidebarConfig.GeneralProperties.artifacts.options[0].jointJsConfig.modelPath, artifact.getAsSimpleObject(artifactKey))
+        }
+
         return storageBackingServiceElement;
     }
 
@@ -1134,6 +1174,10 @@ class SystemEntityManager {
                         componentElement.prop(property.jointJsConfig.modelPath, component.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
                     }
             }
+        }
+
+        for (const [artifactKey, artifact] of component.getArtifacts.entries()) {
+            componentElement.prop(DetailsSidebarConfig.GeneralProperties.artifacts.options[0].jointJsConfig.modelPath, artifact.getAsSimpleObject(artifactKey))
         }
 
         return componentElement;

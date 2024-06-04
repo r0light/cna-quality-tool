@@ -24,7 +24,6 @@ class Artifact {
     #artifactVersion: string;
     #checksum: string;
     #checksumAlgorithm: string;
-    #properties: string;
 
     constructor(
         type: string,
@@ -35,7 +34,6 @@ class Artifact {
         artifactVersion: string,
         checksum: string,
         checksumAlgorithm: string,
-        properties: string
     ) {
         this.#type = type;
         this.#file = file;
@@ -45,7 +43,6 @@ class Artifact {
         this.#artifactVersion = artifactVersion;
         this.#checksum = checksum;
         this.#checksumAlgorithm = checksumAlgorithm;
-        this.#properties = properties;
     }
 
     getType(): string {
@@ -80,10 +77,6 @@ class Artifact {
         return this.#checksumAlgorithm;
     }
 
-    getProperties(): string {
-        return this.#properties;
-    }
-
     setType(type: string): void {
         this.#type = type;
     }
@@ -116,9 +109,35 @@ class Artifact {
         this.#checksumAlgorithm = checksumAlgorithm;
     }
 
-    setProperties(properties: string): void {
-        this.#properties = properties;
+    getAsSimpleObject(keyToAssign: string) {
+        if (keyToAssign) {
+            return {
+                key: keyToAssign,
+                type: this.#type,
+                file: this.#file,
+                repository: this.#repository,
+                description: this.#description,
+                deploy_path: this.#deployPath,
+                artifact_version: this.#artifactVersion,
+                checksum: this.#checksum,
+                checksum_algorithm: this.#checksumAlgorithm
+            }
+        } else {
+            return {
+                type: this.#type,
+                file: this.#file,
+                repository: this.#repository,
+                description: this.#description,
+                deploy_path: this.#deployPath,
+                artifact_version: this.#artifactVersion,
+                checksum: this.#checksum,
+                checksum_algorithm: this.#checksumAlgorithm
+            }
+        }
+
+
     }
+
 }
 
 export { Artifact, getAvailableArtifactTypes }
