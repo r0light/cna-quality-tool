@@ -9,12 +9,12 @@
                     <div class="form-group">
                         <label :for="highlightOption.entityType"><span
                                 v-html="highlightOption.svgRepresentation"></span>{{
-                    highlightOption.labelText }}</label>
+                                    highlightOption.labelText }}</label>
                         <select class="entityHighlightingOption custom-select" :id="highlightOption.selectId"
                             :disabled="highlightOption.options.length == 1" v-model="highlightOption.selectedOption"
                             @change="onSelectHighlighOption(highlightOption)">
                             <option v-for="option of highlightOption.options" :value="option.optionValue">{{
-                    option.optionText }}</option>
+                                option.optionText }}</option>
                         </select>
                     </div>
 
@@ -68,6 +68,7 @@ import type { EditPropertySection } from './PropertiesEditor.vue';
 import { toPropertySections } from './PropertiesEditor.vue';
 import { DEPLOYMENT_UPDATE_STRATEGIES } from '@/core/entities/deploymentMapping';
 import { getAvailableArtifactTypes } from '@/core/common/artifact';
+import { l } from 'vite/dist/node/types.d-aGj9QkWt';
 
 const toArray = (o: object, keyName: string, valueName: string) => {
     let asArray = [];
@@ -207,7 +208,7 @@ function preparePropertyGroupSections(exclude: string[]): PropertyGroupSection[]
                 dataTargetId: "#collapse-" + groupKey,
                 cardBodyId: groupKey + "-card-body",
                 options: toPropertySections(groupValue.options)
-            } as PropertyGroupSection) 
+            } as PropertyGroupSection)
         }
 
     }
@@ -328,7 +329,7 @@ onUpdated(() => {
             proxyOption.dropdownOptions = proxyDropdownOptions;
             proxyOption.value = selectedBackingService;
 
-            let artifactOption = findInSectionsByFeature(selectedEntityPropertyGroups.value,"artifacts");
+            let artifactOption = findInSectionsByFeature(selectedEntityPropertyGroups.value, "artifacts");
             artifactOption.includeFormCheck = false;
             artifactOption.attributes.listElementFields.find(field => field.key === "type")["dropdownOptions"] = getAvailableArtifactTypes();
 
@@ -338,7 +339,28 @@ onUpdated(() => {
             let supportedArtifactsOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "supported_artifacts");
             supportedArtifactsOption.includeFormCheck = false;
 
-            supportedArtifactsOption.value = selectedEntity.model.prop(supportedArtifactsOption.jointJsConfig.modelPath);
+            let currentlySupportedArtifacts = selectedEntity.model.prop(supportedArtifactsOption.jointJsConfig.modelPath) ? selectedEntity.model.prop(supportedArtifactsOption.jointJsConfig.modelPath) : [];
+
+            // clear table rows
+            supportedArtifactsOption.tableRows.length = 0;
+            getAvailableArtifactTypes().forEach((artifactType) => {
+
+                supportedArtifactsOption.tableRows.push({
+                    columns: {
+                        name: artifactType,
+                        supported: {
+                            contentType: PropertyContent.CHECKBOX_WITHOUT_LABEL,
+                            disabled: false,
+                            checked: currentlySupportedArtifacts.includes(artifactType),
+                            id: artifactType
+                        }
+                    },
+                    attributes: {
+                        representationClass: "validOption",
+                        disabled: false
+                    }
+                });
+            })
 
             // prepare involved links selection
             let supportedUpdateStrategiesConfig: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "supported_update_strategies");
@@ -372,9 +394,10 @@ onUpdated(() => {
 
             assignedNetworksOption.value = selectedEntity.model.prop(assignedNetworksOption.jointJsConfig.modelPath);
 
-            let infrastructureArtifactOption = findInSectionsByFeature(selectedEntityPropertyGroups.value,"artifacts");
+            let infrastructureArtifactOption = findInSectionsByFeature(selectedEntityPropertyGroups.value, "artifacts");
             infrastructureArtifactOption.includeFormCheck = false;
             infrastructureArtifactOption.attributes.listElementFields.find(field => field.key === "type")["dropdownOptions"] = getAvailableArtifactTypes();
+
             break;
         case EntityTypes.DATA_AGGREGATE:
 
@@ -827,8 +850,16 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                     }
                     break;
                 case EntityTypes.INFRASTRUCTURE:
-                    if (propertyOption.providedFeature === "supported_artifacts" || propertyOption.providedFeature === "assigned_networks") {
+                    if (propertyOption.providedFeature === "assigned_networks") {
                         selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, propertyOption.value);
+                    } else if (propertyOption.providedFeature === "supported_artifacts" ) {
+                        let supportedArtifacts = [];
+                        propertyOption.tableRows.forEach(artifactType => {
+                            if (artifactType.columns["supported"]["checked"]) {
+                                supportedArtifacts.push(artifactType.columns["supported"]["id"])
+                            }
+                        })
+                        selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, supportedArtifacts, { rewrite: true});
                     } else if (propertyOption.providedFeature === "supported_update_strategies") {
                         let supportedStrategies = [];
                         propertyOption.tableRows.forEach(strategy => {

@@ -15,7 +15,23 @@ export const cna_modeling_profile: TOSCA_File = {
   "description": "This TOSCA definitions document contains the CNA Modeling TOSCA profile",
   "dsl_definitions": "",
   "repositories": {},
-  "artifact_types": {},
+  "artifact_types": {
+    "Kubernetes.Resource": {
+      "description": "A Kubernetes resource (like Deployment, Service, etc) which is described in a file\n",
+      "derived_from": "Root",
+      "file_ext": [
+        "yaml",
+        "yml"
+      ]
+    },
+    "Implementation.Java": {
+      "description": "Artifact type for a Java archive which might be executable\n",
+      "derived_from": "Implementation",
+      "file_ext": [
+        "jar"
+      ]
+    }
+  },
   "data_types": {},
   "capability_types": {
     "cna-modeling.capabilities.Proxy": {
@@ -361,11 +377,6 @@ export const cna_modeling_profile: TOSCA_File = {
           "default": true,
           "required": true
         },
-        "artifact": {
-          "type": "string",
-          "description": "The kind of artifact which is produced for deploying this component. This can for example be a container image, a native executable, a jar file, or some custom packaging format for specific cloud services.",
-          "required": true
-        },
         "load_shedding": {
           "type": "boolean",
           "description": "Whether or not this component applies load shedding. That means whether the component rejects incoming load based on certain thresholds (resource usage, concurrent requests).",
@@ -510,11 +521,6 @@ export const cna_modeling_profile: TOSCA_File = {
           "type": "boolean",
           "description": "True if this component is stateless, that means it requires no disk storage space where data is persisted between executions. That means it can store data to disk, but should not rely on this data to be available for following executions. Instead it should be able to restore required data after a restart in a different environment.",
           "default": true,
-          "required": true
-        },
-        "artifact": {
-          "type": "string",
-          "description": "The kind of artifact which is produced for deploying this component. This can for example be a container image, a native executable, a jar file, or some custom packaging format for specific cloud services.",
           "required": true
         },
         "load_shedding": {
@@ -672,11 +678,6 @@ export const cna_modeling_profile: TOSCA_File = {
           "default": true,
           "required": true
         },
-        "artifact": {
-          "type": "string",
-          "description": "The kind of artifact which is produced for deploying this component. This can for example be a container image, a native executable, a jar file, or some custom packaging format for specific cloud services.",
-          "required": true
-        },
         "load_shedding": {
           "type": "boolean",
           "description": "Whether or not this component applies load shedding. That means whether the component rejects incoming load based on certain thresholds (resource usage, concurrent requests).",
@@ -826,11 +827,6 @@ export const cna_modeling_profile: TOSCA_File = {
           "type": "boolean",
           "description": "Storage Backing Service are per default stateful (not stateless)",
           "default": false,
-          "required": true
-        },
-        "artifact": {
-          "type": "string",
-          "description": "The kind of artifact which is produced for deploying this component. This can for example be a container image, a native executable, a jar file, or some custom packaging format for specific cloud services.",
           "required": true
         },
         "load_shedding": {

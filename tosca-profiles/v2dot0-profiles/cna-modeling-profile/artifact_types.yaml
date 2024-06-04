@@ -1,0 +1,21 @@
+tosca_definitions_version: tosca_2_0
+
+metadata:
+  template_name: artifact_types.yaml
+  template_author: Distributed Systems Group
+  template_version: 0.2
+
+artifact_types:
+
+  Kubernetes.Resource:
+    description: >
+      A Kubernetes resource (like Deployment, Service, etc) which is described in a file
+    derived_from: Root
+    file_ext: [ yaml, yml ]
+
+  Implementation.Java:
+    description: >
+      Artifact type for a Java archive which might be executable
+    derived_from: Implementation
+    file_ext: [ jar ]
+    

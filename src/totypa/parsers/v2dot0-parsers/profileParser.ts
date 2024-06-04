@@ -151,7 +151,6 @@ function parseAllProfiles(profilesFolder: string): Promise<ProfileInfo[]> {
         typeMaps.dataTypesMap.add({ description: "basic YAML string type" }, "string");
         typeMaps.dataTypesMap.add({ description: "basic YAML integer type" }, "integer");
 
-        console.log(entries);
         let sortedEntries = entries.sort((entryA, entryB) => {
             // make sure the tosca simple profile is always parsed first so that types are available
 
@@ -159,7 +158,7 @@ function parseAllProfiles(profilesFolder: string): Promise<ProfileInfo[]> {
             let valueB = entryB.includes("tosca-simple") ? 0 : 1;
             return valueA - valueB;
         });
-        console.log(sortedEntries);
+        console.log("parsing profiles: " + JSON.stringify(sortedEntries));
         return sortedEntries.map(entry => {
             const fullDirectoryPath = path.join(profilesFolder, entry);
             const stats = fs.lstatSync(fullDirectoryPath);
