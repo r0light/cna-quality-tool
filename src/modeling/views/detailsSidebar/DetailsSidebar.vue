@@ -67,6 +67,7 @@ import PropertiesEditor from './PropertiesEditor.vue';
 import type { EditPropertySection } from './PropertiesEditor.vue';
 import { toPropertySections } from './PropertiesEditor.vue';
 import { DEPLOYMENT_UPDATE_STRATEGIES } from '@/core/entities/deploymentMapping';
+import { getAvailableArtifactTypes } from '@/core/common/artifact';
 
 const toArray = (o: object, keyName: string, valueName: string) => {
     let asArray = [];
@@ -206,7 +207,7 @@ function preparePropertyGroupSections(exclude: string[]): PropertyGroupSection[]
                 dataTargetId: "#collapse-" + groupKey,
                 cardBodyId: groupKey + "-card-body",
                 options: toPropertySections(groupValue.options)
-            } as PropertyGroupSection)
+            } as PropertyGroupSection) 
         }
 
     }
@@ -327,8 +328,9 @@ onUpdated(() => {
             proxyOption.dropdownOptions = proxyDropdownOptions;
             proxyOption.value = selectedBackingService;
 
-            const artifactOptions: EditPropertySection[] = selectedEntityPropertyGroups.value.find(group => group.groupId === "artifacts").options;
-            artifactOptions.push(...toPropertySections([EditArtifactsConfig]))
+            let artifactOption = findInSectionsByFeature(selectedEntityPropertyGroups.value,"artifacts");
+            artifactOption.includeFormCheck = false;
+            artifactOption.attributes.listElementFields.find(field => field.key === "artifactType")["dropdownOptions"] = getAvailableArtifactTypes();
 
             break;
         case EntityTypes.INFRASTRUCTURE:
@@ -370,6 +372,9 @@ onUpdated(() => {
 
             assignedNetworksOption.value = selectedEntity.model.prop(assignedNetworksOption.jointJsConfig.modelPath);
 
+            let infrastructureArtifactOption = findInSectionsByFeature(selectedEntityPropertyGroups.value,"artifacts");
+            infrastructureArtifactOption.includeFormCheck = false;
+            infrastructureArtifactOption.attributes.listElementFields.find(field => field.key === "artifactType")["dropdownOptions"] = getAvailableArtifactTypes();
             break;
         case EntityTypes.DATA_AGGREGATE:
 
@@ -715,6 +720,8 @@ function getParentRelationLabel(parentId: string) {
 
 
 function onEnterProperty(propertyOptions: EditPropertySection[]) {
+
+    console.log(propertyOptions);
 
     for (const propertyOption of propertyOptions) {
 

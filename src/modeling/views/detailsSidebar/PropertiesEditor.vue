@@ -152,8 +152,12 @@
                                     <table class="table table-hover">
                                         <thead class="thead-dark">
                                             <tr>
-                                                <th v-for="elementField of option.attributes.listElementFields">
+                                                <th v-for="elementField of option.attributes.listElementFields.slice(0, Math.min(3, option.attributes.listElementFields.length))">
                                                     {{ elementField.label }}
+                                                </th>
+                                                <th v-if="option.attributes.listElementFields.length > 3" class="overloaded">
+                                                    <span v-for="elementField of option.attributes.listElementFields.slice(3)"> {{ elementField.label }}</span>
+                                                
                                                 </th>
                                                 <th>Delete</th>
                                             </tr>
@@ -162,10 +166,15 @@
                                             <tr v-for="[index, row] of (option.value as any[]).entries()"
                                                 class="tableRow">
                                                 <td v-if="typeof row === 'object'"
-                                                    v-for="[columnKey, columnValue] of Object.entries(row)"
+                                                    v-for="[columnKey, columnValue] of Object.entries(row).slice(0, Math.min(3, Object.entries(row).length))"
                                                     :data-table-context="columnKey">
                                                     <!-- list with objects -->
                                                     <span v-if="typeof columnValue === 'string'"> {{ columnValue
+                                                        }}</span>
+                                                </td>
+                                                <td v-if="typeof row === 'object' && Object.entries(row).length > 3" class="overloaded">
+                                                    <!-- list with objects -->
+                                                    <span v-for="[columnKey, columnValue] of Object.entries(row).slice(3)"> {{ columnValue
                                                         }}</span>
                                                 </td>
                                                 <td v-else>
@@ -183,25 +192,30 @@
                                     </table>
                                 </div>
                                 <h5>Add new Item</h5>
-                            <div v-for="elementField of option.attributes.listElementFields">
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">
-                                            <i :class="elementField.labelIcon"></i>
-                                            <span class="modalInputLabel">{{ elementField.label }}</span>
-                                        </span>
+                                <div v-for="elementField of option.attributes.listElementFields">
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">
+                                                <i :class="elementField.labelIcon"></i>
+                                                <span class="modalInputLabel">{{ elementField.label }}</span>
+                                            </span>
+                                        </div>
+                                        <input v-if="elementField.fieldType === 'text'" :id="elementField.key"
+                                            class="form-control" type="text" :placeholder="elementField.placeholder"
+                                            v-model="option.newElementData[elementField.key]">
+                                        <select v-if="elementField.fieldType === 'dropdown'" :id="elementField.key"
+                                            class="form-control"
+                                            v-model="option.newElementData[elementField.key]">
+                                        <option v-for="dropdownOption of elementField.dropdownOptions" :value="dropdownOption"> {{ dropdownOption }}</option>
+                                    </select>
                                     </div>
-                                    <input :id="elementField.key" class="form-control" type="text"
-                                        :placeholder="elementField.placeholder"
-                                        v-model="option.newElementData[elementField.key]">
                                 </div>
+                                <button type="button" class="btn btn-outline-dark" @click="onAddToDynamicList(option)">
+                                    <i :class="option.attributes.addElementButton.labelIcon"></i>
+                                    {{ option.attributes.addElementButton.label }}
+                                </button>
                             </div>
-                            <button type="button" class="btn btn-outline-dark" @click="onAddToDynamicList(option)">
-                                <i :class="option.attributes.addElementButton.labelIcon"></i>
-                                {{ option.attributes.addElementButton.label }}
-                            </button>
-                            </div>
-                            
+
 
                         </template>
                     </ModalWrapper>
@@ -384,7 +398,7 @@ export function toPropertySections(propertyConfigs: PropertyConfig[]): EditPrope
                                 }
                             } else {
                                 // list with literals
-                                dataHolder[dynamicListOption.attributes.listElementFields.key] = "";
+                                //dataHolder[dynamicListOption.attributes.listElementFields.key] = "";
                             }
                             return dataHolder;
                         })(),
@@ -459,5 +473,10 @@ function onRemoveFromDynamicList(propertyOption: EditPropertySection, listIndex:
 
 .dynamic-list-wrapper button {
     width: fit-content;
+}
+
+.overloaded {
+    display: flex;
+    flex-direction: column;
 }
 </style>

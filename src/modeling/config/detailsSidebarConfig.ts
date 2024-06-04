@@ -143,7 +143,7 @@ export type DynamicListPropertyConfig = BasicPropertyConfig & {
         buttonIconClass: string,
         dialogMetaData: DialogMetaData,
         dialogInfo: string,
-        listElementFields: ListElementField | ListElementField[],
+        listElementFields: (ListElementTextField | ListElementDropdownField)[],
         addElementButton: {
             label: string,
             labelIcon: string
@@ -155,10 +155,18 @@ export type ListElementField = {
     key: string,
     label: string,
     helpText: string,
-    labelIcon: string,
+    labelIcon: string
+}
+
+export type ListElementTextField = ListElementField & {
+    fieldType: "text",
     placeholder: string
 }
 
+export type ListElementDropdownField = ListElementField & {
+    fieldType: "dropdown",
+    dropdownOptions: string[],
+}
 
 export type PropertyConfig = TextPropertyConfig | TextAreaPropertyConfig | NumberPropertyConfig | NumberRangePropertyConfig | CheckboxPropertyConfig | CheckboxWithoutLabelPropertyConfig | DropdownPropertyConfig | MultiSelectPropertyConfig | TogglePropertyConfig | DynamicListPropertyConfig;
 
@@ -353,7 +361,128 @@ const DetailsSidebarConfig: {
         artifacts: {
             headline: "Artifacts",
             iconClass: "fa-regular fa-file-code",
-            options: []
+            options: [
+                {
+                    providedFeature: "artifacts",
+                    contentType: PropertyContent.DYNAMIC_LIST,
+                    label: "Deployment Artifacts",
+                    helpText: "",
+                    inputProperties: {
+                        disabled: false,
+                        required: false,
+                        checked: false,
+                        selected: false,
+                        readonly: false
+                    },
+                    attributes: {
+                        svgRepresentation: "",
+                        buttonText: "Edit Artifacts",
+                        buttonIconClass: "fa-solid fa-pencil",
+                        dialogMetaData: {
+                            dialogSize: DialogSize.LARGE,
+                            header: {
+                                iconClass: "fa-regular fa-file-code",
+                                svgRepresentation: "",
+                                text: "Artifacts of this entity: "
+                            },
+                            footer: {
+                                showCancelButton: true,
+                                cancelButtonText: "Cancel",
+                                actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
+                            }
+                        },
+                        dialogInfo: `The following table shows all artifacts included in this entity. In case you want to add a new entry, the following section provides the corresponding input elements which you can submit using the plus button. However, your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all 
+                    your changes will be lost. While you keep the selection of this entity, your changes will be remembered.`,
+                        listElementFields: [
+                            {
+                                fieldType: "text",
+                                key: "key",
+                                label: "Key",
+                                helpText: "The key that identifies the artifact",
+                                labelIcon: "fa-solid fa-key",
+                                placeholder: "e.g. deployment-script"
+                            },
+                            {
+                                fieldType: "dropdown",
+                                key: "artifactType",
+                                label: "Type",
+                                helpText: "The type of the artifact",
+                                labelIcon: "fa-solid fa-tag",
+                                dropdownOptions: []
+                            },
+                            {
+                                fieldType: "text",
+                                key: "file",
+                                label: "File",
+                                helpText: "The name of the file for this artifact",
+                                labelIcon: "fa-regular fa-file",
+                                placeholder: "e.g. entity-deployment.yml"
+                            },
+                            {
+                                fieldType: "text",
+                                key: "repository",
+                                label: "Repository",
+                                helpText: "The repository where the file can be found",
+                                labelIcon: "fa-solid fa-server",
+                                placeholder: "e.g. https://myrepo.com"
+                            },
+                            {
+                                fieldType: "text",
+                                key: "description",
+                                label: "Description",
+                                helpText: "A description of this artifact",
+                                labelIcon: "fa-solid fa-message",
+                                placeholder: "e.g. This file is executed by the platform"
+                            },
+                            {
+                                fieldType: "text",
+                                key: "deployPath",
+                                label: "Deploy Path",
+                                helpText: "The file path the associated file will be deployed on within the target node's container.",
+                                labelIcon: "fa-solid fa-terminal",
+                                placeholder: "e.g. ./"
+                            },
+                            {
+                                fieldType: "text",
+                                key: "artifact_version",
+                                label: "Artifact version",
+                                helpText: "The version of this artifact.",
+                                labelIcon: "fa-solid fa-code-branch",
+                                placeholder: "e.g. 1.0"
+                            },
+                            {
+                                fieldType: "text",
+                                key: "checksum",
+                                label: "Checksum",
+                                helpText: "The checksum used to validate the integrity of the artifact.",
+                                labelIcon: "fa-regular fa-hashtag",
+                                placeholder: "e.g. 34534534"
+                            },
+                            {
+                                fieldType: "text",
+                                key: "checksum_algorithm",
+                                label: "Checksum Algorithm",
+                                helpText: "Algorithm used to calculate the artifact checksum.",
+                                labelIcon: "fa-solid fa-gears",
+                                placeholder: "e.g. MD5"
+                            }
+                        ],
+                        addElementButton: {
+                            label: "Submit",
+                            labelIcon: "fa-solid fa-plus"
+                        }
+                    },
+                    provideEnterButton: false,
+                    show: true,
+                    jointJsConfig: {
+                        propertyType: "property",
+                        modelPath: "entity/artifacts",
+                        defaultPropPath: "",
+                        minPath: "",
+                        min: ""
+                    },
+                }
+            ]
         },
         label: {
             headline: "Entity Label",
@@ -651,6 +780,7 @@ const EntityDetailsConfig: {
                     dialogInfo: `Type in the id or subnet mask of a network and then add it using the plus button. However, your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all your changes will be lost. While you keep the selection of this entity, your changes will be remembered.`,
                     listElementFields: [
                         {
+                            fieldType: "text",
                             key: "network-id",
                             label: "Network Name",
                             helpText: "The name of the network to assign",
@@ -739,6 +869,7 @@ const EntityDetailsConfig: {
                     dialogInfo: `Type in the id or subnet mask of a network and then add it using the plus button. However, your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all your changes will be lost. While you keep the selection of this entity, your changes will be remembered.`,
                     listElementFields: [
                         {
+                            fieldType: "text",
                             key: "network-id",
                             label: "Network Name",
                             helpText: "The name of the network to assign",
@@ -827,6 +958,7 @@ const EntityDetailsConfig: {
                     dialogInfo: `Type in the id or subnet mask of a network and then add it using the plus button. However, your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all your changes will be lost. While you keep the selection of this entity, your changes will be remembered.`,
                     listElementFields: [
                         {
+                            fieldType: "text",
                             key: "network-id",
                             label: "Network Name",
                             helpText: "The name of the network to assign",
@@ -915,6 +1047,7 @@ const EntityDetailsConfig: {
                     dialogInfo: `Type in the id or subnet mask of a network and then add it using the plus button. However, your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all your changes will be lost. While you keep the selection of this entity, your changes will be remembered.`,
                     listElementFields: [
                         {
+                            fieldType: "text",
                             key: "network-id",
                             label: "Network Name",
                             helpText: "The name of the network to assign",
@@ -1289,6 +1422,7 @@ const EntityDetailsConfig: {
                     dialogInfo: `Type in the id or subnet mask of a network and then add it using the plus button. However, your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all your changes will be lost. While you keep the selection of this entity, your changes will be remembered.`,
                     listElementFields: [
                         {
+                            fieldType: "text",
                             key: "network-id",
                             label: "Network Name",
                             helpText: "The name of the network to assign",
@@ -1560,6 +1694,7 @@ const EntityDetailsConfig: {
                     your changes will be lost. While you keep the selection of this Backing Data entity, your changes will be remembered.`,
                     listElementFields: [
                         {
+                            fieldType: "text",
                             key: "key",
                             label: "Key",
                             helpText: "The key that identifies the following value item.",
@@ -1567,6 +1702,7 @@ const EntityDetailsConfig: {
                             placeholder: "e.g. My_SQL_Password"
                         },
                         {
+                            fieldType: "text",
                             key: "value",
                             label: "Value",
                             helpText: "The value of this data item.",
@@ -1810,6 +1946,7 @@ const EditArtifactsConfig: PropertyConfig = {
         your changes will be lost. While you keep the selection of this entity, your changes will be remembered.`,
         listElementFields: [
             {
+                fieldType: "text",
                 key: "key",
                 label: "Key",
                 helpText: "The key that identifies the artifact",
@@ -1817,18 +1954,68 @@ const EditArtifactsConfig: PropertyConfig = {
                 placeholder: "e.g. deployment-script"
             },
             {
+                fieldType: "dropdown",
                 key: "artifactType",
                 label: "Type",
                 helpText: "The type of the artifact",
                 labelIcon: "fa-solid fa-tag",
-                placeholder: "e.g. Deployment.Image"
+                dropdownOptions: []
             },
             {
+                fieldType: "text",
                 key: "file",
                 label: "File",
                 helpText: "The name of the file for this artifact",
                 labelIcon: "fa-regular fa-file",
                 placeholder: "e.g. entity-deployment.yml"
+            },
+            {
+                fieldType: "text",
+                key: "repository",
+                label: "Repository",
+                helpText: "The repository where the file can be found",
+                labelIcon: "fa-solid fa-server",
+                placeholder: "e.g. https://myrepo.com"
+            },
+            {
+                fieldType: "text",
+                key: "description",
+                label: "Description",
+                helpText: "A description of this artifact",
+                labelIcon: "fa-solid fa-message",
+                placeholder: "e.g. This file is executed by the platform"
+            },
+            {
+                fieldType: "text",
+                key: "deployPath",
+                label: "Deploy Path",
+                helpText: "The file path the associated file will be deployed on within the target node's container.",
+                labelIcon: "fa-solid fa-terminal",
+                placeholder: "e.g. ./"
+            },
+            {
+                fieldType: "text",
+                key: "artifact_version",
+                label: "Artifact version",
+                helpText: "The version of this artifact.",
+                labelIcon: "fa-solid fa-code-branch",
+                placeholder: "e.g. 1.0"
+            },
+            {
+                fieldType: "text",
+                key: "checksum",
+                label: "Checksum",
+                helpText: "The checksum used to validate the integrity of the artifact.",
+                labelIcon: "fa-regular fa-hashtag",
+                placeholder: "e.g. 34534534"
+            },
+            {
+                fieldType: "text",
+                key: "checksum_algorithm",
+                label: "Checksum Algorithm",
+                helpText: "Algorithm used to calculate the artifact checksum.",
+                labelIcon: "fa-solid fa-gears",
+                placeholder: "e.g. MD5"
             }
         ],
         addElementButton: {
@@ -1839,7 +2026,7 @@ const EditArtifactsConfig: PropertyConfig = {
     provideEnterButton: false,
     show: true,
     jointJsConfig: {
-        propertyType: "customProperty",
+        propertyType: "property",
         modelPath: "entity/artifacts",
         defaultPropPath: "",
         minPath: "",
