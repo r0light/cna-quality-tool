@@ -1,4 +1,3 @@
-import { dia } from '@joint/core'
 import { PropertyConfig } from "./detailsSidebarConfig"
 
 export type DialogConfig = {

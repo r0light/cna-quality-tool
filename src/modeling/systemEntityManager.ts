@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import EntityTypes from './config/entityTypes';
 import * as Entities from '../core/entities';
 import ErrorMessage, { ErrorType } from './errorMessage'
-import { EntityDetailsConfig, TableDialogPropertyConfig } from './config/detailsSidebarConfig';
+import { DetailsSidebarConfig, EntityDetailsConfig } from './config/detailsSidebarConfig';
 import { MetaData, getEmptyMetaData } from "../core/common/entityDataTypes";
 import { convertToServiceTemplate, importFromServiceTemplate } from "../core/tosca-adapter/ToscaAdapter";
 import {
@@ -18,6 +18,7 @@ import { DataAggregate } from "../core/entities";
 import { FormContentConfig } from "./config/actionDialogConfig";
 import { RelationToDataAggregate } from "../core/entities/relationToDataAggregate";
 import { RelationToBackingData } from "../core/entities/relationToBackingData";
+import { Artifact } from '@/core/common/artifact';
 
 class SystemEntityManager {
 
@@ -237,7 +238,7 @@ class SystemEntityManager {
         for (const graphElement of componentEntities) {
 
             let addedEntity: Entities.Component | Entities.Infrastructure;
-           
+
             switch (graphElement.prop("entity/type")) {
                 case EntityTypes.COMPONENT:
                 case EntityTypes.SERVICE:
@@ -251,7 +252,7 @@ class SystemEntityManager {
                 default:
                     throw new TypeError("Unsuitable Element provided! No corresponding Entity type is known for: " + JSON.stringify(graphElement));
             }
-    
+
             this.#currentSystemEntity.addEntity(addedEntity);
         }
 
@@ -369,8 +370,8 @@ class SystemEntityManager {
                 componentModelEntity = new Entities.Component(graphElement.id.toString(), graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement));
         }
 
-        
-        return componentModelEntity;
+
+        return componentModelEntity; 
 
     }
 
@@ -380,14 +381,21 @@ class SystemEntityManager {
             property.value = graphElement.prop("entity/properties/" + property.getKey)
         }
 
-        /*
-        let embeddedCells = graphElement.getEmbeddedCells().sort((a, b) => {
-            let prioA = this.#getEntityPrioForEmbeddedCells(a.prop("entity/type"));
-            let prioB = this.#getEntityPrioForEmbeddedCells(b.prop("entity/type"));
+        // set artifact(s)
+        let artifactsData = graphElement.prop("entity/artifacts");
+        for (const artifactData of artifactsData) {
+            let artifact = new Artifact(artifactData.type,
+                                        artifactData.file,
+                                        artifactData.repository,
+                                        artifactData.description,
+                                        artifactData.deploy_path,
+                                        artifactData.artifact_version,
+                                        artifactData.checksum,
+                                        artifactData.checksum_algorithm,
+            )
+            entity.setArtifact(artifactData.key, artifact);
+        }
 
-            return prioA - prioB;
-        });
-        */
 
         for (const embeddedCell of graphElement.getEmbeddedCells()) {
             switch (embeddedCell.prop("entity/type")) {
@@ -446,30 +454,32 @@ class SystemEntityManager {
 
     }
 
-    #getEntityPrioForEmbeddedCells(entityType: string) {
-        switch (entityType) {
-            case EntityTypes.DATA_AGGREGATE:
-            case EntityTypes.BACKING_DATA:
-                return 1;
-            case EntityTypes.ENDPOINT:
-            case EntityTypes.EXTERNAL_ENDPOINT:
-                return 2;
-            default:
-                return 3;
-        }
-    }
-
     #createInfrastructureEntity(graphElement) {
         let infrastructureEntity = new Entities.Infrastructure(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement));
 
         return infrastructureEntity;
     }
-    
+
     #configureInfrastructureEntity(infrastructureEntity: Entities.Infrastructure, infrastructureElement: dia.Element) {
 
         // set entity properties
         for (let property of infrastructureEntity.getProperties()) {
             property.value = infrastructureElement.prop("entity/properties/" + property.getKey)
+        }
+
+        // set artifact(s)
+        let artifactsData = infrastructureElement.prop("entity/artifacts");
+        for (const artifactData of artifactsData) {
+            let artifact = new Artifact(artifactData.type,
+                                        artifactData.file,
+                                        artifactData.repository,
+                                        artifactData.description,
+                                        artifactData.deploy_path,
+                                        artifactData.artifact_version,
+                                        artifactData.checksum,
+                                        artifactData.checksum_algorithm,
+            )
+            infrastructureEntity.setArtifact(artifactData.key, artifact);
         }
 
         const backingDataEntities = infrastructureElement.getEmbeddedCells();
@@ -826,14 +836,23 @@ class SystemEntityManager {
             this.#currentSystemGraph.addCell(newInfrastructure);
             createdCells.push(newInfrastructure);
 
+        }
+
+        for (const [id, infrastructure] of this.#currentSystemEntity.getInfrastructureEntities) {
+
+            let infrastructureElement: dia.Element = this.#currentSystemGraph.getCell(id) as dia.Element;
+
+            this.#configureInfrastructureCell(infrastructure, infrastructureElement);
+
             let index = 0;
             for (const usedBackingData of infrastructure.getBackingDataEntities) {
-                let newBackingData = this.#createBackingDataCell(usedBackingData, newInfrastructure, index);
+                let newBackingData = this.#createBackingDataCell(usedBackingData, infrastructureElement, index);
                 index++;
                 this.#currentSystemGraph.addCell(newBackingData);
                 createdCells.push(newBackingData);
             }
         }
+
 
         // first pass: only create entities
         for (const [id, component] of this.#currentSystemEntity.getComponentEntities) {
@@ -966,22 +985,21 @@ class SystemEntityManager {
                 }
             }
         });
+        return newInfrastructure;
+    }
+
+    #configureInfrastructureCell(infrastructure: Entities.Infrastructure, infrastructureElement: dia.Element) {
         for (const property of EntityDetailsConfig.Infrastructure.specificProperties) {
-            switch (property.providedFeature) {
-                case "supportedArtifacts-wrapper":
-                case "supportedUpdateStrategies-wrapper":
-                case "assigned-networks-wrapper":
-                    let tmp = (property as TableDialogPropertyConfig).buttonActionContent.dialogContent as FormContentConfig;
-                    let actualProperty = tmp.groups[0].contentItems[0];
-                    newInfrastructure.prop(actualProperty.jointJsConfig.modelPath, infrastructure.getProperties().find(entityProperty => entityProperty.getKey === actualProperty.providedFeature).value);
-                    break;
-                default:
-                    if (property.jointJsConfig.modelPath) {
-                        newInfrastructure.prop(property.jointJsConfig.modelPath, infrastructure.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
-                    }
+            if (property.jointJsConfig.modelPath) {
+                infrastructureElement.prop(property.jointJsConfig.modelPath, infrastructure.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
             }
         }
-        return newInfrastructure;
+
+        let artifacts = [];
+        for (const [artifactKey, artifact] of infrastructure.getArtifacts.entries()) {
+            artifacts.push(artifact.getAsSimpleObject(artifactKey));
+        }
+        infrastructureElement.prop(DetailsSidebarConfig.GeneralProperties.artifacts.options[0].jointJsConfig.modelPath, artifacts)
     }
 
 
@@ -1011,11 +1029,6 @@ class SystemEntityManager {
     #configureServiceCell(service: Entities.Service, serviceElement: dia.Element) {
         for (const property of EntityDetailsConfig.Service.specificProperties) {
             switch (property.providedFeature) {
-                case "assigned-networks-wrapper":
-                    let tmp = (property as TableDialogPropertyConfig).buttonActionContent.dialogContent as FormContentConfig;
-                    let actualProperty = tmp.groups[0].contentItems[0];
-                    serviceElement.prop(actualProperty.jointJsConfig.modelPath, service.getProperties().find(entityProperty => entityProperty.getKey === actualProperty.providedFeature).value);
-                    break;
                 case "proxiedBy":
                     if (service.getProxiedBy) {
                         serviceElement.prop("entity/properties/proxied_by", service.getProxiedBy.getId);
@@ -1027,6 +1040,13 @@ class SystemEntityManager {
                     }
             }
         }
+
+        let artifacts = [];
+        for (const [artifactKey, artifact] of service.getArtifacts.entries()) {
+            artifacts.push(artifact.getAsSimpleObject(artifactKey));
+        }
+        serviceElement.prop(DetailsSidebarConfig.GeneralProperties.artifacts.options[0].jointJsConfig.modelPath, artifacts)
+
         return serviceElement;
     }
 
@@ -1056,11 +1076,6 @@ class SystemEntityManager {
     #configureBackingServiceCell(backingService: Entities.BackingService, backingServiceElement: dia.Element) {
         for (const property of EntityDetailsConfig.Service.specificProperties) {
             switch (property.providedFeature) {
-                case "assigned-networks-wrapper":
-                    let tmp = (property as TableDialogPropertyConfig).buttonActionContent.dialogContent as FormContentConfig;
-                    let actualProperty = tmp.groups[0].contentItems[0];
-                    backingServiceElement.prop(actualProperty.jointJsConfig.modelPath, backingService.getProperties().find(entityProperty => entityProperty.getKey === actualProperty.providedFeature).value);
-                    break;
                 case "proxiedBy":
                     if (backingService.getProxiedBy) {
                         backingServiceElement.prop("entity/properties/proxied_by", backingService.getProxiedBy.getId);
@@ -1072,6 +1087,12 @@ class SystemEntityManager {
                     }
             }
         }
+
+        let artifacts = [];
+        for (const [artifactKey, artifact] of backingService.getArtifacts.entries()) {
+            artifacts.push(artifact.getAsSimpleObject(artifactKey));
+        }
+        backingServiceElement.prop(DetailsSidebarConfig.GeneralProperties.artifacts.options[0].jointJsConfig.modelPath, artifacts)
 
         return backingServiceElement;
     }
@@ -1102,11 +1123,6 @@ class SystemEntityManager {
     #configureStorageBackingServiceCell(storageBackingService: Entities.StorageBackingService, storageBackingServiceElement: dia.Element) {
         for (const property of EntityDetailsConfig.Service.specificProperties) {
             switch (property.providedFeature) {
-                case "assigned-networks-wrapper":
-                    let tmp = (property as TableDialogPropertyConfig).buttonActionContent.dialogContent as FormContentConfig;
-                    let actualProperty = tmp.groups[0].contentItems[0];
-                    storageBackingServiceElement.prop(actualProperty.jointJsConfig.modelPath, storageBackingService.getProperties().find(entityProperty => entityProperty.getKey === actualProperty.providedFeature).value);
-                    break;
                 case "proxiedBy":
                     if (storageBackingService.getProxiedBy) {
                         storageBackingServiceElement.prop("entity/properties/proxied_by", storageBackingService.getProxiedBy.getId);
@@ -1118,6 +1134,13 @@ class SystemEntityManager {
                     }
             }
         }
+
+        let artifacts = [];
+        for (const [artifactKey, artifact] of storageBackingService.getArtifacts.entries()) {
+            artifacts.push(artifact.getAsSimpleObject(artifactKey));
+        }
+        storageBackingServiceElement.prop(DetailsSidebarConfig.GeneralProperties.artifacts.options[0].jointJsConfig.modelPath, artifacts)
+
 
         return storageBackingServiceElement;
     }
@@ -1149,11 +1172,6 @@ class SystemEntityManager {
 
         for (const property of EntityDetailsConfig.Service.specificProperties) {
             switch (property.providedFeature) {
-                case "assigned-networks-wrapper":
-                    let tmp = (property as TableDialogPropertyConfig).buttonActionContent.dialogContent as FormContentConfig;
-                    let actualProperty = tmp.groups[0].contentItems[0];
-                    componentElement.prop(actualProperty.jointJsConfig.modelPath, component.getProperties().find(entityProperty => entityProperty.getKey === actualProperty.providedFeature).value);
-                    break;
                 case "proxiedBy":
                     if (component.getProxiedBy) {
                         componentElement.prop("entity/properties/proxied_by", component.getProxiedBy.getId);
@@ -1165,6 +1183,12 @@ class SystemEntityManager {
                     }
             }
         }
+
+        let artifacts = [];
+        for (const [artifactKey, artifact] of component.getArtifacts.entries()) {
+            artifacts.push(artifact.getAsSimpleObject(artifactKey));
+        }
+        componentElement.prop(DetailsSidebarConfig.GeneralProperties.artifacts.options[0].jointJsConfig.modelPath, artifacts)
 
         return componentElement;
     }
@@ -1261,15 +1285,7 @@ class SystemEntityManager {
                 case "backingData-assignedFamily":
                     newBackingData.prop(property.jointJsConfig.modelPath, backingData.backingData.getName);
                     break;
-                case "backingData-includedData-wrapper":
-                    let tmp = (property as TableDialogPropertyConfig).buttonActionContent.dialogContent as FormContentConfig;
-                    let actualProperty = tmp.groups[0].contentItems[0];
-                    newBackingData.prop(actualProperty.jointJsConfig.modelPath, backingData.backingData.getProperties().find(entityProperty => entityProperty.getKey === "included_data").value);
-                    break;
                 case "backingData-chooseEditMode":
-                case "backingData-familyConfig-wrapper":
-                    // ignore
-                    break;
                 default:
                     // TODO handle additional attributes?; decide based on model path whether it can be found in data or relation    
                     if (property.jointJsConfig.modelPath) {
@@ -1398,11 +1414,6 @@ class SystemEntityManager {
                     } else {
                         newRequestTrace.prop(property.jointJsConfig.modelPath, "");
                     }
-                    break;
-                case "involvedLinks-wrapper":
-                    let tmp = (property as TableDialogPropertyConfig).buttonActionContent.dialogContent as FormContentConfig;
-                    let actualProperty = tmp.groups[0].contentItems[0];
-                    newRequestTrace.prop(actualProperty.jointJsConfig.modelPath, Array.from(requestTrace.getLinks).map(link => link.getId));
                     break;
                 default:
                     if (property.jointJsConfig.modelPath) {

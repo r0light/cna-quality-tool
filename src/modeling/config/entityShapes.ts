@@ -107,7 +107,8 @@ const Component = dia.Element.define("qualityModel.Component", {
     entityTypeHidden: false,
     entity: {
         type: EntityTypes.COMPONENT,
-        properties: parseProperties(getComponentProperties())
+        properties: parseProperties(getComponentProperties()),
+        artifacts: []
     }
 }, {
     markup: [{
@@ -203,7 +204,8 @@ const Service = dia.Element.define("qualityModel.Service", {
     entityTypeHidden: false,
     entity: {
         type: EntityTypes.SERVICE,
-        properties: parseProperties(getComponentProperties().concat(getServiceProperties()))
+        properties: parseProperties(getComponentProperties().concat(getServiceProperties())),
+        artifacts: []
     }
 }, {
     markup: [{
@@ -297,7 +299,8 @@ const BackingService = dia.Element.define("qualityModel.BackingService", {
     entityTypeHidden: false,
     entity: {
         type: EntityTypes.BACKING_SERVICE,
-        properties: parseProperties(getComponentProperties().concat(getBackingServiceProperties()))
+        properties: parseProperties(getComponentProperties().concat(getBackingServiceProperties())),
+        artifacts: []
     }
 }, {
     markup: [{
@@ -378,7 +381,8 @@ const StorageBackingService = shapes.standard.Cylinder.define("qualityModel.Stor
     entityTypeHidden: false,
     entity: {
         type: EntityTypes.STORAGE_BACKING_SERVICE,
-        properties: parseProperties(getComponentProperties().concat(getStorageBackingServiceProperties()))
+        properties: parseProperties(getComponentProperties().concat(getStorageBackingServiceProperties())),
+        artifacts: []
     }
 }, {
     markup: [{
@@ -623,7 +627,8 @@ const Infrastructure = dia.Element.define("qualityModel.Infrastructure", {
     collapsed: false,
     entity: {
         type: EntityTypes.INFRASTRUCTURE,
-        properties: parseProperties(getInfrastructureProperties())
+        properties: parseProperties(getInfrastructureProperties()),
+        artifacts: []
     }
 }, {
     markup: [{

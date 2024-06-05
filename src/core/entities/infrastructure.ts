@@ -3,6 +3,7 @@ import { EntityProperty, SelectEntityProperty, parseProperties } from "../common
 import { cna_modeling_profile } from '../../totypa/parsedProfiles/v2dot0-profiles/cna_modeling_profile.js'
 import { MetaData } from "../common/entityDataTypes.js";
 import { RelationToBackingData } from "./relationToBackingData.js";
+import { Artifact } from "../common/artifact.js";
 
 
 /**
@@ -186,6 +187,8 @@ class Infrastructure {
 
     #backingDataEntities = new Array<{ backingData: BackingData, relation: RelationToBackingData }>();
 
+    #artifacts: Map<string, Artifact> = new Map<string, Artifact>();
+
     #properties: EntityProperty[];
 
     /**
@@ -249,6 +252,18 @@ class Infrastructure {
      */
     get getBackingDataEntities() {
         return this.#backingDataEntities;
+    }
+
+    get getArtifacts() {
+        return this.#artifacts;
+    }
+
+    setArtifact(artifactKey: string, artifact: Artifact) {
+        this.#artifacts.set(artifactKey, artifact)
+    }
+
+    removeArtifact(artifactKey: string) {
+        this.#artifacts.delete(artifactKey);
     }
 
     /**

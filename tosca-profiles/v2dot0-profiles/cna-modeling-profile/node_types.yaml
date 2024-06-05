@@ -3,7 +3,7 @@ tosca_definitions_version: tosca_2_0
 metadata:
   template_name: node_types.yaml
   template_author: Distributed Systems Group
-  template_version: 0.2
+  template_version: 0.3
 
 description: >-
   This TOSCA definitions document contains the CNA Modeling node types.
@@ -27,10 +27,6 @@ node_types:
         type: boolean
         description: True if this component is stateless, that means it requires no disk storage space where data is persisted between executions. That means it can store data to disk, but should not rely on this data to be available for following executions. Instead it should be able to restore required data after a restart in a different environment. 
         default: true
-        required: true
-      artifact:
-        type: string
-        description: The kind of artifact which is produced for deploying this component. This can for example be a container image, a native executable, a jar file, or some custom packaging format for specific cloud services.
         required: true
       load_shedding:
         type: boolean
