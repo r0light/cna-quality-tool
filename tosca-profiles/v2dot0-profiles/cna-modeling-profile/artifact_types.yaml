@@ -3,7 +3,7 @@ tosca_definitions_version: tosca_2_0
 metadata:
   template_name: artifact_types.yaml
   template_author: Distributed Systems Group
-  template_version: 0.2
+  template_version: 0.3
 
 artifact_types:
 
@@ -19,3 +19,12 @@ artifact_types:
     derived_from: Implementation
     file_ext: [ jar ]
     
+  Terraform.Script:
+    description: A configuration file which can be used by Terraform to set up components or infrastructure.
+    derived_from: Root
+    file_ext: [ tf, tf.json ] 
+
+  CloudFormation.Script:
+    description: A configuration file which can be used by AWS tools to set up components or infrastructure.
+    derived_from: Root
+    file_ext: [ yaml, yml, json ]

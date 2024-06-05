@@ -30,6 +30,23 @@ export const cna_modeling_profile: TOSCA_File = {
       "file_ext": [
         "jar"
       ]
+    },
+    "Terraform.Script": {
+      "description": "A configuration file which can be used by Terraform to set up components or infrastructure.",
+      "derived_from": "Root",
+      "file_ext": [
+        "tf",
+        "tf.json"
+      ]
+    },
+    "CloudFormation.Script": {
+      "description": "A configuration file which can be used by AWS tools to set up components or infrastructure.",
+      "derived_from": "Root",
+      "file_ext": [
+        "yaml",
+        "yml",
+        "json"
+      ]
     }
   },
   "data_types": {},
