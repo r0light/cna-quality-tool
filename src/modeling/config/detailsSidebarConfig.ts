@@ -1227,7 +1227,7 @@ const EntityDetailsConfig: {
                 }
             },
             {
-                providedFeature: "usesData",
+                providedFeature: "uses_data",
                 contentType: PropertyContent.MULTI_SELECT,
                 label: "Data Aggregates used:",
                 inputProperties: {

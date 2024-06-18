@@ -68,7 +68,6 @@ import type { EditPropertySection } from './PropertiesEditor.vue';
 import { toPropertySections } from './PropertiesEditor.vue';
 import { DEPLOYMENT_UPDATE_STRATEGIES } from '@/core/entities/deploymentMapping';
 import { getAvailableArtifactTypes } from '@/core/common/artifact';
-import { l } from 'vite/dist/node/types.d-aGj9QkWt';
 
 const toArray = (o: object, keyName: string, valueName: string) => {
     let asArray = [];

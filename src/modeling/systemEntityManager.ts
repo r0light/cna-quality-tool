@@ -1328,7 +1328,9 @@ class SystemEntityManager {
             if (property.jointJsConfig.modelPath) {
                 if (property.providedFeature === "embedded") {
                     newEndpoint.prop(property.jointJsConfig.modelPath, parent.id.toString());
-                } else {
+                } else if (property.providedFeature === "uses_data") {
+					continue;
+				} else {
                     newEndpoint.prop(property.jointJsConfig.modelPath, endpoint.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
                 }
             }
@@ -1371,7 +1373,9 @@ class SystemEntityManager {
             if (property.jointJsConfig.modelPath) {
                 if (property.providedFeature === "embedded") {
                     newExternalEndpoint.prop(property.jointJsConfig.modelPath, parent.id.toString());
-                } else {
+                } else if (property.providedFeature === "uses_data") {
+					continue;
+				} else {
                     newExternalEndpoint.prop(property.jointJsConfig.modelPath, externalEndpoint.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
                 }
             }

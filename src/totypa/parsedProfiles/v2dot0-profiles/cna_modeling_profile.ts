@@ -10,7 +10,7 @@ export const cna_modeling_profile: TOSCA_File = {
   "metadata": {
     "template_name": "profile.yaml",
     "template_author": "Distributed Systems Group",
-    "template_version": 0.2
+    "template_version": 0.3
   },
   "description": "This TOSCA definitions document contains the CNA Modeling TOSCA profile",
   "dsl_definitions": "",
@@ -47,6 +47,26 @@ export const cna_modeling_profile: TOSCA_File = {
         "yml",
         "json"
       ]
+    },
+    "AWS.Resource": {
+      "description": "An abstract type for resources created in the AWS cloud.",
+      "derived_from": "Root"
+    },
+    "AWS.EKS.Cluster": {
+      "description": "An AWS EKS Cluster",
+      "derived_from": "AWS.Resource"
+    },
+    "AWS.EC2.Instance": {
+      "description": "An abstract type for resources created in the AWS cloud.",
+      "derived_from": "AWS.Resource"
+    },
+    "AWS.Beanstalk.Application": {
+      "description": "An abstract type for resources created in the AWS cloud.",
+      "derived_from": "AWS.Resource"
+    },
+    "AWS.RDS.Instance": {
+      "description": "An abstract type for resources created in the AWS cloud.",
+      "derived_from": "AWS.Resource"
     }
   },
   "data_types": {},
