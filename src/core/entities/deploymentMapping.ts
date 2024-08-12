@@ -10,9 +10,6 @@ import { cna_modeling_profile } from '../../totypa/parsedProfiles/v2dot0-profile
 const DEPLOYMENT_MAPPING_TOSCA_KEY = "cna-modeling.entities.HostedOn.DeploymentMapping";
 const DEPLOYMENT_MAPPING_TOSCA_EQUIVALENT = cna_modeling_profile.relationship_types[DEPLOYMENT_MAPPING_TOSCA_KEY];
 
-// TODO leave here or move closer to where it is used?
-const DEPLOYMENT_UPDATE_STRATEGIES = cna_modeling_profile.relationship_types[DEPLOYMENT_MAPPING_TOSCA_KEY].properties["update_strategy"]["validation"]["$valid_values"][1];
-
 function getDeploymentMappingProperties(): EntityProperty[] {
     let parsed = parseProperties(DEPLOYMENT_MAPPING_TOSCA_EQUIVALENT.properties);
 
@@ -161,4 +158,4 @@ class DeploymentMapping {
     }
 }
 
-export { DeploymentMapping, DEPLOYMENT_MAPPING_TOSCA_KEY, DEPLOYMENT_UPDATE_STRATEGIES, getDeploymentMappingProperties };
+export { DeploymentMapping, DEPLOYMENT_MAPPING_TOSCA_KEY, getDeploymentMappingProperties };

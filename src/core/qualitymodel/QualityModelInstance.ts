@@ -207,23 +207,23 @@ class QualityModelInstance {
         this.entities = [];
     }
 
-    findQualityAspect(qualityAspectKey: string) {
+    findQualityAspect(qualityAspectKey: string): QualityAspect {
         return this.qualityAspects.find(qa => qa.getId === qualityAspectKey);
     }
 
-    findFactorCategory(categoryKey: string) {
+    findFactorCategory(categoryKey: string): { categoryKey: string, categoryName: string } {
         return this.factorCategories.find(category => category.categoryKey === categoryKey);
     }
 
-    findProductFactor(productFactorKey: string) {
+    findProductFactor(productFactorKey: string): ProductFactor {
         return this.productFactors.find(pf => pf.getId === productFactorKey);
     }
 
-    findMeasure(measureKey: string) {
+    findMeasure(measureKey: string): Measure {
         return this.measures.find(m => m.getId === measureKey);
     }
 
-    findEntity(entityKey: string) {
+    findEntity(entityKey: string): Entity {
         return this.entities.find(e => e.getKey === entityKey);
     }
 }

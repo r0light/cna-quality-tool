@@ -66,8 +66,9 @@ import EntityTypes from '@/modeling/config/entityTypes';
 import PropertiesEditor from './PropertiesEditor.vue';
 import type { EditPropertySection } from './PropertiesEditor.vue';
 import { toPropertySections } from './PropertiesEditor.vue';
-import { DEPLOYMENT_UPDATE_STRATEGIES } from '@/core/entities/deploymentMapping';
 import { getAvailableArtifactTypes } from '@/core/common/artifact';
+import { getValidPropertyValues } from '@/core/common/helpers';
+import { DEPLOYMENT_MAPPING_TOSCA_KEY } from '@/core/entities/deploymentMapping';
 
 const toArray = (o: object, keyName: string, valueName: string) => {
     let asArray = [];
@@ -369,7 +370,7 @@ onUpdated(() => {
 
             // clear table rows
             supportedUpdateStrategiesConfig.tableRows.length = 0;
-            DEPLOYMENT_UPDATE_STRATEGIES.forEach((strategy) => {
+            getValidPropertyValues("relationship", DEPLOYMENT_MAPPING_TOSCA_KEY, "update_strategy").forEach((strategy) => {
 
                 supportedUpdateStrategiesConfig.tableRows.push({
                     columns: {
