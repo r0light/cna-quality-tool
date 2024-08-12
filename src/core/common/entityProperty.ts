@@ -312,15 +312,30 @@ function parseProperties(properties: { [propertyKey: string]: TOSCA_Property_Def
                 case "version": // TODO more specific type?
                 case "scalar-unit": // TODO more specific type(s)!
                 default:
-                    parsedProperties.push(new TextEntityProperty(key,
-                        toReadableKey(key),
-                        property.description ? property.description : "",
-                        "",
-                        property.required,
-                        255,
-                        [],
-                        property.default !== undefined ? property.default : "",
-                        property.default !== undefined ? property.default : ""));
+                    if (property.validation && property.validation["$valid_values"]) {
+
+                        // follows the convention of how a range valid values are specified in TOSCA: "validation; { $valid_values: [ $value, [ "a", "b", "c" ] ] }"
+                        let listOfSelectOptions = property.validation["$valid_values"][1].map(option => { return { value: option, text: option } });
+
+                        parsedProperties.push(new SelectEntityProperty(key,
+                            toReadableKey(key),
+                            property.description ? property.description : "",
+                            "",
+                            property.required,
+                            listOfSelectOptions,
+                            property.default !== undefined ? property.default : "",
+                            property.default !== undefined ? property.default : ""));
+                    } else {
+                        parsedProperties.push(new TextEntityProperty(key,
+                            toReadableKey(key),
+                            property.description ? property.description : "",
+                            "",
+                            property.required,
+                            255,
+                            [],
+                            property.default !== undefined ? property.default : "",
+                            property.default !== undefined ? property.default : ""));
+                    }
                     break;
                 case "integer":
                 case "float": // TODO more specific property?

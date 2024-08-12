@@ -27,29 +27,6 @@ function getComponentProperties(): EntityProperty[] {
                 prop.setName = "Managed cloud service?";
                 prop.setExample = "e.g. yes";
                 return prop;
-            case "software_type":
-                let changedProp = new SelectEntityProperty(prop.getKey,
-                    "Type of software",
-                    prop.getDescription,
-                    prop.getExample,
-                    prop.getRequired,
-                    [
-                        {
-                            value: "custom",
-                            text: "custom"
-                        },
-                        {
-                            value: "open-source",
-                            text: "open-source"
-                        },
-                        {
-                            value: "proprietary",
-                            text: "proprietary"
-                        }
-                    ],
-                    prop.getDefaultValue,
-                    prop.value)
-                return changedProp;
             default:
                 return prop;
         }

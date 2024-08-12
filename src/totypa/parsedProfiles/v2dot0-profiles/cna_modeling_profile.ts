@@ -142,6 +142,17 @@ export const cna_modeling_profile: TOSCA_File = {
           "type": "string",
           "required": true,
           "description": "How this deployment mapping is described or ensured. Valid values can be manual, automated imperative, or automated declarative",
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "manual",
+                "automated-imperative",
+                "automated-declarative",
+                "transparent"
+              ]
+            ]
+          },
           "default": "manual"
         },
         "deployment_unit": {
@@ -160,12 +171,34 @@ export const cna_modeling_profile: TOSCA_File = {
           "type": "string",
           "required": true,
           "description": "How the deployed entity is updated in case a new version is deployed. It can simply be replaced by an instance of the new version, or specific strategies like \"rolling upgrade\" or \"blue-green\" can be used.",
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "in-place",
+                "replace",
+                "rolling",
+                "blue-green"
+              ]
+            ]
+          },
           "default": "in-place"
         },
         "automated_restart_policy": {
           "type": "string",
           "required": true,
           "description": "If the deployed entity is automatically restarted in case of failure.",
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "never",
+                "onReboot",
+                "onProcessFailure",
+                "onHealthFailure"
+              ]
+            ]
+          },
           "default": "never"
         },
         "assigned_account": {
@@ -224,7 +257,18 @@ export const cna_modeling_profile: TOSCA_File = {
         "usage_relation": {
           "type": "string",
           "required": true,
-          "description": "Describes how a component uses attached data, that means whether it just uses (reads) it for its functionality or if it also updates and persists (writes) it; possible values are usage, cached usage, and persistence"
+          "description": "Describes how a component uses attached data, that means whether it just uses (reads) it for its functionality or if it also updates and persists (writes) it; possible values are usage, cached usage, and persistence",
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "usage",
+                "cached-usage",
+                "persistence"
+              ]
+            ]
+          },
+          "default": "usage"
         },
         "sharding_level": {
           "type": "integer",
@@ -259,7 +303,18 @@ export const cna_modeling_profile: TOSCA_File = {
         "usage_relation": {
           "type": "string",
           "required": true,
-          "description": "Describes how a component uses attached data, that means whether it just uses (reads) it for its functionality or if it also updates and persists (writes) it; possible values are usage and persistence"
+          "description": "Describes how a component uses attached data, that means whether it just uses (reads) it for its functionality or if it also updates and persists (writes) it; possible values are usage, cached usage, and persistence",
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "usage",
+                "cached-usage",
+                "persistence"
+              ]
+            ]
+          },
+          "default": "usage"
         }
       },
       "valid_target_node_types": [
@@ -406,7 +461,17 @@ export const cna_modeling_profile: TOSCA_File = {
           "type": "string",
           "description": "The type of the software in the sense of who developed it. If it is a self-written component use \"custom\", if it is an existing open-source solution which is not customized (apart from configuration) use \"open-source\". If it is licensed proprietary software, use \"proprietary\".",
           "default": "custom",
-          "required": true
+          "required": true,
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "custom",
+                "open-source",
+                "proprietary"
+              ]
+            ]
+          }
         },
         "stateless": {
           "type": "boolean",
@@ -552,7 +617,17 @@ export const cna_modeling_profile: TOSCA_File = {
           "type": "string",
           "description": "The type of the software in the sense of who developed it. If it is a self-written component use \"custom\", if it is an existing open-source solution which is not customized (apart from configuration) use \"open-source\". If it is licensed proprietary software, use \"proprietary\".",
           "default": "custom",
-          "required": true
+          "required": true,
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "custom",
+                "open-source",
+                "proprietary"
+              ]
+            ]
+          }
         },
         "stateless": {
           "type": "boolean",
@@ -707,7 +782,17 @@ export const cna_modeling_profile: TOSCA_File = {
           "type": "string",
           "description": "The type of the software in the sense of who developed it. If it is a self-written component use \"custom\", if it is an existing open-source solution which is not customized (apart from configuration) use \"open-source\". If it is licensed proprietary software, use \"proprietary\".",
           "default": "custom",
-          "required": true
+          "required": true,
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "custom",
+                "open-source",
+                "proprietary"
+              ]
+            ]
+          }
         },
         "stateless": {
           "type": "boolean",
@@ -858,7 +943,17 @@ export const cna_modeling_profile: TOSCA_File = {
           "type": "string",
           "description": "The type of the software in the sense of who developed it. If it is a self-written component use \"custom\", if it is an existing open-source solution which is not customized (apart from configuration) use \"open-source\". If it is licensed proprietary software, use \"proprietary\".",
           "default": "custom",
-          "required": true
+          "required": true,
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "custom",
+                "open-source",
+                "proprietary"
+              ]
+            ]
+          }
         },
         "stateless": {
           "type": "boolean",
@@ -955,21 +1050,63 @@ export const cna_modeling_profile: TOSCA_File = {
           "type": "string",
           "description": "The kind of infrastructure. Possible kinds are \"physical hardware\", \"virtual hardware\", \"software platform\", or \"cloud service\".",
           "required": true,
-          "default": "virtual hardware"
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "physical-hardware",
+                "virtual-hardware",
+                "software-platform",
+                "cloud-service"
+              ]
+            ]
+          },
+          "default": "virtual-hardware"
         },
         "environment_access": {
           "type": "string",
           "description": "Describes the extend of available access to the environment in which the infrastructure is operated. With full access, one can control all aspects of the infrastructure. Limited access means that infrastructure is under control of a provider and only certain things are allowed, such as configuration. With no access infrastructure is completely managed by a cloud provider.",
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "full",
+                "limited",
+                "none"
+              ]
+            ]
+          },
           "default": "full"
         },
         "maintenance": {
           "type": "string",
           "description": "How infrastructure is maintained, that means for example how updates are installed or how certificates are regenerated.",
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "manual",
+                "automated",
+                "transparent"
+              ]
+            ]
+          },
           "default": "manual"
         },
         "provisioning": {
           "type": "string",
           "description": "How infrastructure is initially provisioned. This can be done manually (for example through the web interface of a cloud provider), automatically coded (for example through an IaC tool), automatically inferred, if it is inferred based on deployed components, or transparent, if it is not explicitly provisioned by a consumer, but done on-demand by a provider.",
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "manual",
+                "automated-coded",
+                "automated-inferred",
+                "transparent"
+              ]
+            ]
+          },
           "default": "manual"
         },
         "supported_artifacts": {
@@ -1004,12 +1141,34 @@ export const cna_modeling_profile: TOSCA_File = {
           "type": "string",
           "required": true,
           "description": "Whether and how entities deployed on this infrastructure can be scaled horizontally",
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "none",
+                "manual",
+                "automated-built-in",
+                "automated-separate"
+              ]
+            ]
+          },
           "default": "none"
         },
         "self_scaling": {
           "type": "string",
           "required": true,
           "description": "Whether and how this entity scales itself, either horizontally or vertically.",
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "none",
+                "manual",
+                "automated-built-in",
+                "automated-separate"
+              ]
+            ]
+          },
           "default": "none"
         },
         "enforced_resource_bounds": {

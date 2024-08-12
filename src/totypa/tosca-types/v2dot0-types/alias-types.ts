@@ -11,8 +11,8 @@ export type TOSCA_Condition_Clause = TOSCA_Function_Call;
 // 5.4.14 Function syntax
 export type TOSCA_Function_Name = string;
 export type TOSCA_Function_Reference = `$${TOSCA_Function_Name}`;
-export type functionArgument = string;
-export type TOSCA_Function_Call = TOSCA_Function_Reference | { TOSCA_Function_Reference: (functionArgument|TOSCA_Function_Call)[]};
+export type functionArgument = (string | functionArgument | TOSCA_Function_Call)[];
+export type TOSCA_Function_Call = TOSCA_Function_Reference | { [key: TOSCA_Function_Reference]: functionArgument};
 
 // 5.4.8 Property assignment
 export type TOSCA_Property_Assignment = any

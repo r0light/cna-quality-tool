@@ -16,29 +16,6 @@ function getDataAggregateRelationshipProperties(): EntityProperty[] {
 
     return parsed.map((prop) => {
         switch (prop.getKey) {
-            case "usage_relation":
-                let changedProp = new SelectEntityProperty(prop.getKey,
-                    prop.getName,
-                    prop.getDescription,
-                    prop.getExample,
-                    prop.getRequired,
-                    [
-                        {
-                            text: "Usage",
-                            value: "usage"
-                        },
-                        {
-                            text: "Cached usage",
-                            value: "cachedUsage"
-                        },
-                        {
-                            text: "Persistence",
-                            value: "persistence"
-                        }
-                    ],
-                    prop.getDefaultValue,
-                    prop.value)
-                return changedProp;
             default:
                 return prop;
         }

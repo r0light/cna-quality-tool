@@ -43,6 +43,7 @@ relationship_types:
         type: string
         required: true
         description: How this deployment mapping is described or ensured. Valid values can be manual, automated imperative, or automated declarative
+        validation: { $valid_values: [ $value, [ "manual", "automated-imperative", "automated-declarative", "transparent"]]}
         default: manual
       deployment_unit:
         type: string
@@ -58,11 +59,13 @@ relationship_types:
         type: string
         required: true
         description: How the deployed entity is updated in case a new version is deployed. It can simply be replaced by an instance of the new version, or specific strategies like "rolling upgrade" or "blue-green" can be used.
+        validation: { $valid_values: [ $value, ["in-place", "replace", "rolling", "blue-green"]]}
         default: in-place 
       automated_restart_policy:
         type: string
         required: true
         description: If the deployed entity is automatically restarted in case of failure.
+        validation: { $valid_values: [ $value, ["never", "onReboot", "onProcessFailure", "onHealthFailure"]]}
         default: never
       assigned_account:
         type: string
@@ -93,6 +96,8 @@ relationship_types:
         type: string
         required: true
         description: Describes how a component uses attached data, that means whether it just uses (reads) it for its functionality or if it also updates and persists (writes) it; possible values are usage, cached usage, and persistence
+        validation: { $valid_values: [ $value, ["usage", "cached-usage", "persistence"]]}
+        default: "usage"
       sharding_level:
         type: integer
         required: true
@@ -108,7 +113,9 @@ relationship_types:
       usage_relation:
         type: string
         required: true
-        description: Describes how a component uses attached data, that means whether it just uses (reads) it for its functionality or if it also updates and persists (writes) it; possible values are usage and persistence
+        description: Describes how a component uses attached data, that means whether it just uses (reads) it for its functionality or if it also updates and persists (writes) it; possible values are usage, cached usage, and persistence
+        validation: { $valid_values: [ $value, ["usage", "cached-usage", "persistence"]]}
+        default: "usage"
     valid_capability_types: [Attachment]
     valid_target_node_types: [ cna-modeling.entities.BackingData ]
         

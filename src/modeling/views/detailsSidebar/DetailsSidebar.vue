@@ -373,12 +373,12 @@ onUpdated(() => {
 
                 supportedUpdateStrategiesConfig.tableRows.push({
                     columns: {
-                        name: strategy.name,
+                        name: strategy,
                         supported: {
                             contentType: PropertyContent.CHECKBOX_WITHOUT_LABEL,
                             disabled: false,
-                            checked: currentlySupportedStrategies.includes(strategy.key),
-                            id: strategy.key
+                            checked: currentlySupportedStrategies.includes(strategy),
+                            id: strategy
                         }
                     },
                     attributes: {

@@ -3,8 +3,6 @@ import { Infrastructure } from './infrastructure.js'
 import { EntityProperty, SelectEntityProperty, parseProperties } from '../common/entityProperty.js';
 import { cna_modeling_profile } from '../../totypa/parsedProfiles/v2dot0-profiles/cna_modeling_profile.js'
 
-const DEPLOYMENT_UPDATE_STRATEGIES = [{key: "in-place", name: "In place"},{ key: "replace", name: "Replace" }, { key: "rolling", name: "Rolling" }, { key: "blue-green", name: "Blue-Green" }];
-
 /**
  * The module for aspects related to a Deployment Mapping quality model entity.
  * @module entities/deploymentMapping
@@ -12,72 +10,17 @@ const DEPLOYMENT_UPDATE_STRATEGIES = [{key: "in-place", name: "In place"},{ key:
 const DEPLOYMENT_MAPPING_TOSCA_KEY = "cna-modeling.entities.HostedOn.DeploymentMapping";
 const DEPLOYMENT_MAPPING_TOSCA_EQUIVALENT = cna_modeling_profile.relationship_types[DEPLOYMENT_MAPPING_TOSCA_KEY];
 
+// TODO leave here or move closer to where it is used?
+const DEPLOYMENT_UPDATE_STRATEGIES = cna_modeling_profile.relationship_types[DEPLOYMENT_MAPPING_TOSCA_KEY].properties["update_strategy"]["validation"]["$valid_values"][1];
+
 function getDeploymentMappingProperties(): EntityProperty[] {
     let parsed = parseProperties(DEPLOYMENT_MAPPING_TOSCA_EQUIVALENT.properties);
 
     return parsed.map((prop) => {
         switch (prop.getKey) {
             case "deployment":
-                return new SelectEntityProperty(prop.getKey,
-                    "Deployment process",
-                    prop.getDescription,
-                    prop.getExample,
-                    prop.getRequired,
-                    [
-                        {
-                            value: "manual",
-                            text: "Manual"
-                        },
-                        {
-                            value: "automated-imperative",
-                            text: "Automated imperative"
-                        },
-                        {
-                            value: "automated-declarative",
-                            text: "Automated declarative"
-                        },
-                        {
-                            value: "transparent",
-                            text: "Transparent"
-                        }
-                    ],
-                    prop.getDefaultValue,
-                    prop.value);
-            case "update_strategy":
-                return new SelectEntityProperty(prop.getKey,
-                    "Update strategy",
-                    prop.getDescription,
-                    prop.getExample,
-                    prop.getRequired,
-                    DEPLOYMENT_UPDATE_STRATEGIES.map(strategy => { return { value: strategy.key, text: strategy.name } }),
-                    prop.getDefaultValue,
-                    prop.value);
-            case "automated_restart_policy":
-                return new SelectEntityProperty(prop.getKey,
-                    "Automated restart policy",
-                    prop.getDescription,
-                    prop.getExample,
-                    prop.getRequired,
-                    [
-                        {
-                            value: "never",
-                            text: "never"
-                        },
-                        {
-                            value: "onReboot",
-                            text: "on reboot"
-                        },
-                        {
-                            value: "onProcessFailure",
-                            text: "on process failure"
-                        },
-                        {
-                            value: "onHealthFailure",
-                            text: "on health failure"
-                        }
-                    ],
-                    prop.getDefaultValue,
-                    prop.value);
+                prop.setName = "Deployment process"
+                return prop;
             default:
                 return prop;
         }
