@@ -61,7 +61,7 @@ const ProductFactorElement = dia.Element.define("quamoco.ProductFactor", {
             width: 120,
             height: 60
         },
-        fontSize: 14,
+        fontSize: 12,
         fill: "#cccccc",
         stroke: "black",
         strokeWidth: 2
@@ -92,9 +92,7 @@ const ProductFactorElement = dia.Element.define("quamoco.ProductFactor", {
             textVerticalAnchor: "middle",
             x: 'calc(0.5*w)',
             y: 'calc(0.5*h)',
-            textWrap: {
-                text: "Product Factor",
-            },
+            text: "Product Factor" // only if 'text' is specified as a property here, it can be overriden as such. If 'textWrap' was defined, it could only be overriden by 'textWrap', not 'text' 
         }
 
     },

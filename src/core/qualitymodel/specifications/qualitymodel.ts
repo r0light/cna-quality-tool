@@ -455,7 +455,7 @@ export const qualityModel: QualityModelSpec = {
             "measures": ["ratioOfServicesThatProvideHealthEndpoints"]
         },
         "automatedInfrastructureProvisioning": {
-            "name": "Automated infrastructure Provisioning",
+            "name": "Automated infrastructure provisioning",
             "description": "Infrastructure provisioning should be automated based on component requirements which are either stated explicitly or inferred from the component which should be deployed. The infrastructure and tools used should require only minimal manual effort. Ideally it should be combined with continuous delivery processes so that no further interaction is needed for a component deployment.",
             "categories": ["cloudInfrastructure", "applicationAdministration"],
             "relevantEntities": ["infrastructure"],

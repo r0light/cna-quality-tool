@@ -243,9 +243,7 @@ function drawQualityModelElements(highLevelFilter: string[], factorCategoryFilte
                     class: "entityHighlighting"
                 },
                 label: {
-                    textWrap: {
-                        text: util.breakText(productFactor.getName, { width: 120 }),
-                    }
+                    text: util.breakText(productFactor.getName, { width: 110, height: 50 }, { 'font-size': 12 }, {ellipsis: "..." }),
                 }
             }
         })
