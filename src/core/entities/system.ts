@@ -177,9 +177,13 @@ class System { // TODO use ID's as keys instead of name?
     searchComponentOfEndpoint(endpointId: string): Component | undefined {
         return Array.from(this.#componentEntities.values()).find(component => {
             return !!component.getEndpointEntities.find(endpoint => {
-                endpoint.getId === endpointId;
-            })
+                return endpoint.getId === endpointId;
+            }) 
         })
+    }
+
+    getOutgoingLinksOfComponent(componentId: string): Link[] {
+        return [...this.#linkEntities.values()].filter(link => link.getSourceEntity.getId === componentId);
     }
 
     /**

@@ -1021,7 +1021,7 @@ export const qualityModel: QualityModelSpec = {
         },
         "degreeToWhichComponentsAreLinkedToStatefulComponents": {
             "name": "Degree to which components are linked to stateful components",
-            "calculation": "",
+            "calculation": "(sum-of(Number of stateful Components a Component is linked to) for all components) / Total Number of Components)",
             "sources": ["Qian2006"]
         },
         "numberOfAsynchronousEndpointsOfferedByAService": {

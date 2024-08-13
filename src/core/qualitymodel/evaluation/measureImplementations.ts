@@ -107,7 +107,7 @@ const measureImplementations: { [measureKey: string]: Calculation } = {
         return [...system.getDataAggregateEntities.keys()].length;
     },
     "ratioOfStatefulComponents": (system) => {
-        let allComponents = [...system.getComponentEntities.entries()]
+        let allComponents = [...system.getComponentEntities.entries()];
         let numberOfStatefulComponents = allComponents.filter(entry => !(entry[1].getProperties().find(property => property.getKey === "stateless").value)).length;
 
         if (allComponents.length === 0) {
@@ -117,7 +117,7 @@ const measureImplementations: { [measureKey: string]: Calculation } = {
         return numberOfStatefulComponents / allComponents.length;
     },
     "ratioOfStatelessComponents": (system) => {
-        let allComponents = [...system.getComponentEntities.entries()]
+        let allComponents = [...system.getComponentEntities.entries()];
         let numberOfStatelessComponents = allComponents.filter(entry => (entry[1].getProperties().find(property => property.getKey === "stateless").value)).length;
 
         if (allComponents.length === 0) {
@@ -125,6 +125,28 @@ const measureImplementations: { [measureKey: string]: Calculation } = {
         }
 
         return numberOfStatelessComponents / allComponents.length;
+    },
+    "degreeToWhichComponentsAreLinkedToStatefulComponents": (system) => {
+        let allComponents = [...system.getComponentEntities.entries()];
+
+        if (allComponents.length === 0) {
+            return 0;
+        }
+
+        let totalNumberOfConnectionsToStatefulComponents = 0;
+        for (const component of allComponents) {
+            let connectedToStatefulComponents = new Set<string>();
+            for (const link of system.getOutgoingLinksOfComponent(component[0])) {
+                console.log(`Link ${link.getId} connects from ${link.getSourceEntity.getId} to ${link.getTargetEndpoint.getId}`);
+
+                let connectedToComponent = system.searchComponentOfEndpoint(link.getTargetEndpoint.getId)
+                if (!connectedToComponent.getProperty("stateless").value) {
+                    connectedToStatefulComponents.add(connectedToComponent.getId);
+                }
+            }
+            totalNumberOfConnectionsToStatefulComponents = totalNumberOfConnectionsToStatefulComponents + connectedToStatefulComponents.size;
+        }
+        return totalNumberOfConnectionsToStatefulComponents / allComponents.length;
     }
 }
 
