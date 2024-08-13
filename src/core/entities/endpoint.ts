@@ -132,7 +132,14 @@ class Endpoint {
      * @param {EntityProperty[]} entityProperties 
      */
     addProperties(entityProperties: EntityProperty[]) {
-        this.#properties = this.#properties.concat(entityProperties);
+        for (const newProperty of entityProperties) {
+            let existingPropertyIndex = this.#properties.findIndex(property => property.getKey === newProperty.getKey);
+            if (~existingPropertyIndex) {
+                this.#properties[existingPropertyIndex] = newProperty;
+            } else {
+                this.#properties.push(newProperty);
+            }
+        }
     }
 
     setPropertyValue(propertyKey: string, propertyValue: any) {

@@ -217,7 +217,7 @@ export const qualityModel: QualityModelSpec = {
                 { "key": "Scholl2019", "section": "6 Encrypt Data in Transit" },
                 { "key": "Indrasiri2021", "section": "2 Security (Use TLS for synchronous communications)" }
             ],
-            "measures": ["ratioOfEndpointsSupportingSsl", "ratioOfSecuredLinks"]
+            "measures": ["ratioOfEndpointsSupportingSsl", "ratioOfExternalEndpointsSupportingTls", "ratioOfSecuredLinks"]
         },
         "secretsManagement": {
             "name": "Secrets management",
@@ -904,6 +904,11 @@ export const qualityModel: QualityModelSpec = {
             "calculation": "Endpoints that support SSL / Endpoints that do not support SSL",
             "sources": ["Ntentos2022"]
         },
+        "ratioOfExternalEndpointsSupportingTls": {
+            "name": "Ratio of external endpoints that support TLS",
+            "calculation": "External Endpoints that support TLS / All External Endpoints",
+            "sources": ["new"]
+        },
         "ratioOfSecuredLinks": {
             "name": "Ratio of secured links",
             "calculation": "Links secured by SSL / All links",
@@ -946,7 +951,7 @@ export const qualityModel: QualityModelSpec = {
         },
         "dataAggregateScope": {
             "name": "Data aggregate scope",
-            "calculation": "",
+            "calculation": "Total number of Data Aggregates in a System",
             "sources": ["Shim2008"]
         },
         "serviceInterfaceDataCohesion": {
@@ -986,7 +991,7 @@ export const qualityModel: QualityModelSpec = {
         },
         "externallyAvailableEndpoints": {
             "name": "Externally available endpoints",
-            "calculation": "",
+            "calculation": "Absolute number of external endpoints",
             "sources": ["Zimmermann2015"]
         },
         "centralizationOfExternallyAvailableEndpoints": {
@@ -1006,12 +1011,12 @@ export const qualityModel: QualityModelSpec = {
         },
         "ratioOfStatefulComponents": {
             "name": "Ratio of stateful components",
-            "calculation": "",
+            "calculation": "Number of stateful components / Total number of components",
             "sources": ["Qian2006"]
         },
         "ratioOfStatelessComponents": {
             "name": "Ratio of stateless components",
-            "calculation": "",
+            "calculation": "Number of stateless components / Total number of components",
             "sources": ["Hirzalla2009"]
         },
         "degreeToWhichComponentsAreLinkedToStatefulComponents": {
@@ -1606,7 +1611,7 @@ export const qualityModel: QualityModelSpec = {
         },
         "dataShardingLevel": {
             "name" : "Level of sharding across storage backing services",
-            "calculation": "",
+            "calculation": "Average number of shards per Storage Backing Service",
             "sources": ["new"]
         }
     },

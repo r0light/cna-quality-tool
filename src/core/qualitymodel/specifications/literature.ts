@@ -516,7 +516,7 @@ export const literature: {[literatureKey: string]: LiteratureSpec }= {
         "year": 2015,
         "authors": "Olaf Zimmermann",
         "publisher": "IEEE Press",
-        "url": ""
+        "url": "https://doi.org/10.1109/SAM.2015.9"
     },
     "Camilli2022": {
         "title": "Microservices integrated performance and reliability testing",

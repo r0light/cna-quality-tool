@@ -71,13 +71,24 @@ const measureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": (system) => {
         let allEndpoints = [...system.getComponentEntities.entries()].flatMap(entry => entry[1].getEndpointEntities.concat(entry[1].getExternalEndpointEntities));
         let numberOfEndpointsSupportingSsl = allEndpoints.map(endpoint => endpoint.getProperties().find(property => property.getKey === "protocol").value)
-                                                         .filter(protocol => PROTOCOLS_SUPPORTING_TLS.includes(protocol))
-                                                         .length;
-        if (allEndpoints.length === 0) {
+            .filter(protocol => PROTOCOLS_SUPPORTING_TLS.includes(protocol))
+            .length;
+        if ((allEndpoints.length - numberOfEndpointsSupportingSsl) === 0) {
             return 0;
         }
 
-        return numberOfEndpointsSupportingSsl / allEndpoints.length;
+        return numberOfEndpointsSupportingSsl / (allEndpoints.length - numberOfEndpointsSupportingSsl);
+    },
+    "ratioOfExternalEndpointsSupportingTls": (system) => {
+        let allExternalEndpoints = [...system.getComponentEntities.entries()].flatMap(entry => entry[1].getExternalEndpointEntities);
+        let numberOfExternalEndpointsSupportingTLS = allExternalEndpoints.map(endpoint => endpoint.getProperties().find(property => property.getKey === "protocol").value)
+            .filter(protocol => PROTOCOLS_SUPPORTING_TLS.includes(protocol))
+            .length;
+        if (allExternalEndpoints.length === 0) {
+            return 0;
+        }
+
+        return numberOfExternalEndpointsSupportingTLS / allExternalEndpoints.length;
     },
     "ratioOfSecuredLinks": (system) => {
         let allLinks = [...system.getLinkEntities.entries()].map(link => link[1]);
@@ -91,8 +102,31 @@ const measureImplementations: { [measureKey: string]: Calculation } = {
         }
 
         return linksConnectedToSecureEndpoints / allLinks.length;
+    },
+    "dataAggregateScope": (system) => {
+        return [...system.getDataAggregateEntities.keys()].length;
+    },
+    "ratioOfStatefulComponents": (system) => {
+        let allComponents = [...system.getComponentEntities.entries()]
+        let numberOfStatefulComponents = allComponents.filter(entry => !(entry[1].getProperties().find(property => property.getKey === "stateless").value)).length;
+
+        if (allComponents.length === 0) {
+            return 0;
+        }
+
+        return numberOfStatefulComponents / allComponents.length;
+    },
+    "ratioOfStatelessComponents": (system) => {
+        let allComponents = [...system.getComponentEntities.entries()]
+        let numberOfStatelessComponents = allComponents.filter(entry => (entry[1].getProperties().find(property => property.getKey === "stateless").value)).length;
+
+        if (allComponents.length === 0) {
+            return 0;
+        }
+
+        return numberOfStatelessComponents / allComponents.length;
     }
 }
 
 
-export { measureImplementations, }
+export { measureImplementations }

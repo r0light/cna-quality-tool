@@ -15,38 +15,66 @@
                         <div v-if="selectedFactor.getFactorType === 'productFactor'">
                             <span>Entities which are relevant for this factor: </span><br><span>{{ (selectedFactor as
                                 ProductFactor).getRelevantEntities.map(entityKey => entities[entityKey].name).join(", ")
-                            }}</span>
+                                }}</span>
                         </div>
                         <div v-if="selectedFactor.getFactorType === 'productFactor'">
                             <span>Categories that this factor is assigned to: </span><br><span>{{ (selectedFactor as
                                 ProductFactor).getCategories.map(categoryKey =>
                                     qualityModel.findFactorCategory(categoryKey).categoryName).join(", ")
-                            }}</span>
+                                }}</span>
                         </div>
                         <div
                             v-if="selectedFactor.getFactorType === 'productFactor' && (selectedFactor as ProductFactor).getSources.length > 0">
                             <span>Read more:</span>
                             <ul>
                                 <li v-for="source of (selectedFactor as ProductFactor).getSources">
-                                    <span><a :href="source.getUrl"><span>{{ source.getKey }}</span></a>: {{ source.getInfo
+                                    <span><a :href="source.getUrl"><span>{{ source.getKey }}</span></a>: {{
+                                        source.getInfo
                                     }}</span>
                                 </li>
                             </ul>
                         </div>
                         <div
                             v-if="selectedFactor.getFactorType === 'productFactor' && (selectedFactor as ProductFactor).getMeasures.length > 0">
-                            <span>Potential measures:</span>
-                            <ul>
-                                <li v-for="measure of (selectedFactor as ProductFactor).getMeasures">
-                                    <span class="font-italics">{{ measure.getName }}</span>
-                                    <span> (</span>
-                                    <span v-for="source of measure.getSources">
-                                        <a v-if="!!source.getUrl" :href="source.getUrl"><span>{{ source.getKey }}, </span></a>
-                                        <span v-else="!source.getUrl.length">{{ source.getKey }}</span>
-                                    </span>
-                                    <span> )</span>
-                                </li>
-                            </ul>
+                            <div
+                                v-if="(selectedFactor as ProductFactor).getMeasures.filter(measure => measure.isCalculationAvailable()).length > 0">
+                                <span>Implemented measures:</span>
+                                <ul class="listWithoutBullets">
+                                    <li
+                                        v-for="measure of (selectedFactor as ProductFactor).getMeasures.filter(measure => measure.isCalculationAvailable())">
+                                        <details>
+                                            <summary>
+                                                <span class="font-italics">{{ measure.getName }}</span>
+                                                <span> (</span>
+                                                <span v-for="source of measure.getSources">
+                                                    <a v-if="!!source.getUrl" :href="source.getUrl"><span>{{
+                                                            source.getKey }},
+                                                        </span></a>
+                                                    <span v-else="!source.getUrl.length">{{ source.getKey }}</span>
+                                                </span>
+                                                <span> )</span>
+                                            </summary>
+                                            <span class="indented">Calculation: {{ measure.getCalculationDescription }}</span>
+                                        </details>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div>
+                                <span>Potential measures:</span>
+                                <ul>
+                                    <li
+                                        v-for="measure of (selectedFactor as ProductFactor).getMeasures.filter(measure => !measure.isCalculationAvailable())">
+                                        <span class="font-italics">{{ measure.getName }}</span>
+                                        <span> (</span>
+                                        <span v-for="source of measure.getSources">
+                                            <a v-if="!!source.getUrl" :href="source.getUrl"><span>{{ source.getKey }},
+                                                </span></a>
+                                            <span v-else="!source.getUrl.length">{{ source.getKey }}</span>
+                                        </span>
+                                        <span> )</span>
+                                    </li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                     <div v-if="!selectedFactor">Select a factor to see it's details here</div>
@@ -243,7 +271,7 @@ function drawQualityModelElements(highLevelFilter: string[], factorCategoryFilte
                     class: "entityHighlighting"
                 },
                 label: {
-                    text: util.breakText(productFactor.getName, { width: 110, height: 50 }, { 'font-size': 12 }, {ellipsis: "..." }),
+                    text: util.breakText(productFactor.getName, { width: 110, height: 50 }, { 'font-size': 12 }, { ellipsis: "..." }),
                 }
             }
         })
@@ -441,4 +469,14 @@ function unselectElement() {
     flex-direction: column;
     row-gap: 0.5em;
 }
+
+.listWithoutBullets {
+    list-style-type: none;
+    padding-left: 26px;
+}
+
+.indented {
+    padding-left: 13px;
+}
+
 </style>

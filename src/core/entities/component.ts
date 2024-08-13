@@ -197,7 +197,14 @@ class Component {
      * @param {EntityProperty[]} entityProperties 
      */
     addProperties(entityProperties: EntityProperty[]) {
-        this.#properties = this.#properties.concat(entityProperties);
+        for (const newProperty of entityProperties) {
+            let existingPropertyIndex = this.#properties.findIndex(property => property.getKey === newProperty.getKey);
+            if (~existingPropertyIndex) {
+                this.#properties[existingPropertyIndex] = newProperty;
+            } else {
+                this.#properties.push(newProperty);
+            }
+        }
     }
 
     setPropertyValue(propertyKey: string, propertyValue: any) {
@@ -207,6 +214,10 @@ class Component {
         } else {
             throw new Error(`Property with key ${propertyKey} not found in ${this.constructor}`)
         }
+    }
+
+    getProperty(propertyKey: string) {
+        return this.#properties.find(property => property.getKey === propertyKey);
     }
 
     /**
@@ -224,6 +235,7 @@ class Component {
     toString() {
         return "Component " + JSON.stringify(this);
     }
+
 }
 
 export { Component, COMPONENT_TOSCA_KEY, getComponentProperties };
