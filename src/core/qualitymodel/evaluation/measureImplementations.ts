@@ -78,6 +78,19 @@ const measureImplementations: { [measureKey: string]: Calculation } = {
         }
 
         return numberOfEndpointsSupportingSsl / allEndpoints.length;
+    },
+    "ratioOfSecuredLinks": (system) => {
+        let allLinks = [...system.getLinkEntities.entries()].map(link => link[1]);
+        let linksConnectedToSecureEndpoints = allLinks.filter(link => {
+            let protocol = link.getTargetEndpoint.getProperties().find(property => property.getKey === "protocol").value;
+            return PROTOCOLS_SUPPORTING_TLS.includes(protocol);
+        }).length
+
+        if (allLinks.length === 0) {
+            return 0;
+        }
+
+        return linksConnectedToSecureEndpoints / allLinks.length;
     }
 }
 
