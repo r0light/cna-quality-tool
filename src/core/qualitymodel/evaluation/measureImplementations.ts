@@ -1,5 +1,7 @@
+import { compact } from "lodash";
 import { Service, StorageBackingService } from "../../entities.js";
 import { Calculation } from "../quamoco/Measure.js";
+import { PROTOCOLS_SUPPORTING_TLS } from "../specifications/featureModel.js";
 
 const average: (list: number[]) => number = list => {
     return list.reduce((e1, e2) => e1 + e2, 0) / list.length
@@ -65,6 +67,17 @@ const measureImplementations: { [measureKey: string]: Calculation } = {
                     .find(prop => prop.getKey === "shards").value)
             );
         }
+    },
+    "ratioOfEndpointsSupportingSsl": (system) => {
+        let allEndpoints = [...system.getComponentEntities.entries()].flatMap(entry => entry[1].getEndpointEntities.concat(entry[1].getExternalEndpointEntities));
+        let numberOfEndpointsSupportingSsl = allEndpoints.map(endpoint => endpoint.getProperties().find(property => property.getKey === "protocol").value)
+                                                         .filter(protocol => PROTOCOLS_SUPPORTING_TLS.includes(protocol))
+                                                         .length;
+        if (allEndpoints.length === 0) {
+            return 0;
+        }
+
+        return numberOfEndpointsSupportingSsl / allEndpoints.length;
     }
 }
 
