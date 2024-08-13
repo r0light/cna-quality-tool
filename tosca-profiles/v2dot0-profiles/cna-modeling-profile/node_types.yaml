@@ -209,6 +209,16 @@ node_types:
     derived_from: Root
     description: Endpoint type to explicitly model endpoints as entities
     properties:
+      kind:
+        type: string
+        required: true
+        description: The kind of endpoint which can be either "query", "command", or "event". A "query" is a synchronous request for data which the client needs for further processing. A "command" is a synchronous send of data for which the client needs a corresponding answer for further processing. An "event" is an asynchronous send of data for which the client does not expect data to be returned for further processing.
+        validation: { $valid_values: [ $value, ["query", "command", "event"]]}
+        default: "query"
+      method_name:
+        type: string
+        required: false
+        description: An optional name of the method/action used. For REST APIs it can for example be specified whether it is a GET or POST method. For message brokers it can be specified whether it is a publish or subscribe action.
       rate_limiting:
         type: string
         required: true
@@ -243,7 +253,7 @@ node_types:
           count_range: [0, UNBOUNDED]
 
   cna-modeling.entities.Endpoint.External:
-    derived_from: Root
+    derived_from: cna-modeling.entities.Endpoint
     description: Endpoint type to explicitly model external endpoints as entities
     capabilities:
       # Allow assigning exactly one External Endpoint Capability

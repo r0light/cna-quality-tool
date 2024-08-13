@@ -2,11 +2,11 @@ import * as Entities from '../entities'
 import { TwoWayKeyIdMap } from "./TwoWayKeyIdMap";
 import { UniqueKeyManager } from "./UniqueKeyManager";
 import { flatMetaData } from '../common/entityDataTypes';
-import { ENDPOINT_TOSCA_KEY } from '../entities/endpoint';
+import { ENDPOINT_CAPABILITY_EQUIVALENT, ENDPOINT_TOSCA_EQUIVALENT, ENDPOINT_TOSCA_KEY } from '../entities/endpoint';
 import { REQUEST_TRACE_TOSCA_KEY } from '../entities/requestTrace';
 import { DEPLOYMENT_MAPPING_TOSCA_KEY } from '../entities/deploymentMapping';
 import { LINK_TOSCA_KEY } from '../entities/link';
-import { EntityProperty } from '../common/entityProperty';
+import { EntityProperty, parseProperties } from '../common/entityProperty';
 import { DATA_AGGREGATE_TOSCA_KEY } from '../entities/dataAggregate';
 import { BACKING_DATA_TOSCA_KEY } from '../entities/backingData';
 import { INFRASTRUCTURE_TOSCA_KEY } from '../entities/infrastructure';
@@ -14,7 +14,7 @@ import { SERVICE_TOSCA_KEY } from '../entities/service';
 import { BACKING_SERVICE_TOSCA_KEY } from '../entities/backingService';
 import { STORAGE_BACKING_SERVICE_TOSCA_KEY } from '../entities/storageBackingService';
 import { COMPONENT_TOSCA_KEY } from '../entities/component';
-import { EXTERNAL_ENDPOINT_TOSCA_KEY } from '../entities/externalEndpoint';
+import { EXTERNAL_ENDPOINT_CAPABILITY_EQUIVALENT, EXTERNAL_ENDPOINT_TOSCA_EQUIVALENT, EXTERNAL_ENDPOINT_TOSCA_KEY } from '../entities/externalEndpoint';
 import { TOSCA_File } from '@/totypa/tosca-types/v2dot0-types/definition-types';
 import { TOSCA_Node_Template, TOSCA_Relationship_Template, TOSCA_Requirement_Assignment, TOSCA_Service_Template } from '@/totypa/tosca-types/v2dot0-types/template-types';
 import { TOSCA_Property_Assignment } from '@/totypa/tosca-types/v2dot0-types/alias-types';
@@ -433,27 +433,33 @@ class EntitiesToToscaConverter {
 
 
     #createEndpointTemplate(endpoint: Entities.Endpoint): TOSCA_Node_Template {
+        let endpointNodePropertyKeys = parseProperties(ENDPOINT_TOSCA_EQUIVALENT.properties).map(property => property.getKey);
         let template: TOSCA_Node_Template = {
             type: ENDPOINT_TOSCA_KEY,
             metadata: flatMetaData(endpoint.getMetaData),
+            properties: this.#parsePropertiesForYaml(endpoint.getProperties().filter(property => endpointNodePropertyKeys.includes(property.getKey))),
             capabilities: {}
         };
 
+        let endpointCapabilityPropertyKeys =  parseProperties(ENDPOINT_CAPABILITY_EQUIVALENT.properties).map(property => property.getKey);
         template.capabilities.endpoint = {
-            properties: this.#parsePropertiesForYaml(endpoint.getProperties())
+            properties: this.#parsePropertiesForYaml(endpoint.getProperties().filter(property => endpointCapabilityPropertyKeys.includes(property.getKey)))
         }
         return template;
     }
 
     #createExternalEndpointTemplate(endpoint: Entities.ExternalEndpoint): TOSCA_Node_Template {
+        let externalEndpointNodePropertyKeys = parseProperties(EXTERNAL_ENDPOINT_TOSCA_EQUIVALENT.properties).map(property => property.getKey);
         let template: TOSCA_Node_Template = {
             type: EXTERNAL_ENDPOINT_TOSCA_KEY,
             metadata: flatMetaData(endpoint.getMetaData),
+            properties: this.#parsePropertiesForYaml(endpoint.getProperties().filter(property => externalEndpointNodePropertyKeys.includes(property.getKey))),
             capabilities: {}
         };
 
+        let externalEndpointCapabilityPropertyKeys = parseProperties(EXTERNAL_ENDPOINT_CAPABILITY_EQUIVALENT.properties).map(property => property.getKey);
         template.capabilities.external_endpoint = {
-            properties: this.#parsePropertiesForYaml(endpoint.getProperties())
+            properties: this.#parsePropertiesForYaml(endpoint.getProperties().filter(property => externalEndpointCapabilityPropertyKeys.includes(property.getKey)))
         }
 
         return template;

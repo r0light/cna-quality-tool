@@ -1,4 +1,4 @@
-import { EntityProperty, parseProperties } from "../common/entityProperty.js"
+import { EntityProperty, parseProperties, TextEntityProperty } from "../common/entityProperty.js"
 import { Endpoint } from "./endpoint.js";
 import { tosca_simple_2_0 } from '../../totypa/parsedProfiles/v2dot0-profiles/tosca_simple_2_0.js'
 import { MetaData } from "../common/entityDataTypes.js";
@@ -16,7 +16,42 @@ const EXTERNAL_ENDPOINT_CAPABILITY_EQUIVALENT = tosca_simple_2_0.capability_type
 
 
 function getExternalEndpointProperties(): EntityProperty[] {
-    let parsed = parseProperties(EXTERNAL_ENDPOINT_CAPABILITY_EQUIVALENT.properties);
+    let parsed = parseProperties(EXTERNAL_ENDPOINT_CAPABILITY_EQUIVALENT.properties).concat(parseProperties(EXTERNAL_ENDPOINT_TOSCA_EQUIVALENT.properties));
+
+    /*
+    for (const prop of parsed) {
+        switch (prop.getKey) {
+            case "method_name":
+                prop.setName = "Method name";
+                prop.setExample = "e.g. GET if protocol is http";
+                (prop as TextEntityProperty).setOptions = [{
+                    value: "GET",
+                    text: "GET"
+                },
+                {
+                    value: "POST",
+                    text: "POST"
+                },
+                {
+                    value: "publish",
+                    text: "publish"
+                },
+                {
+                    value: "subscribe",
+                    text: "subscribe"
+                }
+                ];
+                break;
+            case "url_path":
+                prop.setName = "Endpoint Path:";
+                prop.setExample = "e.g. /orders";
+                break;
+            case "port": // TODO transform to Number type?
+                prop.setName = "Port: ";
+                prop.setExample = "e.g. 3306"
+                break;
+        }
+                */
     return parsed;
 }
 
@@ -49,4 +84,4 @@ class ExternalEndpoint extends Endpoint {
     }
 }
 
-export { ExternalEndpoint, EXTERNAL_ENDPOINT_TOSCA_KEY, getExternalEndpointProperties };
+export { ExternalEndpoint, EXTERNAL_ENDPOINT_TOSCA_KEY, EXTERNAL_ENDPOINT_TOSCA_EQUIVALENT, EXTERNAL_ENDPOINT_CAPABILITY_EQUIVALENT, getExternalEndpointProperties };

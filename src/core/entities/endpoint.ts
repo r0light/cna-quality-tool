@@ -21,9 +21,9 @@ function getEndpointProperties(): EntityProperty[] {
 
     for (const prop of parsed) {
         switch (prop.getKey) {
-            case "protocol":
-                prop.setName = "Endpoint Type:";
-                prop.setExample = "e.g. HTTP GET";
+            case "method_name":
+                prop.setName = "Method name";
+                prop.setExample = "e.g. GET if protocol is http";
                 (prop as TextEntityProperty).setOptions = [{
                     value: "GET",
                     text: "GET"
@@ -33,12 +33,12 @@ function getEndpointProperties(): EntityProperty[] {
                     text: "POST"
                 },
                 {
-                    value: "Topic send-to",
-                    text: "Topic send-to"
+                    value: "publish",
+                    text: "publish"
                 },
                 {
-                    value: "Topic receive-from",
-                    text: "Topic receive-from"
+                    value: "subscribe",
+                    text: "subscribe"
                 }
                 ];
                 break;
@@ -158,4 +158,4 @@ class Endpoint {
     }
 }
 
-export { Endpoint, ENDPOINT_TOSCA_KEY, getEndpointProperties };
+export { Endpoint, ENDPOINT_TOSCA_KEY, ENDPOINT_TOSCA_EQUIVALENT, ENDPOINT_CAPABILITY_EQUIVALENT, getEndpointProperties };

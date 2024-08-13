@@ -1233,6 +1233,27 @@ export const cna_modeling_profile: TOSCA_File = {
       },
       "derived_from": "Root",
       "properties": {
+        "kind": {
+          "type": "string",
+          "required": true,
+          "description": "The kind of endpoint which can be either \"query\", \"command\", or \"event\". A \"query\" is a synchronous request for data which the client needs for further processing. A \"command\" is a synchronous send of data for which the client needs a corresponding answer for further processing. An \"event\" is an asynchronous send of data for which the client does not expect data to be returned for further processing.",
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "query",
+                "command",
+                "event"
+              ]
+            ]
+          },
+          "default": "query"
+        },
+        "method_name": {
+          "type": "string",
+          "required": false,
+          "description": "An optional name of the method/action used. For REST APIs it can for example be specified whether it is a GET or POST method. For message brokers it can be specified whether it is a publish or subscribe action."
+        },
         "rate_limiting": {
           "type": "string",
           "required": true,
@@ -1270,6 +1291,9 @@ export const cna_modeling_profile: TOSCA_File = {
         "feature": {
           "type": "Node"
         },
+        "endpoint": {
+          "type": "Endpoint"
+        },
         "external_endpoint": {
           "type": "Endpoint.Public"
         }
@@ -1303,7 +1327,54 @@ export const cna_modeling_profile: TOSCA_File = {
           "type": "Lifecycle.Standard"
         }
       },
-      "derived_from": "Root"
+      "derived_from": "cna-modeling.entities.Endpoint",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "required": true,
+          "description": "The kind of endpoint which can be either \"query\", \"command\", or \"event\". A \"query\" is a synchronous request for data which the client needs for further processing. A \"command\" is a synchronous send of data for which the client needs a corresponding answer for further processing. An \"event\" is an asynchronous send of data for which the client does not expect data to be returned for further processing.",
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "query",
+                "command",
+                "event"
+              ]
+            ]
+          },
+          "default": "query"
+        },
+        "method_name": {
+          "type": "string",
+          "required": false,
+          "description": "An optional name of the method/action used. For REST APIs it can for example be specified whether it is a GET or POST method. For message brokers it can be specified whether it is a publish or subscribe action."
+        },
+        "rate_limiting": {
+          "type": "string",
+          "required": true,
+          "description": "If for this endpoint rate limiting is enforced, the limit can be stated here, otherwise it is \"none\".",
+          "default": "none"
+        },
+        "idempotent": {
+          "type": "boolean",
+          "required": true,
+          "description": "Flag to specify whether this endpoint is idempotent, meaning that the effect of a successful invocation is independent of the number of times it is invoked.",
+          "default": false
+        },
+        "readiness_check": {
+          "type": "boolean",
+          "required": true,
+          "description": "Flag to specify whether this endpoint is used as a readiness check",
+          "default": false
+        },
+        "health_check": {
+          "type": "boolean",
+          "required": true,
+          "description": "Flag to specify whether this endpoint is used as a health check",
+          "default": false
+        }
+      }
     },
     "cna-modeling.entities.BackingData": {
       "description": "Node Type to model Backing Data entities",

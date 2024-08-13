@@ -8,7 +8,8 @@
     "build": "vite build",
     "ghpages": "vite build --base=/",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "parseProfiles": "cd ./src/totypa/parsers/v2dot0-parsers && npx tsx profileParser.ts && cd /../../.."
   },
   "dependencies": {
     "@joint/core": "^4.0.2",
