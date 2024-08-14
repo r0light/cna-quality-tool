@@ -4,6 +4,7 @@ import { RelationToBackingData } from "@/core/entities/relationToBackingData";
 import { RelationToDataAggregate } from "@/core/entities/relationToDataAggregate";
 import { systemMeasureImplementations } from "@/core/qualitymodel/evaluation/measureImplementations";
 import { getQualityModel } from "@/core/qualitymodel/QualityModelInstance";
+import { ASYNCHRONOUS_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "@/core/qualitymodel/specifications/featureModel";
 import { beforeAll, expect, test } from "vitest"
 
 var systemToEvaluateA: System = new System("testSystem");
@@ -120,4 +121,74 @@ test("degreeToWhichComponentsAreLinkedToStatefulComponents", () => {
     let measureValue = systemMeasureImplementations["degreeToWhichComponentsAreLinkedToStatefulComponents"](systemToEvaluateA);
 
     expect(measureValue).toEqual(1/3);
+})
+
+test("degreeOfAsynchronousCommunication", () => {
+
+    let system = new System("testSystem");
+
+    let serviceX  = new Service("s1", "serviceA", getEmptyMetaData());
+
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    endpointA.setPropertyValue("kind", SYNCHRONOUS_ENDPOINT_KIND[0]);
+    serviceX.addEndpoint(endpointA);
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    endpointB.setPropertyValue("kind", ASYNCHRONOUS_ENDPOINT_KIND[0]);
+    serviceX.addEndpoint(endpointB);
+    let externalEndpointA = new ExternalEndpoint("ee1", "external endpoint 1", getEmptyMetaData());
+    externalEndpointA.setPropertyValue("kind", SYNCHRONOUS_ENDPOINT_KIND[0]);
+    serviceX.addEndpoint(externalEndpointA);
+
+    let serviceY  = new Service("s2", "serviceB", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    endpointC.setPropertyValue("kind", ASYNCHRONOUS_ENDPOINT_KIND[0]);
+    serviceY.addEndpoint(endpointC);
+    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    endpointD.setPropertyValue("kind", ASYNCHRONOUS_ENDPOINT_KIND[0]);
+    serviceY.addEndpoint(endpointD);
+
+    system.addEntities([serviceX, serviceY]);
+
+    let measureValue = systemMeasureImplementations["degreeOfAsynchronousCommunication"](system);
+
+    expect(measureValue).toEqual(2/3);
+})
+
+test("asynchronousCommunicationUtilization", () => {
+    let system = new System("testSystem");
+
+    let serviceX  = new Service("s1", "serviceA", getEmptyMetaData());
+
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    endpointA.setPropertyValue("kind", SYNCHRONOUS_ENDPOINT_KIND[0]);
+    serviceX.addEndpoint(endpointA);
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    endpointB.setPropertyValue("kind", ASYNCHRONOUS_ENDPOINT_KIND[0]);
+    serviceX.addEndpoint(endpointB);
+    let externalEndpointA = new ExternalEndpoint("ee1", "external endpoint 1", getEmptyMetaData());
+    externalEndpointA.setPropertyValue("kind", SYNCHRONOUS_ENDPOINT_KIND[0]);
+    serviceX.addEndpoint(externalEndpointA);
+
+    let serviceY  = new Service("s2", "serviceB", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    endpointC.setPropertyValue("kind", ASYNCHRONOUS_ENDPOINT_KIND[0]);
+    serviceY.addEndpoint(endpointC);
+    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    endpointD.setPropertyValue("kind", ASYNCHRONOUS_ENDPOINT_KIND[0]);
+    serviceY.addEndpoint(endpointD);
+
+    let linkYX1 = new Link("l1", serviceY, endpointA);
+    let linkYX2 = new Link("l2", serviceY, endpointB);
+
+    let serviceZ = new Service("s3", "service Z", getEmptyMetaData());
+    let linkZX1 = new Link("l3", serviceZ, endpointC);
+    let linkZX2 = new Link("l4", serviceZ, endpointD);
+
+    system.addEntities([serviceX, serviceY, serviceZ]);
+    system.addEntities([linkYX1, linkYX2, linkZX1, linkZX2]);
+
+    let measureValue = systemMeasureImplementations["asynchronousCommunicationUtilization"](system);
+
+    expect(measureValue).toEqual(3/4);
+
 })

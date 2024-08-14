@@ -1036,22 +1036,22 @@ export const qualityModel: QualityModelSpec = {
         },
         "numberOfAsynchronousOutgoingLinks": {
             "name": "Number of asynchronous outgoing links",
-            "calculation": "",
+            "calculation": "Number of outgoing links of a service targeting an asynchronous endpoint.",
             "sources": ["Apel2019", "Daniel2023"]
         },
         "ratioOfAsynchronousOutgoingLinks": {
             "name": "Ratio of asynchronous outgoing links",
-            "calculation": "",
+            "calculation": "Number of outgoing links of a service that are asynchronous / Number of all outgoing links",
             "sources": ["Karhikeyan2012"]
         },
         "degreeOfAsynchronousCommunication": {
             "name": "Degree of asynchronous communication",
-            "calculation": "",
+            "calculation": "Average-of(Ratio of asynchronous endpoints) over all components",
             "sources": ["Qian2006"]
         },
         "asynchronousCommunicationUtilization": {
             "name": "Asynchronous Communication Utilization",
-            "calculation": "",
+            "calculation": "Number of Links targeting an asynchronous Endpoint / Total number of Links",
             "sources": ["Ntentos2020a"]
         },
         "serviceInteractionWithEventSourcingUtilizationMetric": {

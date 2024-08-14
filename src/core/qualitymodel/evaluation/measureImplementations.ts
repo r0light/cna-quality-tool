@@ -157,6 +157,45 @@ export const degreeToWhichComponentsAreLinkedToStatefulComponents: Calculation<S
     return totalNumberOfConnectionsToStatefulComponents / allComponents.length;
 }
 
+export const degreeOfAsynchronousCommunication: Calculation<System> = (system) => {
+    let allComponents = [...system.getComponentEntities.entries()];
+
+    if (allComponents.length === 0) {
+        return 0;
+    }
+
+    let degreesOfAsynchronousEndpoints: number[] = [];
+
+    for (const [componentId, component] of allComponents) {
+        let allEndpoints = component.getEndpointEntities.concat(component.getExternalEndpointEntities);
+        if (allEndpoints.length === 0) {
+            continue;
+        }
+        let numberOfAsynchronousEndpoints = allEndpoints.filter(endpoint => ASYNCHRONOUS_ENDPOINT_KIND.includes(endpoint.getProperty("kind").value)).length;
+        degreesOfAsynchronousEndpoints.push(numberOfAsynchronousEndpoints / allEndpoints.length);
+    }
+
+    return average(degreesOfAsynchronousEndpoints);
+}
+
+export const asynchronousCommunicationUtilization: Calculation<System> = (system) => {
+
+    let allLinks = system.getLinkEntities;
+
+    if (allLinks.size === 0) {
+        return 0;
+    }
+
+    let numberOfLinksToAnAsynchronousEndpoint = 0;
+    for (const [linkId, link] of allLinks) {
+        if (ASYNCHRONOUS_ENDPOINT_KIND.includes(link.getTargetEndpoint.getProperty("kind").value)) {
+            numberOfLinksToAnAsynchronousEndpoint++;
+        }
+    }
+    
+    return numberOfLinksToAnAsynchronousEndpoint / allLinks.size;
+}
+
 export const systemMeasureImplementations: { [measureKey: string]: Calculation<System> } = {
     "serviceReplicationLevel": serviceReplicationLevel,
     "storageReplicationLevel": storageReplicationLevel,
@@ -168,7 +207,9 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation<S
     "dataAggregateScope": dataAggregateScope,
     "ratioOfStatefulComponents": ratioOfStatefulComponents,
     "ratioOfStatelessComponents": ratioOfStatelessComponents,
-    "degreeToWhichComponentsAreLinkedToStatefulComponents": degreeToWhichComponentsAreLinkedToStatefulComponents
+    "degreeToWhichComponentsAreLinkedToStatefulComponents": degreeToWhichComponentsAreLinkedToStatefulComponents,
+    "degreeOfAsynchronousCommunication": degreeOfAsynchronousCommunication,
+    "asynchronousCommunicationUtilization": asynchronousCommunicationUtilization
 }
 
 export const serviceInterfaceDataCohesion: Calculation<{ component: Component, system: System }> = (parameters) => {
@@ -271,6 +312,21 @@ export const numberOfSynchronousOutgoingLinks: Calculation<{ component: Componen
     return outgoingLinks.filter(link => SYNCHRONOUS_ENDPOINT_KIND.includes(link.getTargetEndpoint.getProperty("kind").value)).length;   
 }
 
+export const numberOfAsynchronousOutgoingLinks: Calculation<{ component: Component, system: System }> = (parameters) => {
+    let outgoingLinks = parameters.system.getOutgoingLinksOfComponent(parameters.component.getId);
+    return outgoingLinks.filter(link => ASYNCHRONOUS_ENDPOINT_KIND.includes(link.getTargetEndpoint.getProperty("kind").value)).length;   
+}
+
+export const ratioOfAsynchronousOutgoingLinks: Calculation<{ component: Component, system: System }> = (parameters) => {
+    let outgoingLinks = parameters.system.getOutgoingLinksOfComponent(parameters.component.getId);
+    let asynchronousOutgoingLinks = outgoingLinks.filter(link => ASYNCHRONOUS_ENDPOINT_KIND.includes(link.getTargetEndpoint.getProperty("kind").value));
+
+    if (outgoingLinks.length === 0) {
+        return 0;
+    }
+
+    return asynchronousOutgoingLinks.length / outgoingLinks.length;   
+}
   
 export const componentMeasureImplementations: { [measureKey: string]: Calculation<{ component: Component, system: System }> } = {
     "serviceInterfaceDataCohesion": serviceInterfaceDataCohesion,
@@ -280,7 +336,9 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "numberOfProvidedSynchronousAndAsynchronousEndpoints": numberOfProvidedSynchronousAndAsynchronousEndpoints,
     "numberOfSynchronousEndpointsOfferedByAService": numberOfSynchronousEndpointsOfferedByAService,
     "numberOfAsynchronousEndpointsOfferedByAService": numberOfAsynchronousEndpointsOfferedByAService,
-    "numberOfSynchronousOutgoingLinks": numberOfSynchronousOutgoingLinks
+    "numberOfSynchronousOutgoingLinks": numberOfSynchronousOutgoingLinks,
+    "numberOfAsynchronousOutgoingLinks": numberOfAsynchronousOutgoingLinks,
+    "ratioOfAsynchronousOutgoingLinks": ratioOfAsynchronousOutgoingLinks
 }
 
 
