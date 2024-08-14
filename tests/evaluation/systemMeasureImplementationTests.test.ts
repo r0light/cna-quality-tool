@@ -2,7 +2,7 @@ import { getEmptyMetaData } from "@/core/common/entityDataTypes";
 import { Component, DataAggregate, Endpoint, ExternalEndpoint, Link, Service, StorageBackingService, System } from "@/core/entities";
 import { RelationToBackingData } from "@/core/entities/relationToBackingData";
 import { RelationToDataAggregate } from "@/core/entities/relationToDataAggregate";
-import { measureImplementations } from "@/core/qualitymodel/evaluation/measureImplementations";
+import { systemMeasureImplementations } from "@/core/qualitymodel/evaluation/measureImplementations";
 import { getQualityModel } from "@/core/qualitymodel/QualityModelInstance";
 import { beforeAll, expect, test } from "vitest"
 
@@ -32,9 +32,6 @@ beforeAll(() => {
     let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
     serviceB.addEndpoint(endpointD);
 
-
-    console.log(`serviceB has: ${serviceB.getEndpointEntities.map(endpoint => endpoint.getId)}`)
-
     let linkAC = new Link("l1", serviceA, endpointC);
     let linkAD = new Link("l2", serviceA, endpointD);
 
@@ -59,7 +56,7 @@ test("all implementation names refer to an existing measure", () => {
     let measureKeys = getQualityModel().measures.map(measure => measure.getId);
     expect(measureKeys.length).toStrictEqual(new Set(measureKeys).size);
 
-    let measureImplementationKeys = Object.keys(measureImplementations);
+    let measureImplementationKeys = Object.keys(systemMeasureImplementations);
     expect(measureImplementationKeys.length).toStrictEqual(new Set(measureImplementationKeys).size);
 
     expect(measureKeys).toEqual(
@@ -72,7 +69,7 @@ test("all implemented measure must provide information on the calculation", () =
     let measureKeys = measures.map(measure => measure.getId);
     expect(measureKeys.length).toStrictEqual(new Set(measureKeys).size);
 
-    let measureImplementationKeys = Object.keys(measureImplementations);
+    let measureImplementationKeys = Object.keys(systemMeasureImplementations);
     expect(measureImplementationKeys.length).toStrictEqual(new Set(measureImplementationKeys).size);
 
     for (const measure of measures) {
@@ -83,44 +80,44 @@ test("all implemented measure must provide information on the calculation", () =
 })
 
 test("ratioOfEndpointsSupportingSsl", () => {
-    let measureValue = measureImplementations["ratioOfEndpointsSupportingSsl"](systemToEvaluateA);
+    let measureValue = systemMeasureImplementations["ratioOfEndpointsSupportingSsl"](systemToEvaluateA);
 
     expect(measureValue).toEqual(0.5);
 })
 
 test("ratioOfExternalEndpointsSupportingTls", () => {
-    let measureValue = measureImplementations["ratioOfExternalEndpointsSupportingTls"](systemToEvaluateA);
+    let measureValue = systemMeasureImplementations["ratioOfExternalEndpointsSupportingTls"](systemToEvaluateA);
 
     expect(measureValue).toEqual(0.5);
 })
 
 test("ratioOfSecuredLinks", () => {
-    let measureValue = measureImplementations["ratioOfSecuredLinks"](systemToEvaluateA);
+    let measureValue = systemMeasureImplementations["ratioOfSecuredLinks"](systemToEvaluateA);
 
     expect(measureValue).toEqual(0.5);
 })
 
 test("dataAggregateScope", () => {
-    let measureValue = measureImplementations["dataAggregateScope"](systemToEvaluateA);
+    let measureValue = systemMeasureImplementations["dataAggregateScope"](systemToEvaluateA);
 
     expect(measureValue).toEqual(2);
 })
 
 test("ratioOfStatefulComponents", () => {
-    let measureValue = measureImplementations["ratioOfStatefulComponents"](systemToEvaluateA);
+    let measureValue = systemMeasureImplementations["ratioOfStatefulComponents"](systemToEvaluateA);
 
     expect(measureValue).toEqual(2/3);
 })
 
 test("ratioOfStatelessComponents", () => {
-    let measureValue = measureImplementations["ratioOfStatelessComponents"](systemToEvaluateA);
+    let measureValue = systemMeasureImplementations["ratioOfStatelessComponents"](systemToEvaluateA);
 
     expect(measureValue).toEqual(1/3);
 })
 
 
 test("degreeToWhichComponentsAreLinkedToStatefulComponents", () => {
-    let measureValue = measureImplementations["degreeToWhichComponentsAreLinkedToStatefulComponents"](systemToEvaluateA);
+    let measureValue = systemMeasureImplementations["degreeToWhichComponentsAreLinkedToStatefulComponents"](systemToEvaluateA);
 
     expect(measureValue).toEqual(1/3);
 })

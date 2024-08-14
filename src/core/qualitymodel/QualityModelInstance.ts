@@ -1,6 +1,6 @@
 import { HighLevelAspect } from "./quamoco/HighLevelAspect.js";
 import { Impact, ImpactType } from "./quamoco/Impact.js";
-import { Measure } from "./quamoco/Measure.js";
+import { Calculation, Measure } from "./quamoco/Measure.js";
 import { ProductFactor } from "./quamoco/ProductFactor.js";
 import { QualityAspect } from "./quamoco/QualityAspect.js";
 import { entities } from "./specifications/entities.js";
@@ -10,8 +10,9 @@ import { LiteratureSource } from "./quamoco/LiteratureSource.js";
 import { Entity } from "./quamoco/Entity.js";
 import { productFactorEvaluationImplementation, qualityAspectEvaluationImplementation } from "./evaluation/evaluationImplementations.js";
 import { ProductFactorEvaluation } from "./evaluation/ProductFactorEvaluation.js";
-import { measureImplementations } from "./evaluation/measureImplementations.js";
+import { componentMeasureImplementations, systemMeasureImplementations } from "./evaluation/measureImplementations.js";
 import { QualityAspectEvaluation } from "./evaluation/QualityAspectEvaluation.js";
+import { Component, System } from "../entities.js";
 
 
 function getQualityModel(): QualityModelInstance {
@@ -49,12 +50,17 @@ function getQualityModel(): QualityModelInstance {
             let url = literature[sourceKey] ? literature[sourceKey].url : "";
             newMeasure.addSource(new LiteratureSource(sourceKey, "", url));
         });
-        if (measureImplementations[measureKey]) {
-            newMeasure.addCalculation(measureImplementations[measureKey]);
+        if (systemMeasureImplementations[measureKey]) {
+            newMeasure.addCalculation(systemMeasureImplementations[measureKey]);
+            newQualityModel.measures.push(newMeasure as Measure<System>);
+        } else if (componentMeasureImplementations[measureKey]){
+            newMeasure.addCalculation(componentMeasureImplementations[measureKey]);
+            newQualityModel.measures.push(newMeasure as Measure<{component: Component, system: System}>);
         } else {
             //console.log(`No measure implementation found for measure ${measureKey}`);
+            //default:
+            newQualityModel.measures.push(newMeasure as Measure<System>);
         }
-        newQualityModel.measures.push(newMeasure);
     }
 
     // add all Product Factors
@@ -193,7 +199,7 @@ class QualityModelInstance {
 
     impacts: Impact[];
 
-    measures: Measure[];
+    measures: (Measure<System>|Measure<{component: Component, system: System}>)[];
 
     entities: Entity[];
 
@@ -219,7 +225,7 @@ class QualityModelInstance {
         return this.productFactors.find(pf => pf.getId === productFactorKey);
     }
 
-    findMeasure(measureKey: string): Measure {
+    findMeasure(measureKey: string): Measure<System>|Measure<{component: Component, system: System}> {
         return this.measures.find(m => m.getId === measureKey);
     }
 

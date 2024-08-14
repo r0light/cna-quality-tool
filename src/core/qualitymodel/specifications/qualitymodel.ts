@@ -936,7 +936,7 @@ export const qualityModel: QualityModelSpec = {
         },
         "totalServiceInterfaceCohesion": {
             "name": "Total Service Interface Cohesion",
-            "calculation": "",
+            "calculation": "(\"Service Interface Data Cohesion\" + \"Service Interface Usage Cohesion\") / 2",
             "sources": ["Bogner2017", "Perepletchikov2007"]
         },
         "covesivenessOfService": {
@@ -956,7 +956,7 @@ export const qualityModel: QualityModelSpec = {
         },
         "serviceInterfaceDataCohesion": {
             "name": "Service Interface Data Cohesion",
-            "calculation": "",
+            "calculation": "| Set of Service Endpoints that use the same Data Aggregate | / Number of Data Aggregates used in a Service",
             "sources": ["Bogner2017", "Perepletchikov2007", "Kazemi2011", "Brito2021", "Jin2021", "Jin2018", "Athanasopoulos2011", "Athanasopoulos2015", "Bogner2020"]
         },
         "cohesionBetweenEndpointsBasedOnDataAggregateUsage": {
@@ -976,7 +976,7 @@ export const qualityModel: QualityModelSpec = {
         },
         "serviceInterfaceUsageCohesion": {
             "name": "Service Interface Usage Cohesion",
-            "calculation": "",
+            "calculation": "Sum-of(Number of endpoints used per client of this service) / (number of clients of this service * number of endpoints of this service)",
             "sources": ["Bogner2017", "Perepletchikov2007", "Kazemi2011"]
         },
         "distributionOfSynchronousCalls": {

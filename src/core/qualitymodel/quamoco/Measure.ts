@@ -1,15 +1,15 @@
-import { System } from "../../entities";
+import { Component, System } from "../../entities";
 import { LiteratureSource } from "./LiteratureSource";
 
 type MeasureValue = number | string | "n/a";
-type Calculation = (system: System) => MeasureValue;
+type Calculation<T> = (parameters: T) => MeasureValue;
 
-class Measure {
+class Measure<T> {
 
     #id: string;
     #name: string;
     #calculationDescription: string;
-    #calculation: Calculation;
+    #calculation: Calculation<T>;
     #sources: LiteratureSource[];
 
     constructor(id: string, name: string, calculationDescription: string) {
@@ -40,7 +40,7 @@ class Measure {
         this.#sources.push(literatureSource);
     }
 
-    addCalculation(calculation: Calculation) {
+    addCalculation(calculation: Calculation<T>) {
         this.#calculation = calculation;
     }
 
@@ -48,8 +48,8 @@ class Measure {
         return !!this.#calculation;
     }
 
-    calculate(system: System) {
-        return this.#calculation(system);
+    calculate(parameters: T) {
+        return this.#calculation(parameters);
     }
 }
 
