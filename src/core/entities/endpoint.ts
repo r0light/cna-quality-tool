@@ -151,6 +151,9 @@ class Endpoint {
         }
     }
 
+    getProperty(propertyKey: string) {
+        return this.#properties.find(property => property.getKey === propertyKey);
+    }
 
     getProperties() {
         return this.#properties;

@@ -2,6 +2,7 @@ import { getEmptyMetaData } from "@/core/common/entityDataTypes";
 import { DataAggregate, Endpoint, ExternalEndpoint, Link, Service, System } from "@/core/entities";
 import { RelationToDataAggregate } from "@/core/entities/relationToDataAggregate";
 import { componentMeasureImplementations } from "@/core/qualitymodel/evaluation/measureImplementations";
+import { ASYNCHRONOUS_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "@/core/qualitymodel/specifications/featureModel";
 import { expect, test } from "vitest";
 
 test("serviceInterfaceDataCohesion", () => {
@@ -141,5 +142,56 @@ test("cohesionBetweenEndpointsBasedOnDataAggregateUsage", () => {
 
     let measureValue = componentMeasureImplementations["cohesionBetweenEndpointsBasedOnDataAggregateUsage"]({component: service, system: system});
     expect(measureValue).toEqual(1/3);
+
+})
+
+test("numberOfProvidedSynchronousAndAsynchronousEndpoints", () => {
+    let system = new System("testSystem");
+
+    let service = new Service("s1", "testService", getEmptyMetaData());
+
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    service.addEndpoint(endpointA);
+
+    let endpointB = new ExternalEndpoint("e2", "endpoint 2", getEmptyMetaData());
+    service.addEndpoint(endpointB);
+
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    service.addEndpoint(endpointC);
+
+    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    service.addEndpoint(endpointD);
+
+    system.addEntity(service);
+
+    let measureValue = componentMeasureImplementations["numberOfProvidedSynchronousAndAsynchronousEndpoints"]({component: service, system: system});
+    expect(measureValue).toEqual(4);
+})
+
+test("numberOfSynchronousEndpointsOfferedByAService", () => {
+    let system = new System("testSystem");
+
+    let service = new Service("s1", "testService", getEmptyMetaData());
+
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    endpointA.setPropertyValue("kind", SYNCHRONOUS_ENDPOINT_KIND[0]);
+    service.addEndpoint(endpointA);
+
+    let endpointB = new ExternalEndpoint("e2", "endpoint 2", getEmptyMetaData());
+    endpointB.setPropertyValue("kind", SYNCHRONOUS_ENDPOINT_KIND[0]);
+    service.addEndpoint(endpointB);
+
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    endpointC.setPropertyValue("kind", ASYNCHRONOUS_ENDPOINT_KIND[0]);
+    service.addEndpoint(endpointC);
+
+    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    endpointD.setPropertyValue("kind", ASYNCHRONOUS_ENDPOINT_KIND[0]);
+    service.addEndpoint(endpointD);
+
+    system.addEntity(service);
+
+    let measureValue = componentMeasureImplementations["numberOfSynchronousEndpointsOfferedByAService"]({component: service, system: system});
+    expect(measureValue).toEqual(2);
 
 })

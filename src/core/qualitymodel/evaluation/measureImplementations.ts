@@ -1,7 +1,7 @@
 
 import { Component, Service, StorageBackingService, System } from "../../entities.js";
 import { Calculation } from "../quamoco/Measure.js";
-import { PROTOCOLS_SUPPORTING_TLS } from "../specifications/featureModel.js";
+import { PROTOCOLS_SUPPORTING_TLS, SYNCHRONOUS_ENDPOINT_KIND } from "../specifications/featureModel.js";
 
 const average: (list: number[]) => number = list => {
     return list.reduce((e1, e2) => e1 + e2, 0) / list.length
@@ -237,7 +237,7 @@ export const cohesionBetweenEndpointsBasedOnDataAggregateUsage: Calculation<{ co
         if (!dataAggregateUsage.has(endpoint.getId)) {
             dataAggregateUsage.set(endpoint.getId, new Set([...endpoint.getDataAggregateEntities.entries()].map(entry => entry[1].data.getId)));
         }
-        for (const [jindex, otherEndpoint] of allEndpoints.slice(index+1).entries()) {
+        for (const otherEndpoint of allEndpoints.slice(index+1)) {
             if (!dataAggregateUsage.has(otherEndpoint.getId)) {
                 dataAggregateUsage.set(otherEndpoint.getId, new Set([...otherEndpoint.getDataAggregateEntities.entries()].map(entry => entry[1].data.getId)));
             }
@@ -251,12 +251,24 @@ export const cohesionBetweenEndpointsBasedOnDataAggregateUsage: Calculation<{ co
     }
     return average(sharedUsages);
 }
+
+export const numberOfProvidedSynchronousAndAsynchronousEndpoints: Calculation<{ component: Component, system: System }> = (parameters) => {
+    return parameters.component.getEndpointEntities.concat(parameters.component.getExternalEndpointEntities).length;
+}
+
+export const numberOfSynchronousEndpointsOfferedByAService: Calculation<{ component: Component, system: System }> = (parameters) => {
+    return parameters.component.getEndpointEntities.concat(parameters.component.getExternalEndpointEntities)
+           .filter(endpoint => SYNCHRONOUS_ENDPOINT_KIND.includes(endpoint.getProperty("kind").value)).length;
+}
+
   
 export const componentMeasureImplementations: { [measureKey: string]: Calculation<{ component: Component, system: System }> } = {
     "serviceInterfaceDataCohesion": serviceInterfaceDataCohesion,
     "serviceInterfaceUsageCohesion": serviceInterfaceUsageCohesion,
     "totalServiceInterfaceCohesion": totalServiceInterfaceCohesion,
-    "cohesionBetweenEndpointsBasedOnDataAggregateUsage": cohesionBetweenEndpointsBasedOnDataAggregateUsage
+    "cohesionBetweenEndpointsBasedOnDataAggregateUsage": cohesionBetweenEndpointsBasedOnDataAggregateUsage,
+    "numberOfProvidedSynchronousAndAsynchronousEndpoints": numberOfProvidedSynchronousAndAsynchronousEndpoints,
+    "numberOfSynchronousEndpointsOfferedByAService": numberOfSynchronousEndpointsOfferedByAService
 }
 
 
