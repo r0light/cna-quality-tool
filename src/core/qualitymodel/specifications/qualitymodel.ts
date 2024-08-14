@@ -946,7 +946,7 @@ export const qualityModel: QualityModelSpec = {
         },
         "cohesionOfAServiceBasedOnOtherEndpointsCalled": {
             "name": "Cohesion of a Service based on other Endpoints called",
-            "calculation": "",
+            "calculation": "Endpoints that are called from this services which are from the same other service / All Endpoints called by this service",
             "sources": ["Peng2022"]
         },
         "dataAggregateScope": {
@@ -961,7 +961,7 @@ export const qualityModel: QualityModelSpec = {
         },
         "cohesionBetweenEndpointsBasedOnDataAggregateUsage": {
             "name": "Cohesion between Endpoints based on data aggregate usage",
-            "calculation": "",
+            "calculation": "Average-of(Number of Shared Usage of Data Aggregates per endpoint pair) over all endpoints / All Data Aggregates used by endpoints",
             "sources": ["Peng2022"]
         },
         "numberOfProvidedSynchronousAndAsynchronousEndpoints": {
