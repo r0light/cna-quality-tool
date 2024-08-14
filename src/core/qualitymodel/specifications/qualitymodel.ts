@@ -1026,12 +1026,12 @@ export const qualityModel: QualityModelSpec = {
         },
         "numberOfAsynchronousEndpointsOfferedByAService": {
             "name": "Number of asynchronous endpoints offered by a service",
-            "calculation": "",
+            "calculation": "Number of endpoints of a service of kind event",
             "sources": ["Shim2008", "Daniel2023"]
         },
         "numberOfSynchronousOutgoingLinks": {
             "name": "Number of synchronous outgoing links",
-            "calculation": "",
+            "calculation": "Number of outgoing links of a service targeting a synchronous endpoint.",
             "sources": ["Apel2019", "Daniel2023"]
         },
         "numberOfAsynchronousOutgoingLinks": {

@@ -1,7 +1,7 @@
 
 import { Component, Service, StorageBackingService, System } from "../../entities.js";
 import { Calculation } from "../quamoco/Measure.js";
-import { PROTOCOLS_SUPPORTING_TLS, SYNCHRONOUS_ENDPOINT_KIND } from "../specifications/featureModel.js";
+import { ASYNCHRONOUS_ENDPOINT_KIND, PROTOCOLS_SUPPORTING_TLS, SYNCHRONOUS_ENDPOINT_KIND } from "../specifications/featureModel.js";
 
 const average: (list: number[]) => number = list => {
     return list.reduce((e1, e2) => e1 + e2, 0) / list.length
@@ -261,6 +261,16 @@ export const numberOfSynchronousEndpointsOfferedByAService: Calculation<{ compon
            .filter(endpoint => SYNCHRONOUS_ENDPOINT_KIND.includes(endpoint.getProperty("kind").value)).length;
 }
 
+export const numberOfAsynchronousEndpointsOfferedByAService: Calculation<{ component: Component, system: System }> = (parameters) => {
+    return parameters.component.getEndpointEntities.concat(parameters.component.getExternalEndpointEntities)
+    .filter(endpoint => ASYNCHRONOUS_ENDPOINT_KIND.includes(endpoint.getProperty("kind").value)).length;
+}
+
+export const numberOfSynchronousOutgoingLinks: Calculation<{ component: Component, system: System }> = (parameters) => {
+    let outgoingLinks = parameters.system.getOutgoingLinksOfComponent(parameters.component.getId);
+    return outgoingLinks.filter(link => SYNCHRONOUS_ENDPOINT_KIND.includes(link.getTargetEndpoint.getProperty("kind").value)).length;   
+}
+
   
 export const componentMeasureImplementations: { [measureKey: string]: Calculation<{ component: Component, system: System }> } = {
     "serviceInterfaceDataCohesion": serviceInterfaceDataCohesion,
@@ -268,7 +278,9 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "totalServiceInterfaceCohesion": totalServiceInterfaceCohesion,
     "cohesionBetweenEndpointsBasedOnDataAggregateUsage": cohesionBetweenEndpointsBasedOnDataAggregateUsage,
     "numberOfProvidedSynchronousAndAsynchronousEndpoints": numberOfProvidedSynchronousAndAsynchronousEndpoints,
-    "numberOfSynchronousEndpointsOfferedByAService": numberOfSynchronousEndpointsOfferedByAService
+    "numberOfSynchronousEndpointsOfferedByAService": numberOfSynchronousEndpointsOfferedByAService,
+    "numberOfAsynchronousEndpointsOfferedByAService": numberOfAsynchronousEndpointsOfferedByAService,
+    "numberOfSynchronousOutgoingLinks": numberOfSynchronousOutgoingLinks
 }
 
 

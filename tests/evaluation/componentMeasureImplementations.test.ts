@@ -195,3 +195,68 @@ test("numberOfSynchronousEndpointsOfferedByAService", () => {
     expect(measureValue).toEqual(2);
 
 })
+
+test("numberOfAsynchronousEndpointsOfferedByAService", () => {
+    let system = new System("testSystem");
+
+    let service = new Service("s1", "testService", getEmptyMetaData());
+
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    endpointA.setPropertyValue("kind", SYNCHRONOUS_ENDPOINT_KIND[0]);
+    service.addEndpoint(endpointA);
+
+    let endpointB = new ExternalEndpoint("e2", "endpoint 2", getEmptyMetaData());
+    endpointB.setPropertyValue("kind", ASYNCHRONOUS_ENDPOINT_KIND[0]);
+    service.addEndpoint(endpointB);
+
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    endpointC.setPropertyValue("kind", SYNCHRONOUS_ENDPOINT_KIND[0]);
+    service.addEndpoint(endpointC);
+
+    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    endpointD.setPropertyValue("kind", ASYNCHRONOUS_ENDPOINT_KIND[0]);
+    service.addEndpoint(endpointD);
+
+    system.addEntity(service);
+
+    let measureValue = componentMeasureImplementations["numberOfAsynchronousEndpointsOfferedByAService"]({component: service, system: system});
+    expect(measureValue).toEqual(2);
+
+})
+
+test("numberOfSynchronousOutgoingLinks", () => {
+    let system = new System("testSystem");
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    endpointA.setPropertyValue("kind", ASYNCHRONOUS_ENDPOINT_KIND[0]);
+    serviceB.addEndpoint(endpointA);
+
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    endpointB.setPropertyValue("kind", SYNCHRONOUS_ENDPOINT_KIND[0]);
+    serviceB.addEndpoint(endpointB);
+
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    endpointC.setPropertyValue("kind", ASYNCHRONOUS_ENDPOINT_KIND[0]);
+    serviceC.addEndpoint(endpointC);
+
+    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    endpointD.setPropertyValue("kind", SYNCHRONOUS_ENDPOINT_KIND[0]);
+    serviceC.addEndpoint(endpointD);
+
+    let linkAB1 = new Link("l1", serviceA, endpointA);
+    let linkAB2 = new Link("l2", serviceA, endpointB);
+    let linkAC1 = new Link("l3", serviceA, endpointC);
+    let linkAC2 = new Link("l4", serviceA, endpointD);
+
+    system.addEntities([serviceA, serviceB, serviceC]);
+    system.addEntities([linkAB1, linkAB2, linkAC1, linkAC2]);
+
+    let measureValue = componentMeasureImplementations["numberOfSynchronousOutgoingLinks"]({component: serviceA, system: system});
+    expect(measureValue).toEqual(2);
+
+})
