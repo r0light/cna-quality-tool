@@ -1116,17 +1116,17 @@ export const qualityModel: QualityModelSpec = {
         },
         "numberOfConsumedEndpoints": {
             "name": "Number of Consumed Endpoints",
-            "calculation": "",
+            "calculation": "Number of endpoints a service is linked to",
             "sources": ["Apel2019", "Gamage2021", "Perera2018"]
         },
         "incomingOutgoingRatioOfAComponent": {
             "name": "Incoming outgoing ratio of a component",
-            "calculation": "",
+            "calculation": "Number of outgoing links from a component / Number of incoming links of a component",
             "sources": ["Tiwari2014"]
         },
         "ratioOfOutgoingLinksOfAService": {
             "name": "Ratio of outgoing links of a service",
-            "calculation": "",
+            "calculation": "(Number of outgoing links of a service / (Total Number of links connected to a service)) * 100",
             "sources": ["PhamThiQuynh2009"]
         },
         "couplingDegreeBasedOnPotentialCoupling": {

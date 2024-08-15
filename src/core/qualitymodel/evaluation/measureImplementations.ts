@@ -354,10 +354,34 @@ export const ratioOfAsynchronousOutgoingLinks: Calculation<{ component: Componen
 }
 
 export const numberOfLinksPerComponent: Calculation<{ component: Component, system: System }> = (parameters) => {
-    let outgoingLinks = parameters.system.getOutgoingLinksOfComponent(parameters.component.getId);
+    let numberOfOutgoingLinks: number = numberOfConsumedEndpoints(parameters) as number;
     let incomingLinks = parameters.system.getIncomingLinksOfComponent(parameters.component.getId);
-    return outgoingLinks.length + incomingLinks.length;
+    return numberOfOutgoingLinks + incomingLinks.length;
+}
+
+export const numberOfConsumedEndpoints: Calculation<{ component: Component, system: System }> = (parameters) => {
+    let outgoingLinks = parameters.system.getOutgoingLinksOfComponent(parameters.component.getId);
+    return outgoingLinks.length;
+}
+
+export const incomingOutgoingRatioOfAComponent: Calculation<{ component: Component, system: System }> = (parameters) => {1
+    let numberOfOutgoingLinks: number = numberOfConsumedEndpoints(parameters) as number;
+    let incomingLinks = parameters.system.getIncomingLinksOfComponent(parameters.component.getId);
+    if (incomingLinks.length === 0) {
+        return 0;
     }
+    return numberOfOutgoingLinks / incomingLinks.length;
+}
+
+export const ratioOfOutgoingLinksOfAService: Calculation<{ component: Component, system: System }> = (parameters) => {1
+    let numberOfOutgoingLinks: number = numberOfConsumedEndpoints(parameters) as number;
+    let incomingLinks = parameters.system.getIncomingLinksOfComponent(parameters.component.getId);
+    if (incomingLinks.length + numberOfOutgoingLinks === 0) {
+        return 0;
+    }
+
+    return (numberOfOutgoingLinks / (incomingLinks.length + numberOfOutgoingLinks)) * 100
+}
 
 export const componentMeasureImplementations: { [measureKey: string]: Calculation<{ component: Component, system: System }> } = {
     "serviceInterfaceDataCohesion": serviceInterfaceDataCohesion,
@@ -370,7 +394,10 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "numberOfSynchronousOutgoingLinks": numberOfSynchronousOutgoingLinks,
     "numberOfAsynchronousOutgoingLinks": numberOfAsynchronousOutgoingLinks,
     "ratioOfAsynchronousOutgoingLinks": ratioOfAsynchronousOutgoingLinks,
-    "numberOfLinksPerComponent": numberOfLinksPerComponent
+    "numberOfLinksPerComponent": numberOfLinksPerComponent,
+    "numberOfConsumedEndpoints": numberOfConsumedEndpoints,
+    "incomingOutgoingRatioOfAComponent": incomingOutgoingRatioOfAComponent,
+    "ratioOfOutgoingLinksOfAService": ratioOfOutgoingLinksOfAService
 }
 
 
