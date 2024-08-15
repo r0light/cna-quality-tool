@@ -52,14 +52,14 @@ function getQualityModel(): QualityModelInstance {
         });
         if (systemMeasureImplementations[measureKey]) {
             newMeasure.addCalculation(systemMeasureImplementations[measureKey]);
-            newQualityModel.measures.push(newMeasure as Measure<System>);
+            newQualityModel.systemMeasures.push(newMeasure as Measure<System>);
         } else if (componentMeasureImplementations[measureKey]){
             newMeasure.addCalculation(componentMeasureImplementations[measureKey]);
-            newQualityModel.measures.push(newMeasure as Measure<{component: Component, system: System}>);
+            newQualityModel.componentMeasures.push(newMeasure as Measure<{component: Component, system: System}>);
         } else {
             //console.log(`No measure implementation found for measure ${measureKey}`);
             //default:
-            newQualityModel.measures.push(newMeasure as Measure<System>);
+            newQualityModel.systemMeasures.push(newMeasure as Measure<System>);
         }
     }
 
@@ -85,11 +85,16 @@ function getQualityModel(): QualityModelInstance {
         });
 
         for (const measureKey of productFactor.measures) {
-            let foundMeasure = newQualityModel.findMeasure(measureKey);
+            let foundMeasure = newQualityModel.findSystemMeasure(measureKey);
             if (foundMeasure) {
-                newProductFactor.addMeasure(foundMeasure);
+                newProductFactor.addSystemMeasure(foundMeasure);
             } else {
-                throw Error("No measure with key " + measureKey + " could be found, please check the quality model definition.")
+                let foundComponentMeasure = newQualityModel.findComponentMeasure(measureKey);
+                if (foundComponentMeasure) {
+                    newProductFactor.addComponentMeasure(foundComponentMeasure);
+                } else {
+                    throw Error("No measure with key " + measureKey + " could be found, please check the quality model definition.")
+                }
             }
         }
 
@@ -199,7 +204,9 @@ class QualityModelInstance {
 
     impacts: Impact[];
 
-    measures: (Measure<System>|Measure<{component: Component, system: System}>)[];
+    systemMeasures: (Measure<System>)[];
+
+    componentMeasures: Measure<{component: Component, system: System}>[];
 
     entities: Entity[];
 
@@ -209,7 +216,8 @@ class QualityModelInstance {
         this.productFactors = [];
         this.factorCategories = [];
         this.impacts = [];
-        this.measures = [];
+        this.systemMeasures = [];
+        this.componentMeasures = [];
         this.entities = [];
     }
 
@@ -225,8 +233,12 @@ class QualityModelInstance {
         return this.productFactors.find(pf => pf.getId === productFactorKey);
     }
 
-    findMeasure(measureKey: string): Measure<System>|Measure<{component: Component, system: System}> {
-        return this.measures.find(m => m.getId === measureKey);
+    findSystemMeasure(measureKey: string): Measure<System> {
+        return this.systemMeasures.find(m => m.getId === measureKey);
+    }
+
+    findComponentMeasure(measureKey: string): Measure<{component: Component, system: System}> {
+        return this.componentMeasures.find(m => m.getId === measureKey);
     }
 
     findEntity(entityKey: string): Entity {

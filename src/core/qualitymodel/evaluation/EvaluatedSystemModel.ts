@@ -108,7 +108,7 @@ class EvaluatedSystemModel {
 
             // add measures for this factor
             let measuresForThisFactor = new Map();
-            currentFactor.getMeasures.forEach(measure => {
+            currentFactor.getSystemMeasures.forEach(measure => {
                 if (this.#calculatedMeasures.has(measure.getId)) {
                     measuresForThisFactor.set(measure.getId, this.#calculatedMeasures.get(measure.getId));
                     return;
@@ -202,6 +202,7 @@ class EvaluatedSystemModel {
             this.#evaluatedQualityAspects.set(evaluatedQualityAspect.id, evaluatedQualityAspect);
         }
 
+        /*
         this.#qualityModel.measures.forEach(measure => {
             if (this.#calculatedMeasures.has(measure.getId)) {
                 return;
@@ -211,6 +212,7 @@ class EvaluatedSystemModel {
                 this.#calculatedMeasures.set(measure.getId, calculatedMeasure);
             }
         })
+            */
 
     }
 

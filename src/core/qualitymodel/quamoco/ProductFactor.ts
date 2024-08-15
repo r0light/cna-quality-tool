@@ -1,3 +1,4 @@
+import { Component, System } from "@/core/entities";
 import { EvaluatedSystemModel, ProductFactorEvaluationResult } from "../evaluation/EvaluatedSystemModel";
 import { ProductFactorEvaluation } from "../evaluation/ProductFactorEvaluation";
 import { Impact } from "./Impact";
@@ -13,7 +14,8 @@ class ProductFactor {
     #categories: string[];
     #relevantEntities: string[];
     #sources: LiteratureSource[];
-    #measures: Measure[];
+    #systemMeasures: Measure<System>[];
+    #componentMeasures: Measure<{component: Component, system: System}>[];
     #evaluation: ProductFactorEvaluation;
 
     #outgoingImpacts: Impact[];
@@ -26,7 +28,8 @@ class ProductFactor {
         this.#categories = categories;
         this.#relevantEntities = [];
         this.#sources = [];
-        this.#measures = [];
+        this.#systemMeasures = [];
+        this.#componentMeasures = [];
         this.#evaluation = undefined;
         this.#outgoingImpacts = [];
         this.#incomingImpacts = [];
@@ -63,8 +66,12 @@ class ProductFactor {
         return this.#sources;
     }
 
-    get getMeasures() {
-        return this.#measures;
+    get getSystemMeasures() {
+        return this.#systemMeasures;
+    }
+
+    get getComponentMeasures() {
+        return this.#componentMeasures;
     }
 
     get getOutgoingImpacts() {
@@ -83,8 +90,12 @@ class ProductFactor {
         this.#sources.push(literatureSource);
     }
 
-    addMeasure(measure: Measure) {
-        this.#measures.push(measure);
+    addSystemMeasure(measure: Measure<System>) {
+        this.#systemMeasures.push(measure);
+    }
+
+    addComponentMeasure(measure: Measure<{component: Component, system: System}>) {
+        this.#componentMeasures.push(measure);
     }
 
     addOutgoingImpact(impact: Impact) {
@@ -107,14 +118,24 @@ class ProductFactor {
         return this.#incomingImpacts.map(impact => impact.getSourceFactor);
     }
 
-    getMeasure(measureKey: string) {
-        let measure = this.#measures.find(measure => measure.getId === measureKey);
+    getSystemMeasure(measureKey: string) {
+        let measure = this.#systemMeasures.find(measure => measure.getId === measureKey);
         if (measure) {
             return measure;
         } else {
             throw new Error (`Measure ${measureKey} not found for product factor ${this.#id}`);
         }
     }
+
+    getComponentMeasure(measureKey: string) {
+        let measure = this.#componentMeasures.find(measure => measure.getId === measureKey);
+        if (measure) {
+            return measure;
+        } else {
+            throw new Error (`Measure ${measureKey} not found for product factor ${this.#id}`);
+        }
+    }
+
 
     isEvaluationAvailable(): boolean {
         return this.#evaluation !== undefined;

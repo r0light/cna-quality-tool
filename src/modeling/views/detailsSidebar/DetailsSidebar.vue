@@ -30,8 +30,8 @@
                         <h2 class="mb-0">
                             <button :id="propertyGroup.headerButtonId"
                                 class="detailsSidebar-headlineButton btn btn-link btn-block text-left collapsed"
-                                :class="{ collapsed: true }" type="button" data-toggle="collapse"
-                                :data-target="propertyGroup.dataTargetId" aria-expanded="false"
+                                :class="{ collapsed: true }" type="button" data-bs-toggle="collapse"
+                                :data-bs-target="propertyGroup.dataTargetId" aria-expanded="false"
                                 :aria-controls="propertyGroup.dataTarget">
                                 <i class="detailsSidebar-iconHeadline" :class="propertyGroup.headlineIconClass"></i>
                                 {{ propertyGroup.headline }}
