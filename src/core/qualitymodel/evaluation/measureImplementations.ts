@@ -234,31 +234,7 @@ export const couplingDegreeBasedOnPotentialCoupling: Calculation<System> = (syst
 
     for (const componentId of allComponents) {
         for (const otherComponentId of allComponents.filter(id => id !== componentId)) {
-            let alreadyVisited: string[] = [componentId]; // track visited nodes to handle potential circular paths
-            let nextNodes: {component: Component, currentPath: number}[] = system.getOutgoingLinksOfComponent(componentId)
-            .map(link => {
-                return {component: system.searchComponentOfEndpoint(link.getTargetEndpoint.getId), currentPath: 1};
-            })
-            .filter(next => !alreadyVisited.includes(next.component.getId));
-            let shortestPath = allComponents.length - 1; //assume longest possible path length if no path can be found
-            while(nextNodes.length > 0) {
-                let next = nextNodes[0];
-                if (next.component.getId === otherComponentId) {
-                    // found path :)
-                    shortestPath = next.currentPath;
-                    break;
-                } else {
-                    // continue search
-                    let nextNextNodes: {component: Component, currentPath: number}[] = system.getOutgoingLinksOfComponent(next.component.getId)
-                    .map(link => {
-                        return {component: system.searchComponentOfEndpoint(link.getTargetEndpoint.getId), currentPath: next.currentPath + 1};
-                    })
-                    .filter(next => !alreadyVisited.includes(next.component.getId));
-                    nextNodes.push(...nextNextNodes);
-                    alreadyVisited.push(next.component.getId);
-                    nextNodes.splice(0, 1);
-                }
-            }
+            let shortestPath = system.getShortestPathLength(componentId, otherComponentId);
 
             if (shortestPaths.has(componentId)) {
                 shortestPaths.get(componentId).set(otherComponentId, shortestPath);

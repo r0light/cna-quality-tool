@@ -191,6 +191,35 @@ class System { // TODO use ID's as keys instead of name?
         return [...this.#linkEntities.values()].filter(link => endpointIds.includes(link.getTargetEndpoint.getId));
     }
 
+    getShortestPathLength(fromComponentId: string, toComponentId: string) {
+        let alreadyVisited: string[] = [fromComponentId]; // track visited nodes to handle potential circular paths
+        let nextNodes: {component: Component, currentPath: number}[] = this.getOutgoingLinksOfComponent(fromComponentId)
+        .map(link => {
+            return {component: this.searchComponentOfEndpoint(link.getTargetEndpoint.getId), currentPath: 1};
+        })
+        .filter(next => !alreadyVisited.includes(next.component.getId));
+        let shortestPath = this.getComponentEntities.size - 1; //assume longest possible path length if no path can be found
+        while(nextNodes.length > 0) {
+            let next = nextNodes[0];
+            if (next.component.getId === toComponentId) {
+                // found path :)
+                shortestPath = next.currentPath;
+                break;
+            } else {
+                // continue search
+                let nextNextNodes: {component: Component, currentPath: number}[] = this.getOutgoingLinksOfComponent(next.component.getId)
+                .map(link => {
+                    return {component: this.searchComponentOfEndpoint(link.getTargetEndpoint.getId), currentPath: next.currentPath + 1};
+                })
+                .filter(next => !alreadyVisited.includes(next.component.getId));
+                nextNodes.push(...nextNextNodes);
+                alreadyVisited.push(next.component.getId);
+                nextNodes.splice(0, 1);
+            }
+        }
+        return shortestPath;
+    }
+
     /**
      * Transforms the System object into a String. 
      * @returns {string}
