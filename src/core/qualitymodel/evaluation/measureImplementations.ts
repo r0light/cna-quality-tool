@@ -1,4 +1,5 @@
 
+import { a } from "vitest/dist/suite-IbNSsUWN.js";
 import { Component, Service, StorageBackingService, System } from "../../entities.js";
 import { Calculation } from "../quamoco/Measure.js";
 import { ASYNCHRONOUS_ENDPOINT_KIND, PROTOCOLS_SUPPORTING_TLS, SYNCHRONOUS_ENDPOINT_KIND } from "../specifications/featureModel.js";
@@ -219,6 +220,66 @@ export const ratioOfServicesThatProvideHealthEndpoints: Calculation<System> = (s
     return numberOfServicesWithHealthAndReadinessEndpoint / allServices.length;
 }
 
+export const couplingDegreeBasedOnPotentialCoupling: Calculation<System> = (system) => {
+
+    let allComponents = [...system.getComponentEntities.entries()].map(entry => entry[0]);
+
+    // the system has to have at least three components for this measure to make sense, because otherwise max-min is 0.
+    if (allComponents.length < 3) {
+        return 0;
+    }
+
+    let shortestPaths = new Map<string, Map<string, number>>();
+    let pathSum = 0;
+
+    for (const componentId of allComponents) {
+        for (const otherComponentId of allComponents.filter(id => id !== componentId)) {
+            let alreadyVisited: string[] = [componentId]; // track visited nodes to handle potential circular paths
+            let nextNodes: {component: Component, currentPath: number}[] = system.getOutgoingLinksOfComponent(componentId)
+            .map(link => {
+                return {component: system.searchComponentOfEndpoint(link.getTargetEndpoint.getId), currentPath: 1};
+            })
+            .filter(next => !alreadyVisited.includes(next.component.getId));
+            let shortestPath = allComponents.length - 1; //assume longest possible path length if no path can be found
+            while(nextNodes.length > 0) {
+                let next = nextNodes[0];
+                if (next.component.getId === otherComponentId) {
+                    // found path :)
+                    shortestPath = next.currentPath;
+                    break;
+                } else {
+                    // continue search
+                    let nextNextNodes: {component: Component, currentPath: number}[] = system.getOutgoingLinksOfComponent(next.component.getId)
+                    .map(link => {
+                        return {component: system.searchComponentOfEndpoint(link.getTargetEndpoint.getId), currentPath: next.currentPath + 1};
+                    })
+                    .filter(next => !alreadyVisited.includes(next.component.getId));
+                    nextNodes.push(...nextNextNodes);
+                    alreadyVisited.push(next.component.getId);
+                    nextNodes.splice(0, 1);
+                }
+            }
+
+            if (shortestPaths.has(componentId)) {
+                shortestPaths.get(componentId).set(otherComponentId, shortestPath);
+            } else {
+                let newMap = new Map<string, number>();
+                newMap.set(otherComponentId, shortestPath);
+                shortestPaths.set(componentId, newMap);
+            }
+            pathSum += shortestPath;
+        }
+    }
+
+    // hypothetical sum of all paths, if no connections between components exist
+    let max = allComponents.length * (allComponents.length - 1) * (allComponents.length - 1);
+
+    // hypothetical sum of all paths, if each component had a connection to each other component
+    let min = allComponents.length * (allComponents.length - 1)
+
+    return ((max - pathSum) / (max - min));
+}
+
 
 export const systemMeasureImplementations: { [measureKey: string]: Calculation<System> } = {
     "serviceReplicationLevel": serviceReplicationLevel,
@@ -234,7 +295,8 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation<S
     "degreeToWhichComponentsAreLinkedToStatefulComponents": degreeToWhichComponentsAreLinkedToStatefulComponents,
     "degreeOfAsynchronousCommunication": degreeOfAsynchronousCommunication,
     "asynchronousCommunicationUtilization": asynchronousCommunicationUtilization,
-    "ratioOfServicesThatProvideHealthEndpoints": ratioOfServicesThatProvideHealthEndpoints
+    "ratioOfServicesThatProvideHealthEndpoints": ratioOfServicesThatProvideHealthEndpoints,
+    "couplingDegreeBasedOnPotentialCoupling": couplingDegreeBasedOnPotentialCoupling
 }
 
 export const serviceInterfaceDataCohesion: Calculation<{ component: Component, system: System }> = (parameters) => {
@@ -399,5 +461,3 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "incomingOutgoingRatioOfAComponent": incomingOutgoingRatioOfAComponent,
     "ratioOfOutgoingLinksOfAService": ratioOfOutgoingLinksOfAService
 }
-
-

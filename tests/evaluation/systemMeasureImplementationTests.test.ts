@@ -218,7 +218,34 @@ test("ratioOfServicesThatProvideHealthEndpoints", () => {
     let measureValue = systemMeasureImplementations["ratioOfServicesThatProvideHealthEndpoints"](system);
 
     expect(measureValue).toEqual(0.5);
+})
 
+
+test("couplingDegreeBasedOnPotentialCoupling", () => {
+    let system = new System("testSystem");
+
+    let serviceX  = new Service("s1", "serviceA", getEmptyMetaData());
+
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    serviceX.addEndpoint(endpointA);
+
+    let serviceY  = new Service("s2", "serviceB", getEmptyMetaData());
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceY.addEndpoint(endpointB);
+
+    let serviceZ  = new Service("s3", "serviceC", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceZ.addEndpoint(endpointC);
+
+    let linkXY = new Link("l1", serviceX, endpointB);
+    let linkYZ = new Link("l2", serviceY, endpointC);
+
+    system.addEntities([serviceX, serviceY, serviceZ]);
+    system.addEntities([linkXY, linkYZ]);
+
+    let measureValue = systemMeasureImplementations["couplingDegreeBasedOnPotentialCoupling"](system);
+
+    expect(measureValue).toEqual(1/3);
 
 
 })

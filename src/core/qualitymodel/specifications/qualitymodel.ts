@@ -1131,7 +1131,7 @@ export const qualityModel: QualityModelSpec = {
         },
         "couplingDegreeBasedOnPotentialCoupling": {
             "name": "Coupling degree based on potential coupling",
-            "calculation": "",
+            "calculation": "(Sum-of(Maximum path lengths between components when no links exist) - Sum-of(path lengths between components based on actually existing links)) / Sum-of(Maximum path lengths between components when no links exist) - Sum-of(Minimum path lengths when links exist between all components)",
             "sources": ["PhamThiQuynh2009"]
         },
         "interactionDensityInTheSystem": {
