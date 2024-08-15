@@ -192,9 +192,33 @@ export const asynchronousCommunicationUtilization: Calculation<System> = (system
             numberOfLinksToAnAsynchronousEndpoint++;
         }
     }
-    
+
     return numberOfLinksToAnAsynchronousEndpoint / allLinks.size;
 }
+
+export const ratioOfServicesThatProvideHealthEndpoints: Calculation<System> = (system) => {
+
+    let allServices = [...system.getComponentEntities.entries()]
+        .map(entry => entry[1])
+        .filter(entity => entity.constructor.name === Service.name);
+
+    if (allServices.length === 0) {
+        return 0;
+    }
+
+    let numberOfServicesWithHealthAndReadinessEndpoint = 0;
+
+    for (const service of allServices) {
+        let hasHealthEndpoint = [...service.getEndpointEntities.entries()].filter(service => service[1].getProperty("health_check").value).length > 0;
+        let hasReadinessEndpoint = [...service.getEndpointEntities.entries()].filter(service => service[1].getProperty("readiness_check").value).length > 0;
+        if (hasHealthEndpoint && hasReadinessEndpoint) {
+            numberOfServicesWithHealthAndReadinessEndpoint++;
+        }
+    }
+
+    return numberOfServicesWithHealthAndReadinessEndpoint / allServices.length;
+}
+
 
 export const systemMeasureImplementations: { [measureKey: string]: Calculation<System> } = {
     "serviceReplicationLevel": serviceReplicationLevel,
@@ -209,7 +233,8 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation<S
     "ratioOfStatelessComponents": ratioOfStatelessComponents,
     "degreeToWhichComponentsAreLinkedToStatefulComponents": degreeToWhichComponentsAreLinkedToStatefulComponents,
     "degreeOfAsynchronousCommunication": degreeOfAsynchronousCommunication,
-    "asynchronousCommunicationUtilization": asynchronousCommunicationUtilization
+    "asynchronousCommunicationUtilization": asynchronousCommunicationUtilization,
+    "ratioOfServicesThatProvideHealthEndpoints": ratioOfServicesThatProvideHealthEndpoints
 }
 
 export const serviceInterfaceDataCohesion: Calculation<{ component: Component, system: System }> = (parameters) => {
@@ -274,11 +299,11 @@ export const cohesionBetweenEndpointsBasedOnDataAggregateUsage: Calculation<{ co
     let dataAggregateUsage = new Map<string, Set<string>>();
     let sharedUsages: number[] = [];
 
-    for(const [index, endpoint] of allEndpoints.entries()) {
+    for (const [index, endpoint] of allEndpoints.entries()) {
         if (!dataAggregateUsage.has(endpoint.getId)) {
             dataAggregateUsage.set(endpoint.getId, new Set([...endpoint.getDataAggregateEntities.entries()].map(entry => entry[1].data.getId)));
         }
-        for (const otherEndpoint of allEndpoints.slice(index+1)) {
+        for (const otherEndpoint of allEndpoints.slice(index + 1)) {
             if (!dataAggregateUsage.has(otherEndpoint.getId)) {
                 dataAggregateUsage.set(otherEndpoint.getId, new Set([...otherEndpoint.getDataAggregateEntities.entries()].map(entry => entry[1].data.getId)));
             }
@@ -299,22 +324,22 @@ export const numberOfProvidedSynchronousAndAsynchronousEndpoints: Calculation<{ 
 
 export const numberOfSynchronousEndpointsOfferedByAService: Calculation<{ component: Component, system: System }> = (parameters) => {
     return parameters.component.getEndpointEntities.concat(parameters.component.getExternalEndpointEntities)
-           .filter(endpoint => SYNCHRONOUS_ENDPOINT_KIND.includes(endpoint.getProperty("kind").value)).length;
+        .filter(endpoint => SYNCHRONOUS_ENDPOINT_KIND.includes(endpoint.getProperty("kind").value)).length;
 }
 
 export const numberOfAsynchronousEndpointsOfferedByAService: Calculation<{ component: Component, system: System }> = (parameters) => {
     return parameters.component.getEndpointEntities.concat(parameters.component.getExternalEndpointEntities)
-    .filter(endpoint => ASYNCHRONOUS_ENDPOINT_KIND.includes(endpoint.getProperty("kind").value)).length;
+        .filter(endpoint => ASYNCHRONOUS_ENDPOINT_KIND.includes(endpoint.getProperty("kind").value)).length;
 }
 
 export const numberOfSynchronousOutgoingLinks: Calculation<{ component: Component, system: System }> = (parameters) => {
     let outgoingLinks = parameters.system.getOutgoingLinksOfComponent(parameters.component.getId);
-    return outgoingLinks.filter(link => SYNCHRONOUS_ENDPOINT_KIND.includes(link.getTargetEndpoint.getProperty("kind").value)).length;   
+    return outgoingLinks.filter(link => SYNCHRONOUS_ENDPOINT_KIND.includes(link.getTargetEndpoint.getProperty("kind").value)).length;
 }
 
 export const numberOfAsynchronousOutgoingLinks: Calculation<{ component: Component, system: System }> = (parameters) => {
     let outgoingLinks = parameters.system.getOutgoingLinksOfComponent(parameters.component.getId);
-    return outgoingLinks.filter(link => ASYNCHRONOUS_ENDPOINT_KIND.includes(link.getTargetEndpoint.getProperty("kind").value)).length;   
+    return outgoingLinks.filter(link => ASYNCHRONOUS_ENDPOINT_KIND.includes(link.getTargetEndpoint.getProperty("kind").value)).length;
 }
 
 export const ratioOfAsynchronousOutgoingLinks: Calculation<{ component: Component, system: System }> = (parameters) => {
@@ -325,9 +350,9 @@ export const ratioOfAsynchronousOutgoingLinks: Calculation<{ component: Componen
         return 0;
     }
 
-    return asynchronousOutgoingLinks.length / outgoingLinks.length;   
+    return asynchronousOutgoingLinks.length / outgoingLinks.length;
 }
-  
+
 export const componentMeasureImplementations: { [measureKey: string]: Calculation<{ component: Component, system: System }> } = {
     "serviceInterfaceDataCohesion": serviceInterfaceDataCohesion,
     "serviceInterfaceUsageCohesion": serviceInterfaceUsageCohesion,

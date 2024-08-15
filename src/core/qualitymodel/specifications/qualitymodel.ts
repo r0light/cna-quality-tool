@@ -1101,7 +1101,7 @@ export const qualityModel: QualityModelSpec = {
         },
         "ratioOfServicesThatProvideHealthEndpoints": {
             "name": "Ratio of Services that provide Health endpoints",
-            "calculation": "",
+            "calculation": "Number of Service with at least one health endpoint and at least one readiness endpoint / Number of all Services",
             "sources": ["Ntentos2022"]
         },
         "linesOfCodeForDeploymentConfiguration": {
