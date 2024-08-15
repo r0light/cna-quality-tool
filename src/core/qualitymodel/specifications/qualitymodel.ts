@@ -1111,7 +1111,7 @@ export const qualityModel: QualityModelSpec = {
         },
         "numberOfLinksPerComponent": {
             "name": "Number of Links per Component ",
-            "calculation": "",
+            "calculation": "Number of outoging and incoming Links of a component",
             "sources": ["Zimmermann2015", "Tiwari2014", "Rosa2020"]
         },
         "numberOfConsumedEndpoints": {

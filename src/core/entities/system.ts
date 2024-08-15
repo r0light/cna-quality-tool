@@ -186,6 +186,11 @@ class System { // TODO use ID's as keys instead of name?
         return [...this.#linkEntities.values()].filter(link => link.getSourceEntity.getId === componentId);
     }
 
+    getIncomingLinksOfComponent(componentId: string): Link[] {
+        let endpointIds = this.#componentEntities.get(componentId).getEndpointEntities.map(endpoint => endpoint.getId);
+        return [...this.#linkEntities.values()].filter(link => endpointIds.includes(link.getTargetEndpoint.getId));
+    }
+
     /**
      * Transforms the System object into a String. 
      * @returns {string}

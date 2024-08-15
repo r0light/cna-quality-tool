@@ -353,6 +353,12 @@ export const ratioOfAsynchronousOutgoingLinks: Calculation<{ component: Componen
     return asynchronousOutgoingLinks.length / outgoingLinks.length;
 }
 
+export const numberOfLinksPerComponent: Calculation<{ component: Component, system: System }> = (parameters) => {
+    let outgoingLinks = parameters.system.getOutgoingLinksOfComponent(parameters.component.getId);
+    let incomingLinks = parameters.system.getIncomingLinksOfComponent(parameters.component.getId);
+    return outgoingLinks.length + incomingLinks.length;
+    }
+
 export const componentMeasureImplementations: { [measureKey: string]: Calculation<{ component: Component, system: System }> } = {
     "serviceInterfaceDataCohesion": serviceInterfaceDataCohesion,
     "serviceInterfaceUsageCohesion": serviceInterfaceUsageCohesion,
@@ -363,7 +369,8 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "numberOfAsynchronousEndpointsOfferedByAService": numberOfAsynchronousEndpointsOfferedByAService,
     "numberOfSynchronousOutgoingLinks": numberOfSynchronousOutgoingLinks,
     "numberOfAsynchronousOutgoingLinks": numberOfAsynchronousOutgoingLinks,
-    "ratioOfAsynchronousOutgoingLinks": ratioOfAsynchronousOutgoingLinks
+    "ratioOfAsynchronousOutgoingLinks": ratioOfAsynchronousOutgoingLinks,
+    "numberOfLinksPerComponent": numberOfLinksPerComponent
 }
 
 

@@ -361,3 +361,36 @@ test("ratioOfAsynchronousOutgoingLinks", () => {
     let measureValue = componentMeasureImplementations["ratioOfAsynchronousOutgoingLinks"]({component: serviceA, system: system});
     expect(measureValue).toEqual(3/4);
 })
+
+test("numberOfLinksPerComponent", () => {
+    let system = new System("testSystem");
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    serviceB.addEndpoint(endpointA);
+
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+
+    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    serviceC.addEndpoint(endpointD);
+
+    let linkAB1 = new Link("l1", serviceA, endpointA);
+    let linkAB2 = new Link("l2", serviceA, endpointB);
+    let linkBC1 = new Link("l3", serviceB, endpointC);
+    let linkBC2 = new Link("l4", serviceB, endpointD);
+
+    system.addEntities([serviceA, serviceB, serviceC]);
+    system.addEntities([linkAB1, linkAB2, linkBC1, linkBC2]);
+
+    let measureValue = componentMeasureImplementations["numberOfLinksPerComponent"]({component: serviceB, system: system});
+    expect(measureValue).toEqual(4);
+
+})
