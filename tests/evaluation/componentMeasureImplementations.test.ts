@@ -518,3 +518,26 @@ test("indirectInteractionDensity", () => {
     expect(measureValue).toEqual(0.5);
 
 })
+
+test("serviceCouplingBasedOnEndpointEntropy", () => {
+    let system = new System("testSystem");
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA);
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceA.addEndpoint(endpointB);
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+
+    let linkBA1 = new Link("l1", serviceB, endpointA);
+    let linkCA1 = new Link("l2", serviceC, endpointA);
+    let linkBA2 = new Link("l3", serviceC, endpointB);
+
+    system.addEntities([serviceA, serviceB, serviceC]);
+    system.addEntities([linkBA1, linkBA2, linkCA1]);
+
+    let measureValue = componentMeasureImplementations["serviceCouplingBasedOnEndpointEntropy"]({component: serviceA, system: system});
+    expect(measureValue).toBeCloseTo(0.389075, 5)
+})

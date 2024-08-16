@@ -1151,7 +1151,7 @@ export const qualityModel: QualityModelSpec = {
         },
         "serviceCouplingBasedOnEndpointEntropy": {
             "name": "Service Coupling based on Endpoint Entropy",
-            "calculation": "",
+            "calculation": "(sum-of(-log(1 /(Number of links connected to an endpoint + 1))) for all endpoints of a service) / Number of endpoints of a service",
             "sources": ["Wang2009"]
         },
         "systemCouplingBasedOnEndpointEntropy": {

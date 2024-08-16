@@ -492,6 +492,32 @@ export const indirectInteractionDensity: Calculation<{ component: Component, sys
 }
 
 
+export const serviceCouplingBasedOnEndpointEntropy: Calculation<{ component: Component, system: System }> = (parameters) => {
+    let endpointIds = parameters.component.getEndpointEntities.map(endpoint => endpoint.getId);
+
+    if (endpointIds.length === 0) {
+        return 0;
+    }
+
+    let incomingLinks = new Map<string, string[]>();
+    endpointIds.forEach(endpointId => incomingLinks.set(endpointId, []));
+    for (const [linkId, link] of parameters.system.getLinkEntities) {
+        let targetEndpointId = link.getTargetEndpoint.getId;
+        if (endpointIds.includes(targetEndpointId)) {
+            incomingLinks.get(targetEndpointId).push(linkId);
+        }
+    }
+
+    let sum = 0;
+
+    for (const endpointId of endpointIds) {
+        let val = Math.log10(1 / (incomingLinks.get(endpointId).length + 1));
+        sum -= val
+    }
+
+    return sum / endpointIds.length;
+}
+
 export const componentMeasureImplementations: { [measureKey: string]: Calculation<{ component: Component, system: System }> } = {
     "serviceInterfaceDataCohesion": serviceInterfaceDataCohesion,
     "serviceInterfaceUsageCohesion": serviceInterfaceUsageCohesion,
@@ -507,5 +533,6 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "numberOfConsumedEndpoints": numberOfConsumedEndpoints,
     "incomingOutgoingRatioOfAComponent": incomingOutgoingRatioOfAComponent,
     "ratioOfOutgoingLinksOfAService": ratioOfOutgoingLinksOfAService,
-    "indirectInteractionDensity": indirectInteractionDensity
+    "indirectInteractionDensity": indirectInteractionDensity,
+    "serviceCouplingBasedOnEndpointEntropy": serviceCouplingBasedOnEndpointEntropy
 }
