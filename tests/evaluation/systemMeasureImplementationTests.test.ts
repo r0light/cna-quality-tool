@@ -249,3 +249,69 @@ test("couplingDegreeBasedOnPotentialCoupling", () => {
 
 
 })
+
+test("interactionDensityBasedOnComponents", () => {
+    let system = new System("testSystem");
+
+    let serviceX  = new Service("s1", "serviceA", getEmptyMetaData());
+
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    serviceX.addEndpoint(endpointA);
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceX.addEndpoint(endpointB);
+
+    let serviceY  = new Service("s2", "serviceB", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceY.addEndpoint(endpointC);
+    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    serviceY.addEndpoint(endpointD);
+
+    let linkYX1 = new Link("l1", serviceY, endpointA);
+    let linkYX2 = new Link("l2", serviceY, endpointB);
+
+    let serviceZ = new Service("s3", "service Z", getEmptyMetaData());
+    let linkZX1 = new Link("l3", serviceZ, endpointC);
+    let linkZX2 = new Link("l4", serviceZ, endpointD);
+
+    system.addEntities([serviceX, serviceY, serviceZ]);
+    system.addEntities([linkYX1, linkYX2, linkZX1, linkZX2]);
+
+    let measureValue = systemMeasureImplementations["interactionDensityBasedOnComponents"](system);
+
+    expect(measureValue).toEqual(4/3);
+
+})
+
+
+test("interactionDensityBasedOnLinks", () => {
+
+    let system = new System("testSystem");
+
+    let serviceX  = new Service("s1", "serviceA", getEmptyMetaData());
+
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    serviceX.addEndpoint(endpointA);
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceX.addEndpoint(endpointB);
+
+    let serviceY  = new Service("s2", "serviceB", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceY.addEndpoint(endpointC);
+    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    serviceY.addEndpoint(endpointD);
+
+    let linkYX1 = new Link("l1", serviceY, endpointA);
+    let linkYX2 = new Link("l2", serviceY, endpointB);
+
+    let serviceZ = new Service("s3", "service Z", getEmptyMetaData());
+    let linkZX1 = new Link("l3", serviceZ, endpointC);
+    let linkZX2 = new Link("l4", serviceZ, endpointD);
+
+    system.addEntities([serviceX, serviceY, serviceZ]);
+    system.addEntities([linkYX1, linkYX2, linkZX1, linkZX2]);
+
+    let measureValue = systemMeasureImplementations["interactionDensityBasedOnLinks"](system);
+
+    expect(measureValue).toEqual(1/3);
+
+})

@@ -3,6 +3,7 @@ import { a } from "vitest/dist/suite-IbNSsUWN.js";
 import { Component, Service, StorageBackingService, System } from "../../entities.js";
 import { Calculation } from "../quamoco/Measure.js";
 import { ASYNCHRONOUS_ENDPOINT_KIND, PROTOCOLS_SUPPORTING_TLS, SYNCHRONOUS_ENDPOINT_KIND } from "../specifications/featureModel.js";
+import { c } from "vite/dist/node/types.d-aGj9QkWt.js";
 
 const average: (list: number[]) => number = list => {
     return list.reduce((e1, e2) => e1 + e2, 0) / list.length
@@ -256,6 +257,28 @@ export const couplingDegreeBasedOnPotentialCoupling: Calculation<System> = (syst
     return ((max - pathSum) / (max - min));
 }
 
+export const interactionDensityBasedOnComponents: Calculation<System> = (system) => {
+
+    let numberOfComponents = system.getComponentEntities.size;
+
+    if (numberOfComponents === 0) {
+        return 0;
+    }
+
+    return system.getLinkEntities.size / numberOfComponents;
+}
+
+export const interactionDensityBasedOnLinks: Calculation<System> = (system) => {
+
+    let maximumPotentialNumberOfLinks = system.getComponentEntities.size * (system.getComponentEntities.size - 1) * (system.getComponentEntities.size - 1);
+
+    if (maximumPotentialNumberOfLinks === 0) {
+        return 0;
+    }
+
+    return system.getLinkEntities.size / maximumPotentialNumberOfLinks;
+}
+
 
 export const systemMeasureImplementations: { [measureKey: string]: Calculation<System> } = {
     "serviceReplicationLevel": serviceReplicationLevel,
@@ -272,7 +295,9 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation<S
     "degreeOfAsynchronousCommunication": degreeOfAsynchronousCommunication,
     "asynchronousCommunicationUtilization": asynchronousCommunicationUtilization,
     "ratioOfServicesThatProvideHealthEndpoints": ratioOfServicesThatProvideHealthEndpoints,
-    "couplingDegreeBasedOnPotentialCoupling": couplingDegreeBasedOnPotentialCoupling
+    "couplingDegreeBasedOnPotentialCoupling": couplingDegreeBasedOnPotentialCoupling,
+    "interactionDensityBasedOnComponents": interactionDensityBasedOnComponents,
+    "interactionDensityBasedOnLinks": interactionDensityBasedOnLinks
 }
 
 export const serviceInterfaceDataCohesion: Calculation<{ component: Component, system: System }> = (parameters) => {
@@ -402,7 +427,8 @@ export const numberOfConsumedEndpoints: Calculation<{ component: Component, syst
     return outgoingLinks.length;
 }
 
-export const incomingOutgoingRatioOfAComponent: Calculation<{ component: Component, system: System }> = (parameters) => {1
+export const incomingOutgoingRatioOfAComponent: Calculation<{ component: Component, system: System }> = (parameters) => {
+    1
     let numberOfOutgoingLinks: number = numberOfConsumedEndpoints(parameters) as number;
     let incomingLinks = parameters.system.getIncomingLinksOfComponent(parameters.component.getId);
     if (incomingLinks.length === 0) {
@@ -411,7 +437,8 @@ export const incomingOutgoingRatioOfAComponent: Calculation<{ component: Compone
     return numberOfOutgoingLinks / incomingLinks.length;
 }
 
-export const ratioOfOutgoingLinksOfAService: Calculation<{ component: Component, system: System }> = (parameters) => {1
+export const ratioOfOutgoingLinksOfAService: Calculation<{ component: Component, system: System }> = (parameters) => {
+    1
     let numberOfOutgoingLinks: number = numberOfConsumedEndpoints(parameters) as number;
     let incomingLinks = parameters.system.getIncomingLinksOfComponent(parameters.component.getId);
     if (incomingLinks.length + numberOfOutgoingLinks === 0) {
@@ -420,6 +447,50 @@ export const ratioOfOutgoingLinksOfAService: Calculation<{ component: Component,
 
     return (numberOfOutgoingLinks / (incomingLinks.length + numberOfOutgoingLinks)) * 100
 }
+
+export const indirectInteractionDensity: Calculation<{ component: Component, system: System }> = (parameters) => {
+    let allComponents = parameters.system.getComponentEntities;
+
+    if (allComponents.size < 3) {
+        return 0;
+    }
+
+    let directDependencies = parameters.system.getOutgoingLinksOfComponent(parameters.component.getId).map(link => parameters.system.searchComponentOfEndpoint(link.getTargetEndpoint.getId));
+    let directDependenciesIds = directDependencies.map(component => component.getId);
+
+    // initialize potentialIndirectDependencies with all values to 0 assuming there are no indirect dependencies
+    let potentialIndirectDependencies = new Map<string, number>();
+    [...parameters.system.getComponentEntities.entries()]
+        .map(component => component[0])
+        .filter(componentId => componentId !== parameters.component.getId && !directDependenciesIds.includes(componentId))
+        .forEach(componentId => {
+            potentialIndirectDependencies.set(componentId, 0);
+        })
+
+    let alreadyVisited: string[] = directDependenciesIds.concat([parameters.component.getId]); // track visited nodes to handle potential circular paths
+    let nextNodeIds: string[] = directDependenciesIds
+        .flatMap(componentId => {
+            return parameters.system.getOutgoingLinksOfComponent(componentId).map(link => parameters.system.searchComponentOfEndpoint(link.getTargetEndpoint.getId).getId)
+        })
+        .filter(nextId => !alreadyVisited.includes(nextId));
+    while (nextNodeIds.length > 0) {
+        let nextNodeId = nextNodeIds[0];
+        // set visited node as indirect dependency
+        potentialIndirectDependencies.set(nextNodeId, 1);
+
+        // continue search
+        let nextNextNodeIds: string[] = parameters.system.getOutgoingLinksOfComponent(nextNodeId)
+            .map(link => parameters.system.searchComponentOfEndpoint(link.getTargetEndpoint.getId).getId)
+            .filter(nextId => !alreadyVisited.includes(nextId));
+        nextNodeIds.push(...nextNextNodeIds);
+        alreadyVisited.push(nextNodeId);
+        nextNodeIds.splice(0, 1);
+
+    }
+
+    return average([...potentialIndirectDependencies.values()]);
+}
+
 
 export const componentMeasureImplementations: { [measureKey: string]: Calculation<{ component: Component, system: System }> } = {
     "serviceInterfaceDataCohesion": serviceInterfaceDataCohesion,
@@ -435,5 +506,6 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "numberOfLinksPerComponent": numberOfLinksPerComponent,
     "numberOfConsumedEndpoints": numberOfConsumedEndpoints,
     "incomingOutgoingRatioOfAComponent": incomingOutgoingRatioOfAComponent,
-    "ratioOfOutgoingLinksOfAService": ratioOfOutgoingLinksOfAService
+    "ratioOfOutgoingLinksOfAService": ratioOfOutgoingLinksOfAService,
+    "indirectInteractionDensity": indirectInteractionDensity
 }

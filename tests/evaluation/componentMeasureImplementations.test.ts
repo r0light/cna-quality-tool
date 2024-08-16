@@ -490,3 +490,31 @@ test("ratioOfOutgoingLinksOfAService", () => {
     expect(measureValue).toEqual(50);
 
 })
+
+test("indirectInteractionDensity", () => {
+    let system = new System("testSystem");
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    serviceB.addEndpoint(endpointA);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+
+    let serviceD = new Service("s4", "testService", getEmptyMetaData());
+    let endpointE = new Endpoint("e5", "endpoint 5", getEmptyMetaData());
+    serviceD.addEndpoint(endpointE);
+
+    let linkAB1 = new Link("l1", serviceA, endpointA);
+    let linkBC1 = new Link("l3", serviceB, endpointC);
+
+    system.addEntities([serviceA, serviceB, serviceC, serviceD]);
+    system.addEntities([linkAB1, linkBC1]);
+
+    let measureValue = componentMeasureImplementations["indirectInteractionDensity"]({component: serviceA, system: system});
+    expect(measureValue).toEqual(0.5);
+
+})

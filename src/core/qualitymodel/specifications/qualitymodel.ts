@@ -492,7 +492,7 @@ export const qualityModel: QualityModelSpec = {
             "categories": ["businessDomain"],
             "relevantEntities": ["service", "link"],
             "sources": [],
-            "measures": ["numberOfLinksPerComponent", "numberOfConsumedEndpoints", "incomingOutgoingRatioOfAComponent", "ratioOfOutgoingLinksOfAService", "couplingDegreeBasedOnPotentialCoupling", "interactionDensityInTheSystem", "interactionDensityOfASystem", "indirectInteractionDensityOfASystem", "serviceCouplingBasedOnEndpointEntropy", "systemCouplingBasedOnEndpointEntropy", "modularityQualityBasedOnCohesionAndCoupling", "combinedMetricForIndirectDependency", "servicesInterdependenceInTheSystem", "indirectInteractionDensityOfASystem", "averageNumberOfDirectlyConnectedServices", "numberOfComponentsThatAreLinkedToAComponent", "numberOfComponentsAComponentIsLinkedTo", "numberOfLinksBetweenTwoServices", "aggregateSystemMetricToMeasureServiceCoupling", "numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfComponents", "degreeOfCouplingInASystem", "serviceCouplingBasedOnDataExchangeComplexity", "simpleDegreeOfCouplingInASystem", "directServiceSharing", "transitivelySharedServices", "ratioOfSharedNonExternalComponentsToNonExternalComponents", "ratioOfSharedDependenciesOfNonExternalComponentsToPossibleDependencies", "degreeOfDependenceOnOtherComponents", "averageSystemCoupling", "couplingOfServicesBasedOnUsedDataAggregates", "couplingOfServicesBasedServicesWhichCallThem", "couplingOfServicesBasedServicesWhichAreCalledByThem", "couplingOfServicesBasedOnAmountOfRequestTracesThatIncludeASpecificLink", "couplingOfServicesBasedTimesThatTheyOccurInTheSameRequestTrace"]
+            "measures": ["numberOfLinksPerComponent", "numberOfConsumedEndpoints", "incomingOutgoingRatioOfAComponent", "ratioOfOutgoingLinksOfAService", "couplingDegreeBasedOnPotentialCoupling", "interactionDensityBasedOnComponents", "interactionDensityBasedOnLinks", "serviceCouplingBasedOnEndpointEntropy", "systemCouplingBasedOnEndpointEntropy", "modularityQualityBasedOnCohesionAndCoupling", "combinedMetricForIndirectDependency", "servicesInterdependenceInTheSystem", "indirectInteractionDensity", "averageNumberOfDirectlyConnectedServices", "numberOfComponentsThatAreLinkedToAComponent", "numberOfComponentsAComponentIsLinkedTo", "numberOfLinksBetweenTwoServices", "aggregateSystemMetricToMeasureServiceCoupling", "numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfComponents", "degreeOfCouplingInASystem", "serviceCouplingBasedOnDataExchangeComplexity", "simpleDegreeOfCouplingInASystem", "directServiceSharing", "transitivelySharedServices", "ratioOfSharedNonExternalComponentsToNonExternalComponents", "ratioOfSharedDependenciesOfNonExternalComponentsToPossibleDependencies", "degreeOfDependenceOnOtherComponents", "averageSystemCoupling", "couplingOfServicesBasedOnUsedDataAggregates", "couplingOfServicesBasedServicesWhichCallThem", "couplingOfServicesBasedServicesWhichAreCalledByThem", "couplingOfServicesBasedOnAmountOfRequestTracesThatIncludeASpecificLink", "couplingOfServicesBasedTimesThatTheyOccurInTheSameRequestTrace"]
         },
         "functionalDecentralization": {
             "name": "Functional decentralization",
@@ -1134,19 +1134,19 @@ export const qualityModel: QualityModelSpec = {
             "calculation": "(Sum-of(Maximum path lengths between components when no links exist) - Sum-of(path lengths between components based on actually existing links)) / Sum-of(Maximum path lengths between components when no links exist) - Sum-of(Minimum path lengths when links exist between all components)",
             "sources": ["PhamThiQuynh2009"]
         },
-        "interactionDensityInTheSystem": {
-            "name": "Interaction density in the system",
-            "calculation": "",
+        "interactionDensityBasedOnComponents": {
+            "name": "Interaction density based on components",
+            "calculation": "Number of links in a system / Number of components in a system",
             "sources": ["Tiwari2014"]
         },
-        "interactionDensityOfASystem": {
-            "name": "Interaction density of a system",
-            "calculation": "",
+        "interactionDensityBasedOnLinks" : {
+            "name": "Interaction density based on links",
+            "calculation": "Number of links in a system / Number of potential links in a system",
             "sources": ["Tiwari2014", "Karhikeyan2012"]
         },
-        "indirectInteractionDensityOfASystem ": {
-            "name": "Indirect Interaction density of a system ",
-            "calculation": "",
+        "indirectInteractionDensity": {
+            "name": "Indirect Interaction density of a system",
+            "calculation": "Number of other components to which an indirect dependency exist / Number of components to which an indirect dependency could exist (because they are not direct dependencies) ",
             "sources": ["Karhikeyan2012"]
         },
         "serviceCouplingBasedOnEndpointEntropy": {
@@ -1173,11 +1173,6 @@ export const qualityModel: QualityModelSpec = {
             "name": "Services Interdependence in the System",
             "calculation": "",
             "sources": ["Bogner2017", "Rud2006"]
-        },
-        "indirectInteractionDensityOfASystem": {
-            "name": "Indirect Interaction density of a system",
-            "calculation": "",
-            "sources": ["Karhikeyan2012"]
         },
         "averageNumberOfDirectlyConnectedServices": {
             "name": "Average Number of Directly Connected Services",
