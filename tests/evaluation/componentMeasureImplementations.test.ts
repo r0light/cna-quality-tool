@@ -1,5 +1,5 @@
 import { getEmptyMetaData } from "@/core/common/entityDataTypes";
-import { DataAggregate, Endpoint, ExternalEndpoint, Link, Service, System } from "@/core/entities";
+import { DataAggregate, Endpoint, ExternalEndpoint, Link, Service, StorageBackingService, System } from "@/core/entities";
 import { RelationToDataAggregate } from "@/core/entities/relationToDataAggregate";
 import { componentMeasureImplementations } from "@/core/qualitymodel/evaluation/measureImplementations";
 import { getQualityModel } from "@/core/qualitymodel/QualityModelInstance";
@@ -540,4 +540,65 @@ test("serviceCouplingBasedOnEndpointEntropy", () => {
 
     let measureValue = componentMeasureImplementations["serviceCouplingBasedOnEndpointEntropy"]({component: serviceA, system: system});
     expect(measureValue).toBeCloseTo(0.389075, 5)
+})
+
+test("ratioOfStorageBackendSharing", () => {
+
+    let system = new System("testSystem");
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    serviceB.addEndpoint(endpointA);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+
+    let storageServiceD = new StorageBackingService("s4", "testService", getEmptyMetaData());
+    let endpointE = new Endpoint("e5", "endpoint 5", getEmptyMetaData());
+    storageServiceD.addEndpoint(endpointE);
+
+    let linkAD = new Link("l1", serviceA, endpointE);
+    let linkBD = new Link("l3", serviceB, endpointE);
+
+    system.addEntities([serviceA, serviceB, serviceC, storageServiceD]);
+    system.addEntities([linkAD, linkBD]);
+
+    let measureValue = componentMeasureImplementations["ratioOfStorageBackendSharing"]({component: serviceA, system: system});
+    expect(measureValue).toEqual(1/3);
+})
+
+test("combinedMetricForIndirectDependency", () => {
+    let system = new System("testSystem");
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    serviceB.addEndpoint(endpointA);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+
+    let storageServiceD = new StorageBackingService("s4", "testService", getEmptyMetaData());
+    let endpointE = new Endpoint("e5", "endpoint 5", getEmptyMetaData());
+    storageServiceD.addEndpoint(endpointE);
+
+    let serviceE = new Service("s5", "testService", getEmptyMetaData());
+    let endpointF = new Endpoint("e6", "endpoint 6", getEmptyMetaData());
+    serviceE.addEndpoint(endpointF);
+
+    let linkAD = new Link("l1", serviceA, endpointE);
+    let linkBD = new Link("l3", serviceB, endpointE);
+    let linkAB = new Link("l1", serviceA, endpointA);
+    let linkBC = new Link("l3", serviceB, endpointC);
+
+    system.addEntities([serviceA, serviceB, serviceC, storageServiceD, serviceE]);
+    system.addEntities([linkAD, linkBD, linkAB, linkBC]);
+
+    let measureValue = componentMeasureImplementations["combinedMetricForIndirectDependency"]({component: serviceA, system: system});
+    expect(measureValue).toEqual(1/6);
 })

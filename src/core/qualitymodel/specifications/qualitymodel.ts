@@ -1151,12 +1151,12 @@ export const qualityModel: QualityModelSpec = {
         },
         "serviceCouplingBasedOnEndpointEntropy": {
             "name": "Service Coupling based on Endpoint Entropy",
-            "calculation": "(sum-of(-log(1 /(Number of links connected to an endpoint + 1))) for all endpoints of a service) / Number of endpoints of a service",
+            "calculation": "(sum-of(-log(1 /(Number of links connected to an endpoint + 1))) for all endpoints of a service) / Number of endpoints of a component",
             "sources": ["Wang2009"]
         },
         "systemCouplingBasedOnEndpointEntropy": {
             "name": "System Coupling based on Endpoint Entropy",
-            "calculation": "",
+            "calculation": "sum-of(\"Service Coupling based on Endpoint Entropy\" for all components",
             "sources": ["Wang2009"]
         },
         "modularityQualityBasedOnCohesionAndCoupling": {
@@ -1166,7 +1166,7 @@ export const qualityModel: QualityModelSpec = {
         },
         "combinedMetricForIndirectDependency": {
             "name": "Combined metric for indirect dependency",
-            "calculation": "",
+            "calculation": "(\"Indirect Interaction density of a system\" + \"Indirect Dependency because of shared data repository\") / 2",
             "sources": ["Karhikeyan2012"]
         },
         "servicesInterdependenceInTheSystem": {
@@ -1366,8 +1366,8 @@ export const qualityModel: QualityModelSpec = {
         },
         "ratioOfStorageBackendSharing": {
             "name": "Ratio of Storage Backend Sharing",
-            "calculation": "",
-            "sources": ["Rosa2020"]
+            "calculation": "(sum-of(Number of Services sharing the same Storage Backing Service) for all Storage Backing Services) / (Total Number of Services * Total Number of Storage Backing Service)",
+            "sources": ["Karhikeyan2012"]
         },
         "sharedStorageBackingServiceInteractions": {
             "name": "Shared Storage Backing Service Interactions",

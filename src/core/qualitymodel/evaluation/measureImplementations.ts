@@ -279,6 +279,20 @@ export const interactionDensityBasedOnLinks: Calculation<System> = (system) => {
     return system.getLinkEntities.size / maximumPotentialNumberOfLinks;
 }
 
+export const systemCouplingBasedOnEndpointEntropy: Calculation<System> = (system) => {
+
+    let allComponents = [...system.getComponentEntities.entries()];
+
+    let cumulativeCoupling = 0;
+    for (const [componentId, component] of allComponents) {
+        let coupling = serviceCouplingBasedOnEndpointEntropy({ component: component, system: system });
+        cumulativeCoupling += coupling as number;
+    }
+
+    return cumulativeCoupling;
+
+}
+
 
 export const systemMeasureImplementations: { [measureKey: string]: Calculation<System> } = {
     "serviceReplicationLevel": serviceReplicationLevel,
@@ -297,7 +311,8 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation<S
     "ratioOfServicesThatProvideHealthEndpoints": ratioOfServicesThatProvideHealthEndpoints,
     "couplingDegreeBasedOnPotentialCoupling": couplingDegreeBasedOnPotentialCoupling,
     "interactionDensityBasedOnComponents": interactionDensityBasedOnComponents,
-    "interactionDensityBasedOnLinks": interactionDensityBasedOnLinks
+    "interactionDensityBasedOnLinks": interactionDensityBasedOnLinks,
+    "systemCouplingBasedOnEndpointEntropy": systemCouplingBasedOnEndpointEntropy
 }
 
 export const serviceInterfaceDataCohesion: Calculation<{ component: Component, system: System }> = (parameters) => {
@@ -518,6 +533,51 @@ export const serviceCouplingBasedOnEndpointEntropy: Calculation<{ component: Com
     return sum / endpointIds.length;
 }
 
+export const ratioOfStorageBackendSharing: Calculation<{ component: Component, system: System }> = (parameters) => {
+    let storageServicesUsedByThisComponent = parameters.system.getOutgoingLinksOfComponent(parameters.component.getId)
+        .map(link => parameters.system.searchComponentOfEndpoint(link.getTargetEndpoint.getId))
+        .filter(component => component.constructor.name === StorageBackingService.name);
+
+    if (storageServicesUsedByThisComponent.length === 0) {
+        return 0;
+    }
+
+    let otherServicesUsingStorageServices = new Map<string, Set<string>>();
+    storageServicesUsedByThisComponent.forEach(storageService => {
+        otherServicesUsingStorageServices.set(storageService.getId, new Set<string>());
+    })
+
+    for (const [linkId, link] of parameters.system.getLinkEntities) {
+        if (link.getSourceEntity.getId === parameters.component.getId) {
+            continue;
+        }
+
+        let targetComponentId = parameters.system.searchComponentOfEndpoint(link.getTargetEndpoint.getId).getId;
+        if (otherServicesUsingStorageServices.has(targetComponentId)) {
+            otherServicesUsingStorageServices.get(targetComponentId).add(link.getSourceEntity.getId);
+        }
+
+    }
+
+    let sum = 0;
+    for (const [storageId, storageService] of otherServicesUsingStorageServices.entries()) {
+        sum += otherServicesUsingStorageServices.get(storageId).size;
+    }
+    
+    return sum / (([...parameters.system.getComponentEntities.entries()]).filter(component => component[1].constructor.name === Service.name).length * ([...parameters.system.getComponentEntities.entries()]).filter(component => component[1].constructor.name === StorageBackingService.name).length)
+
+}
+
+export const combinedMetricForIndirectDependency: Calculation<{ component: Component, system: System }> = (parameters) => {
+
+    let indirectInteractionDensityValue = indirectInteractionDensity({component: parameters.component, system: parameters.system});
+
+    let ratioOfStorageBackendSharingValue = ratioOfStorageBackendSharing({component: parameters.component, system: parameters.system});
+
+    return ((indirectInteractionDensityValue as number) + (ratioOfStorageBackendSharingValue as number)) / 2;
+}
+
+
 export const componentMeasureImplementations: { [measureKey: string]: Calculation<{ component: Component, system: System }> } = {
     "serviceInterfaceDataCohesion": serviceInterfaceDataCohesion,
     "serviceInterfaceUsageCohesion": serviceInterfaceUsageCohesion,
@@ -534,5 +594,7 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "incomingOutgoingRatioOfAComponent": incomingOutgoingRatioOfAComponent,
     "ratioOfOutgoingLinksOfAService": ratioOfOutgoingLinksOfAService,
     "indirectInteractionDensity": indirectInteractionDensity,
-    "serviceCouplingBasedOnEndpointEntropy": serviceCouplingBasedOnEndpointEntropy
+    "serviceCouplingBasedOnEndpointEntropy": serviceCouplingBasedOnEndpointEntropy,
+    "ratioOfStorageBackendSharing": ratioOfStorageBackendSharing,
+    "combinedMetricForIndirectDependency": combinedMetricForIndirectDependency
 }
