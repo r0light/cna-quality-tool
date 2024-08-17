@@ -347,3 +347,34 @@ test("systemCouplingBasedOnEndpointEntropy", () => {
 
     expect(measureValue).toBeCloseTo(0.602059, 5);
 })
+
+test("servicesInterdependenceInTheSystem", () => {
+    let system = new System("testSystem");
+
+    let serviceX  = new Service("s1", "serviceA", getEmptyMetaData());
+
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    serviceX.addEndpoint(endpointA);
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceX.addEndpoint(endpointB);
+
+    let serviceY  = new Service("s2", "serviceB", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceY.addEndpoint(endpointC);
+    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    serviceY.addEndpoint(endpointD);
+
+    let linkXY = new Link("l1", serviceX, endpointC);
+    let linkYX = new Link("l2", serviceY, endpointA);
+
+    let serviceZ = new Service("s3", "service Z", getEmptyMetaData());
+    let linkZX = new Link("l3", serviceZ, endpointC);
+
+    system.addEntities([serviceX, serviceY, serviceZ]);
+    system.addEntities([linkXY, linkYX, linkZX]);
+
+    let measureValue = systemMeasureImplementations["servicesInterdependenceInTheSystem"](system);
+
+    expect(measureValue).toEqual(1);
+
+})

@@ -1171,7 +1171,7 @@ export const qualityModel: QualityModelSpec = {
         },
         "servicesInterdependenceInTheSystem": {
             "name": "Services Interdependence in the System",
-            "calculation": "",
+            "calculation": "Number of service pairs which are bi-directionally linked",
             "sources": ["Bogner2017", "Rud2006"]
         },
         "averageNumberOfDirectlyConnectedServices": {

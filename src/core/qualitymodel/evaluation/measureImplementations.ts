@@ -294,6 +294,33 @@ export const systemCouplingBasedOnEndpointEntropy: Calculation<System> = (system
 }
 
 
+export const servicesInterdependenceInTheSystem: Calculation<System> = (system) => {
+
+    let allLinks = [...system.getLinkEntities.entries()];
+
+    // tracl pairs of services, if a link exists between two services and entry is added which has a unique id for this pair and the set stores the source service of links.
+    // Thus, if a pair has two entries in the set in the end, there exists a bi-directional connection for this pair
+    let componentPairs = new Map<string, Set<string>>();
+    
+    for (const [linkId, link] of allLinks) {
+        let from = link.getSourceEntity;
+        let to = system.searchComponentOfEndpoint(link.getTargetEndpoint.getId);
+        if (from.constructor.name === Service.name && to.constructor.name === Service.name) {
+            let connectionId = [from.getId, to.getId].sort().join("");
+            if (componentPairs.has(connectionId)) {
+                componentPairs.get(connectionId).add(from.getId);
+            } else {
+                let set: Set<string> = new Set();
+                set.add(from.getId);
+                componentPairs.set(connectionId, set);
+            }
+        }
+    }
+
+    return [...componentPairs.entries()].map(pair => pair[1].size).filter(size => size === 2).length;
+}
+
+
 export const systemMeasureImplementations: { [measureKey: string]: Calculation<System> } = {
     "serviceReplicationLevel": serviceReplicationLevel,
     "storageReplicationLevel": storageReplicationLevel,
@@ -312,7 +339,8 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation<S
     "couplingDegreeBasedOnPotentialCoupling": couplingDegreeBasedOnPotentialCoupling,
     "interactionDensityBasedOnComponents": interactionDensityBasedOnComponents,
     "interactionDensityBasedOnLinks": interactionDensityBasedOnLinks,
-    "systemCouplingBasedOnEndpointEntropy": systemCouplingBasedOnEndpointEntropy
+    "systemCouplingBasedOnEndpointEntropy": systemCouplingBasedOnEndpointEntropy,
+    "servicesInterdependenceInTheSystem": servicesInterdependenceInTheSystem
 }
 
 export const serviceInterfaceDataCohesion: Calculation<{ component: Component, system: System }> = (parameters) => {
