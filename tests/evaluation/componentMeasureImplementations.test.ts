@@ -693,3 +693,32 @@ test("averageNumberOfDirectlyConnectedServices", () => {
     expect(measureValue).toEqual(3/4);
 
 })
+
+test("numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfComponents", () => {
+    let system = new System("testSystem");
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    serviceB.addEndpoint(endpointA);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+
+    let serviceD = new Service("s4", "testService", getEmptyMetaData());
+    let endpointF = new Endpoint("e6", "endpoint 6", getEmptyMetaData());
+    serviceD.addEndpoint(endpointF);
+
+    let linkAB = new Link("l1", serviceA, endpointA);
+    let linkBC = new Link("l2", serviceB, endpointC);
+    let linkDB = new Link("l3", serviceD, endpointA);
+    let linkDC = new Link("l4", serviceD, endpointC);
+
+    system.addEntities([serviceA, serviceB, serviceC, serviceD]);
+    system.addEntities([linkAB, linkBC, linkDB, linkDC]);
+
+    let measureValue = componentMeasureImplementations["numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfComponents"]({component: serviceD, system: system});
+    expect(measureValue).toEqual(0.5);
+})

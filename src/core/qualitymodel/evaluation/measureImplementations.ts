@@ -655,6 +655,18 @@ export const averageNumberOfDirectlyConnectedServices: Calculation<{ component: 
     return ((numberOfComponentsAComponentIsLinkedToValue as number) + (numberOfComponentsThatAreLinkedToAComponentValue as number)) / parameters.system.getComponentEntities.size;
 }
 
+export const numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfComponents: Calculation<{ component: Component, system: System }> = (parameters) => {
+
+    if (parameters.system.getComponentEntities.size === 0) {
+        return 0;
+    }    
+
+    let numberOfComponentsAComponentIsLinkedToValue = numberOfComponentsAComponentIsLinkedTo(parameters);
+
+    return (numberOfComponentsAComponentIsLinkedToValue as number) / parameters.system.getComponentEntities.size;
+    
+}
+
 
 
 export const componentMeasureImplementations: { [measureKey: string]: Calculation<{ component: Component, system: System }> } = {
@@ -679,5 +691,6 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "numberOfComponentsThatAreLinkedToAComponent": numberOfComponentsThatAreLinkedToAComponent,
     "numberOfComponentsAComponentIsLinkedTo": numberOfComponentsAComponentIsLinkedTo,
     "averageNumberOfDirectlyConnectedServices":
-    averageNumberOfDirectlyConnectedServices
+    averageNumberOfDirectlyConnectedServices,
+    "numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfComponents": numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfComponents
 }
