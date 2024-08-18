@@ -4,6 +4,7 @@ import { Component, Service, StorageBackingService, System } from "../../entitie
 import { Calculation } from "../quamoco/Measure.js";
 import { ASYNCHRONOUS_ENDPOINT_KIND, PROTOCOLS_SUPPORTING_TLS, SYNCHRONOUS_ENDPOINT_KIND } from "../specifications/featureModel.js";
 import { c } from "vite/dist/node/types.d-aGj9QkWt.js";
+import { param } from "jquery";
 
 const average: (list: number[]) => number = list => {
     return list.reduce((e1, e2) => e1 + e2, 0) / list.length
@@ -320,6 +321,20 @@ export const servicesInterdependenceInTheSystem: Calculation<System> = (system) 
     return [...componentPairs.entries()].map(pair => pair[1].size).filter(size => size === 2).length;
 }
 
+export const aggregateSystemMetricToMeasureServiceCoupling: Calculation<System> = (system) => {
+    let allComponents = [...system.getComponentEntities.entries()];
+
+    let sum = 0;
+    for (const [componentId, component] of allComponents) {
+        let numberOfComponentsAComponentIsLinkedToValue = numberOfComponentsAComponentIsLinkedTo({component: component, system: system})
+        sum += numberOfComponentsAComponentIsLinkedToValue as number;
+    }
+
+    return sum / (allComponents.length * (allComponents.length - 1));
+}
+
+
+
 
 export const systemMeasureImplementations: { [measureKey: string]: Calculation<System> } = {
     "serviceReplicationLevel": serviceReplicationLevel,
@@ -340,7 +355,9 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation<S
     "interactionDensityBasedOnComponents": interactionDensityBasedOnComponents,
     "interactionDensityBasedOnLinks": interactionDensityBasedOnLinks,
     "systemCouplingBasedOnEndpointEntropy": systemCouplingBasedOnEndpointEntropy,
-    "servicesInterdependenceInTheSystem": servicesInterdependenceInTheSystem
+    "servicesInterdependenceInTheSystem": servicesInterdependenceInTheSystem,
+    "aggregateSystemMetricToMeasureServiceCoupling":
+    aggregateSystemMetricToMeasureServiceCoupling
 }
 
 export const serviceInterfaceDataCohesion: Calculation<{ component: Component, system: System }> = (parameters) => {

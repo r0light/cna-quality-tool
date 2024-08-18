@@ -1196,7 +1196,7 @@ export const qualityModel: QualityModelSpec = {
         },
         "aggregateSystemMetricToMeasureServiceCoupling": {
             "name": "Aggregate System metric to measure service coupling",
-            "calculation": "",
+            "calculation": " (sum-of(\"Number of Components a component is linked to\" for all Service Consumers)) / (Number of services) * (Number of services - 1)",
             "sources": ["Hofmeister2008", "Gamage2021"]
         },
         "numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfComponents": {
