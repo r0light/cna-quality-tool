@@ -1176,17 +1176,17 @@ export const qualityModel: QualityModelSpec = {
         },
         "averageNumberOfDirectlyConnectedServices": {
             "name": "Average Number of Directly Connected Services",
-            "calculation": "",
+            "calculation": "(\"Number of Components a component is linked to\" + \"Number of Components that are linked to a component\") / Number of services in the system",
             "sources": ["Shim2008"]
         },
         "numberOfComponentsThatAreLinkedToAComponent": {
             "name": "Number of Components that are linked to a component",
-            "calculation": "",
+            "calculation": "Number of Components that are linked to a component (consumers)",
             "sources": ["Bogner2017", "Rud2009", "Shim2008", "Zhang2009", "Asik2017", "Gamage2021", "Perera2018"]
         },
         "numberOfComponentsAComponentIsLinkedTo": {
             "name": "Number of Components a component is linked to",
-            "calculation": "",
+            "calculation": "Number of Components a component is linked to",
             "sources": ["Bogner2017", "Rud2009", "Engel2018", "Shim2008", "Raj2021", "Raj2018", "Hofmeister2008", "PhamThiQuynh2009", "Zhang2009"]
         },
         "numberOfLinksBetweenTwoServices": {

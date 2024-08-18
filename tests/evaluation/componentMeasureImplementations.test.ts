@@ -602,3 +602,94 @@ test("combinedMetricForIndirectDependency", () => {
     let measureValue = componentMeasureImplementations["combinedMetricForIndirectDependency"]({component: serviceA, system: system});
     expect(measureValue).toEqual(1/6);
 })
+
+test("numberOfComponentsThatAreLinkedToAComponent", () => {
+    let system = new System("testSystem");
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    serviceB.addEndpoint(endpointA);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+
+    let serviceD = new Service("s4", "testService", getEmptyMetaData());
+    let endpointF = new Endpoint("e6", "endpoint 6", getEmptyMetaData());
+    serviceD.addEndpoint(endpointF);
+
+    let linkAB = new Link("l1", serviceA, endpointA);
+    let linkBC = new Link("l2", serviceB, endpointC);
+    let linkDB = new Link("l3", serviceD, endpointA);
+    let linkDC = new Link("l4", serviceD, endpointC);
+
+    system.addEntities([serviceA, serviceB, serviceC, serviceD]);
+    system.addEntities([linkAB, linkBC, linkDB, linkDC]);
+
+    let measureValue = componentMeasureImplementations["numberOfComponentsThatAreLinkedToAComponent"]({component: serviceB, system: system});
+    expect(measureValue).toEqual(2);
+
+
+})
+
+test("numberOfComponentsAComponentIsLinkedTo", () => {
+    let system = new System("testSystem");
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    serviceB.addEndpoint(endpointA);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+
+    let serviceD = new Service("s4", "testService", getEmptyMetaData());
+    let endpointF = new Endpoint("e6", "endpoint 6", getEmptyMetaData());
+    serviceD.addEndpoint(endpointF);
+
+    let linkAB = new Link("l1", serviceA, endpointA);
+    let linkBC = new Link("l2", serviceB, endpointC);
+    let linkDB = new Link("l3", serviceD, endpointA);
+    let linkDC = new Link("l4", serviceD, endpointC);
+
+    system.addEntities([serviceA, serviceB, serviceC, serviceD]);
+    system.addEntities([linkAB, linkBC, linkDB, linkDC]);
+
+    let measureValue = componentMeasureImplementations["numberOfComponentsAComponentIsLinkedTo"]({component: serviceD, system: system});
+    expect(measureValue).toEqual(2);
+
+})
+
+test("averageNumberOfDirectlyConnectedServices", () => {
+    let system = new System("testSystem");
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    serviceB.addEndpoint(endpointA);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+
+    let serviceD = new Service("s4", "testService", getEmptyMetaData());
+    let endpointF = new Endpoint("e6", "endpoint 6", getEmptyMetaData());
+    serviceD.addEndpoint(endpointF);
+
+    let linkAB = new Link("l1", serviceA, endpointA);
+    let linkBC = new Link("l2", serviceB, endpointC);
+    let linkDB = new Link("l3", serviceD, endpointA);
+    let linkDC = new Link("l4", serviceD, endpointC);
+
+    system.addEntities([serviceA, serviceB, serviceC, serviceD]);
+    system.addEntities([linkAB, linkBC, linkDB, linkDC]);
+
+    let measureValue = componentMeasureImplementations["averageNumberOfDirectlyConnectedServices"]({component: serviceB, system: system});
+    expect(measureValue).toEqual(3/4);
+
+})

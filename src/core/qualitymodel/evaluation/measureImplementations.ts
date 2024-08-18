@@ -605,6 +605,40 @@ export const combinedMetricForIndirectDependency: Calculation<{ component: Compo
     return ((indirectInteractionDensityValue as number) + (ratioOfStorageBackendSharingValue as number)) / 2;
 }
 
+export const numberOfComponentsThatAreLinkedToAComponent: Calculation<{ component: Component, system: System }> = (parameters) => {
+
+    let allLinks = parameters.system.getLinkEntities;
+    let consumers = new Set<string>();
+
+    for (const [linkId, link] of allLinks) {
+        if (parameters.system.searchComponentOfEndpoint(link.getTargetEndpoint.getId).getId === parameters.component.getId) {
+            let consumer = link.getSourceEntity.getId;
+            consumers.add(consumer);
+        }
+    }
+    return consumers.size;
+}
+
+export const numberOfComponentsAComponentIsLinkedTo: Calculation<{ component: Component, system: System }> = (parameters) => {   
+    let linksWithThisComponentAsSource = [...parameters.system.getLinkEntities.entries()].filter(link => link[1].getSourceEntity.getId === parameters.component.getId);
+    let linkedToServices = new Set<string>();
+
+    linksWithThisComponentAsSource.forEach(link => {
+        linkedToServices.add(parameters.system.searchComponentOfEndpoint(link[1].getTargetEndpoint.getId).getId);
+    })
+
+    return linkedToServices.size;
+}
+
+export const averageNumberOfDirectlyConnectedServices: Calculation<{ component: Component, system: System }> = (parameters) => {
+    let numberOfComponentsAComponentIsLinkedToValue = numberOfComponentsAComponentIsLinkedTo(parameters);
+
+    let numberOfComponentsThatAreLinkedToAComponentValue = numberOfComponentsThatAreLinkedToAComponent(parameters);
+
+    return ((numberOfComponentsAComponentIsLinkedToValue as number) + (numberOfComponentsThatAreLinkedToAComponentValue as number)) / parameters.system.getComponentEntities.size;
+}
+
+
 
 export const componentMeasureImplementations: { [measureKey: string]: Calculation<{ component: Component, system: System }> } = {
     "serviceInterfaceDataCohesion": serviceInterfaceDataCohesion,
@@ -624,5 +658,9 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "indirectInteractionDensity": indirectInteractionDensity,
     "serviceCouplingBasedOnEndpointEntropy": serviceCouplingBasedOnEndpointEntropy,
     "ratioOfStorageBackendSharing": ratioOfStorageBackendSharing,
-    "combinedMetricForIndirectDependency": combinedMetricForIndirectDependency
+    "combinedMetricForIndirectDependency": combinedMetricForIndirectDependency,
+    "numberOfComponentsThatAreLinkedToAComponent": numberOfComponentsThatAreLinkedToAComponent,
+    "numberOfComponentsAComponentIsLinkedTo": numberOfComponentsAComponentIsLinkedTo,
+    "averageNumberOfDirectlyConnectedServices":
+    averageNumberOfDirectlyConnectedServices
 }
