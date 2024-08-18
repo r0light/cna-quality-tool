@@ -1206,7 +1206,7 @@ export const qualityModel: QualityModelSpec = {
         },
         "degreeOfCouplingInASystem": {
             "name": "Degree of coupling in a system",
-            "calculation": "",
+            "calculation": "Sum-of(Number of Components a component is linked to) / ((Total Number of Components)² - (Total Number of Components))",
             "sources": ["Raj2021", "Raj2018", "Hofmeister2008", "Zhang2009"]
         },
         "serviceCouplingBasedOnDataExchangeComplexity": {

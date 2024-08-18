@@ -333,7 +333,21 @@ export const aggregateSystemMetricToMeasureServiceCoupling: Calculation<System> 
     return sum / (allComponents.length * (allComponents.length - 1));
 }
 
+export const degreeOfCouplingInASystem: Calculation<System> = (system) => {
+    let allComponents = [...system.getComponentEntities.entries()];
 
+    let sum = 0;
+    for (const [componentId, component] of allComponents) {
+        let numberOfComponentsAComponentIsLinkedToValue = numberOfComponentsAComponentIsLinkedTo({component: component, system: system})
+        sum += numberOfComponentsAComponentIsLinkedToValue as number;
+    }
+
+    console.log(sum);
+    console.log(Math.pow(allComponents.length, 2));
+
+    return sum / (Math.pow(allComponents.length, 2) - allComponents.length);
+
+}
 
 
 export const systemMeasureImplementations: { [measureKey: string]: Calculation<System> } = {
@@ -357,7 +371,8 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation<S
     "systemCouplingBasedOnEndpointEntropy": systemCouplingBasedOnEndpointEntropy,
     "servicesInterdependenceInTheSystem": servicesInterdependenceInTheSystem,
     "aggregateSystemMetricToMeasureServiceCoupling":
-    aggregateSystemMetricToMeasureServiceCoupling
+    aggregateSystemMetricToMeasureServiceCoupling,
+    "degreeOfCouplingInASystem": degreeOfCouplingInASystem
 }
 
 export const serviceInterfaceDataCohesion: Calculation<{ component: Component, system: System }> = (parameters) => {
