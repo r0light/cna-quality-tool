@@ -302,7 +302,7 @@ export const servicesInterdependenceInTheSystem: Calculation<System> = (system) 
     // tracl pairs of services, if a link exists between two services and entry is added which has a unique id for this pair and the set stores the source service of links.
     // Thus, if a pair has two entries in the set in the end, there exists a bi-directional connection for this pair
     let componentPairs = new Map<string, Set<string>>();
-    
+
     for (const [linkId, link] of allLinks) {
         let from = link.getSourceEntity;
         let to = system.searchComponentOfEndpoint(link.getTargetEndpoint.getId);
@@ -326,7 +326,7 @@ export const aggregateSystemMetricToMeasureServiceCoupling: Calculation<System> 
 
     let sum = 0;
     for (const [componentId, component] of allComponents) {
-        let numberOfComponentsAComponentIsLinkedToValue = numberOfComponentsAComponentIsLinkedTo({component: component, system: system})
+        let numberOfComponentsAComponentIsLinkedToValue = numberOfComponentsAComponentIsLinkedTo({ component: component, system: system })
         sum += numberOfComponentsAComponentIsLinkedToValue as number;
     }
 
@@ -338,15 +338,60 @@ export const degreeOfCouplingInASystem: Calculation<System> = (system) => {
 
     let sum = 0;
     for (const [componentId, component] of allComponents) {
-        let numberOfComponentsAComponentIsLinkedToValue = numberOfComponentsAComponentIsLinkedTo({component: component, system: system})
+        let numberOfComponentsAComponentIsLinkedToValue = numberOfComponentsAComponentIsLinkedTo({ component: component, system: system })
         sum += numberOfComponentsAComponentIsLinkedToValue as number;
     }
 
-    console.log(sum);
-    console.log(Math.pow(allComponents.length, 2));
-
     return sum / (Math.pow(allComponents.length, 2) - allComponents.length);
 
+}
+
+export const simpleDegreeOfCouplingInASystem: Calculation<System> = (system) => {
+    let allComponents = [...system.getComponentEntities.entries()];
+
+    let sum = 0;
+    for (const [componentId, component] of allComponents) {
+        let numberOfComponentsAComponentIsLinkedToValue = numberOfComponentsAComponentIsLinkedTo({ component: component, system: system })
+        sum += numberOfComponentsAComponentIsLinkedToValue as number;
+    }
+
+    return sum / allComponents.length;
+}
+
+
+export const directServiceSharing: Calculation<System> = (system) => {
+    let allComponents = [...system.getComponentEntities.entries()];
+
+    let servicesUsedBy = new Map<string, Set<string>>();
+    let endpointsUsedBy = new Map<string, Set<string>>();
+
+    for (const [linkId, link] of system.getLinkEntities.entries()) {
+        let targetServiceId = system.searchComponentOfEndpoint(link.getTargetEndpoint.getId).getId;
+
+        if (servicesUsedBy.has(targetServiceId)) {
+            servicesUsedBy.get(targetServiceId).add(link.getSourceEntity.getId);
+        } else {
+            let setOfServices = new Set<string>();
+            setOfServices.add(link.getSourceEntity.getId);
+            servicesUsedBy.set(targetServiceId, setOfServices);
+        }
+
+        if (endpointsUsedBy.has(link.getTargetEndpoint.getId)) {
+            endpointsUsedBy.get(link.getTargetEndpoint.getId).add(link.getSourceEntity.getId);
+        } else {
+            let setOfServices = new Set<string>();
+            setOfServices.add(link.getSourceEntity.getId);
+            endpointsUsedBy.set(link.getTargetEndpoint.getId, setOfServices);
+        }
+    }
+
+    let numberOfSharedServices = servicesUsedBy.entries()
+        .filter(serviceUsedBy => serviceUsedBy[1].size >= 2).toArray().length;
+
+    let numberOfSharedEndpoints = endpointsUsedBy.entries()
+        .filter(endpointUsedBy => endpointUsedBy[1].size >= 2).toArray().length;
+
+    return (((numberOfSharedServices / allComponents.length) + (numberOfSharedEndpoints / system.getLinkEntities.size)) / 2 );
 }
 
 
@@ -371,8 +416,10 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation<S
     "systemCouplingBasedOnEndpointEntropy": systemCouplingBasedOnEndpointEntropy,
     "servicesInterdependenceInTheSystem": servicesInterdependenceInTheSystem,
     "aggregateSystemMetricToMeasureServiceCoupling":
-    aggregateSystemMetricToMeasureServiceCoupling,
-    "degreeOfCouplingInASystem": degreeOfCouplingInASystem
+        aggregateSystemMetricToMeasureServiceCoupling,
+    "degreeOfCouplingInASystem": degreeOfCouplingInASystem,
+    "simpleDegreeOfCouplingInASystem": simpleDegreeOfCouplingInASystem,
+    "directServiceSharing": directServiceSharing
 }
 
 export const serviceInterfaceDataCohesion: Calculation<{ component: Component, system: System }> = (parameters) => {
@@ -623,16 +670,16 @@ export const ratioOfStorageBackendSharing: Calculation<{ component: Component, s
     for (const [storageId, storageService] of otherServicesUsingStorageServices.entries()) {
         sum += otherServicesUsingStorageServices.get(storageId).size;
     }
-    
+
     return sum / (([...parameters.system.getComponentEntities.entries()]).filter(component => component[1].constructor.name === Service.name).length * ([...parameters.system.getComponentEntities.entries()]).filter(component => component[1].constructor.name === StorageBackingService.name).length)
 
 }
 
 export const combinedMetricForIndirectDependency: Calculation<{ component: Component, system: System }> = (parameters) => {
 
-    let indirectInteractionDensityValue = indirectInteractionDensity({component: parameters.component, system: parameters.system});
+    let indirectInteractionDensityValue = indirectInteractionDensity({ component: parameters.component, system: parameters.system });
 
-    let ratioOfStorageBackendSharingValue = ratioOfStorageBackendSharing({component: parameters.component, system: parameters.system});
+    let ratioOfStorageBackendSharingValue = ratioOfStorageBackendSharing({ component: parameters.component, system: parameters.system });
 
     return ((indirectInteractionDensityValue as number) + (ratioOfStorageBackendSharingValue as number)) / 2;
 }
@@ -651,7 +698,7 @@ export const numberOfComponentsThatAreLinkedToAComponent: Calculation<{ componen
     return consumers.size;
 }
 
-export const numberOfComponentsAComponentIsLinkedTo: Calculation<{ component: Component, system: System }> = (parameters) => {   
+export const numberOfComponentsAComponentIsLinkedTo: Calculation<{ component: Component, system: System }> = (parameters) => {
     let linksWithThisComponentAsSource = [...parameters.system.getLinkEntities.entries()].filter(link => link[1].getSourceEntity.getId === parameters.component.getId);
     let linkedToServices = new Set<string>();
 
@@ -674,12 +721,12 @@ export const numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfCom
 
     if (parameters.system.getComponentEntities.size === 0) {
         return 0;
-    }    
+    }
 
     let numberOfComponentsAComponentIsLinkedToValue = numberOfComponentsAComponentIsLinkedTo(parameters);
 
     return (numberOfComponentsAComponentIsLinkedToValue as number) / parameters.system.getComponentEntities.size;
-    
+
 }
 
 
@@ -706,6 +753,6 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "numberOfComponentsThatAreLinkedToAComponent": numberOfComponentsThatAreLinkedToAComponent,
     "numberOfComponentsAComponentIsLinkedTo": numberOfComponentsAComponentIsLinkedTo,
     "averageNumberOfDirectlyConnectedServices":
-    averageNumberOfDirectlyConnectedServices,
+        averageNumberOfDirectlyConnectedServices,
     "numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfComponents": numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfComponents
 }

@@ -1216,12 +1216,12 @@ export const qualityModel: QualityModelSpec = {
         },
         "simpleDegreeOfCouplingInASystem": {
             "name": "Simple Degree of coupling in a system",
-            "calculation": "",
+            "calculation": "Sum-of(Number of Components a component is linked to) / (Total Number of Components)",
             "sources": ["Qian2006"]
         },
         "directServiceSharing": {
             "name": "Direct Service Sharing",
-            "calculation": "",
+            "calculation": "((Number of Services with at least two incoming links from different services / Total number of services) + (Number of Endpoints with at least two incoming links from different services / Total number of links)) / 2",
             "sources": ["Ntentos2020a"]
         },
         "transitivelySharedServices": {
