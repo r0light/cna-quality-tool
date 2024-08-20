@@ -541,3 +541,64 @@ test("transitivelySharedServices", () => {
     expect(measureValue).toEqual(0.5);
 
 })
+
+test("ratioOfSharedNonExternalComponentsToNonExternalComponents", () => {
+    let system = new System("testSystem");
+
+    let serviceX  = new Service("s1", "serviceA", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    serviceX.addEndpoint(endpointA);
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceX.addEndpoint(endpointB);
+
+    let serviceY  = new Service("s2", "serviceB", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceY.addEndpoint(endpointC);
+    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    serviceY.addEndpoint(endpointD);
+
+    let serviceZ = new Service("s3", "service Z", getEmptyMetaData());
+    let linkZX1 = new Link("l1", serviceZ, endpointA);
+    let linkZX2 = new Link("l2", serviceZ, endpointB);
+
+    let serviceA = new Service("s4", "service A", getEmptyMetaData());
+    let linkAX = new Link("l3", serviceA, endpointB);
+
+    system.addEntities([serviceX, serviceY, serviceZ, serviceA]);
+    system.addEntities([linkZX1, linkZX2, linkAX]);
+
+    let measureValue = systemMeasureImplementations["ratioOfSharedNonExternalComponentsToNonExternalComponents"](system);
+    expect(measureValue).toEqual(1/4);
+
+})
+
+test("ratioOfSharedDependenciesOfNonExternalComponentsToPossibleDependencies", () => {
+    let system = new System("testSystem");
+
+    let serviceX  = new Service("s1", "serviceA", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    serviceX.addEndpoint(endpointA);
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceX.addEndpoint(endpointB);
+
+    let serviceY  = new Service("s2", "serviceB", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceY.addEndpoint(endpointC);
+    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    serviceY.addEndpoint(endpointD);
+
+    let serviceZ = new Service("s3", "service Z", getEmptyMetaData());
+    let linkZX1 = new Link("l1", serviceZ, endpointA);
+    let linkZX2 = new Link("l2", serviceZ, endpointB);
+
+    let serviceA = new Service("s4", "service A", getEmptyMetaData());
+    let linkAX = new Link("l3", serviceA, endpointB);
+
+    system.addEntities([serviceX, serviceY, serviceZ, serviceA]);
+    system.addEntities([linkZX1, linkZX2, linkAX]);
+
+    let measureValue = systemMeasureImplementations["ratioOfSharedDependenciesOfNonExternalComponentsToPossibleDependencies"](system);
+    expect(measureValue).toEqual(1/8);
+
+
+})

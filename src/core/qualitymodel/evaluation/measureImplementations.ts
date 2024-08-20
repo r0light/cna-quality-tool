@@ -425,6 +425,88 @@ export const transitivelySharedServices: Calculation<System> = (system) => {
 }
 
 
+export const ratioOfSharedNonExternalComponentsToNonExternalComponents: Calculation<System> = (system) => {
+    let allComponents = [...system.getComponentEntities.entries()];
+
+    if (allComponents.length === 0) {
+        return 0;
+    }
+
+    let servicesUsedBy = new Map<string, Set<string>>();
+    let endpointsUsedBy = new Map<string, Set<string>>();
+
+    for (const [linkId, link] of system.getLinkEntities.entries()) {
+        let targetServiceId = system.searchComponentOfEndpoint(link.getTargetEndpoint.getId).getId;
+
+        if (servicesUsedBy.has(targetServiceId)) {
+            servicesUsedBy.get(targetServiceId).add(link.getSourceEntity.getId);
+        } else {
+            let setOfServices = new Set<string>();
+            setOfServices.add(link.getSourceEntity.getId);
+            servicesUsedBy.set(targetServiceId, setOfServices);
+        }
+
+        if (endpointsUsedBy.has(link.getTargetEndpoint.getId)) {
+            endpointsUsedBy.get(link.getTargetEndpoint.getId).add(link.getSourceEntity.getId);
+        } else {
+            let setOfServices = new Set<string>();
+            setOfServices.add(link.getSourceEntity.getId);
+            endpointsUsedBy.set(link.getTargetEndpoint.getId, setOfServices);
+        }
+    }
+
+    let numberOfSharedServices = servicesUsedBy.entries()
+        .filter(serviceUsedBy => serviceUsedBy[1].size >= 2).toArray().length;
+
+    return  numberOfSharedServices / allComponents.length;
+
+
+}
+
+export const ratioOfSharedDependenciesOfNonExternalComponentsToPossibleDependencies: Calculation<System> = (system) => {
+    let allComponents = [...system.getComponentEntities.entries()];
+
+    if (allComponents.length === 0) {
+        return 0;
+    }
+
+    let servicesUsedBy = new Map<string, Set<string>>();
+    let endpointsUsedBy = new Map<string, Set<string>>();
+
+    for (const [linkId, link] of system.getLinkEntities.entries()) {
+        let targetServiceId = system.searchComponentOfEndpoint(link.getTargetEndpoint.getId).getId;
+
+        if (servicesUsedBy.has(targetServiceId)) {
+            servicesUsedBy.get(targetServiceId).add(link.getSourceEntity.getId);
+        } else {
+            let setOfServices = new Set<string>();
+            setOfServices.add(link.getSourceEntity.getId);
+            servicesUsedBy.set(targetServiceId, setOfServices);
+        }
+
+        if (endpointsUsedBy.has(link.getTargetEndpoint.getId)) {
+            endpointsUsedBy.get(link.getTargetEndpoint.getId).add(link.getSourceEntity.getId);
+        } else {
+            let setOfServices = new Set<string>();
+            setOfServices.add(link.getSourceEntity.getId);
+            endpointsUsedBy.set(link.getTargetEndpoint.getId, setOfServices);
+        }
+    }
+
+    let sumOfServiceDependencyTuples = servicesUsedBy.entries().map(entry => {
+        let dependents = entry[1];
+        if (dependents.size >= 2) {
+            return dependents.size * (dependents.size - 1) // sum of "dependency relationships" from one of the dependent services considering the dependency and the other components which share this dependeny
+        }
+        return 0;
+    }).reduce((accumulator, current) => accumulator + current, 0);
+
+
+    return  sumOfServiceDependencyTuples / Math.pow(allComponents.length, 2);
+
+
+}
+
 export const systemMeasureImplementations: { [measureKey: string]: Calculation<System> } = {
     "serviceReplicationLevel": serviceReplicationLevel,
     "storageReplicationLevel": storageReplicationLevel,
@@ -450,7 +532,9 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation<S
     "degreeOfCouplingInASystem": degreeOfCouplingInASystem,
     "simpleDegreeOfCouplingInASystem": simpleDegreeOfCouplingInASystem,
     "directServiceSharing": directServiceSharing,
-    "transitivelySharedServices": transitivelySharedServices
+    "transitivelySharedServices": transitivelySharedServices,
+    "ratioOfSharedNonExternalComponentsToNonExternalComponents": ratioOfSharedNonExternalComponentsToNonExternalComponents,
+    "ratioOfSharedDependenciesOfNonExternalComponentsToPossibleDependencies": ratioOfSharedDependenciesOfNonExternalComponentsToPossibleDependencies
 }
 
 export const serviceInterfaceDataCohesion: Calculation<{ component: Component, system: System }> = (parameters) => {

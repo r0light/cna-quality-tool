@@ -1231,12 +1231,12 @@ export const qualityModel: QualityModelSpec = {
         },
         "ratioOfSharedNonExternalComponentsToNonExternalComponents": {
             "name": "Ratio of shared non-external components to non-external components",
-            "calculation": "",
+            "calculation": "Number of Services with at least two incoming links from different services / Total number of services",
             "sources": ["Zdun2017"]
         },
         "ratioOfSharedDependenciesOfNonExternalComponentsToPossibleDependencies": {
             "name": "Ratio of shared dependencies of non-external components to possible dependencies",
-            "calculation": "",
+            "calculation": "Number of component sharing relationships / (Number of components)²",
             "sources": ["Zdun2017"]
         },
         "degreeOfDependenceOnOtherComponents": {
