@@ -1,6 +1,6 @@
 
 import { a } from "vitest/dist/suite-IbNSsUWN.js";
-import { Component, Service, StorageBackingService, System } from "../../entities.js";
+import { Component, RequestTrace, Service, StorageBackingService, System } from "../../entities.js";
 import { Calculation } from "../quamoco/Measure.js";
 import { ASYNCHRONOUS_ENDPOINT_KIND, getEndpointKindWeight, getUsageRelationWeight, PROTOCOLS_SUPPORTING_TLS, SYNCHRONOUS_ENDPOINT_KIND } from "../specifications/featureModel.js";
 import { c } from "vite/dist/node/types.d-aGj9QkWt.js";
@@ -900,9 +900,113 @@ export const couplingOfServicesBasedOnUsedDataAggregates:  Calculation<{ compone
     let dataAggregatesUsedByA = new Set<string>(parameters.componentA.getDataAggregateEntities.map(dataAggregate => dataAggregate.data.getId));
     let dataAggregatesUsedByB = new Set<string>(parameters.componentB.getDataAggregateEntities.map(dataAggregate => dataAggregate.data.getId));
 
+    if (dataAggregatesUsedByA.union(dataAggregatesUsedByB).size === 0) {
+        return 0;
+    }
+
     return dataAggregatesUsedByA.intersection(dataAggregatesUsedByB).size / dataAggregatesUsedByA.union(dataAggregatesUsedByB).size; 
 }
 
+export const couplingOfServicesBasedServicesWhichCallThem:  Calculation<{ componentA: Component, componentB: Component, system: System }> = (parameters) => {
+    let servicesWhichCallA = new Set<string>(parameters.system.getIncomingLinksOfComponent(parameters.componentA.getId).map(link => link.getSourceEntity.getId));
+    let servicesWhichCallB = new Set<string>(parameters.system.getIncomingLinksOfComponent(parameters.componentB.getId).map(link => link.getSourceEntity.getId));
+
+    if (servicesWhichCallA.union(servicesWhichCallB).size === 0) {
+        return 0;
+    }
+
+    return servicesWhichCallA.intersection(servicesWhichCallB).size / servicesWhichCallA.union(servicesWhichCallB).size;
+}
+
+export const couplingOfServicesBasedServicesWhichAreCalledByThem: Calculation<{ componentA: Component, componentB: Component, system: System }> = (parameters) => {
+    let servicesCalledByA = new Set<string>(parameters.system.getOutgoingLinksOfComponent(parameters.componentA.getId).map(link => parameters.system.searchComponentOfEndpoint(link.getTargetEndpoint.getId).getId));
+
+    let servicesCalledByB = new Set<string>(parameters.system.getOutgoingLinksOfComponent(parameters.componentB.getId).map(link => parameters.system.searchComponentOfEndpoint(link.getTargetEndpoint.getId).getId));
+
+    if (servicesCalledByA.union(servicesCalledByB).size === 0) {
+        return 0;
+    }
+    
+    return servicesCalledByA.intersection(servicesCalledByB).size / servicesCalledByA.union(servicesCalledByB).size
+}
+
+
+export const couplingOfServicesBasedOnAmountOfRequestTracesThatIncludeASpecificLink: Calculation<{ componentA: Component, componentB: Component, system: System }> = (parameters) => {
+
+    let allRequestTraces = parameters.system.getRequestTraceEntities;
+
+    let requestTracesIncludingA = new Set<string>();
+    let requestTracesIncludingB = new Set<string>();
+    let requestTracesInWhichACallsB = new Set<string>();
+    let requestTracesInWhichBCallsA = new Set<string>();
+
+    for (const [requestTraceId, requestTrace] of allRequestTraces.entries()) {
+        for (const link of requestTrace.getLinks) {
+            let callingComponentId = link.getSourceEntity.getId;
+            let calledComponentId = parameters.system.searchComponentOfEndpoint(link.getTargetEndpoint.getId).getId;
+
+            let aIsCalling = callingComponentId === parameters.componentA.getId;
+            let bIsCalled = calledComponentId === parameters.componentB.getId;
+            let bIsCalling = callingComponentId === parameters.componentB.getId;
+            let aIsCalled = calledComponentId === parameters.componentA.getId;
+
+            if (aIsCalling || aIsCalled) {
+                requestTracesIncludingA.add(requestTraceId);
+                if (aIsCalling && bIsCalled) {
+                    requestTracesInWhichACallsB.add(requestTraceId);
+                }
+            }
+            if (bIsCalling || bIsCalled) {
+                requestTracesIncludingB.add(requestTraceId);
+                if (bIsCalled && aIsCalled) {
+                    requestTracesInWhichBCallsA.add(requestTraceId);
+                }
+            }
+        }
+    }
+
+    let probA = requestTracesIncludingB.size === 0 ? 0 : requestTracesInWhichACallsB.size / requestTracesIncludingB.size;
+    let probB = requestTracesIncludingA.size === 0 ? 0 : requestTracesInWhichBCallsA.size / requestTracesIncludingA.size;
+
+    return Math.max(probA, probB);
+}
+
+export const couplingOfServicesBasedTimesThatTheyOccurInTheSameRequestTrace: Calculation<{ componentA: Component, componentB: Component, system: System }> = (parameters) => {
+    let allRequestTraces = parameters.system.getRequestTraceEntities;
+
+    if (allRequestTraces.size === 0) {
+        return 0;
+    }
+
+    let requestTracesIncludingA = new Set<string>();
+    let requestTracesIncludingB = new Set<string>();
+
+    for (const [requestTraceId, requestTrace] of allRequestTraces.entries()) {
+        for (const link of requestTrace.getLinks) {
+            let callingComponentId = link.getSourceEntity.getId;
+            let calledComponentId = parameters.system.searchComponentOfEndpoint(link.getTargetEndpoint.getId).getId;
+
+            let aIsCalling = callingComponentId === parameters.componentA.getId;
+            let bIsCalled = calledComponentId === parameters.componentB.getId;
+            let bIsCalling = callingComponentId === parameters.componentB.getId;
+            let aIsCalled = calledComponentId === parameters.componentA.getId;
+
+            if (aIsCalling || aIsCalled) {
+                requestTracesIncludingA.add(requestTraceId);
+            }
+            if (bIsCalling || bIsCalled) {
+                requestTracesIncludingB.add(requestTraceId);
+            }
+        }
+    }
+
+    return requestTracesIncludingA.intersection(requestTracesIncludingB).size / allRequestTraces.size;
+}
+
 export const componentPairMeasureImplementations: { [measureKey: string]: Calculation<{ componentA: Component, componentB: Component, system: System }> } = {
-    "couplingOfServicesBasedOnUsedDataAggregates": couplingOfServicesBasedOnUsedDataAggregates
+    "couplingOfServicesBasedOnUsedDataAggregates": couplingOfServicesBasedOnUsedDataAggregates,
+    "couplingOfServicesBasedServicesWhichCallThem": couplingOfServicesBasedServicesWhichCallThem,
+    "couplingOfServicesBasedServicesWhichAreCalledByThem": couplingOfServicesBasedServicesWhichAreCalledByThem,
+    "couplingOfServicesBasedOnAmountOfRequestTracesThatIncludeASpecificLink": couplingOfServicesBasedOnAmountOfRequestTracesThatIncludeASpecificLink,
+    "couplingOfServicesBasedTimesThatTheyOccurInTheSameRequestTrace": couplingOfServicesBasedTimesThatTheyOccurInTheSameRequestTrace
 }

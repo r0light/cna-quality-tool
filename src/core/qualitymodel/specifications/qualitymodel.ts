@@ -1256,22 +1256,22 @@ export const qualityModel: QualityModelSpec = {
         },
         "couplingOfServicesBasedServicesWhichCallThem": {
             "name": "Coupling of services based services which call them",
-            "calculation": "",
+            "calculation": "Services which call both two services / All services calling either of the two services",
             "sources": ["Peng2022"]
         },
         "couplingOfServicesBasedServicesWhichAreCalledByThem": {
             "name": "Coupling of services based services which are called by them",
-            "calculation": "",
+            "calculation": "Services which are called by both two services / All services called by either of the two services",
             "sources": ["Peng2022"]
         },
         "couplingOfServicesBasedOnAmountOfRequestTracesThatIncludeASpecificLink": {
             "name": "Coupling of services based on amount of request traces that include a specific link",
-            "calculation": "",
+            "calculation": "Maximum of probabilities that one service is called by the other in all requests traces in which the first service is included.",
             "sources": ["Peng2022"]
         },
         "couplingOfServicesBasedTimesThatTheyOccurInTheSameRequestTrace": {
             "name": "Coupling of services based times that they occur in the same request trace",
-            "calculation": "",
+            "calculation": "Number of request traces which contain the same two services / Number of request traces",
             "sources": ["Peng2022"]
         },
         "conceptualModularityQualityBasedOnDataAggregateCohesionAndCoupling": {
