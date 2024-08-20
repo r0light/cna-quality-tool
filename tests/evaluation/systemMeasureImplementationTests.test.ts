@@ -599,6 +599,41 @@ test("ratioOfSharedDependenciesOfNonExternalComponentsToPossibleDependencies", (
 
     let measureValue = systemMeasureImplementations["ratioOfSharedDependenciesOfNonExternalComponentsToPossibleDependencies"](system);
     expect(measureValue).toEqual(1/8);
+})
 
+test("averageSystemCoupling", () => {
+
+    let system = new System("testSystem");
+
+    let dataAggregateA = new DataAggregate("da1", "data aggregate 1", getEmptyMetaData());
+    let dataAggregateB = new DataAggregate("da2", "data aggregate 2", getEmptyMetaData());
+
+    let serviceX  = new Service("s1", "serviceA", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    endpointA.setPropertyValue("kind", "query");
+    let relationAA = new RelationToDataAggregate("dar1", getEmptyMetaData());
+    relationAA.setPropertyValue("usage_relation", "usage");
+    endpointA.addDataAggregateEntity(dataAggregateA, relationAA);
+    serviceX.addEndpoint(endpointA);
+
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceX.addEndpoint(endpointB);
+    endpointB.setPropertyValue("kind", "command");
+    let relationBB = new RelationToDataAggregate("dar2", getEmptyMetaData());
+    relationBB.setPropertyValue("usage_relation", "persistence");
+    endpointB.addDataAggregateEntity(dataAggregateB, relationBB);
+
+    let serviceY  = new Service("s2", "serviceB", getEmptyMetaData());
+    let linkYX1 = new Link("l1", serviceY, endpointA);
+    let linkYX2 = new Link("l2", serviceY, endpointB);
+
+    let serviceZ = new Service("s3", "service C", getEmptyMetaData());
+    let linkZX = new Link("l3", serviceZ, endpointB);
+
+    system.addEntities([serviceX, serviceY, serviceZ]);
+    system.addEntities([linkYX1, linkYX2, linkZX]);
+
+    let measureValue = systemMeasureImplementations["averageSystemCoupling"](system);
+    expect(measureValue).toEqual(2.45/3);
 
 })

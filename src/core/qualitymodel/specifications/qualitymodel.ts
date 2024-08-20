@@ -1246,7 +1246,7 @@ export const qualityModel: QualityModelSpec = {
         },
         "averageSystemCoupling": {
             "name": "Average System Coupling",
-            "calculation": "",
+            "calculation": "Sum-of(relationship weights of links between services) / Number of services",
             "sources": ["Filippone2023"]
         },
         "couplingOfServicesBasedOnUsedDataAggregates": {

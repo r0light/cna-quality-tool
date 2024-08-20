@@ -2,11 +2,14 @@
 import { a } from "vitest/dist/suite-IbNSsUWN.js";
 import { Component, Service, StorageBackingService, System } from "../../entities.js";
 import { Calculation } from "../quamoco/Measure.js";
-import { ASYNCHRONOUS_ENDPOINT_KIND, PROTOCOLS_SUPPORTING_TLS, SYNCHRONOUS_ENDPOINT_KIND } from "../specifications/featureModel.js";
+import { ASYNCHRONOUS_ENDPOINT_KIND, getEndpointKindWeight, getUsageRelationWeight, PROTOCOLS_SUPPORTING_TLS, SYNCHRONOUS_ENDPOINT_KIND } from "../specifications/featureModel.js";
 import { c } from "vite/dist/node/types.d-aGj9QkWt.js";
 import { param } from "jquery";
 
 const average: (list: number[]) => number = list => {
+    if (list.length === 0) {
+        return 0; // TODO better use NaN?
+    }
     return list.reduce((e1, e2) => e1 + e2, 0) / list.length
 }
 
@@ -503,8 +506,25 @@ export const ratioOfSharedDependenciesOfNonExternalComponentsToPossibleDependenc
 
 
     return  sumOfServiceDependencyTuples / Math.pow(allComponents.length, 2);
+}
 
+export const averageSystemCoupling: Calculation<System> = (system) => {
 
+    if (system.getComponentEntities.size === 0) {
+        return 0;
+    }
+
+    let allLinks = [...system.getLinkEntities.entries()];
+    
+    let sumOfLinkWeights = 0;
+
+    for (const [linkId, link] of allLinks) {
+        let linkWeight = getEndpointKindWeight(link.getTargetEndpoint.getProperty("kind").value);
+        let entityUsageWeight = average(link.getTargetEndpoint.getDataAggregateEntities.map(entity => getUsageRelationWeight(entity.relation.getProperty("usage_relation").value)));
+        sumOfLinkWeights += linkWeight + entityUsageWeight;
+    }
+
+    return sumOfLinkWeights / system.getComponentEntities.size;
 }
 
 export const systemMeasureImplementations: { [measureKey: string]: Calculation<System> } = {
@@ -534,7 +554,8 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation<S
     "directServiceSharing": directServiceSharing,
     "transitivelySharedServices": transitivelySharedServices,
     "ratioOfSharedNonExternalComponentsToNonExternalComponents": ratioOfSharedNonExternalComponentsToNonExternalComponents,
-    "ratioOfSharedDependenciesOfNonExternalComponentsToPossibleDependencies": ratioOfSharedDependenciesOfNonExternalComponentsToPossibleDependencies
+    "ratioOfSharedDependenciesOfNonExternalComponentsToPossibleDependencies": ratioOfSharedDependenciesOfNonExternalComponentsToPossibleDependencies,
+    "averageSystemCoupling": averageSystemCoupling
 }
 
 export const serviceInterfaceDataCohesion: Calculation<{ component: Component, system: System }> = (parameters) => {
