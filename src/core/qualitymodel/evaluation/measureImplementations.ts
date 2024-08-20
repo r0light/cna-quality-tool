@@ -527,6 +527,8 @@ export const averageSystemCoupling: Calculation<System> = (system) => {
     return sumOfLinkWeights / system.getComponentEntities.size;
 }
 
+
+
 export const systemMeasureImplementations: { [measureKey: string]: Calculation<System> } = {
     "serviceReplicationLevel": serviceReplicationLevel,
     "storageReplicationLevel": storageReplicationLevel,
@@ -891,4 +893,16 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "averageNumberOfDirectlyConnectedServices":
         averageNumberOfDirectlyConnectedServices,
     "numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfComponents": numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfComponents
+}
+
+
+export const couplingOfServicesBasedOnUsedDataAggregates:  Calculation<{ componentA: Component, componentB: Component, system: System }> = (parameters) => {
+    let dataAggregatesUsedByA = new Set<string>(parameters.componentA.getDataAggregateEntities.map(dataAggregate => dataAggregate.data.getId));
+    let dataAggregatesUsedByB = new Set<string>(parameters.componentB.getDataAggregateEntities.map(dataAggregate => dataAggregate.data.getId));
+
+    return dataAggregatesUsedByA.intersection(dataAggregatesUsedByB).size / dataAggregatesUsedByA.union(dataAggregatesUsedByB).size; 
+}
+
+export const componentPairMeasureImplementations: { [measureKey: string]: Calculation<{ componentA: Component, componentB: Component, system: System }> } = {
+    "couplingOfServicesBasedOnUsedDataAggregates": couplingOfServicesBasedOnUsedDataAggregates
 }

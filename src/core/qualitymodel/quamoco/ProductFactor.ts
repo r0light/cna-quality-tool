@@ -16,6 +16,7 @@ class ProductFactor {
     #sources: LiteratureSource[];
     #systemMeasures: Measure<System>[];
     #componentMeasures: Measure<{component: Component, system: System}>[];
+    #componentPairMeasures: Measure<{ componentA: Component, componentB: Component, system: System }>[];
     #evaluation: ProductFactorEvaluation;
 
     #outgoingImpacts: Impact[];
@@ -30,6 +31,7 @@ class ProductFactor {
         this.#sources = [];
         this.#systemMeasures = [];
         this.#componentMeasures = [];
+        this.#componentPairMeasures = [];
         this.#evaluation = undefined;
         this.#outgoingImpacts = [];
         this.#incomingImpacts = [];
@@ -74,6 +76,10 @@ class ProductFactor {
         return this.#componentMeasures;
     }
 
+    get getComponentPairMeasures() {
+        return this.#componentPairMeasures;
+    }
+
     get getOutgoingImpacts() {
         return this.#outgoingImpacts;
     }
@@ -96,6 +102,10 @@ class ProductFactor {
 
     addComponentMeasure(measure: Measure<{component: Component, system: System}>) {
         this.#componentMeasures.push(measure);
+    }
+
+    addComponentPairMeasure(measure: Measure<{ componentA: Component, componentB: Component, system: System }>) {
+        this.#componentPairMeasures.push(measure);
     }
 
     addOutgoingImpact(impact: Impact) {
@@ -129,6 +139,15 @@ class ProductFactor {
 
     getComponentMeasure(measureKey: string) {
         let measure = this.#componentMeasures.find(measure => measure.getId === measureKey);
+        if (measure) {
+            return measure;
+        } else {
+            throw new Error (`Measure ${measureKey} not found for product factor ${this.#id}`);
+        }
+    }
+
+    getComponentPairMeasure(measureKey: string) {
+        let measure = this.#componentPairMeasures.find(measure => measure.getId === measureKey);
         if (measure) {
             return measure;
         } else {

@@ -10,7 +10,7 @@ import { LiteratureSource } from "./quamoco/LiteratureSource.js";
 import { Entity } from "./quamoco/Entity.js";
 import { productFactorEvaluationImplementation, qualityAspectEvaluationImplementation } from "./evaluation/evaluationImplementations.js";
 import { ProductFactorEvaluation } from "./evaluation/ProductFactorEvaluation.js";
-import { componentMeasureImplementations, systemMeasureImplementations } from "./evaluation/measureImplementations.js";
+import { componentMeasureImplementations, componentPairMeasureImplementations, systemMeasureImplementations } from "./evaluation/measureImplementations.js";
 import { QualityAspectEvaluation } from "./evaluation/QualityAspectEvaluation.js";
 import { Component, System } from "../entities.js";
 
@@ -44,6 +44,7 @@ function getQualityModel(): QualityModelInstance {
     }
 
     // add all Measures
+
     for (const [measureKey, measure] of Object.entries(qualityModel.measures)) {
         let newMeasure = new Measure(measureKey, measure.name, measure.calculation);
         measure.sources.forEach(sourceKey => {
@@ -53,9 +54,12 @@ function getQualityModel(): QualityModelInstance {
         if (systemMeasureImplementations[measureKey]) {
             newMeasure.addCalculation(systemMeasureImplementations[measureKey]);
             newQualityModel.systemMeasures.push(newMeasure as Measure<System>);
-        } else if (componentMeasureImplementations[measureKey]){
+        } else if (componentMeasureImplementations[measureKey]) {
             newMeasure.addCalculation(componentMeasureImplementations[measureKey]);
-            newQualityModel.componentMeasures.push(newMeasure as Measure<{component: Component, system: System}>);
+            newQualityModel.componentMeasures.push(newMeasure as Measure<{ component: Component, system: System }>);
+        } else if (componentPairMeasureImplementations[measureKey]) {
+            newMeasure.addCalculation(componentPairMeasureImplementations[measureKey]);
+            newQualityModel.componentPairMeasures.push(newMeasure as Measure<{ componentA: Component, componentB: Component, system: System }>);
         } else {
             //console.log(`No measure implementation found for measure ${measureKey}`);
             //default:
@@ -93,7 +97,12 @@ function getQualityModel(): QualityModelInstance {
                 if (foundComponentMeasure) {
                     newProductFactor.addComponentMeasure(foundComponentMeasure);
                 } else {
-                    throw Error("No measure with key " + measureKey + " could be found, please check the quality model definition.")
+                    let foundComponentPairMeasure = newQualityModel.findComponentPairMeasure(measureKey);
+                    if (foundComponentPairMeasure) {
+                        newProductFactor.addComponentPairMeasure(foundComponentPairMeasure);
+                    } else {
+                        throw Error("No measure with key " + measureKey + " could be found, please check the quality model definition.")
+                    }
                 }
             }
         }
@@ -206,7 +215,9 @@ class QualityModelInstance {
 
     systemMeasures: (Measure<System>)[];
 
-    componentMeasures: Measure<{component: Component, system: System}>[];
+    componentMeasures: Measure<{ component: Component, system: System }>[];
+
+    componentPairMeasures: Measure<{ componentA: Component, componentB: Component, system: System }>[];
 
     entities: Entity[];
 
@@ -218,6 +229,7 @@ class QualityModelInstance {
         this.impacts = [];
         this.systemMeasures = [];
         this.componentMeasures = [];
+        this.componentPairMeasures = [];
         this.entities = [];
     }
 
@@ -237,8 +249,12 @@ class QualityModelInstance {
         return this.systemMeasures.find(m => m.getId === measureKey);
     }
 
-    findComponentMeasure(measureKey: string): Measure<{component: Component, system: System}> {
+    findComponentMeasure(measureKey: string): Measure<{ component: Component, system: System }> {
         return this.componentMeasures.find(m => m.getId === measureKey);
+    }
+
+    findComponentPairMeasure(measureKey: string): Measure<{ componentA: Component, componentB: Component, system: System }> {
+        return this.componentPairMeasures.find(m => m.getId === measureKey);
     }
 
     findEntity(entityKey: string): Entity {

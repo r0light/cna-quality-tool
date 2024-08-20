@@ -1251,7 +1251,7 @@ export const qualityModel: QualityModelSpec = {
         },
         "couplingOfServicesBasedOnUsedDataAggregates": {
             "name": "Coupling of services based on used Data Aggregates",
-            "calculation": "",
+            "calculation": "Data Aggregates used by both two services / All Data Aggregates used by two services",
             "sources": ["Peng2022"]
         },
         "couplingOfServicesBasedServicesWhichCallThem": {
