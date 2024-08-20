@@ -503,3 +503,41 @@ test("directServiceSharing", () => {
     let measureValue = systemMeasureImplementations["directServiceSharing"](system);
     expect(measureValue).toBeCloseTo(7/24, 6);
 })
+
+test("transitivelySharedServices", () => {
+    let system = new System("testSystem");
+
+    let serviceA  = new Service("s1", "serviceA", getEmptyMetaData());
+
+    let serviceB  = new Service("s2", "serviceB", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    serviceB.addEndpoint(endpointA);
+
+    let serviceC  = new Service("s3", "serviceC", getEmptyMetaData());
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceC.addEndpoint(endpointB);
+
+    let serviceD = new Service("s4", "service D", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceD.addEndpoint(endpointC);
+
+    let serviceE = new Service("s5", "service E", getEmptyMetaData());
+    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    serviceE.addEndpoint(endpointD);
+    let endpointE = new Endpoint("e5", "endpoint 5", getEmptyMetaData());
+    serviceE.addEndpoint(endpointE);
+
+
+    let linkAB = new Link("l1", serviceA, endpointA);
+    let linkAC = new Link("l2", serviceA, endpointB);
+    let linkBD = new Link("l3", serviceB, endpointC);
+    let LinkBE = new Link("l4", serviceB, endpointD);
+    let linkCE = new Link("l5", serviceC, endpointE);
+
+    system.addEntities([serviceA, serviceB, serviceC, serviceD, serviceE]);
+    system.addEntities([linkAB, linkAC, linkBD, LinkBE, linkCE]);
+
+    let measureValue = systemMeasureImplementations["transitivelySharedServices"](system);
+    expect(measureValue).toEqual(0.5);
+
+})

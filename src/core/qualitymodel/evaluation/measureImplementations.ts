@@ -394,6 +394,36 @@ export const directServiceSharing: Calculation<System> = (system) => {
     return (((numberOfSharedServices / allComponents.length) + (numberOfSharedEndpoints / system.getLinkEntities.size)) / 2 );
 }
 
+export const transitivelySharedServices: Calculation<System> = (system) => {
+    // TODO better rely on request traces?
+    
+    let allComponents = [...system.getComponentEntities.entries()];
+    let componentsWithIncomingLinks: string[] = [];
+
+    for (const [componentId, component] of allComponents) {
+        let incomingLinks = system.getIncomingLinksOfComponent(componentId);
+        if (incomingLinks.length > 0) {
+            componentsWithIncomingLinks.push(componentId);
+        } 
+    }
+
+    let transitivelySharedComponents: Set<string> = new Set<string>();
+    let transitivelySharedEndpoints: Set<string> = new Set<string>();
+
+    for (const [componentId, component] of allComponents) {
+        let incomingLinks = system.getIncomingLinksOfComponent(componentId);
+        for (const link of incomingLinks) {
+            let consumerId = link.getSourceEntity.getId;
+            if (componentsWithIncomingLinks.includes(consumerId) && consumerId !== componentId) {
+                transitivelySharedEndpoints.add(link.getTargetEndpoint.getId);
+                transitivelySharedComponents.add(componentId);
+            }
+        }
+    } 
+
+    return ((transitivelySharedComponents.size / allComponents.length) + (transitivelySharedEndpoints.size / system.getLinkEntities.size)) / 2
+}
+
 
 export const systemMeasureImplementations: { [measureKey: string]: Calculation<System> } = {
     "serviceReplicationLevel": serviceReplicationLevel,
@@ -419,7 +449,8 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation<S
         aggregateSystemMetricToMeasureServiceCoupling,
     "degreeOfCouplingInASystem": degreeOfCouplingInASystem,
     "simpleDegreeOfCouplingInASystem": simpleDegreeOfCouplingInASystem,
-    "directServiceSharing": directServiceSharing
+    "directServiceSharing": directServiceSharing,
+    "transitivelySharedServices": transitivelySharedServices
 }
 
 export const serviceInterfaceDataCohesion: Calculation<{ component: Component, system: System }> = (parameters) => {

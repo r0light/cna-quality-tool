@@ -1226,7 +1226,7 @@ export const qualityModel: QualityModelSpec = {
         },
         "transitivelySharedServices": {
             "name": "Transitively Shared Services",
-            "calculation": "",
+            "calculation": "((Number of Services which are transitively reachable by another service / Total number of services) + (Number of Endpoints which are transitively reachable by another service / Total number of links)) / 2",
             "sources": ["Ntentos2020a"]
         },
         "ratioOfSharedNonExternalComponentsToNonExternalComponents": {
