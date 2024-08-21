@@ -804,3 +804,33 @@ test("relativeImportanceOfTheService", () => {
     let measureValue = componentMeasureImplementations["relativeImportanceOfTheService"]({component: serviceA, system: system});
     expect(measureValue).toEqual(0.5)
 })
+
+test("serviceCriticality", () => {
+    let system = new System("testSystem");
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA);
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+
+    let serviceD = new Service("s4", "testService", getEmptyMetaData());
+    let endpointD = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceD.addEndpoint(endpointD);
+
+    let serviceE =  new Service("s5", "testService", getEmptyMetaData());
+    let endpointE = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceE.addEndpoint(endpointE);
+
+    let linkBA = new Link("l1", serviceB, endpointA);
+    let linkCA = new Link("l2", serviceC, endpointA);
+    let linkAD = new Link("l3", serviceA, endpointD);
+    let linkAE = new Link("l4", serviceA, endpointE);
+
+    system.addEntities([serviceA, serviceB, serviceC, serviceD, serviceE]);
+    system.addEntities([linkBA, linkCA, linkAD, linkAE])
+
+    let measureValue = componentMeasureImplementations["serviceCriticality"]({component: serviceA, system: system});
+    expect(measureValue).toEqual(4)
+})

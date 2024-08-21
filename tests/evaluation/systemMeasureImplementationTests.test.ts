@@ -674,3 +674,54 @@ test("numberOfSynchronousCycles", () => {
     expect(measureValue).toEqual(2);
 
 })
+
+test("densityOfAggregation", () => {
+    let system = new System("testSystem");
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+
+    let serviceD = new Service("s4", "testService", getEmptyMetaData());
+    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    serviceD.addEndpoint(endpointD);
+
+    let linkAC = new Link("l1", serviceA, endpointC);
+    let linkBC = new Link("l2", serviceB, endpointC);
+    let linkCD = new Link("l3", serviceC, endpointD);
+
+    system.addEntities([serviceA, serviceB, serviceC, serviceD]);
+    system.addEntities([linkAC, linkBC, linkCD]);
+
+    let measureValue = systemMeasureImplementations["densityOfAggregation"](system);
+    expect(measureValue).toBeCloseTo(-0.405465, 5);
+
+})
+
+test("dataAggregateConvergenceAcrossComponents", () => {
+    let system = new System("testSystem");
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+
+    let dataAggregateX = new DataAggregate("da1", "data aggregate 1", getEmptyMetaData());
+    let dataAggregateY = new DataAggregate("da2", "data aggregate 2", getEmptyMetaData());
+    let dataAggregateZ = new DataAggregate("da3", "data aggregate 3", getEmptyMetaData());
+
+    serviceA.addDataAggregateEntity(dataAggregateX, new RelationToDataAggregate("r1", getEmptyMetaData()));
+    serviceA.addDataAggregateEntity(dataAggregateY, new RelationToDataAggregate("r2", getEmptyMetaData()));
+
+    serviceB.addDataAggregateEntity(dataAggregateY, new RelationToDataAggregate("r3", getEmptyMetaData()));
+    serviceB.addDataAggregateEntity(dataAggregateZ, new RelationToDataAggregate("r4", getEmptyMetaData()));
+
+    system.addEntities([serviceA, serviceB, serviceC]);
+    system.addEntities([dataAggregateX, dataAggregateY, dataAggregateZ]);
+
+    let measureValue = systemMeasureImplementations["dataAggregateConvergenceAcrossComponents"](system);
+    expect(measureValue).toBeCloseTo(2.666666666, 5);
+})

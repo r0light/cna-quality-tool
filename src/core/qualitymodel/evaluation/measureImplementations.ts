@@ -568,6 +568,51 @@ export const numberOfSynchronousCycles: Calculation<System> = (system) => {
     return cycles.length;
 }
 
+export const densityOfAggregation: Calculation<System> = (system) => {
+    let aggregators = system.getComponentEntities.entries().filter(component => system.getOutgoingLinksOfComponent(component[1].getId).length > 0 && system.getIncomingLinksOfComponent(component[1].getId).length > 0);
+
+    let sum = 0;
+
+    for (const [aggregatorId, aggregator] of aggregators) {
+        sum += Math.log(system.getOutgoingLinksOfComponent(aggregatorId).length / (system.getOutgoingLinksOfComponent(aggregatorId).length + system.getIncomingLinksOfComponent(aggregatorId).length) * 2);
+    }
+
+    return sum;
+}
+
+export const dataAggregateConvergenceAcrossComponents: Calculation<System> = (system) => {
+
+    let allDataAggregates = system.getDataAggregateEntities;
+    let dataAggregateUsedBy = new Map<string, Set<string>>();
+    allDataAggregates.forEach(dataAggregate => {
+        dataAggregateUsedBy.set(dataAggregate.getId, new Set());
+    })
+
+    let allComponents = system.getComponentEntities;
+
+    if (allDataAggregates.size === 0 || allComponents.size === 0) {
+        return 0;
+    }
+
+    let sumOfDataAggregatesUsed = 0;
+
+    for (const [componentId, component] of allComponents.entries()) {
+        let usedDataAggregates = component.getDataAggregateEntities;
+        usedDataAggregates.forEach(dataAggregateUsed => {
+            dataAggregateUsedBy.get(dataAggregateUsed.data.getId).add(componentId);
+        })
+        sumOfDataAggregatesUsed += usedDataAggregates.length;
+    }
+
+    let sumOfServicesInWhichDataAggregatesAreUsed = 0;
+
+    for (const [dataAggregateId, servicesUsingIt] of dataAggregateUsedBy.entries()) {
+        sumOfServicesInWhichDataAggregatesAreUsed += servicesUsingIt.size;
+    }
+
+    return (sumOfDataAggregatesUsed / allComponents.size) + (sumOfServicesInWhichDataAggregatesAreUsed / allDataAggregates.size)
+}
+
 export const systemMeasureImplementations: { [measureKey: string]: Calculation<System> } = {
     "serviceReplicationLevel": serviceReplicationLevel,
     "storageReplicationLevel": storageReplicationLevel,
@@ -597,7 +642,9 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation<S
     "ratioOfSharedNonExternalComponentsToNonExternalComponents": ratioOfSharedNonExternalComponentsToNonExternalComponents,
     "ratioOfSharedDependenciesOfNonExternalComponentsToPossibleDependencies": ratioOfSharedDependenciesOfNonExternalComponentsToPossibleDependencies,
     "averageSystemCoupling": averageSystemCoupling,
-    "numberOfSynchronousCycles": numberOfSynchronousCycles
+    "numberOfSynchronousCycles": numberOfSynchronousCycles,
+    "densityOfAggregation": densityOfAggregation,
+    "dataAggregateConvergenceAcrossComponents": dataAggregateConvergenceAcrossComponents
 }
 
 export const serviceInterfaceDataCohesion: Calculation<{ component: Component, system: System }> = (parameters) => {
@@ -938,6 +985,10 @@ export const relativeImportanceOfTheService: Calculation<{ component: Component,
     return consumers.size / parameters.system.getComponentEntities.size;
 }
 
+export const serviceCriticality: Calculation<{ component: Component, system: System }> = (parameters) => {
+    return numberOfComponentsThatAreLinkedToAComponent(parameters) as number * (numberOfComponentsAComponentIsLinkedTo(parameters) as number);
+}
+
 
 export const componentMeasureImplementations: { [measureKey: string]: Calculation<{ component: Component, system: System }> } = {
     "serviceInterfaceDataCohesion": serviceInterfaceDataCohesion,
@@ -964,7 +1015,8 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
         averageNumberOfDirectlyConnectedServices,
     "numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfComponents": numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfComponents,
     "cyclicCommunication": cyclicCommunication,
-    "relativeImportanceOfTheService": relativeImportanceOfTheService
+    "relativeImportanceOfTheService": relativeImportanceOfTheService,
+    "serviceCriticality": serviceCriticality
 }
 
 

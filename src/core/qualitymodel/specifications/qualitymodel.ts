@@ -1306,7 +1306,7 @@ export const qualityModel: QualityModelSpec = {
         },
         "densityOfAggregation": {
             "name": "Density of Aggregation",
-            "calculation": "",
+            "calculation": "sum-of(ln(number of outoging links / total number of outgoing and incoming links * 2)) for all aggregators that means services which have incoming and outgoing links",
             "sources": ["Hofmeister2008"]
         },
         "aggregatorCentralization": {
@@ -1316,12 +1316,12 @@ export const qualityModel: QualityModelSpec = {
         },
         "dataAggregateConvergenceAcrossComponents": {
             "name": "Data Aggregate Convergence across Components",
-            "calculation": "",
+            "calculation": "((sum-of(number of data aggregates used in a service) for all services) / Number of Services) + ((sum-of(Services that use a data aggregate) for all data aggregates) / Number of Data Aggregates)",
             "sources": ["Kazemi2013", "Ma2009"]
         },
         "serviceCriticality": {
             "name": "Service Criticality",
-            "calculation": "",
+            "calculation": "Number of Components that are linked to a component * Number of Components a component is linked to",
             "sources": ["Bogner2017", "Rud2009"]
         },
         "ratioOfCyclicRequestTraces": {
