@@ -1281,22 +1281,22 @@ export const qualityModel: QualityModelSpec = {
         },
         "cyclicCommunication": {
             "name": "Cyclic Communication",
-            "calculation": "",
+            "calculation": "Whether or not a Service is part of a cyclic communication path",
             "sources": ["Apel2019", "Ntentos2020a"]
         },
         "numberOfSynchronousCycles": {
             "name": "Number of synchronous cycles",
-            "calculation": "",
+            "calculation": "Number of cycles that exist between services based on synchronous links",
             "sources": ["Engel2018"]
         },
         "relativeImportanceOfTheService": {
             "name": "Relative Importance of the Service",
-            "calculation": "",
+            "calculation": "Number of Components that are linked to a component (consumers) / Total Number of Components",
             "sources": ["Zhang2009"]
         },
         "extentOfAggregationComponents": {
             "name": "Extent of Aggregation components",
-            "calculation": "",
+            "calculation": "(sum-of((sum-of(Incoming Links) of all components with in- and outgoing links) / (sum-of(Outgoing Links) for all components with only incoming Links)) for all components that have only outgoing links )",
             "sources": ["Hofmeister2008"]
         },
         "systemCentralization": {

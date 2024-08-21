@@ -394,12 +394,12 @@ export const directServiceSharing: Calculation<System> = (system) => {
     let numberOfSharedEndpoints = endpointsUsedBy.entries()
         .filter(endpointUsedBy => endpointUsedBy[1].size >= 2).toArray().length;
 
-    return (((numberOfSharedServices / allComponents.length) + (numberOfSharedEndpoints / system.getLinkEntities.size)) / 2 );
+    return (((numberOfSharedServices / allComponents.length) + (numberOfSharedEndpoints / system.getLinkEntities.size)) / 2);
 }
 
 export const transitivelySharedServices: Calculation<System> = (system) => {
     // TODO better rely on request traces?
-    
+
     let allComponents = [...system.getComponentEntities.entries()];
     let componentsWithIncomingLinks: string[] = [];
 
@@ -407,7 +407,7 @@ export const transitivelySharedServices: Calculation<System> = (system) => {
         let incomingLinks = system.getIncomingLinksOfComponent(componentId);
         if (incomingLinks.length > 0) {
             componentsWithIncomingLinks.push(componentId);
-        } 
+        }
     }
 
     let transitivelySharedComponents: Set<string> = new Set<string>();
@@ -422,7 +422,7 @@ export const transitivelySharedServices: Calculation<System> = (system) => {
                 transitivelySharedComponents.add(componentId);
             }
         }
-    } 
+    }
 
     return ((transitivelySharedComponents.size / allComponents.length) + (transitivelySharedEndpoints.size / system.getLinkEntities.size)) / 2
 }
@@ -461,7 +461,7 @@ export const ratioOfSharedNonExternalComponentsToNonExternalComponents: Calculat
     let numberOfSharedServices = servicesUsedBy.entries()
         .filter(serviceUsedBy => serviceUsedBy[1].size >= 2).toArray().length;
 
-    return  numberOfSharedServices / allComponents.length;
+    return numberOfSharedServices / allComponents.length;
 
 
 }
@@ -505,7 +505,7 @@ export const ratioOfSharedDependenciesOfNonExternalComponentsToPossibleDependenc
     }).reduce((accumulator, current) => accumulator + current, 0);
 
 
-    return  sumOfServiceDependencyTuples / Math.pow(allComponents.length, 2);
+    return sumOfServiceDependencyTuples / Math.pow(allComponents.length, 2);
 }
 
 export const averageSystemCoupling: Calculation<System> = (system) => {
@@ -515,7 +515,7 @@ export const averageSystemCoupling: Calculation<System> = (system) => {
     }
 
     let allLinks = [...system.getLinkEntities.entries()];
-    
+
     let sumOfLinkWeights = 0;
 
     for (const [linkId, link] of allLinks) {
@@ -527,7 +527,46 @@ export const averageSystemCoupling: Calculation<System> = (system) => {
     return sumOfLinkWeights / system.getComponentEntities.size;
 }
 
+export const numberOfSynchronousCycles: Calculation<System> = (system) => {
+    let cycles: Set<string>[] = [];
 
+    let allComponents = [...system.getComponentEntities.entries()];
+
+    for (let [componentId, component] of allComponents) {
+        let pathsToSearch = system.getOutgoingLinksOfComponent(componentId)
+            .filter(link => SYNCHRONOUS_ENDPOINT_KIND.includes(link.getTargetEndpoint.getProperty("kind").value))
+            .map(link => [link]); // a path is an array of links
+        let linksVisited: string[] = [];
+
+        while (pathsToSearch.length > 0) {
+            let currentPath = pathsToSearch[0];
+            let nextLink = currentPath[currentPath.length - 1]; // next link is always the last of an array of links
+            if (linksVisited.includes(nextLink.getId)) {
+                pathsToSearch.splice(0, 1);
+                continue;
+            }
+
+            let targetComponentId = system.searchComponentOfEndpoint(nextLink.getTargetEndpoint.getId).getId;
+            if (targetComponentId === componentId) {
+                // cycle found!
+                let cycle = new Set(currentPath.map(link => link.getId));
+                // add it, if it has not already been detected
+                if (!cycles.find(foundCycle => foundCycle.symmetricDifference(cycle).size === 0)) {
+                    cycles.push(cycle);
+                }
+            }
+            system.getOutgoingLinksOfComponent(targetComponentId)
+                .filter(link => SYNCHRONOUS_ENDPOINT_KIND.includes(link.getTargetEndpoint.getProperty("kind").value))
+                .forEach(link => {
+                    pathsToSearch.push(currentPath.concat(link));
+                })
+
+            linksVisited.push(nextLink.getId);
+            pathsToSearch.splice(0, 1);
+        }
+    }
+    return cycles.length;
+}
 
 export const systemMeasureImplementations: { [measureKey: string]: Calculation<System> } = {
     "serviceReplicationLevel": serviceReplicationLevel,
@@ -557,7 +596,8 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation<S
     "transitivelySharedServices": transitivelySharedServices,
     "ratioOfSharedNonExternalComponentsToNonExternalComponents": ratioOfSharedNonExternalComponentsToNonExternalComponents,
     "ratioOfSharedDependenciesOfNonExternalComponentsToPossibleDependencies": ratioOfSharedDependenciesOfNonExternalComponentsToPossibleDependencies,
-    "averageSystemCoupling": averageSystemCoupling
+    "averageSystemCoupling": averageSystemCoupling,
+    "numberOfSynchronousCycles": numberOfSynchronousCycles
 }
 
 export const serviceInterfaceDataCohesion: Calculation<{ component: Component, system: System }> = (parameters) => {
@@ -867,6 +907,36 @@ export const numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfCom
 
 }
 
+/* returns 1 if component is part of a communication cycle, and 0 if not */
+export const cyclicCommunication: Calculation<{ component: Component, system: System }> = (parameters) => {
+    let linksToSearch = parameters.system.getOutgoingLinksOfComponent(parameters.component.getId);
+    let linksVisited: string[] = [];
+    let cycleFound: number = 0;
+
+    while (linksToSearch.length > 0) {
+        let link = linksToSearch[0];
+        if (linksVisited.includes(link.getId)) {
+            linksToSearch.splice(0, 1);
+            continue;
+        }
+
+        let targetComponentId = parameters.system.searchComponentOfEndpoint(link.getTargetEndpoint.getId).getId;
+        if (targetComponentId === parameters.component.getId) {
+            cycleFound = 1;
+            break;
+        }
+        linksToSearch.push(...parameters.system.getOutgoingLinksOfComponent(targetComponentId));
+        linksToSearch.splice(0, 1);
+    }
+
+    return cycleFound;
+}
+
+export const relativeImportanceOfTheService: Calculation<{ component: Component, system: System }> = (parameters) => {
+    let consumers = new Set<string>(parameters.system.getIncomingLinksOfComponent(parameters.component.getId).map(link => link.getSourceEntity.getId));
+
+    return consumers.size / parameters.system.getComponentEntities.size;
+}
 
 
 export const componentMeasureImplementations: { [measureKey: string]: Calculation<{ component: Component, system: System }> } = {
@@ -892,11 +962,13 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "numberOfComponentsAComponentIsLinkedTo": numberOfComponentsAComponentIsLinkedTo,
     "averageNumberOfDirectlyConnectedServices":
         averageNumberOfDirectlyConnectedServices,
-    "numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfComponents": numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfComponents
+    "numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfComponents": numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfComponents,
+    "cyclicCommunication": cyclicCommunication,
+    "relativeImportanceOfTheService": relativeImportanceOfTheService
 }
 
 
-export const couplingOfServicesBasedOnUsedDataAggregates:  Calculation<{ componentA: Component, componentB: Component, system: System }> = (parameters) => {
+export const couplingOfServicesBasedOnUsedDataAggregates: Calculation<{ componentA: Component, componentB: Component, system: System }> = (parameters) => {
     let dataAggregatesUsedByA = new Set<string>(parameters.componentA.getDataAggregateEntities.map(dataAggregate => dataAggregate.data.getId));
     let dataAggregatesUsedByB = new Set<string>(parameters.componentB.getDataAggregateEntities.map(dataAggregate => dataAggregate.data.getId));
 
@@ -904,10 +976,10 @@ export const couplingOfServicesBasedOnUsedDataAggregates:  Calculation<{ compone
         return 0;
     }
 
-    return dataAggregatesUsedByA.intersection(dataAggregatesUsedByB).size / dataAggregatesUsedByA.union(dataAggregatesUsedByB).size; 
+    return dataAggregatesUsedByA.intersection(dataAggregatesUsedByB).size / dataAggregatesUsedByA.union(dataAggregatesUsedByB).size;
 }
 
-export const couplingOfServicesBasedServicesWhichCallThem:  Calculation<{ componentA: Component, componentB: Component, system: System }> = (parameters) => {
+export const couplingOfServicesBasedServicesWhichCallThem: Calculation<{ componentA: Component, componentB: Component, system: System }> = (parameters) => {
     let servicesWhichCallA = new Set<string>(parameters.system.getIncomingLinksOfComponent(parameters.componentA.getId).map(link => link.getSourceEntity.getId));
     let servicesWhichCallB = new Set<string>(parameters.system.getIncomingLinksOfComponent(parameters.componentB.getId).map(link => link.getSourceEntity.getId));
 
@@ -926,7 +998,7 @@ export const couplingOfServicesBasedServicesWhichAreCalledByThem: Calculation<{ 
     if (servicesCalledByA.union(servicesCalledByB).size === 0) {
         return 0;
     }
-    
+
     return servicesCalledByA.intersection(servicesCalledByB).size / servicesCalledByA.union(servicesCalledByB).size
 }
 
