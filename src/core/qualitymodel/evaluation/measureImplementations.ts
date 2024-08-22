@@ -1063,6 +1063,15 @@ export const serviceCriticality: Calculation<{ component: Component, system: Sys
     return numberOfComponentsThatAreLinkedToAComponent(parameters) as number * (numberOfComponentsAComponentIsLinkedTo(parameters) as number);
 }
 
+export const degreeOfStorageBackendSharing: Calculation<{ component: Component, system: System }> = (parameters) => {
+    if (parameters.component.constructor.name === StorageBackingService.name) {
+        return numberOfComponentsThatAreLinkedToAComponent(parameters);
+    } else {
+        // TODO how to react here? throw an error?
+        return 0;
+    }
+}
+
 
 export const componentMeasureImplementations: { [measureKey: string]: Calculation<{ component: Component, system: System }> } = {
     "serviceInterfaceDataCohesion": serviceInterfaceDataCohesion,
@@ -1090,7 +1099,8 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfComponents": numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfComponents,
     "cyclicCommunication": cyclicCommunication,
     "relativeImportanceOfTheService": relativeImportanceOfTheService,
-    "serviceCriticality": serviceCriticality
+    "serviceCriticality": serviceCriticality,
+    "degreeOfStorageBackendSharing": degreeOfStorageBackendSharing
 }
 
 
@@ -1215,7 +1225,6 @@ export const requestTraceLength: Calculation<{ requestTrace: RequestTrace, syste
 
 
 export const numberOfCyclesInRequestTraces: Calculation<{ requestTrace: RequestTrace, system: System }> = (parameters) => {
-
     let includedNodes = [];
     let links = parameters.requestTrace.getLinks;
     let numberOfCycles = 0;
@@ -1228,7 +1237,7 @@ export const numberOfCyclesInRequestTraces: Calculation<{ requestTrace: RequestT
             includedNodes = [];
         }
     }
-    return numberOfCycles
+    return numberOfCycles;
 }
 
 export const requestTraceMeasureImplementations: { [measureKey: string]: Calculation<{ requestTrace: RequestTrace, system: System }> } = {

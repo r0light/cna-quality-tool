@@ -1361,7 +1361,7 @@ export const qualityModel: QualityModelSpec = {
         },
         "degreeOfStorageBackendSharing": {
             "name": "Degree of Storage Backend Sharing",
-            "calculation": "",
+            "calculation": "Number of Services sharing the same Storage Backing Service",
             "sources": ["Rosa2020"]
         },
         "ratioOfStorageBackendSharing": {
