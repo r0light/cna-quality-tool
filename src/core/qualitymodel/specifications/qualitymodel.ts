@@ -1326,17 +1326,17 @@ export const qualityModel: QualityModelSpec = {
         },
         "ratioOfCyclicRequestTraces": {
             "name": "Ratio of cyclic request traces",
-            "calculation": "",
+            "calculation": "Number of request traces with a cycle / Total number of request traces",
             "sources": ["Genfer2021"]
         },
         "numberOfPotentialCyclesInASystem": {
             "name": "Number of potential cycles in a system",
-            "calculation": "",
+            "calculation": "Number of cycles found in a system based on defined links",
             "sources": ["Peng2022"]
         },
         "maximumLengthOfServiceLinkChainPerRequestTrace": {
             "name": "Maximum Length of Service Link chain per request trace",
-            "calculation": "",
+            "calculation": "Maximum of number-of links of request trace for all request traces",
             "sources": ["Apel2019", "Engel2018", "Rosa2020"]
         },
         "maximumNumberOfServicesWithinARequestTrace": {

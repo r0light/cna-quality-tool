@@ -613,6 +613,74 @@ export const dataAggregateConvergenceAcrossComponents: Calculation<System> = (sy
     return (sumOfDataAggregatesUsed / allComponents.size) + (sumOfServicesInWhichDataAggregatesAreUsed / allDataAggregates.size)
 }
 
+export const ratioOfCyclicRequestTraces: Calculation<System> = (system) => {
+    let allRequestTraces = system.getRequestTraceEntities;
+
+    let numberOfCycles = 0;
+
+    rqLoop: for (const [requestTraceId, requestTrace] of allRequestTraces) {
+        let includedNodes = [];
+        let links = requestTrace.getLinks;
+
+        linkLoop: for (const link of links) {
+            includedNodes.push(link.getSourceEntity.getId);
+            let targetComponent = system.searchComponentOfEndpoint(link.getTargetEndpoint.getId);
+            if (includedNodes.includes(targetComponent.getId)) {
+                numberOfCycles += 1;
+                continue rqLoop;
+            }
+        }
+    }
+
+    return numberOfCycles / allRequestTraces.size;
+}
+
+export const numberOfPotentialCyclesInASystem: Calculation<System> = (system) => {
+    let cycles: Set<string>[] = [];
+
+    let allComponents = [...system.getComponentEntities.entries()];
+
+    for (let [componentId, component] of allComponents) {
+        let pathsToSearch = system.getOutgoingLinksOfComponent(componentId)
+            .map(link => [link]); // a path is an array of links
+        let linksVisited: string[] = [];
+
+        while (pathsToSearch.length > 0) {
+            let currentPath = pathsToSearch[0];
+            let nextLink = currentPath[currentPath.length - 1]; // next link is always the last of an array of links
+            if (linksVisited.includes(nextLink.getId)) {
+                pathsToSearch.splice(0, 1);
+                continue;
+            }
+
+            let targetComponentId = system.searchComponentOfEndpoint(nextLink.getTargetEndpoint.getId).getId;
+            if (targetComponentId === componentId) {
+                // cycle found!
+                let cycle = new Set(currentPath.map(link => link.getId));
+                // add it, if it has not already been detected
+                if (!cycles.find(foundCycle => foundCycle.symmetricDifference(cycle).size === 0)) {
+                    cycles.push(cycle);
+                }
+            }
+            system.getOutgoingLinksOfComponent(targetComponentId)
+                .forEach(link => {
+                    pathsToSearch.push(currentPath.concat(link));
+                })
+
+            linksVisited.push(nextLink.getId);
+            pathsToSearch.splice(0, 1);
+        }
+    }
+    return cycles.length;
+}
+
+export const maximumLengthOfServiceLinkChainPerRequestTrace: Calculation<System> = (system) => {
+    let allRequestTraces = [...system.getRequestTraceEntities.entries()].map(requestTrace => requestTrace[1]);
+
+    return Math.max(...allRequestTraces.map(requestTrace => requestTrace.getLinks.size));
+}
+
+
 export const systemMeasureImplementations: { [measureKey: string]: Calculation<System> } = {
     "serviceReplicationLevel": serviceReplicationLevel,
     "storageReplicationLevel": storageReplicationLevel,
@@ -644,7 +712,10 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation<S
     "averageSystemCoupling": averageSystemCoupling,
     "numberOfSynchronousCycles": numberOfSynchronousCycles,
     "densityOfAggregation": densityOfAggregation,
-    "dataAggregateConvergenceAcrossComponents": dataAggregateConvergenceAcrossComponents
+    "dataAggregateConvergenceAcrossComponents": dataAggregateConvergenceAcrossComponents,
+    "ratioOfCyclicRequestTraces": ratioOfCyclicRequestTraces,
+    "numberOfPotentialCyclesInASystem": numberOfPotentialCyclesInASystem,
+    "maximumLengthOfServiceLinkChainPerRequestTrace": maximumLengthOfServiceLinkChainPerRequestTrace
 }
 
 export const serviceInterfaceDataCohesion: Calculation<{ component: Component, system: System }> = (parameters) => {

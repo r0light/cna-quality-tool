@@ -1,5 +1,5 @@
 import { getEmptyMetaData } from "@/core/common/entityDataTypes";
-import { Component, DataAggregate, Endpoint, ExternalEndpoint, Link, Service, StorageBackingService, System } from "@/core/entities";
+import { Component, DataAggregate, Endpoint, ExternalEndpoint, Link, RequestTrace, Service, StorageBackingService, System } from "@/core/entities";
 import { RelationToBackingData } from "@/core/entities/relationToBackingData";
 import { RelationToDataAggregate } from "@/core/entities/relationToDataAggregate";
 import { systemMeasureImplementations } from "@/core/qualitymodel/evaluation/measureImplementations";
@@ -724,4 +724,138 @@ test("dataAggregateConvergenceAcrossComponents", () => {
 
     let measureValue = systemMeasureImplementations["dataAggregateConvergenceAcrossComponents"](system);
     expect(measureValue).toBeCloseTo(2.666666666, 5);
+})
+
+test("ratioOfCyclicRequestTraces", () => {
+    let system = new System("testSystem");
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA);
+    serviceA.addEndpoint(externalEndpointA);
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+
+    let serviceD = new Service("s4", "testService", getEmptyMetaData());
+    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    serviceD.addEndpoint(endpointD);
+
+
+    let serviceE = new Service("s5", "testService", getEmptyMetaData());
+    let endpointE = new Endpoint("e5", "endpoint 5", getEmptyMetaData());
+    let externalEndpointE = new ExternalEndpoint("ex2", "external endpoint 2", getEmptyMetaData());
+    serviceE.addEndpoint(endpointE);
+    serviceE.addEndpoint(externalEndpointE);
+
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+    let linkBC = new Link("l2", serviceB, endpointC);
+    let linkCD = new Link("l3", serviceC, endpointD);
+    let linkDB = new Link("l4", serviceD, endpointB);
+    let linkED = new Link("l5", serviceE, endpointD);
+
+
+    let requestTraceA = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
+    requestTraceA.setLinks = [linkAB, linkBC];
+    requestTraceA.setExternalEndpoint = externalEndpointA;
+
+    let requestTraceB = new RequestTrace("rq2", "request trace 2", getEmptyMetaData());
+    requestTraceB.setLinks = [linkED, linkDB, linkBC, linkCD];
+    requestTraceB.setExternalEndpoint = externalEndpointE;
+
+    system.addEntities([serviceA, serviceB, serviceC, serviceD, serviceE]);
+    system.addEntities([linkAB, linkBC, linkCD, linkDB, linkED]);
+    system.addEntities([requestTraceA, requestTraceB]);
+
+    let measureValue = systemMeasureImplementations["ratioOfCyclicRequestTraces"](system);
+    expect(measureValue).toEqual(0.5);
+})
+
+
+test("numberOfPotentialCyclesInASystem", () => {
+    let system = new System("testSystem");
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA);
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+
+    let serviceD = new Service("s4", "testService", getEmptyMetaData());
+    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    serviceD.addEndpoint(endpointD);
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+    let linkBC = new Link("l2", serviceB, endpointC);
+    let linkCD = new Link("l3", serviceC, endpointD);
+    let linkDA = new Link("l4", serviceD, endpointA);
+    let linkDB = new Link("l5", serviceD, endpointB);
+
+    system.addEntities([serviceA, serviceB, serviceC, serviceD]);
+    system.addEntities([linkAB, linkBC, linkCD, linkDA, linkDB]);
+
+    let measureValue = systemMeasureImplementations["numberOfPotentialCyclesInASystem"](system);
+    expect(measureValue).toEqual(2);
+
+})
+
+test("maximumLengthOfServiceLinkChainPerRequestTrace", () => {
+    let system = new System("testSystem");
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA);
+    serviceA.addEndpoint(externalEndpointA);
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+
+    let serviceD = new Service("s4", "testService", getEmptyMetaData());
+    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    serviceD.addEndpoint(endpointD);
+
+    let serviceE = new Service("s5", "testService", getEmptyMetaData());
+    let endpointE = new Endpoint("e5", "endpoint 5", getEmptyMetaData());
+    let externalEndpointE = new ExternalEndpoint("ex2", "external endpoint 2", getEmptyMetaData());
+    serviceE.addEndpoint(endpointE);
+    serviceE.addEndpoint(externalEndpointE);
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+    let linkBC = new Link("l2", serviceB, endpointC);
+    let linkED = new Link("l3", serviceE, endpointD);
+    let linkDB = new Link("l4", serviceD, endpointB);
+
+    let requestTraceA = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
+    requestTraceA.setLinks = [linkAB, linkBC];
+    requestTraceA.setExternalEndpoint = externalEndpointA;
+
+    let requestTraceB = new RequestTrace("rq2", "request trace 2", getEmptyMetaData());
+    requestTraceB.setLinks = [linkED, linkDB, linkBC];
+    requestTraceB.setExternalEndpoint = externalEndpointE;
+
+    system.addEntities([serviceA, serviceB, serviceC, serviceD, serviceE]);
+    system.addEntities([linkAB, linkBC, linkED, linkDB]);
+    system.addEntities([requestTraceA, requestTraceB]);
+
+    let measureValue = systemMeasureImplementations["maximumLengthOfServiceLinkChainPerRequestTrace"](system);
+    expect(measureValue).toEqual(3);
 })
