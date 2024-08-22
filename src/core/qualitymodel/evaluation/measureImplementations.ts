@@ -680,6 +680,16 @@ export const maximumLengthOfServiceLinkChainPerRequestTrace: Calculation<System>
     return Math.max(...allRequestTraces.map(requestTrace => requestTrace.getLinks.size));
 }
 
+export const maximumNumberOfServicesWithinARequestTrace: Calculation<System> = (system) => {
+    let allRequestTraces = [...system.getRequestTraceEntities.entries()].map(requestTrace => requestTrace[1]);
+
+    return Math.max(...allRequestTraces.map(requestTrace => {
+        let nodes = [...requestTrace.getLinks].flatMap(link => [link.getSourceEntity, system.searchComponentOfEndpoint(link.getTargetEndpoint.getId)]).map(component => component.getId);
+        return new Set(nodes).size;
+    }));
+}
+
+
 
 export const systemMeasureImplementations: { [measureKey: string]: Calculation<System> } = {
     "serviceReplicationLevel": serviceReplicationLevel,
@@ -715,7 +725,8 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation<S
     "dataAggregateConvergenceAcrossComponents": dataAggregateConvergenceAcrossComponents,
     "ratioOfCyclicRequestTraces": ratioOfCyclicRequestTraces,
     "numberOfPotentialCyclesInASystem": numberOfPotentialCyclesInASystem,
-    "maximumLengthOfServiceLinkChainPerRequestTrace": maximumLengthOfServiceLinkChainPerRequestTrace
+    "maximumLengthOfServiceLinkChainPerRequestTrace": maximumLengthOfServiceLinkChainPerRequestTrace,
+    "maximumNumberOfServicesWithinARequestTrace": maximumNumberOfServicesWithinARequestTrace
 }
 
 export const serviceInterfaceDataCohesion: Calculation<{ component: Component, system: System }> = (parameters) => {

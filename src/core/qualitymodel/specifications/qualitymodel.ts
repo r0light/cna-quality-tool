@@ -1341,7 +1341,7 @@ export const qualityModel: QualityModelSpec = {
         },
         "maximumNumberOfServicesWithinARequestTrace": {
             "name": "Maximum number of services within a request trace",
-            "calculation": "",
+            "calculation": "Maximum of number-of components within a request trace for all request traces",
             "sources": ["Apel2019"]
         },
         "serviceCompositionScope": {
