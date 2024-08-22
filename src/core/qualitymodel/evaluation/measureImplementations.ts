@@ -618,17 +618,9 @@ export const ratioOfCyclicRequestTraces: Calculation<System> = (system) => {
 
     let numberOfCycles = 0;
 
-    rqLoop: for (const [requestTraceId, requestTrace] of allRequestTraces) {
-        let includedNodes = [];
-        let links = requestTrace.getLinks;
-
-        linkLoop: for (const link of links) {
-            includedNodes.push(link.getSourceEntity.getId);
-            let targetComponent = system.searchComponentOfEndpoint(link.getTargetEndpoint.getId);
-            if (includedNodes.includes(targetComponent.getId)) {
-                numberOfCycles += 1;
-                continue rqLoop;
-            }
+    for (const [requestTraceId, requestTrace] of allRequestTraces) {
+        if (numberOfCyclesInRequestTraces({requestTrace: requestTrace, system: system}) as number > 0) {
+            numberOfCycles += 1;
         }
     }
 
@@ -1216,3 +1208,31 @@ export const componentPairMeasureImplementations: { [measureKey: string]: Calcul
     "couplingOfServicesBasedOnAmountOfRequestTracesThatIncludeASpecificLink": couplingOfServicesBasedOnAmountOfRequestTracesThatIncludeASpecificLink,
     "couplingOfServicesBasedTimesThatTheyOccurInTheSameRequestTrace": couplingOfServicesBasedTimesThatTheyOccurInTheSameRequestTrace
 }
+
+export const requestTraceLength: Calculation<{ requestTrace: RequestTrace, system: System }> = (parameters) => {
+    return parameters.requestTrace.getLinks.size;
+}
+
+
+export const numberOfCyclesInRequestTraces: Calculation<{ requestTrace: RequestTrace, system: System }> = (parameters) => {
+
+    let includedNodes = [];
+    let links = parameters.requestTrace.getLinks;
+    let numberOfCycles = 0;
+
+    for (const link of links) {
+        includedNodes.push(link.getSourceEntity.getId);
+        let targetComponent = parameters.system.searchComponentOfEndpoint(link.getTargetEndpoint.getId);
+        if (includedNodes.includes(targetComponent.getId)) {
+            numberOfCycles += 1;
+            includedNodes = [];
+        }
+    }
+    return numberOfCycles
+}
+
+export const requestTraceMeasureImplementations: { [measureKey: string]: Calculation<{ requestTrace: RequestTrace, system: System }> } = {
+    "requestTraceLength": requestTraceLength,
+    "numberOfCyclesInRequestTraces": numberOfCyclesInRequestTraces
+}
+

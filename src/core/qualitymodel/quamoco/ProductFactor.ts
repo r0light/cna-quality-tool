@@ -1,4 +1,4 @@
-import { Component, System } from "@/core/entities";
+import { Component, RequestTrace, System } from "@/core/entities";
 import { EvaluatedSystemModel, ProductFactorEvaluationResult } from "../evaluation/EvaluatedSystemModel";
 import { ProductFactorEvaluation } from "../evaluation/ProductFactorEvaluation";
 import { Impact } from "./Impact";
@@ -17,6 +17,7 @@ class ProductFactor {
     #systemMeasures: Measure<System>[];
     #componentMeasures: Measure<{component: Component, system: System}>[];
     #componentPairMeasures: Measure<{ componentA: Component, componentB: Component, system: System }>[];
+    #requestTraceMeasures: Measure<{requestTrace: RequestTrace, system: System}>[];
     #evaluation: ProductFactorEvaluation;
 
     #outgoingImpacts: Impact[];
@@ -32,6 +33,7 @@ class ProductFactor {
         this.#systemMeasures = [];
         this.#componentMeasures = [];
         this.#componentPairMeasures = [];
+        this.#requestTraceMeasures = [];
         this.#evaluation = undefined;
         this.#outgoingImpacts = [];
         this.#incomingImpacts = [];
@@ -80,6 +82,10 @@ class ProductFactor {
         return this.#componentPairMeasures;
     }
 
+    get getRequestTraceMeasures() {
+        return this.#requestTraceMeasures;
+    }
+
     get getOutgoingImpacts() {
         return this.#outgoingImpacts;
     }
@@ -106,6 +112,10 @@ class ProductFactor {
 
     addComponentPairMeasure(measure: Measure<{ componentA: Component, componentB: Component, system: System }>) {
         this.#componentPairMeasures.push(measure);
+    }
+
+    addRequestTraceMeasure(measure: Measure<{requestTrace: RequestTrace, system: System}>) {
+        this.#requestTraceMeasures.push(measure);
     }
 
     addOutgoingImpact(impact: Impact) {

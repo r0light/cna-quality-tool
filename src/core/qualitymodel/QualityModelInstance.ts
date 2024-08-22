@@ -10,9 +10,9 @@ import { LiteratureSource } from "./quamoco/LiteratureSource.js";
 import { Entity } from "./quamoco/Entity.js";
 import { productFactorEvaluationImplementation, qualityAspectEvaluationImplementation } from "./evaluation/evaluationImplementations.js";
 import { ProductFactorEvaluation } from "./evaluation/ProductFactorEvaluation.js";
-import { componentMeasureImplementations, componentPairMeasureImplementations, systemMeasureImplementations } from "./evaluation/measureImplementations.js";
+import { componentMeasureImplementations, componentPairMeasureImplementations, requestTraceMeasureImplementations, systemMeasureImplementations } from "./evaluation/measureImplementations.js";
 import { QualityAspectEvaluation } from "./evaluation/QualityAspectEvaluation.js";
-import { Component, System } from "../entities.js";
+import { Component, RequestTrace, System } from "../entities.js";
 
 
 function getQualityModel(): QualityModelInstance {
@@ -60,6 +60,9 @@ function getQualityModel(): QualityModelInstance {
         } else if (componentPairMeasureImplementations[measureKey]) {
             newMeasure.addCalculation(componentPairMeasureImplementations[measureKey]);
             newQualityModel.componentPairMeasures.push(newMeasure as Measure<{ componentA: Component, componentB: Component, system: System }>);
+        } else if (requestTraceMeasureImplementations[measureKey]) {
+            newMeasure.addCalculation(requestTraceMeasureImplementations[measureKey]);
+            newQualityModel.requestTraceMeasures.push(newMeasure as Measure<{requestTrace: RequestTrace, system: System}>);
         } else {
             //console.log(`No measure implementation found for measure ${measureKey}`);
             //default:
@@ -101,7 +104,12 @@ function getQualityModel(): QualityModelInstance {
                     if (foundComponentPairMeasure) {
                         newProductFactor.addComponentPairMeasure(foundComponentPairMeasure);
                     } else {
-                        throw Error("No measure with key " + measureKey + " could be found, please check the quality model definition.")
+                        let foundRequestTraceMeasure = newQualityModel.findRequestTraceMeasure(measureKey);
+                        if (foundRequestTraceMeasure) {
+                            newProductFactor.addRequestTraceMeasure(foundRequestTraceMeasure);
+                        } else {
+                            throw Error("No measure with key " + measureKey + " could be found, please check the quality model definition.")
+                        }
                     }
                 }
             }
@@ -219,6 +227,8 @@ class QualityModelInstance {
 
     componentPairMeasures: Measure<{ componentA: Component, componentB: Component, system: System }>[];
 
+    requestTraceMeasures: Measure<{ requestTrace: RequestTrace, system: System }>[];
+
     entities: Entity[];
 
     constructor() {
@@ -230,6 +240,7 @@ class QualityModelInstance {
         this.systemMeasures = [];
         this.componentMeasures = [];
         this.componentPairMeasures = [];
+        this.requestTraceMeasures = [];
         this.entities = [];
     }
 
@@ -255,6 +266,10 @@ class QualityModelInstance {
 
     findComponentPairMeasure(measureKey: string): Measure<{ componentA: Component, componentB: Component, system: System }> {
         return this.componentPairMeasures.find(m => m.getId === measureKey);
+    }
+
+    findRequestTraceMeasure(measureKey: string): Measure<{ requestTrace: RequestTrace, system: System }> {
+        return this.requestTraceMeasures.find(m => m.getId === measureKey);
     }
 
     findEntity(entityKey: string): Entity {

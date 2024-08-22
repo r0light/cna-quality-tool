@@ -1351,12 +1351,12 @@ export const qualityModel: QualityModelSpec = {
         },
         "requestTraceLength": {
             "name": "Request Trace Length",
-            "calculation": "",
+            "calculation": "Number of links in a request trace",
             "sources": ["Peng2022", "Gamage2021"]
         },
         "numberOfCyclesInRequestTraces": {
             "name": "Number of Cycles in Request Traces",
-            "calculation": "",
+            "calculation": "Number of Cycles in Request Trace",
             "sources": ["Peng2022", "Gamage2021"]
         },
         "degreeOfStorageBackendSharing": {
