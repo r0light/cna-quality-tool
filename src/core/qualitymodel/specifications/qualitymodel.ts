@@ -1376,7 +1376,7 @@ export const qualityModel: QualityModelSpec = {
         },
         "databaseTypeUtilization": {
             "name": "Database Type Utilization",
-            "calculation": "",
+            "calculation": "Storage Backing Services used by individual services / Total number of Storage Backing Services",
             "sources": ["Ntentos2020a"]
         },
         "serviceDiscoveryUsage": {

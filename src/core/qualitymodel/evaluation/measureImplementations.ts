@@ -681,6 +681,30 @@ export const maximumNumberOfServicesWithinARequestTrace: Calculation<System> = (
     }));
 }
 
+export const databaseTypeUtilization: Calculation<System> = (system) => {
+
+    let componentsPerStorage = new Map<string, Set<string>>();
+
+    for (const [linkId, link] of system.getLinkEntities) {
+        let targetComponent = system.searchComponentOfEndpoint(link.getTargetEndpoint.getId);
+        if (targetComponent.constructor.name === StorageBackingService.name) {
+            let storageId = targetComponent.getId;
+            let callerId = link.getSourceEntity.getId;
+
+            if (componentsPerStorage.has(storageId)) {
+                componentsPerStorage.get(storageId).add(callerId);
+            } else {
+                let setOfComponents = new Set<string>();
+                setOfComponents.add(callerId);
+                componentsPerStorage.set(storageId, setOfComponents);
+            }
+
+        }
+    }
+
+    return [...componentsPerStorage.values().filter(componentSet => componentSet.size === 1)].length / componentsPerStorage.size;
+}
+
 
 
 export const systemMeasureImplementations: { [measureKey: string]: Calculation<System> } = {
@@ -718,7 +742,8 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation<S
     "ratioOfCyclicRequestTraces": ratioOfCyclicRequestTraces,
     "numberOfPotentialCyclesInASystem": numberOfPotentialCyclesInASystem,
     "maximumLengthOfServiceLinkChainPerRequestTrace": maximumLengthOfServiceLinkChainPerRequestTrace,
-    "maximumNumberOfServicesWithinARequestTrace": maximumNumberOfServicesWithinARequestTrace
+    "maximumNumberOfServicesWithinARequestTrace": maximumNumberOfServicesWithinARequestTrace,
+    "databaseTypeUtilization": databaseTypeUtilization
 }
 
 export const serviceInterfaceDataCohesion: Calculation<{ component: Component, system: System }> = (parameters) => {

@@ -908,3 +908,73 @@ test("maximumNumberOfServicesWithinARequestTrace", () => {
     let measureValue = systemMeasureImplementations["maximumNumberOfServicesWithinARequestTrace"](system);
     expect(measureValue).toEqual(4);
 })
+
+test("databaseTypeUtilization", () => {
+
+    let system = new System("testSystem");
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    serviceB.addEndpoint(endpointA);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+
+    let storageBackingService = new StorageBackingService("sbs1", "storage service", getEmptyMetaData());
+    let endpointS = new Endpoint("e2", "storage endpoint", getEmptyMetaData());
+    storageBackingService.addEndpoint(endpointS);
+
+
+    let linkAS = new Link("l1", serviceA, endpointS);
+    let linkBS = new Link("l2", serviceB, endpointS);
+    let linkCS = new Link("l3", serviceC, endpointS);
+    let linkAB = new Link("l4", serviceA, endpointA);
+
+    system.addEntities([serviceA, serviceB, serviceC]);
+    system.addEntity(storageBackingService);
+    system.addEntities([linkAS, linkBS, linkCS, linkAB]);
+
+    let measureValue = systemMeasureImplementations["databaseTypeUtilization"](system);
+    expect(measureValue).toEqual(0);
+
+})
+
+test("databaseTypeUtilization databasePerService", () => {
+
+    let system = new System("testSystem");
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    serviceB.addEndpoint(endpointA);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+
+    let storageBackingServiceA = new StorageBackingService("sbs1", "storage service", getEmptyMetaData());
+    let endpointSA = new Endpoint("es1", "storage endpoint", getEmptyMetaData());
+    storageBackingServiceA.addEndpoint(endpointSA);
+
+    let storageBackingServiceB = new StorageBackingService("sbs2", "storage service", getEmptyMetaData());
+    let endpointSB = new Endpoint("es2", "storage endpoint", getEmptyMetaData());
+    storageBackingServiceB.addEndpoint(endpointSB);
+
+    let storageBackingServiceC = new StorageBackingService("sbs3", "storage service", getEmptyMetaData());
+    let endpointSC = new Endpoint("es3", "storage endpoint", getEmptyMetaData());
+    storageBackingServiceC.addEndpoint(endpointSC);
+
+
+    let linkASA = new Link("l1", serviceA, endpointSA);
+    let linkBSB = new Link("l2", serviceB, endpointSB);
+    let linkCSC = new Link("l3", serviceC, endpointSC);
+    let linkAB = new Link("l4", serviceA, endpointA);
+
+    system.addEntities([serviceA, serviceB, serviceC]);
+    system.addEntities([storageBackingServiceA, storageBackingServiceB, storageBackingServiceC]);
+    system.addEntities([linkASA, linkBSB, linkCSC, linkAB]);
+
+    let measureValue = systemMeasureImplementations["databaseTypeUtilization"](system);
+    expect(measureValue).toEqual(1);
+
+})
