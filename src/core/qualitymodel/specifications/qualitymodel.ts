@@ -1386,7 +1386,7 @@ export const qualityModel: QualityModelSpec = {
         },
         "averageNumberOfEndpointsPerService": {
             "name": "Average Number of Endpoints per Service",
-            "calculation": "",
+            "calculation": "Number of Endpoints / Number of Services",
             "sources": ["Bogner2017", "Bogner2020", "Hirzalla2009", "Brito2021", "Jin2021", "Rosa2020", "Kazemi2013", "Ma2009", "Desai2021"]
         },
         "numberOfDependencies": {

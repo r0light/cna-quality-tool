@@ -978,3 +978,36 @@ test("databaseTypeUtilization databasePerService", () => {
     expect(measureValue).toEqual(1);
 
 })
+
+test("averageNumberOfEndpointsPerService", () => {
+
+    let system = new System("testSystem");
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA);
+    serviceA.addEndpoint(externalEndpointA);
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointB1 = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB1);
+    let endpointB2 = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB2);
+    let endpointB3 = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB3);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e5", "endpoint 3", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+
+    let serviceD = new Service("s4", "testService", getEmptyMetaData());
+    let externalEndpointE = new ExternalEndpoint("ex2", "external endpoint 2", getEmptyMetaData());
+    serviceD.addEndpoint(externalEndpointE);
+
+    system.addEntities([serviceA, serviceB, serviceC, serviceD]);
+
+    let measureValue = systemMeasureImplementations["averageNumberOfEndpointsPerService"](system);
+    expect(measureValue).toEqual(7/4);
+
+})

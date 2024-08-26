@@ -705,6 +705,23 @@ export const databaseTypeUtilization: Calculation<System> = (system) => {
     return [...componentsPerStorage.values().filter(componentSet => componentSet.size === 1)].length / componentsPerStorage.size;
 }
 
+export const averageNumberOfEndpointsPerService: Calculation<System> = (system) => {
+
+    let allComponents = system.getComponentEntities;
+
+    if (allComponents.size === 0) {
+        return 0;
+    }
+
+    let allEndpointIds: string[] = [];
+
+    for (const [componentId, component] of allComponents) {
+        allEndpointIds.push(...component.getEndpointEntities.concat(component.getExternalEndpointEntities).map(endpoint => endpoint.getId));
+    }
+
+    return allEndpointIds.length / allComponents.size;
+}
+
 
 
 export const systemMeasureImplementations: { [measureKey: string]: Calculation<System> } = {
@@ -743,7 +760,8 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation<S
     "numberOfPotentialCyclesInASystem": numberOfPotentialCyclesInASystem,
     "maximumLengthOfServiceLinkChainPerRequestTrace": maximumLengthOfServiceLinkChainPerRequestTrace,
     "maximumNumberOfServicesWithinARequestTrace": maximumNumberOfServicesWithinARequestTrace,
-    "databaseTypeUtilization": databaseTypeUtilization
+    "databaseTypeUtilization": databaseTypeUtilization,
+    "averageNumberOfEndpointsPerService": averageNumberOfEndpointsPerService
 }
 
 export const serviceInterfaceDataCohesion: Calculation<{ component: Component, system: System }> = (parameters) => {
