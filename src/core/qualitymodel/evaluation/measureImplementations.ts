@@ -2,7 +2,7 @@
 import { a } from "vitest/dist/suite-IbNSsUWN.js";
 import { BackingService, Component, DeploymentMapping, Infrastructure, RequestTrace, Service, StorageBackingService, System } from "../../entities.js";
 import { Calculation } from "../quamoco/Measure.js";
-import { ASYNCHRONOUS_ENDPOINT_KIND, getEndpointKindWeight, getUsageRelationWeight, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, PROTOCOLS_SUPPORTING_TLS, SYNCHRONOUS_ENDPOINT_KIND } from "../specifications/featureModel.js";
+import { ASYNCHRONOUS_ENDPOINT_KIND, getEndpointKindWeight, getUsageRelationWeight, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SYNCHRONOUS_ENDPOINT_KIND } from "../specifications/featureModel.js";
 import { c } from "vite/dist/node/types.d-aGj9QkWt.js";
 import { param } from "jquery";
 
@@ -777,13 +777,139 @@ export const numberOfAvailabilityZonesUsed: Calculation<System> = (system) => {
     
     system.getInfrastructureEntities.entries().forEach(([infrastructureId, infrastructure]) => {
         let usedAvailabilityZones = (infrastructure.getProperty("availability_zone").value as string).split(",");
-        console.log(`${infrastructureId} running in ${usedAvailabilityZones}`);
         usedAvailabilityZones.forEach(zoneId => availabilityZones.add(zoneId));
     });
 
     return availabilityZones.size;
 }
 
+
+export const rollingUpdateOption: Calculation<System> = (system) => {
+    let infrastructureDeployingComponents: Map<string, Infrastructure> = new Map();
+
+    for (const [deploymentMappingId, deploymentMapping] of system.getDeploymentMappingEntities) {
+        if (deploymentMapping.getDeployedEntity.constructor.name !== Infrastructure.name) {
+            infrastructureDeployingComponents.set(deploymentMapping.getUnderlyingInfrastructure.getId, deploymentMapping.getUnderlyingInfrastructure);
+        }
+    }
+
+    if (infrastructureDeployingComponents.size === 0) {
+        return 0;
+    }
+
+    let infrastructureEnablingRollingUpdates = infrastructureDeployingComponents.entries().filter(infrastructure => infrastructure[1].getProperty("supported_update_strategies").value.some(strategy => ROLLING_UPDATE_STRATEGY_OPTIONS.includes(strategy))).map(infrastructure => infrastructure[1]).toArray();
+
+    return infrastructureEnablingRollingUpdates.length / infrastructureDeployingComponents.size;
+}
+
+export const numberOfLinksWithRetryLogic: Calculation<System> = (system) => {
+
+    // TODO also limit to endpoints which are safe/idempotent
+    let linksToSynchronousEndpoints = system.getLinkEntities.entries().filter(([linkId, link]) => SYNCHRONOUS_ENDPOINT_KIND.includes(link.getTargetEndpoint.getProperty("kind").value)).map(([linkId, link]) => link).toArray();
+
+    if (linksToSynchronousEndpoints.length === 0) {
+        return 0;
+    }
+
+    let linksWithRetryLogic = linksToSynchronousEndpoints.filter(link => link.getProperty("retries").value > 0);
+
+    return linksWithRetryLogic.length / linksToSynchronousEndpoints.length;
+
+}
+
+export const numberOfLinksWithComplexFailover: Calculation<System> = (system) => {
+        // TODO also limit to endpoints which are safe/idempotent
+        let linksToSynchronousEndpoints = system.getLinkEntities.entries().filter(([linkId, link]) => SYNCHRONOUS_ENDPOINT_KIND.includes(link.getTargetEndpoint.getProperty("kind").value)).map(([linkId, link]) => link).toArray();
+
+        if (linksToSynchronousEndpoints.length === 0) {
+            return 0;
+        }
+    
+        let linksWithCircuitBreaker = linksToSynchronousEndpoints.filter(link => link.getProperty("circuit_breaker").value !== "none");
+    
+        return linksWithCircuitBreaker.length / linksToSynchronousEndpoints.length;
+}
+
+export const totalNumberOfComponents: Calculation<System> = (system) => {
+    return system.getComponentEntities.size;
+}
+
+export const numberOfServices: Calculation<System> = (system) => {
+    return system.getComponentEntities.entries().filter(([componentId, component]) => component.constructor.name === Service.name).toArray().length;
+}
+
+export const numberOfBackingServices: Calculation<System> = (system) => {
+    return system.getComponentEntities.entries().filter(([componentId, component]) => component.constructor.name === BackingService.name).toArray().length;
+}
+
+export const totalNumberOfLinksInASystem: Calculation<System> = (system) => {
+    return system.getLinkEntities.size;
+}
+
+export const numberOfSynchronousEndpoints: Calculation<System> = (system) => {
+    let sum = 0;
+    system.getComponentEntities.entries().forEach(([componentId, component]) => {
+        sum += numberOfSynchronousEndpointsOfferedByAService({component: component, system: system}) as number;
+    })
+    return sum;
+}
+
+export const numberOfAsynchronousEndpoints: Calculation<System> = (system) => {
+    let sum = 0;
+    system.getComponentEntities.entries().forEach(([componentId, component]) => {
+        sum += numberOfAsynchronousEndpointsOfferedByAService({component: component, system: system}) as number;
+    })
+    return sum;
+}
+
+export const numberOfServicesWhichHaveIncomingLinks: Calculation<System> = (system) => {
+    let servicesWithIncomingLinks = system.getComponentEntities.entries()
+    .filter(([componentId, component]) => {
+        return component.constructor.name === Service.name && system.getIncomingLinksOfComponent(componentId).length > 0;
+    })
+    .map(([componentId, component]) => componentId)
+    .toArray();
+
+    return servicesWithIncomingLinks.length;
+}
+
+export const numberOfServicesWhichHaveOutgoingLinks: Calculation<System> = (system) => {
+    let servicesWithOutgoingLinks = system.getComponentEntities.entries()
+    .filter(([componentId, component]) => {
+        return component.constructor.name === Service.name && system.getOutgoingLinksOfComponent(componentId).length > 0;
+    })
+    .map(([componentId, component]) => componentId)
+    .toArray();
+
+    return servicesWithOutgoingLinks.length;
+}
+
+export const numberOfServicesWhichHaveBothIncomingAndOutgoingLinks: Calculation<System> = (system) => {
+    let servicesWithIncomingAndOutgoingLinks = system.getComponentEntities.entries()
+    .filter(([componentId, component]) => {
+        return component.constructor.name === Service.name 
+        && system.getOutgoingLinksOfComponent(componentId).length > 0
+        && system.getIncomingLinksOfComponent(componentId).length > 0;
+    })
+    .map(([componentId, component]) => componentId)
+    .toArray();
+
+    return servicesWithIncomingAndOutgoingLinks.length;
+}
+
+export const numberOfServiceConnectedToStorageBackingService: Calculation<System> = (system) => {
+
+    let servicesConnectedToAStorageBackingService: Set<string> = new Set();
+
+    system.getLinkEntities.entries().forEach(([linkId, link]) => {
+        if (link.getSourceEntity.constructor.name === Service.name 
+            && system.searchComponentOfEndpoint(link.getTargetEndpoint.getId).constructor.name === StorageBackingService.name) {
+                servicesConnectedToAStorageBackingService.add(link.getSourceEntity.getId);
+            }
+    })
+
+    return servicesConnectedToAStorageBackingService.size;
+}
 
 export const systemMeasureImplementations: { [measureKey: string]: Calculation<System> } = {
     "serviceReplicationLevel": serviceReplicationLevel,
@@ -826,8 +952,20 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation<S
     "numberOfComponents": numberOfComponents,
     "ratioOfProviderManagedComponentsAndInfrastructure": ratioOfProviderManagedComponentsAndInfrastructure,
     "componentDensity": componentDensity,
-    "numberOfAvailabilityZonesUsed": numberOfAvailabilityZonesUsed
-
+    "numberOfAvailabilityZonesUsed": numberOfAvailabilityZonesUsed,
+    "rollingUpdateOption": rollingUpdateOption,
+    "numberOfLinksWithRetryLogic": numberOfLinksWithRetryLogic,
+    "numberOfLinksWithComplexFailover": numberOfLinksWithComplexFailover,
+    "totalNumberOfComponents": totalNumberOfComponents,
+    "numberOfServices": numberOfServices,
+    "numberOfBackingServices": numberOfBackingServices,
+    "totalNumberOfLinksInASystem": totalNumberOfLinksInASystem,
+    "numberOfSynchronousEndpoints": numberOfSynchronousEndpoints,
+    "numberOfAsynchronousEndpoints": numberOfAsynchronousEndpoints,
+    "numberOfServicesWhichHaveIncomingLinks": numberOfServicesWhichHaveIncomingLinks,
+    "numberOfServicesWhichHaveOutgoingLinks": numberOfServicesWhichHaveOutgoingLinks,
+    "numberOfServicesWhichHaveBothIncomingAndOutgoingLinks": numberOfServicesWhichHaveBothIncomingAndOutgoingLinks,
+    "numberOfServiceConnectedToStorageBackingService": numberOfServiceConnectedToStorageBackingService
 }
 
 export const serviceInterfaceDataCohesion: Calculation<{ component: Component, system: System }> = (parameters) => {
@@ -1181,6 +1319,46 @@ export const degreeOfStorageBackendSharing: Calculation<{ component: Component, 
     }
 }
 
+export const resourceCount: Calculation<{ component: Component, system: System }> = (parameters) => {
+    return parameters.component.getDataAggregateEntities.length;
+
+}
+
+export const serviceSize: Calculation<{ component: Component, system: System }> = (parameters) => {
+   return resourceCount(parameters) as number + (numberOfComponentsThatAreLinkedToAComponent(parameters) as number);
+}
+
+export const unusedResourceCount: Calculation<{ component: Component, system: System }> = (parameters) => {
+
+   let endpointUsage: Map<string, string[]> = new Map();
+   
+   parameters.component.getEndpointEntities.forEach(endpoint => {
+        endpointUsage.set(endpoint.getId, []);
+   })
+
+   parameters.system.getLinkEntities.entries().forEach(([linkId, link]) => {
+        if (endpointUsage.has(link.getTargetEndpoint.getId)) {
+            endpointUsage.get(link.getTargetEndpoint.getId).push(linkId);
+        }
+   })
+
+   return endpointUsage.entries().filter(([endpointId, usage]) => usage.length === 0).toArray().length;
+}
+
+export const numberOfReadEndpointsProvidedByAService: Calculation<{ component: Component, system: System }> = (parameters) => {
+
+    return parameters.component.getEndpointEntities.concat(parameters.component.getExternalEndpointEntities).filter(endpoint => {
+        return endpoint.getProperty("kind").value === "query";
+    }).length;
+}
+ 
+export const numberOfWriteEndpointsProvidedByAService: Calculation<{ component: Component, system: System }> = (parameters) => {
+
+    return parameters.component.getEndpointEntities.concat(parameters.component.getExternalEndpointEntities).filter(endpoint => {
+        return ["command", "event"].includes(endpoint.getProperty("kind").value);
+    }).length;
+}
+
 
 export const componentMeasureImplementations: { [measureKey: string]: Calculation<{ component: Component, system: System }> } = {
     "serviceInterfaceDataCohesion": serviceInterfaceDataCohesion,
@@ -1209,7 +1387,12 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "cyclicCommunication": cyclicCommunication,
     "relativeImportanceOfTheService": relativeImportanceOfTheService,
     "serviceCriticality": serviceCriticality,
-    "degreeOfStorageBackendSharing": degreeOfStorageBackendSharing
+    "degreeOfStorageBackendSharing": degreeOfStorageBackendSharing,
+    "resourceCount": resourceCount,
+    "serviceSize": serviceSize,
+    "unusedResourceCount": unusedResourceCount,
+    "numberOfReadEndpointsProvidedByAService": numberOfReadEndpointsProvidedByAService,
+    "numberOfWriteEndpointsProvidedByAService": numberOfWriteEndpointsProvidedByAService
 }
 
 

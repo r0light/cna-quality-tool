@@ -1471,17 +1471,17 @@ export const qualityModel: QualityModelSpec = {
         },
         "rollingUpdateOption": {
             "name": "Rolling Update Option",
-            "calculation": "",
+            "calculation": "Number of Infrastructure entities deploying components and supporting rolling update strategies / All Infrastructure entities deploying components",
             "sources": ["Straesser2023"]
         },
         "numberOfLinksWithRetryLogic": {
             "name": "Number of Links with retry logic",
-            "calculation": "",
+            "calculation": "Number of Links to a synchronous endpoint with retries > 0 / Total number of Links to a synchronous endpoint",
             "sources": ["Apel2019"]
         },
         "numberOfLinksWithComplexFailover": {
             "name": "Number of Links with Complex Failover",
-            "calculation": "",
+            "calculation": "Number of Links to a synchronous endpoint with a circuit breaker / Total number of Links to a synchronous endpoint",
             "sources": ["Apel2019"]
         },
         "serviceInteractionViaBackingService": {
@@ -1496,32 +1496,32 @@ export const qualityModel: QualityModelSpec = {
         },
         "totalNumberOfComponents": {
             "name": "Total Number of Components",
-            "calculation": "",
+            "calculation": "Total Number of components",
             "sources": ["Shim2008", "Zimmermann2015"]
         },
         "numberOfServices": {
             "name": "Number of Services",
-            "calculation": "",
+            "calculation": "Total Number of Services",
             "sources": ["Shim2008", "Raj2018", "Hirzalla2009", "Hofmeister2008", "Zhang2009", "Rud2006"]
         },
         "numberOfBackingServices": {
             "name": "Number of Backing Services",
-            "calculation": "",
+            "calculation": "Total Number of Backing Services",
             "sources": ["Shim2008"]
         },
         "totalNumberOfLinksInASystem": {
             "name": "Total number of links in a system",
-            "calculation": "",
+            "calculation": "Total number of links",
             "sources": ["Brito2021", "Jin2018", "Tiwari2014", "Assuncao2021"]
         },
         "numberOfSynchronousEndpoints": {
             "name": "Number of synchronous endpoints",
-            "calculation": "",
+            "calculation": "Total number of synchronous endpoints",
             "sources": ["Shim2008"]
         },
         "numberOfAsynchronousEndpoints": {
             "name": "Number of asynchronous endpoints",
-            "calculation": "",
+            "calculation": "Total number of asynchronous endpoints",
             "sources": ["Shim2008"]
         },
         "numberOfAsynchronousAndSynchronousLinks": {
@@ -1531,17 +1531,17 @@ export const qualityModel: QualityModelSpec = {
         },
         "numberOfServicesWhichHaveIncomingLinks": {
             "name": "Number of Services which have incoming links",
-            "calculation": "",
+            "calculation": "Total number of services which have at least one incoming link",
             "sources": ["Shim2008", "Hofmeister2008"]
         },
         "numberOfServicesWhichHaveOutgoingLinks": {
             "name": "Number of Services which have outgoing links",
-            "calculation": "",
+            "calculation": "Total number of services which have at least one outgoing link",
             "sources": ["Shim2008", "Hofmeister2008"]
         },
         "numberOfServicesWhichHaveBothIncomingAndOutgoingLinks": {
             "name": "Number of Services which have both incoming and outgoing links",
-            "calculation": "",
+            "calculation": "Total number of services which have at least one incoming link and at least one outgoing link",
             "sources": ["Shim2008", "Hofmeister2008"]
         },
         "lackOfCohesion": {
@@ -1556,17 +1556,17 @@ export const qualityModel: QualityModelSpec = {
         },
         "serviceSize": {
             "name": "Size of a service",
-            "calculation": "",
+            "calculation": "\"Number of Data Aggregates used in a service\" + \"Number of Components that are linked to a component\"",
             "sources": ["Asik2017"]
         },
         "resourceCount": {
             "name": "Data Aggregate Count",
-            "calculation": "",
+            "calculation": "Number of Data Aggregates used in a service",
             "sources": ["Asik2017"]
         },
         "unusedResourceCount": {
             "name": "Unused Endpoint Count",
-            "calculation": "",
+            "calculation": "Number of Endpoints of a Component not targeted by a Link",
             "sources": ["Asik2017"]
         },
         "unreachableEndpointCount": {
@@ -1576,17 +1576,17 @@ export const qualityModel: QualityModelSpec = {
         },
         "numberOfServiceConnectedToStorageBackingService": {
             "name": "Number of Services connected to a Storage Backing Service",
-            "calculation": "",
+            "calculation": "Number of Services with a link to an Endpoint of a Storage Backing Service",
             "sources": ["Daniel2023"]
         },
         "numberOfReadEndpointsProvidedByAService": {
             "name": "Number of Read Endpoints provided by a service",
-            "calculation": "",
+            "calculation": "Number of Endpoints of kind \"query\" of a component",
             "sources": ["Daniel2023"]
         },
         "numberOfWriteEndpointsProvidedByAService": {
             "name": "Number of Wrie Endpoints provided by a service",
-            "calculation": "",
+            "calculation": "Number of Endpoints of kind \"command\" or \"event\" of a component",
             "sources": ["Daniel2023"]
         },
         "numberOfServiceHostedOnOneInfrastructure": {

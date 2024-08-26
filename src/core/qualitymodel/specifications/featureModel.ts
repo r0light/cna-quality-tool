@@ -5,6 +5,7 @@ const ASYNCHRONOUS_ENDPOINT_KIND = ["event"];
 
 const MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS = ["limited", "none"];
 
+const ROLLING_UPDATE_STRATEGY_OPTIONS = ["rolling", "blue-green"]
 
 const getUsageRelationWeight = (usageRelation: "usage" | "cached-usage" | "persistence"): number => {
     switch (usageRelation) {
@@ -33,5 +34,5 @@ const getEndpointKindWeight = (usageRelation: "query" | "command" | "event"): nu
 
 
 
-export { PROTOCOLS_SUPPORTING_TLS, SYNCHRONOUS_ENDPOINT_KIND, ASYNCHRONOUS_ENDPOINT_KIND, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, getUsageRelationWeight, getEndpointKindWeight }
+export { PROTOCOLS_SUPPORTING_TLS, SYNCHRONOUS_ENDPOINT_KIND, ASYNCHRONOUS_ENDPOINT_KIND, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, ROLLING_UPDATE_STRATEGY_OPTIONS, getUsageRelationWeight, getEndpointKindWeight }
 

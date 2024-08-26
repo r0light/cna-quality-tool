@@ -1,7 +1,7 @@
 import { getEmptyMetaData } from "@/core/common/entityDataTypes";
 import { DataAggregate, Endpoint, ExternalEndpoint, Link, Service, StorageBackingService, System } from "@/core/entities";
 import { RelationToDataAggregate } from "@/core/entities/relationToDataAggregate";
-import { componentMeasureImplementations } from "@/core/qualitymodel/evaluation/measureImplementations";
+import { componentMeasureImplementations, serviceCriticality } from "@/core/qualitymodel/evaluation/measureImplementations";
 import { getQualityModel } from "@/core/qualitymodel/QualityModelInstance";
 import { ASYNCHRONOUS_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "@/core/qualitymodel/specifications/featureModel";
 import { expect, test } from "vitest";
@@ -862,5 +862,141 @@ test("degreeOfStorageBackendSharing", () => {
 
     let measureValue = componentMeasureImplementations["degreeOfStorageBackendSharing"]({component: storageBackingService, system: system});
     expect(measureValue).toEqual(3);
+
+})
+
+test("resourceCount", () => {
+    let system = new System("testSystem");
+
+    let service = new Service("s1", "testService", getEmptyMetaData());
+    let dataAggregateA = new DataAggregate("d1", "data 1", getEmptyMetaData());
+    service.addDataAggregateEntity(dataAggregateA, new RelationToDataAggregate("r1", getEmptyMetaData()));
+    let dataAggregateB = new DataAggregate("d2", "data 2", getEmptyMetaData());
+    service.addDataAggregateEntity(dataAggregateB, new RelationToDataAggregate("r2", getEmptyMetaData()));
+
+    system.addEntities([dataAggregateA, dataAggregateB]);
+    system.addEntity(service);
+
+    let measureValue = componentMeasureImplementations["resourceCount"]({component: service, system: system});
+    expect(measureValue).toEqual(2);
+})
+
+test("serviceSize", () => {
+    let system = new System("testSystem");
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let dataAggregateA = new DataAggregate("d1", "data 1", getEmptyMetaData());
+    serviceA.addDataAggregateEntity(dataAggregateA, new RelationToDataAggregate("r1", getEmptyMetaData()));
+    let dataAggregateB = new DataAggregate("d2", "data 2", getEmptyMetaData());
+    serviceA.addDataAggregateEntity(dataAggregateB, new RelationToDataAggregate("r2", getEmptyMetaData()));
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA);
+
+    let serviceB = new Service("s2", "service B", getEmptyMetaData());
+    let endpointB = new Endpoint("e2", "endpoint B", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+
+    let serviceC = new Service("s3", "service C", getEmptyMetaData());
+
+    let linkBA = new Link("l1", serviceB, endpointA);
+    let linkCA = new Link("l2", serviceC, endpointA);
+    let linkCB = new Link("l3", serviceC, endpointB);
+
+    system.addEntities([dataAggregateA, dataAggregateB]);
+    system.addEntities([serviceA, serviceB, serviceC]);
+    system.addEntities([linkBA, linkCA, linkCB]);
+
+    let measureValue = componentMeasureImplementations["serviceSize"]({component: serviceA, system: system});
+    expect(measureValue).toEqual(4);
+})
+
+test("unusedResourceCount", () => {
+    let system = new System("testSystem");
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA1 = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA1);
+    let endpointA2 = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA2);
+    let endpointA3 = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA3);
+
+    let serviceB = new Service("s2", "service B", getEmptyMetaData());
+    let endpointB = new Endpoint("e4", "endpoint B", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+
+    let serviceC = new Service("s3", "service C", getEmptyMetaData());
+
+    let linkBA = new Link("l1", serviceB, endpointA1);
+    let linkCA = new Link("l2", serviceC, endpointA1);
+    let linkCB = new Link("l3", serviceC, endpointB);
+
+    system.addEntities([serviceA, serviceB, serviceC]);
+    system.addEntities([linkBA, linkCA, linkCB]);
+
+    let measureValue = componentMeasureImplementations["unusedResourceCount"]({component: serviceA, system: system});
+    expect(measureValue).toEqual(2);
+})
+
+test("numberOfReadEndpointsProvidedByAService", () => {
+    let system = new System("testSystem");
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA1 = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    endpointA1.setPropertyValue("kind", "query");
+    serviceA.addEndpoint(endpointA1);
+    let endpointA2 = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    endpointA2.setPropertyValue("kind", "command");
+    serviceA.addEndpoint(endpointA2);
+    let endpointA3 = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    endpointA1.setPropertyValue("kind", "query");
+    serviceA.addEndpoint(endpointA3);
+
+    let serviceB = new Service("s2", "service B", getEmptyMetaData());
+    let endpointB = new Endpoint("e4", "endpoint B", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+
+    let serviceC = new Service("s3", "service C", getEmptyMetaData());
+
+    let linkBA = new Link("l1", serviceB, endpointA1);
+    let linkCA = new Link("l2", serviceC, endpointA1);
+    let linkCB = new Link("l3", serviceC, endpointB);
+
+    system.addEntities([serviceA, serviceB, serviceC]);
+    system.addEntities([linkBA, linkCA, linkCB]);
+
+    let measureValue = componentMeasureImplementations["numberOfReadEndpointsProvidedByAService"]({component: serviceA, system: system});
+    expect(measureValue).toEqual(2);
+})
+
+test("numberOfWriteEndpointsProvidedByAService", () => {
+    let system = new System("testSystem");
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA1 = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    endpointA1.setPropertyValue("kind", "query");
+    serviceA.addEndpoint(endpointA1);
+    let endpointA2 = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    endpointA2.setPropertyValue("kind", "command");
+    serviceA.addEndpoint(endpointA2);
+    let endpointA3 = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    endpointA1.setPropertyValue("kind", "event");
+    serviceA.addEndpoint(endpointA3);
+
+    let serviceB = new Service("s2", "service B", getEmptyMetaData());
+    let endpointB = new Endpoint("e4", "endpoint B", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+
+    let serviceC = new Service("s3", "service C", getEmptyMetaData());
+
+    let linkBA = new Link("l1", serviceB, endpointA1);
+    let linkCA = new Link("l2", serviceC, endpointA1);
+    let linkCB = new Link("l3", serviceC, endpointB);
+
+    system.addEntities([serviceA, serviceB, serviceC]);
+    system.addEntities([linkBA, linkCA, linkCB]);
+
+    let measureValue = componentMeasureImplementations["numberOfWriteEndpointsProvidedByAService"]({component: serviceA, system: system});
+    expect(measureValue).toEqual(2);
 
 })
