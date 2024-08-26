@@ -1466,7 +1466,7 @@ export const qualityModel: QualityModelSpec = {
         },
         "numberOfAvailabilityZonesUsed": {
             "name": "Number of Availability Zones used",
-            "calculation": "",
+            "calculation": "Number of unique availability zones in which the infrastructure is running",
             "sources": ["Guerron2020", "Baranwal2014"]
         },
         "rollingUpdateOption": {

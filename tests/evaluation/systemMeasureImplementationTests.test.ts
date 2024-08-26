@@ -1109,6 +1109,32 @@ test("componentDensity", () => {
 
     let measureValue = systemMeasureImplementations["componentDensity"](system);
     expect(measureValue).toEqual(1.5);
+})
 
 
+test("numberOfAvailabilityZonesUsed", () => {
+    let system = new System("testSystem");
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    infrastructureA.setPropertyValue("availability_zone", "zone-1,zone-2");
+    let infrastructureB = new Infrastructure("i2", "infrastructure 3", getEmptyMetaData());
+    infrastructureB.setPropertyValue("availability_zone", "zone-1");
+    let infrastructureC = new Infrastructure("i3", "infrastructure 4", getEmptyMetaData());
+    infrastructureC.setPropertyValue("availability_zone", "zone-1,zone-2,zone-3");
+
+    let deploymentMappingA = new DeploymentMapping("dm1", serviceA, infrastructureA);
+    let deploymentMappingB = new DeploymentMapping("dm2", serviceB, infrastructureA);
+    let deploymentMappingC = new DeploymentMapping("dm3", serviceC, infrastructureB);
+    let deploymentMappingD = new DeploymentMapping("dm4", infrastructureB, infrastructureC);
+
+    system.addEntities([serviceA, serviceB, serviceC]);
+    system.addEntities([infrastructureA, infrastructureB, infrastructureC]);
+    system.addEntities([deploymentMappingA, deploymentMappingB, deploymentMappingC, deploymentMappingD]);
+
+    let measureValue = systemMeasureImplementations["numberOfAvailabilityZonesUsed"](system);
+    expect(measureValue).toEqual(3);
 })

@@ -765,11 +765,23 @@ export const componentDensity: Calculation<System> = (system) => {
             deployedEntityIds.push(deploymentMapping.getDeployedEntity.getId);
             usedInfrastructureIds.push(deploymentMapping.getUnderlyingInfrastructure.getId);
         }
-
     })
 
     return allComponents.entries().filter(component => deployedEntityIds.includes(component[0])).reduce((accumulator, current) => accumulator + 1, 0) / 
     allInfrastructure.entries().filter(infrastructure => usedInfrastructureIds.includes(infrastructure[0])).reduce((accumulator, current) => accumulator + 1, 0);
+}
+
+export const numberOfAvailabilityZonesUsed: Calculation<System> = (system) => {
+    
+    let availabilityZones: Set<string> = new Set();
+    
+    system.getInfrastructureEntities.entries().forEach(([infrastructureId, infrastructure]) => {
+        let usedAvailabilityZones = (infrastructure.getProperty("availability_zone").value as string).split(",");
+        console.log(`${infrastructureId} running in ${usedAvailabilityZones}`);
+        usedAvailabilityZones.forEach(zoneId => availabilityZones.add(zoneId));
+    });
+
+    return availabilityZones.size;
 }
 
 
@@ -813,7 +825,8 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation<S
     "averageNumberOfEndpointsPerService": averageNumberOfEndpointsPerService,
     "numberOfComponents": numberOfComponents,
     "ratioOfProviderManagedComponentsAndInfrastructure": ratioOfProviderManagedComponentsAndInfrastructure,
-    "componentDensity": componentDensity
+    "componentDensity": componentDensity,
+    "numberOfAvailabilityZonesUsed": numberOfAvailabilityZonesUsed
 
 }
 
