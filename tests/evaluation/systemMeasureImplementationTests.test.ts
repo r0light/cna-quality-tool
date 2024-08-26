@@ -1,5 +1,5 @@
 import { getEmptyMetaData } from "@/core/common/entityDataTypes";
-import { Component, DataAggregate, Endpoint, ExternalEndpoint, Link, RequestTrace, Service, StorageBackingService, System } from "@/core/entities";
+import { Component, DataAggregate, DeploymentMapping, Endpoint, ExternalEndpoint, Infrastructure, Link, RequestTrace, Service, StorageBackingService, System } from "@/core/entities";
 import { RelationToBackingData } from "@/core/entities/relationToBackingData";
 import { RelationToDataAggregate } from "@/core/entities/relationToDataAggregate";
 import { systemMeasureImplementations } from "@/core/qualitymodel/evaluation/measureImplementations";
@@ -1009,5 +1009,65 @@ test("averageNumberOfEndpointsPerService", () => {
 
     let measureValue = systemMeasureImplementations["averageNumberOfEndpointsPerService"](system);
     expect(measureValue).toEqual(7/4);
+
+})
+
+test("numberOfComponents", () => {
+    let system = new System("testSystem");
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA);
+    serviceA.addEndpoint(externalEndpointA);
+
+    let storageBackingService = new StorageBackingService("sb1", "storage service", getEmptyMetaData());
+
+    let component = new Component("c1", "component 1", getEmptyMetaData());
+
+    system.addEntities([serviceA, storageBackingService, component]);
+
+    let measureValue = systemMeasureImplementations["numberOfComponents"](system);
+    expect(measureValue).toEqual(3);
+
+})
+
+test("ratioOfProviderManagedComponentsAndInfrastructure", () => {
+    let system = new System("testSystem");
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA);
+    serviceA.addEndpoint(externalEndpointA);
+    serviceA.setPropertyValue("managed", true);
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointB1 = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB1);
+    let endpointB2 = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB2);
+    let endpointB3 = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB3);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e5", "endpoint 3", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    let infrastructureB = new Infrastructure("i2", "infrastructure 2", getEmptyMetaData());
+    infrastructureB.setPropertyValue("environment_access", "limited");
+    let infrastructureC = new Infrastructure("i3", "infrastructure 3", getEmptyMetaData());
+
+    let deploymentMappingA = new DeploymentMapping("dm1", serviceA, infrastructureA);
+    let deploymentMappingB = new DeploymentMapping("dm1", serviceB, infrastructureB);
+    let deploymentMappingC = new DeploymentMapping("dm1", serviceC, infrastructureC);
+
+    system.addEntities([serviceA, serviceB, serviceC]);
+    system.addEntities([infrastructureA, infrastructureB, infrastructureC]);
+    system.addEntities([deploymentMappingA, deploymentMappingB, deploymentMappingC]);
+
+    let measureValue = systemMeasureImplementations["ratioOfProviderManagedComponentsAndInfrastructure"](system);
+    expect(measureValue).toEqual(1/3);
 
 })

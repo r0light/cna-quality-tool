@@ -1416,12 +1416,12 @@ export const qualityModel: QualityModelSpec = {
         },
         "numberOfComponents": {
             "name": "Number of components",
-            "calculation": "",
+            "calculation": "Total number of components",
             "sources": ["Silva2023", "Venkitachalam2017"]
         },
         "ratioOfProviderManagedComponentsAndInfrastructure": {
             "name": "Ratio of Provider-Managed Components and Infrastructure",
-            "calculation": "",
+            "calculation": "Number of Provider-managed components and infrastrcture nodes / All components and infrastructure nodes",
             "sources": ["Yussupov2022"]
         },
         "amountOfRedundancy": {

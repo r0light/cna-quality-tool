@@ -129,6 +129,10 @@ class Infrastructure {
         return this.#properties;
     }
 
+    getProperty(propertyKey: string) {
+        return this.#properties.find(property => property.getKey === propertyKey);
+    }
+
     setPropertyValue(propertyKey: string, propertyValue: any) {
         let propertyToSet = (this.#properties.find(property => property.getKey === propertyKey))
         if (propertyToSet) {

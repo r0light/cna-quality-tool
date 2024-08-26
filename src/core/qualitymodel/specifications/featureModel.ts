@@ -3,6 +3,8 @@ const PROTOCOLS_SUPPORTING_TLS = ["https", "sftp"];
 const SYNCHRONOUS_ENDPOINT_KIND = ["query", "command"];
 const ASYNCHRONOUS_ENDPOINT_KIND = ["event"];
 
+const MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS = ["limited", "none"];
+
 
 const getUsageRelationWeight = (usageRelation: "usage" | "cached-usage" | "persistence"): number => {
     switch (usageRelation) {
@@ -31,5 +33,5 @@ const getEndpointKindWeight = (usageRelation: "query" | "command" | "event"): nu
 
 
 
-export { PROTOCOLS_SUPPORTING_TLS, SYNCHRONOUS_ENDPOINT_KIND, ASYNCHRONOUS_ENDPOINT_KIND, getUsageRelationWeight, getEndpointKindWeight }
+export { PROTOCOLS_SUPPORTING_TLS, SYNCHRONOUS_ENDPOINT_KIND, ASYNCHRONOUS_ENDPOINT_KIND, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, getUsageRelationWeight, getEndpointKindWeight }
 
