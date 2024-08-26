@@ -1060,8 +1060,8 @@ test("ratioOfProviderManagedComponentsAndInfrastructure", () => {
     let infrastructureC = new Infrastructure("i3", "infrastructure 3", getEmptyMetaData());
 
     let deploymentMappingA = new DeploymentMapping("dm1", serviceA, infrastructureA);
-    let deploymentMappingB = new DeploymentMapping("dm1", serviceB, infrastructureB);
-    let deploymentMappingC = new DeploymentMapping("dm1", serviceC, infrastructureC);
+    let deploymentMappingB = new DeploymentMapping("dm2", serviceB, infrastructureB);
+    let deploymentMappingC = new DeploymentMapping("dm3", serviceC, infrastructureC);
 
     system.addEntities([serviceA, serviceB, serviceC]);
     system.addEntities([infrastructureA, infrastructureB, infrastructureC]);
@@ -1069,5 +1069,46 @@ test("ratioOfProviderManagedComponentsAndInfrastructure", () => {
 
     let measureValue = systemMeasureImplementations["ratioOfProviderManagedComponentsAndInfrastructure"](system);
     expect(measureValue).toEqual(1/3);
+
+})
+
+test("componentDensity", () => {
+    let system = new System("testSystem");
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA);
+    serviceA.addEndpoint(externalEndpointA);
+    serviceA.setPropertyValue("managed", true);
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointB1 = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB1);
+    let endpointB2 = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB2);
+    let endpointB3 = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB3);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e5", "endpoint 3", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    let infrastructureB = new Infrastructure("i2", "infrastructure 3", getEmptyMetaData());
+    let infrastructureC = new Infrastructure("i3", "infrastructure 4", getEmptyMetaData());
+
+    let deploymentMappingA = new DeploymentMapping("dm1", serviceA, infrastructureA);
+    let deploymentMappingB = new DeploymentMapping("dm2", serviceB, infrastructureA);
+    let deploymentMappingC = new DeploymentMapping("dm3", serviceC, infrastructureB);
+    let deploymentMappingD = new DeploymentMapping("dm4", infrastructureB, infrastructureC);
+
+    system.addEntities([serviceA, serviceB, serviceC]);
+    system.addEntities([infrastructureA, infrastructureB, infrastructureC]);
+    system.addEntities([deploymentMappingA, deploymentMappingB, deploymentMappingC, deploymentMappingD]);
+
+    let measureValue = systemMeasureImplementations["componentDensity"](system);
+    expect(measureValue).toEqual(1.5);
+
 
 })

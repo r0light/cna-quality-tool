@@ -1,6 +1,6 @@
 
 import { a } from "vitest/dist/suite-IbNSsUWN.js";
-import { Component, RequestTrace, Service, StorageBackingService, System } from "../../entities.js";
+import { BackingService, Component, DeploymentMapping, Infrastructure, RequestTrace, Service, StorageBackingService, System } from "../../entities.js";
 import { Calculation } from "../quamoco/Measure.js";
 import { ASYNCHRONOUS_ENDPOINT_KIND, getEndpointKindWeight, getUsageRelationWeight, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, PROTOCOLS_SUPPORTING_TLS, SYNCHRONOUS_ENDPOINT_KIND } from "../specifications/featureModel.js";
 import { c } from "vite/dist/node/types.d-aGj9QkWt.js";
@@ -619,7 +619,7 @@ export const ratioOfCyclicRequestTraces: Calculation<System> = (system) => {
     let numberOfCycles = 0;
 
     for (const [requestTraceId, requestTrace] of allRequestTraces) {
-        if (numberOfCyclesInRequestTraces({requestTrace: requestTrace, system: system}) as number > 0) {
+        if (numberOfCyclesInRequestTraces({ requestTrace: requestTrace, system: system }) as number > 0) {
             numberOfCycles += 1;
         }
     }
@@ -738,15 +738,39 @@ export const ratioOfProviderManagedComponentsAndInfrastructure: Calculation<Syst
 
     let numberOfManagedComponents = allComponents.entries().filter(component => component[1].getProperty("managed").value).reduce((accumulator, current) => accumulator + 1, 0);
 
-    console.log(`${numberOfManagedComponents} out of ${allComponents.size} components are managed`);
-
     let numberOfManagedInfrastructure = allInfrastructure.entries().filter(infrastructure => MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS.includes(infrastructure[1].getProperty("environment_access").value)).reduce((accumulator, current) => accumulator + 1, 0);
-
-    console.log(`${numberOfManagedInfrastructure} out of ${allInfrastructure.size} infrastructure are managed`);
 
     return (numberOfManagedComponents + numberOfManagedInfrastructure) / (allComponents.size + allInfrastructure.size);
 }
 
+export const componentDensity: Calculation<System> = (system) => {
+
+    let allDeploymentMappings = system.getDeploymentMappingEntities;
+
+    if (allDeploymentMappings.size === 0) {
+        return 0;
+    }
+
+    let allComponents = system.getComponentEntities;
+
+    let allInfrastructure = system.getInfrastructureEntities;
+
+    let deployedEntityIds: string[] = [];
+    let usedInfrastructureIds: string[] = [];
+
+    system.getDeploymentMappingEntities.forEach((deploymentMapping, id) => {
+        if (deploymentMapping.getDeployedEntity.constructor.name === Infrastructure.name) {
+            // ignore deployment mappings of infrastructure on infrastructure
+        } else {
+            deployedEntityIds.push(deploymentMapping.getDeployedEntity.getId);
+            usedInfrastructureIds.push(deploymentMapping.getUnderlyingInfrastructure.getId);
+        }
+
+    })
+
+    return allComponents.entries().filter(component => deployedEntityIds.includes(component[0])).reduce((accumulator, current) => accumulator + 1, 0) / 
+    allInfrastructure.entries().filter(infrastructure => usedInfrastructureIds.includes(infrastructure[0])).reduce((accumulator, current) => accumulator + 1, 0);
+}
 
 
 export const systemMeasureImplementations: { [measureKey: string]: Calculation<System> } = {
@@ -788,7 +812,9 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation<S
     "databaseTypeUtilization": databaseTypeUtilization,
     "averageNumberOfEndpointsPerService": averageNumberOfEndpointsPerService,
     "numberOfComponents": numberOfComponents,
-    "ratioOfProviderManagedComponentsAndInfrastructure": ratioOfProviderManagedComponentsAndInfrastructure
+    "ratioOfProviderManagedComponentsAndInfrastructure": ratioOfProviderManagedComponentsAndInfrastructure,
+    "componentDensity": componentDensity
+
 }
 
 export const serviceInterfaceDataCohesion: Calculation<{ component: Component, system: System }> = (parameters) => {

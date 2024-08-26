@@ -1461,7 +1461,7 @@ export const qualityModel: QualityModelSpec = {
         },
         "componentDensity": {
             "name": "Component density",
-            "calculation": "",
+            "calculation": "Number of deployed components / Number of infrastructure entities on which one or more components are deployed",
             "sources": ["Guerron2020", "Rizvi2017"]
         },
         "numberOfAvailabilityZonesUsed": {
