@@ -165,7 +165,7 @@ function createTemporaryEntityManager(selectedSystem: ModelingData): SystemEntit
     // not the best solution, because the evaluation now depends on jointjs
 
     let newEntityManager = new SystemEntityManager(new dia.Graph({}, { cellNamespace: entityShapes }));
-    newEntityManager.loadFromJson(selectedSystem.toImport.fileContent, selectedSystem.toImport.fileName);
+    newEntityManager.loadFromJson(selectedSystem.toImport.fileContent, selectedSystem.toImport.fileName, "replace");
     return newEntityManager;
 }
 

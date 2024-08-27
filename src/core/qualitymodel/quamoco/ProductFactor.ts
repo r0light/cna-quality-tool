@@ -1,4 +1,4 @@
-import { Component, RequestTrace, System } from "@/core/entities";
+import { Component, Infrastructure, RequestTrace, System } from "@/core/entities";
 import { EvaluatedSystemModel, ProductFactorEvaluationResult } from "../evaluation/EvaluatedSystemModel";
 import { ProductFactorEvaluation } from "../evaluation/ProductFactorEvaluation";
 import { Impact } from "./Impact";
@@ -17,6 +17,7 @@ class ProductFactor {
     #systemMeasures: Measure<System>[];
     #componentMeasures: Measure<{component: Component, system: System}>[];
     #componentPairMeasures: Measure<{ componentA: Component, componentB: Component, system: System }>[];
+    #infrastructureMeasures: Measure<{ infrastructure: Infrastructure, system: System }>[];
     #requestTraceMeasures: Measure<{requestTrace: RequestTrace, system: System}>[];
     #evaluation: ProductFactorEvaluation;
 
@@ -33,6 +34,7 @@ class ProductFactor {
         this.#systemMeasures = [];
         this.#componentMeasures = [];
         this.#componentPairMeasures = [];
+        this.#infrastructureMeasures = [];
         this.#requestTraceMeasures = [];
         this.#evaluation = undefined;
         this.#outgoingImpacts = [];
@@ -82,6 +84,10 @@ class ProductFactor {
         return this.#componentPairMeasures;
     }
 
+    get getInfrastructureMeasures() {
+        return this.#infrastructureMeasures;
+    }
+
     get getRequestTraceMeasures() {
         return this.#requestTraceMeasures;
     }
@@ -114,6 +120,10 @@ class ProductFactor {
         this.#componentPairMeasures.push(measure);
     }
 
+    addInfrastructureMeasures(measure: Measure<{infrastructure: Infrastructure, system: System}>) {
+        this.#infrastructureMeasures.push(measure);
+    }
+
     addRequestTraceMeasure(measure: Measure<{requestTrace: RequestTrace, system: System}>) {
         this.#requestTraceMeasures.push(measure);
     }
@@ -136,6 +146,16 @@ class ProductFactor {
 
     getImpactingFactors(): ProductFactor[] {
         return this.#incomingImpacts.map(impact => impact.getSourceFactor);
+    }
+
+    getAllMeasures(): Measure<any>[] {
+        let allMeasures: Measure<any>[] = [];
+        allMeasures.push(...this.#systemMeasures);
+        allMeasures.push(...this.#componentMeasures);
+        allMeasures.push(...this.#componentPairMeasures);
+        allMeasures.push(...this.#infrastructureMeasures);
+        allMeasures.push(...this.#requestTraceMeasures);
+        return allMeasures;
     }
 
     getSystemMeasure(measureKey: string) {
@@ -165,6 +185,23 @@ class ProductFactor {
         }
     }
 
+    getInfrastructureMeasure(measureKey: string) {
+        let measure = this.#infrastructureMeasures.find(measure => measure.getId === measureKey);
+        if (measure) {
+            return measure;
+        } else {
+            throw new Error (`Measure ${measureKey} not found for product factor ${this.#id}`);
+        }
+    }
+
+    getRequestTraceMeasure(measureKey: string) {
+        let measure = this.#requestTraceMeasures.find(measure => measure.getId === measureKey);
+        if (measure) {
+            return measure;
+        } else {
+            throw new Error (`Measure ${measureKey} not found for product factor ${this.#id}`);
+        }
+    }
 
     isEvaluationAvailable(): boolean {
         return this.#evaluation !== undefined;

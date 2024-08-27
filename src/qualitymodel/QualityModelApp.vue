@@ -35,13 +35,13 @@
                             </ul>
                         </div>
                         <div
-                            v-if="selectedFactor.getFactorType === 'productFactor' && (selectedFactor as ProductFactor).getMeasures.length > 0">
+                            v-if="selectedFactor.getFactorType === 'productFactor' && (selectedFactor as ProductFactor).getAllMeasures().length > 0">
                             <div
-                                v-if="(selectedFactor as ProductFactor).getMeasures.filter(measure => measure.isCalculationAvailable()).length > 0">
+                                v-if="(selectedFactor as ProductFactor).getAllMeasures().filter(measure => measure.isCalculationAvailable()).length > 0">
                                 <span>Implemented measures:</span>
                                 <ul class="listWithoutBullets">
                                     <li
-                                        v-for="measure of (selectedFactor as ProductFactor).getMeasures.filter(measure => measure.isCalculationAvailable())">
+                                        v-for="measure of (selectedFactor as ProductFactor).getAllMeasures().filter(measure => measure.isCalculationAvailable())">
                                         <details>
                                             <summary>
                                                 <span class="font-italics">{{ measure.getName }}</span>
@@ -63,7 +63,7 @@
                                 <span>Potential measures:</span>
                                 <ul>
                                     <li
-                                        v-for="measure of (selectedFactor as ProductFactor).getMeasures.filter(measure => !measure.isCalculationAvailable())">
+                                        v-for="measure of (selectedFactor as ProductFactor).getAllMeasures().filter(measure => !measure.isCalculationAvailable())">
                                         <span class="font-italics">{{ measure.getName }}</span>
                                         <span> (</span>
                                         <span v-for="source of measure.getSources">

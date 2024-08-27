@@ -80,7 +80,7 @@ for (const highLevelAspect of qualityModel.highLevelAspects) {
                             output += `${indent()}  ${sourcesString}\n`;
                         }
                         indentationLevel += 1;
-                        for (const measure of factor.getMeasures) {
+                        for (const measure of factor.getAllMeasures()) {
                             let measureSources = measure.getSources.map(source => {
                                 return source.getUrl ? `[${source.getKey}](${source.getUrl})` : source.getKey;
                             })

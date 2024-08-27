@@ -10,9 +10,9 @@ import { LiteratureSource } from "./quamoco/LiteratureSource.js";
 import { Entity } from "./quamoco/Entity.js";
 import { productFactorEvaluationImplementation, qualityAspectEvaluationImplementation } from "./evaluation/evaluationImplementations.js";
 import { ProductFactorEvaluation } from "./evaluation/ProductFactorEvaluation.js";
-import { componentMeasureImplementations, componentPairMeasureImplementations, requestTraceMeasureImplementations, systemMeasureImplementations } from "./evaluation/measureImplementations.js";
+import { componentMeasureImplementations, componentPairMeasureImplementations, infrastructureMeasureImplementations, requestTraceMeasureImplementations, systemMeasureImplementations } from "./evaluation/measureImplementations.js";
 import { QualityAspectEvaluation } from "./evaluation/QualityAspectEvaluation.js";
-import { Component, RequestTrace, System } from "../entities.js";
+import { Component, Infrastructure, RequestTrace, System } from "../entities.js";
 
 
 function getQualityModel(): QualityModelInstance {
@@ -60,9 +60,12 @@ function getQualityModel(): QualityModelInstance {
         } else if (componentPairMeasureImplementations[measureKey]) {
             newMeasure.addCalculation(componentPairMeasureImplementations[measureKey]);
             newQualityModel.componentPairMeasures.push(newMeasure as Measure<{ componentA: Component, componentB: Component, system: System }>);
+        } else if (infrastructureMeasureImplementations[measureKey]) {
+            newMeasure.addCalculation(infrastructureMeasureImplementations[measureKey]);
+            newQualityModel.infrastructureMeasures.push(newMeasure as Measure<{ infrastructure: Infrastructure, system: System }>);
         } else if (requestTraceMeasureImplementations[measureKey]) {
             newMeasure.addCalculation(requestTraceMeasureImplementations[measureKey]);
-            newQualityModel.requestTraceMeasures.push(newMeasure as Measure<{requestTrace: RequestTrace, system: System}>);
+            newQualityModel.requestTraceMeasures.push(newMeasure as Measure<{ requestTrace: RequestTrace, system: System }>);
         } else {
             //console.log(`No measure implementation found for measure ${measureKey}`);
             //default:
@@ -92,31 +95,40 @@ function getQualityModel(): QualityModelInstance {
         });
 
         for (const measureKey of productFactor.measures) {
-            let foundMeasure = newQualityModel.findSystemMeasure(measureKey);
-            if (foundMeasure) {
-                newProductFactor.addSystemMeasure(foundMeasure);
-            } else {
-                let foundComponentMeasure = newQualityModel.findComponentMeasure(measureKey);
-                if (foundComponentMeasure) {
-                    newProductFactor.addComponentMeasure(foundComponentMeasure);
-                } else {
-                    let foundComponentPairMeasure = newQualityModel.findComponentPairMeasure(measureKey);
-                    if (foundComponentPairMeasure) {
-                        newProductFactor.addComponentPairMeasure(foundComponentPairMeasure);
-                    } else {
-                        let foundRequestTraceMeasure = newQualityModel.findRequestTraceMeasure(measureKey);
-                        if (foundRequestTraceMeasure) {
-                            newProductFactor.addRequestTraceMeasure(foundRequestTraceMeasure);
-                        } else {
-                            throw Error("No measure with key " + measureKey + " could be found, please check the quality model definition.")
-                        }
-                    }
-                }
+            let foundSystemMeasure = newQualityModel.findSystemMeasure(measureKey);
+            if (foundSystemMeasure) {
+                newProductFactor.addSystemMeasure(foundSystemMeasure);
+                continue;
             }
+
+            let foundComponentMeasure = newQualityModel.findComponentMeasure(measureKey);
+            if (foundComponentMeasure) {
+                newProductFactor.addComponentMeasure(foundComponentMeasure);
+                continue;
+            }
+
+            let foundComponentPairMeasure = newQualityModel.findComponentPairMeasure(measureKey);
+            if (foundComponentPairMeasure) {
+                newProductFactor.addComponentPairMeasure(foundComponentPairMeasure);
+                continue;
+            }
+
+            let foundInfrastructureMeasure = newQualityModel.findInfrastructureMeasure(measureKey);
+            if (foundInfrastructureMeasure) {
+                newProductFactor.addInfrastructureMeasures(foundInfrastructureMeasure);
+                continue;
+            }
+
+            let foundRequestTraceMeasure = newQualityModel.findRequestTraceMeasure(measureKey);
+            if (foundRequestTraceMeasure) {
+                newProductFactor.addRequestTraceMeasure(foundRequestTraceMeasure);
+                continue;
+            }
+
+            // else
+            throw Error("No measure with key " + measureKey + " could be found, please check the quality model definition.")
         }
-
         newQualityModel.productFactors.push(newProductFactor);
-
     }
 
     // add all Impacts
@@ -227,6 +239,8 @@ class QualityModelInstance {
 
     componentPairMeasures: Measure<{ componentA: Component, componentB: Component, system: System }>[];
 
+    infrastructureMeasures: Measure<{ infrastructure: Infrastructure, system: System }>[];
+
     requestTraceMeasures: Measure<{ requestTrace: RequestTrace, system: System }>[];
 
     entities: Entity[];
@@ -240,6 +254,7 @@ class QualityModelInstance {
         this.systemMeasures = [];
         this.componentMeasures = [];
         this.componentPairMeasures = [];
+        this.infrastructureMeasures = [];
         this.requestTraceMeasures = [];
         this.entities = [];
     }
@@ -266,6 +281,10 @@ class QualityModelInstance {
 
     findComponentPairMeasure(measureKey: string): Measure<{ componentA: Component, componentB: Component, system: System }> {
         return this.componentPairMeasures.find(m => m.getId === measureKey);
+    }
+
+    findInfrastructureMeasure(measureKey: string): Measure<{ infrastructure: Infrastructure, system: System }> {
+        return this.infrastructureMeasures.find(m => m.getId === measureKey);
     }
 
     findRequestTraceMeasure(measureKey: string): Measure<{ requestTrace: RequestTrace, system: System }> {

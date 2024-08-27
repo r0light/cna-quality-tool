@@ -1511,6 +1511,14 @@ export const componentPairMeasureImplementations: { [measureKey: string]: Calcul
     "couplingOfServicesBasedTimesThatTheyOccurInTheSameRequestTrace": couplingOfServicesBasedTimesThatTheyOccurInTheSameRequestTrace
 }
 
+
+
+
+
+export const infrastructureMeasureImplementations: { [measureKey: string]: Calculation<{ infrastructure: Infrastructure, system: System }> } = {
+
+}
+
 export const requestTraceLength: Calculation<{ requestTrace: RequestTrace, system: System }> = (parameters) => {
     return parameters.requestTrace.getLinks.size;
 }
