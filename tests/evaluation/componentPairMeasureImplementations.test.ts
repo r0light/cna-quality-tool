@@ -6,8 +6,6 @@ import { getQualityModel } from "@/core/qualitymodel/QualityModelInstance";
 import { expect, test } from "vitest";
 
 
-// TODO general tests similar to others
-
 test("all implementation names refer to an existing measure", () => {
     let measureKeys = getQualityModel().componentPairMeasures.map(measure => measure.getId);
     expect(measureKeys.length).toStrictEqual(new Set(measureKeys).size);

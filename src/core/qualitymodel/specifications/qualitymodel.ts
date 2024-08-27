@@ -1591,7 +1591,7 @@ export const qualityModel: QualityModelSpec = {
         },
         "numberOfServiceHostedOnOneInfrastructure": {
             "name": "Number of Services hosted on one infrastructure entity",
-            "calculation": "",
+            "calculation": "Number of Service deployed on an infrastructure entity",
             "sources": ["Daniel2023"]
         },
         "ratioOfRequestTracesThroughGateway": {
