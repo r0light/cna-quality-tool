@@ -1000,3 +1000,35 @@ test("numberOfWriteEndpointsProvidedByAService", () => {
     expect(measureValue).toEqual(2);
 
 })
+
+test("ratioOfStateDependencyOfEndpoints", () => {
+   let system = new System("testSystem");
+
+    let service = new Service("s1", "testService", getEmptyMetaData());
+    let dataAggregateA = new DataAggregate("d1", "data 1", getEmptyMetaData());
+    service.addDataAggregateEntity(dataAggregateA, new RelationToDataAggregate("r1", getEmptyMetaData()));
+    let dataAggregateB = new DataAggregate("d2", "data 2", getEmptyMetaData());
+    service.addDataAggregateEntity(dataAggregateB, new RelationToDataAggregate("r2", getEmptyMetaData()));
+
+
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    service.addEndpoint(endpointA);
+    endpointA.addDataAggregateEntity(dataAggregateA, new RelationToDataAggregate("r3", getEmptyMetaData()));
+
+    let endpointB = new ExternalEndpoint("e2", "endpoint 2", getEmptyMetaData());
+    service.addEndpoint(endpointB);
+    endpointB.addDataAggregateEntity(dataAggregateA, new RelationToDataAggregate("r4", getEmptyMetaData()));
+
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    service.addEndpoint(endpointC);
+
+    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    service.addEndpoint(endpointD);
+
+    system.addEntities([dataAggregateA, dataAggregateB]);
+    system.addEntity(service);
+
+    let measureValue = componentMeasureImplementations["ratioOfStateDependencyOfEndpoints"]({component: service, system: system});
+    expect(measureValue).toEqual(0.5);
+
+})

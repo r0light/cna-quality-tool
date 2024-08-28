@@ -1006,7 +1006,7 @@ export const qualityModel: QualityModelSpec = {
         },
         "ratioOfStateDependencyOfEndpoints": {
             "name": "Ratio of state dependency of endpoints",
-            "calculation": "",
+            "calculation": "Number of Endpoints requiring a Data Aggregate / Total number of Endpoints",
             "sources": ["Karhikeyan2012"]
         },
         "ratioOfStatefulComponents": {

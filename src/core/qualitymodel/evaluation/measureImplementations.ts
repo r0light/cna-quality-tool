@@ -1058,6 +1058,18 @@ export const numberOfSynchronousEndpointsOfferedByAService: Calculation<{ compon
         .filter(endpoint => SYNCHRONOUS_ENDPOINT_KIND.includes(endpoint.getProperty("kind").value)).length;
 }
 
+export const ratioOfStateDependencyOfEndpoints: Calculation<{ component: Component, system: System }> = (parameters) => {
+    let allEndpoints = parameters.component.getEndpointEntities.concat(parameters.component.getExternalEndpointEntities);
+
+    if (allEndpoints.length === 0) {
+        return 0;
+    }
+
+    let numberOfDependingEndpoints = allEndpoints.filter(endpoint => endpoint.getDataAggregateEntities.length > 0).length;
+
+    return numberOfDependingEndpoints / allEndpoints.length;
+}
+
 export const numberOfAsynchronousEndpointsOfferedByAService: Calculation<{ component: Component, system: System }> = (parameters) => {
     return parameters.component.getEndpointEntities.concat(parameters.component.getExternalEndpointEntities)
         .filter(endpoint => ASYNCHRONOUS_ENDPOINT_KIND.includes(endpoint.getProperty("kind").value)).length;
@@ -1367,6 +1379,7 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "cohesionBetweenEndpointsBasedOnDataAggregateUsage": cohesionBetweenEndpointsBasedOnDataAggregateUsage,
     "numberOfProvidedSynchronousAndAsynchronousEndpoints": numberOfProvidedSynchronousAndAsynchronousEndpoints,
     "numberOfSynchronousEndpointsOfferedByAService": numberOfSynchronousEndpointsOfferedByAService,
+    "ratioOfStateDependencyOfEndpoints": ratioOfStateDependencyOfEndpoints,
     "numberOfAsynchronousEndpointsOfferedByAService": numberOfAsynchronousEndpointsOfferedByAService,
     "numberOfSynchronousOutgoingLinks": numberOfSynchronousOutgoingLinks,
     "numberOfAsynchronousOutgoingLinks": numberOfAsynchronousOutgoingLinks,
