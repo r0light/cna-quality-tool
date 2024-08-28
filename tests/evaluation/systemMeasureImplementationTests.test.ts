@@ -1589,3 +1589,131 @@ test("numberOfServiceConnectedToStorageBackingService", () => {
     expect(measureValue).toEqual(3);
 
 })
+
+test("numberOfRequestTraces", () => {
+
+    let system = new System("testSystem");
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA);
+    serviceA.addEndpoint(externalEndpointA);
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+
+    let serviceD = new Service("s4", "testService", getEmptyMetaData());
+    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    serviceD.addEndpoint(endpointD);
+
+
+    let serviceE = new Service("s5", "testService", getEmptyMetaData());
+    let endpointE = new Endpoint("e5", "endpoint 5", getEmptyMetaData());
+    let externalEndpointE = new ExternalEndpoint("ex2", "external endpoint 2", getEmptyMetaData());
+    serviceE.addEndpoint(endpointE);
+    serviceE.addEndpoint(externalEndpointE);
+
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+    let linkBC = new Link("l2", serviceB, endpointC);
+    let linkDB = new Link("l3", serviceD, endpointB);
+    let linkED = new Link("l4", serviceE, endpointD);
+
+
+    let requestTraceA = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
+    requestTraceA.setLinks = [linkAB, linkBC];
+    requestTraceA.setExternalEndpoint = externalEndpointA;
+
+    let requestTraceB = new RequestTrace("rq2", "request trace 2", getEmptyMetaData());
+    requestTraceB.setLinks = [linkED, linkDB, linkBC];
+    requestTraceB.setExternalEndpoint = externalEndpointE;
+
+    system.addEntities([serviceA, serviceB, serviceC, serviceD, serviceE]);
+    system.addEntities([linkAB, linkBC, linkDB, linkED]);
+    system.addEntities([requestTraceA, requestTraceB]);
+
+    let measureValue = systemMeasureImplementations["numberOfRequestTraces"](system);
+    expect(measureValue).toEqual(2);
+})
+
+test("averageComplexityOfRequestTraces", () => {
+    let system = new System("testSystem");
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA);
+    serviceA.addEndpoint(externalEndpointA);
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+
+    let serviceD = new Service("s4", "testService", getEmptyMetaData());
+    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    serviceD.addEndpoint(endpointD);
+
+
+    let serviceE = new Service("s5", "testService", getEmptyMetaData());
+    let endpointE = new Endpoint("e5", "endpoint 5", getEmptyMetaData());
+    let externalEndpointE = new ExternalEndpoint("ex2", "external endpoint 2", getEmptyMetaData());
+    serviceE.addEndpoint(endpointE);
+    serviceE.addEndpoint(externalEndpointE);
+
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+    let linkBC = new Link("l2", serviceB, endpointC);
+    let linkDB = new Link("l3", serviceD, endpointB);
+    let linkED = new Link("l4", serviceE, endpointD);
+
+
+    let requestTraceA = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
+    requestTraceA.setLinks = [linkAB, linkBC];
+    requestTraceA.setExternalEndpoint = externalEndpointA;
+
+    let requestTraceB = new RequestTrace("rq2", "request trace 2", getEmptyMetaData());
+    requestTraceB.setLinks = [linkED, linkDB, linkBC];
+    requestTraceB.setExternalEndpoint = externalEndpointE;
+
+    system.addEntities([serviceA, serviceB, serviceC, serviceD, serviceE]);
+    system.addEntities([linkAB, linkBC, linkDB, linkED]);
+    system.addEntities([requestTraceA, requestTraceB]);
+
+    let measureValue = systemMeasureImplementations["averageComplexityOfRequestTraces"](system);
+    expect(measureValue).toEqual(2.5);
+})
+
+
+test("amountOfRedundancy", () => {
+    let system = new System("testSystem");
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    let infrastructureB = new Infrastructure("i2", "infrastructure 2", getEmptyMetaData());
+    let infrastructureC = new Infrastructure("i3", "infrastructure 3", getEmptyMetaData());
+
+    let deploymentMappingA = new DeploymentMapping("dm1", serviceA, infrastructureA);
+    let deploymentMappingB = new DeploymentMapping("dm2", serviceA, infrastructureB);
+    let deploymentMappingC = new DeploymentMapping("dm3", serviceB, infrastructureB);
+    let deploymentMappingD = new DeploymentMapping("dm4", serviceC, infrastructureC);
+
+    system.addEntities([serviceA, serviceB, serviceC]);
+    system.addEntities([infrastructureA, infrastructureB, infrastructureC]);
+    system.addEntities([deploymentMappingA, deploymentMappingB, deploymentMappingC, deploymentMappingD]);
+
+    let measureValue = systemMeasureImplementations["amountOfRedundancy"](system);
+    expect(measureValue).toEqual(4/3);
+})

@@ -186,3 +186,31 @@ test("couplingOfServicesBasedTimesThatTheyOccurInTheSameRequestTrace", () => {
     let measureValue = componentPairMeasureImplementations["couplingOfServicesBasedTimesThatTheyOccurInTheSameRequestTrace"]({componentA: serviceA, componentB: serviceB, system: system});
     expect(measureValue).toEqual(1/2);
 })
+
+test("numberOfLinksBetweenTwoServices", () => {
+    let system = new System("testSystem");
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointB1 = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB1);
+    let endpointB2 = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB2);
+    let endpointB3 = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB3);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e4", "endpoint 3", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+
+    let linkAB1 = new Link("l1", serviceA, endpointB1);
+    let linkAB2 = new Link("l2", serviceA, endpointB2);
+    let linkAC = new Link("l3", serviceA, endpointC);
+
+    system.addEntities([serviceA, serviceB, serviceC]);
+    system.addEntities([linkAB1, linkAB2, linkAC]);
+
+    let measureValue = componentPairMeasureImplementations["numberOfLinksBetweenTwoServices"]({componentA: serviceA, componentB: serviceB, system: system});
+    expect(measureValue).toEqual(2);
+})

@@ -508,7 +508,7 @@ export const qualityModel: QualityModelSpec = {
             "categories": ["businessDomain", "networkCommunication"],
             "relevantEntities": ["requestTrace"],
             "sources": [],
-            "measures": ["maximumLengthOfServiceLinkChainPerRequestTrace", "maximumNumberOfServicesWithinARequestTrace", "serviceCompositionScope", "requestTraceLength", "numberOfCyclesInRequestTraces"]
+            "measures": ["maximumLengthOfServiceLinkChainPerRequestTrace", "maximumNumberOfServicesWithinARequestTrace", "numberOfRequestTraces", "averageComplexityOfRequestTraces", "requestTraceLength", "numberOfCyclesInRequestTraces"]
         },
         "logicalGrouping": {
             "name": "Logical grouping",
@@ -1191,12 +1191,12 @@ export const qualityModel: QualityModelSpec = {
         },
         "numberOfLinksBetweenTwoServices": {
             "name": "Number of links between two services",
-            "calculation": "",
+            "calculation": "Number of Links from component to unique endpoints of component B",
             "sources": ["Hofmeister2008"]
         },
         "aggregateSystemMetricToMeasureServiceCoupling": {
             "name": "Aggregate System metric to measure service coupling",
-            "calculation": " (sum-of(\"Number of Components a component is linked to\" for all Service Consumers)) / (Number of services) * (Number of services - 1)",
+            "calculation": "(sum-of(\"Number of Components a component is linked to\" for all Service Consumers)) / (Number of services) * (Number of services - 1)",
             "sources": ["Hofmeister2008", "Gamage2021"]
         },
         "numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfComponents": {
@@ -1344,9 +1344,14 @@ export const qualityModel: QualityModelSpec = {
             "calculation": "Maximum of number-of components within a request trace for all request traces",
             "sources": ["Apel2019"]
         },
-        "serviceCompositionScope": {
-            "name": "Service composition scope",
-            "calculation": "",
+        "numberOfRequestTraces": {
+            "name": "Number of Request Traces",
+            "calculation": "Total number of request traces",
+            "sources": ["Zimmermann2015"]
+        },
+        "averageComplexityOfRequestTraces": {
+            "name": "Average Complexity of Request Traces",
+            "calculation": "(sum-of(Number of Links in Request Trace) for all Request Traces) / Total number of request traces",
             "sources": ["Zimmermann2015"]
         },
         "requestTraceLength": {
@@ -1426,7 +1431,7 @@ export const qualityModel: QualityModelSpec = {
         },
         "amountOfRedundancy": {
             "name": "Amount of redundancy",
-            "calculation": "",
+            "calculation": "sum-of(deployment mappings) for all Components / Number of deployed Components",
             "sources": ["Zimmermann2015"]
         },
         "serviceReplicationLevel": {

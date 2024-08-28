@@ -911,6 +911,37 @@ export const numberOfServiceConnectedToStorageBackingService: Calculation<System
     return servicesConnectedToAStorageBackingService.size;
 }
 
+export const numberOfRequestTraces: Calculation<System> = (system) => {
+    return system.getRequestTraceEntities.size;
+}
+
+export const averageComplexityOfRequestTraces: Calculation<System> = (system) => {
+    if (system.getRequestTraceEntities.size === 0) {
+        return 0;
+    }
+
+    return average(system.getRequestTraceEntities.entries().map(([requestTraceId, requestTrace]) => requestTrace.getLinks.size).toArray());
+}
+
+export const amountOfRedundancy: Calculation<System> = (system) => {
+    if (system.getDeploymentMappingEntities.size === 0) {
+        return 0;
+    }
+
+    let deploymentMappings: Set<string> = new Set();
+    let deployedComponents: Set<string> = new Set();
+
+    for (const [deploymentMappingId, deploymentMapping] of system.getDeploymentMappingEntities) {
+        if (deploymentMapping.getDeployedEntity.constructor.name !== Infrastructure.name) {
+            deploymentMappings.add(deploymentMappingId);
+            deployedComponents.add(deploymentMapping.getDeployedEntity.getId);
+        }
+    }
+
+    return deploymentMappings.size / deployedComponents.size
+
+}
+
 export const systemMeasureImplementations: { [measureKey: string]: Calculation<System> } = {
     "serviceReplicationLevel": serviceReplicationLevel,
     "storageReplicationLevel": storageReplicationLevel,
@@ -965,7 +996,10 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation<S
     "numberOfServicesWhichHaveIncomingLinks": numberOfServicesWhichHaveIncomingLinks,
     "numberOfServicesWhichHaveOutgoingLinks": numberOfServicesWhichHaveOutgoingLinks,
     "numberOfServicesWhichHaveBothIncomingAndOutgoingLinks": numberOfServicesWhichHaveBothIncomingAndOutgoingLinks,
-    "numberOfServiceConnectedToStorageBackingService": numberOfServiceConnectedToStorageBackingService
+    "numberOfServiceConnectedToStorageBackingService": numberOfServiceConnectedToStorageBackingService,
+    "numberOfRequestTraces": numberOfRequestTraces,
+    "averageComplexityOfRequestTraces": averageComplexityOfRequestTraces,
+    "amountOfRedundancy": amountOfRedundancy
 }
 
 export const serviceInterfaceDataCohesion: Calculation<{ component: Component, system: System }> = (parameters) => {
@@ -1516,12 +1550,27 @@ export const couplingOfServicesBasedTimesThatTheyOccurInTheSameRequestTrace: Cal
     return requestTracesIncludingA.intersection(requestTracesIncludingB).size / allRequestTraces.size;
 }
 
+export const numberOfLinksBetweenTwoServices: Calculation<{ componentA: Component, componentB: Component, system: System }> = (parameters) => {
+    let numberOfLinksFromAToB = 0;
+    let idA: string = parameters.componentA.getId;
+    let endpointIdsOfB: string[] = parameters.componentB.getEndpointEntities.concat(parameters.componentB.getExternalEndpointEntities).map(endpoint => endpoint.getId);
+
+    for (const [linkId, link] of parameters.system.getLinkEntities) {
+        if (link.getSourceEntity.getId === idA && endpointIdsOfB.includes(link.getTargetEndpoint.getId)) {
+            numberOfLinksFromAToB++;
+        }
+    }
+
+    return numberOfLinksFromAToB;
+}
+
 export const componentPairMeasureImplementations: { [measureKey: string]: Calculation<{ componentA: Component, componentB: Component, system: System }> } = {
     "couplingOfServicesBasedOnUsedDataAggregates": couplingOfServicesBasedOnUsedDataAggregates,
     "couplingOfServicesBasedServicesWhichCallThem": couplingOfServicesBasedServicesWhichCallThem,
     "couplingOfServicesBasedServicesWhichAreCalledByThem": couplingOfServicesBasedServicesWhichAreCalledByThem,
     "couplingOfServicesBasedOnAmountOfRequestTracesThatIncludeASpecificLink": couplingOfServicesBasedOnAmountOfRequestTracesThatIncludeASpecificLink,
-    "couplingOfServicesBasedTimesThatTheyOccurInTheSameRequestTrace": couplingOfServicesBasedTimesThatTheyOccurInTheSameRequestTrace
+    "couplingOfServicesBasedTimesThatTheyOccurInTheSameRequestTrace": couplingOfServicesBasedTimesThatTheyOccurInTheSameRequestTrace,
+    "numberOfLinksBetweenTwoServices": numberOfLinksBetweenTwoServices
 }
 
 
