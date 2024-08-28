@@ -910,7 +910,7 @@ test("serviceSize", () => {
     expect(measureValue).toEqual(4);
 })
 
-test("unusedResourceCount", () => {
+test("unusedEndpointCount", () => {
     let system = new System("testSystem");
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
@@ -934,7 +934,7 @@ test("unusedResourceCount", () => {
     system.addEntities([serviceA, serviceB, serviceC]);
     system.addEntities([linkBA, linkCA, linkCB]);
 
-    let measureValue = componentMeasureImplementations["unusedResourceCount"]({component: serviceA, system: system});
+    let measureValue = componentMeasureImplementations["unusedEndpointCount"]({component: serviceA, system: system});
     expect(measureValue).toEqual(2);
 })
 

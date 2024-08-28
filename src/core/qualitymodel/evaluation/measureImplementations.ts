@@ -1374,7 +1374,7 @@ export const serviceSize: Calculation<{ component: Component, system: System }> 
     return resourceCount(parameters) as number + (numberOfComponentsThatAreLinkedToAComponent(parameters) as number);
 }
 
-export const unusedResourceCount: Calculation<{ component: Component, system: System }> = (parameters) => {
+export const unusedEndpointCount: Calculation<{ component: Component, system: System }> = (parameters) => {
 
     let endpointUsage: Map<string, string[]> = new Map();
 
@@ -1437,7 +1437,7 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "degreeOfStorageBackendSharing": degreeOfStorageBackendSharing,
     "resourceCount": resourceCount,
     "serviceSize": serviceSize,
-    "unusedResourceCount": unusedResourceCount,
+    "unusedEndpointCount": unusedEndpointCount,
     "numberOfReadEndpointsProvidedByAService": numberOfReadEndpointsProvidedByAService,
     "numberOfWriteEndpointsProvidedByAService": numberOfWriteEndpointsProvidedByAService
 }

@@ -315,7 +315,7 @@ export const qualityModel: QualityModelSpec = {
             "categories": ["businessDomain"],
             "relevantEntities": ["service", "endpoint"],
             "sources": [],
-            "measures": ["numberOfProvidedSynchronousAndAsynchronousEndpoints", "numberOfSynchronousEndpointsOfferedByAService", "serviceInterfaceUsageCohesion", "distributionOfSynchronousCalls", "cohesionOfEndpointsBasedOnInvocationByOtherServices", "unusedResourceCount"]
+            "measures": ["numberOfProvidedSynchronousAndAsynchronousEndpoints", "numberOfSynchronousEndpointsOfferedByAService", "serviceInterfaceUsageCohesion", "distributionOfSynchronousCalls", "cohesionOfEndpointsBasedOnInvocationByOtherServices", "unusedEndpointCount"]
         },
         "commandQueryResponsibilitySegregation": {
             "name": "Command Query Responsibility Segregation",
@@ -540,7 +540,7 @@ export const qualityModel: QualityModelSpec = {
             "categories": ["applicationAdministration", "businessDomain"],
             "relevantEntities": ["system", "component", "infrastructure"],
             "sources": [],
-            "measures": ["averageNumberOfEndpointsPerService", "numberOfDependencies", "numberOfVersionsPerService", "concurrentlyAvailableVersionsComplexity", "serviceSupportForTransactions", "dataModelScope", "numberOfComponents"]
+            "measures": ["averageNumberOfEndpointsPerService", "numberOfDependencies", "numberOfVersionsPerService", "concurrentlyAvailableVersionsComplexity", "serviceSupportForTransactions", "numberOfComponents"]
         },
         "operationOutsourcing": {
             "name": "Operation outsourcing",
@@ -952,7 +952,7 @@ export const qualityModel: QualityModelSpec = {
         "dataAggregateScope": {
             "name": "Data aggregate scope",
             "calculation": "Total number of Data Aggregates in a System",
-            "sources": ["Shim2008"]
+            "sources": ["Shim2008", "Zimmermann2015"]
         },
         "serviceInterfaceDataCohesion": {
             "name": "Service Interface Data Cohesion",
@@ -1414,11 +1414,6 @@ export const qualityModel: QualityModelSpec = {
             "calculation": "",
             "sources": ["Bogner2017", "Hirzalla2009"]
         },
-        "dataModelScope": {
-            "name": "Data Model Scope",
-            "calculation": "",
-            "sources": ["Zimmermann2015"]
-        },
         "numberOfComponents": {
             "name": "Number of components",
             "calculation": "Total number of components",
@@ -1517,7 +1512,7 @@ export const qualityModel: QualityModelSpec = {
         "totalNumberOfLinksInASystem": {
             "name": "Total number of links in a system",
             "calculation": "Total number of links",
-            "sources": ["Brito2021", "Jin2018", "Tiwari2014", "Assuncao2021"]
+            "sources": ["Brito2021", "Jin2018", "Tiwari2014", "Assuncao2021", "Zimmermann2015"]
         },
         "numberOfSynchronousEndpoints": {
             "name": "Number of synchronous endpoints",
@@ -1528,11 +1523,6 @@ export const qualityModel: QualityModelSpec = {
             "name": "Number of asynchronous endpoints",
             "calculation": "Total number of asynchronous endpoints",
             "sources": ["Shim2008"]
-        },
-        "numberOfAsynchronousAndSynchronousLinks": {
-            "name": "Number of asynchronous and synchronous links",
-            "calculation": "",
-            "sources": ["Zimmermann2015"]
         },
         "numberOfServicesWhichHaveIncomingLinks": {
             "name": "Number of Services which have incoming links",
@@ -1569,7 +1559,7 @@ export const qualityModel: QualityModelSpec = {
             "calculation": "Number of Data Aggregates used in a service",
             "sources": ["Asik2017"]
         },
-        "unusedResourceCount": {
+        "unusedEndpointCount": {
             "name": "Unused Endpoint Count",
             "calculation": "Number of Endpoints of a Component not targeted by a Link",
             "sources": ["Asik2017"]
