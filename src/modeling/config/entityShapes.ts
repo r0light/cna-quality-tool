@@ -244,8 +244,8 @@ const BackingService = dia.Element.define("qualityModel.BackingService", {
     defaults: {
         type: "qualityModel.BackingService",
         size: {
-            width: 200,
-            height: 120
+            width: 140,
+            height: 140
         },
         fontSize: 14,
         fill: "white",
@@ -253,12 +253,12 @@ const BackingService = dia.Element.define("qualityModel.BackingService", {
         strokeWidth: 2
     },
     size: {
-        width: 200,
-        height: 120
+        width: 140,
+        height: 140
     },
     attrs: {
         body: {
-            points: "calc(0.5 * l),0 calc(l),calc(0.3 * l) calc(0.5 * l),calc(0.6 * l) 0,calc(0.3 * l)",
+            points: "calc(0.5 * l),0 calc(l),calc(0.4 * l) calc(0.5 * l),calc(0.8 * l) 0,calc(0.4 * l)",
             strokeWidth: 2,
             stroke: "black",
             fill: "white",

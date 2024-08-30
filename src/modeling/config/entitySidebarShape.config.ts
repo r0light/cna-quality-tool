@@ -56,8 +56,8 @@ const SidebarEntityShapes = {
     BackingService: {
         index: 3,
         shape: new BackingService({
-            position: { x: 20, y: 100 },
-            size: { width: 100, height: 45 },
+            position: { x: 20, y: 90 },
+            size: { width: 100, height: 100 },
             attrs: {
                 root: {
                     title: "cna.qualityModel.BackingService"
