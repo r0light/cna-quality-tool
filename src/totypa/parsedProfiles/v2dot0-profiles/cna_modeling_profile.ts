@@ -816,8 +816,25 @@ export const cna_modeling_profile: TOSCA_File = {
         },
         "providedFunctionality": {
           "type": "string",
-          "description": "A short description of the provided functionality.",
-          "required": false
+          "description": "The functionality provided by this backing service",
+          "required": true,
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "messaging/events",
+                "proxy",
+                "naming/addressing",
+                "configuration",
+                "authentication/authorization",
+                "logging",
+                "metrics",
+                "tracing",
+                "other"
+              ]
+            ]
+          },
+          "default": "other"
         }
       }
     },
@@ -1418,6 +1435,23 @@ export const cna_modeling_profile: TOSCA_File = {
       },
       "derived_from": "Root",
       "properties": {
+        "kind": {
+          "type": "string",
+          "required": true,
+          "description": "The kind of backing data, meaning what kind of data this refers to",
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "config",
+                "secret",
+                "logs",
+                "metrics"
+              ]
+            ]
+          },
+          "default": "config"
+        },
         "included_data": {
           "type": "map",
           "required": true,

@@ -368,6 +368,8 @@ export const directServiceSharing: Calculation<System> = (system) => {
     let servicesUsedBy = new Map<string, Set<string>>();
     let endpointsUsedBy = new Map<string, Set<string>>();
 
+    console.log(servicesUsedBy);
+
     for (const [linkId, link] of system.getLinkEntities.entries()) {
         let targetServiceId = system.searchComponentOfEndpoint(link.getTargetEndpoint.getId).getId;
 
@@ -388,11 +390,13 @@ export const directServiceSharing: Calculation<System> = (system) => {
         }
     }
 
-    let numberOfSharedServices = servicesUsedBy.entries()
-        .filter(serviceUsedBy => serviceUsedBy[1].size >= 2).toArray().length;
+    console.log(servicesUsedBy.entries());
 
-    let numberOfSharedEndpoints = endpointsUsedBy.entries()
-        .filter(endpointUsedBy => endpointUsedBy[1].size >= 2).toArray().length;
+    let numberOfSharedServices = [...servicesUsedBy.entries()]
+        .filter(serviceUsedBy => serviceUsedBy[1].size >= 2).length;
+
+    let numberOfSharedEndpoints = [...endpointsUsedBy.entries()]
+        .filter(endpointUsedBy => endpointUsedBy[1].size >= 2).length;
 
     return (((numberOfSharedServices / allComponents.length) + (numberOfSharedEndpoints / system.getLinkEntities.size)) / 2);
 }
@@ -458,8 +462,8 @@ export const ratioOfSharedNonExternalComponentsToNonExternalComponents: Calculat
         }
     }
 
-    let numberOfSharedServices = servicesUsedBy.entries()
-        .filter(serviceUsedBy => serviceUsedBy[1].size >= 2).toArray().length;
+    let numberOfSharedServices = [...servicesUsedBy.entries()]
+        .filter(serviceUsedBy => serviceUsedBy[1].size >= 2).length;
 
     return numberOfSharedServices / allComponents.length;
 
@@ -496,7 +500,7 @@ export const ratioOfSharedDependenciesOfNonExternalComponentsToPossibleDependenc
         }
     }
 
-    let sumOfServiceDependencyTuples = servicesUsedBy.entries().map(entry => {
+    let sumOfServiceDependencyTuples = [...servicesUsedBy.entries()].map(entry => {
         let dependents = entry[1];
         if (dependents.size >= 2) {
             return dependents.size * (dependents.size - 1) // sum of "dependency relationships" from one of the dependent services considering the dependency and the other components which share this dependeny
@@ -569,7 +573,7 @@ export const numberOfSynchronousCycles: Calculation<System> = (system) => {
 }
 
 export const densityOfAggregation: Calculation<System> = (system) => {
-    let aggregators = system.getComponentEntities.entries().filter(component => system.getOutgoingLinksOfComponent(component[1].getId).length > 0 && system.getIncomingLinksOfComponent(component[1].getId).length > 0);
+    let aggregators = [...system.getComponentEntities.entries()].filter(component => system.getOutgoingLinksOfComponent(component[1].getId).length > 0 && system.getIncomingLinksOfComponent(component[1].getId).length > 0);
 
     let sum = 0;
 
@@ -702,7 +706,7 @@ export const databaseTypeUtilization: Calculation<System> = (system) => {
         }
     }
 
-    return [...componentsPerStorage.values().filter(componentSet => componentSet.size === 1)].length / componentsPerStorage.size;
+    return [...componentsPerStorage.values()].filter(componentSet => componentSet.size === 1).length / componentsPerStorage.size;
 }
 
 export const averageNumberOfEndpointsPerService: Calculation<System> = (system) => {
@@ -736,9 +740,9 @@ export const ratioOfProviderManagedComponentsAndInfrastructure: Calculation<Syst
         return 0;
     }
 
-    let numberOfManagedComponents = allComponents.entries().filter(component => component[1].getProperty("managed").value).reduce((accumulator, current) => accumulator + 1, 0);
+    let numberOfManagedComponents = [...allComponents.entries()].filter(component => component[1].getProperty("managed").value).reduce((accumulator, current) => accumulator + 1, 0);
 
-    let numberOfManagedInfrastructure = allInfrastructure.entries().filter(infrastructure => MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS.includes(infrastructure[1].getProperty("environment_access").value)).reduce((accumulator, current) => accumulator + 1, 0);
+    let numberOfManagedInfrastructure = [...allInfrastructure.entries()].filter(infrastructure => MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS.includes(infrastructure[1].getProperty("environment_access").value)).reduce((accumulator, current) => accumulator + 1, 0);
 
     return (numberOfManagedComponents + numberOfManagedInfrastructure) / (allComponents.size + allInfrastructure.size);
 }
@@ -767,15 +771,15 @@ export const componentDensity: Calculation<System> = (system) => {
         }
     })
 
-    return allComponents.entries().filter(component => deployedEntityIds.includes(component[0])).reduce((accumulator, current) => accumulator + 1, 0) /
-        allInfrastructure.entries().filter(infrastructure => usedInfrastructureIds.includes(infrastructure[0])).reduce((accumulator, current) => accumulator + 1, 0);
+    return [...allComponents.entries()].filter(component => deployedEntityIds.includes(component[0])).reduce((accumulator, current) => accumulator + 1, 0) /
+        [...allInfrastructure.entries()].filter(infrastructure => usedInfrastructureIds.includes(infrastructure[0])).reduce((accumulator, current) => accumulator + 1, 0);
 }
 
 export const numberOfAvailabilityZonesUsed: Calculation<System> = (system) => {
 
     let availabilityZones: Set<string> = new Set();
 
-    system.getInfrastructureEntities.entries().forEach(([infrastructureId, infrastructure]) => {
+    [...system.getInfrastructureEntities.entries()].forEach(([infrastructureId, infrastructure]) => {
         let usedAvailabilityZones = (infrastructure.getProperty("availability_zone").value as string).split(",");
         usedAvailabilityZones.forEach(zoneId => availabilityZones.add(zoneId));
     });
@@ -797,7 +801,7 @@ export const rollingUpdateOption: Calculation<System> = (system) => {
         return 0;
     }
 
-    let infrastructureEnablingRollingUpdates = infrastructureDeployingComponents.entries().filter(infrastructure => infrastructure[1].getProperty("supported_update_strategies").value.some(strategy => ROLLING_UPDATE_STRATEGY_OPTIONS.includes(strategy))).map(infrastructure => infrastructure[1]).toArray();
+    let infrastructureEnablingRollingUpdates = [...infrastructureDeployingComponents.entries()].filter(infrastructure => infrastructure[1].getProperty("supported_update_strategies").value.some(strategy => ROLLING_UPDATE_STRATEGY_OPTIONS.includes(strategy))).map(infrastructure => infrastructure[1]);
 
     return infrastructureEnablingRollingUpdates.length / infrastructureDeployingComponents.size;
 }
@@ -805,7 +809,7 @@ export const rollingUpdateOption: Calculation<System> = (system) => {
 export const numberOfLinksWithRetryLogic: Calculation<System> = (system) => {
 
     // TODO also limit to endpoints which are safe/idempotent
-    let linksToSynchronousEndpoints = system.getLinkEntities.entries().filter(([linkId, link]) => SYNCHRONOUS_ENDPOINT_KIND.includes(link.getTargetEndpoint.getProperty("kind").value)).map(([linkId, link]) => link).toArray();
+    let linksToSynchronousEndpoints = [...system.getLinkEntities.entries()].filter(([linkId, link]) => SYNCHRONOUS_ENDPOINT_KIND.includes(link.getTargetEndpoint.getProperty("kind").value)).map(([linkId, link]) => link);
 
     if (linksToSynchronousEndpoints.length === 0) {
         return 0;
@@ -819,7 +823,7 @@ export const numberOfLinksWithRetryLogic: Calculation<System> = (system) => {
 
 export const numberOfLinksWithComplexFailover: Calculation<System> = (system) => {
     // TODO also limit to endpoints which are safe/idempotent
-    let linksToSynchronousEndpoints = system.getLinkEntities.entries().filter(([linkId, link]) => SYNCHRONOUS_ENDPOINT_KIND.includes(link.getTargetEndpoint.getProperty("kind").value)).map(([linkId, link]) => link).toArray();
+    let linksToSynchronousEndpoints = [...system.getLinkEntities.entries()].filter(([linkId, link]) => SYNCHRONOUS_ENDPOINT_KIND.includes(link.getTargetEndpoint.getProperty("kind").value)).map(([linkId, link]) => link);
 
     if (linksToSynchronousEndpoints.length === 0) {
         return 0;
@@ -835,11 +839,11 @@ export const totalNumberOfComponents: Calculation<System> = (system) => {
 }
 
 export const numberOfServices: Calculation<System> = (system) => {
-    return system.getComponentEntities.entries().filter(([componentId, component]) => component.constructor.name === Service.name).toArray().length;
+    return [...system.getComponentEntities.entries()].filter(([componentId, component]) => component.constructor.name === Service.name).length;
 }
 
 export const numberOfBackingServices: Calculation<System> = (system) => {
-    return system.getComponentEntities.entries().filter(([componentId, component]) => component.constructor.name === BackingService.name).toArray().length;
+    return [...system.getComponentEntities.entries()].filter(([componentId, component]) => component.constructor.name === BackingService.name).length;
 }
 
 export const totalNumberOfLinksInASystem: Calculation<System> = (system) => {
@@ -848,7 +852,7 @@ export const totalNumberOfLinksInASystem: Calculation<System> = (system) => {
 
 export const numberOfSynchronousEndpoints: Calculation<System> = (system) => {
     let sum = 0;
-    system.getComponentEntities.entries().forEach(([componentId, component]) => {
+    [...system.getComponentEntities.entries()].forEach(([componentId, component]) => {
         sum += numberOfSynchronousEndpointsOfferedByAService({ component: component, system: system }) as number;
     })
     return sum;
@@ -856,7 +860,8 @@ export const numberOfSynchronousEndpoints: Calculation<System> = (system) => {
 
 export const numberOfAsynchronousEndpoints: Calculation<System> = (system) => {
     let sum = 0;
-    system.getComponentEntities.entries().forEach(([componentId, component]) => {
+    let allComponents = [...system.getComponentEntities.entries()];
+    allComponents.forEach(([componentId, component]) => {
         sum += numberOfAsynchronousEndpointsOfferedByAService({ component: component, system: system }) as number;
     })
     return sum;
@@ -901,12 +906,12 @@ export const numberOfServiceConnectedToStorageBackingService: Calculation<System
 
     let servicesConnectedToAStorageBackingService: Set<string> = new Set();
 
-    system.getLinkEntities.entries().forEach(([linkId, link]) => {
+    for (const [linkId, link] of system.getLinkEntities.entries()) {
         if (link.getSourceEntity.constructor.name === Service.name
             && system.searchComponentOfEndpoint(link.getTargetEndpoint.getId).constructor.name === StorageBackingService.name) {
             servicesConnectedToAStorageBackingService.add(link.getSourceEntity.getId);
         }
-    })
+    }
 
     return servicesConnectedToAStorageBackingService.size;
 }
@@ -1382,13 +1387,13 @@ export const unusedEndpointCount: Calculation<{ component: Component, system: Sy
         endpointUsage.set(endpoint.getId, []);
     })
 
-    parameters.system.getLinkEntities.entries().forEach(([linkId, link]) => {
+    for (const [linkId, link] of parameters.system.getLinkEntities.entries()) {
         if (endpointUsage.has(link.getTargetEndpoint.getId)) {
             endpointUsage.get(link.getTargetEndpoint.getId).push(linkId);
         }
-    })
+    }
 
-    return endpointUsage.entries().filter(([endpointId, usage]) => usage.length === 0).toArray().length;
+    return [...endpointUsage.entries()].filter(([endpointId, usage]) => usage.length === 0).length;
 }
 
 export const numberOfReadEndpointsProvidedByAService: Calculation<{ component: Component, system: System }> = (parameters) => {
