@@ -215,7 +215,7 @@ node_types:
         type: string
         required: true
         description: The kind of endpoint which can be either "query", "command", or "event". A "query" is a synchronous request for data which the client needs for further processing. A "command" is a synchronous send of data for which the client needs a corresponding answer for further processing. An "event" is an asynchronous send of data for which the client does not expect data to be returned for further processing.
-        validation: { $valid_values: [ $value, ["query", "command", "event"]]}
+        validation: { $valid_values: [ $value, ["query", "command", "send event", "subscribe"]]}
         default: "query"
       method_name:
         type: string

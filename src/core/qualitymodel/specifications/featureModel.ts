@@ -1,7 +1,7 @@
 const PROTOCOLS_SUPPORTING_TLS = ["https", "sftp"];
 
 const SYNCHRONOUS_ENDPOINT_KIND = ["query", "command"];
-const ASYNCHRONOUS_ENDPOINT_KIND = ["event"];
+const ASYNCHRONOUS_ENDPOINT_KIND = ["send event", "subscribe"];
 
 const MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS = ["limited", "none"];
 

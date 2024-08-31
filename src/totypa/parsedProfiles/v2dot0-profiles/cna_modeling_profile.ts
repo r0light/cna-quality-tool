@@ -1260,7 +1260,8 @@ export const cna_modeling_profile: TOSCA_File = {
               [
                 "query",
                 "command",
-                "event"
+                "send event",
+                "subscribe"
               ]
             ]
           },
@@ -1356,7 +1357,8 @@ export const cna_modeling_profile: TOSCA_File = {
               [
                 "query",
                 "command",
-                "event"
+                "send event",
+                "subscribe"
               ]
             ]
           },
