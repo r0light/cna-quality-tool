@@ -9,7 +9,7 @@
             </button>
             <div v-if="button.buttonType === 'button-dropdown'" class="buttonDropDownGroup dropdown">
                 <button :id="button.providedFeature" class="toolbarDropdownButton btn dropdown-toggle"
-                    :class="button.additionalCssClass" type="button" :title="button.tooltipText" data-toggle="dropdown"
+                    :class="button.additionalCssClass" type="button" :title="button.tooltipText" data-bs-toggle="dropdown"
                     data-tooltip-toggle="tooltip" data-placement="bottom" aria-expanded="false">
                     <i :class="button.iconClass"></i>{{ button.text }}
                 </button>

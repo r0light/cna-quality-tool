@@ -1,5 +1,5 @@
 import { dia, shapes } from '@joint/core'
-import { getComponentProperties, getBackingServiceProperties, getStorageBackingServiceProperties, getEndpointProperties, getInfrastructureProperties, getDataAggregateProperties, getBackingDataProperties, getDeploymentMappingProperties, getExternalEndpointProperties, getServiceProperties, getRequestTraceProperties } from "../../core/entities";
+import { getComponentProperties, getBackingServiceProperties, getStorageBackingServiceProperties, getEndpointProperties, getInfrastructureProperties, getDataAggregateProperties, getBackingDataProperties, getDeploymentMappingProperties, getExternalEndpointProperties, getServiceProperties, getRequestTraceProperties, getProxyBackingServiceProperties } from "../../core/entities";
 import EntityTypes from "./entityTypes";
 import { getLinkProperties } from '@/core/entities/link';
 
@@ -314,6 +314,84 @@ const BackingService = dia.Element.define("qualityModel.BackingService", {
         selector: "icon"
     }]
 });
+
+
+const ProxyBackingService = dia.Element.define("qualityModel.ProxyBackingService", {
+    defaults: {
+        type: "qualityModel.ProxyBackingService",
+        size: {
+            width: 140,
+            height: 140
+        },
+        fontSize: 14,
+        fill: "white",
+        stroke: "black",
+        strokeWidth: 2
+    },
+    size: {
+        width: 140,
+        height: 140
+    },
+    attrs: {
+        body: {
+            //points: "0,0 calc(0.5 * w),0 calc(w),calc(0.4 * w) calc(0.5 * w),calc(0.8 * w) 0,calc(0.8 * w)",
+            points: "0,0 calc(0.5 * w),0 calc(w),calc(0.4 * h) calc(0.5 * w),calc(0.8 * h) 0,calc(0.8 * h)",
+            strokeWidth: 2,
+            stroke: "black",
+            fill: "white",
+            class: "entityShape" // TODO keep?
+        },
+        label: {
+            ref: "body",
+            fill: "black",
+            fontFamily: defaultTextFont,
+            fontWeight: "Normal",
+            fontSize: 14,
+            strokeWidth: 0,
+            textAnchor: "middle",
+            textVerticalAnchor: "top",
+            refX: "50%",
+            refY: "40%", // TODO Fix me
+            textWrap: {
+                text: "Proxy Backing Service",
+            },
+            class: "entityLabel" // TODO keep?
+        },
+        icon: {
+            title: "Expand to show included entities",
+            ref: "body",
+            href: expandEntityIconPath,
+            class: "expandEntityIcon",
+            transform: "scale(calc(0.0013 * h))",
+            refX: "49%",
+            refY: "90%",
+            xAlignment: "middle",
+            yAlignment: "bottom",
+            preserveAspectRatio: 'xMidYMin',
+            visibility: "hidden",
+            event: "element:icon:pointerclick",
+        }
+    },
+    collapsed: false,
+    entityTypeHidden: false,
+    entity: {
+        type: EntityTypes.PROXY_BACKING_SERVICE,
+        properties: parseProperties(getComponentProperties().concat(getProxyBackingServiceProperties())),
+        artifacts: []
+    }
+}, {
+    markup: [{
+        tagName: "polygon",
+        selector: "body"
+    }, {
+        tagName: "text",
+        selector: "label"
+    }, {
+        tagName: "image",
+        selector: "icon"
+    }]
+});
+
 
 
 // TODO ensure aspect ratio
@@ -993,7 +1071,7 @@ const BackingData = dia.Element.define("qualityModel.BackingData", {
 
 const entityShapes = Object.assign({
     qualityModel: {
-        Component, Service, BackingService, StorageBackingService,
+        Component, Service, BackingService, StorageBackingService, ProxyBackingService,
         Endpoint, ExternalEndpoint, Link,
         Infrastructure, DeploymentMapping,
         RequestTrace, DataAggregate, BackingData
@@ -1002,7 +1080,7 @@ const entityShapes = Object.assign({
 
 
 export {
-    entityShapes, Component, Service, BackingService, StorageBackingService,
+    entityShapes, Component, Service, BackingService, ProxyBackingService, StorageBackingService,
     Endpoint, ExternalEndpoint, Link,
     Infrastructure, DeploymentMapping,
     RequestTrace, DataAggregate, BackingData

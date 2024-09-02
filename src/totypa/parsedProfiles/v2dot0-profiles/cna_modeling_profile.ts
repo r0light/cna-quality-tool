@@ -838,8 +838,173 @@ export const cna_modeling_profile: TOSCA_File = {
         }
       }
     },
+    "cna-modeling.entities.ProxyBackingService": {
+      "description": "Node Type to model Proxy Backing Service entities, typically Load Balancers, API Gateways or other intermediate Services",
+      "attributes": {
+        "state": {
+          "type": "string"
+        }
+      },
+      "capabilities": {
+        "feature": {
+          "type": "Node"
+        },
+        "proxy": {
+          "type": "cna-modeling.capabilities.Proxy",
+          "valid_source_node_types": [
+            "cna-modeling.entities.Component",
+            "cna-modeling.entities.Service",
+            "cna-modeling.entities.BackingService",
+            "cna-modeling.entities.StorageBackingService"
+          ]
+        }
+      },
+      "requirements": [
+        {
+          "dependency": {
+            "capability": "Node",
+            "node": "Root",
+            "relationship": "DependsOn",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
+        },
+        {
+          "host": {
+            "capability": "Compute",
+            "node": "cna-modeling.entities.Infrastructure",
+            "relationship": "cna-modeling.entities.HostedOn.DeploymentMapping"
+          }
+        },
+        {
+          "provides_endpoint": {
+            "capability": "Endpoint",
+            "relationship": "cna-modeling.relationships.Provides.Endpoint",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
+        },
+        {
+          "provides_external_endpoint": {
+            "capability": "Endpoint.Public",
+            "relationship": "cna-modeling.relationships.Provides.Endpoint",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
+        },
+        {
+          "endpoint_link": {
+            "capability": "Endpoint",
+            "node": "cna-modeling.entities.Endpoint",
+            "relationship": "cna-modeling.relationships.ConnectsTo.Link",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
+        },
+        {
+          "uses_data": {
+            "capability": "Attachment",
+            "node": "cna-modeling.entities.DataAggregate",
+            "relationship": "cna-modeling.relationships.AttachesTo.DataAggregate",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
+        },
+        {
+          "uses_backing_data": {
+            "capability": "Attachment",
+            "node": "cna-modeling.entities.BackingData",
+            "relationship": "cna-modeling.relationships.AttachesTo.BackingData",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
+        },
+        {
+          "proxied_by": {
+            "capability": "cna-modeling.capabilities.Proxy",
+            "node": "cna-modeling.entities.BackingService",
+            "relationship": "cna-modeling.relationships.ProxiedBy.BackingService",
+            "count_range": [
+              0,
+              1
+            ]
+          }
+        }
+      ],
+      "interfaces": {
+        "Standard": {
+          "type": "Lifecycle.Standard"
+        }
+      },
+      "derived_from": "cna-modeling.entities.Component",
+      "properties": {
+        "component_version": {
+          "description": "Domain-specific software component version.\n",
+          "type": "version",
+          "required": false
+        },
+        "admin_credential": {
+          "description": "The optional credential that can be used to authenticate to the software component.",
+          "type": "Credential",
+          "required": false
+        },
+        "managed": {
+          "type": "boolean",
+          "description": "A component is managed if it is exclusively operated by someone else, e.g. a cloud provider and the source code of the component instance is inaccessible. If the source code of a component can be changed by yourself, the component is not managed.",
+          "required": true
+        },
+        "software_type": {
+          "type": "string",
+          "description": "The type of the software in the sense of who developed it. If it is a self-written component use \"custom\", if it is an existing open-source solution which is not customized (apart from configuration) use \"open-source\". If it is licensed proprietary software, use \"proprietary\".",
+          "default": "custom",
+          "required": true,
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "custom",
+                "open-source",
+                "proprietary"
+              ]
+            ]
+          }
+        },
+        "stateless": {
+          "type": "boolean",
+          "description": "True if this component is stateless, that means it requires no disk storage space where data is persisted between executions. That means it can store data to disk, but should not rely on this data to be available for following executions. Instead it should be able to restore required data after a restart in a different environment.",
+          "default": true,
+          "required": true
+        },
+        "load_shedding": {
+          "type": "boolean",
+          "description": "Whether or not this component applies load shedding. That means whether the component rejects incoming load based on certain thresholds (resource usage, concurrent requests).",
+          "required": true,
+          "default": false
+        },
+        "assigned_networks": {
+          "type": "list",
+          "description": "A list of networks to which this component is assigned to.",
+          "entry_schema": {
+            "description": "Either a network id or subnet mask",
+            "type": "string"
+          }
+        }
+      }
+    },
     "cna-modeling.entities.StorageBackingService": {
-      "description": "Node Type to model Storage Backing Service entities",
+      "description": "Node Type to model Storage Backing Service entities, typically databases",
       "attributes": {
         "state": {
           "type": "string"

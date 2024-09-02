@@ -334,6 +334,11 @@ onUpdated(() => {
             artifactOption.attributes.listElementFields.find(field => field.key === "type")["dropdownOptions"] = getAvailableArtifactTypes();
 
             break;
+        case EntityTypes.PROXY_BACKING_SERVICE:
+            let proxyBackingServiceAssignedNetworksOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "assigned_networks");
+            proxyBackingServiceAssignedNetworksOption.includeFormCheck = false;
+            proxyBackingServiceAssignedNetworksOption.value = selectedEntity.model.prop(proxyBackingServiceAssignedNetworksOption.jointJsConfig.modelPath);
+            break;
         case EntityTypes.INFRASTRUCTURE:
 
             let supportedArtifactsOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "supported_artifacts");
@@ -778,20 +783,28 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                     let newWidth = propertyOption.value as number;
                     let oldHeight = selectedEntityElement.size().height;
                     let updatedHeight = oldHeight;
-                    if (selectedEntityElement.prop("entity/type") !== EntityTypes.INFRASTRUCTURE) {
-                        // ensure aspect ratio except for infrastructure
+                    if (selectedEntityElement.prop("entity/type") !== EntityTypes.INFRASTRUCTURE && selectedEntityElement.prop("entity/type") !== EntityTypes.PROXY_BACKING_SERVICE) {
+                        // ensure aspect ratio except for infrastructure and proxy backing service
                         const defaultEntitySize = selectedEntityElement.prop("defaults/size");
-                        const aspectRatio = defaultEntitySize.height / defaultEntitySize.width;
-                        updatedHeight = Number((aspectRatio * (newWidth as number)).toFixed(2));
+                        const horizontalAspectRatio = defaultEntitySize.height / defaultEntitySize.width;
+                        updatedHeight = Number((horizontalAspectRatio * (newWidth as number)).toFixed(2));
                     }
                     selectedEntityElement.resize(newWidth as number, updatedHeight, { deep: true });
                     selectedEntityElement.position(selectedEntityElement.position().x - (newWidth - currentWidth) * 0.5, selectedEntityElement.position().y - (updatedHeight - oldHeight) * 0.5);
                     break;
                 case "entity-height":
+                    let currenHeight = selectedEntityElement.size().height;
                     let newHeight = propertyOption.value;
                     let oldWidth = selectedEntityElement.size().width;
-                    // TODO preserve aspect ratio? -> currently height is not modifiable
-                    selectedEntityElement.resize(oldWidth, newHeight as number, { deep: true });
+                    let updatedWidth = oldWidth;
+                    if (selectedEntityElement.prop("entity/type") !== EntityTypes.INFRASTRUCTURE && selectedEntityElement.prop("entity/type") !== EntityTypes.PROXY_BACKING_SERVICE) {
+                        // ensure aspect ratio except for infrastructure and proxy backing service
+                        const defaultEntitySize = selectedEntityElement.prop("defaults/size");
+                        const verticalAspectRatio = defaultEntitySize.width / defaultEntitySize.height;
+                        updatedWidth = Number((verticalAspectRatio * (newHeight as number)).toFixed(2));
+                    }                 
+                    selectedEntityElement.resize(updatedWidth, newHeight as number, { deep: true });
+                    selectedEntityElement.position(selectedEntityElement.position().x - (updatedWidth - oldWidth) * 0.5, selectedEntityElement.position().y - (newHeight as number - currenHeight) * 0.5);
                 default:
                     break;
             }
@@ -845,6 +858,7 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                 case EntityTypes.SERVICE:
                 case EntityTypes.BACKING_SERVICE:
                 case EntityTypes.STORAGE_BACKING_SERVICE:
+                case EntityTypes.PROXY_BACKING_SERVICE:
                     if (propertyOption.providedFeature === "assigned_networks") {
                         selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, propertyOption.value);
                     }
@@ -852,14 +866,14 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                 case EntityTypes.INFRASTRUCTURE:
                     if (propertyOption.providedFeature === "assigned_networks") {
                         selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, propertyOption.value);
-                    } else if (propertyOption.providedFeature === "supported_artifacts" ) {
+                    } else if (propertyOption.providedFeature === "supported_artifacts") {
                         let supportedArtifacts = [];
                         propertyOption.tableRows.forEach(artifactType => {
                             if (artifactType.columns["supported"]["checked"]) {
                                 supportedArtifacts.push(artifactType.columns["supported"]["id"])
                             }
                         })
-                        selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, supportedArtifacts, { rewrite: true});
+                        selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, supportedArtifacts, { rewrite: true });
                     } else if (propertyOption.providedFeature === "supported_update_strategies") {
                         let supportedStrategies = [];
                         propertyOption.tableRows.forEach(strategy => {

@@ -1,11 +1,11 @@
 tosca_definitions_version: tosca_2_0
 
-profile: org.dsg.cna-modeling:0.2
+profile: org.dsg.cna-modeling:0.4
 
 metadata:
   template_name: profile.yaml
   template_author: Distributed Systems Group
-  template_version: 0.3
+  template_version: 0.4
 
 description: >-
   This TOSCA definitions document contains the CNA Modeling TOSCA profile

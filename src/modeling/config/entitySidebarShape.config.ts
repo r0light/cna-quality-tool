@@ -2,7 +2,8 @@ import { util } from '@joint/core'
 import { Component, Service, BackingService, StorageBackingService,
     Endpoint, ExternalEndpoint, Link,
     Infrastructure, DeploymentMapping,
-    RequestTrace, DataAggregate, BackingData } from './entityShapes'
+    RequestTrace, DataAggregate, BackingData, 
+    ProxyBackingService} from './entityShapes'
 
 /**
  * Configuration of the available entity shapes  
@@ -57,7 +58,7 @@ const SidebarEntityShapes = {
         index: 3,
         shape: new BackingService({
             position: { x: 20, y: 90 },
-            size: { width: 100, height: 100 },
+            size: { width: 90, height: 90 },
             attrs: {
                 root: {
                     title: "cna.qualityModel.BackingService"
@@ -97,10 +98,32 @@ const SidebarEntityShapes = {
         })
     },
 
-    Endpoint: {
+    ProxyBackingService: {
         index: 5,
+        shape: new ProxyBackingService({
+            position: { x: 20, y: 170 },
+            size: { width: 90, height: 90 },
+            attrs: {
+                root: {
+                    title: "cna.qualityModel.ProxyBackingService"
+                },
+                body: {
+                    class: "entityHighlighting"
+                },
+                label: {
+                    fontSize: 11,
+                    textWrap: {
+                        text: "Proxy Backing Service",
+                    }
+                }
+            }
+        })
+    },
+
+    Endpoint: {
+        index: 6,
         shape: new Endpoint({
-            position: { x: 41, y: 182 },
+            position: { x: 41, y: 252 },
             size: { width: 55, height: 55 },
             attrs: {
                 root: {
@@ -121,9 +144,9 @@ const SidebarEntityShapes = {
     },
 
     ExternalEndpoint: {
-        index: 6,
+        index: 7,
         shape: new ExternalEndpoint({
-            position: { x: 155, y: 182 },
+            position: { x: 155, y: 252 },
             size: { width: 55, height: 55 },
             attrs: {
                 root: {
@@ -144,9 +167,9 @@ const SidebarEntityShapes = {
     },
 
     Infrastructure: {
-        index: 7,
+        index: 8,
         shape: new Infrastructure({
-            position: { x: 20, y: 264 },
+            position: { x: 20, y: 334 },
             size: { width: 100, height: 45 },
             attrs: {
                 root: {
@@ -166,9 +189,9 @@ const SidebarEntityShapes = {
     },
 
     DataAggregate: {
-        index: 8,
+        index: 9,
         shape: new DataAggregate({
-            position: { x: 140, y: 264 },
+            position: { x: 140, y: 334 },
             size: { width: 45, height: 25 },
             attrs: {
                 root: {
@@ -188,9 +211,9 @@ const SidebarEntityShapes = {
     },
 
     RequestTrace: {
-        index: 9,
+        index: 10,
         shape: new RequestTrace({
-            position: { x: 18, y: 348 },
+            position: { x: 18, y: 418 },
             size: { width: 110, height: 45 },
             attrs: {
                 root: {
@@ -210,9 +233,9 @@ const SidebarEntityShapes = {
     },
 
     BackingData: {
-        index: 10,
+        index: 11,
         shape: new BackingData({
-            position: { x: 147, y: 346 },
+            position: { x: 147, y: 416 },
             size: { width: 80, height: 60 },
             attrs: {
                 root: {
@@ -232,10 +255,10 @@ const SidebarEntityShapes = {
     },
 
     Link: {
-        index: 11,
+        index: 12,
         shape: new Link({
-            source: { x: 20, y: 434 },
-            target: { x: 120, y: 434 },
+            source: { x: 20, y: 504 },
+            target: { x: 120, y: 504 },
             labels: [
                 {
                     attrs: {
@@ -265,10 +288,10 @@ const SidebarEntityShapes = {
     },
 
     DeploymentMapping: {
-        index: 12,
+        index: 13,
         shape: new DeploymentMapping({
-            source: { x: 145, y: 434 },
-            target: { x: 225, y: 434 },
+            source: { x: 145, y: 504 },
+            target: { x: 225, y: 504 },
             labels: [
                 {
                     attrs: {

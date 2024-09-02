@@ -3,7 +3,7 @@ tosca_definitions_version: tosca_2_0
 metadata:
   template_name: capability_types.yaml
   template_author: Distributed Systems Group
-  template_version: 0.3
+  template_version: 0.4
 
 description: >-
   This TOSCA definitions document contains the CNA Modeling capability types.

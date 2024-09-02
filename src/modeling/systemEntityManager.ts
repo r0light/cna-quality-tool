@@ -8,7 +8,7 @@ import { DetailsSidebarConfig, EntityDetailsConfig } from './config/detailsSideb
 import { MetaData, getEmptyMetaData } from "../core/common/entityDataTypes";
 import { convertToServiceTemplate, importFromServiceTemplate } from "../core/tosca-adapter/ToscaAdapter";
 import {
-    Component as ComponentElement, Service as ServiceElement, BackingService as BackingServiceElement, StorageBackingService as StorageBackingServiceElement,
+    Component as ComponentElement, Service as ServiceElement, BackingService as BackingServiceElement, StorageBackingService as StorageBackingServiceElement, ProxyBackingService as ProxyBackingServiceElement,
     Endpoint as EndpointElement, ExternalEndpoint as ExternalEndpointElement, Link as LinkElement,
     Infrastructure as InfrastructureElement, DeploymentMapping as DeploymentMappingElement,
     RequestTrace as RequestTraceElement, DataAggregate as DataAggregateElement, BackingData as BackingDataElement,
@@ -232,6 +232,7 @@ class SystemEntityManager {
             || element.prop("entity/type") === EntityTypes.SERVICE
             || element.prop("entity/type") === EntityTypes.BACKING_SERVICE
             || element.prop("entity/type") === EntityTypes.STORAGE_BACKING_SERVICE
+            || element.prop("entity/type") === EntityTypes.PROXY_BACKING_SERVICE
             || element.prop("entity/type") === EntityTypes.INFRASTRUCTURE
         );
 
@@ -244,6 +245,7 @@ class SystemEntityManager {
                 case EntityTypes.SERVICE:
                 case EntityTypes.BACKING_SERVICE:
                 case EntityTypes.STORAGE_BACKING_SERVICE:
+                case EntityTypes.PROXY_BACKING_SERVICE:
                     addedEntity = this.#createComponentEntity(graphElement);
                     break;
                 case EntityTypes.INFRASTRUCTURE:
@@ -263,6 +265,7 @@ class SystemEntityManager {
                 case EntityTypes.SERVICE:
                 case EntityTypes.BACKING_SERVICE:
                 case EntityTypes.STORAGE_BACKING_SERVICE:
+                case EntityTypes.PROXY_BACKING_SERVICE:
                     let addedEntity = this.#currentSystemEntity.getComponentEntities.get(graphElement.id.toString());
                     this.#configureComponentEntity(addedEntity, graphElement);
                     break;
@@ -354,7 +357,7 @@ class SystemEntityManager {
 
     #createComponentEntity(graphElement: dia.Element) {
 
-        let componentModelEntity: Entities.Component | Entities.Service | Entities.BackingService | Entities.StorageBackingService;
+        let componentModelEntity: Entities.Component | Entities.Service | Entities.BackingService | Entities.StorageBackingService | Entities.ProxyBackingService;
         switch (graphElement.prop("entity/type")) {
             case EntityTypes.SERVICE:
                 componentModelEntity = new Entities.Service(graphElement.id.toString(), graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement));
@@ -365,17 +368,20 @@ class SystemEntityManager {
             case EntityTypes.STORAGE_BACKING_SERVICE:
                 componentModelEntity = new Entities.StorageBackingService(graphElement.id.toString(), graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement));
                 break;
+            case EntityTypes.PROXY_BACKING_SERVICE:
+                componentModelEntity = new Entities.ProxyBackingService(graphElement.id.toString(), graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement));
+                break;
             case EntityTypes.COMPONENT:
             default:
                 componentModelEntity = new Entities.Component(graphElement.id.toString(), graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement));
         }
 
 
-        return componentModelEntity; 
+        return componentModelEntity;
 
     }
 
-    #configureComponentEntity(entity: Entities.Component | Entities.Service | Entities.BackingService | Entities.StorageBackingService, graphElement: dia.Element) {
+    #configureComponentEntity(entity: Entities.Component | Entities.Service | Entities.BackingService | Entities.StorageBackingService | Entities.ProxyBackingService, graphElement: dia.Element) {
         // set entity properties
         for (let property of entity.getProperties()) {
             property.value = graphElement.prop("entity/properties/" + property.getKey)
@@ -385,13 +391,13 @@ class SystemEntityManager {
         let artifactsData = graphElement.prop("entity/artifacts");
         for (const artifactData of artifactsData) {
             let artifact = new Artifact(artifactData.type,
-                                        artifactData.file,
-                                        artifactData.repository,
-                                        artifactData.description,
-                                        artifactData.deploy_path,
-                                        artifactData.artifact_version,
-                                        artifactData.checksum,
-                                        artifactData.checksum_algorithm,
+                artifactData.file,
+                artifactData.repository,
+                artifactData.description,
+                artifactData.deploy_path,
+                artifactData.artifact_version,
+                artifactData.checksum,
+                artifactData.checksum_algorithm,
             )
             entity.setArtifact(artifactData.key, artifact);
         }
@@ -471,13 +477,13 @@ class SystemEntityManager {
         let artifactsData = infrastructureElement.prop("entity/artifacts");
         for (const artifactData of artifactsData) {
             let artifact = new Artifact(artifactData.type,
-                                        artifactData.file,
-                                        artifactData.repository,
-                                        artifactData.description,
-                                        artifactData.deploy_path,
-                                        artifactData.artifact_version,
-                                        artifactData.checksum,
-                                        artifactData.checksum_algorithm,
+                artifactData.file,
+                artifactData.repository,
+                artifactData.description,
+                artifactData.deploy_path,
+                artifactData.artifact_version,
+                artifactData.checksum,
+                artifactData.checksum_algorithm,
             )
             infrastructureEntity.setArtifact(artifactData.key, artifact);
         }
@@ -585,6 +591,8 @@ class SystemEntityManager {
                             return "Backing Service";
                         case Entities.StorageBackingService:
                             return "Storage Backing Service";
+                        case Entities.ProxyBackingService:
+                            return "Proxy Backing Service";
                         case Entities.Component:
                         default:
                             return "Component";
@@ -627,7 +635,7 @@ class SystemEntityManager {
         return errors;
     }
 
-    #createEndpointEntity(graphElement, parentElement: dia.Element, parentEntity: Entities.Component | Entities.Service | Entities.BackingService | Entities.StorageBackingService) {
+    #createEndpointEntity(graphElement, parentElement: dia.Element, parentEntity: Entities.Component | Entities.Service | Entities.BackingService | Entities.StorageBackingService | Entities.ProxyBackingService) {
         let endpointEntity: Entities.Endpoint | Entities.ExternalEndpoint;
         switch (graphElement.prop("entity/type")) {
             case EntityTypes.EXTERNAL_ENDPOINT:
@@ -869,6 +877,10 @@ class SystemEntityManager {
                     let newStorageBackingService = this.#createStorageBackingServiceCell(component);
                     this.#currentSystemGraph.addCell(newStorageBackingService);
                     break;
+                case Entities.ProxyBackingService.name:
+                    let newProxyBackingService = this.#createProxyBackingServiceCell(component);
+                    this.#currentSystemGraph.addCell(newProxyBackingService);
+                    break;
                 case Entities.Component.name:
                     let newComponent = this.#createComponentCell(component);
                     this.#currentSystemGraph.addCell(newComponent);
@@ -890,6 +902,9 @@ class SystemEntityManager {
                 createdCells.push(componentElement);
             } else if (component.constructor.name === Entities.StorageBackingService.name) {
                 this.#configureStorageBackingServiceCell(component, componentElement);
+                createdCells.push(componentElement);
+            } else if (component.constructor.name === Entities.ProxyBackingService.name) {
+                this.#configureProxyBackingServiceCell(component, componentElement);
                 createdCells.push(componentElement);
             } else if (component.constructor.name === Entities.Component.name) {
                 this.#configureComponentCell(component, componentElement);
@@ -1074,7 +1089,7 @@ class SystemEntityManager {
     }
 
     #configureBackingServiceCell(backingService: Entities.BackingService, backingServiceElement: dia.Element) {
-        for (const property of EntityDetailsConfig.Service.specificProperties) {
+        for (const property of EntityDetailsConfig.BackingService.specificProperties) {
             switch (property.providedFeature) {
                 case "proxiedBy":
                     if (backingService.getProxiedBy) {
@@ -1121,7 +1136,7 @@ class SystemEntityManager {
     }
 
     #configureStorageBackingServiceCell(storageBackingService: Entities.StorageBackingService, storageBackingServiceElement: dia.Element) {
-        for (const property of EntityDetailsConfig.Service.specificProperties) {
+        for (const property of EntityDetailsConfig.StorageBackingService.specificProperties) {
             switch (property.providedFeature) {
                 case "proxiedBy":
                     if (storageBackingService.getProxiedBy) {
@@ -1143,6 +1158,49 @@ class SystemEntityManager {
 
 
         return storageBackingServiceElement;
+    }
+
+    #createProxyBackingServiceCell(proxyBackingService: Entities.ProxyBackingService) {
+        let newProxyBackingService: dia.Element = new ProxyBackingServiceElement({
+            id: proxyBackingService.getId,
+            position: { x: proxyBackingService.getMetaData.position.xCoord, y: proxyBackingService.getMetaData.position.yCoord },
+            size: proxyBackingService.getMetaData.size,
+            attrs: {
+                root: {
+                    title: "cna.qualityModel.ProxyBackingService"
+                },
+                body: {
+                    class: "entityHighlighting"
+                },
+                label: {
+                    fontSize: proxyBackingService.getMetaData.fontSize,
+                    textWrap: {
+                        text: proxyBackingService.getMetaData.label ? proxyBackingService.getMetaData.label : proxyBackingService.getName
+                    }
+                }
+            }
+        })
+        return newProxyBackingService;
+    }
+
+    #configureProxyBackingServiceCell(proxyBackingService: Entities.ProxyBackingService, proxyBackingServiceElement: dia.Element) {
+        for (const property of EntityDetailsConfig.ProxyBackingService.specificProperties) {
+            switch (property.providedFeature) {
+                default:
+                    if (property.jointJsConfig.modelPath) {
+                        proxyBackingServiceElement.prop(property.jointJsConfig.modelPath, proxyBackingService.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
+                    }
+            }
+        }
+
+        let artifacts = [];
+        for (const [artifactKey, artifact] of proxyBackingService.getArtifacts.entries()) {
+            artifacts.push(artifact.getAsSimpleObject(artifactKey));
+        }
+        proxyBackingServiceElement.prop(DetailsSidebarConfig.GeneralProperties.artifacts.options[0].jointJsConfig.modelPath, artifacts)
+
+
+        return proxyBackingServiceElement;
     }
 
     #createComponentCell(component: Entities.Component) {
@@ -1329,8 +1387,8 @@ class SystemEntityManager {
                 if (property.providedFeature === "embedded") {
                     newEndpoint.prop(property.jointJsConfig.modelPath, parent.id.toString());
                 } else if (property.providedFeature === "uses_data") {
-					continue;
-				} else {
+                    continue;
+                } else {
                     newEndpoint.prop(property.jointJsConfig.modelPath, endpoint.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
                 }
             }
@@ -1374,8 +1432,8 @@ class SystemEntityManager {
                 if (property.providedFeature === "embedded") {
                     newExternalEndpoint.prop(property.jointJsConfig.modelPath, parent.id.toString());
                 } else if (property.providedFeature === "uses_data") {
-					continue;
-				} else {
+                    continue;
+                } else {
                     newExternalEndpoint.prop(property.jointJsConfig.modelPath, externalEndpoint.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
                 }
             }

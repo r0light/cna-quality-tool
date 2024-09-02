@@ -5,6 +5,7 @@ import { DataAggregate } from "./dataAggregate.js";
 import { DeploymentMapping } from "./deploymentMapping.js";
 import { Infrastructure } from "./infrastructure.js";
 import { Link } from "./link.js";
+import { ProxyBackingService } from "./proxyBackingService.js";
 import { RequestTrace } from "./requestTrace.js";
 import { Service } from "./service.js";
 import { StorageBackingService } from "./storageBackingService.js";
@@ -68,6 +69,7 @@ class System { // TODO use ID's as keys instead of name?
             case Service:
             case BackingService:
             case StorageBackingService:
+            case ProxyBackingService:
                 this.#componentEntities.set(entityToAdd.getId, entityToAdd as Component);
                 break;
             case Link:

@@ -3,6 +3,7 @@ const EntityTypes = Object.freeze({
     SERVICE: "service",
     BACKING_SERVICE: "backing-service",
     STORAGE_BACKING_SERVICE: "storage-backing-service",
+    PROXY_BACKING_SERVICE: "proxy-backing-service",
     ENDPOINT: "endpoint",
     EXTERNAL_ENDPOINT: "external-endpoint",
     LINK: "link",

@@ -18,6 +18,7 @@ import { EXTERNAL_ENDPOINT_CAPABILITY_EQUIVALENT, EXTERNAL_ENDPOINT_TOSCA_EQUIVA
 import { TOSCA_File } from '@/totypa/tosca-types/v2dot0-types/definition-types';
 import { TOSCA_Node_Template, TOSCA_Relationship_Template, TOSCA_Requirement_Assignment, TOSCA_Service_Template } from '@/totypa/tosca-types/v2dot0-types/template-types';
 import { TOSCA_Property_Assignment } from '@/totypa/tosca-types/v2dot0-types/alias-types';
+import { PROXY_BACKING_SERVICE_TOSCA_KEY } from '../entities/proxyBackingService';
 
 const TOSCA_DEFINITIONS_VERSION = "tosca_2_0"
 const MATCH_WHITESPACES = new RegExp(/\s/g);
@@ -404,6 +405,8 @@ class EntitiesToToscaConverter {
                     return BACKING_SERVICE_TOSCA_KEY;
                 case Entities.StorageBackingService:
                     return STORAGE_BACKING_SERVICE_TOSCA_KEY;
+                case Entities.ProxyBackingService:
+                    return PROXY_BACKING_SERVICE_TOSCA_KEY;
                 case Entities.Component:
                 default:
                     return COMPONENT_TOSCA_KEY;

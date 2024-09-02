@@ -3,7 +3,7 @@ tosca_definitions_version: tosca_2_0
 metadata:
   template_name: node_types.yaml
   template_author: Distributed Systems Group
-  template_version: 0.3
+  template_version: 0.4
 
 description: >-
   This TOSCA definitions document contains the CNA Modeling node types.
@@ -103,9 +103,21 @@ node_types:
           - cna-modeling.entities.StorageBackingService
         #count_range: [0, UNBOUNDED]
 
+  cna-modeling.entities.ProxyBackingService:
+    derived_from: cna-modeling.entities.Component
+    description: Node Type to model Proxy Backing Service entities, typically Load Balancers, API Gateways or other intermediate Services
+    capabilities:
+      proxy:
+        type: cna-modeling.capabilities.Proxy
+        valid_source_node_types:
+          - cna-modeling.entities.Component
+          - cna-modeling.entities.Service
+          - cna-modeling.entities.BackingService
+          - cna-modeling.entities.StorageBackingService
+
   cna-modeling.entities.StorageBackingService:
     derived_from: cna-modeling.entities.Component
-    description: Node Type to model Storage Backing Service entities
+    description: Node Type to model Storage Backing Service entities, typically databases
     properties:
       name:
         type: string
