@@ -168,6 +168,8 @@ class EntitySelectionTools extends dia.ToolsView {
     createBoundaryTool() {
         let boundaryTool = new elementTools.Boundary({
             padding: 2,
+            rotate: false,
+            useModelGeometry: true,
             attributes: {
                 fill: "none",
                 stroke: "#FEB663",
@@ -234,7 +236,7 @@ function addSelectionToolToEntity(addedElement: dia.Cell, currentPaper: dia.Pape
         return;
     }
 
-    let connectableEntity = (addedElement.prop("entity/type") === EntityTypes.COMPONENT || addedElement.prop("entity/type") === EntityTypes.SERVICE || addedElement.prop("entity/type") === EntityTypes.BACKING_SERVICE || addedElement.prop("entity/type") === EntityTypes.STORAGE_BACKING_SERVICE || addedElement.prop("entity/type") === EntityTypes.PROXY_BACKING_SERVICE || addedElement.prop("entity/type") === EntityTypes.INFRASTRUCTURE) ? true : false;
+    let connectableEntity = (addedElement.prop("entity/type") === EntityTypes.COMPONENT || addedElement.prop("entity/type") === EntityTypes.SERVICE || addedElement.prop("entity/type") === EntityTypes.BACKING_SERVICE || addedElement.prop("entity/type") === EntityTypes.STORAGE_BACKING_SERVICE || addedElement.prop("entity/type") === EntityTypes.PROXY_BACKING_SERVICE || addedElement.prop("entity/type") === EntityTypes.BROKER_BACKING_SERVICE || addedElement.prop("entity/type") === EntityTypes.INFRASTRUCTURE) ? true : false;
     let collapsableEntity = (addedElement.prop("entity/type") === EntityTypes.REQUEST_TRACE || connectableEntity) ? true : false;
     let toolToAdd = new EntitySelectionTools(connectableEntity, collapsableEntity);
     var elementView = currentPaper.requireView(addedElement);

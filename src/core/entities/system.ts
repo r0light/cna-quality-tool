@@ -1,5 +1,6 @@
 import { BackingData } from "./backingData.js";
 import { BackingService } from "./backingService.js";
+import { BrokerBackingService } from "./brokerBackingService.js";
 import { Component } from "./component.js";
 import { DataAggregate } from "./dataAggregate.js";
 import { DeploymentMapping } from "./deploymentMapping.js";
@@ -51,7 +52,7 @@ class System { // TODO use ID's as keys instead of name?
      * @param {Array} listOfEntitiesToAdd The list of entities, which should be added to the System entity.
      * @throws {TypeError} If a wrong entity type is being provided. 
      */
-    addEntities(listOfEntitiesToAdd: Component[] | Service[] | BackingService[] | StorageBackingService[] | Link[] | Infrastructure[] | DeploymentMapping[] | RequestTrace[] | DataAggregate[] | BackingData[] ) {
+    addEntities(listOfEntitiesToAdd: Component[] | Service[] | BackingService[] | StorageBackingService[] | ProxyBackingService[] | BrokerBackingService[] | Link[] | Infrastructure[] | DeploymentMapping[] | RequestTrace[] | DataAggregate[] | BackingData[] ) {
         for (const newEntity of listOfEntitiesToAdd) {
             this.addEntity(newEntity);
         }
@@ -70,6 +71,7 @@ class System { // TODO use ID's as keys instead of name?
             case BackingService:
             case StorageBackingService:
             case ProxyBackingService:
+            case BrokerBackingService:
                 this.#componentEntities.set(entityToAdd.getId, entityToAdd as Component);
                 break;
             case Link:

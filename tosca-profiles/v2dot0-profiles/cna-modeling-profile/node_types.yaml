@@ -115,6 +115,10 @@ node_types:
           - cna-modeling.entities.BackingService
           - cna-modeling.entities.StorageBackingService
 
+  cna-modeling.entities.BrokerBackingService:
+    derived_from: cna-modeling.entities.Component
+    description: Node Type to model Broker Backing Service entities, typically Message Brokers or Event Stores
+
   cna-modeling.entities.StorageBackingService:
     derived_from: cna-modeling.entities.Component
     description: Node Type to model Storage Backing Service entities, typically databases

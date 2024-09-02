@@ -1,7 +1,8 @@
-import { dia, shapes } from '@joint/core'
+import { dia, shapes, util } from '@joint/core'
 import { getComponentProperties, getBackingServiceProperties, getStorageBackingServiceProperties, getEndpointProperties, getInfrastructureProperties, getDataAggregateProperties, getBackingDataProperties, getDeploymentMappingProperties, getExternalEndpointProperties, getServiceProperties, getRequestTraceProperties, getProxyBackingServiceProperties } from "../../core/entities";
 import EntityTypes from "./entityTypes";
 import { getLinkProperties } from '@/core/entities/link';
+import { getBrokerBackingServiceProperties } from '@/core/entities/brokerBackingService';
 
 // TODO section:
 /*  -   Icon on first load not on correct position --> with firefox for every F5, 
@@ -18,7 +19,7 @@ function parseProperties(entityProperties) {
     var keyValueOnlyProperty = {}
     entityProperties.map(property => {
         keyValueOnlyProperty[property.getKey] = property.value;
-        
+
     });
     return keyValueOnlyProperty;
 }
@@ -334,7 +335,6 @@ const ProxyBackingService = dia.Element.define("qualityModel.ProxyBackingService
     },
     attrs: {
         body: {
-            //points: "0,0 calc(0.5 * w),0 calc(w),calc(0.4 * w) calc(0.5 * w),calc(0.8 * w) 0,calc(0.8 * w)",
             points: "0,0 calc(0.5 * w),0 calc(w),calc(0.4 * h) calc(0.5 * w),calc(0.8 * h) 0,calc(0.8 * h)",
             strokeWidth: 2,
             stroke: "black",
@@ -350,7 +350,7 @@ const ProxyBackingService = dia.Element.define("qualityModel.ProxyBackingService
             strokeWidth: 0,
             textAnchor: "middle",
             textVerticalAnchor: "top",
-            refX: "50%",
+            refX: "45%",
             refY: "40%", // TODO Fix me
             textWrap: {
                 text: "Proxy Backing Service",
@@ -416,7 +416,7 @@ const StorageBackingService = shapes.standard.Cylinder.define("qualityModel.Stor
             strokeWidth: 2,
             stroke: "black",
             fill: "white",
-            class: "entityShape" // TODO keep?
+            class: "entityShape"
         },
         top: {
             strokeWidth: 2,
@@ -477,6 +477,167 @@ const StorageBackingService = shapes.standard.Cylinder.define("qualityModel.Stor
         selector: "icon"
     }]
 });
+
+// adapted from https://github.com/clientIO/joint/blob/master/packages/joint-core/src/shapes/standard.mjs
+var CYLINDER_TILT = 10;
+const KAPPA = 0.551784;
+const BrokerBackingService = dia.Element.define("qualityModel.BrokerBackingService", {
+    defaults: {
+        type: "qualityModel.BrokerBackingService",
+        size: {
+            width: 150,
+            height: 100
+        },
+        fontSize: 14,
+        fill: "white",
+        stroke: "black",
+        strokeWidth: 2
+    },
+    size: {
+        width: 150,
+        height: 100
+    },
+    attrs: {
+        root: {
+            cursor: 'move'
+        },
+        body: {
+            lateralArea: CYLINDER_TILT,
+            strokeWidth: 2,
+            stroke: "black",
+            fill: "white",
+            class: "entityShape" // TODO keep?
+        },
+        top: {
+            cx: CYLINDER_TILT,
+            cy: 'calc(h/2)',
+            rx: CYLINDER_TILT,
+            ry: 'calc(h/2)',
+            fill: '#FFFFFF',
+            stroke: '#333333',
+            strokeWidth: 2,
+            class: "entityShape"
+        },
+        label: {
+            ref: "body",
+            fill: "black",
+            fontFamily: defaultTextFont,
+            fontWeight: "Normal",
+            fontSize: 14,
+            strokeWidth: 0,
+            textAnchor: "middle",
+            textVerticalAnchor: "middle",
+            //x: 'calc(w/2)',
+            //y: 'calc(h/2)',
+            refY: "35%",
+            refX: "50%",
+            textWrap: {
+                width: "80%",
+                text: "Broker Backing Service",
+            },
+            class: "entityLabel" // TODO keep?
+        },
+        icon: {
+            title: "Expand to show included entities",
+            ref: "body",
+            href: expandEntityIconPath,
+            class: "expandEntityIcon",
+            transform: "scale(calc(0.0011 * h))",
+            refX: "49%",
+            refY: "95%",
+            xAlignment: "middle",
+            yAlignment: "bottom",
+            preserveAspectRatio: 'xMidYMin',
+            visibility: "hidden",
+            event: "element:icon:pointerclick"
+        }
+    },
+    collapsed: false,
+    entityTypeHidden: false,
+    entity: {
+        type: EntityTypes.BROKER_BACKING_SERVICE,
+        properties: parseProperties(getComponentProperties().concat(getBrokerBackingServiceProperties())),
+        artifacts: []
+    }
+}, {
+    markup: [{
+        tagName: "path",
+        selector: "body"
+    }, {
+        tagName: "ellipse",
+        selector: "top"
+    }, {
+        tagName: "text",
+        selector: "label"
+    }, {
+        tagName: "image",
+        selector: "icon"
+    }],
+
+    topRy: function (t, opt) {
+        // getter
+        if (t === undefined) return this.attr('body/lateralArea');
+
+        // setter
+        var bodyAttrs = { lateralArea: t };
+
+        var isPercentageSetter = util.isPercentage(t);
+        //var ty = (isPercentageSetter) ? `calc(${parseFloat(t) / 100}*h)` : t;
+        var ty = (isPercentageSetter) ? `calc(${parseFloat(t) / 100}*h)` : t;
+        var topAttrs = { cy: ty, ry: ty };
+
+        return this.attr({ body: bodyAttrs, top: topAttrs }, opt);
+    }
+}, {
+    attributes: {
+        'lateral-area': {
+            set: function (t, refBBox) {
+                var isPercentageSetter = util.isPercentage(t);
+                if (isPercentageSetter) t = parseFloat(t) / 100;
+
+                var x = refBBox.x;
+                var y = refBBox.y;
+                var w = refBBox.width;
+                var h = refBBox.height;
+
+                // curve control point variables
+                var ry = h / 2;
+                var rx = isPercentageSetter ? (w * t) : t;
+
+                var kappa = KAPPA;
+                var cy = kappa * ry;
+                var cx = kappa * (isPercentageSetter ? (w * t) : t);
+
+                // shape variables
+                var yTop = y;
+                var yCenter = y + (h / 2);
+                var yBottom = y + h;
+
+                var xCurveLeft = x + rx;
+                var xCurveLeftest = x;
+                var xCurveRight = x + w - rx;
+                var xCurveRightest = x + w;
+
+                // return calculated shape
+                var data = [
+                    'M', xCurveLeft, yBottom,
+                    'L', xCurveRight, yBottom,
+                    'C', (xCurveRight + cx),yBottom , xCurveRightest, (yBottom - cy), xCurveRightest, yCenter,
+                    'C', xCurveRightest, (yCenter -cy), (xCurveRight + cx), yTop, xCurveRight, yTop,
+                    'L', xCurveLeft, yTop,
+                    'C', (xCurveLeft - cx), yTop, xCurveLeftest, (yTop + cy), xCurveLeftest, yCenter,
+                    'C', (xCurveLeftest + cx), yCenter, xCurveLeft, (yBottom- cy), xCurveLeft, yBottom,
+                    'Z'
+                ];
+
+                return { d: data.join(' ') };
+            },
+            unset: 'd'
+        }
+    }
+}
+);
+
 
 
 /**
@@ -1071,7 +1232,7 @@ const BackingData = dia.Element.define("qualityModel.BackingData", {
 
 const entityShapes = Object.assign({
     qualityModel: {
-        Component, Service, BackingService, StorageBackingService, ProxyBackingService,
+        Component, Service, BackingService, StorageBackingService, ProxyBackingService, BrokerBackingService,
         Endpoint, ExternalEndpoint, Link,
         Infrastructure, DeploymentMapping,
         RequestTrace, DataAggregate, BackingData
@@ -1080,7 +1241,7 @@ const entityShapes = Object.assign({
 
 
 export {
-    entityShapes, Component, Service, BackingService, ProxyBackingService, StorageBackingService,
+    entityShapes, Component, Service, BackingService, ProxyBackingService, BrokerBackingService, StorageBackingService,
     Endpoint, ExternalEndpoint, Link,
     Infrastructure, DeploymentMapping,
     RequestTrace, DataAggregate, BackingData

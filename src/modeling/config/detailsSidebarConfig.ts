@@ -4,6 +4,7 @@ import { DialogConfig, DialogMetaData, DialogSize, FormContentConfig, UIContentT
 import { EntityProperty, NumberEntityProperty, SelectEntityProperty, TextEntityProperty } from "../../core/common/entityProperty";
 import { getDataAggregateRelationshipProperties } from "@/core/entities/relationToDataAggregate";
 import { getBackingDataRelationshipProperties } from "@/core/entities/relationToBackingData";
+import { getBrokerBackingServiceProperties } from "@/core/entities/brokerBackingService";
 
 export type DatalistItem = {
     value: string,
@@ -1015,6 +1016,95 @@ const EntityDetailsConfig: {
     StorageBackingService: {
         type: EntityTypes.STORAGE_BACKING_SERVICE,
         specificProperties: customizePropertyConfigs(concatInOrder(parseProperties(getStorageBackingServiceProperties(), "entity"), parseProperties(getComponentProperties(), "entity")), [
+            {
+                providedFeature: "assigned_networks",
+                contentType: PropertyContent.DYNAMIC_LIST,
+                label: "Assigned networks:",
+                helpText: "",
+                inputProperties: {
+                    disabled: false,
+                    required: false,
+                    checked: false,
+                    selected: false,
+                    readonly: false
+                },
+                attributes: {
+                    svgRepresentation: "",
+                    buttonText: "Edit assigned networks",
+                    buttonIconClass: "fa-solid fa-pencil",
+                    dialogMetaData: {
+                        dialogSize: DialogSize.LARGE,
+                        header: {
+                            iconClass: "fa-solid fa-network-wired",
+                            svgRepresentation: "",
+                            text: "Assigned networks: "
+                        },
+                        footer: {
+                            showCancelButton: true,
+                            cancelButtonText: "Cancel",
+                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
+                        }
+                    },
+                    dialogInfo: `Type in the id or subnet mask of a network and then add it using the plus button. However, your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all your changes will be lost. While you keep the selection of this entity, your changes will be remembered.`,
+                    listElementFields: [
+                        {
+                            fieldType: "text",
+                            key: "network-id",
+                            label: "Network Name",
+                            helpText: "The name of the network to assign",
+                            labelIcon: "fa-solid fa-network-wired",
+                            placeholder: "e.g. my-private-network"
+                        }
+                    ],
+                    addElementButton: {
+                        label: "Submit",
+                        labelIcon: "fa-solid fa-plus"
+                    }
+                },
+                provideEnterButton: false,
+                show: true,
+                jointJsConfig: {
+                    propertyType: "customProperty",
+                    modelPath: "entity/properties/assigned_networks",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
+            },
+            {
+                providedFeature: "proxiedBy",
+                contentType: PropertyContent.DROPDOWN,
+                label: "Proxied by:",
+                inputProperties: {
+                    disabled: false,
+                    required: true,
+                    checked: false,
+                    selected: false,
+                    readonly: false,
+                },
+                helpText: "The backing service acting as a proxy for this component.",
+                show: true,
+                attributes: {
+                    placeholder: "Choose Backing Service...",
+                    svgRepresentation: "",
+                    defaultValue: ""
+
+                },
+                provideEnterButton: false,
+                jointJsConfig: {
+                    propertyType: "property",
+                    modelPath: "entity/properties/proxied_by",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
+                dropdownOptions: []
+            },
+        ])
+    },
+    BrokerBackingService: {
+        type: EntityTypes.BROKER_BACKING_SERVICE,
+        specificProperties: customizePropertyConfigs(concatInOrder(parseProperties(getBrokerBackingServiceProperties(), "entity"), parseProperties(getComponentProperties(), "entity")), [
             {
                 providedFeature: "assigned_networks",
                 contentType: PropertyContent.DYNAMIC_LIST,

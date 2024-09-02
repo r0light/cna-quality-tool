@@ -8,7 +8,7 @@ import { DetailsSidebarConfig, EntityDetailsConfig } from './config/detailsSideb
 import { MetaData, getEmptyMetaData } from "../core/common/entityDataTypes";
 import { convertToServiceTemplate, importFromServiceTemplate } from "../core/tosca-adapter/ToscaAdapter";
 import {
-    Component as ComponentElement, Service as ServiceElement, BackingService as BackingServiceElement, StorageBackingService as StorageBackingServiceElement, ProxyBackingService as ProxyBackingServiceElement,
+    Component as ComponentElement, Service as ServiceElement, BackingService as BackingServiceElement, StorageBackingService as StorageBackingServiceElement, ProxyBackingService as ProxyBackingServiceElement, BrokerBackingService as BrokerBackingServiceElement,
     Endpoint as EndpointElement, ExternalEndpoint as ExternalEndpointElement, Link as LinkElement,
     Infrastructure as InfrastructureElement, DeploymentMapping as DeploymentMappingElement,
     RequestTrace as RequestTraceElement, DataAggregate as DataAggregateElement, BackingData as BackingDataElement,
@@ -19,6 +19,7 @@ import { FormContentConfig } from "./config/actionDialogConfig";
 import { RelationToDataAggregate } from "../core/entities/relationToDataAggregate";
 import { RelationToBackingData } from "../core/entities/relationToBackingData";
 import { Artifact } from '@/core/common/artifact';
+import { Entity } from '@/core/qualitymodel/quamoco/Entity';
 
 class SystemEntityManager {
 
@@ -163,7 +164,6 @@ class SystemEntityManager {
 
         }
 
-
         this.convertToGraph();
         this.#currentSystemGraph.trigger("reloaded");
 
@@ -233,6 +233,7 @@ class SystemEntityManager {
             || element.prop("entity/type") === EntityTypes.BACKING_SERVICE
             || element.prop("entity/type") === EntityTypes.STORAGE_BACKING_SERVICE
             || element.prop("entity/type") === EntityTypes.PROXY_BACKING_SERVICE
+            || element.prop("entity/type") === EntityTypes.BROKER_BACKING_SERVICE
             || element.prop("entity/type") === EntityTypes.INFRASTRUCTURE
         );
 
@@ -246,6 +247,7 @@ class SystemEntityManager {
                 case EntityTypes.BACKING_SERVICE:
                 case EntityTypes.STORAGE_BACKING_SERVICE:
                 case EntityTypes.PROXY_BACKING_SERVICE:
+                case EntityTypes.BROKER_BACKING_SERVICE:
                     addedEntity = this.#createComponentEntity(graphElement);
                     break;
                 case EntityTypes.INFRASTRUCTURE:
@@ -266,6 +268,7 @@ class SystemEntityManager {
                 case EntityTypes.BACKING_SERVICE:
                 case EntityTypes.STORAGE_BACKING_SERVICE:
                 case EntityTypes.PROXY_BACKING_SERVICE:
+                case EntityTypes.BROKER_BACKING_SERVICE:
                     let addedEntity = this.#currentSystemEntity.getComponentEntities.get(graphElement.id.toString());
                     this.#configureComponentEntity(addedEntity, graphElement);
                     break;
@@ -371,6 +374,9 @@ class SystemEntityManager {
             case EntityTypes.PROXY_BACKING_SERVICE:
                 componentModelEntity = new Entities.ProxyBackingService(graphElement.id.toString(), graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement));
                 break;
+            case EntityTypes.BROKER_BACKING_SERVICE:
+                componentModelEntity = new Entities.BrokerBackingService(graphElement.id.toString(), graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement));
+                break;
             case EntityTypes.COMPONENT:
             default:
                 componentModelEntity = new Entities.Component(graphElement.id.toString(), graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement));
@@ -381,7 +387,7 @@ class SystemEntityManager {
 
     }
 
-    #configureComponentEntity(entity: Entities.Component | Entities.Service | Entities.BackingService | Entities.StorageBackingService | Entities.ProxyBackingService, graphElement: dia.Element) {
+    #configureComponentEntity(entity: Entities.Component | Entities.Service | Entities.BackingService | Entities.StorageBackingService | Entities.ProxyBackingService | Entities.BrokerBackingService, graphElement: dia.Element) {
         // set entity properties
         for (let property of entity.getProperties()) {
             property.value = graphElement.prop("entity/properties/" + property.getKey)
@@ -593,6 +599,8 @@ class SystemEntityManager {
                             return "Storage Backing Service";
                         case Entities.ProxyBackingService:
                             return "Proxy Backing Service";
+                        case Entities.BrokerBackingService:
+                            return "Broker Backing Service";
                         case Entities.Component:
                         default:
                             return "Component";
@@ -635,7 +643,7 @@ class SystemEntityManager {
         return errors;
     }
 
-    #createEndpointEntity(graphElement, parentElement: dia.Element, parentEntity: Entities.Component | Entities.Service | Entities.BackingService | Entities.StorageBackingService | Entities.ProxyBackingService) {
+    #createEndpointEntity(graphElement, parentElement: dia.Element, parentEntity: Entities.Component | Entities.Service | Entities.BackingService | Entities.StorageBackingService | Entities.ProxyBackingService | Entities.BrokerBackingService) {
         let endpointEntity: Entities.Endpoint | Entities.ExternalEndpoint;
         switch (graphElement.prop("entity/type")) {
             case EntityTypes.EXTERNAL_ENDPOINT:
@@ -881,6 +889,10 @@ class SystemEntityManager {
                     let newProxyBackingService = this.#createProxyBackingServiceCell(component);
                     this.#currentSystemGraph.addCell(newProxyBackingService);
                     break;
+                case Entities.BrokerBackingService.name:
+                    let newBrokerBackingService = this.#createBrokerBackingServiceCell(component);
+                    this.#currentSystemGraph.addCell(newBrokerBackingService);
+                    break;
                 case Entities.Component.name:
                     let newComponent = this.#createComponentCell(component);
                     this.#currentSystemGraph.addCell(newComponent);
@@ -905,6 +917,9 @@ class SystemEntityManager {
                 createdCells.push(componentElement);
             } else if (component.constructor.name === Entities.ProxyBackingService.name) {
                 this.#configureProxyBackingServiceCell(component, componentElement);
+                createdCells.push(componentElement);
+            } else if (component.constructor.name === Entities.BrokerBackingService.name) {
+                this.#configureBrokerBackingServiceCell(component, componentElement);
                 createdCells.push(componentElement);
             } else if (component.constructor.name === Entities.Component.name) {
                 this.#configureComponentCell(component, componentElement);
@@ -1201,6 +1216,55 @@ class SystemEntityManager {
 
 
         return proxyBackingServiceElement;
+    }
+
+    #createBrokerBackingServiceCell(brokerBackingService: Entities.BrokerBackingService) {
+        let newBrokerBackingService: dia.Element = new BrokerBackingServiceElement({
+            id: brokerBackingService.getId,
+            position: { x: brokerBackingService.getMetaData.position.xCoord, y: brokerBackingService.getMetaData.position.yCoord },
+            size: brokerBackingService.getMetaData.size,
+            attrs: {
+                root: {
+                    title: "cna.qualityModel.BrokerBackingService"
+                },
+                body: {
+                    class: "entityHighlighting"
+                },
+                label: {
+                    fontSize: brokerBackingService.getMetaData.fontSize,
+                    textWrap: {
+                        text: brokerBackingService.getMetaData.label ? brokerBackingService.getMetaData.label : brokerBackingService.getName
+                    }
+                }
+            }
+        })
+        return newBrokerBackingService;
+    }
+
+
+    #configureBrokerBackingServiceCell(brokerBackingService: Entities.BrokerBackingService, brokerBackingServiceElement: dia.Element) {
+        for (const property of EntityDetailsConfig.BrokerBackingService.specificProperties) {
+            switch (property.providedFeature) {
+                case "proxiedBy":
+                    if (brokerBackingService.getProxiedBy) {
+                        brokerBackingServiceElement.prop("entity/properties/proxied_by", brokerBackingService.getProxiedBy.getId);
+                    }
+                    break;
+                default:
+                    if (property.jointJsConfig.modelPath) {
+                        brokerBackingServiceElement.prop(property.jointJsConfig.modelPath, brokerBackingService.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
+                    }
+            }
+        }
+
+        let artifacts = [];
+        for (const [artifactKey, artifact] of brokerBackingService.getArtifacts.entries()) {
+            artifacts.push(artifact.getAsSimpleObject(artifactKey));
+        }
+        brokerBackingServiceElement.prop(DetailsSidebarConfig.GeneralProperties.artifacts.options[0].jointJsConfig.modelPath, artifacts)
+
+
+        return brokerBackingServiceElement;
     }
 
     #createComponentCell(component: Entities.Component) {

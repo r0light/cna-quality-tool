@@ -4,6 +4,7 @@ export { Service, getServiceProperties } from './entities/service.js';
 export { BackingService, getBackingServiceProperties } from './entities/backingService.js';
 export { StorageBackingService, getStorageBackingServiceProperties } from './entities/storageBackingService.js';
 export { ProxyBackingService, getProxyBackingServiceProperties} from './entities/proxyBackingService.js';
+export { BrokerBackingService, getBrokerBackingServiceProperties} from './entities/brokerBackingService.js';
 export { Endpoint, getEndpointProperties } from './entities/endpoint.js';
 export { ExternalEndpoint, getExternalEndpointProperties } from './entities/externalEndpoint.js';
 export { Link, getLinkProperties } from './entities/link.js';

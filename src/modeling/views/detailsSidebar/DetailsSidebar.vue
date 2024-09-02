@@ -310,6 +310,7 @@ onUpdated(() => {
         case EntityTypes.SERVICE:
         case EntityTypes.BACKING_SERVICE:
         case EntityTypes.STORAGE_BACKING_SERVICE:
+        case EntityTypes.BROKER_BACKING_SERVICE:
             let componentAssignedNetworksOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "assigned_networks");
             componentAssignedNetworksOption.includeFormCheck = false;
             componentAssignedNetworksOption.value = selectedEntity.model.prop(componentAssignedNetworksOption.jointJsConfig.modelPath);
@@ -859,6 +860,7 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                 case EntityTypes.BACKING_SERVICE:
                 case EntityTypes.STORAGE_BACKING_SERVICE:
                 case EntityTypes.PROXY_BACKING_SERVICE:
+                case EntityTypes.BROKER_BACKING_SERVICE:
                     if (propertyOption.providedFeature === "assigned_networks") {
                         selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, propertyOption.value);
                     }

@@ -19,6 +19,7 @@ import { TOSCA_File } from '@/totypa/tosca-types/v2dot0-types/definition-types';
 import { TOSCA_Node_Template, TOSCA_Relationship_Template, TOSCA_Requirement_Assignment, TOSCA_Service_Template } from '@/totypa/tosca-types/v2dot0-types/template-types';
 import { TOSCA_Property_Assignment } from '@/totypa/tosca-types/v2dot0-types/alias-types';
 import { PROXY_BACKING_SERVICE_TOSCA_KEY } from '../entities/proxyBackingService';
+import { BROKER_BACKING_SERVICE_TOSCA_KEY } from '../entities/brokerBackingService';
 
 const TOSCA_DEFINITIONS_VERSION = "tosca_2_0"
 const MATCH_WHITESPACES = new RegExp(/\s/g);
@@ -127,7 +128,7 @@ class EntitiesToToscaConverter {
                         if (!endpointNode["requirements"]) {
                             endpointNode["requirements"] = [];
                         }
-    
+
                         endpointNode.requirements.push({
                             "uses_data": dataAggregateKey
                         });
@@ -160,7 +161,7 @@ class EntitiesToToscaConverter {
                         if (!endpointNode["requirements"]) {
                             endpointNode["requirements"] = [];
                         }
-    
+
                         endpointNode.requirements.push({
                             "uses_data": dataAggregateKey
                         });
@@ -172,7 +173,7 @@ class EntitiesToToscaConverter {
                         "provides_external_endpoint": {
                             capability: "Endpoint.Public",
                             node: endpointNodeKey,
-                            relationship:"cna-modeling.relationships.Provides.Endpoint"
+                            relationship: "cna-modeling.relationships.Provides.Endpoint"
                         }
                     });
                 }
@@ -193,7 +194,7 @@ class EntitiesToToscaConverter {
                     if (usedDataAggregate.relation.getProperties().length > 0) {
                         dataAggregateRelationship.properties = this.#parsePropertiesForYaml(usedDataAggregate.relation.getProperties());
                     }
-            
+
                     serviceTemplate.relationship_templates[usageRelationshipKey] = dataAggregateRelationship;
 
                     node.requirements.push({
@@ -407,6 +408,8 @@ class EntitiesToToscaConverter {
                     return STORAGE_BACKING_SERVICE_TOSCA_KEY;
                 case Entities.ProxyBackingService:
                     return PROXY_BACKING_SERVICE_TOSCA_KEY;
+                case Entities.BrokerBackingService:
+                    return BROKER_BACKING_SERVICE_TOSCA_KEY;
                 case Entities.Component:
                 default:
                     return COMPONENT_TOSCA_KEY;
@@ -444,7 +447,7 @@ class EntitiesToToscaConverter {
             capabilities: {}
         };
 
-        let endpointCapabilityPropertyKeys =  parseProperties(ENDPOINT_CAPABILITY_EQUIVALENT.properties).map(property => property.getKey);
+        let endpointCapabilityPropertyKeys = parseProperties(ENDPOINT_CAPABILITY_EQUIVALENT.properties).map(property => property.getKey);
         template.capabilities.endpoint = {
             properties: this.#parsePropertiesForYaml(endpoint.getProperties().filter(property => endpointCapabilityPropertyKeys.includes(property.getKey)))
         }

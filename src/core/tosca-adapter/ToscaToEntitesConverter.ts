@@ -20,6 +20,7 @@ import { TOSCA_File } from '@/totypa/tosca-types/v2dot0-types/definition-types';
 import { TOSCA_Node_Template, TOSCA_Service_Template } from '@/totypa/tosca-types/v2dot0-types/template-types';
 import { Artifact } from '../common/artifact';
 import { PROXY_BACKING_SERVICE_TOSCA_KEY } from '../entities/proxyBackingService';
+import { BROKER_BACKING_SERVICE_TOSCA_KEY } from '../entities/brokerBackingService';
 
 const MATCH_UNDERSCORE = new RegExp(/_/g);
 const MATCH_FIRST_CHARACTER = new RegExp(/^./g);
@@ -86,6 +87,10 @@ class ToscaToEntitesConverter {
                 case PROXY_BACKING_SERVICE_TOSCA_KEY:
                     let proxyBackingService = new Entities.ProxyBackingService(uuid, this.#transformYamlKeyToLabel(key), readToscaMetaData(node.metadata));
                     this.#importedSystem.addEntity(proxyBackingService);
+                    break;
+                case BROKER_BACKING_SERVICE_TOSCA_KEY:
+                    let brokerBackingService = new Entities.BrokerBackingService(uuid, this.#transformYamlKeyToLabel(key), readToscaMetaData(node.metadata));
+                    this.#importedSystem.addEntity(brokerBackingService);
                     break;
                 case COMPONENT_TOSCA_KEY:
                     let component = new Entities.Component(uuid, this.#transformYamlKeyToLabel(key), readToscaMetaData(node.metadata));
@@ -274,6 +279,7 @@ class ToscaToEntitesConverter {
                 node.type === BACKING_SERVICE_TOSCA_KEY ||
                 node.type === STORAGE_BACKING_SERVICE_TOSCA_KEY ||
                 node.type === PROXY_BACKING_SERVICE_TOSCA_KEY ||
+                node.type === BROKER_BACKING_SERVICE_TOSCA_KEY ||
                 node.type === COMPONENT_TOSCA_KEY) {
                 let component = this.#importedSystem.getComponentEntities.get(this.#keyIdMap.getId(key));
 

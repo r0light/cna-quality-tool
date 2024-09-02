@@ -117,6 +117,7 @@ export class ModelingValidator {
             cellView.model.attributes.entity.type === EntityTypes.BACKING_SERVICE ||
             cellView.model.attributes.entity.type === EntityTypes.STORAGE_BACKING_SERVICE ||
             cellView.model.attributes.entity.type === EntityTypes.PROXY_BACKING_SERVICE ||
+            cellView.model.attributes.entity.type === EntityTypes.BROKER_BACKING_SERVICE ||
             cellView.model.attributes.entity.type === EntityTypes.INFRASTRUCTURE;
     }
 
@@ -132,6 +133,7 @@ export class ModelingValidator {
             cellView.model.attributes.entity.type === EntityTypes.SERVICE ||
             cellView.model.attributes.entity.type === EntityTypes.BACKING_SERVICE ||
             cellView.model.attributes.entity.type === EntityTypes.STORAGE_BACKING_SERVICE ||
+            cellView.model.attributes.entity.type === EntityTypes.BROKER_BACKING_SERVICE ||
             cellView.model.attributes.entity.type === EntityTypes.PROXY_BACKING_SERVICE;
     }
 
@@ -168,6 +170,7 @@ export class ModelingValidator {
             case EntityTypes.BACKING_SERVICE:
             case EntityTypes.STORAGE_BACKING_SERVICE:
             case EntityTypes.PROXY_BACKING_SERVICE:
+            case EntityTypes.BROKER_BACKING_SERVICE:
                 if (this.checkIfConnectionAlreadyExists(childView, parentView)) {
                     // cannot embed entities to which a connection exists
                     return false;
