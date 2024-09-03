@@ -991,6 +991,22 @@ export const cna_modeling_profile: TOSCA_File = {
             "description": "Either a network id or subnet mask",
             "type": "string"
           }
+        },
+        "kind": {
+          "type": "string",
+          "description": "The kind of proxy this is.",
+          "required": true,
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "API Gateway",
+                "Load Balancer",
+                "Service Mesh"
+              ]
+            ]
+          },
+          "default": "other"
         }
       }
     },

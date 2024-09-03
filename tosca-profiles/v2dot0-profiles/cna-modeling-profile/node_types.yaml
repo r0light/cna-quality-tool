@@ -97,6 +97,13 @@ node_types:
   cna-modeling.entities.ProxyBackingService:
     derived_from: cna-modeling.entities.Component
     description: Node Type to model Proxy Backing Service entities, typically Load Balancers, API Gateways or other intermediate Services
+    properties:
+      kind:
+        type: string
+        description: "The kind of proxy this is."
+        required: true
+        validation: { $valid_values: [ $value, [ "API Gateway", "Load Balancer", "Service Mesh" ]]}
+        default: other
     capabilities:
       proxy:
         type: cna-modeling.capabilities.Proxy

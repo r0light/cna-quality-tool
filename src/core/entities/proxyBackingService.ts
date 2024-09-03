@@ -13,7 +13,7 @@ const PROXY_BACKING_SERVICE_TOSCA_EQUIVALENT = cna_modeling_profile.node_types[P
 
 
 function getProxyBackingServiceProperties(): EntityProperty[] {
-    //let parsed = parseProperties(PROXY_BACKING_SERVICE_TOSCA_KEY.properties);
+    let parsed = parseProperties(PROXY_BACKING_SERVICE_TOSCA_EQUIVALENT.properties);
 
     /*
     for (const prop of parsed) {
@@ -24,8 +24,9 @@ function getProxyBackingServiceProperties(): EntityProperty[] {
             break;
         }
     }
-    */
-    return [];
+        */
+    
+    return parsed;
 }
 
 /**
