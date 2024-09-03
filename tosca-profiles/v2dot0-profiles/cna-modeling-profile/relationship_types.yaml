@@ -119,8 +119,8 @@ relationship_types:
     valid_capability_types: [Attachment]
     valid_target_node_types: [ cna-modeling.entities.BackingData ]
         
-  cna-modeling.relationships.ProxiedBy.BackingService:
+  cna-modeling.relationships.ProxiedBy.ProxyBackingService:
     derived_from: Root
-    description: Relationship Type to connect Components to Backing Services which act as a proxy for them
-    valid_target_node_types: [cna.qualityModel.entities.BackingService]
+    description: Relationship Type to connect Components to Proxy Backing Services which act as a proxy for them
+    valid_target_node_types: [cna.qualityModel.entities.ProxyBackingService]
     

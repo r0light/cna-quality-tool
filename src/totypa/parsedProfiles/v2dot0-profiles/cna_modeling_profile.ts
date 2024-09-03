@@ -325,8 +325,8 @@ export const cna_modeling_profile: TOSCA_File = {
         "Attachment"
       ]
     },
-    "cna-modeling.relationships.ProxiedBy.BackingService": {
-      "description": "Relationship Type to connect Components to Backing Services which act as a proxy for them",
+    "cna-modeling.relationships.ProxiedBy.ProxyBackingService": {
+      "description": "Relationship Type to connect Components to Proxy Backing Services which act as a proxy for them",
       "interfaces": {
         "Configure": {
           "type": "Relationship.Configure"
@@ -334,7 +334,7 @@ export const cna_modeling_profile: TOSCA_File = {
       },
       "derived_from": "Root",
       "valid_target_node_types": [
-        "cna.qualityModel.entities.BackingService"
+        "cna.qualityModel.entities.ProxyBackingService"
       ]
     }
   },
@@ -426,8 +426,8 @@ export const cna_modeling_profile: TOSCA_File = {
         {
           "proxied_by": {
             "capability": "cna-modeling.capabilities.Proxy",
-            "node": "cna-modeling.entities.BackingService",
-            "relationship": "cna-modeling.relationships.ProxiedBy.BackingService",
+            "node": "cna-modeling.entities.ProxyBackingService",
+            "relationship": "cna-modeling.relationships.ProxiedBy.ProxyBackingService",
             "count_range": [
               0,
               1
@@ -582,8 +582,8 @@ export const cna_modeling_profile: TOSCA_File = {
         {
           "proxied_by": {
             "capability": "cna-modeling.capabilities.Proxy",
-            "node": "cna-modeling.entities.BackingService",
-            "relationship": "cna-modeling.relationships.ProxiedBy.BackingService",
+            "node": "cna-modeling.entities.ProxyBackingService",
+            "relationship": "cna-modeling.relationships.ProxiedBy.ProxyBackingService",
             "count_range": [
               0,
               1
@@ -661,15 +661,6 @@ export const cna_modeling_profile: TOSCA_File = {
       "capabilities": {
         "feature": {
           "type": "Node"
-        },
-        "proxy": {
-          "type": "cna-modeling.capabilities.Proxy",
-          "valid_source_node_types": [
-            "cna-modeling.entities.Component",
-            "cna-modeling.entities.Service",
-            "cna-modeling.entities.BackingService",
-            "cna-modeling.entities.StorageBackingService"
-          ]
         }
       },
       "requirements": [
@@ -747,8 +738,8 @@ export const cna_modeling_profile: TOSCA_File = {
         {
           "proxied_by": {
             "capability": "cna-modeling.capabilities.Proxy",
-            "node": "cna-modeling.entities.BackingService",
-            "relationship": "cna-modeling.relationships.ProxiedBy.BackingService",
+            "node": "cna-modeling.entities.ProxyBackingService",
+            "relationship": "cna-modeling.relationships.ProxiedBy.ProxyBackingService",
             "count_range": [
               0,
               1
@@ -822,8 +813,6 @@ export const cna_modeling_profile: TOSCA_File = {
             "$valid_values": [
               "$value",
               [
-                "messaging/events",
-                "proxy",
                 "naming/addressing",
                 "configuration",
                 "authentication/authorization",
@@ -855,7 +844,9 @@ export const cna_modeling_profile: TOSCA_File = {
             "cna-modeling.entities.Component",
             "cna-modeling.entities.Service",
             "cna-modeling.entities.BackingService",
-            "cna-modeling.entities.StorageBackingService"
+            "cna-modeling.entities.StorageBackingService",
+            "cna-modeling.entities.ProxyBackingService",
+            "cna-modeling.entities.BrokerBackingService"
           ]
         }
       },
@@ -934,8 +925,8 @@ export const cna_modeling_profile: TOSCA_File = {
         {
           "proxied_by": {
             "capability": "cna-modeling.capabilities.Proxy",
-            "node": "cna-modeling.entities.BackingService",
-            "relationship": "cna-modeling.relationships.ProxiedBy.BackingService",
+            "node": "cna-modeling.entities.ProxyBackingService",
+            "relationship": "cna-modeling.relationships.ProxiedBy.ProxyBackingService",
             "count_range": [
               0,
               1
@@ -1090,8 +1081,8 @@ export const cna_modeling_profile: TOSCA_File = {
         {
           "proxied_by": {
             "capability": "cna-modeling.capabilities.Proxy",
-            "node": "cna-modeling.entities.BackingService",
-            "relationship": "cna-modeling.relationships.ProxiedBy.BackingService",
+            "node": "cna-modeling.entities.ProxyBackingService",
+            "relationship": "cna-modeling.relationships.ProxiedBy.ProxyBackingService",
             "count_range": [
               0,
               1
@@ -1246,8 +1237,8 @@ export const cna_modeling_profile: TOSCA_File = {
         {
           "proxied_by": {
             "capability": "cna-modeling.capabilities.Proxy",
-            "node": "cna-modeling.entities.BackingService",
-            "relationship": "cna-modeling.relationships.ProxiedBy.BackingService",
+            "node": "cna-modeling.entities.ProxyBackingService",
+            "relationship": "cna-modeling.relationships.ProxiedBy.ProxyBackingService",
             "count_range": [
               0,
               1

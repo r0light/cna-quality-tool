@@ -310,35 +310,30 @@ onUpdated(() => {
         case EntityTypes.SERVICE:
         case EntityTypes.BACKING_SERVICE:
         case EntityTypes.STORAGE_BACKING_SERVICE:
+        case EntityTypes.PROXY_BACKING_SERVICE:
         case EntityTypes.BROKER_BACKING_SERVICE:
             let componentAssignedNetworksOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "assigned_networks");
             componentAssignedNetworksOption.includeFormCheck = false;
             componentAssignedNetworksOption.value = selectedEntity.model.prop(componentAssignedNetworksOption.jointJsConfig.modelPath);
 
-            const backingServices = props.graph.getElements().filter(element => element.prop("entity/type") === EntityTypes.BACKING_SERVICE);
+            const proxyBackingServices = props.graph.getElements().filter(element => element.prop("entity/type") === EntityTypes.PROXY_BACKING_SERVICE);
             let proxyOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "proxiedBy");
-            const selectedBackingService = selectedEntity.model.prop(proxyOption.jointJsConfig.modelPath);
-            const proxyDropdownOptions = backingServices.map((backingService) => {
+            const selectedProxyBackingService = selectedEntity.model.prop(proxyOption.jointJsConfig.modelPath);
+            const proxyDropdownOptions = proxyBackingServices.map((proxyBackingService) => {
                 return {
-                    optionValue: backingService.id,
-                    optionText: backingService.attr("label/textWrap/text"),
-                    optionTitle: backingService.attr("label/textWrap/text"),
+                    optionValue: proxyBackingService.id,
+                    optionText: proxyBackingService.attr("label/textWrap/text"),
+                    optionTitle: proxyBackingService.attr("label/textWrap/text"),
                     optionRepresentationClass: "validOption",
                     disabled: false,
                 };
             })
             proxyOption.dropdownOptions = proxyDropdownOptions;
-            proxyOption.value = selectedBackingService;
+            proxyOption.value = selectedProxyBackingService;
 
             let artifactOption = findInSectionsByFeature(selectedEntityPropertyGroups.value, "artifacts");
             artifactOption.includeFormCheck = false;
             artifactOption.attributes.listElementFields.find(field => field.key === "type")["dropdownOptions"] = getAvailableArtifactTypes();
-
-            break;
-        case EntityTypes.PROXY_BACKING_SERVICE:
-            let proxyBackingServiceAssignedNetworksOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "assigned_networks");
-            proxyBackingServiceAssignedNetworksOption.includeFormCheck = false;
-            proxyBackingServiceAssignedNetworksOption.value = selectedEntity.model.prop(proxyBackingServiceAssignedNetworksOption.jointJsConfig.modelPath);
             break;
         case EntityTypes.INFRASTRUCTURE:
 

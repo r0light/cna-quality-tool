@@ -907,7 +907,7 @@ const EntityDetailsConfig: {
                 helpText: "The backing service acting as a proxy for this component.",
                 show: true,
                 attributes: {
-                    placeholder: "Choose Backing Service...",
+                    placeholder: "Choose Proxy Backing Service...",
                     svgRepresentation: "",
                     defaultValue: ""
 
@@ -996,7 +996,7 @@ const EntityDetailsConfig: {
                 helpText: "The backing service acting as a proxy for this component.",
                 show: true,
                 attributes: {
-                    placeholder: "Choose Backing Service...",
+                    placeholder: "Choose Proxy Backing Service...",
                     svgRepresentation: "",
                     defaultValue: ""
 
@@ -1085,7 +1085,7 @@ const EntityDetailsConfig: {
                 helpText: "The backing service acting as a proxy for this component.",
                 show: true,
                 attributes: {
-                    placeholder: "Choose Backing Service...",
+                    placeholder: "Choose Proxy Backing Service...",
                     svgRepresentation: "",
                     defaultValue: ""
 
@@ -1174,7 +1174,7 @@ const EntityDetailsConfig: {
                 helpText: "The backing service acting as a proxy for this component.",
                 show: true,
                 attributes: {
-                    placeholder: "Choose Backing Service...",
+                    placeholder: "Choose Proxy Backing Service...",
                     svgRepresentation: "",
                     defaultValue: ""
 
@@ -1248,7 +1248,35 @@ const EntityDetailsConfig: {
                     minPath: "",
                     min: ""
                 },
-            }
+            }, {
+                providedFeature: "proxiedBy",
+                contentType: PropertyContent.DROPDOWN,
+                label: "Proxied by:",
+                inputProperties: {
+                    disabled: false,
+                    required: true,
+                    checked: false,
+                    selected: false,
+                    readonly: false,
+                },
+                helpText: "The backing service acting as a proxy for this component.",
+                show: true,
+                attributes: {
+                    placeholder: "Choose Proxy Backing Service...",
+                    svgRepresentation: "",
+                    defaultValue: ""
+
+                },
+                provideEnterButton: false,
+                jointJsConfig: {
+                    propertyType: "property",
+                    modelPath: "entity/properties/proxied_by",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
+                dropdownOptions: []
+            },
         ])
     },
     Endpoint: {

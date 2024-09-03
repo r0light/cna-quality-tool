@@ -7,8 +7,8 @@ import { cna_modeling_profile } from '../../totypa/parsedProfiles/v2dot0-profile
 import { MetaData } from '../common/entityDataTypes.js'
 import { RelationToDataAggregate } from './relationToDataAggregate.js'
 import { RelationToBackingData } from './relationToBackingData.js'
-import { BackingService } from './backingService.js'
 import { Artifact } from '../common/artifact.js'
+import { ProxyBackingService } from './proxyBackingService.js'
 
 
 /**
@@ -53,7 +53,7 @@ class Component {
 
     #dataAggregateEntities = new Array<{ data: DataAggregate, relation: RelationToDataAggregate }>();
 
-    #proxiedBy: BackingService;
+    #proxiedBy: ProxyBackingService;
 
     #artifacts: Map<string, Artifact> = new Map<string, Artifact>();
 
@@ -175,7 +175,7 @@ class Component {
         return this.#proxiedBy;
     }
 
-    set setProxiedBy(proxy: BackingService) {
+    set setProxiedBy(proxy: ProxyBackingService) {
         this.#proxiedBy = proxy;
     }
 
