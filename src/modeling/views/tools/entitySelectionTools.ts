@@ -168,8 +168,6 @@ class EntitySelectionTools extends dia.ToolsView {
     createBoundaryTool() {
         let boundaryTool = new elementTools.Boundary({
             padding: 2,
-            rotate: false,
-            useModelGeometry: true,
             attributes: {
                 fill: "none",
                 stroke: "#FEB663",

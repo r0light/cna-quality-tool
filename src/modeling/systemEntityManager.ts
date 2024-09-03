@@ -613,19 +613,17 @@ class SystemEntityManager {
 
         // validate that each Data Aggregate is persisted by at least one component
         let dataAggregateRelations: Map<string, RelationToDataAggregate[]> = new Map();
+        this.#currentSystemEntity.getDataAggregateEntities.forEach((dataAggregate, dataAggregateId)  => {
+            dataAggregateRelations.set(dataAggregateId, []);
+        })
         for (let [componentId, component] of this.#currentSystemEntity.getComponentEntities.entries()) {
             component.getDataAggregateEntities.forEach(dataAggregateRelation => {
-                let relations = dataAggregateRelations.get(dataAggregateRelation.data.getId);
-                if (relations) {
-                    relations.push(dataAggregateRelation.relation);
-                    dataAggregateRelations.set(dataAggregateRelation.data.getId, relations);
-                } else {
-                    dataAggregateRelations.set(dataAggregateRelation.data.getId, [dataAggregateRelation.relation]);
-                }
+                dataAggregateRelations.get(dataAggregateRelation.data.getId).push(dataAggregateRelation.relation);
             })
         }
         for (let [dataAggregateId, dataAggregate] of this.#currentSystemEntity.getDataAggregateEntities.entries()) {
-            if (!dataAggregateRelations.get(dataAggregateId).some(relation => relation.getProperties().find(prop => prop.getKey === "usage_relation").value === "persistence")) {
+            let relationsToThisDataAggregate = dataAggregateRelations.get(dataAggregateId);
+            if (!relationsToThisDataAggregate.some(relation => relation.getProperties().find(prop => prop.getKey === "usage_relation").value === "persistence")) {
                 errors.push(`Data Aggregate ${dataAggregate.getName} is not persisted by any entity.`)
             }
         }
