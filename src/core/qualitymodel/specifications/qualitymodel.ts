@@ -299,7 +299,7 @@ export const qualityModel: QualityModelSpec = {
             "categories": ["businessDomain", "dataManagement"],
             "relevantEntities": ["service", "endpoint"],
             "sources": [{ "key": "Reznik2019", "section": "9 Microservices Architecture" }, { "key": "Adkins2019", "section": "7 Use Microservices" }, { "key": "Goniwada2021", "section": "3 Polylithic Architecture Principle (Build separate services for different business functionalitites) " }],
-            "measures": ["totalServiceInterfaceCohesion", "covesivenessOfService", "cohesionOfAServiceBasedOnOtherEndpointsCalled", "lackOfCohesion", "averageLackOfCohesion", "serviceSize", "unreachableEndpointCount"]
+            "measures": ["totalServiceInterfaceCohesion", "cohesivenessOfService", "cohesionOfAServiceBasedOnOtherEndpointsCalled", "lackOfCohesion", "averageLackOfCohesion", "serviceSize", "unreachableEndpointCount"]
         },
         "limitedDataScope": {
             "name": "Limited data scope",
@@ -939,8 +939,8 @@ export const qualityModel: QualityModelSpec = {
             "calculation": "(\"Service Interface Data Cohesion\" + \"Service Interface Usage Cohesion\") / 2",
             "sources": ["Bogner2017", "Perepletchikov2007"]
         },
-        "covesivenessOfService": {
-            "name": "Covesiveness of Service",
+        "cohesivenessOfService": {
+            "name": "Cohesiveness of Service",
             "calculation": "",
             "sources": ["Oliveira2018", "La2013"]
         },

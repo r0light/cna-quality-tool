@@ -368,8 +368,6 @@ export const directServiceSharing: Calculation<System> = (system) => {
     let servicesUsedBy = new Map<string, Set<string>>();
     let endpointsUsedBy = new Map<string, Set<string>>();
 
-    console.log(servicesUsedBy);
-
     for (const [linkId, link] of system.getLinkEntities.entries()) {
         let targetServiceId = system.searchComponentOfEndpoint(link.getTargetEndpoint.getId).getId;
 
@@ -389,8 +387,6 @@ export const directServiceSharing: Calculation<System> = (system) => {
             endpointsUsedBy.set(link.getTargetEndpoint.getId, setOfServices);
         }
     }
-
-    console.log(servicesUsedBy.entries());
 
     let numberOfSharedServices = [...servicesUsedBy.entries()]
         .filter(serviceUsedBy => serviceUsedBy[1].size >= 2).length;
