@@ -1,8 +1,8 @@
 
 import { a } from "vitest/dist/suite-IbNSsUWN.js";
-import { BackingService, Component, DeploymentMapping, Infrastructure, RequestTrace, Service, StorageBackingService, System } from "../../entities.js";
+import { BackingService, BrokerBackingService, Component, DeploymentMapping, Infrastructure, RequestTrace, Service, StorageBackingService, System } from "../../entities.js";
 import { Calculation } from "../quamoco/Measure.js";
-import { ASYNCHRONOUS_ENDPOINT_KIND, getEndpointKindWeight, getUsageRelationWeight, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SYNCHRONOUS_ENDPOINT_KIND } from "../specifications/featureModel.js";
+import { ASYNCHRONOUS_ENDPOINT_KIND, getEndpointKindWeight, getUsageRelationWeight, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SEND_EVENT_ENDPOINT_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "../specifications/featureModel.js";
 import { c } from "vite/dist/node/types.d-aGj9QkWt.js";
 import { param } from "jquery";
 
@@ -943,6 +943,80 @@ export const amountOfRedundancy: Calculation<System> = (system) => {
 
 }
 
+export const serviceInteractionViaBackingService: Calculation<System> = (system) => {
+
+    let asynchronousConnections: Map<string, {
+        "in-endpoint-ids": Set<string>,
+        "in": Set<string>,
+        "out-endpoint-ids": Set<string>,
+        "out": Set<string>
+    }> = new Map();
+
+    // initialize potential asynchronous connection points
+    let allBrokerBackingServices = [...system.getComponentEntities.entries()].filter(([componentId, component]) => component.constructor.name === BrokerBackingService.name);
+    for (const [brokerServiceId, brokerService] of allBrokerBackingServices) {
+        for (const endpoint of brokerService.getEndpointEntities) {
+            let endpointPath = endpoint.getProperty("url_path").value;
+            let endpointKind = endpoint.getProperty("kind").value;
+            let connectionPointId = brokerServiceId.concat(endpointPath);
+
+            // initialize entry, if not present yet
+            if (!asynchronousConnections.has(connectionPointId)) {
+                asynchronousConnections.set(connectionPointId, {
+                    "in-endpoint-ids": new Set(),
+                    "in": new Set(),
+                    "out-endpoint-ids": new Set(),
+                    "out": new Set()
+                })
+            }
+
+            // actually assign endpoint to corresponding connection point
+            switch(endpointKind) {
+                case SEND_EVENT_ENDPOINT_KIND:
+                    asynchronousConnections.get(connectionPointId)["in-endpoint-ids"].add(endpoint.getId);
+                    break;
+                case SUBSCRIBE_ENDPOINT_KIND:
+                    asynchronousConnections.get(connectionPointId)["out-endpoint-ids"].add(endpoint.getId);
+                    break;
+                default:
+                    // do nothing
+            }
+        }
+    }
+
+    let directServiceConnections: Set<string> = new Set<string>();
+
+    //check all links to find asynchronous service connections and direct service connections.  
+    for (const [linkId, link] of system.getLinkEntities) {
+        if (link.getSourceEntity.constructor.name === Service.name) {
+            let targetComponent = system.searchComponentOfEndpoint(link.getTargetEndpoint.getId);
+            if (targetComponent && targetComponent.constructor.name === Service.name
+                && SYNCHRONOUS_ENDPOINT_KIND.includes(link.getTargetEndpoint.getProperty("kind").value)) {
+                    directServiceConnections.add(linkId);
+                }
+            if (targetComponent && targetComponent.constructor.name === BrokerBackingService.name) {
+                let connectionPointId = targetComponent.getId.concat(link.getTargetEndpoint.getProperty("url_path").value);
+                if (asynchronousConnections.get(connectionPointId)["in-endpoint-ids"].has(link.getTargetEndpoint.getId)) {
+                    asynchronousConnections.get(connectionPointId)["in"].add(link.getSourceEntity.getId);
+                } else if (asynchronousConnections.get(connectionPointId)["out-endpoint-ids"].has(link.getTargetEndpoint.getId)) {
+                    asynchronousConnections.get(connectionPointId)["out"].add(link.getSourceEntity.getId);
+                }
+            }
+        }
+    }
+
+    let numberOfAsynchronousConnectionsViaBroker = [...asynchronousConnections.entries()]
+    .map(([connectionId, connection]) => {
+        return connection.in.size * connection.out.size;
+    }).reduce((accumulator, currentValue) => { return accumulator + currentValue}, 0);
+
+    if ((numberOfAsynchronousConnectionsViaBroker + directServiceConnections.size) === 0) {
+        return 0;
+    }
+
+    return numberOfAsynchronousConnectionsViaBroker / (numberOfAsynchronousConnectionsViaBroker + directServiceConnections.size);
+}
+
 export const systemMeasureImplementations: { [measureKey: string]: Calculation<System> } = {
     "serviceReplicationLevel": serviceReplicationLevel,
     "storageReplicationLevel": storageReplicationLevel,
@@ -1000,7 +1074,8 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation<S
     "numberOfServiceConnectedToStorageBackingService": numberOfServiceConnectedToStorageBackingService,
     "numberOfRequestTraces": numberOfRequestTraces,
     "averageComplexityOfRequestTraces": averageComplexityOfRequestTraces,
-    "amountOfRedundancy": amountOfRedundancy
+    "amountOfRedundancy": amountOfRedundancy,
+    "serviceInteractionViaBackingService": serviceInteractionViaBackingService
 }
 
 export const serviceInterfaceDataCohesion: Calculation<{ component: Component, system: System }> = (parameters) => {

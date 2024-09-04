@@ -1486,7 +1486,7 @@ export const qualityModel: QualityModelSpec = {
         },
         "serviceInteractionViaBackingService": {
             "name": "Service Interaction via Backing Service",
-            "calculation": "",
+            "calculation": "Number of service interconnections via a broker backing service / Total number of service interconnections",
             "sources": ["Ntentos2020a"]
         },
         "serviceInteractionViaCentralComponentUtilizationMetric": {
