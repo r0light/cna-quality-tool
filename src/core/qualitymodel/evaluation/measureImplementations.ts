@@ -2,7 +2,7 @@
 import { a } from "vitest/dist/suite-IbNSsUWN.js";
 import { BackingService, BrokerBackingService, Component, DeploymentMapping, Infrastructure, Link, RequestTrace, Service, StorageBackingService, System } from "../../entities.js";
 import { Calculation } from "../quamoco/Measure.js";
-import { ASYNCHRONOUS_ENDPOINT_KIND, EVENT_SOURCING_KIND, getEndpointKindWeight, getUsageRelationWeight, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MESSAGE_BROKER_KIND, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SEND_EVENT_ENDPOINT_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "../specifications/featureModel.js";
+import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_CONFIG_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, EVENT_SOURCING_KIND, getEndpointKindWeight, getUsageRelationWeight, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MESSAGE_BROKER_KIND, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SEND_EVENT_ENDPOINT_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "../specifications/featureModel.js";
 import { c } from "vite/dist/node/types.d-aGj9QkWt.js";
 import { param } from "jquery";
 
@@ -1061,6 +1061,80 @@ export const eventSourcingUtilizationMetric: Calculation<System> = (system) => {
 
 }
 
+export const configurationExternalization: Calculation<System> = (system) => {
+
+    let allNonConfigServices = [...system.getComponentEntities.entries()].filter(([componentId, component]) => {
+        return component.constructor.name !== BackingService.name || component.getProperty("providedFunctionality").value !== "config";
+    })
+
+    let allConfigServices = [...system.getComponentEntities.entries()].filter(([componentId, component]) => {
+        return component.constructor.name === BackingService.name && component.getProperty("providedFunctionality").value === "config";
+    })
+
+    let allInfrastructure = [...system.getInfrastructureEntities.entries()];
+
+    let configurationRelations: Map<string, {
+        "usedBy": string[],
+        "persistedBy": string[],
+    }> = new Map();
+
+    system.getBackingDataEntities.entries()
+        .filter(([backingDataId, backingData]) => { return backingData.getProperty("kind").value === BACKING_DATA_CONFIG_KIND })
+        .forEach(([configId, config]) => { configurationRelations.set(configId, { "usedBy": [], "persistedBy": [] }) });
+
+    for (const [componentId, component] of allNonConfigServices) {
+        let configurations = component.getBackingDataEntities.filter(backingData => { return backingData.backingData.getProperty("kind").value === BACKING_DATA_CONFIG_KIND });
+        configurations.forEach(config => {
+            // set usedBy in any case
+            configurationRelations.get(config.backingData.getId).usedBy.push(componentId);
+            if (DATA_USAGE_RELATION_PERSISTENCE.includes(config.relation.getProperty("usage_relation").value)) {
+                configurationRelations.get(config.backingData.getId).persistedBy.push(componentId);
+            }
+        })
+    }
+
+    for (const [configServiceId, configService] of allConfigServices) {
+        let configurations = configService.getBackingDataEntities.filter(backingData => { return backingData.backingData.getProperty("kind").value === BACKING_DATA_CONFIG_KIND });
+        configurations.forEach(config => {
+            if (DATA_USAGE_RELATION_USAGE.includes(config.relation.getProperty("usage_relation").value)) {
+                configurationRelations.get(config.backingData.getId).usedBy.push(configServiceId);
+            }
+            if (DATA_USAGE_RELATION_PERSISTENCE.includes(config.relation.getProperty("usage_relation").value)) {
+                configurationRelations.get(config.backingData.getId).persistedBy.push(configServiceId);
+            }
+        })
+    }
+
+    for (const [infrastructureId, infrastructure] of allInfrastructure) {
+        let configurations = infrastructure.getBackingDataEntities.filter(backingData => { return backingData.backingData.getProperty("kind").value === BACKING_DATA_CONFIG_KIND });
+        configurations.forEach(config => {
+            if (DATA_USAGE_RELATION_USAGE.includes(config.relation.getProperty("usage_relation").value)) {
+                configurationRelations.get(config.backingData.getId).usedBy.push(infrastructureId);
+            }
+            if (DATA_USAGE_RELATION_PERSISTENCE.includes(config.relation.getProperty("usage_relation").value)) {
+                configurationRelations.get(config.backingData.getId).persistedBy.push(infrastructureId);
+            }
+        })
+    }
+
+    let nonExternalizedConfigurations = 0;
+    let externalizedConfigurations = 0;
+    configurationRelations.entries().forEach(([configId, relations]) => {
+        for (const usingComponent of relations.usedBy) {
+            if (!relations.persistedBy.includes(usingComponent) && relations.persistedBy.length > 0) {
+                externalizedConfigurations++;
+            } else {
+                nonExternalizedConfigurations++;
+            }
+        }
+    })
+
+    if (nonExternalizedConfigurations + externalizedConfigurations === 0) {
+        return 0;
+    }
+    return externalizedConfigurations / (nonExternalizedConfigurations + externalizedConfigurations);
+}
+
 export const systemMeasureImplementations: { [measureKey: string]: Calculation<System> } = {
     "serviceReplicationLevel": serviceReplicationLevel,
     "storageReplicationLevel": storageReplicationLevel,
@@ -1120,7 +1194,8 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation<S
     "averageComplexityOfRequestTraces": averageComplexityOfRequestTraces,
     "amountOfRedundancy": amountOfRedundancy,
     "serviceInteractionViaBackingService": serviceInteractionViaBackingService,
-    "eventSourcingUtilizationMetric": eventSourcingUtilizationMetric
+    "eventSourcingUtilizationMetric": eventSourcingUtilizationMetric,
+    "configurationExternalization": configurationExternalization
 }
 
 export const serviceInterfaceDataCohesion: Calculation<{ component: Component, system: System }> = (parameters) => {

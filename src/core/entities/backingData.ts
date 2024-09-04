@@ -87,6 +87,10 @@ class BackingData {
         }
     }
 
+    getProperty(propertyKey: string) {
+        return this.#properties.find(property => property.getKey === propertyKey);
+    }
+
     /**
      * Transforms the BackingData object into a String. 
      * @returns {string}

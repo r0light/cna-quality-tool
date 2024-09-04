@@ -1436,7 +1436,7 @@ export const qualityModel: QualityModelSpec = {
         },
         "configurationExternalization": {
             "name": "Configuration externalization",
-            "calculation": "",
+            "calculation": "Number of configuration usages where config data is stored externally / Total number of configuration usages",
             "sources": ["Apel2019"]
         },
         "numberOfDeploymentTargetEnvironments": {

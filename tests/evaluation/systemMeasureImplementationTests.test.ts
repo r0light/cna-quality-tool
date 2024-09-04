@@ -1,10 +1,10 @@
 import { getEmptyMetaData } from "@/core/common/entityDataTypes";
-import { BackingService, BrokerBackingService, Component, DataAggregate, DeploymentMapping, Endpoint, ExternalEndpoint, Infrastructure, Link, RequestTrace, Service, StorageBackingService, System } from "@/core/entities";
+import { BackingData, BackingService, BrokerBackingService, Component, DataAggregate, DeploymentMapping, Endpoint, ExternalEndpoint, Infrastructure, Link, RequestTrace, Service, StorageBackingService, System } from "@/core/entities";
 import { RelationToBackingData } from "@/core/entities/relationToBackingData";
 import { RelationToDataAggregate } from "@/core/entities/relationToDataAggregate";
 import { systemMeasureImplementations } from "@/core/qualitymodel/evaluation/measureImplementations";
 import { getQualityModel } from "@/core/qualitymodel/QualityModelInstance";
-import { ASYNCHRONOUS_ENDPOINT_KIND, COMMAND_ENDPOINT_KIND, QUERY_ENDPOINT_KIND, SEND_EVENT_ENDPOINT_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "@/core/qualitymodel/specifications/featureModel";
+import { ASYNCHRONOUS_ENDPOINT_KIND, COMMAND_ENDPOINT_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, QUERY_ENDPOINT_KIND, SEND_EVENT_ENDPOINT_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "@/core/qualitymodel/specifications/featureModel";
 import { beforeAll, expect, test } from "vitest"
 
 var systemToEvaluateA: System = new System("testSystem");
@@ -1802,4 +1802,50 @@ test("serviceInteractionViaBackingService", () => {
 
     let measureValue = systemMeasureImplementations["eventSourcingUtilizationMetric"](system);
     expect(measureValue).toEqual(2/5);
+})
+
+test("configurationExternalization", () => {
+    let system = new System("testSystem");
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let configA = new BackingData("c1", "config A", getEmptyMetaData());
+    let relationAtoA =  new RelationToBackingData("r1", getEmptyMetaData());
+    relationAtoA.setPropertyValue("usage_relation", DATA_USAGE_RELATION_USAGE[0]);
+    serviceA.addBackingDataEntity(configA,relationAtoA);
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let configB = new BackingData("c2", "config B", getEmptyMetaData());
+    let relationBtoB =  new RelationToBackingData("r2", getEmptyMetaData());
+    relationBtoB.setPropertyValue("usage_relation", DATA_USAGE_RELATION_PERSISTENCE[0]);
+    serviceB.addBackingDataEntity(configB,relationBtoB);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let configC = new BackingData("c3", "config C", getEmptyMetaData());
+    let relationCtoC =  new RelationToBackingData("r3", getEmptyMetaData());
+    relationCtoC.setPropertyValue("usage_relation", DATA_USAGE_RELATION_USAGE[0]);
+    serviceC.addBackingDataEntity(configC,relationCtoC);
+
+    let backingService = new BackingService("bs1", "backing service 1", getEmptyMetaData());
+    backingService.setPropertyValue("providedFunctionality", "config");
+    let relationBStoA =  new RelationToBackingData("r4", getEmptyMetaData());
+    relationBStoA.setPropertyValue("usage_relation", DATA_USAGE_RELATION_PERSISTENCE[0]);
+    backingService.addBackingDataEntity(configA,relationBStoA);
+
+    let storageBackingService = new StorageBackingService("sbs1", "storage backing service 1", getEmptyMetaData());
+    let relationSBStoA =  new RelationToBackingData("r5", getEmptyMetaData());
+    relationSBStoA.setPropertyValue("usage_relation", DATA_USAGE_RELATION_USAGE[0]);
+    storageBackingService.addBackingDataEntity(configA,relationSBStoA);
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    let relationIAtoC = new RelationToBackingData("r6", getEmptyMetaData());
+    relationIAtoC.setPropertyValue("usage_relation", DATA_USAGE_RELATION_PERSISTENCE[0]);
+    infrastructureA.addBackingDataEntity(configC, relationIAtoC);
+
+    system.addEntities([configA, configB, configC]);
+    system.addEntities([serviceA, serviceB, serviceC, backingService, storageBackingService]);
+    system.addEntities([infrastructureA]);
+
+    let measureValue = systemMeasureImplementations["configurationExternalization"](system);
+    expect(measureValue).toEqual(3/4);
+
 })
