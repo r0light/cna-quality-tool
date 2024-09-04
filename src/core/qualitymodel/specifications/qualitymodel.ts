@@ -380,7 +380,7 @@ export const qualityModel: QualityModelSpec = {
             "categories": ["networkCommunication"],
             "relevantEntities": ["link", "backingService"],
             "sources": [{ "key": "Richardson2019", "section": "6 Event-driven communication" }, { "key": "Ruecker2021", "section": "8: Event-driven systems “event chains emerge over time and therefore lack visibility." }],
-            "measures": ["serviceInteractionWithEventSourcingUtilizationMetric"]
+            "measures": ["eventSourcingUtilizationMetric"]
         },
         "persistentCommunication": {
             "name": "Persistent communication",
@@ -388,7 +388,7 @@ export const qualityModel: QualityModelSpec = {
             "categories": ["networkCommunication"],
             "relevantEntities": ["link"],
             "sources": [{ "key": "Indrasiri2021", "section": "5 Event Sourcing Pattern: Log-based message brokers" }],
-            "measures": ["serviceLinkPersistenceUtilizationMetric", "outboxEventSourcingUtilizationMetric"]
+            "measures": ["serviceInteractionViaBackingService", "eventSourcingUtilizationMetric"]
         },
         "usageOfExistingSolutionsForNonCoreCapabilities": {
             "name": "Usage of existing solutions for non-core capabilities",
@@ -1054,19 +1054,9 @@ export const qualityModel: QualityModelSpec = {
             "calculation": "Number of Links targeting an asynchronous Endpoint / Total number of Links",
             "sources": ["Ntentos2020a"]
         },
-        "serviceInteractionWithEventSourcingUtilizationMetric": {
-            "name": "Service Interaction with Event Sourcing utilization metric",
-            "calculation": "",
-            "sources": ["Ntentos2020"]
-        },
-        "serviceLinkPersistenceUtilizationMetric": {
-            "name": "Service Link Persistence utilization metric",
-            "calculation": "",
-            "sources": ["Ntentos2020", "Ntentos2021"]
-        },
-        "outboxEventSourcingUtilizationMetric": {
-            "name": "Outbox/Event Sourcing utilization metric",
-            "calculation": "",
+        "eventSourcingUtilizationMetric": {
+            "name": "Event Sourcing utilization metric",
+            "calculation": "Number of service interconnections via an Event Store / Total number of service interconnections",
             "sources": ["Ntentos2020", "Ntentos2021"]
         },
         "ratioOfInfrastructureNodesThatSupportMonitoring": {

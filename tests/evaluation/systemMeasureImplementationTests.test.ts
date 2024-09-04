@@ -1727,6 +1727,7 @@ test("serviceInteractionViaBackingService", () => {
     let serviceC = new Service("s3", "testService 3", getEmptyMetaData());
 
     let brokerService = new BrokerBackingService("bs1", "broker service", getEmptyMetaData());
+    brokerService.setPropertyValue("kind", "queue");
     let inEndpoint = new Endpoint("e1", "in endpoint", getEmptyMetaData());
     inEndpoint.setPropertyValue("kind", SEND_EVENT_ENDPOINT_KIND);
     inEndpoint.setPropertyValue("url_path", "orders");
@@ -1758,4 +1759,47 @@ test("serviceInteractionViaBackingService", () => {
 
     let measureValue = systemMeasureImplementations["serviceInteractionViaBackingService"](system);
     expect(measureValue).toEqual(0.5);
+})
+
+test("serviceInteractionViaBackingService", () => {
+    let system = new System("testSystem");
+
+    let serviceA = new Service("s1", "testService 1", getEmptyMetaData());
+    let serviceB = new Service("s2", "testService 2", getEmptyMetaData());
+    let serviceC = new Service("s3", "testService 3", getEmptyMetaData());
+
+    let brokerService = new BrokerBackingService("bs1", "broker service", getEmptyMetaData());
+    brokerService.setPropertyValue("kind", "log");
+    let inEndpoint = new Endpoint("e1", "in endpoint", getEmptyMetaData());
+    inEndpoint.setPropertyValue("kind", SEND_EVENT_ENDPOINT_KIND);
+    inEndpoint.setPropertyValue("url_path", "orders");
+    brokerService.addEndpoint(inEndpoint);
+    let outEndpoint = new Endpoint("e2", "out endpoint", getEmptyMetaData());
+    outEndpoint.setPropertyValue("kind", SUBSCRIBE_ENDPOINT_KIND);
+    outEndpoint.setPropertyValue("url_path", "orders");
+    brokerService.addEndpoint(outEndpoint);
+
+    let serviceD = new Service("s4", "testService", getEmptyMetaData());
+    let serviceE = new Service("s5", "testService", getEmptyMetaData());
+    let endpointE = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    endpointE.setPropertyValue("kind", COMMAND_ENDPOINT_KIND);
+    serviceE.addEndpoint(endpointE);
+    let serviceF = new Service("s6", "testService 6", getEmptyMetaData());
+    let endpointF = new Endpoint("e4", "endpoint F", getEmptyMetaData());
+    serviceF.addEndpoint(endpointF);
+    endpointF.setPropertyValue("kind", QUERY_ENDPOINT_KIND);
+
+    let linkABS = new Link("l1", serviceA, inEndpoint);
+    let linkBBS = new Link("l2", serviceB, outEndpoint);
+    let linkCBS = new Link("l3", serviceC, outEndpoint);
+    let linkDE = new Link("l4", serviceD, endpointE);
+    let linkDF = new Link("l5", serviceD, endpointF);
+    let linkEF = new Link("l6", serviceE, endpointF);
+
+    system.addEntities([serviceA, serviceB, serviceC, serviceD, serviceE, serviceF]);
+    system.addEntities([brokerService]);
+    system.addEntities([linkABS, linkBBS, linkCBS, linkDE, linkDF, linkEF]);
+
+    let measureValue = systemMeasureImplementations["eventSourcingUtilizationMetric"](system);
+    expect(measureValue).toEqual(2/5);
 })

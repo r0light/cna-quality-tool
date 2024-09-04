@@ -1,8 +1,8 @@
 
 import { a } from "vitest/dist/suite-IbNSsUWN.js";
-import { BackingService, BrokerBackingService, Component, DeploymentMapping, Infrastructure, RequestTrace, Service, StorageBackingService, System } from "../../entities.js";
+import { BackingService, BrokerBackingService, Component, DeploymentMapping, Infrastructure, Link, RequestTrace, Service, StorageBackingService, System } from "../../entities.js";
 import { Calculation } from "../quamoco/Measure.js";
-import { ASYNCHRONOUS_ENDPOINT_KIND, getEndpointKindWeight, getUsageRelationWeight, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SEND_EVENT_ENDPOINT_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "../specifications/featureModel.js";
+import { ASYNCHRONOUS_ENDPOINT_KIND, EVENT_SOURCING_KIND, getEndpointKindWeight, getUsageRelationWeight, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MESSAGE_BROKER_KIND, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SEND_EVENT_ENDPOINT_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "../specifications/featureModel.js";
 import { c } from "vite/dist/node/types.d-aGj9QkWt.js";
 import { param } from "jquery";
 
@@ -943,11 +943,21 @@ export const amountOfRedundancy: Calculation<System> = (system) => {
 
 }
 
-export const serviceInteractionViaBackingService: Calculation<System> = (system) => {
+const getServiceInteractions: (system: System) => {
+    asynchronousConnections: Map<string, {
+        "in-endpoint-ids": Set<string>,
+        "in": Set<string>,
+        "broker": BrokerBackingService,
+        "out-endpoint-ids": Set<string>,
+        "out": Set<string>
+    }>,
+    synchronousConnections: Map<string, Link>
+} = (system) => {
 
     let asynchronousConnections: Map<string, {
         "in-endpoint-ids": Set<string>,
         "in": Set<string>,
+        "broker": BrokerBackingService
         "out-endpoint-ids": Set<string>,
         "out": Set<string>
     }> = new Map();
@@ -965,13 +975,14 @@ export const serviceInteractionViaBackingService: Calculation<System> = (system)
                 asynchronousConnections.set(connectionPointId, {
                     "in-endpoint-ids": new Set(),
                     "in": new Set(),
+                    "broker": brokerService,
                     "out-endpoint-ids": new Set(),
                     "out": new Set()
                 })
             }
 
             // actually assign endpoint to corresponding connection point
-            switch(endpointKind) {
+            switch (endpointKind) {
                 case SEND_EVENT_ENDPOINT_KIND:
                     asynchronousConnections.get(connectionPointId)["in-endpoint-ids"].add(endpoint.getId);
                     break;
@@ -979,12 +990,12 @@ export const serviceInteractionViaBackingService: Calculation<System> = (system)
                     asynchronousConnections.get(connectionPointId)["out-endpoint-ids"].add(endpoint.getId);
                     break;
                 default:
-                    // do nothing
+                // do nothing
             }
         }
     }
 
-    let directServiceConnections: Set<string> = new Set<string>();
+    let directServiceConnections: Map<string, Link> = new Map<string, Link>();
 
     //check all links to find asynchronous service connections and direct service connections.  
     for (const [linkId, link] of system.getLinkEntities) {
@@ -992,8 +1003,8 @@ export const serviceInteractionViaBackingService: Calculation<System> = (system)
             let targetComponent = system.searchComponentOfEndpoint(link.getTargetEndpoint.getId);
             if (targetComponent && targetComponent.constructor.name === Service.name
                 && SYNCHRONOUS_ENDPOINT_KIND.includes(link.getTargetEndpoint.getProperty("kind").value)) {
-                    directServiceConnections.add(linkId);
-                }
+                directServiceConnections.set(linkId, link);
+            }
             if (targetComponent && targetComponent.constructor.name === BrokerBackingService.name) {
                 let connectionPointId = targetComponent.getId.concat(link.getTargetEndpoint.getProperty("url_path").value);
                 if (asynchronousConnections.get(connectionPointId)["in-endpoint-ids"].has(link.getTargetEndpoint.getId)) {
@@ -1005,16 +1016,49 @@ export const serviceInteractionViaBackingService: Calculation<System> = (system)
         }
     }
 
-    let numberOfAsynchronousConnectionsViaBroker = [...asynchronousConnections.entries()]
-    .map(([connectionId, connection]) => {
-        return connection.in.size * connection.out.size;
-    }).reduce((accumulator, currentValue) => { return accumulator + currentValue}, 0);
+    return {
+        asynchronousConnections: asynchronousConnections,
+        synchronousConnections: directServiceConnections
+    }
+}
 
-    if ((numberOfAsynchronousConnectionsViaBroker + directServiceConnections.size) === 0) {
+export const serviceInteractionViaBackingService: Calculation<System> = (system) => {
+
+    let serviceInteractions = getServiceInteractions(system);
+
+    let numberOfAsynchronousConnectionsViaBroker = [...serviceInteractions.asynchronousConnections.entries()]
+        .filter(([connectionId, connection]) => {
+            return MESSAGE_BROKER_KIND.includes(connection.broker.getProperty("kind").value);
+        })
+        .map(([connectionId, connection]) => {
+            return connection.in.size * connection.out.size;
+        }).reduce((accumulator, currentValue) => { return accumulator + currentValue }, 0);
+
+    if ((numberOfAsynchronousConnectionsViaBroker + serviceInteractions.synchronousConnections.size) === 0) {
         return 0;
     }
 
-    return numberOfAsynchronousConnectionsViaBroker / (numberOfAsynchronousConnectionsViaBroker + directServiceConnections.size);
+    return numberOfAsynchronousConnectionsViaBroker / (numberOfAsynchronousConnectionsViaBroker + serviceInteractions.synchronousConnections.size);
+}
+
+export const eventSourcingUtilizationMetric: Calculation<System> = (system) => {
+
+    let serviceInteractions = getServiceInteractions(system);
+
+    let numberOfEventSourcingConnections = [...serviceInteractions.asynchronousConnections.entries()]
+        .filter(([connectionId, connection]) => {
+            return EVENT_SOURCING_KIND.includes(connection.broker.getProperty("kind").value);
+        })
+        .map(([connectionId, connection]) => {
+            return connection.in.size * connection.out.size;
+        }).reduce((accumulator, currentValue) => { return accumulator + currentValue }, 0);
+
+    if ((numberOfEventSourcingConnections + serviceInteractions.synchronousConnections.size) === 0) {
+        return 0;
+    }
+
+    return numberOfEventSourcingConnections / (numberOfEventSourcingConnections + serviceInteractions.synchronousConnections.size);
+
 }
 
 export const systemMeasureImplementations: { [measureKey: string]: Calculation<System> } = {
@@ -1075,7 +1119,8 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation<S
     "numberOfRequestTraces": numberOfRequestTraces,
     "averageComplexityOfRequestTraces": averageComplexityOfRequestTraces,
     "amountOfRedundancy": amountOfRedundancy,
-    "serviceInteractionViaBackingService": serviceInteractionViaBackingService
+    "serviceInteractionViaBackingService": serviceInteractionViaBackingService,
+    "eventSourcingUtilizationMetric": eventSourcingUtilizationMetric
 }
 
 export const serviceInterfaceDataCohesion: Calculation<{ component: Component, system: System }> = (parameters) => {
