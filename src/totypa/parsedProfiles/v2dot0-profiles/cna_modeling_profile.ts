@@ -1163,6 +1163,22 @@ export const cna_modeling_profile: TOSCA_File = {
             "description": "Either a network id or subnet mask",
             "type": "string"
           }
+        },
+        "kind": {
+          "type": "string",
+          "description": "The kind of broker based on how messages are persisted and delivered. Queue is the classical message broker where messages are stored in a queue, delivered to one consumer and deleted afterwards. Topic enables a delivery of one message to several different consumers, but messages are also deleted. Log enables the Event sourcing pattern, since messages/events are persistently stored and can be retrieved at any time.",
+          "required": true,
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "queue",
+                "topic",
+                "log"
+              ]
+            ]
+          },
+          "default": "queue"
         }
       }
     },

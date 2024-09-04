@@ -13,7 +13,7 @@ const BROKER_BACKING_SERVICE_TOSCA_EQUIVALENT = cna_modeling_profile.node_types[
 
 
 function getBrokerBackingServiceProperties(): EntityProperty[] {
-    //let parsed = parseProperties(BROKER_BACKING_SERVICE_TOSCA_KEY.properties);
+    let parsed = parseProperties(BROKER_BACKING_SERVICE_TOSCA_EQUIVALENT.properties);
 
     /*
     for (const prop of parsed) {
@@ -25,7 +25,7 @@ function getBrokerBackingServiceProperties(): EntityProperty[] {
         }
     }
     */
-    return [];
+    return parsed;
 }
 
 /**

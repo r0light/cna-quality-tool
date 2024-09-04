@@ -796,7 +796,7 @@ export const qualityModel: QualityModelSpec = {
             "categories": ["networkCommunication"],
             "relevantEntities": ["component", "link"],
             "sources": [{ "key": "Indrasiri2021", "section": "3 Sidecar Pattern, Service Mesh Pattern, Service Abstraction Pattern (Proxy communication with services to include service discovery and load balancing)" }, { "key": "Davis2019", "section": "10.3" }, { "key": "Richardson2019", "section": "11.4.2" }],
-            "measures": ["serviceInteractionViaBackingService", "serviceInteractionViaCentralComponentUtilizationMetric"]
+            "measures": ["serviceInteractionViaBackingService"]
         }
     },
     "impacts": [
@@ -1487,12 +1487,7 @@ export const qualityModel: QualityModelSpec = {
         "serviceInteractionViaBackingService": {
             "name": "Service Interaction via Backing Service",
             "calculation": "Number of service interconnections via a broker backing service / Total number of service interconnections",
-            "sources": ["Ntentos2020a"]
-        },
-        "serviceInteractionViaCentralComponentUtilizationMetric": {
-            "name": "Service Interaction via Central Component utilization metric",
-            "calculation": "",
-            "sources": ["Ntentos2020", "Ntentos2021"]
+            "sources": ["Ntentos2020a", "Ntentos2020", "Ntentos2021"]
         },
         "totalNumberOfComponents": {
             "name": "Total Number of Components",
