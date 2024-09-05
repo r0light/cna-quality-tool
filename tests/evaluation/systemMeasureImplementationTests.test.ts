@@ -2120,3 +2120,29 @@ test("ratioOfComponentsOrInfrastructureNodesThatExportMetrics", () => {
     let measureValue = systemMeasureImplementations["ratioOfComponentsOrInfrastructureNodesThatExportMetrics"](system);
     expect(measureValue).toEqual(3/6);
 })
+
+
+test("distributedTracingSupport", () => {
+    let system = new System("testSystem");
+
+    let tracingService= new BackingService("t1", "tracing service", getEmptyMetaData());
+    tracingService.setPropertyValue("providedFunctionality", "tracing");
+    let tracingEndpoint = new Endpoint("te1", "tracing endpoint", getEmptyMetaData());
+    tracingService.addEndpoint(tracingEndpoint);
+
+    let serviceA = new Service("s1", "testService 1", getEmptyMetaData());
+    let serviceB = new Service("s2", "testService 2", getEmptyMetaData())
+    let serviceC = new Service("s3", "testService 3", getEmptyMetaData());
+
+    let storageBackingService = new StorageBackingService("sbs1", "storage 1", getEmptyMetaData());
+
+    let linkATS = new Link("link1", serviceA, tracingEndpoint);
+    let linkCTS = new Link("link2", serviceC, tracingEndpoint);
+    let linkSBSTS = new Link("link3", storageBackingService, tracingEndpoint);
+
+    system.addEntities([tracingService, serviceA, serviceB, serviceC, storageBackingService]);
+    system.addEntities([linkATS, linkCTS, linkSBSTS]);
+
+    let measureValue = systemMeasureImplementations["distributedTracingSupport"](system);
+    expect(measureValue).toEqual(3/4);
+})

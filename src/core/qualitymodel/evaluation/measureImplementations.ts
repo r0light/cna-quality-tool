@@ -1404,6 +1404,38 @@ export const ratioOfComponentsOrInfrastructureNodesThatExportMetrics: Calculatio
     return numberOfComponentsOrInfrastructureExportingMetrics / (allNonMetricsComponents.length + allInfrastructure.size);
 }
 
+export const distributedTracingSupport: Calculation<System> = (system) => {
+
+    // TODO also consider a proxy service that supports tracing and when a component is proxied by that proxy?
+
+    let allTraceableComponents = [...system.getComponentEntities.entries()].filter(([componentId, component]) => {
+        return component.constructor.name !== BackingService.name || component.getProperty("providedFunctionality").value !== "tracing";
+    })
+    
+    let tracingServices =  [...system.getComponentEntities.entries()].filter(([componentId, component]) => {
+        return component.constructor.name === BackingService.name && component.getProperty("providedFunctionality").value === "tracing";
+    })
+
+    if (allTraceableComponents.length === 0 || tracingServices.length === 0) {
+        return 0;
+    }
+
+    let tracingEndpoints = new Set(tracingServices.flatMap(([componentId, component]) => {
+        return component.getEndpointEntities.map(endpoint => endpoint.getId);
+    }));
+
+    let numberOfComponentsConnectedToTracingService = 0;
+
+    for (const [componentId, component] of allTraceableComponents) {
+        let targetedEndpoints = new Set(system.getOutgoingLinksOfComponent(componentId).map(link => link.getTargetEndpoint.getId));
+        if (targetedEndpoints.intersection(tracingEndpoints).size > 0) {
+            numberOfComponentsConnectedToTracingService++;
+        }
+    }
+
+    return numberOfComponentsConnectedToTracingService / allTraceableComponents.length;
+}
+
 
 export const systemMeasureImplementations: { [measureKey: string]: Calculation<System> } = {
     "serviceReplicationLevel": serviceReplicationLevel,
@@ -1470,7 +1502,8 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation<S
     "ratioOfInfrastructureNodesThatSupportMonitoring": ratioOfInfrastructureNodesThatSupportMonitoring,
     "ratioOfComponentsThatSupportMonitoring": ratioOfComponentsThatSupportMonitoring,
     "ratioOfComponentsOrInfrastructureNodesThatExportLogsToACentralService": ratioOfComponentsOrInfrastructureNodesThatExportLogsToACentralService,
-    "ratioOfComponentsOrInfrastructureNodesThatExportMetrics": ratioOfComponentsOrInfrastructureNodesThatExportMetrics
+    "ratioOfComponentsOrInfrastructureNodesThatExportMetrics": ratioOfComponentsOrInfrastructureNodesThatExportMetrics,
+    "distributedTracingSupport": distributedTracingSupport
 }
 
 export const serviceInterfaceDataCohesion: Calculation<{ component: Component, system: System }> = (parameters) => {

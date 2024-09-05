@@ -1086,7 +1086,7 @@ export const qualityModel: QualityModelSpec = {
         },
         "distributedTracingSupport": {
             "name": "Distributed Tracing Support",
-            "calculation": "",
+            "calculation": "Number of Components linked to a tracing service / Total Number of Components which are not tracing services themselves",
             "sources": ["Ntentos2020", "Ntentos2021"]
         },
         "ratioOfServicesThatProvideHealthEndpoints": {
