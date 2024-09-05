@@ -5,6 +5,7 @@ import { RelationToDataAggregate } from "@/core/entities/relationToDataAggregate
 import { systemMeasureImplementations } from "@/core/qualitymodel/evaluation/measureImplementations";
 import { getQualityModel } from "@/core/qualitymodel/QualityModelInstance";
 import { ASYNCHRONOUS_ENDPOINT_KIND, COMMAND_ENDPOINT_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, QUERY_ENDPOINT_KIND, SEND_EVENT_ENDPOINT_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "@/core/qualitymodel/specifications/featureModel";
+import { backingDataSvgRepresentation } from "@/modeling/config/detailsSidebarConfig";
 import { beforeAll, expect, test } from "vitest"
 
 var systemToEvaluateA: System = new System("testSystem");
@@ -1968,4 +1969,154 @@ test("ratioOfComponentsThatSupportMonitoring", () => {
     let measureValue = systemMeasureImplementations["ratioOfComponentsThatSupportMonitoring"](system);
     expect(measureValue).toEqual(1/3);
 
+})
+
+test("ratioOfComponentsOrInfrastructureNodesThatExportLogsToACentralService", () => {
+    let system = new System("testSystem");
+
+    let loggingService = new BackingService("bl1", "logging service", getEmptyMetaData());
+    loggingService.setPropertyValue("providedFunctionality", "logging");
+    let loggingEndpoint = new Endpoint("e1", "logging endpoint", getEmptyMetaData());
+    loggingService.addEndpoint(loggingEndpoint);
+
+    let serviceA = new Service("s1", "testService 1", getEmptyMetaData());
+    let metricsA = new BackingData("m1", "metrics 1", getEmptyMetaData());
+    metricsA.setPropertyValue("kind", "metrics");
+    let relationAtoMA = new RelationToBackingData("r1", getEmptyMetaData());
+    relationAtoMA.setPropertyValue("usage_relation", "persistence");
+    serviceA.addBackingDataEntity(metricsA, relationAtoMA);
+    let logsA = new BackingData("l1", "logs 1", getEmptyMetaData());
+    logsA.setPropertyValue("kind", "logs");
+    let relationAtoLA = new RelationToBackingData("r2", getEmptyMetaData());
+    relationAtoLA.setPropertyValue("usage_relation", "usage");
+    serviceA.addBackingDataEntity(logsA, relationAtoLA);
+    let relationLStoLA = new RelationToBackingData("r3", getEmptyMetaData());
+    relationLStoLA.setPropertyValue("usage_relation", "persistence");
+    loggingService.addBackingDataEntity(logsA, relationLStoLA);
+
+    let serviceB = new Service("s2", "testService 2", getEmptyMetaData());
+    let logsB = new BackingData("l2", "logs 2", getEmptyMetaData());
+    logsB.setPropertyValue("kind", "logs");
+    let relationBtoLB = new RelationToBackingData("r4", getEmptyMetaData());
+    relationBtoLB.setPropertyValue("usage_relation", "usage");
+    serviceB.addBackingDataEntity(logsB, relationBtoLB);
+    let relationLStoLB = new RelationToBackingData("r5", getEmptyMetaData());
+    relationLStoLB.setPropertyValue("usage_relation", "persistence");
+    loggingService.addBackingDataEntity(logsB, relationLStoLB);
+    let endpointB = new Endpoint("e2", "endpoint B", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+
+    let serviceC = new Service("s3", "testService 3", getEmptyMetaData());
+    let logsC = new BackingData("l3", "logs 3", getEmptyMetaData());
+    logsC.setPropertyValue("kind", "logs");
+    let relationCtoLC = new RelationToBackingData("r6", getEmptyMetaData());
+    relationCtoLC.setPropertyValue("usage_relation", "persistence");
+    serviceC.addBackingDataEntity(logsC, relationCtoLC);
+
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    let metricsIA = new BackingData("m2", "metrics 2", getEmptyMetaData());
+    metricsIA.setPropertyValue("kind", "metrics");
+    let relationIAtoMIA = new RelationToBackingData("r7", getEmptyMetaData());
+    relationIAtoMIA.setPropertyValue("usage_relation", "persistence");
+    infrastructureA.addBackingDataEntity(metricsIA, relationIAtoMIA);
+    let logsIA = new BackingData("l4", "logs 4", getEmptyMetaData());
+    logsIA.setPropertyValue("kind", "logs");
+    let relationIAtoLIA = new RelationToBackingData("r8", getEmptyMetaData());
+    relationIAtoLIA.setPropertyValue("usage_relation", "usage");
+    infrastructureA.addBackingDataEntity(logsIA, relationIAtoLIA);
+    let relationLStoLIA = new RelationToBackingData("r9", getEmptyMetaData());
+    relationLStoLIA.setPropertyValue("usage_relation", "persistence");
+    loggingService.addBackingDataEntity(logsIA, relationLStoLIA);
+
+
+    let infrastructureB = new Infrastructure("i2", "infrastructure 2", getEmptyMetaData());
+    let logsIB = new BackingData("l5", "logs 5", getEmptyMetaData());
+    logsIB.setPropertyValue("kind", "logs");
+    let relationIBtoLIB = new RelationToBackingData("r10", getEmptyMetaData());
+    relationIBtoLIB.setPropertyValue("usage_relation", "persistence");
+    infrastructureB.addBackingDataEntity(logsIB, relationIBtoLIB);
+
+    let infrastructureC = new Infrastructure("i3", "infrastructure 3", getEmptyMetaData());
+
+    let linkALS = new Link("link1", serviceA, loggingEndpoint);
+    let linkLSB = new Link("link2", loggingService, endpointB);
+
+
+    system.addEntities([loggingService, serviceA, serviceB, serviceC]);
+    system.addEntities([infrastructureA, infrastructureB, infrastructureC]);
+    system.addEntities([linkALS, linkLSB]);
+
+    let measureValue = systemMeasureImplementations["ratioOfComponentsOrInfrastructureNodesThatExportLogsToACentralService"](system);
+    expect(measureValue).toEqual(3/6);
+})
+
+
+test("ratioOfComponentsOrInfrastructureNodesThatExportMetrics", () => {
+    let system = new System("testSystem");
+
+    let metricsService = new BackingService("bl1", "metrics service", getEmptyMetaData());
+    metricsService.setPropertyValue("providedFunctionality", "metrics");
+    let metricsEndpoint = new Endpoint("e1", "metrics endpoint", getEmptyMetaData());
+    metricsService.addEndpoint(metricsEndpoint);
+
+    let serviceA = new Service("s1", "testService 1", getEmptyMetaData());
+    let metricsA = new BackingData("m1", "metrics 1", getEmptyMetaData());
+    metricsA.setPropertyValue("kind", "metrics");
+    let relationAtoMA = new RelationToBackingData("r1", getEmptyMetaData());
+    relationAtoMA.setPropertyValue("usage_relation", "usage");
+    serviceA.addBackingDataEntity(metricsA, relationAtoMA);
+    let relationMStoMA = new RelationToBackingData("r2", getEmptyMetaData());
+    relationMStoMA.setPropertyValue("usage_relation", "persistence");
+    metricsService.addBackingDataEntity(metricsA, relationMStoMA);
+
+    let serviceB = new Service("s2", "testService 2", getEmptyMetaData());
+    let metricsB = new BackingData("m2", "metrics 2", getEmptyMetaData());
+    metricsB.setPropertyValue("kind", "metrics");
+    let relationBtoMB = new RelationToBackingData("r3", getEmptyMetaData());
+    relationBtoMB.setPropertyValue("usage_relation", "usage");
+    serviceB.addBackingDataEntity(metricsB, relationBtoMB);
+    let relationMStoMB = new RelationToBackingData("r4", getEmptyMetaData());
+    relationMStoMB.setPropertyValue("usage_relation", "persistence");
+    metricsService.addBackingDataEntity(metricsB, relationMStoMB);
+    let endpointB = new Endpoint("e2", "endpoint B", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+
+    let serviceC = new Service("s3", "testService 3", getEmptyMetaData());
+    let metricsC = new BackingData("m3", "metrics 3", getEmptyMetaData());
+    metricsC.setPropertyValue("kind", "metrics");
+    let relationCtoMC = new RelationToBackingData("r5", getEmptyMetaData());
+    relationCtoMC.setPropertyValue("usage_relation", "persistence");
+    serviceC.addBackingDataEntity(metricsC, relationCtoMC);
+
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    let metricsIA = new BackingData("m4", "metrics 4", getEmptyMetaData());
+    metricsIA.setPropertyValue("kind", "metrics");
+    let relationIAtoMIA = new RelationToBackingData("r6", getEmptyMetaData());
+    relationIAtoMIA.setPropertyValue("usage_relation", "usage");
+    infrastructureA.addBackingDataEntity(metricsIA, relationIAtoMIA);
+    let relationMStoMIA = new RelationToBackingData("r7", getEmptyMetaData());
+    relationMStoMIA.setPropertyValue("usage_relation", "persistence");
+    metricsService.addBackingDataEntity(metricsIA, relationMStoMIA);
+
+
+    let infrastructureB = new Infrastructure("i2", "infrastructure 2", getEmptyMetaData());
+    let metricsIB = new BackingData("m5", "metrics 5", getEmptyMetaData());
+    metricsIB.setPropertyValue("kind", "metrics");
+    let relationIBtoMIB = new RelationToBackingData("r8", getEmptyMetaData());
+    relationIBtoMIB.setPropertyValue("usage_relation", "persistence");
+    infrastructureB.addBackingDataEntity(metricsIB, relationIBtoMIB);
+
+    let infrastructureC = new Infrastructure("i3", "infrastructure 3", getEmptyMetaData());
+
+    let linkAMS = new Link("link1", serviceA, metricsEndpoint);
+    let linkMSB = new Link("link2", metricsService, endpointB);
+
+    system.addEntities([metricsService, serviceA, serviceB, serviceC]);
+    system.addEntities([infrastructureA, infrastructureB, infrastructureC]);
+    system.addEntities([linkAMS, linkMSB]);
+
+    let measureValue = systemMeasureImplementations["ratioOfComponentsOrInfrastructureNodesThatExportMetrics"](system);
+    expect(measureValue).toEqual(3/6);
 })

@@ -1071,12 +1071,12 @@ export const qualityModel: QualityModelSpec = {
         },
         "ratioOfComponentsOrInfrastructureNodesThatExportLogsToACentralService": {
             "name": "Ratio of Components or Infrastructure nodes that export logs to a central service",
-            "calculation": "",
+            "calculation": "Number of Components or Infrastrcture Entities exporting logs to a central service / Total number of Components and Infrastructure entities",
             "sources": ["Ntentos2022"]
         },
         "ratioOfComponentsOrInfrastructureNodesThatExportMetrics": {
             "name": "Ratio of Components or Infrastructure nodes that export metrics",
-            "calculation": "",
+            "calculation": "Number of Components or Infrastrcture Entities exporting metrics to a central service / Total number of Components and Infrastructure entities",
             "sources": ["Ntentos2022"]
         },
         "ratioOfComponentsOrInfrastructureNodesThatEnablePerformanceAnalytics": {

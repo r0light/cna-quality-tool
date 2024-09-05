@@ -1230,6 +1230,180 @@ export const ratioOfComponentsThatSupportMonitoring: Calculation<System> = (syst
     return numberOfComponentsSupportingMonitoring / allComponents.size;
 }
 
+export const ratioOfComponentsOrInfrastructureNodesThatExportLogsToACentralService: Calculation<System> = (system) => {
+
+    let allNonLoggingComponents = [...system.getComponentEntities.entries()].filter(([componentId, component]) => {
+        return component.constructor.name !== BackingService.name || component.getProperty("providedFunctionality").value !== "logging";
+    })
+
+    let allInfrastructure = system.getInfrastructureEntities;
+
+    let loggingComponents = [...system.getComponentEntities.entries()].filter(([componentId, component]) => {
+        return component.constructor.name === BackingService.name && component.getProperty("providedFunctionality").value === "logging";
+    })
+
+    if ((allNonLoggingComponents.length + allInfrastructure.size === 0) || loggingComponents.length === 0) {
+        return 0;
+    }
+
+
+    let connectionsToLoggingService: Map<string, {
+        loggingService: string,
+        mode: "push" | "pull"
+    }[]> = new Map();
+    allNonLoggingComponents.forEach(([componentId, component]) => connectionsToLoggingService.set(componentId, []));
+    let loggingComponentIds = loggingComponents.map(([componentId, component]) => componentId);
+    for (const [linkId, link] of system.getLinkEntities) {
+        let targetService = system.searchComponentOfEndpoint(link.getTargetEndpoint.getId);
+        // case 1: component sends to a logging service
+        if (loggingComponentIds.includes(targetService.getId)) {
+            connectionsToLoggingService.get(link.getSourceEntity.getId).push({
+                loggingService: targetService.getId,
+                mode: "push"
+            })
+        }
+        // case 2: logging service scrapes logs from component
+        if (loggingComponentIds.includes(link.getSourceEntity.getId)) {
+            connectionsToLoggingService.get(targetService.getId).push({
+                loggingService: link.getSourceEntity.getId,
+                mode: "pull"
+            })
+        }
+    }
+
+    let numberOfComponentsOrInfrastructureExportingLogs = 0;
+
+    for (const [componentId, nonLoggingComponent] of allNonLoggingComponents) {
+        let loggingData: string[] = nonLoggingComponent.getBackingDataEntities.filter(backingData => {
+            return backingData.backingData.getProperty("kind").value === BACKING_DATA_LOGS_KIND && DATA_USAGE_RELATION_USAGE.includes(backingData.relation.getProperty("usage_relation").value)
+        }).map(backingData => backingData.backingData.getId);
+
+        let componentExportsLoggingData = false;
+        logDataLoop: for (const logData of loggingData) {
+            for (const loggingConnection of connectionsToLoggingService.get(componentId)) {
+                let loggingService = system.getComponentEntities.get(loggingConnection.loggingService);
+                let dataStoredByLoggingService = loggingService.getBackingDataEntities.find(backingData => backingData.backingData.getId === logData);
+                if (dataStoredByLoggingService && DATA_USAGE_RELATION_PERSISTENCE.includes(dataStoredByLoggingService.relation.getProperty("usage_relation").value)) {
+                    componentExportsLoggingData = true;
+                    continue logDataLoop;
+                }
+
+            }
+        }
+        if (componentExportsLoggingData) {
+            numberOfComponentsOrInfrastructureExportingLogs++;
+        }
+    }
+
+    for (const [infrastructureId, infrastructure] of allInfrastructure) {
+        let loggingData: string[] = infrastructure.getBackingDataEntities.filter(backingData => {
+            return backingData.backingData.getProperty("kind").value === BACKING_DATA_LOGS_KIND && DATA_USAGE_RELATION_USAGE.includes(backingData.relation.getProperty("usage_relation").value)
+        }).map(backingData => backingData.backingData.getId);
+
+        let infrastructureExportsLoggingData = false;
+        for (const [loggingServiceId, loggingService] of loggingComponents) {
+            let loggingDataAlsoInLoggingService = loggingService.getBackingDataEntities.find(backingData => {
+                return loggingData.includes(backingData.backingData.getId)
+            });
+            if (loggingDataAlsoInLoggingService && DATA_USAGE_RELATION_PERSISTENCE.includes(loggingDataAlsoInLoggingService.relation.getProperty("usage_relation").value)) {
+                infrastructureExportsLoggingData = true;
+            }
+        }
+        if (infrastructureExportsLoggingData) {
+            numberOfComponentsOrInfrastructureExportingLogs++;
+        }
+    }
+
+    return numberOfComponentsOrInfrastructureExportingLogs / (allNonLoggingComponents.length + allInfrastructure.size);
+}
+
+export const ratioOfComponentsOrInfrastructureNodesThatExportMetrics: Calculation<System> = (system) => {
+
+    let allNonMetricsComponents = [...system.getComponentEntities.entries()].filter(([componentId, component]) => {
+        return component.constructor.name !== BackingService.name || component.getProperty("providedFunctionality").value !== "metrics";
+    })
+
+    let allInfrastructure = system.getInfrastructureEntities;
+
+    let metricComponents = [...system.getComponentEntities.entries()].filter(([componentId, component]) => {
+        return component.constructor.name === BackingService.name && component.getProperty("providedFunctionality").value === "metrics";
+    })
+
+    if ((allNonMetricsComponents.length + allInfrastructure.size === 0) || metricComponents.length === 0) {
+        return 0;
+    }
+
+
+    let connectionsToMetricsService: Map<string, {
+        metricsService: string,
+        mode: "push" | "pull"
+    }[]> = new Map();
+    allNonMetricsComponents.forEach(([componentId, component]) => connectionsToMetricsService.set(componentId, []));
+    let metricComponentIds = metricComponents.map(([componentId, component]) => componentId);
+    for (const [linkId, link] of system.getLinkEntities) {
+        let targetService = system.searchComponentOfEndpoint(link.getTargetEndpoint.getId);
+        // case 1: component sends to a metrics service
+        if (metricComponentIds.includes(targetService.getId)) {
+            connectionsToMetricsService.get(link.getSourceEntity.getId).push({
+                metricsService: targetService.getId,
+                mode: "push"
+            })
+        }
+        // case 2: metrics service scrapes metrics from component
+        if (metricComponentIds.includes(link.getSourceEntity.getId)) {
+            connectionsToMetricsService.get(targetService.getId).push({
+                metricsService: link.getSourceEntity.getId,
+                mode: "pull"
+            })
+        }
+    }
+
+    let numberOfComponentsOrInfrastructureExportingMetrics = 0;
+
+    for (const [componentId, nonMetricsComponent] of allNonMetricsComponents) {
+        let metricData: string[] = nonMetricsComponent.getBackingDataEntities.filter(backingData => {
+            return backingData.backingData.getProperty("kind").value === BACKING_DATA_METRICS_KIND && DATA_USAGE_RELATION_USAGE.includes(backingData.relation.getProperty("usage_relation").value)
+        }).map(backingData => backingData.backingData.getId);
+
+        let componentExportsMetrics = false;
+        metricsDataLoop: for (const metrics of metricData) {
+            for (const metricsConnection of connectionsToMetricsService.get(componentId)) {
+                let metricsService = system.getComponentEntities.get(metricsConnection.metricsService);
+                let dataStoredByMetricsService = metricsService.getBackingDataEntities.find(backingData => backingData.backingData.getId === metrics);
+                if (dataStoredByMetricsService && DATA_USAGE_RELATION_PERSISTENCE.includes(dataStoredByMetricsService.relation.getProperty("usage_relation").value)) {
+                    componentExportsMetrics = true;
+                    continue metricsDataLoop;
+                }
+
+            }
+        }
+        if (componentExportsMetrics) {
+            numberOfComponentsOrInfrastructureExportingMetrics++;
+        }
+    }
+
+    for (const [infrastructureId, infrastructure] of allInfrastructure) {
+        let metricsData: string[] = infrastructure.getBackingDataEntities.filter(backingData => {
+            return backingData.backingData.getProperty("kind").value === BACKING_DATA_METRICS_KIND && DATA_USAGE_RELATION_USAGE.includes(backingData.relation.getProperty("usage_relation").value)
+        }).map(backingData => backingData.backingData.getId);
+
+        let infrastructureExportsMetricsData = false;
+        for (const [metricsServiceId, metricsService] of metricComponents) {
+            let metricsDataAlsoInMetricsService = metricsService.getBackingDataEntities.find(backingData => {
+                return metricsData.includes(backingData.backingData.getId)
+            });
+            if (metricsDataAlsoInMetricsService && DATA_USAGE_RELATION_PERSISTENCE.includes(metricsDataAlsoInMetricsService.relation.getProperty("usage_relation").value)) {
+                infrastructureExportsMetricsData = true;
+            }
+        }
+        if (infrastructureExportsMetricsData) {
+            numberOfComponentsOrInfrastructureExportingMetrics++;
+        }
+    }
+
+    return numberOfComponentsOrInfrastructureExportingMetrics / (allNonMetricsComponents.length + allInfrastructure.size);
+}
+
 
 export const systemMeasureImplementations: { [measureKey: string]: Calculation<System> } = {
     "serviceReplicationLevel": serviceReplicationLevel,
@@ -1294,7 +1468,9 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation<S
     "configurationExternalization": configurationExternalization,
     "ratioOfRequestTracesThroughGateway": ratioOfRequestTracesThroughGateway,
     "ratioOfInfrastructureNodesThatSupportMonitoring": ratioOfInfrastructureNodesThatSupportMonitoring,
-    "ratioOfComponentsThatSupportMonitoring": ratioOfComponentsThatSupportMonitoring
+    "ratioOfComponentsThatSupportMonitoring": ratioOfComponentsThatSupportMonitoring,
+    "ratioOfComponentsOrInfrastructureNodesThatExportLogsToACentralService": ratioOfComponentsOrInfrastructureNodesThatExportLogsToACentralService,
+    "ratioOfComponentsOrInfrastructureNodesThatExportMetrics": ratioOfComponentsOrInfrastructureNodesThatExportMetrics
 }
 
 export const serviceInterfaceDataCohesion: Calculation<{ component: Component, system: System }> = (parameters) => {
