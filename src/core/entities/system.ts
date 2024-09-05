@@ -180,7 +180,7 @@ class System { // TODO use ID's as keys instead of name?
 
     searchComponentOfEndpoint(endpointId: string): Component | undefined {
         return Array.from(this.#componentEntities.values()).find(component => {
-            return !!component.getEndpointEntities.find(endpoint => {
+            return !!component.getEndpointEntities.concat(component.getExternalEndpointEntities).find(endpoint => {
                 return endpoint.getId === endpointId;
             }) 
         })

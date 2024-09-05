@@ -708,10 +708,12 @@ class SystemEntityManager {
 
         const sourceEntity = this.#currentSystemEntity.getComponentEntities.get(sourceElement.id);
 
+
         if (!targetElement.getParentCell()) {
             throw new Error(`Cannot create a link to the Endpoint ${targetElement}, because it is not embedded`);
         }
-        const targetEndpoint = this.#currentSystemEntity.getComponentEntities.get(targetElement.getParentCell().id).getEndpointEntities.filter(endpoint => endpoint.getId === targetElement.id);
+        let targetParent = this.#currentSystemEntity.getComponentEntities.get(targetElement.getParentCell().id);
+        const targetEndpoint = targetParent.getEndpointEntities.concat(targetParent.getExternalEndpointEntities).filter(endpoint => endpoint.getId === targetElement.id);
 
         if (targetEndpoint.length === 0) {
             throw new Error(`Could not find Endpoint for: ${targetElement}`);

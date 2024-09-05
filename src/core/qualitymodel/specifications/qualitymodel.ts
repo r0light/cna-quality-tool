@@ -1576,7 +1576,7 @@ export const qualityModel: QualityModelSpec = {
         },
         "ratioOfRequestTracesThroughGateway": {
             "name": "Ratio of request traces through a gateway",
-            "calculation": "",
+            "calculation": "Number of request traces including an API Gateway as a proxy / Total number of request traces",
             "sources": ["Zdun2023a"]
         },
         "ratioOfRequestTracesContainingFrontend": {

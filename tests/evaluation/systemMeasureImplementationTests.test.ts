@@ -1,5 +1,5 @@
 import { getEmptyMetaData } from "@/core/common/entityDataTypes";
-import { BackingData, BackingService, BrokerBackingService, Component, DataAggregate, DeploymentMapping, Endpoint, ExternalEndpoint, Infrastructure, Link, RequestTrace, Service, StorageBackingService, System } from "@/core/entities";
+import { BackingData, BackingService, BrokerBackingService, Component, DataAggregate, DeploymentMapping, Endpoint, ExternalEndpoint, Infrastructure, Link, ProxyBackingService, RequestTrace, Service, StorageBackingService, System } from "@/core/entities";
 import { RelationToBackingData } from "@/core/entities/relationToBackingData";
 import { RelationToDataAggregate } from "@/core/entities/relationToDataAggregate";
 import { systemMeasureImplementations } from "@/core/qualitymodel/evaluation/measureImplementations";
@@ -1847,5 +1847,63 @@ test("configurationExternalization", () => {
 
     let measureValue = systemMeasureImplementations["configurationExternalization"](system);
     expect(measureValue).toEqual(3/4);
+
+})
+
+test("ratioOfRequestTracesThroughGateway", () => {
+    let system = new System("testSystem");
+
+    let serviceA = new Service("s1", "testService 1", getEmptyMetaData());
+    let externalEndpointA = new ExternalEndpoint("ee1", "external endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(externalEndpointA);
+    let serviceB = new Service("s2", "testService 2", getEmptyMetaData());
+    let endpointB = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+    let serviceC = new Service("s3", "testService 3", getEmptyMetaData());
+    let externalEndpointC = new ExternalEndpoint("ee2", "external endpoint 2", getEmptyMetaData());
+    serviceC.addEndpoint(externalEndpointC);
+
+    let serviceD = new Service("s4", "testService 3", getEmptyMetaData());
+    let endpointD = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceD.addEndpoint(endpointD);
+
+    let storageBackingService = new StorageBackingService("sbs1", "storageBackingService", getEmptyMetaData());
+    let endpointSBS = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    storageBackingService.addEndpoint(endpointSBS);
+
+    let gatewayServiceA = new ProxyBackingService("p1", "proxy 1", getEmptyMetaData());
+    gatewayServiceA.setPropertyValue("kind", "API Gateway");
+    serviceA.setProxiedBy = gatewayServiceA;
+
+    let gatewayServiceB = new ProxyBackingService("p2", "proxy 2", getEmptyMetaData());
+    gatewayServiceB.setPropertyValue("kind", "API Gateway");
+    let externalEndpointPB = new ExternalEndpoint("ee3", "external endpoint 3", getEmptyMetaData());
+    gatewayServiceB.addEndpoint(externalEndpointPB);
+    serviceB.setProxiedBy = gatewayServiceB;
+
+    let linkPAA = new Link("l1", gatewayServiceA, externalEndpointA);
+    let linkASBS = new Link("l2", serviceA, endpointSBS);
+    let linkBSBS = new Link("l3", serviceB, endpointSBS);
+    let linkPBB = new Link("l4", gatewayServiceB, endpointB);
+    let linkCD = new Link("l5", serviceC, endpointD);
+
+    let requestTraceA = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
+    requestTraceA.setLinks = [linkPAA, linkASBS];
+    requestTraceA.setExternalEndpoint = externalEndpointA;
+
+    let requestTraceB = new RequestTrace("rq2", "request trace 2", getEmptyMetaData());
+    requestTraceB.setLinks = [linkPBB, linkBSBS];
+    requestTraceB.setExternalEndpoint = externalEndpointPB
+
+    let requestTraceC = new RequestTrace("rq3", "request trace 3", getEmptyMetaData());
+    requestTraceC.setLinks = [linkCD]
+    requestTraceC.setExternalEndpoint = externalEndpointC;
+
+    system.addEntities([serviceA, serviceB, serviceC, serviceD, storageBackingService, gatewayServiceA, gatewayServiceB]);
+    system.addEntities([linkPAA, linkASBS, linkBSBS, linkPBB, linkCD]);
+    system.addEntities([requestTraceA, requestTraceB, requestTraceC])
+
+    let measureValue = systemMeasureImplementations["ratioOfRequestTracesThroughGateway"](system);
+    expect(measureValue).toEqual(2/3);
 
 })

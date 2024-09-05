@@ -1,6 +1,6 @@
 
 import { a } from "vitest/dist/suite-IbNSsUWN.js";
-import { BackingService, BrokerBackingService, Component, DeploymentMapping, Infrastructure, Link, RequestTrace, Service, StorageBackingService, System } from "../../entities.js";
+import { BackingService, BrokerBackingService, Component, DeploymentMapping, Infrastructure, Link, ProxyBackingService, RequestTrace, Service, StorageBackingService, System } from "../../entities.js";
 import { Calculation } from "../quamoco/Measure.js";
 import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_CONFIG_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, EVENT_SOURCING_KIND, getEndpointKindWeight, getUsageRelationWeight, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MESSAGE_BROKER_KIND, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SEND_EVENT_ENDPOINT_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "../specifications/featureModel.js";
 import { c } from "vite/dist/node/types.d-aGj9QkWt.js";
@@ -1135,6 +1135,40 @@ export const configurationExternalization: Calculation<System> = (system) => {
     return externalizedConfigurations / (nonExternalizedConfigurations + externalizedConfigurations);
 }
 
+export const ratioOfRequestTracesThroughGateway: Calculation<System> = (system) => {
+    let allRequestTraces = system.getRequestTraceEntities;
+
+    if (allRequestTraces.size === 0) {
+        return 0;
+    }
+
+    let numberOfRequestTracesThroughGateway = 0;
+
+    requestTraceLoop: for (const [requestTraceId, requestTrace] of allRequestTraces) {
+        // consider a request trace as going through a gateway if either the component owning the external endpoint is a Gateway or a gateway is included in the request trace
+
+        if (requestTrace.getExternalEndpoint) {
+            let componentWithExternalEndpoint = system.searchComponentOfEndpoint(requestTrace.getExternalEndpoint.getId);
+            let proxy = componentWithExternalEndpoint.getProxiedBy;
+            if (proxy && proxy.constructor.name === ProxyBackingService.name && proxy.getProperty("kind").value === "API Gateway") {
+                numberOfRequestTracesThroughGateway++;
+                continue requestTraceLoop;
+            }
+        }
+
+        for (const link of requestTrace.getLinks) {
+            let linkSource = link.getSourceEntity;
+            if (linkSource.constructor.name === ProxyBackingService.name && linkSource.getProperty("kind").value === "API Gateway") {
+                numberOfRequestTracesThroughGateway++;
+                continue requestTraceLoop;
+            }
+        }
+    }
+
+    return numberOfRequestTracesThroughGateway / allRequestTraces.size;
+}
+
+
 export const systemMeasureImplementations: { [measureKey: string]: Calculation<System> } = {
     "serviceReplicationLevel": serviceReplicationLevel,
     "storageReplicationLevel": storageReplicationLevel,
@@ -1195,7 +1229,8 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation<S
     "amountOfRedundancy": amountOfRedundancy,
     "serviceInteractionViaBackingService": serviceInteractionViaBackingService,
     "eventSourcingUtilizationMetric": eventSourcingUtilizationMetric,
-    "configurationExternalization": configurationExternalization
+    "configurationExternalization": configurationExternalization,
+    "ratioOfRequestTracesThroughGateway": ratioOfRequestTracesThroughGateway
 }
 
 export const serviceInterfaceDataCohesion: Calculation<{ component: Component, system: System }> = (parameters) => {
