@@ -108,6 +108,7 @@ const Component = dia.Element.define("qualityModel.Component", {
     entityTypeHidden: false,
     entity: {
         type: EntityTypes.COMPONENT,
+        keepAspectRatio: true,
         properties: parseProperties(getComponentProperties()),
         artifacts: []
     }
@@ -205,6 +206,7 @@ const Service = dia.Element.define("qualityModel.Service", {
     entityTypeHidden: false,
     entity: {
         type: EntityTypes.SERVICE,
+        keepAspectRatio: true,
         properties: parseProperties(getComponentProperties().concat(getServiceProperties())),
         artifacts: []
     }
@@ -300,6 +302,7 @@ const BackingService = dia.Element.define("qualityModel.BackingService", {
     entityTypeHidden: false,
     entity: {
         type: EntityTypes.BACKING_SERVICE,
+        keepAspectRatio: true,
         properties: parseProperties(getComponentProperties().concat(getBackingServiceProperties())),
         artifacts: []
     }
@@ -376,6 +379,7 @@ const ProxyBackingService = dia.Element.define("qualityModel.ProxyBackingService
     entityTypeHidden: false,
     entity: {
         type: EntityTypes.PROXY_BACKING_SERVICE,
+        keepAspectRatio: false,
         properties: parseProperties(getComponentProperties().concat(getProxyBackingServiceProperties())),
         artifacts: []
     }
@@ -459,6 +463,7 @@ const StorageBackingService = shapes.standard.Cylinder.define("qualityModel.Stor
     entityTypeHidden: false,
     entity: {
         type: EntityTypes.STORAGE_BACKING_SERVICE,
+        keepAspectRatio: true,
         properties: parseProperties(getComponentProperties().concat(getStorageBackingServiceProperties())),
         artifacts: []
     }
@@ -556,6 +561,7 @@ const BrokerBackingService = dia.Element.define("qualityModel.BrokerBackingServi
     entityTypeHidden: false,
     entity: {
         type: EntityTypes.BROKER_BACKING_SERVICE,
+        keepAspectRatio: true,
         properties: parseProperties(getComponentProperties().concat(getBrokerBackingServiceProperties())),
         artifacts: []
     }
@@ -699,6 +705,7 @@ const Endpoint = shapes.standard.Circle.define("qualityModel.Endpoint", {
     parentCollapsed: false,
     entity: {
         type: EntityTypes.ENDPOINT,
+        keepAspectRatio: true,
         embedded: "",
         properties: parseProperties(getEndpointProperties())
     }
@@ -773,6 +780,7 @@ const ExternalEndpoint = shapes.standard.Circle.define("qualityModel.ExternalEnd
     parentCollapsed: false,
     entity: {
         type: EntityTypes.EXTERNAL_ENDPOINT,
+        keepAspectRatio: true,
         embedded: "",
         properties: parseProperties(getEndpointProperties().concat(getExternalEndpointProperties()))
     }
@@ -866,6 +874,7 @@ const Infrastructure = dia.Element.define("qualityModel.Infrastructure", {
     collapsed: false,
     entity: {
         type: EntityTypes.INFRASTRUCTURE,
+        keepAspectRatio: false,
         properties: parseProperties(getInfrastructureProperties()),
         artifacts: []
     }
@@ -962,6 +971,7 @@ const RequestTrace = dia.Element.define("qualityModel.RequestTrace", {
     collapsed: true,
     entity: {
         type: EntityTypes.REQUEST_TRACE,
+        keepAspectRatio: true,
         properties: parseProperties(getRequestTraceProperties())
     }
 }, {
@@ -1107,10 +1117,10 @@ const DataAggregate = dia.Element.define("qualityModel.DataAggregate", {
     },
     attrs: {
         body: {
-            rx: "calc(l)",
-            ry: "calc(0.5 * l)",
-            cx: "calc(l)",
-            cy: "calc(0.5 * l)",
+            rx: "calc(w)",
+            ry: "calc(0.45 * w)",
+            cx: "calc(w)",
+            cy: "calc(0.45 * w)",
             fill: 'white',
             stroke: 'black',
             strokeWidth: 2,
@@ -1136,6 +1146,7 @@ const DataAggregate = dia.Element.define("qualityModel.DataAggregate", {
     parentCollapsed: false,
     entity: {
         type: EntityTypes.DATA_AGGREGATE,
+        keepAspectRatio: true,
         embedded: "", // id of the element in which this entity is embedded
         assignedFamily: "",
         properties: parseProperties(getDataAggregateProperties())
@@ -1175,8 +1186,8 @@ const BackingData = dia.Element.define("qualityModel.BackingData", {
     defaults: {
         type: "qualityModel.BackingData",
         size: {
-            width: 100,
-            height: 60
+            width: 95,
+            height: 30
         },
         fontSize: 14,
         fill: "white",
@@ -1184,12 +1195,12 @@ const BackingData = dia.Element.define("qualityModel.BackingData", {
         strokeWidth: 2
     },
     size: {
-        width: 100,
-        height: 60
+        width: 95,
+        height: 30
     },
     attrs: {
         body: {
-            d: "M 0 0 L calc(0.7 * l) 0 Q calc(l) 0 calc(l) calc(0.3 * l) Q calc(l) calc(0.6 * l) calc(0.7 * l) calc(0.6 * l) L 0 calc(0.6 * l) Z",
+            d: "M 0 0 L calc(0.7 * w) 0 Q calc(w) 0 calc(w) calc(0.5 * h) Q calc(w) calc(h) calc(0.7 * w) calc(h) L 0 calc(h) Z",
             fill: "white",
             stroke: "black",
             strokeWidth: 2,
@@ -1215,6 +1226,7 @@ const BackingData = dia.Element.define("qualityModel.BackingData", {
     parentCollapsed: false,
     entity: {
         type: EntityTypes.BACKING_DATA,
+        keepAspectRatio: false,
         embedded: "", // id of the element in which this entity is embedded
         assignedFamily: "",
         properties: parseProperties(getBackingDataProperties())

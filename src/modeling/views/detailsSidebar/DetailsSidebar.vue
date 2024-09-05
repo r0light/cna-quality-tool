@@ -779,7 +779,7 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                     let newWidth = propertyOption.value as number;
                     let oldHeight = selectedEntityElement.size().height;
                     let updatedHeight = oldHeight;
-                    if (selectedEntityElement.prop("entity/type") !== EntityTypes.INFRASTRUCTURE && selectedEntityElement.prop("entity/type") !== EntityTypes.PROXY_BACKING_SERVICE) {
+                    if (selectedEntityElement.prop("entity/keepAspectRatio")) {
                         // ensure aspect ratio except for infrastructure and proxy backing service
                         const defaultEntitySize = selectedEntityElement.prop("defaults/size");
                         const horizontalAspectRatio = defaultEntitySize.height / defaultEntitySize.width;
@@ -793,7 +793,7 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                     let newHeight = propertyOption.value;
                     let oldWidth = selectedEntityElement.size().width;
                     let updatedWidth = oldWidth;
-                    if (selectedEntityElement.prop("entity/type") !== EntityTypes.INFRASTRUCTURE && selectedEntityElement.prop("entity/type") !== EntityTypes.PROXY_BACKING_SERVICE) {
+                    if (selectedEntityElement.prop("entity/keepAspectRatio")) {
                         // ensure aspect ratio except for infrastructure and proxy backing service
                         const defaultEntitySize = selectedEntityElement.prop("defaults/size");
                         const verticalAspectRatio = defaultEntitySize.width / defaultEntitySize.height;

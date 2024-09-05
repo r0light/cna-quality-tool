@@ -597,7 +597,7 @@ const DetailsSidebarConfig: {
                         max: 99999,
                         defaultValue: 150,
                     },
-                    helpText: "The entity height; might also change due to width change to preserve aspect ration",
+                    helpText: "The entity height; might also change due to width change to preserve aspect ratio",
                     show: true,
                     provideEnterButton: true,
                     jointJsConfig: {
@@ -623,7 +623,7 @@ const DetailsSidebarConfig: {
                         defaultValue: true,
                     },
                     helpText: "If aspect ratio is preserved, width and height change simultaneously.",
-                    show: true,
+                    show: false,
                     provideEnterButton: false,
                     jointJsConfig: {
                         propertyType: "free",

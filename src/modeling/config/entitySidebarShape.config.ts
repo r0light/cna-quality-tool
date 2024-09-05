@@ -213,7 +213,7 @@ const SidebarEntityShapes = {
     DataAggregate: {
         index: 10,
         shape: new DataAggregate({
-            position: { x: 140, y: 334 },
+            position: { x: 140, y: 338 },
             size: { width: 45, height: 25 },
             attrs: {
                 root: {
@@ -257,8 +257,8 @@ const SidebarEntityShapes = {
     BackingData: {
         index: 12,
         shape: new BackingData({
-            position: { x: 147, y: 416 },
-            size: { width: 80, height: 60 },
+            position: { x: 147, y: 426 },
+            size: { width: 80, height: 27 },
             attrs: {
                 root: {
                     title: "cna.qualityModel.BackingData"
