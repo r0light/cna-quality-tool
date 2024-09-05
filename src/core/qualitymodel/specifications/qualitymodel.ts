@@ -1061,12 +1061,12 @@ export const qualityModel: QualityModelSpec = {
         },
         "ratioOfInfrastructureNodesThatSupportMonitoring": {
             "name": "Ratio of Infrastructure nodes that support Monitoring",
-            "calculation": "",
+            "calculation": "Number of Infrastructure nodes providing metrics and logs / Total number of Infrastructure nodes",
             "sources": ["Ntentos2022", "Zdun2023"]
         },
         "ratioOfComponentsThatSupportMonitoring": {
             "name": "Ratio of Components that support Monitoring",
-            "calculation": "",
+            "calculation": "Number of Components providing metrics and logs / Total number of Components",
             "sources": ["Ntentos2022", "Zdun2023"]
         },
         "ratioOfComponentsOrInfrastructureNodesThatExportLogsToACentralService": {

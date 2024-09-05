@@ -2,7 +2,7 @@
 import { a } from "vitest/dist/suite-IbNSsUWN.js";
 import { BackingService, BrokerBackingService, Component, DeploymentMapping, Infrastructure, Link, ProxyBackingService, RequestTrace, Service, StorageBackingService, System } from "../../entities.js";
 import { Calculation } from "../quamoco/Measure.js";
-import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_CONFIG_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, EVENT_SOURCING_KIND, getEndpointKindWeight, getUsageRelationWeight, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MESSAGE_BROKER_KIND, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SEND_EVENT_ENDPOINT_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "../specifications/featureModel.js";
+import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, EVENT_SOURCING_KIND, getEndpointKindWeight, getUsageRelationWeight, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MESSAGE_BROKER_KIND, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SEND_EVENT_ENDPOINT_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "../specifications/featureModel.js";
 import { c } from "vite/dist/node/types.d-aGj9QkWt.js";
 import { param } from "jquery";
 
@@ -1168,6 +1168,68 @@ export const ratioOfRequestTracesThroughGateway: Calculation<System> = (system) 
     return numberOfRequestTracesThroughGateway / allRequestTraces.size;
 }
 
+export const ratioOfInfrastructureNodesThatSupportMonitoring: Calculation<System> = (system) => {
+    let allInfrastructure = system.getInfrastructureEntities;
+
+    if (allInfrastructure.size === 0) {
+        return 0;
+    }
+
+    let numberOfInfrastructureNodesSupportingMonitoring = 0;
+
+    for (const [infrastructureId, infrastructure] of allInfrastructure) {
+        let supportsMetrics = false;
+        let supportsLogging = false;
+
+        for (const backingData of infrastructure.getBackingDataEntities) {
+            if (backingData.backingData.getProperty("kind").value === BACKING_DATA_METRICS_KIND) {
+                supportsMetrics = true;
+                continue;
+            }
+            if (backingData.backingData.getProperty("kind").value === BACKING_DATA_LOGS_KIND) {
+                supportsLogging = true;
+            }
+        }
+
+        if (supportsMetrics && supportsLogging) {
+            numberOfInfrastructureNodesSupportingMonitoring++;
+        }
+    }
+
+    return numberOfInfrastructureNodesSupportingMonitoring / allInfrastructure.size;
+}
+
+export const ratioOfComponentsThatSupportMonitoring: Calculation<System> = (system) => {
+    let allComponents = system.getComponentEntities;
+
+    if (allComponents.size === 0) {
+        return 0;
+    }
+
+    let numberOfComponentsSupportingMonitoring = 0;
+
+    for (const [componentId, component] of allComponents) {
+        let supportsMetrics = false;
+        let supportsLogging = false;
+
+        for (const backingData of component.getBackingDataEntities) {
+            if (backingData.backingData.getProperty("kind").value === BACKING_DATA_METRICS_KIND) {
+                supportsMetrics = true;
+                continue;
+            }
+            if (backingData.backingData.getProperty("kind").value === BACKING_DATA_LOGS_KIND) {
+                supportsLogging = true;
+            }
+        }
+
+        if (supportsMetrics && supportsLogging) {
+            numberOfComponentsSupportingMonitoring++;
+        }
+    }
+
+    return numberOfComponentsSupportingMonitoring / allComponents.size;
+}
+
 
 export const systemMeasureImplementations: { [measureKey: string]: Calculation<System> } = {
     "serviceReplicationLevel": serviceReplicationLevel,
@@ -1230,7 +1292,9 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation<S
     "serviceInteractionViaBackingService": serviceInteractionViaBackingService,
     "eventSourcingUtilizationMetric": eventSourcingUtilizationMetric,
     "configurationExternalization": configurationExternalization,
-    "ratioOfRequestTracesThroughGateway": ratioOfRequestTracesThroughGateway
+    "ratioOfRequestTracesThroughGateway": ratioOfRequestTracesThroughGateway,
+    "ratioOfInfrastructureNodesThatSupportMonitoring": ratioOfInfrastructureNodesThatSupportMonitoring,
+    "ratioOfComponentsThatSupportMonitoring": ratioOfComponentsThatSupportMonitoring
 }
 
 export const serviceInterfaceDataCohesion: Calculation<{ component: Component, system: System }> = (parameters) => {

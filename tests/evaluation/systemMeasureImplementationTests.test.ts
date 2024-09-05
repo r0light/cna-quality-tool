@@ -1907,3 +1907,65 @@ test("ratioOfRequestTracesThroughGateway", () => {
     expect(measureValue).toEqual(2/3);
 
 })
+
+
+test("ratioOfInfrastructureNodesThatSupportMonitoring", () => {
+    let system = new System("testSystem");
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    let metricsIA = new BackingData("m2", "metrics 2", getEmptyMetaData());
+    metricsIA.setPropertyValue("kind", "metrics");
+    let relationIAtoMIA = new RelationToBackingData("r4", getEmptyMetaData());
+    relationIAtoMIA.setPropertyValue("usage_relation", "persistence");
+    infrastructureA.addBackingDataEntity(metricsIA, relationIAtoMIA);
+    let logsIA = new BackingData("l2", "logs 2", getEmptyMetaData());
+    logsIA.setPropertyValue("kind", "logs");
+    let relationIAtoLIA = new RelationToBackingData("r5", getEmptyMetaData());
+    relationIAtoLIA.setPropertyValue("usage_relation", "persistence");
+    infrastructureA.addBackingDataEntity(logsIA, relationIAtoLIA);
+
+    let infrastructureB = new Infrastructure("i2", "infrastructure 2", getEmptyMetaData());
+    let logsIB = new BackingData("l3", "logs 3", getEmptyMetaData());
+    logsIB.setPropertyValue("kind", "logs");
+    let relationIBtoLIB = new RelationToBackingData("r6", getEmptyMetaData());
+    relationIBtoLIB.setPropertyValue("usage_relation", "persistence");
+    infrastructureB.addBackingDataEntity(logsIB, relationIBtoLIB);
+
+    let infrastructureC = new Infrastructure("i3", "infrastructure 3", getEmptyMetaData());
+
+    system.addEntities([infrastructureA, infrastructureB, infrastructureC]);
+
+    let measureValue = systemMeasureImplementations["ratioOfInfrastructureNodesThatSupportMonitoring"](system);
+    expect(measureValue).toEqual(1/3);
+})
+
+test("ratioOfComponentsThatSupportMonitoring", () => {
+    let system = new System("testSystem");
+
+    let serviceA = new Service("s1", "testService 1", getEmptyMetaData());
+    let metricsA = new BackingData("m1", "metrics 1", getEmptyMetaData());
+    metricsA.setPropertyValue("kind", "metrics");
+    let relationAtoMA = new RelationToBackingData("r1", getEmptyMetaData());
+    relationAtoMA.setPropertyValue("usage_relation", "persistence");
+    serviceA.addBackingDataEntity(metricsA, relationAtoMA);
+    let logsA = new BackingData("l1", "logs 1", getEmptyMetaData());
+    logsA.setPropertyValue("kind", "logs");
+    let relationAtoLA = new RelationToBackingData("r2", getEmptyMetaData());
+    relationAtoLA.setPropertyValue("usage_relation", "persistence");
+    serviceA.addBackingDataEntity(logsA, relationAtoLA);
+
+    let serviceB = new Service("s2", "testService 2", getEmptyMetaData());
+    let logsB = new BackingData("l2", "logs 2", getEmptyMetaData());
+    logsB.setPropertyValue("kind", "logs");
+    let relationBtoLB = new RelationToBackingData("r3", getEmptyMetaData());
+    relationBtoLB.setPropertyValue("usage_relation", "persistence");
+    serviceB.addBackingDataEntity(logsB, relationBtoLB);
+
+    let serviceC = new Service("s3", "testService 3", getEmptyMetaData());
+
+    system.addEntities([serviceA, serviceB, serviceC]);
+
+    let measureValue = systemMeasureImplementations["ratioOfComponentsThatSupportMonitoring"](system);
+    expect(measureValue).toEqual(1/3);
+
+})
