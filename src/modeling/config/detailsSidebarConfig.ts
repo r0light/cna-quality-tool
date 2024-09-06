@@ -5,6 +5,7 @@ import { EntityProperty, NumberEntityProperty, SelectEntityProperty, TextEntityP
 import { getDataAggregateRelationshipProperties } from "@/core/entities/relationToDataAggregate";
 import { getBackingDataRelationshipProperties } from "@/core/entities/relationToBackingData";
 import { getBrokerBackingServiceProperties } from "@/core/entities/brokerBackingService";
+import { getNetworkProperties } from "@/core/entities/network";
 
 export type DatalistItem = {
     value: string,
@@ -2088,6 +2089,10 @@ const EntityDetailsConfig: {
                 },
             }
         ])
+    },
+    Network: {
+        type: EntityTypes.NETWORK,
+        specificProperties: parseProperties(getNetworkProperties(), "entity")
     }
 };
 

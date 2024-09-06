@@ -3,6 +3,7 @@ import { getComponentProperties, getBackingServiceProperties, getStorageBackingS
 import EntityTypes from "./entityTypes";
 import { getLinkProperties } from '@/core/entities/link';
 import { getBrokerBackingServiceProperties } from '@/core/entities/brokerBackingService';
+import { getNetworkProperties } from '@/core/entities/network';
 
 // TODO section:
 /*  -   Icon on first load not on correct position --> with firefox for every F5, 
@@ -1241,13 +1242,79 @@ const BackingData = dia.Element.define("qualityModel.BackingData", {
     }]
 });
 
+const Network = dia.Element.define("qualityModel.Network", {
+    defaults: {
+        type: "qualityModel.Network",
+        size: {
+            width: 100,
+            height: 100
+        },
+        fontSize: 14,
+        stroke: "black",
+        strokeWidth: 2,
+        fill: "none"
+    },
+    size: {
+        width: 100,
+        height: 100
+    },
+    attrs: {
+        body: {
+            width: "calc(w)",
+            height: "calc(h)",
+            rx: 2,
+            ry: 2,
+            strokeDasharray: 2,
+            strokeWidth: 2,
+            stroke: "black",
+            fill: "white",
+        },
+        label: {
+            ref: "body",
+            fill: "black",
+            fontFamily: defaultTextFont,
+            fontWeight: "Normal",
+            fontSize: 14,
+            strokeWidth: 0,
+            textAnchor: "left",
+            textVerticalAnchor: "top",
+            refX: "5%",
+            refY: "5%",
+            textWrap: {
+                text: "Component",
+            },
+            class: "entityLabel" // TODO keep?
+        }
+    },
+    collapsed: false,
+    entityTypeHidden: false,
+    entity: {
+        type: EntityTypes.NETWORK,
+        keepAspectRatio: false,
+        properties: parseProperties(getNetworkProperties())
+    }
+}, {
+    markup: [{
+        tagName: "rect",
+        selector: "body"
+    }, {
+        tagName: "text",
+        selector: "label"
+    }, {
+        tagName: "image",
+        selector: "icon"
+    }]
+});
+
+
+
 
 const entityShapes = Object.assign({
     qualityModel: {
         Component, Service, BackingService, StorageBackingService, ProxyBackingService, BrokerBackingService,
         Endpoint, ExternalEndpoint, Link,
         Infrastructure, DeploymentMapping,
-        RequestTrace, DataAggregate, BackingData
+        RequestTrace, DataAggregate, BackingData, Network
     }, shapes
 });
 
@@ -1256,5 +1323,5 @@ export {
     entityShapes, Component, Service, BackingService, ProxyBackingService, BrokerBackingService, StorageBackingService,
     Endpoint, ExternalEndpoint, Link,
     Infrastructure, DeploymentMapping,
-    RequestTrace, DataAggregate, BackingData
+    RequestTrace, DataAggregate, BackingData, Network
 };

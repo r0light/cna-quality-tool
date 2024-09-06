@@ -3,7 +3,8 @@ import { Component, Service, BackingService, StorageBackingService,
     Endpoint, ExternalEndpoint, Link,
     Infrastructure, DeploymentMapping,
     RequestTrace, DataAggregate, BackingData, 
-    ProxyBackingService, BrokerBackingService} from './entityShapes'
+    ProxyBackingService, BrokerBackingService,
+    Network} from './entityShapes'
 
 /**
  * Configuration of the available entity shapes  
@@ -340,7 +341,30 @@ const SidebarEntityShapes = {
                 }
             }
         })
-    }
+    },
+
+    Network: {
+        index: 15,
+        shape: new Network({
+            position: { x: 35, y: 550 },
+            size: { width: 60, height: 60 },
+            attrs: {
+                root: {
+                    title: "cna.qualityModel.Network"
+                },
+                body: {
+                    class: "entityHighlighting",
+                    fill: "transparent"
+                },
+                label: {
+                    fontSize: 11,
+                    textWrap: {
+                        text: "Network",
+                    }
+                }
+            }
+        })
+    },
 }
 
 export default SidebarEntityShapes;

@@ -104,6 +104,7 @@ function addEntity(eventElement) {
     let newElement = cell.clone();
     
     newElement.attr("label/fontSize", cell.prop("defaults/fontSize"));
+    newElement.attr("body/fill", cell.prop("defaults/fill"));
     newElement.removeAttr("root/title");
     newElement.position(30, 20);
 

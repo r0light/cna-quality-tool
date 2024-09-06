@@ -12,7 +12,8 @@ const EntityTypes = Object.freeze({
     DEPLOYMENT_MAPPING: "deployment-mapping",
     REQUEST_TRACE: "request-trace",
     DATA_AGGREGATE: "data-aggregate",
-    BACKING_DATA: "backing-data"
+    BACKING_DATA: "backing-data",
+    NETWORK: "network"
 });
 
 export default EntityTypes;

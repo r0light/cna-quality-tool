@@ -267,7 +267,7 @@ onUpdated(() => {
         // exclude sections if the entity is a link or a deployment mapping
         excludePropertySections.push(...["artifacts", "label", "size", "position"]);
     }
-    if ([EntityTypes.ENDPOINT, EntityTypes.EXTERNAL_ENDPOINT, EntityTypes.DATA_AGGREGATE, EntityTypes.BACKING_DATA, EntityTypes.REQUEST_TRACE].includes(selectedEntity.model.prop("entity/type"))) {
+    if ([EntityTypes.ENDPOINT, EntityTypes.EXTERNAL_ENDPOINT, EntityTypes.DATA_AGGREGATE, EntityTypes.BACKING_DATA, EntityTypes.REQUEST_TRACE, EntityTypes.NETWORK].includes(selectedEntity.model.prop("entity/type"))) {
         excludePropertySections.push("artifacts");
     }
 
@@ -674,6 +674,9 @@ onUpdated(() => {
                     }
                 });
             })
+            break;
+        default:
+            // do nothing
     }
 
     // remove previously registered event callbacks
