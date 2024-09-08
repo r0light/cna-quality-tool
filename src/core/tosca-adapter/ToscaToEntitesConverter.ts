@@ -21,6 +21,7 @@ import { TOSCA_Node_Template, TOSCA_Service_Template } from '@/totypa/tosca-type
 import { Artifact } from '../common/artifact';
 import { PROXY_BACKING_SERVICE_TOSCA_KEY } from '../entities/proxyBackingService';
 import { BROKER_BACKING_SERVICE_TOSCA_KEY } from '../entities/brokerBackingService';
+import { NETWORK_TOSCA_KEY } from '../entities/network';
 
 const MATCH_UNDERSCORE = new RegExp(/_/g);
 const MATCH_FIRST_CHARACTER = new RegExp(/^./g);
@@ -100,6 +101,12 @@ class ToscaToEntitesConverter {
                     let requestTrace = new Entities.RequestTrace(uuid, this.#transformYamlKeyToLabel(key), readToscaMetaData(node.metadata));
                     this.#importedSystem.addEntity(requestTrace);
                     break;
+                case NETWORK_TOSCA_KEY:
+                    let network = new Entities.Network(uuid, this.#transformYamlKeyToLabel(key), readToscaMetaData(node.metadata));
+                    this.#importedSystem.addEntity(network);
+                    break;
+                default:
+                    throw new Error(`Unknown node type: ${node.type}. Cannot parse`)
             }
         }
 
@@ -190,6 +197,19 @@ class ToscaToEntitesConverter {
             }
         }
 
+        // continue with Networks
+        for (const [key, node] of Object.entries(this.#serviceTemplate.node_templates)) {
+            if (node.type === NETWORK_TOSCA_KEY) {
+
+                let network = this.#importedSystem.getNetworkEntities.get(this.#keyIdMap.getId(key));
+
+                if (node.properties) {
+                    for (const [key, value] of Object.entries(node.properties)) {
+                        network.setPropertyValue(key, value);
+                    }
+                }
+            }
+        }
 
         // continue with Endpoints
         for (const [key, node] of Object.entries(this.#serviceTemplate.node_templates)) {

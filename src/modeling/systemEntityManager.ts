@@ -11,7 +11,7 @@ import {
     Component as ComponentElement, Service as ServiceElement, BackingService as BackingServiceElement, StorageBackingService as StorageBackingServiceElement, ProxyBackingService as ProxyBackingServiceElement, BrokerBackingService as BrokerBackingServiceElement,
     Endpoint as EndpointElement, ExternalEndpoint as ExternalEndpointElement, Link as LinkElement,
     Infrastructure as InfrastructureElement, DeploymentMapping as DeploymentMappingElement,
-    RequestTrace as RequestTraceElement, DataAggregate as DataAggregateElement, BackingData as BackingDataElement,
+    RequestTrace as RequestTraceElement, DataAggregate as DataAggregateElement, BackingData as BackingDataElement, Network as NetworkElement,
     entityShapes
 } from './config/entityShapes'
 import { DataAggregate } from "../core/entities";
@@ -20,6 +20,8 @@ import { RelationToDataAggregate } from "../core/entities/relationToDataAggregat
 import { RelationToBackingData } from "../core/entities/relationToBackingData";
 import { Artifact } from '@/core/common/artifact';
 import { Entity } from '@/core/qualitymodel/quamoco/Entity';
+import { networkInterfaces } from 'os';
+import { Network } from '@/core/entities/network';
 
 class SystemEntityManager {
 
@@ -109,6 +111,14 @@ class SystemEntityManager {
                     backingData.setId = newId;
                 }
                 this.#currentSystemEntity.addEntity(backingData);
+            }
+
+            for (const [id, network] of system.getNetworkEntities.entries()) {
+                if (this.#currentSystemEntity.getNetworkEntities.get(id)) {
+                    let newId = uuidv4();
+                    network.setId = newId;
+                }
+                this.#currentSystemEntity.addEntity(network);
             }
 
             for (const [id, infrastructure] of system.getInfrastructureEntities.entries()) {
@@ -227,6 +237,12 @@ class SystemEntityManager {
             this.#addDataEntity(dataEntityElement);
         }
 
+        // continue with networks
+        let networkEntities = elements.filter((element) => element.prop("entity/type") === EntityTypes.NETWORK);
+        for (const networkElement of networkEntities) {
+            this.#addNetworkEntity(networkElement)
+        }
+
         // continue with entities
         let componentEntities = elements.filter((element) => element.prop("entity/type") === EntityTypes.COMPONENT
             || element.prop("entity/type") === EntityTypes.SERVICE
@@ -316,6 +332,22 @@ class SystemEntityManager {
             default:
                 throw new TypeError("Unsuitable Data Element provided! No corresponding Data Entity type is known for: " + JSON.stringify(graphElement));
         }
+    }
+
+    #addNetworkEntity(network: dia.Element) {
+        let networkEntity: Entities.Network = this.#createNetworkEntity(network);
+        this.#currentSystemEntity.addEntity(networkEntity);
+    }
+
+    #createNetworkEntity(graphElement) {
+        const networkEntity = new Entities.Network(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement));
+
+        // set entity properties
+        for (let property of networkEntity.getProperties()) {
+            property.value = graphElement.prop("entity/properties/" + property.getKey)
+        }
+
+        return networkEntity;
     }
 
     #addConnectionEntity(graphLink: dia.Link) {
@@ -833,6 +865,7 @@ class SystemEntityManager {
         this.#currentSystemEntity.resetAllIncludedSystemEntities();
         this.#currentSystemEntity.addEntities(Array.from(newSystemEntity.getDataAggregateEntities.values()));
         this.#currentSystemEntity.addEntities(Array.from(newSystemEntity.getBackingDataEntities.values()));
+        this.#currentSystemEntity.addEntities(Array.from(newSystemEntity.getNetworkEntities.values()));
         this.#currentSystemEntity.addEntities(Array.from(newSystemEntity.getInfrastructureEntities.values()));
         this.#currentSystemEntity.addEntities(Array.from(newSystemEntity.getComponentEntities.values()));
         this.#currentSystemEntity.addEntities(Array.from(newSystemEntity.getDeploymentMappingEntities.values()));
@@ -846,6 +879,12 @@ class SystemEntityManager {
 
         let createdCells = [];
         let createdEdges = [];
+
+        for (const [id, network] of this.#currentSystemEntity.getNetworkEntities) {
+            let newNetwork = this.#createNetworkCell(network);
+            this.#currentSystemGraph.addCell(newNetwork);
+            createdCells.push(newNetwork);
+        }
 
         for (const [id, infrastructure] of this.#currentSystemEntity.getInfrastructureEntities) {
             let newInfrastructure = this.#createInfrastructureCell(infrastructure);
@@ -993,6 +1032,36 @@ class SystemEntityManager {
         }
 
         return createdCells;
+    }
+
+    #createNetworkCell(network: Entities.Network) {
+        let newNetworkElement: dia.Element = new NetworkElement({
+            id: network.getId,
+            position: { x: network.getMetaData.position.xCoord, y: network.getMetaData.position.yCoord },
+            size: network.getMetaData.size,
+            attrs: {
+                root: {
+                    title: "cna.qualityModel.Network"
+                },
+                body: {
+                    class: "entityHighlighting"
+                },
+                label: {
+                    fontSize: network.getMetaData.fontSize,
+                    textWrap: {
+                        text: network.getMetaData.label ? network.getMetaData.label : network.getName
+                    }
+                }
+            }
+        })
+
+        for (const property of EntityDetailsConfig.Network.specificProperties) {
+            if (property.jointJsConfig.modelPath) {
+                newNetworkElement.prop(property.jointJsConfig.modelPath, network.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
+            }
+        }
+
+        return newNetworkElement;
     }
 
     #createInfrastructureCell(infrastructure: Entities.Infrastructure) {

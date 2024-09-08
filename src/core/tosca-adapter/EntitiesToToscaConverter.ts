@@ -20,6 +20,7 @@ import { TOSCA_Node_Template, TOSCA_Relationship_Template, TOSCA_Requirement_Ass
 import { TOSCA_Property_Assignment } from '@/totypa/tosca-types/v2dot0-types/alias-types';
 import { PROXY_BACKING_SERVICE_TOSCA_KEY } from '../entities/proxyBackingService';
 import { BROKER_BACKING_SERVICE_TOSCA_KEY } from '../entities/brokerBackingService';
+import { NETWORK_TOSCA_KEY } from '../entities/network';
 
 const TOSCA_DEFINITIONS_VERSION = "tosca_2_0"
 const MATCH_WHITESPACES = new RegExp(/\s/g);
@@ -67,6 +68,13 @@ class EntitiesToToscaConverter {
         for (const [id, backingData] of this.#systemEntity.getBackingDataEntities.entries()) {
             const nodeKey: string = this.#uniqueKeyManager.ensureUniqueness(this.#transformToYamlKey(backingData.getName));
             let node = this.#createBackingDataTemplate(backingData);
+            this.#keyIdMap.add(nodeKey, id);
+            serviceTemplate.node_templates[nodeKey] = node;
+        }
+
+        for (const [id, network] of this.#systemEntity.getNetworkEntities.entries()) {
+            const nodeKey: string = this.#uniqueKeyManager.ensureUniqueness(this.#transformToYamlKey(network.getName));
+            let node = this.#createNetworkTemplate(network);
             this.#keyIdMap.add(nodeKey, id);
             serviceTemplate.node_templates[nodeKey] = node;
         }
@@ -369,6 +377,20 @@ class EntitiesToToscaConverter {
 
         if (backingData.getProperties().length > 0) {
             template.properties = this.#parsePropertiesForYaml(backingData.getProperties());
+        }
+
+        return template;
+    }
+
+    #createNetworkTemplate(network: Entities.Network): TOSCA_Node_Template {
+
+        let template: TOSCA_Node_Template = {
+            type: NETWORK_TOSCA_KEY,
+            metadata: flatMetaData(network.getMetaData),
+        }
+
+        if (network.getProperties().length > 0) {
+            template.properties = this.#parsePropertiesForYaml(network.getProperties());
         }
 
         return template;

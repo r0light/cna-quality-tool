@@ -1267,7 +1267,7 @@ const Network = dia.Element.define("qualityModel.Network", {
             strokeDasharray: 2,
             strokeWidth: 2,
             stroke: "black",
-            fill: "white",
+            fill: "none",
         },
         label: {
             ref: "body",

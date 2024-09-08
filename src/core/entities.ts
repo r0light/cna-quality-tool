@@ -13,3 +13,4 @@ export { DeploymentMapping, getDeploymentMappingProperties } from './entities/de
 export { RequestTrace, getRequestTraceProperties } from './entities/requestTrace.js';
 export { DataAggregate, getDataAggregateProperties } from './entities/dataAggregate.js';
 export { BackingData, getBackingDataProperties } from './entities/backingData.js';
+export { Network, getNetworkProperties } from './entities/network.js';

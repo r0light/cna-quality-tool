@@ -6,6 +6,7 @@ import { DataAggregate } from "./dataAggregate.js";
 import { DeploymentMapping } from "./deploymentMapping.js";
 import { Infrastructure } from "./infrastructure.js";
 import { Link } from "./link.js";
+import { Network } from "./network.js";
 import { ProxyBackingService } from "./proxyBackingService.js";
 import { RequestTrace } from "./requestTrace.js";
 import { Service } from "./service.js";
@@ -38,6 +39,8 @@ class System { // TODO use ID's as keys instead of name?
 
     #backingDataEntities: Map<string, BackingData> = new Map();
 
+    #networkEntities: Map<string, Network> = new Map();
+
     /**
      * Create a System entity.
      * @param {string} applicationName The name of the application, which the System entity represents. 
@@ -52,7 +55,7 @@ class System { // TODO use ID's as keys instead of name?
      * @param {Array} listOfEntitiesToAdd The list of entities, which should be added to the System entity.
      * @throws {TypeError} If a wrong entity type is being provided. 
      */
-    addEntities(listOfEntitiesToAdd: Component[] | Service[] | BackingService[] | StorageBackingService[] | ProxyBackingService[] | BrokerBackingService[] | Link[] | Infrastructure[] | DeploymentMapping[] | RequestTrace[] | DataAggregate[] | BackingData[] ) {
+    addEntities(listOfEntitiesToAdd: Component[] | Service[] | BackingService[] | StorageBackingService[] | ProxyBackingService[] | BrokerBackingService[] | Link[] | Infrastructure[] | DeploymentMapping[] | RequestTrace[] | DataAggregate[] | BackingData[] | Network[] ) {
         for (const newEntity of listOfEntitiesToAdd) {
             this.addEntity(newEntity);
         }
@@ -64,7 +67,7 @@ class System { // TODO use ID's as keys instead of name?
      * @param {Component|Link|Infrastructure|DeploymentMapping|RequestTrace|DataAggregate|BackingData} entityToAdd The entity that is part of this System entity.
      * @throws {TypeError} If a wrong entity type is being provided. 
      */
-    addEntity(entityToAdd: Component | Link | Infrastructure | DeploymentMapping | RequestTrace | DataAggregate | BackingData) {
+    addEntity(entityToAdd: Component | Link | Infrastructure | DeploymentMapping | RequestTrace | DataAggregate | BackingData | Network) {
         switch (entityToAdd.constructor) {
             case Component:
             case Service:
@@ -92,6 +95,9 @@ class System { // TODO use ID's as keys instead of name?
             case BackingData:
                 this.#backingDataEntities.set(entityToAdd.getId, entityToAdd as BackingData);
                 break;
+            case Network:
+                this.#networkEntities.set(entityToAdd.getId, entityToAdd as Network);
+                break;
             default:
                 const errorMessage = "Wrong entity type provided. The provided entity was: " + Object.getPrototypeOf(entityToAdd) + JSON.stringify(entityToAdd);
                 throw new TypeError(errorMessage);
@@ -107,6 +113,7 @@ class System { // TODO use ID's as keys instead of name?
         this.#requestTraceEntities = new Map();    
         this.#dataAggregateEntities = new Map();    
         this.#backingDataEntities = new Map();
+        this.#networkEntities = new Map();
     }
 
     set setSystemName(updatedSystemName: string) {
@@ -175,6 +182,10 @@ class System { // TODO use ID's as keys instead of name?
      */
     get getBackingDataEntities() {
         return this.#backingDataEntities;
+    }
+
+    get getNetworkEntities() {
+        return this.#networkEntities;
     }
 
 
