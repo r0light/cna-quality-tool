@@ -169,6 +169,13 @@ class ToscaToEntitesConverter {
                                     this.#keyIdMap.add(requirement.relationship as string, deploymentMapping.getId);
                                     this.#importedSystem.addEntity(deploymentMapping);
                                 }
+                            } else if (requirementKey === "assigned_to_network") {
+                                if (typeof requirement === "string") {
+                                    // TODO requirement is of type string
+                                } else {
+                                    let assignedToNetwork = this.#importedSystem.getNetworkEntities.get(this.#keyIdMap.getId(requirement.node));
+                                    infrastructure.addNetwork(assignedToNetwork);
+                                }
                             }
                         }
                     }
@@ -481,7 +488,16 @@ class ToscaToEntitesConverter {
                                 component.setProxiedBy = this.#importedSystem.getComponentEntities.get(this.#keyIdMap.getId(requirement.node));
                             }
                             break;
+                        case "assigned_to_network":
+                            if (typeof requirement === "string") {
+                                // TODO requirement is of type string
+                            } else if (typeof requirement === "object") {
+                                let assignedToNetwork = this.#importedSystem.getNetworkEntities.get(this.#keyIdMap.getId(requirement.node));
+                                component.addNetwork(assignedToNetwork);
+                            }
+                            break;
                     }
+
                 }
             }
         }

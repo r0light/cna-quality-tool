@@ -496,6 +496,17 @@ class SystemEntityManager {
             }
         }
 
+        const assignedNetworks = graphElement.prop("entity/properties/assigned_to_networks");
+        if (assignedNetworks.length > 0) {
+            for (const networkId of assignedNetworks) {
+                let network = this.#currentSystemEntity.getNetworkEntities.get(networkId);
+                if (network) {
+                    entity.addNetwork(network);
+                } else {
+                    console.log(`Network ${networkId} not found`)
+                }
+            }
+        }
     }
 
     #createInfrastructureEntity(graphElement) {
@@ -547,6 +558,18 @@ class SystemEntityManager {
                     break;
                 default:
                     break;
+            }
+        }
+
+        const assignedNetworks = infrastructureElement.prop("entity/properties/assigned_to_networks");
+        if (assignedNetworks.length > 0) {
+            for (const networkId of assignedNetworks) {
+                let network = this.#currentSystemEntity.getNetworkEntities.get(networkId);
+                if (network) {
+                    infrastructureEntity.addNetwork(network);
+                } else {
+                    console.log(`Network ${networkId} not found`)
+                }
             }
         }
 
@@ -645,7 +668,7 @@ class SystemEntityManager {
 
         // validate that each Data Aggregate is persisted by at least one component
         let dataAggregateRelations: Map<string, RelationToDataAggregate[]> = new Map();
-        this.#currentSystemEntity.getDataAggregateEntities.forEach((dataAggregate, dataAggregateId)  => {
+        this.#currentSystemEntity.getDataAggregateEntities.forEach((dataAggregate, dataAggregateId) => {
             dataAggregateRelations.set(dataAggregateId, []);
         })
         for (let [componentId, component] of this.#currentSystemEntity.getComponentEntities.entries()) {
@@ -1089,8 +1112,14 @@ class SystemEntityManager {
 
     #configureInfrastructureCell(infrastructure: Entities.Infrastructure, infrastructureElement: dia.Element) {
         for (const property of EntityDetailsConfig.Infrastructure.specificProperties) {
-            if (property.jointJsConfig.modelPath) {
-                infrastructureElement.prop(property.jointJsConfig.modelPath, infrastructure.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
+            switch (property.providedFeature) {
+                case "assigned_to_networks":
+                    infrastructureElement.prop("entity/properties/assigned_to_networks", infrastructure.getNetworks.keys().toArray());
+                    break;
+                default:
+                    if (property.jointJsConfig.modelPath) {
+                        infrastructureElement.prop(property.jointJsConfig.modelPath, infrastructure.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
+                    }
             }
         }
 
@@ -1099,6 +1128,7 @@ class SystemEntityManager {
             artifacts.push(artifact.getAsSimpleObject(artifactKey));
         }
         infrastructureElement.prop(DetailsSidebarConfig.GeneralProperties.artifacts.options[0].jointJsConfig.modelPath, artifacts)
+
     }
 
 
@@ -1132,6 +1162,9 @@ class SystemEntityManager {
                     if (service.getProxiedBy) {
                         serviceElement.prop("entity/properties/proxied_by", service.getProxiedBy.getId);
                     }
+                    break;
+                case "assigned_to_networks":
+                    serviceElement.prop("entity/properties/assigned_to_networks", [...service.getNetworks.keys()]);
                     break;
                 default:
                     if (property.jointJsConfig.modelPath) {
@@ -1180,6 +1213,9 @@ class SystemEntityManager {
                         backingServiceElement.prop("entity/properties/proxied_by", backingService.getProxiedBy.getId);
                     }
                     break;
+                case "assigned_to_networks":
+                    backingServiceElement.prop("entity/properties/assigned_to_networks", [...backingService.getNetworks.keys()]);
+                    break;
                 default:
                     if (property.jointJsConfig.modelPath) {
                         backingServiceElement.prop(property.jointJsConfig.modelPath, backingService.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
@@ -1227,6 +1263,9 @@ class SystemEntityManager {
                         storageBackingServiceElement.prop("entity/properties/proxied_by", storageBackingService.getProxiedBy.getId);
                     }
                     break;
+                case "assigned_to_networks":
+                    storageBackingServiceElement.prop("entity/properties/assigned_to_networks", [...storageBackingService.getNetworks.keys()]);
+                    break;
                 default:
                     if (property.jointJsConfig.modelPath) {
                         storageBackingServiceElement.prop(property.jointJsConfig.modelPath, storageBackingService.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
@@ -1270,6 +1309,9 @@ class SystemEntityManager {
     #configureProxyBackingServiceCell(proxyBackingService: Entities.ProxyBackingService, proxyBackingServiceElement: dia.Element) {
         for (const property of EntityDetailsConfig.ProxyBackingService.specificProperties) {
             switch (property.providedFeature) {
+                case "assigned_to_networks":
+                    proxyBackingServiceElement.prop("entity/properties/assigned_to_networks", [...proxyBackingService.getNetworks.keys()]);
+                    break;
                 default:
                     if (property.jointJsConfig.modelPath) {
                         proxyBackingServiceElement.prop(property.jointJsConfig.modelPath, proxyBackingService.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
@@ -1319,6 +1361,9 @@ class SystemEntityManager {
                         brokerBackingServiceElement.prop("entity/properties/proxied_by", brokerBackingService.getProxiedBy.getId);
                     }
                     break;
+                case "assigned_to_networks":
+                    brokerBackingServiceElement.prop("entity/properties/assigned_to_networks", [...brokerBackingService.getNetworks.keys()]);
+                    break;
                 default:
                     if (property.jointJsConfig.modelPath) {
                         brokerBackingServiceElement.prop(property.jointJsConfig.modelPath, brokerBackingService.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
@@ -1367,6 +1412,9 @@ class SystemEntityManager {
                     if (component.getProxiedBy) {
                         componentElement.prop("entity/properties/proxied_by", component.getProxiedBy.getId);
                     }
+                    break;
+                case "assigned_to_networks":
+                    componentElement.prop("entity/properties/assigned_to_networks", [...component.getNetworks.keys()]);
                     break;
                 default:
                     if (property.jointJsConfig.modelPath) {

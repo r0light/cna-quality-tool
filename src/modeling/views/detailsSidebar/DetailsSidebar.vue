@@ -312,9 +312,32 @@ onUpdated(() => {
         case EntityTypes.STORAGE_BACKING_SERVICE:
         case EntityTypes.PROXY_BACKING_SERVICE:
         case EntityTypes.BROKER_BACKING_SERVICE:
-            let componentAssignedNetworksOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "assigned_networks");
+            let componentAssignedNetworksOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "assigned_to_networks");
             componentAssignedNetworksOption.includeFormCheck = false;
-            componentAssignedNetworksOption.value = selectedEntity.model.prop(componentAssignedNetworksOption.jointJsConfig.modelPath);
+
+            let currentlyAssignedNetworks = selectedEntity.model.prop(componentAssignedNetworksOption.jointJsConfig.modelPath) ? selectedEntity.model.prop(componentAssignedNetworksOption.jointJsConfig.modelPath) : [];
+
+            // clear table rows
+            componentAssignedNetworksOption.tableRows.length = 0;
+            let existingNetworks = props.graph.getElements().filter(element => element.prop("entity/type") === EntityTypes.NETWORK);
+            existingNetworks.forEach((networkElement) => {
+
+                componentAssignedNetworksOption.tableRows.push({
+                    columns: {
+                        name: networkElement.attr("label/textWrap/text"),
+                        assigned: {
+                            contentType: PropertyContent.CHECKBOX_WITHOUT_LABEL,
+                            disabled: false,
+                            checked: currentlyAssignedNetworks.includes(networkElement.id),
+                            id: networkElement.id
+                        }
+                    },
+                    attributes: {
+                        representationClass: "validOption",
+                        disabled: false
+                    }
+                });
+            })
 
             const proxyBackingServices = props.graph.getElements().filter(element => element.prop("entity/type") === EntityTypes.PROXY_BACKING_SERVICE);
             let proxyOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "proxiedBy");
@@ -363,7 +386,7 @@ onUpdated(() => {
                 });
             })
 
-            // prepare involved links selection
+            // prepare supported update strategies selection
             let supportedUpdateStrategiesConfig: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "supported_update_strategies");
             supportedUpdateStrategiesConfig.includeFormCheck = false;
 
@@ -390,10 +413,32 @@ onUpdated(() => {
                 });
             })
 
-            let assignedNetworksOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "assigned_networks");
-            assignedNetworksOption.includeFormCheck = false;
+            let infrastructureAssignedNetworksOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "assigned_to_networks");
+            infrastructureAssignedNetworksOption.includeFormCheck = false;
 
-            assignedNetworksOption.value = selectedEntity.model.prop(assignedNetworksOption.jointJsConfig.modelPath);
+            let currentlyInfrastructureAssignedNetworks = selectedEntity.model.prop(infrastructureAssignedNetworksOption.jointJsConfig.modelPath) ? selectedEntity.model.prop(infrastructureAssignedNetworksOption.jointJsConfig.modelPath) : [];
+
+            // clear table rows
+            infrastructureAssignedNetworksOption.tableRows.length = 0;
+            let existingAvailableNetworks = props.graph.getElements().filter(element => element.prop("entity/type") === EntityTypes.NETWORK);
+            existingAvailableNetworks.forEach((networkElement) => {
+
+                infrastructureAssignedNetworksOption.tableRows.push({
+                    columns: {
+                        name: networkElement.attr("label/textWrap/text"),
+                        assigned: {
+                            contentType: PropertyContent.CHECKBOX_WITHOUT_LABEL,
+                            disabled: false,
+                            checked: currentlyInfrastructureAssignedNetworks.includes(networkElement.id),
+                            id: networkElement.id
+                        }
+                    },
+                    attributes: {
+                        representationClass: "validOption",
+                        disabled: false
+                    }
+                });
+            })
 
             let infrastructureArtifactOption = findInSectionsByFeature(selectedEntityPropertyGroups.value, "artifacts");
             infrastructureArtifactOption.includeFormCheck = false;
@@ -676,7 +721,7 @@ onUpdated(() => {
             })
             break;
         default:
-            // do nothing
+        // do nothing
     }
 
     // remove previously registered event callbacks
@@ -801,7 +846,7 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                         const defaultEntitySize = selectedEntityElement.prop("defaults/size");
                         const verticalAspectRatio = defaultEntitySize.width / defaultEntitySize.height;
                         updatedWidth = Number((verticalAspectRatio * (newHeight as number)).toFixed(2));
-                    }                 
+                    }
                     selectedEntityElement.resize(updatedWidth, newHeight as number, { deep: true });
                     selectedEntityElement.position(selectedEntityElement.position().x - (updatedWidth - oldWidth) * 0.5, selectedEntityElement.position().y - (newHeight as number - currenHeight) * 0.5);
                 default:
@@ -859,13 +904,25 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                 case EntityTypes.STORAGE_BACKING_SERVICE:
                 case EntityTypes.PROXY_BACKING_SERVICE:
                 case EntityTypes.BROKER_BACKING_SERVICE:
-                    if (propertyOption.providedFeature === "assigned_networks") {
-                        selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, propertyOption.value);
+                    if (propertyOption.providedFeature === "assigned_to_networks") {
+                        let assignedNetworks = [];
+                        propertyOption.tableRows.forEach(network => {
+                            if (network.columns["assigned"]["checked"]) {
+                                assignedNetworks.push(network.columns["assigned"]["id"]);
+                            }
+                        })
+                        selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, assignedNetworks, { rewrite: true });
                     }
                     break;
                 case EntityTypes.INFRASTRUCTURE:
-                    if (propertyOption.providedFeature === "assigned_networks") {
-                        selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, propertyOption.value);
+                    if (propertyOption.providedFeature === "assigned_to_networks") {
+                        let assignedNetworks = [];
+                        propertyOption.tableRows.forEach(network => {
+                            if (network.columns["assigned"]["checked"]) {
+                                assignedNetworks.push(network.columns["assigned"]["id"]);
+                            }
+                        })
+                        selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, assignedNetworks, { rewrite: true });
                     } else if (propertyOption.providedFeature === "supported_artifacts") {
                         let supportedArtifacts = [];
                         propertyOption.tableRows.forEach(artifactType => {

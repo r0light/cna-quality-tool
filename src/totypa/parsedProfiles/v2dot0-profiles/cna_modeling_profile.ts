@@ -433,6 +433,17 @@ export const cna_modeling_profile: TOSCA_File = {
               1
             ]
           }
+        },
+        {
+          "assigned_to_network": {
+            "capability": "Linkable",
+            "node": "Network",
+            "relationship": "LinksTo",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
         }
       ],
       "interfaces": {
@@ -484,14 +495,6 @@ export const cna_modeling_profile: TOSCA_File = {
           "description": "Whether or not this component applies load shedding. That means whether the component rejects incoming load based on certain thresholds (resource usage, concurrent requests).",
           "required": true,
           "default": false
-        },
-        "assigned_networks": {
-          "type": "list",
-          "description": "A list of networks to which this component is assigned to.",
-          "entry_schema": {
-            "description": "Either a network id or subnet mask",
-            "type": "string"
-          }
         }
       }
     },
@@ -589,6 +592,17 @@ export const cna_modeling_profile: TOSCA_File = {
               1
             ]
           }
+        },
+        {
+          "assigned_to_network": {
+            "capability": "Linkable",
+            "node": "Network",
+            "relationship": "LinksTo",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
         }
       ],
       "interfaces": {
@@ -640,14 +654,6 @@ export const cna_modeling_profile: TOSCA_File = {
           "description": "Whether or not this component applies load shedding. That means whether the component rejects incoming load based on certain thresholds (resource usage, concurrent requests).",
           "required": true,
           "default": false
-        },
-        "assigned_networks": {
-          "type": "list",
-          "description": "A list of networks to which this component is assigned to.",
-          "entry_schema": {
-            "description": "Either a network id or subnet mask",
-            "type": "string"
-          }
         }
       }
     },
@@ -745,6 +751,17 @@ export const cna_modeling_profile: TOSCA_File = {
               1
             ]
           }
+        },
+        {
+          "assigned_to_network": {
+            "capability": "Linkable",
+            "node": "Network",
+            "relationship": "LinksTo",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
         }
       ],
       "interfaces": {
@@ -796,14 +813,6 @@ export const cna_modeling_profile: TOSCA_File = {
           "description": "Whether or not this component applies load shedding. That means whether the component rejects incoming load based on certain thresholds (resource usage, concurrent requests).",
           "required": true,
           "default": false
-        },
-        "assigned_networks": {
-          "type": "list",
-          "description": "A list of networks to which this component is assigned to.",
-          "entry_schema": {
-            "description": "Either a network id or subnet mask",
-            "type": "string"
-          }
         },
         "providedFunctionality": {
           "type": "string",
@@ -932,6 +941,17 @@ export const cna_modeling_profile: TOSCA_File = {
               1
             ]
           }
+        },
+        {
+          "assigned_to_network": {
+            "capability": "Linkable",
+            "node": "Network",
+            "relationship": "LinksTo",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
         }
       ],
       "interfaces": {
@@ -983,14 +1003,6 @@ export const cna_modeling_profile: TOSCA_File = {
           "description": "Whether or not this component applies load shedding. That means whether the component rejects incoming load based on certain thresholds (resource usage, concurrent requests).",
           "required": true,
           "default": false
-        },
-        "assigned_networks": {
-          "type": "list",
-          "description": "A list of networks to which this component is assigned to.",
-          "entry_schema": {
-            "description": "Either a network id or subnet mask",
-            "type": "string"
-          }
         },
         "kind": {
           "type": "string",
@@ -1104,6 +1116,17 @@ export const cna_modeling_profile: TOSCA_File = {
               1
             ]
           }
+        },
+        {
+          "assigned_to_network": {
+            "capability": "Linkable",
+            "node": "Network",
+            "relationship": "LinksTo",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
         }
       ],
       "interfaces": {
@@ -1155,14 +1178,6 @@ export const cna_modeling_profile: TOSCA_File = {
           "description": "Whether or not this component applies load shedding. That means whether the component rejects incoming load based on certain thresholds (resource usage, concurrent requests).",
           "required": true,
           "default": false
-        },
-        "assigned_networks": {
-          "type": "list",
-          "description": "A list of networks to which this component is assigned to.",
-          "entry_schema": {
-            "description": "Either a network id or subnet mask",
-            "type": "string"
-          }
         },
         "kind": {
           "type": "string",
@@ -1276,6 +1291,17 @@ export const cna_modeling_profile: TOSCA_File = {
               1
             ]
           }
+        },
+        {
+          "assigned_to_network": {
+            "capability": "Linkable",
+            "node": "Network",
+            "relationship": "LinksTo",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
         }
       ],
       "interfaces": {
@@ -1327,14 +1353,6 @@ export const cna_modeling_profile: TOSCA_File = {
           "description": "Whether or not this component applies load shedding. That means whether the component rejects incoming load based on certain thresholds (resource usage, concurrent requests).",
           "required": true,
           "default": false
-        },
-        "assigned_networks": {
-          "type": "list",
-          "description": "A list of networks to which this component is assigned to.",
-          "entry_schema": {
-            "description": "Either a network id or subnet mask",
-            "type": "string"
-          }
         },
         "name": {
           "type": "string",
@@ -1393,6 +1411,17 @@ export const cna_modeling_profile: TOSCA_File = {
             "capability": "Attachment",
             "node": "cna-modeling.entities.BackingData",
             "relationship": "cna-modeling.relationships.AttachesTo.BackingData",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
+        },
+        {
+          "assigned_to_network": {
+            "capability": "Linkable",
+            "node": "Network",
+            "relationship": "LinksTo",
             "count_range": [
               0,
               "UNBOUNDED"
@@ -1537,14 +1566,6 @@ export const cna_modeling_profile: TOSCA_File = {
           "required": true,
           "description": "Set to true if the infrastructure enforces resource bounds on deployed components, for example regarding cpu shares or memory size. Deployed entities can then only use resources up to a certain bound. Otherwise entities can use resources as available.",
           "default": false
-        },
-        "assigned_networks": {
-          "type": "list",
-          "description": "A list of networks to which this infrastructure is assigned to.",
-          "entry_schema": {
-            "description": "Either a network id or subnet mask",
-            "type": "string"
-          }
         }
       }
     },

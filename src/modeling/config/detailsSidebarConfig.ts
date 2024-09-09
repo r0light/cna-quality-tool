@@ -751,8 +751,8 @@ const EntityDetailsConfig: {
         type: EntityTypes.COMPONENT,
         specificProperties: customizePropertyConfigs(parseProperties(getComponentProperties(), "entity"), [
             {
-                providedFeature: "assigned_networks",
-                contentType: PropertyContent.DYNAMIC_LIST,
+                providedFeature: "assigned_to_networks",
+                contentType: PropertyContent.MULTI_SELECT,
                 label: "Assigned networks:",
                 helpText: "",
                 inputProperties: {
@@ -779,27 +779,21 @@ const EntityDetailsConfig: {
                             actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
                         }
                     },
-                    dialogInfo: `Type in the id or subnet mask of a network and then add it using the plus button. However, your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all your changes will be lost. While you keep the selection of this entity, your changes will be remembered.`,
-                    listElementFields: [
+                    dialogInfo: `Check all networks to which this infrastructure is assigned to.`,
+                    tableColumnHeaders: [
                         {
-                            fieldType: "text",
-                            key: "network-id",
-                            label: "Network Name",
-                            helpText: "The name of the network to assign",
-                            labelIcon: "fa-solid fa-network-wired",
-                            placeholder: "e.g. my-private-network"
+                            text: "Network"
+                        },
+                        {
+                            text: "Assigned"
                         }
-                    ],
-                    addElementButton: {
-                        label: "Submit",
-                        labelIcon: "fa-solid fa-plus"
-                    }
+                    ]
                 },
                 provideEnterButton: false,
                 show: true,
                 jointJsConfig: {
                     propertyType: "customProperty",
-                    modelPath: "entity/properties/assigned_networks",
+                    modelPath: "entity/properties/assigned_to_networks",
                     defaultPropPath: "",
                     minPath: "",
                     min: ""
@@ -840,8 +834,8 @@ const EntityDetailsConfig: {
         type: EntityTypes.SERVICE,
         specificProperties: customizePropertyConfigs(concatInOrder(parseProperties(getServiceProperties(), "entity"), parseProperties(getComponentProperties(), "entity")), [
             {
-                providedFeature: "assigned_networks",
-                contentType: PropertyContent.DYNAMIC_LIST,
+                providedFeature: "assigned_to_networks",
+                contentType: PropertyContent.MULTI_SELECT,
                 label: "Assigned networks:",
                 helpText: "",
                 inputProperties: {
@@ -868,27 +862,21 @@ const EntityDetailsConfig: {
                             actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
                         }
                     },
-                    dialogInfo: `Type in the id or subnet mask of a network and then add it using the plus button. However, your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all your changes will be lost. While you keep the selection of this entity, your changes will be remembered.`,
-                    listElementFields: [
+                    dialogInfo: `Check all networks to which this infrastructure is assigned to.`,
+                    tableColumnHeaders: [
                         {
-                            fieldType: "text",
-                            key: "network-id",
-                            label: "Network Name",
-                            helpText: "The name of the network to assign",
-                            labelIcon: "fa-solid fa-network-wired",
-                            placeholder: "e.g. my-private-network"
+                            text: "Network"
+                        },
+                        {
+                            text: "Assigned"
                         }
-                    ],
-                    addElementButton: {
-                        label: "Submit",
-                        labelIcon: "fa-solid fa-plus"
-                    }
+                    ]
                 },
                 provideEnterButton: false,
                 show: true,
                 jointJsConfig: {
                     propertyType: "customProperty",
-                    modelPath: "entity/properties/assigned_networks",
+                    modelPath: "entity/properties/assigned_to_networks",
                     defaultPropPath: "",
                     minPath: "",
                     min: ""
@@ -929,8 +917,8 @@ const EntityDetailsConfig: {
         type: EntityTypes.BACKING_SERVICE,
         specificProperties: customizePropertyConfigs(concatInOrder(parseProperties(getBackingServiceProperties(), "entity"), parseProperties(getComponentProperties(), "entity")), [
             {
-                providedFeature: "assigned_networks",
-                contentType: PropertyContent.DYNAMIC_LIST,
+                providedFeature: "assigned_to_networks",
+                contentType: PropertyContent.MULTI_SELECT,
                 label: "Assigned networks:",
                 helpText: "",
                 inputProperties: {
@@ -957,27 +945,21 @@ const EntityDetailsConfig: {
                             actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
                         }
                     },
-                    dialogInfo: `Type in the id or subnet mask of a network and then add it using the plus button. However, your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all your changes will be lost. While you keep the selection of this entity, your changes will be remembered.`,
-                    listElementFields: [
+                    dialogInfo: `Check all networks to which this infrastructure is assigned to.`,
+                    tableColumnHeaders: [
                         {
-                            fieldType: "text",
-                            key: "network-id",
-                            label: "Network Name",
-                            helpText: "The name of the network to assign",
-                            labelIcon: "fa-solid fa-network-wired",
-                            placeholder: "e.g. my-private-network"
+                            text: "Network"
+                        },
+                        {
+                            text: "Assigned"
                         }
-                    ],
-                    addElementButton: {
-                        label: "Submit",
-                        labelIcon: "fa-solid fa-plus"
-                    }
+                    ]
                 },
                 provideEnterButton: false,
                 show: true,
                 jointJsConfig: {
                     propertyType: "customProperty",
-                    modelPath: "entity/properties/assigned_networks",
+                    modelPath: "entity/properties/assigned_to_networks",
                     defaultPropPath: "",
                     minPath: "",
                     min: ""
@@ -1018,8 +1000,8 @@ const EntityDetailsConfig: {
         type: EntityTypes.STORAGE_BACKING_SERVICE,
         specificProperties: customizePropertyConfigs(concatInOrder(parseProperties(getStorageBackingServiceProperties(), "entity"), parseProperties(getComponentProperties(), "entity")), [
             {
-                providedFeature: "assigned_networks",
-                contentType: PropertyContent.DYNAMIC_LIST,
+                providedFeature: "assigned_to_networks",
+                contentType: PropertyContent.MULTI_SELECT,
                 label: "Assigned networks:",
                 helpText: "",
                 inputProperties: {
@@ -1046,27 +1028,21 @@ const EntityDetailsConfig: {
                             actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
                         }
                     },
-                    dialogInfo: `Type in the id or subnet mask of a network and then add it using the plus button. However, your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all your changes will be lost. While you keep the selection of this entity, your changes will be remembered.`,
-                    listElementFields: [
+                    dialogInfo: `Check all networks to which this infrastructure is assigned to.`,
+                    tableColumnHeaders: [
                         {
-                            fieldType: "text",
-                            key: "network-id",
-                            label: "Network Name",
-                            helpText: "The name of the network to assign",
-                            labelIcon: "fa-solid fa-network-wired",
-                            placeholder: "e.g. my-private-network"
+                            text: "Network"
+                        },
+                        {
+                            text: "Assigned"
                         }
-                    ],
-                    addElementButton: {
-                        label: "Submit",
-                        labelIcon: "fa-solid fa-plus"
-                    }
+                    ]
                 },
                 provideEnterButton: false,
                 show: true,
                 jointJsConfig: {
                     propertyType: "customProperty",
-                    modelPath: "entity/properties/assigned_networks",
+                    modelPath: "entity/properties/assigned_to_networks",
                     defaultPropPath: "",
                     minPath: "",
                     min: ""
@@ -1107,8 +1083,8 @@ const EntityDetailsConfig: {
         type: EntityTypes.BROKER_BACKING_SERVICE,
         specificProperties: customizePropertyConfigs(concatInOrder(parseProperties(getBrokerBackingServiceProperties(), "entity"), parseProperties(getComponentProperties(), "entity")), [
             {
-                providedFeature: "assigned_networks",
-                contentType: PropertyContent.DYNAMIC_LIST,
+                providedFeature: "assigned_to_networks",
+                contentType: PropertyContent.MULTI_SELECT,
                 label: "Assigned networks:",
                 helpText: "",
                 inputProperties: {
@@ -1135,27 +1111,21 @@ const EntityDetailsConfig: {
                             actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
                         }
                     },
-                    dialogInfo: `Type in the id or subnet mask of a network and then add it using the plus button. However, your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all your changes will be lost. While you keep the selection of this entity, your changes will be remembered.`,
-                    listElementFields: [
+                    dialogInfo: `Check all networks to which this infrastructure is assigned to.`,
+                    tableColumnHeaders: [
                         {
-                            fieldType: "text",
-                            key: "network-id",
-                            label: "Network Name",
-                            helpText: "The name of the network to assign",
-                            labelIcon: "fa-solid fa-network-wired",
-                            placeholder: "e.g. my-private-network"
+                            text: "Network"
+                        },
+                        {
+                            text: "Assigned"
                         }
-                    ],
-                    addElementButton: {
-                        label: "Submit",
-                        labelIcon: "fa-solid fa-plus"
-                    }
+                    ]
                 },
                 provideEnterButton: false,
                 show: true,
                 jointJsConfig: {
                     propertyType: "customProperty",
-                    modelPath: "entity/properties/assigned_networks",
+                    modelPath: "entity/properties/assigned_to_networks",
                     defaultPropPath: "",
                     minPath: "",
                     min: ""
@@ -1196,8 +1166,8 @@ const EntityDetailsConfig: {
         type: EntityTypes.PROXY_BACKING_SERVICE,
         specificProperties: customizePropertyConfigs(concatInOrder(parseProperties(getProxyBackingServiceProperties(), "entity"), parseProperties(getComponentProperties(), "entity")), [
             {
-                providedFeature: "assigned_networks",
-                contentType: PropertyContent.DYNAMIC_LIST,
+                providedFeature: "assigned_to_networks",
+                contentType: PropertyContent.MULTI_SELECT,
                 label: "Assigned networks:",
                 helpText: "",
                 inputProperties: {
@@ -1224,27 +1194,21 @@ const EntityDetailsConfig: {
                             actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
                         }
                     },
-                    dialogInfo: `Type in the id or subnet mask of a network and then add it using the plus button. However, your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all your changes will be lost. While you keep the selection of this entity, your changes will be remembered.`,
-                    listElementFields: [
+                    dialogInfo: `Check all networks to which this infrastructure is assigned to.`,
+                    tableColumnHeaders: [
                         {
-                            fieldType: "text",
-                            key: "network-id",
-                            label: "Network Name",
-                            helpText: "The name of the network to assign",
-                            labelIcon: "fa-solid fa-network-wired",
-                            placeholder: "e.g. my-private-network"
+                            text: "Network"
+                        },
+                        {
+                            text: "Assigned"
                         }
-                    ],
-                    addElementButton: {
-                        label: "Submit",
-                        labelIcon: "fa-solid fa-plus"
-                    }
+                    ]
                 },
                 provideEnterButton: false,
                 show: true,
                 jointJsConfig: {
                     propertyType: "customProperty",
-                    modelPath: "entity/properties/assigned_networks",
+                    modelPath: "entity/properties/assigned_to_networks",
                     defaultPropPath: "",
                     minPath: "",
                     min: ""
@@ -1570,8 +1534,8 @@ const EntityDetailsConfig: {
                 },
             },
             {
-                providedFeature: "assigned_networks",
-                contentType: PropertyContent.DYNAMIC_LIST,
+                providedFeature: "assigned_to_networks",
+                contentType: PropertyContent.MULTI_SELECT,
                 label: "Assigned networks:",
                 helpText: "",
                 inputProperties: {
@@ -1598,32 +1562,26 @@ const EntityDetailsConfig: {
                             actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
                         }
                     },
-                    dialogInfo: `Type in the id or subnet mask of a network and then add it using the plus button. However, your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all your changes will be lost. While you keep the selection of this entity, your changes will be remembered.`,
-                    listElementFields: [
+                    dialogInfo: `Check all networks to which this infrastructure is assigned to.`,
+                    tableColumnHeaders: [
                         {
-                            fieldType: "text",
-                            key: "network-id",
-                            label: "Network Name",
-                            helpText: "The name of the network to assign",
-                            labelIcon: "fa-solid fa-network-wired",
-                            placeholder: "e.g. my-private-network"
+                            text: "Network"
+                        },
+                        {
+                            text: "Assigned"
                         }
-                    ],
-                    addElementButton: {
-                        label: "Submit",
-                        labelIcon: "fa-solid fa-plus"
-                    }
+                    ]
                 },
                 provideEnterButton: false,
                 show: true,
                 jointJsConfig: {
                     propertyType: "customProperty",
-                    modelPath: "entity/properties/assigned_networks",
+                    modelPath: "entity/properties/assigned_to_networks",
                     defaultPropPath: "",
                     minPath: "",
                     min: ""
                 },
-            }
+            },
         ])
     },
     DeploymentMapping: {

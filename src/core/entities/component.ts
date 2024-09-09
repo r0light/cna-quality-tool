@@ -9,6 +9,7 @@ import { RelationToDataAggregate } from './relationToDataAggregate.js'
 import { RelationToBackingData } from './relationToBackingData.js'
 import { Artifact } from '../common/artifact.js'
 import { ProxyBackingService } from './proxyBackingService.js'
+import { Network } from './network.js'
 
 
 /**
@@ -56,6 +57,8 @@ class Component {
     #proxiedBy: ProxyBackingService;
 
     #artifacts: Map<string, Artifact> = new Map<string, Artifact>();
+
+    #networks: Map<string, Network> = new Map();
 
     #properties: EntityProperty[] = new Array();
 
@@ -189,6 +192,18 @@ class Component {
 
     removeArtifact(artifactKey: string) {
         this.#artifacts.delete(artifactKey);
+    }
+
+    get getNetworks() {
+        return this.#networks;
+    }
+
+    addNetwork(network: Network) {
+        this.#networks.set(network.getId, network);
+    }
+
+    removeNetwork(networkId: string) {
+        this.#networks.delete(networkId);
     }
 
     /**

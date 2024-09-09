@@ -4,6 +4,7 @@ import { cna_modeling_profile } from '../../totypa/parsedProfiles/v2dot0-profile
 import { MetaData } from "../common/entityDataTypes.js";
 import { RelationToBackingData } from "./relationToBackingData.js";
 import { Artifact } from "../common/artifact.js";
+import { Network } from "./network.js";
 
 
 /**
@@ -43,6 +44,8 @@ class Infrastructure {
     #backingDataEntities = new Array<{ backingData: BackingData, relation: RelationToBackingData }>();
 
     #artifacts: Map<string, Artifact> = new Map<string, Artifact>();
+
+    #networks: Map<string, Network> = new Map();
 
     #properties: EntityProperty[];
 
@@ -121,6 +124,18 @@ class Infrastructure {
         this.#artifacts.delete(artifactKey);
     }
 
+    get getNetworks() {
+        return this.#networks;
+    }
+
+    addNetwork(network: Network) {
+        this.#networks.set(network.getId, network);
+    }
+
+    removeNetwork(networkId: string) {
+        this.#networks.delete(networkId);
+    }
+    
     /**
      * Returns all properties of this entity
      * @returns {EntityProperty[]}

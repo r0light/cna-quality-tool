@@ -83,7 +83,9 @@ class EntitiesToToscaConverter {
             const nodeKey: string = this.#uniqueKeyManager.ensureUniqueness(this.#transformToYamlKey(infrastructure.getName));
             let node = this.#createInfrastructureTemplate(infrastructure);
             if (infrastructure.getBackingDataEntities.length > 0) {
-                node.requirements = [];
+                if (!node.requirements) {
+                    node.requirements = [];
+                }
                 for (const usedBackingData of infrastructure.getBackingDataEntities) {
                     const usageRelationshipKey = this.#uniqueKeyManager.ensureUniqueness(`${nodeKey}_uses_${this.#keyIdMap.getKey(usedBackingData.backingData.getId)}`);
                     let backingDataRelationship: TOSCA_Relationship_Template = {
@@ -105,6 +107,23 @@ class EntitiesToToscaConverter {
                     });
                 }
             }
+
+
+            if (infrastructure.getNetworks.size > 0) {
+                if (!node.requirements) {
+                    node.requirements = [];
+                }
+
+                for (const [networkId, network] of infrastructure.getNetworks) {
+                    node.requirements.push({
+                        "assigned_to_network": {
+                            node: this.#keyIdMap.getKey(networkId),
+                            relationship: "LinksTo"
+                        }
+                    });
+                }
+            }
+
             this.#keyIdMap.add(nodeKey, id);
             serviceTemplate.node_templates[nodeKey] = node;
         }
@@ -252,6 +271,21 @@ class EntitiesToToscaConverter {
                         relationship: "cna-modeling.relationships.ProxiedBy.BackingService"
                     }
                 });
+            }
+
+            if (component.getNetworks.size > 0) {
+                if (!node.requirements) {
+                    node.requirements = [];
+                }
+
+                for (const [networkId, network] of component.getNetworks) {
+                    node.requirements.push({
+                        "assigned_to_network": {
+                            node: this.#keyIdMap.getKey(networkId),
+                            relationship: "LinksTo"
+                        }
+                    });
+                }
             }
         }
 
