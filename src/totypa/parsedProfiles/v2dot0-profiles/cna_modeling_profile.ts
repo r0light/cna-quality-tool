@@ -73,6 +73,17 @@ export const cna_modeling_profile: TOSCA_File = {
   "capability_types": {
     "cna-modeling.capabilities.Proxy": {
       "description": "When included, the Node is able to act as a proxy. This covers all communication to the endpoints of the proxied component.",
+      "derived_from": "Node",
+      "properties": {
+        "load_balancing": {
+          "description": "Flag whether the proxy functionality includes load balancing",
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "cna-modeling.capabilities.AdressResolution": {
+      "description": "When included, the Node is able to provide address resolution, meaning that symbolic names can be translated into specific IP adresses",
       "derived_from": "Node"
     }
   },
@@ -667,6 +678,17 @@ export const cna_modeling_profile: TOSCA_File = {
       "capabilities": {
         "feature": {
           "type": "Node"
+        },
+        "addressResolution": {
+          "type": "cna-modeling.capabilities.AdressResolution",
+          "valid_source_node_types": [
+            "cna-modeling.entities.Component",
+            "cna-modeling.entities.Service",
+            "cna-modeling.entities.BackingService",
+            "cna-modeling.entities.StorageBackingService",
+            "cna-modeling.entities.ProxyBackingService",
+            "cna-modeling.entities.BrokerBackingService"
+          ]
         }
       },
       "requirements": [
@@ -1381,6 +1403,17 @@ export const cna_modeling_profile: TOSCA_File = {
         "host": {
           "type": "Compute",
           "valid_source_node_types": []
+        },
+        "addressResolution": {
+          "type": "cna-modeling.capabilities.AdressResolution",
+          "valid_source_node_types": [
+            "cna-modeling.entities.Component",
+            "cna-modeling.entities.Service",
+            "cna-modeling.entities.BackingService",
+            "cna-modeling.entities.StorageBackingService",
+            "cna-modeling.entities.ProxyBackingService",
+            "cna-modeling.entities.BrokerBackingService"
+          ]
         }
       },
       "requirements": [

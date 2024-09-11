@@ -53,4 +53,4 @@ class StorageBackingService extends Component {
     }
 }
 
-export { StorageBackingService, STORAGE_BACKING_SERVICE_TOSCA_KEY, getStorageBackingServiceProperties };
+export { StorageBackingService, STORAGE_BACKING_SERVICE_TOSCA_KEY, STORAGE_BACKING_SERVICE_TOSCA_EQUIVALENT, getStorageBackingServiceProperties };

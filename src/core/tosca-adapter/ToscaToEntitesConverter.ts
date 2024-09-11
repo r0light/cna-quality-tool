@@ -22,6 +22,7 @@ import { Artifact } from '../common/artifact';
 import { PROXY_BACKING_SERVICE_TOSCA_KEY } from '../entities/proxyBackingService';
 import { BROKER_BACKING_SERVICE_TOSCA_KEY } from '../entities/brokerBackingService';
 import { NETWORK_TOSCA_KEY } from '../entities/network';
+import { valHooks } from 'jquery';
 
 const MATCH_UNDERSCORE = new RegExp(/_/g);
 const MATCH_FIRST_CHARACTER = new RegExp(/^./g);
@@ -227,9 +228,13 @@ class ToscaToEntitesConverter {
                         endpoint.setPropertyValue(key, value);
                     }
                 }
-                if (node.capabilities && node.capabilities["endpoint"] && node.capabilities["endpoint"].properties) {
-                    for (const [key, value] of Object.entries(node.capabilities["endpoint"].properties)) {
-                        endpoint.setPropertyValue(key, value);
+                if (node.capabilities) {
+                    for (const [capabilityKey, capability] of Object.entries(node.capabilities)) {
+                        if (capability.properties) {
+                            for (const [key, value] of Object.entries(capability.properties)) {
+                                endpoint.setPropertyValue(key, value);
+                            }
+                        }
                     }
                 }
                 if (node.requirements) {
@@ -266,9 +271,13 @@ class ToscaToEntitesConverter {
                         externalEndpoint.setPropertyValue(key, value);
                     }
                 }
-                if (node.capabilities && node.capabilities["external_endpoint"] && node.capabilities["external_endpoint"].properties) {
-                    for (const [key, value] of Object.entries(node.capabilities["external_endpoint"].properties)) {
-                        externalEndpoint.setPropertyValue(key, value);
+                if (node.capabilities) {
+                    for (const [capabilityKey, capability] of Object.entries(node.capabilities)) {
+                        if (capability.properties) {
+                            for (const [key, value] of Object.entries(capability.properties)) {
+                                externalEndpoint.setPropertyValue(key, value);
+                            }
+                        }
                     }
                 }
                 if (node.requirements) {
@@ -315,6 +324,16 @@ class ToscaToEntitesConverter {
                 if (node.properties) {
                     for (const [key, value] of Object.entries(node.properties)) {
                         component.setPropertyValue(key, value);
+                    }
+                }
+
+                if (node.capabilities) {
+                    for (const [capabilityKey, capability] of Object.entries(node.capabilities)) {
+                        if (capability.properties) {
+                            for (const [propertyKey, propertyValue] of Object.entries(capability.properties)) {
+                                component.setPropertyValue(propertyKey, propertyValue);
+                            }
+                        }
                     }
                 }
 

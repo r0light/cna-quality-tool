@@ -1307,8 +1307,14 @@ class SystemEntityManager {
     }
 
     #configureProxyBackingServiceCell(proxyBackingService: Entities.ProxyBackingService, proxyBackingServiceElement: dia.Element) {
+
         for (const property of EntityDetailsConfig.ProxyBackingService.specificProperties) {
             switch (property.providedFeature) {
+                case "proxiedBy":
+                    if (proxyBackingService.getProxiedBy) {
+                        proxyBackingServiceElement.prop("entity/properties/proxied_by", proxyBackingService.getProxiedBy.getId);
+                    }
+                    break;
                 case "assigned_to_networks":
                     proxyBackingServiceElement.prop("entity/properties/assigned_to_networks", [...proxyBackingService.getNetworks.keys()]);
                     break;

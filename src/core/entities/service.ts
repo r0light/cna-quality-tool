@@ -48,4 +48,4 @@ class Service extends Component {
     }
 }
 
-export { Service, SERVICE_TOSCA_KEY, getServiceProperties };
+export { Service, SERVICE_TOSCA_KEY, SERVICE_TOSCA_EQUIVALENT, getServiceProperties };

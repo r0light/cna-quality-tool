@@ -1,4 +1,4 @@
-import { EntityProperty, parseProperties } from '../common/entityProperty.js'
+import { EntityProperty, mergeAllCapabilitiesProperties, parseCapabilitiesProperties, parseProperties } from '../common/entityProperty.js'
 import { Component } from './component.js'
 import { cna_modeling_profile } from '../../totypa/parsedProfiles/v2dot0-profiles/cna_modeling_profile.js'
 import { MetaData } from '../common/entityDataTypes.js'
@@ -13,7 +13,7 @@ const PROXY_BACKING_SERVICE_TOSCA_EQUIVALENT = cna_modeling_profile.node_types[P
 
 
 function getProxyBackingServiceProperties(): EntityProperty[] {
-    let parsed = parseProperties(PROXY_BACKING_SERVICE_TOSCA_EQUIVALENT.properties);
+    let parsed = parseProperties(PROXY_BACKING_SERVICE_TOSCA_EQUIVALENT.properties).concat(mergeAllCapabilitiesProperties(parseCapabilitiesProperties(PROXY_BACKING_SERVICE_TOSCA_EQUIVALENT.capabilities)));
 
     /*
     for (const prop of parsed) {
@@ -56,4 +56,4 @@ class ProxyBackingService extends Component {
     }
 }
 
-export { ProxyBackingService, PROXY_BACKING_SERVICE_TOSCA_KEY, getProxyBackingServiceProperties };
+export { ProxyBackingService, PROXY_BACKING_SERVICE_TOSCA_KEY, PROXY_BACKING_SERVICE_TOSCA_EQUIVALENT, getProxyBackingServiceProperties };

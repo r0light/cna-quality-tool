@@ -55,4 +55,4 @@ class BackingService extends Component {
     }
 }
 
-export { BackingService, BACKING_SERVICE_TOSCA_KEY, getBackingServiceProperties };
+export { BackingService, BACKING_SERVICE_TOSCA_KEY, BACKING_SERVICE_TOSCA_EQUIVALENT, getBackingServiceProperties };

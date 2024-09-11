@@ -253,4 +253,4 @@ class Component {
 
 }
 
-export { Component, COMPONENT_TOSCA_KEY, getComponentProperties };
+export { Component, COMPONENT_TOSCA_KEY, COMPONENT_TOSCA_EQUIVALENT, getComponentProperties };

@@ -55,4 +55,4 @@ class BrokerBackingService extends Component {
     }
 }
 
-export { BrokerBackingService, BROKER_BACKING_SERVICE_TOSCA_KEY, getBrokerBackingServiceProperties };
+export { BrokerBackingService, BROKER_BACKING_SERVICE_TOSCA_KEY, BROKER_BACKING_SERVICE_TOSCA_EQUIVALENT, getBrokerBackingServiceProperties };

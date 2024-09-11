@@ -10,16 +10,16 @@ import { EntityProperty, parseCapabilitiesProperties, parseProperties } from '..
 import { DATA_AGGREGATE_TOSCA_KEY } from '../entities/dataAggregate';
 import { BACKING_DATA_TOSCA_KEY } from '../entities/backingData';
 import { INFRASTRUCTURE_TOSCA_KEY } from '../entities/infrastructure';
-import { SERVICE_TOSCA_KEY } from '../entities/service';
-import { BACKING_SERVICE_TOSCA_KEY } from '../entities/backingService';
-import { STORAGE_BACKING_SERVICE_TOSCA_KEY } from '../entities/storageBackingService';
-import { COMPONENT_TOSCA_KEY } from '../entities/component';
+import { SERVICE_TOSCA_EQUIVALENT, SERVICE_TOSCA_KEY } from '../entities/service';
+import { BACKING_SERVICE_TOSCA_EQUIVALENT, BACKING_SERVICE_TOSCA_KEY } from '../entities/backingService';
+import { STORAGE_BACKING_SERVICE_TOSCA_EQUIVALENT, STORAGE_BACKING_SERVICE_TOSCA_KEY } from '../entities/storageBackingService';
+import { COMPONENT_TOSCA_EQUIVALENT, COMPONENT_TOSCA_KEY } from '../entities/component';
 import { EXTERNAL_ENDPOINT_TOSCA_EQUIVALENT, EXTERNAL_ENDPOINT_TOSCA_KEY } from '../entities/externalEndpoint';
 import { TOSCA_File } from '@/totypa/tosca-types/v2dot0-types/definition-types';
 import { TOSCA_Node_Template, TOSCA_Relationship_Template, TOSCA_Requirement_Assignment, TOSCA_Service_Template } from '@/totypa/tosca-types/v2dot0-types/template-types';
 import { TOSCA_Property_Assignment } from '@/totypa/tosca-types/v2dot0-types/alias-types';
-import { PROXY_BACKING_SERVICE_TOSCA_KEY } from '../entities/proxyBackingService';
-import { BROKER_BACKING_SERVICE_TOSCA_KEY } from '../entities/brokerBackingService';
+import { PROXY_BACKING_SERVICE_TOSCA_EQUIVALENT, PROXY_BACKING_SERVICE_TOSCA_KEY } from '../entities/proxyBackingService';
+import { BROKER_BACKING_SERVICE_TOSCA_EQUIVALENT, BROKER_BACKING_SERVICE_TOSCA_KEY } from '../entities/brokerBackingService';
 import { NETWORK_TOSCA_KEY } from '../entities/network';
 
 const TOSCA_DEFINITIONS_VERSION = "tosca_2_0"
@@ -260,6 +260,7 @@ class EntitiesToToscaConverter {
                 }
             }
 
+
             if (component.getProxiedBy) {
                 if (!node.requirements) {
                     node.requirements = [];
@@ -477,10 +478,42 @@ class EntitiesToToscaConverter {
             metadata: flatMetaData(component.getMetaData),
         }
 
-        let properties = this.#parsePropertiesForYaml(component.getProperties());
-        if (this.#isNonEmpty(properties)) {
-            template.properties = properties;
+        let toscaEquivalent = (() => {
+            switch (component.constructor) {
+                case Entities.Service:
+                    return SERVICE_TOSCA_EQUIVALENT;
+                case Entities.BackingService:
+                    return BACKING_SERVICE_TOSCA_EQUIVALENT;
+                case Entities.StorageBackingService:
+                    return STORAGE_BACKING_SERVICE_TOSCA_EQUIVALENT;
+                case Entities.ProxyBackingService:
+                    return PROXY_BACKING_SERVICE_TOSCA_EQUIVALENT;
+                case Entities.BrokerBackingService:
+                    return BROKER_BACKING_SERVICE_TOSCA_EQUIVALENT;
+                case Entities.Component:
+                default:
+                    return COMPONENT_TOSCA_EQUIVALENT;
+            }
+        })();
+
+        let componentNodePropertyKeys = parseProperties(toscaEquivalent.properties).map(property => property.getKey);
+        let nodeProperties = this.#parsePropertiesForYaml(component.getProperties().filter(property => componentNodePropertyKeys.includes(property.getKey)));
+        if (this.#isNonEmpty(nodeProperties)) {
+            template.properties = nodeProperties;
         }
+
+        [...parseCapabilitiesProperties(toscaEquivalent.capabilities).entries()].forEach(([capabilityKey, capabilityProperties]) => {
+            let propertyKeys = Object.keys(capabilityProperties);
+            if (propertyKeys.length > 0) {
+                if (!template.capabilities) {
+                    template.capabilities = {};
+                }
+                template.capabilities[capabilityKey] = {
+                    properties: this.#parsePropertiesForYaml(component.getProperties().filter(property => propertyKeys.includes(property.getKey)))
+                }
+            }
+        })
+
 
         if (component.getArtifacts.size > 0) {
             template.artifacts = {};
@@ -528,7 +561,7 @@ class EntitiesToToscaConverter {
                 properties: this.#parsePropertiesForYaml(endpoint.getProperties().filter(property => propertyKeys.includes(property.getKey)))
             }
         })
-        
+
         return template;
     }
 
