@@ -13,3 +13,13 @@ capability_types:
   cna-modeling.capabilities.Proxy:
     derived_from: Node
     description: When included, the Node is able to act as a proxy. This covers all communication to the endpoints of the proxied component.
+     properties:
+      load_balancing:
+        description: Flag whether the proxy functionality includes load balancing
+        type: boolean
+        default: false
+
+  cna-modeling.capabilities.AdressResolution:
+    derived_from: Node
+    description: When included, the Node is able to provide address resolution, meaning that symbolic names can be translated into specific IP adresses
+    

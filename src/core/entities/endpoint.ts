@@ -1,5 +1,4 @@
-import { EntityProperty, TextEntityProperty, parseProperties } from "../common/entityProperty.js";
-import { tosca_simple_2_0 } from '../../totypa/parsedProfiles/v2dot0-profiles/tosca_simple_2_0.js'
+import { EntityProperty, TextEntityProperty, mergeAllCapabilitiesProperties, parseCapabilitiesProperties, parseProperties } from "../common/entityProperty.js";
 import { MetaData } from "../common/entityDataTypes.js";
 import { cna_modeling_profile } from '../../totypa/parsedProfiles/v2dot0-profiles/cna_modeling_profile.js'
 import { DataAggregate } from "./dataAggregate.js";
@@ -8,16 +7,13 @@ import { RelationToDataAggregate } from "./relationToDataAggregate.js";
 const ENDPOINT_TOSCA_KEY = "cna-modeling.entities.Endpoint";
 const ENDPOINT_TOSCA_EQUIVALENT = cna_modeling_profile.node_types[ENDPOINT_TOSCA_KEY];
 
-const ENDPOINT_CAPABILITY_KEY = "Endpoint";
-const ENDPOINT_CAPABILITY_EQUIVALENT = tosca_simple_2_0.capability_types[ENDPOINT_CAPABILITY_KEY];
-
 /**
  * The module for aspects related to a Endpoint quality model Entity.
  * @module entities/endpoint
  */
 
 function getEndpointProperties(): EntityProperty[] {
-    let parsed = parseProperties(ENDPOINT_CAPABILITY_EQUIVALENT.properties).concat(parseProperties(ENDPOINT_TOSCA_EQUIVALENT.properties));
+    let parsed = parseProperties(ENDPOINT_TOSCA_EQUIVALENT.properties).concat(mergeAllCapabilitiesProperties(parseCapabilitiesProperties(ENDPOINT_TOSCA_EQUIVALENT.capabilities)));
 
     for (const prop of parsed) {
         switch (prop.getKey) {
@@ -168,4 +164,4 @@ class Endpoint {
     }
 }
 
-export { Endpoint, ENDPOINT_TOSCA_KEY, ENDPOINT_TOSCA_EQUIVALENT, ENDPOINT_CAPABILITY_EQUIVALENT, getEndpointProperties };
+export { Endpoint, ENDPOINT_TOSCA_KEY, ENDPOINT_TOSCA_EQUIVALENT, getEndpointProperties };

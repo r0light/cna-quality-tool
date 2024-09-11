@@ -497,7 +497,7 @@ class SystemEntityManager {
         }
 
         const assignedNetworks = graphElement.prop("entity/properties/assigned_to_networks");
-        if (assignedNetworks.length > 0) {
+        if (assignedNetworks && assignedNetworks.length > 0) {
             for (const networkId of assignedNetworks) {
                 let network = this.#currentSystemEntity.getNetworkEntities.get(networkId);
                 if (network) {
@@ -562,7 +562,7 @@ class SystemEntityManager {
         }
 
         const assignedNetworks = infrastructureElement.prop("entity/properties/assigned_to_networks");
-        if (assignedNetworks.length > 0) {
+        if (assignedNetworks && assignedNetworks.length > 0) {
             for (const networkId of assignedNetworks) {
                 let network = this.#currentSystemEntity.getNetworkEntities.get(networkId);
                 if (network) {

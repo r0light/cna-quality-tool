@@ -3,7 +3,9 @@
  * @module entities/entityProperty
  */
 
-import { TOSCA_Property_Definition, TOSCA_Property_Refinement } from "@/totypa/tosca-types/v2dot0-types/definition-types";
+import { TOSCA_Capability_Type_Key } from "@/totypa/tosca-types/v2dot0-types/alias-types";
+import { TOSCA_Capability_Definition, TOSCA_Capability_Refinement, TOSCA_Property_Definition, TOSCA_Property_Refinement } from "@/totypa/tosca-types/v2dot0-types/definition-types";
+import { getCapabilityTypeDefinition, refineValue } from "./helpers";
 
 type propertyDatatype = "text" | "select" | "textarea" | "number" | "boolean" | "bounded" | "list" | "map" //TODO | "timestamp" | "version"
 
@@ -268,6 +270,38 @@ function toReadableKey(yamlKey: string) {
         .replace(/[-_]+(.)/g, (_, c) => ' ' + c.toUpperCase()) // First char after each -/_
 }
 
+function mergeAllCapabilitiesProperties(capabilitiesProperties: Map<string, { [propertyKey: string]: TOSCA_Property_Definition }>): EntityProperty[] {
+    // Warning: assume that propertyKeys are unique across capabilities!
+    let mergedProperties = [...capabilitiesProperties.entries()].map(([key, value]) => value).reduce((accumulator, currentValue) => {
+        Object.entries(currentValue).forEach(([key, value]) => { accumulator[key] = value })
+        return accumulator;
+    }, {});
+
+    return parseProperties(mergedProperties);
+}
+
+function parseCapabilitiesProperties(capabilities: { [capabilityTypeKey: TOSCA_Capability_Type_Key]: TOSCA_Capability_Definition | TOSCA_Capability_Refinement }): Map<string, { [propertyKey: string]: TOSCA_Property_Definition }> {
+
+    let capabilityPropertyMap: Map<string, { [propertyKey: string]: TOSCA_Property_Definition }> = new Map();
+
+    // get capability type definition via helper
+    Object.entries(capabilities).forEach(([capabilityTypeKey, capabilityTypeRefinement]) => {
+        let capabilityTypeDefinition = getCapabilityTypeDefinition(typeof capabilityTypeRefinement === "string" ? capabilityTypeRefinement : capabilityTypeRefinement.type);
+        // get properties from type definition
+
+        let originalProperties: { [propertyKey: string]: TOSCA_Property_Definition } = !!capabilityTypeDefinition.properties ? JSON.parse(JSON.stringify(capabilityTypeDefinition.properties)) : {};
+        for (const propertyKey of Object.keys(originalProperties)) {
+            if (typeof capabilityTypeRefinement === "object" && capabilityTypeRefinement.properties && capabilityTypeRefinement.properties[propertyKey]) {
+                originalProperties[propertyKey] = refineValue(originalProperties[propertyKey], capabilityTypeRefinement.properties[propertyKey]);
+            }
+        }
+        capabilityPropertyMap.set(capabilityTypeKey, originalProperties);
+    })
+
+    return capabilityPropertyMap;
+}
+
+
 function parseProperties(properties: { [propertyKey: string]: TOSCA_Property_Definition | TOSCA_Property_Refinement }): EntityProperty[] {
 
     let parsedProperties: EntityProperty[] = [];
@@ -399,4 +433,4 @@ function parseProperties(properties: { [propertyKey: string]: TOSCA_Property_Def
 }
 
 
-export { EntityProperty, TextEntityProperty, SelectEntityProperty, TextAreaEntityProperty, NumberEntityProperty, BooleanEntityProperty, BoundsEntityProperty as BoundedEntityProperty, ListEntityProperty, MapEntityProperty, parseProperties };
+export { EntityProperty, TextEntityProperty, SelectEntityProperty, TextAreaEntityProperty, NumberEntityProperty, BooleanEntityProperty, BoundsEntityProperty as BoundedEntityProperty, ListEntityProperty, MapEntityProperty, mergeAllCapabilitiesProperties, parseCapabilitiesProperties, parseProperties };

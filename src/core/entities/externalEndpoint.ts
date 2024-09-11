@@ -1,4 +1,4 @@
-import { EntityProperty, parseProperties, TextEntityProperty } from "../common/entityProperty.js"
+import { EntityProperty, mergeAllCapabilitiesProperties, parseCapabilitiesProperties, parseProperties, TextEntityProperty } from "../common/entityProperty.js"
 import { Endpoint } from "./endpoint.js";
 import { tosca_simple_2_0 } from '../../totypa/parsedProfiles/v2dot0-profiles/tosca_simple_2_0.js'
 import { MetaData } from "../common/entityDataTypes.js";
@@ -11,14 +11,9 @@ import { cna_modeling_profile } from '../../totypa/parsedProfiles/v2dot0-profile
 const EXTERNAL_ENDPOINT_TOSCA_KEY = "cna-modeling.entities.Endpoint.External";
 const EXTERNAL_ENDPOINT_TOSCA_EQUIVALENT = cna_modeling_profile.node_types[EXTERNAL_ENDPOINT_TOSCA_KEY];
 
-const EXTERNAL_ENDPOINT_CAPABILITY_KEY = "Endpoint.Public";
-const EXTERNAL_ENDPOINT_CAPABILITY_EQUIVALENT = tosca_simple_2_0.capability_types[EXTERNAL_ENDPOINT_CAPABILITY_KEY];
-
-
 function getExternalEndpointProperties(): EntityProperty[] {
-    let parsed = parseProperties(EXTERNAL_ENDPOINT_CAPABILITY_EQUIVALENT.properties).concat(parseProperties(EXTERNAL_ENDPOINT_TOSCA_EQUIVALENT.properties));
+    let parsed = parseProperties(EXTERNAL_ENDPOINT_TOSCA_EQUIVALENT.properties).concat(mergeAllCapabilitiesProperties(parseCapabilitiesProperties(EXTERNAL_ENDPOINT_TOSCA_EQUIVALENT.capabilities)));
 
-    /*
     for (const prop of parsed) {
         switch (prop.getKey) {
             case "method_name":
@@ -51,7 +46,7 @@ function getExternalEndpointProperties(): EntityProperty[] {
                 prop.setExample = "e.g. 3306"
                 break;
         }
-                */
+    }
     return parsed;
 }
 
@@ -84,4 +79,4 @@ class ExternalEndpoint extends Endpoint {
     }
 }
 
-export { ExternalEndpoint, EXTERNAL_ENDPOINT_TOSCA_KEY, EXTERNAL_ENDPOINT_TOSCA_EQUIVALENT, EXTERNAL_ENDPOINT_CAPABILITY_EQUIVALENT, getExternalEndpointProperties };
+export { ExternalEndpoint, EXTERNAL_ENDPOINT_TOSCA_KEY, EXTERNAL_ENDPOINT_TOSCA_EQUIVALENT, getExternalEndpointProperties };

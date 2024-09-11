@@ -92,6 +92,16 @@ node_types:
         required: true
         validation: { $valid_values: [ $value, [ "naming/addressing", "configuration", "authentication/authorization", "logging", "metrics", "tracing", "other" ]]}
         default: other
+    capabilities:
+      addressResolution:
+        type: cna-modeling.capabilities.AdressResolution
+        valid_source_node_types:
+          - cna-modeling.entities.Component
+          - cna-modeling.entities.Service
+          - cna-modeling.entities.BackingService
+          - cna-modeling.entities.StorageBackingService
+          - cna-modeling.entities.ProxyBackingService
+          - cna-modeling.entities.BrokerBackingService
 
   cna-modeling.entities.ProxyBackingService:
     derived_from: cna-modeling.entities.Component
@@ -210,6 +220,16 @@ node_types:
         required: true
         description: Set to true if the infrastructure enforces resource bounds on deployed components, for example regarding cpu shares or memory size. Deployed entities can then only use resources up to a certain bound. Otherwise entities can use resources as available.
         default: false
+    capabilities:
+      - addressResolution:
+          type: cna-modeling.capabilities.AdressResolution
+          valid_source_node_types:
+            - cna-modeling.entities.Component
+            - cna-modeling.entities.Service
+            - cna-modeling.entities.BackingService
+            - cna-modeling.entities.StorageBackingService
+            - cna-modeling.entities.ProxyBackingService
+            - cna-modeling.entities.BrokerBackingService
     requirements:
       # Allow the deployment on another Infrastructure entity
       - host:
@@ -228,6 +248,7 @@ node_types:
           node: Network
           relationship: LinksTo
           count_range: [0, UNBOUNDED]
+      
 
   cna-modeling.entities.Endpoint:
     derived_from: Root

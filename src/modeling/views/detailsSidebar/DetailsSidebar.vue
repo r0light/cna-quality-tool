@@ -315,7 +315,7 @@ onUpdated(() => {
             let componentAssignedNetworksOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "assigned_to_networks");
             componentAssignedNetworksOption.includeFormCheck = false;
 
-            let currentlyAssignedNetworks = selectedEntity.model.prop(componentAssignedNetworksOption.jointJsConfig.modelPath) ? selectedEntity.model.prop(componentAssignedNetworksOption.jointJsConfig.modelPath) : [];
+            let currentlyAssignedNetworks = !!selectedEntity.model.prop(componentAssignedNetworksOption.jointJsConfig.modelPath) ? selectedEntity.model.prop(componentAssignedNetworksOption.jointJsConfig.modelPath) : [];
 
             // clear table rows
             componentAssignedNetworksOption.tableRows.length = 0;
