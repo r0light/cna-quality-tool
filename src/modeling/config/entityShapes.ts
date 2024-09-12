@@ -111,6 +111,7 @@ const Component = dia.Element.define("qualityModel.Component", {
         type: EntityTypes.COMPONENT,
         keepAspectRatio: true,
         properties: parseProperties(getComponentProperties()),
+        relations: {},
         artifacts: []
     }
 }, {
@@ -209,6 +210,7 @@ const Service = dia.Element.define("qualityModel.Service", {
         type: EntityTypes.SERVICE,
         keepAspectRatio: true,
         properties: parseProperties(getComponentProperties().concat(getServiceProperties())),
+        relations: {},
         artifacts: []
     }
 }, {
@@ -305,6 +307,7 @@ const BackingService = dia.Element.define("qualityModel.BackingService", {
         type: EntityTypes.BACKING_SERVICE,
         keepAspectRatio: true,
         properties: parseProperties(getComponentProperties().concat(getBackingServiceProperties())),
+        relations: {},
         artifacts: []
     }
 }, {
@@ -382,6 +385,7 @@ const ProxyBackingService = dia.Element.define("qualityModel.ProxyBackingService
         type: EntityTypes.PROXY_BACKING_SERVICE,
         keepAspectRatio: false,
         properties: parseProperties(getComponentProperties().concat(getProxyBackingServiceProperties())),
+        relations: {},
         artifacts: []
     }
 }, {
@@ -466,6 +470,7 @@ const StorageBackingService = shapes.standard.Cylinder.define("qualityModel.Stor
         type: EntityTypes.STORAGE_BACKING_SERVICE,
         keepAspectRatio: true,
         properties: parseProperties(getComponentProperties().concat(getStorageBackingServiceProperties())),
+        relations: {},
         artifacts: []
     }
 }, {
@@ -564,6 +569,7 @@ const BrokerBackingService = dia.Element.define("qualityModel.BrokerBackingServi
         type: EntityTypes.BROKER_BACKING_SERVICE,
         keepAspectRatio: true,
         properties: parseProperties(getComponentProperties().concat(getBrokerBackingServiceProperties())),
+        relations: {},
         artifacts: []
     }
 }, {
@@ -708,7 +714,8 @@ const Endpoint = shapes.standard.Circle.define("qualityModel.Endpoint", {
         type: EntityTypes.ENDPOINT,
         keepAspectRatio: true,
         embedded: "",
-        properties: parseProperties(getEndpointProperties())
+        properties: parseProperties(getEndpointProperties()),
+        relations: {}
     }
 }, {
     markup: [{
@@ -783,7 +790,8 @@ const ExternalEndpoint = shapes.standard.Circle.define("qualityModel.ExternalEnd
         type: EntityTypes.EXTERNAL_ENDPOINT,
         keepAspectRatio: true,
         embedded: "",
-        properties: parseProperties(getEndpointProperties().concat(getExternalEndpointProperties()))
+        properties: parseProperties(getEndpointProperties().concat(getExternalEndpointProperties())),
+        relations: {}
     }
 }, {
     markup: [{
@@ -877,6 +885,7 @@ const Infrastructure = dia.Element.define("qualityModel.Infrastructure", {
         type: EntityTypes.INFRASTRUCTURE,
         keepAspectRatio: false,
         properties: parseProperties(getInfrastructureProperties()),
+        relations: {},
         artifacts: []
     }
 }, {
@@ -973,7 +982,8 @@ const RequestTrace = dia.Element.define("qualityModel.RequestTrace", {
     entity: {
         type: EntityTypes.REQUEST_TRACE,
         keepAspectRatio: true,
-        properties: parseProperties(getRequestTraceProperties())
+        properties: parseProperties(getRequestTraceProperties()),
+        relations: {}
     }
 }, {
     markup: [{
@@ -1032,7 +1042,8 @@ const Link = shapes.standard.Link.define("qualityModel.Link", {
     entityTypeHidden: false,
     entity: {
         type: EntityTypes.LINK,
-        properties: parseProperties(getLinkProperties())
+        properties: parseProperties(getLinkProperties()),
+        relations: {}
     }
 });
 
@@ -1077,7 +1088,8 @@ const DeploymentMapping = shapes.standard.Link.define("qualityModel.DeploymentMa
     entityTypeHidden: false,
     entity: {
         type: EntityTypes.DEPLOYMENT_MAPPING,
-        properties: parseProperties(getDeploymentMappingProperties())
+        properties: parseProperties(getDeploymentMappingProperties()),
+        relations: {}
     }
 });
 
@@ -1150,7 +1162,8 @@ const DataAggregate = dia.Element.define("qualityModel.DataAggregate", {
         keepAspectRatio: true,
         embedded: "", // id of the element in which this entity is embedded
         assignedFamily: "",
-        properties: parseProperties(getDataAggregateProperties())
+        properties: parseProperties(getDataAggregateProperties()),
+        relations: {}
     }
 }, {
     markup: [{
@@ -1230,7 +1243,8 @@ const BackingData = dia.Element.define("qualityModel.BackingData", {
         keepAspectRatio: false,
         embedded: "", // id of the element in which this entity is embedded
         assignedFamily: "",
-        properties: parseProperties(getBackingDataProperties())
+        properties: parseProperties(getBackingDataProperties()),
+        relations: {}
     }
 }, {
     markup: [{
@@ -1291,7 +1305,8 @@ const Network = dia.Element.define("qualityModel.Network", {
     entity: {
         type: EntityTypes.NETWORK,
         keepAspectRatio: false,
-        properties: parseProperties(getNetworkProperties())
+        properties: parseProperties(getNetworkProperties()),
+        relations: {}
     }
 }, {
     markup: [{

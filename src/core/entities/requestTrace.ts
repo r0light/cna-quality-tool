@@ -16,7 +16,8 @@ const REQUEST_TRACE_TOSCA_KEY = "cna-modeling.entities.RequestTrace";
 const REQUEST_TRACE_TOSCA_EQUIVALENT = cna_modeling_profile.node_types[REQUEST_TRACE_TOSCA_KEY];
 
 function getRequestTraceProperties(): EntityProperty[] {
-    let parsed = parseProperties(REQUEST_TRACE_TOSCA_EQUIVALENT.properties);
+    // ignore involved_links, because this is actually a relation to links, but this cannot be modeled as a requirement in tosca.. 
+    let parsed = parseProperties(REQUEST_TRACE_TOSCA_EQUIVALENT.properties).filter(property => property.getKey !== "involved_links");
 
     return parsed;
 }

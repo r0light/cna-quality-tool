@@ -1949,10 +1949,6 @@ export const cna_modeling_profile: TOSCA_File = {
       },
       "derived_from": "Root",
       "properties": {
-        "referred_endpoint": {
-          "type": "string",
-          "required": true
-        },
         "nodes": {
           "type": "list",
           "required": false,

@@ -23,7 +23,7 @@ export type InputProperties = {
 }
 
 export type JointJsConfig = {
-    propertyType: "attribute" | "providedMethod" | "property" | "customProperty" | "free",
+    propertyType: "attribute" | "providedMethod" | "property" | "customProperty" | "relation" | "free",
     modelPath: string,
     defaultPropPath: string,
     minPath: string,
@@ -358,6 +358,11 @@ const DetailsSidebarConfig: {
         entity: {
             headline: "Entity Specific",
             iconClass: "fa-solid fa-sliders",
+            options: []
+        },
+        relations: {
+            headline: "Relations",
+            iconClass: "fa-solid fa-diagram-project",
             options: []
         },
         artifacts: {
@@ -749,500 +754,27 @@ const EntityDetailsConfig: {
 } = {
     Component: {
         type: EntityTypes.COMPONENT,
-        specificProperties: customizePropertyConfigs(parseProperties(getComponentProperties(), "entity"), [
-            {
-                providedFeature: "assigned_to_networks",
-                contentType: PropertyContent.MULTI_SELECT,
-                label: "Assigned networks:",
-                helpText: "",
-                inputProperties: {
-                    disabled: false,
-                    required: false,
-                    checked: false,
-                    selected: false,
-                    readonly: false
-                },
-                attributes: {
-                    svgRepresentation: "",
-                    buttonText: "Edit assigned networks",
-                    buttonIconClass: "fa-solid fa-pencil",
-                    dialogMetaData: {
-                        dialogSize: DialogSize.LARGE,
-                        header: {
-                            iconClass: "fa-solid fa-network-wired",
-                            svgRepresentation: "",
-                            text: "Assigned networks: "
-                        },
-                        footer: {
-                            showCancelButton: true,
-                            cancelButtonText: "Cancel",
-                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
-                        }
-                    },
-                    dialogInfo: `Check all networks to which this infrastructure is assigned to.`,
-                    tableColumnHeaders: [
-                        {
-                            text: "Network"
-                        },
-                        {
-                            text: "Assigned"
-                        }
-                    ]
-                },
-                provideEnterButton: false,
-                show: true,
-                jointJsConfig: {
-                    propertyType: "customProperty",
-                    modelPath: "entity/properties/assigned_to_networks",
-                    defaultPropPath: "",
-                    minPath: "",
-                    min: ""
-                },
-            },
-            {
-                providedFeature: "proxiedBy",
-                contentType: PropertyContent.DROPDOWN,
-                label: "Proxied by:",
-                inputProperties: {
-                    disabled: false,
-                    required: true,
-                    checked: false,
-                    selected: false,
-                    readonly: false,
-                },
-                helpText: "The backing service acting as a proxy for this component.",
-                show: true,
-                attributes: {
-                    placeholder: "Choose Backing Service...",
-                    svgRepresentation: "",
-                    defaultValue: ""
-
-                },
-                provideEnterButton: false,
-                jointJsConfig: {
-                    propertyType: "property",
-                    modelPath: "entity/properties/proxied_by",
-                    defaultPropPath: "",
-                    minPath: "",
-                    min: ""
-                },
-                dropdownOptions: []
-            },
-        ])
+        specificProperties: parseProperties(getComponentProperties(), "entity")
     },
     Service: {
         type: EntityTypes.SERVICE,
-        specificProperties: customizePropertyConfigs(concatInOrder(parseProperties(getServiceProperties(), "entity"), parseProperties(getComponentProperties(), "entity")), [
-            {
-                providedFeature: "assigned_to_networks",
-                contentType: PropertyContent.MULTI_SELECT,
-                label: "Assigned networks:",
-                helpText: "",
-                inputProperties: {
-                    disabled: false,
-                    required: false,
-                    checked: false,
-                    selected: false,
-                    readonly: false
-                },
-                attributes: {
-                    svgRepresentation: "",
-                    buttonText: "Edit assigned networks",
-                    buttonIconClass: "fa-solid fa-pencil",
-                    dialogMetaData: {
-                        dialogSize: DialogSize.LARGE,
-                        header: {
-                            iconClass: "fa-solid fa-network-wired",
-                            svgRepresentation: "",
-                            text: "Assigned networks: "
-                        },
-                        footer: {
-                            showCancelButton: true,
-                            cancelButtonText: "Cancel",
-                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
-                        }
-                    },
-                    dialogInfo: `Check all networks to which this infrastructure is assigned to.`,
-                    tableColumnHeaders: [
-                        {
-                            text: "Network"
-                        },
-                        {
-                            text: "Assigned"
-                        }
-                    ]
-                },
-                provideEnterButton: false,
-                show: true,
-                jointJsConfig: {
-                    propertyType: "customProperty",
-                    modelPath: "entity/properties/assigned_to_networks",
-                    defaultPropPath: "",
-                    minPath: "",
-                    min: ""
-                },
-            },
-            {
-                providedFeature: "proxiedBy",
-                contentType: PropertyContent.DROPDOWN,
-                label: "Proxied by:",
-                inputProperties: {
-                    disabled: false,
-                    required: true,
-                    checked: false,
-                    selected: false,
-                    readonly: false,
-                },
-                helpText: "The backing service acting as a proxy for this component.",
-                show: true,
-                attributes: {
-                    placeholder: "Choose Proxy Backing Service...",
-                    svgRepresentation: "",
-                    defaultValue: ""
-
-                },
-                provideEnterButton: false,
-                jointJsConfig: {
-                    propertyType: "property",
-                    modelPath: "entity/properties/proxied_by",
-                    defaultPropPath: "",
-                    minPath: "",
-                    min: ""
-                },
-                dropdownOptions: []
-            },
-        ])
+        specificProperties: concatInOrder(parseProperties(getServiceProperties(), "entity"), parseProperties(getComponentProperties(), "entity"))
     },
     BackingService: {
         type: EntityTypes.BACKING_SERVICE,
-        specificProperties: customizePropertyConfigs(concatInOrder(parseProperties(getBackingServiceProperties(), "entity"), parseProperties(getComponentProperties(), "entity")), [
-            {
-                providedFeature: "assigned_to_networks",
-                contentType: PropertyContent.MULTI_SELECT,
-                label: "Assigned networks:",
-                helpText: "",
-                inputProperties: {
-                    disabled: false,
-                    required: false,
-                    checked: false,
-                    selected: false,
-                    readonly: false
-                },
-                attributes: {
-                    svgRepresentation: "",
-                    buttonText: "Edit assigned networks",
-                    buttonIconClass: "fa-solid fa-pencil",
-                    dialogMetaData: {
-                        dialogSize: DialogSize.LARGE,
-                        header: {
-                            iconClass: "fa-solid fa-network-wired",
-                            svgRepresentation: "",
-                            text: "Assigned networks: "
-                        },
-                        footer: {
-                            showCancelButton: true,
-                            cancelButtonText: "Cancel",
-                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
-                        }
-                    },
-                    dialogInfo: `Check all networks to which this infrastructure is assigned to.`,
-                    tableColumnHeaders: [
-                        {
-                            text: "Network"
-                        },
-                        {
-                            text: "Assigned"
-                        }
-                    ]
-                },
-                provideEnterButton: false,
-                show: true,
-                jointJsConfig: {
-                    propertyType: "customProperty",
-                    modelPath: "entity/properties/assigned_to_networks",
-                    defaultPropPath: "",
-                    minPath: "",
-                    min: ""
-                },
-            },
-            {
-                providedFeature: "proxiedBy",
-                contentType: PropertyContent.DROPDOWN,
-                label: "Proxied by:",
-                inputProperties: {
-                    disabled: false,
-                    required: true,
-                    checked: false,
-                    selected: false,
-                    readonly: false,
-                },
-                helpText: "The backing service acting as a proxy for this component.",
-                show: true,
-                attributes: {
-                    placeholder: "Choose Proxy Backing Service...",
-                    svgRepresentation: "",
-                    defaultValue: ""
-
-                },
-                provideEnterButton: false,
-                jointJsConfig: {
-                    propertyType: "property",
-                    modelPath: "entity/properties/proxied_by",
-                    defaultPropPath: "",
-                    minPath: "",
-                    min: ""
-                },
-                dropdownOptions: []
-            },
-        ])
+        specificProperties: concatInOrder(parseProperties(getBackingServiceProperties(), "entity"), parseProperties(getComponentProperties(), "entity"))
     },
     StorageBackingService: {
         type: EntityTypes.STORAGE_BACKING_SERVICE,
-        specificProperties: customizePropertyConfigs(concatInOrder(parseProperties(getStorageBackingServiceProperties(), "entity"), parseProperties(getComponentProperties(), "entity")), [
-            {
-                providedFeature: "assigned_to_networks",
-                contentType: PropertyContent.MULTI_SELECT,
-                label: "Assigned networks:",
-                helpText: "",
-                inputProperties: {
-                    disabled: false,
-                    required: false,
-                    checked: false,
-                    selected: false,
-                    readonly: false
-                },
-                attributes: {
-                    svgRepresentation: "",
-                    buttonText: "Edit assigned networks",
-                    buttonIconClass: "fa-solid fa-pencil",
-                    dialogMetaData: {
-                        dialogSize: DialogSize.LARGE,
-                        header: {
-                            iconClass: "fa-solid fa-network-wired",
-                            svgRepresentation: "",
-                            text: "Assigned networks: "
-                        },
-                        footer: {
-                            showCancelButton: true,
-                            cancelButtonText: "Cancel",
-                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
-                        }
-                    },
-                    dialogInfo: `Check all networks to which this infrastructure is assigned to.`,
-                    tableColumnHeaders: [
-                        {
-                            text: "Network"
-                        },
-                        {
-                            text: "Assigned"
-                        }
-                    ]
-                },
-                provideEnterButton: false,
-                show: true,
-                jointJsConfig: {
-                    propertyType: "customProperty",
-                    modelPath: "entity/properties/assigned_to_networks",
-                    defaultPropPath: "",
-                    minPath: "",
-                    min: ""
-                },
-            },
-            {
-                providedFeature: "proxiedBy",
-                contentType: PropertyContent.DROPDOWN,
-                label: "Proxied by:",
-                inputProperties: {
-                    disabled: false,
-                    required: true,
-                    checked: false,
-                    selected: false,
-                    readonly: false,
-                },
-                helpText: "The backing service acting as a proxy for this component.",
-                show: true,
-                attributes: {
-                    placeholder: "Choose Proxy Backing Service...",
-                    svgRepresentation: "",
-                    defaultValue: ""
-
-                },
-                provideEnterButton: false,
-                jointJsConfig: {
-                    propertyType: "property",
-                    modelPath: "entity/properties/proxied_by",
-                    defaultPropPath: "",
-                    minPath: "",
-                    min: ""
-                },
-                dropdownOptions: []
-            },
-        ])
+        specificProperties: concatInOrder(parseProperties(getStorageBackingServiceProperties(), "entity"), parseProperties(getComponentProperties(), "entity"))
     },
     BrokerBackingService: {
         type: EntityTypes.BROKER_BACKING_SERVICE,
-        specificProperties: customizePropertyConfigs(concatInOrder(parseProperties(getBrokerBackingServiceProperties(), "entity"), parseProperties(getComponentProperties(), "entity")), [
-            {
-                providedFeature: "assigned_to_networks",
-                contentType: PropertyContent.MULTI_SELECT,
-                label: "Assigned networks:",
-                helpText: "",
-                inputProperties: {
-                    disabled: false,
-                    required: false,
-                    checked: false,
-                    selected: false,
-                    readonly: false
-                },
-                attributes: {
-                    svgRepresentation: "",
-                    buttonText: "Edit assigned networks",
-                    buttonIconClass: "fa-solid fa-pencil",
-                    dialogMetaData: {
-                        dialogSize: DialogSize.LARGE,
-                        header: {
-                            iconClass: "fa-solid fa-network-wired",
-                            svgRepresentation: "",
-                            text: "Assigned networks: "
-                        },
-                        footer: {
-                            showCancelButton: true,
-                            cancelButtonText: "Cancel",
-                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
-                        }
-                    },
-                    dialogInfo: `Check all networks to which this infrastructure is assigned to.`,
-                    tableColumnHeaders: [
-                        {
-                            text: "Network"
-                        },
-                        {
-                            text: "Assigned"
-                        }
-                    ]
-                },
-                provideEnterButton: false,
-                show: true,
-                jointJsConfig: {
-                    propertyType: "customProperty",
-                    modelPath: "entity/properties/assigned_to_networks",
-                    defaultPropPath: "",
-                    minPath: "",
-                    min: ""
-                },
-            },
-            {
-                providedFeature: "proxiedBy",
-                contentType: PropertyContent.DROPDOWN,
-                label: "Proxied by:",
-                inputProperties: {
-                    disabled: false,
-                    required: true,
-                    checked: false,
-                    selected: false,
-                    readonly: false,
-                },
-                helpText: "The backing service acting as a proxy for this component.",
-                show: true,
-                attributes: {
-                    placeholder: "Choose Proxy Backing Service...",
-                    svgRepresentation: "",
-                    defaultValue: ""
-
-                },
-                provideEnterButton: false,
-                jointJsConfig: {
-                    propertyType: "property",
-                    modelPath: "entity/properties/proxied_by",
-                    defaultPropPath: "",
-                    minPath: "",
-                    min: ""
-                },
-                dropdownOptions: []
-            },
-        ])
+        specificProperties: concatInOrder(parseProperties(getBrokerBackingServiceProperties(), "entity"), parseProperties(getComponentProperties(), "entity"))
     },
     ProxyBackingService: {
         type: EntityTypes.PROXY_BACKING_SERVICE,
-        specificProperties: customizePropertyConfigs(concatInOrder(parseProperties(getProxyBackingServiceProperties(), "entity"), parseProperties(getComponentProperties(), "entity")), [
-            {
-                providedFeature: "assigned_to_networks",
-                contentType: PropertyContent.MULTI_SELECT,
-                label: "Assigned networks:",
-                helpText: "",
-                inputProperties: {
-                    disabled: false,
-                    required: false,
-                    checked: false,
-                    selected: false,
-                    readonly: false
-                },
-                attributes: {
-                    svgRepresentation: "",
-                    buttonText: "Edit assigned networks",
-                    buttonIconClass: "fa-solid fa-pencil",
-                    dialogMetaData: {
-                        dialogSize: DialogSize.LARGE,
-                        header: {
-                            iconClass: "fa-solid fa-network-wired",
-                            svgRepresentation: "",
-                            text: "Assigned networks: "
-                        },
-                        footer: {
-                            showCancelButton: true,
-                            cancelButtonText: "Cancel",
-                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
-                        }
-                    },
-                    dialogInfo: `Check all networks to which this infrastructure is assigned to.`,
-                    tableColumnHeaders: [
-                        {
-                            text: "Network"
-                        },
-                        {
-                            text: "Assigned"
-                        }
-                    ]
-                },
-                provideEnterButton: false,
-                show: true,
-                jointJsConfig: {
-                    propertyType: "customProperty",
-                    modelPath: "entity/properties/assigned_to_networks",
-                    defaultPropPath: "",
-                    minPath: "",
-                    min: ""
-                },
-            }, {
-                providedFeature: "proxiedBy",
-                contentType: PropertyContent.DROPDOWN,
-                label: "Proxied by:",
-                inputProperties: {
-                    disabled: false,
-                    required: true,
-                    checked: false,
-                    selected: false,
-                    readonly: false,
-                },
-                helpText: "The backing service acting as a proxy for this component.",
-                show: true,
-                attributes: {
-                    placeholder: "Choose Proxy Backing Service...",
-                    svgRepresentation: "",
-                    defaultValue: ""
-
-                },
-                provideEnterButton: false,
-                jointJsConfig: {
-                    propertyType: "property",
-                    modelPath: "entity/properties/proxied_by",
-                    defaultPropPath: "",
-                    minPath: "",
-                    min: ""
-                },
-                dropdownOptions: []
-            },
-        ])
+        specificProperties: concatInOrder(parseProperties(getProxyBackingServiceProperties(), "entity"), parseProperties(getComponentProperties(), "entity"))
     },
     Endpoint: {
         type: EntityTypes.ENDPOINT,
@@ -1272,63 +804,6 @@ const EntityDetailsConfig: {
                 jointJsConfig: {
                     propertyType: "property",
                     modelPath: "entity/embedded",
-                    defaultPropPath: "",
-                    minPath: "",
-                    min: ""
-                }
-            },
-            {
-                providedFeature: "uses_data",
-                contentType: PropertyContent.MULTI_SELECT,
-                label: "Data Aggregates used:",
-                inputProperties: {
-                    disabled: false,
-                    required: true,
-                    checked: false,
-                    selected: false,
-                    readonly: false,
-                },
-                helpText: "",
-                show: true,
-                attributes: {
-                    svgRepresentation: '<svg width="35" height="20">' + dataAggregateSvgRepresentation() + '</svg>',
-                    buttonText: "Add Data Aggregates",
-                    buttonIconClass: "bi bi-window-plus",
-                    dialogMetaData: {
-                        dialogSize: DialogSize.LARGE,
-                        header: {
-                            // iconClass: "bi bi-window-plus", // TODO decide if this or SVG
-                            iconClass: "",
-                            svgRepresentation: '<svg width="35" height="20">' + dataAggregateSvgRepresentation() + '</svg>',
-                            text: "Data Aggregates used by Endpoint: ",
-                        },
-                        footer: {
-                            showCancelButton: true,
-                            cancelButtonText: "Cancel",
-                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
-                        },
-                    },
-                    dialogInfo: `The following table shows all Data Aggregate entities associated with this component. By selecting the respective 
-                    checkbox the Data Aggregate entity will be added to this Endpoint. The selection at the beginning 
-                    shows the currently saved state for this entity. Your changes won't be adopted until you 
-                    clicked "Save". In case you cancel and change your entity selection, all your changes will be 
-                    lost. While you keep the selection of this Endpoint entity, your changes will be remembered.`,
-                    tableColumnHeaders: [
-                        {
-                            text: "Data Aggregate"
-                        },
-                        {
-                            text: "Usage relation"
-                        },
-                        {
-                            text: "Include"
-                        }
-                    ]
-                },
-                provideEnterButton: false,
-                jointJsConfig: {
-                    propertyType: "customProperty",
-                    modelPath: "entity/properties/uses_data",
                     defaultPropPath: "",
                     minPath: "",
                     min: ""
@@ -1364,63 +839,6 @@ const EntityDetailsConfig: {
                 jointJsConfig: {
                     propertyType: "property",
                     modelPath: "entity/embedded",
-                    defaultPropPath: "",
-                    minPath: "",
-                    min: ""
-                }
-            },
-            {
-                providedFeature: "uses_data",
-                contentType: PropertyContent.MULTI_SELECT,
-                label: "Data Aggregates used:",
-                inputProperties: {
-                    disabled: false,
-                    required: true,
-                    checked: false,
-                    selected: false,
-                    readonly: false,
-                },
-                helpText: "",
-                show: true,
-                attributes: {
-                    svgRepresentation: '<svg width="35" height="20">' + dataAggregateSvgRepresentation() + '</svg>',
-                    buttonText: "Add Data Aggregates",
-                    buttonIconClass: "bi bi-window-plus",
-                    dialogMetaData: {
-                        dialogSize: DialogSize.LARGE,
-                        header: {
-                            // iconClass: "bi bi-window-plus", // TODO decide if this or SVG
-                            iconClass: "",
-                            svgRepresentation: '<svg width="35" height="20">' + dataAggregateSvgRepresentation() + '</svg>',
-                            text: "Data Aggregates used by External Endpoint: ",
-                        },
-                        footer: {
-                            showCancelButton: true,
-                            cancelButtonText: "Cancel",
-                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
-                        },
-                    },
-                    dialogInfo: `The following table shows all Data Aggregate entities associated with this component. By selecting the respective 
-                    checkbox the Data Aggregate entity will be added to this Endpoint. The selection at the beginning 
-                    shows the currently saved state for this entity. Your changes won't be adopted until you 
-                    clicked "Save". In case you cancel and change your entity selection, all your changes will be 
-                    lost. While you keep the selection of this Endpoint entity, your changes will be remembered.`,
-                    tableColumnHeaders: [
-                        {
-                            text: "Data Aggregate"
-                        },
-                        {
-                            text: "Usage relation"
-                        },
-                        {
-                            text: "Include"
-                        }
-                    ]
-                },
-                provideEnterButton: false,
-                jointJsConfig: {
-                    propertyType: "customProperty",
-                    modelPath: "entity/properties/uses_data",
                     defaultPropPath: "",
                     minPath: "",
                     min: ""
@@ -1532,56 +950,7 @@ const EntityDetailsConfig: {
                     minPath: "",
                     min: ""
                 },
-            },
-            {
-                providedFeature: "assigned_to_networks",
-                contentType: PropertyContent.MULTI_SELECT,
-                label: "Assigned networks:",
-                helpText: "",
-                inputProperties: {
-                    disabled: false,
-                    required: false,
-                    checked: false,
-                    selected: false,
-                    readonly: false
-                },
-                attributes: {
-                    svgRepresentation: "",
-                    buttonText: "Edit assigned networks",
-                    buttonIconClass: "fa-solid fa-pencil",
-                    dialogMetaData: {
-                        dialogSize: DialogSize.LARGE,
-                        header: {
-                            iconClass: "fa-solid fa-network-wired",
-                            svgRepresentation: "",
-                            text: "Assigned networks: "
-                        },
-                        footer: {
-                            showCancelButton: true,
-                            cancelButtonText: "Cancel",
-                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
-                        }
-                    },
-                    dialogInfo: `Check all networks to which this infrastructure is assigned to.`,
-                    tableColumnHeaders: [
-                        {
-                            text: "Network"
-                        },
-                        {
-                            text: "Assigned"
-                        }
-                    ]
-                },
-                provideEnterButton: false,
-                show: true,
-                jointJsConfig: {
-                    propertyType: "customProperty",
-                    modelPath: "entity/properties/assigned_to_networks",
-                    defaultPropPath: "",
-                    minPath: "",
-                    min: ""
-                },
-            },
+            }
         ])
     },
     DeploymentMapping: {
@@ -1954,7 +1323,715 @@ const EntityDetailsConfig: {
     },
     RequestTrace: {
         type: EntityTypes.REQUEST_TRACE,
-        specificProperties: customizePropertyConfigs(parseProperties(getRequestTraceProperties(), "entity"), [
+        specificProperties: parseProperties(getRequestTraceProperties(), "entity")
+    },
+    Network: {
+        type: EntityTypes.NETWORK,
+        specificProperties: parseProperties(getNetworkProperties(), "entity")
+    }
+};
+
+
+const EntityRelationsConfig: {
+    [key: string]: {
+        type: string,
+        relations: PropertyConfig[]
+    }
+} = {
+    Component: {
+        type: EntityTypes.COMPONENT,
+        relations: [
+            {
+                providedFeature: "assigned_to_networks",
+                contentType: PropertyContent.MULTI_SELECT,
+                label: "Assigned networks:",
+                helpText: "",
+                inputProperties: {
+                    disabled: false,
+                    required: false,
+                    checked: false,
+                    selected: false,
+                    readonly: false
+                },
+                attributes: {
+                    svgRepresentation: "",
+                    buttonText: "Edit assigned networks",
+                    buttonIconClass: "fa-solid fa-pencil",
+                    dialogMetaData: {
+                        dialogSize: DialogSize.LARGE,
+                        header: {
+                            iconClass: "fa-solid fa-network-wired",
+                            svgRepresentation: "",
+                            text: "Assigned networks: "
+                        },
+                        footer: {
+                            showCancelButton: true,
+                            cancelButtonText: "Cancel",
+                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
+                        }
+                    },
+                    dialogInfo: `Check all networks to which this infrastructure is assigned to.`,
+                    tableColumnHeaders: [
+                        {
+                            text: "Network"
+                        },
+                        {
+                            text: "Assigned"
+                        }
+                    ]
+                },
+                provideEnterButton: false,
+                show: true,
+                jointJsConfig: {
+                    propertyType: "relation",
+                    modelPath: "entity/relations/assigned_to_networks",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
+            },
+            {
+                providedFeature: "proxiedBy",
+                contentType: PropertyContent.DROPDOWN,
+                label: "Proxied by:",
+                inputProperties: {
+                    disabled: false,
+                    required: true,
+                    checked: false,
+                    selected: false,
+                    readonly: false,
+                },
+                helpText: "The backing service acting as a proxy for this component.",
+                show: true,
+                attributes: {
+                    placeholder: "Choose Backing Service...",
+                    svgRepresentation: "",
+                    defaultValue: ""
+
+                },
+                provideEnterButton: false,
+                jointJsConfig: {
+                    propertyType: "relation",
+                    modelPath: "entity/relations/proxied_by",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
+                dropdownOptions: []
+            },
+        ]
+    },
+    Service: {
+        type: EntityTypes.SERVICE,
+        relations: [
+            {
+                providedFeature: "assigned_to_networks",
+                contentType: PropertyContent.MULTI_SELECT,
+                label: "Assigned networks:",
+                helpText: "",
+                inputProperties: {
+                    disabled: false,
+                    required: false,
+                    checked: false,
+                    selected: false,
+                    readonly: false
+                },
+                attributes: {
+                    svgRepresentation: "",
+                    buttonText: "Edit assigned networks",
+                    buttonIconClass: "fa-solid fa-pencil",
+                    dialogMetaData: {
+                        dialogSize: DialogSize.LARGE,
+                        header: {
+                            iconClass: "fa-solid fa-network-wired",
+                            svgRepresentation: "",
+                            text: "Assigned networks: "
+                        },
+                        footer: {
+                            showCancelButton: true,
+                            cancelButtonText: "Cancel",
+                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
+                        }
+                    },
+                    dialogInfo: `Check all networks to which this infrastructure is assigned to.`,
+                    tableColumnHeaders: [
+                        {
+                            text: "Network"
+                        },
+                        {
+                            text: "Assigned"
+                        }
+                    ]
+                },
+                provideEnterButton: false,
+                show: true,
+                jointJsConfig: {
+                    propertyType: "relation",
+                    modelPath: "entity/relations/assigned_to_networks",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
+            },
+            {
+                providedFeature: "proxiedBy",
+                contentType: PropertyContent.DROPDOWN,
+                label: "Proxied by:",
+                inputProperties: {
+                    disabled: false,
+                    required: true,
+                    checked: false,
+                    selected: false,
+                    readonly: false,
+                },
+                helpText: "The backing service acting as a proxy for this component.",
+                show: true,
+                attributes: {
+                    placeholder: "Choose Proxy Backing Service...",
+                    svgRepresentation: "",
+                    defaultValue: ""
+
+                },
+                provideEnterButton: false,
+                jointJsConfig: {
+                    propertyType: "relation",
+                    modelPath: "entity/relations/proxied_by",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
+                dropdownOptions: []
+            },
+        ]
+    },
+    BackingService: {
+        type: EntityTypes.BACKING_SERVICE,
+        relations: [
+            {
+                providedFeature: "assigned_to_networks",
+                contentType: PropertyContent.MULTI_SELECT,
+                label: "Assigned networks:",
+                helpText: "",
+                inputProperties: {
+                    disabled: false,
+                    required: false,
+                    checked: false,
+                    selected: false,
+                    readonly: false
+                },
+                attributes: {
+                    svgRepresentation: "",
+                    buttonText: "Edit assigned networks",
+                    buttonIconClass: "fa-solid fa-pencil",
+                    dialogMetaData: {
+                        dialogSize: DialogSize.LARGE,
+                        header: {
+                            iconClass: "fa-solid fa-network-wired",
+                            svgRepresentation: "",
+                            text: "Assigned networks: "
+                        },
+                        footer: {
+                            showCancelButton: true,
+                            cancelButtonText: "Cancel",
+                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
+                        }
+                    },
+                    dialogInfo: `Check all networks to which this infrastructure is assigned to.`,
+                    tableColumnHeaders: [
+                        {
+                            text: "Network"
+                        },
+                        {
+                            text: "Assigned"
+                        }
+                    ]
+                },
+                provideEnterButton: false,
+                show: true,
+                jointJsConfig: {
+                    propertyType: "relation",
+                    modelPath: "entity/relations/assigned_to_networks",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
+            },
+            {
+                providedFeature: "proxiedBy",
+                contentType: PropertyContent.DROPDOWN,
+                label: "Proxied by:",
+                inputProperties: {
+                    disabled: false,
+                    required: true,
+                    checked: false,
+                    selected: false,
+                    readonly: false,
+                },
+                helpText: "The backing service acting as a proxy for this component.",
+                show: true,
+                attributes: {
+                    placeholder: "Choose Proxy Backing Service...",
+                    svgRepresentation: "",
+                    defaultValue: ""
+
+                },
+                provideEnterButton: false,
+                jointJsConfig: {
+                    propertyType: "relation",
+                    modelPath: "entity/relations/proxied_by",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
+                dropdownOptions: []
+            },
+        ]
+    },
+    StorageBackingService: {
+        type: EntityTypes.STORAGE_BACKING_SERVICE,
+        relations: [
+            {
+                providedFeature: "assigned_to_networks",
+                contentType: PropertyContent.MULTI_SELECT,
+                label: "Assigned networks:",
+                helpText: "",
+                inputProperties: {
+                    disabled: false,
+                    required: false,
+                    checked: false,
+                    selected: false,
+                    readonly: false
+                },
+                attributes: {
+                    svgRepresentation: "",
+                    buttonText: "Edit assigned networks",
+                    buttonIconClass: "fa-solid fa-pencil",
+                    dialogMetaData: {
+                        dialogSize: DialogSize.LARGE,
+                        header: {
+                            iconClass: "fa-solid fa-network-wired",
+                            svgRepresentation: "",
+                            text: "Assigned networks: "
+                        },
+                        footer: {
+                            showCancelButton: true,
+                            cancelButtonText: "Cancel",
+                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
+                        }
+                    },
+                    dialogInfo: `Check all networks to which this infrastructure is assigned to.`,
+                    tableColumnHeaders: [
+                        {
+                            text: "Network"
+                        },
+                        {
+                            text: "Assigned"
+                        }
+                    ]
+                },
+                provideEnterButton: false,
+                show: true,
+                jointJsConfig: {
+                    propertyType: "relation",
+                    modelPath: "entity/relations/assigned_to_networks",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
+            },
+            {
+                providedFeature: "proxiedBy",
+                contentType: PropertyContent.DROPDOWN,
+                label: "Proxied by:",
+                inputProperties: {
+                    disabled: false,
+                    required: true,
+                    checked: false,
+                    selected: false,
+                    readonly: false,
+                },
+                helpText: "The backing service acting as a proxy for this component.",
+                show: true,
+                attributes: {
+                    placeholder: "Choose Proxy Backing Service...",
+                    svgRepresentation: "",
+                    defaultValue: ""
+
+                },
+                provideEnterButton: false,
+                jointJsConfig: {
+                    propertyType: "relation",
+                    modelPath: "entity/relations/proxied_by",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
+                dropdownOptions: []
+            },
+        ]
+    },
+    BrokerBackingService: {
+        type: EntityTypes.BROKER_BACKING_SERVICE,
+        relations: [
+            {
+                providedFeature: "assigned_to_networks",
+                contentType: PropertyContent.MULTI_SELECT,
+                label: "Assigned networks:",
+                helpText: "",
+                inputProperties: {
+                    disabled: false,
+                    required: false,
+                    checked: false,
+                    selected: false,
+                    readonly: false
+                },
+                attributes: {
+                    svgRepresentation: "",
+                    buttonText: "Edit assigned networks",
+                    buttonIconClass: "fa-solid fa-pencil",
+                    dialogMetaData: {
+                        dialogSize: DialogSize.LARGE,
+                        header: {
+                            iconClass: "fa-solid fa-network-wired",
+                            svgRepresentation: "",
+                            text: "Assigned networks: "
+                        },
+                        footer: {
+                            showCancelButton: true,
+                            cancelButtonText: "Cancel",
+                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
+                        }
+                    },
+                    dialogInfo: `Check all networks to which this infrastructure is assigned to.`,
+                    tableColumnHeaders: [
+                        {
+                            text: "Network"
+                        },
+                        {
+                            text: "Assigned"
+                        }
+                    ]
+                },
+                provideEnterButton: false,
+                show: true,
+                jointJsConfig: {
+                    propertyType: "relation",
+                    modelPath: "entity/relations/assigned_to_networks",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
+            },
+            {
+                providedFeature: "proxiedBy",
+                contentType: PropertyContent.DROPDOWN,
+                label: "Proxied by:",
+                inputProperties: {
+                    disabled: false,
+                    required: true,
+                    checked: false,
+                    selected: false,
+                    readonly: false,
+                },
+                helpText: "The backing service acting as a proxy for this component.",
+                show: true,
+                attributes: {
+                    placeholder: "Choose Proxy Backing Service...",
+                    svgRepresentation: "",
+                    defaultValue: ""
+
+                },
+                provideEnterButton: false,
+                jointJsConfig: {
+                    propertyType: "relation",
+                    modelPath: "entity/relations/proxied_by",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
+                dropdownOptions: []
+            },
+        ]
+    },
+    ProxyBackingService: {
+        type: EntityTypes.PROXY_BACKING_SERVICE,
+        relations: [
+            {
+                providedFeature: "assigned_to_networks",
+                contentType: PropertyContent.MULTI_SELECT,
+                label: "Assigned networks:",
+                helpText: "",
+                inputProperties: {
+                    disabled: false,
+                    required: false,
+                    checked: false,
+                    selected: false,
+                    readonly: false
+                },
+                attributes: {
+                    svgRepresentation: "",
+                    buttonText: "Edit assigned networks",
+                    buttonIconClass: "fa-solid fa-pencil",
+                    dialogMetaData: {
+                        dialogSize: DialogSize.LARGE,
+                        header: {
+                            iconClass: "fa-solid fa-network-wired",
+                            svgRepresentation: "",
+                            text: "Assigned networks: "
+                        },
+                        footer: {
+                            showCancelButton: true,
+                            cancelButtonText: "Cancel",
+                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
+                        }
+                    },
+                    dialogInfo: `Check all networks to which this infrastructure is assigned to.`,
+                    tableColumnHeaders: [
+                        {
+                            text: "Network"
+                        },
+                        {
+                            text: "Assigned"
+                        }
+                    ]
+                },
+                provideEnterButton: false,
+                show: true,
+                jointJsConfig: {
+                    propertyType: "relation",
+                    modelPath: "entity/relations/assigned_to_networks",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
+            }, {
+                providedFeature: "proxiedBy",
+                contentType: PropertyContent.DROPDOWN,
+                label: "Proxied by:",
+                inputProperties: {
+                    disabled: false,
+                    required: true,
+                    checked: false,
+                    selected: false,
+                    readonly: false,
+                },
+                helpText: "The backing service acting as a proxy for this component.",
+                show: true,
+                attributes: {
+                    placeholder: "Choose Proxy Backing Service...",
+                    svgRepresentation: "",
+                    defaultValue: ""
+
+                },
+                provideEnterButton: false,
+                jointJsConfig: {
+                    propertyType: "relation",
+                    modelPath: "entity/relations/proxied_by",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
+                dropdownOptions: []
+            },
+        ]
+    },
+    Endpoint: {
+        type: EntityTypes.ENDPOINT,
+        relations: [
+            {
+                providedFeature: "uses_data",
+                contentType: PropertyContent.MULTI_SELECT,
+                label: "Data Aggregates used:",
+                inputProperties: {
+                    disabled: false,
+                    required: true,
+                    checked: false,
+                    selected: false,
+                    readonly: false,
+                },
+                helpText: "",
+                show: true,
+                attributes: {
+                    svgRepresentation: '<svg width="35" height="20">' + dataAggregateSvgRepresentation() + '</svg>',
+                    buttonText: "Add Data Aggregates",
+                    buttonIconClass: "bi bi-window-plus",
+                    dialogMetaData: {
+                        dialogSize: DialogSize.LARGE,
+                        header: {
+                            // iconClass: "bi bi-window-plus", // TODO decide if this or SVG
+                            iconClass: "",
+                            svgRepresentation: '<svg width="35" height="20">' + dataAggregateSvgRepresentation() + '</svg>',
+                            text: "Data Aggregates used by Endpoint: ",
+                        },
+                        footer: {
+                            showCancelButton: true,
+                            cancelButtonText: "Cancel",
+                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
+                        },
+                    },
+                    dialogInfo: `The following table shows all Data Aggregate entities associated with this component. By selecting the respective 
+                    checkbox the Data Aggregate entity will be added to this Endpoint. The selection at the beginning 
+                    shows the currently saved state for this entity. Your changes won't be adopted until you 
+                    clicked "Save". In case you cancel and change your entity selection, all your changes will be 
+                    lost. While you keep the selection of this Endpoint entity, your changes will be remembered.`,
+                    tableColumnHeaders: [
+                        {
+                            text: "Data Aggregate"
+                        },
+                        {
+                            text: "Usage relation"
+                        },
+                        {
+                            text: "Include"
+                        }
+                    ]
+                },
+                provideEnterButton: false,
+                jointJsConfig: {
+                    propertyType: "relation",
+                    modelPath: "entity/relations/uses_data",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                }
+            }
+        ]
+    },
+    ExternalEndpoint: {
+        type: EntityTypes.EXTERNAL_ENDPOINT,
+        relations: [
+            {
+                providedFeature: "uses_data",
+                contentType: PropertyContent.MULTI_SELECT,
+                label: "Data Aggregates used:",
+                inputProperties: {
+                    disabled: false,
+                    required: true,
+                    checked: false,
+                    selected: false,
+                    readonly: false,
+                },
+                helpText: "",
+                show: true,
+                attributes: {
+                    svgRepresentation: '<svg width="35" height="20">' + dataAggregateSvgRepresentation() + '</svg>',
+                    buttonText: "Add Data Aggregates",
+                    buttonIconClass: "bi bi-window-plus",
+                    dialogMetaData: {
+                        dialogSize: DialogSize.LARGE,
+                        header: {
+                            // iconClass: "bi bi-window-plus", // TODO decide if this or SVG
+                            iconClass: "",
+                            svgRepresentation: '<svg width="35" height="20">' + dataAggregateSvgRepresentation() + '</svg>',
+                            text: "Data Aggregates used by External Endpoint: ",
+                        },
+                        footer: {
+                            showCancelButton: true,
+                            cancelButtonText: "Cancel",
+                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
+                        },
+                    },
+                    dialogInfo: `The following table shows all Data Aggregate entities associated with this component. By selecting the respective 
+                    checkbox the Data Aggregate entity will be added to this Endpoint. The selection at the beginning 
+                    shows the currently saved state for this entity. Your changes won't be adopted until you 
+                    clicked "Save". In case you cancel and change your entity selection, all your changes will be 
+                    lost. While you keep the selection of this Endpoint entity, your changes will be remembered.`,
+                    tableColumnHeaders: [
+                        {
+                            text: "Data Aggregate"
+                        },
+                        {
+                            text: "Usage relation"
+                        },
+                        {
+                            text: "Include"
+                        }
+                    ]
+                },
+                provideEnterButton: false,
+                jointJsConfig: {
+                    propertyType: "relation",
+                    modelPath: "entity/relations/uses_data",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                }
+            }
+        ]
+    },
+    Link: {
+        type: EntityTypes.LINK,
+        relations: []
+    },
+    Infrastructure: {
+        type: EntityTypes.INFRASTRUCTURE,
+        relations: [
+            {
+                providedFeature: "assigned_to_networks",
+                contentType: PropertyContent.MULTI_SELECT,
+                label: "Assigned networks:",
+                helpText: "",
+                inputProperties: {
+                    disabled: false,
+                    required: false,
+                    checked: false,
+                    selected: false,
+                    readonly: false
+                },
+                attributes: {
+                    svgRepresentation: "",
+                    buttonText: "Edit assigned networks",
+                    buttonIconClass: "fa-solid fa-pencil",
+                    dialogMetaData: {
+                        dialogSize: DialogSize.LARGE,
+                        header: {
+                            iconClass: "fa-solid fa-network-wired",
+                            svgRepresentation: "",
+                            text: "Assigned networks: "
+                        },
+                        footer: {
+                            showCancelButton: true,
+                            cancelButtonText: "Cancel",
+                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
+                        }
+                    },
+                    dialogInfo: `Check all networks to which this infrastructure is assigned to.`,
+                    tableColumnHeaders: [
+                        {
+                            text: "Network"
+                        },
+                        {
+                            text: "Assigned"
+                        }
+                    ]
+                },
+                provideEnterButton: false,
+                show: true,
+                jointJsConfig: {
+                    propertyType: "relation",
+                    modelPath: "entity/relations/assigned_to_networks",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
+            },
+        ]
+    },
+    DeploymentMapping: {
+        type: EntityTypes.DEPLOYMENT_MAPPING,
+        relations: []
+    },
+    DataAggregate: {
+        type: EntityTypes.DATA_AGGREGATE,
+        relations: []
+    },
+    BackingData: {
+        type: EntityTypes.BACKING_DATA,
+        relations: []
+    },
+    RequestTrace: {
+        type: EntityTypes.REQUEST_TRACE,
+        relations: [
             {
                 providedFeature: "referred_endpoint",
                 contentType: PropertyContent.DROPDOWN,
@@ -1976,8 +2053,8 @@ const EntityDetailsConfig: {
                 },
                 provideEnterButton: false,
                 jointJsConfig: {
-                    propertyType: "property",
-                    modelPath: "entity/properties/referred_endpoint",
+                    propertyType: "relation",
+                    modelPath: "entity/relations/referred_endpoint",
                     defaultPropPath: "",
                     minPath: "",
                     min: ""
@@ -2039,20 +2116,20 @@ const EntityDetailsConfig: {
                 },
                 provideEnterButton: false,
                 jointJsConfig: {
-                    propertyType: "customProperty",
-                    modelPath: "entity/properties/involved_links",
+                    propertyType: "relation",
+                    modelPath: "entity/relations/involved_links",
                     defaultPropPath: "",
                     minPath: "",
                     min: ""
                 },
             }
-        ])
+        ]
     },
     Network: {
         type: EntityTypes.NETWORK,
-        specificProperties: parseProperties(getNetworkProperties(), "entity")
+        relations: []
     }
-};
+}
 
 const EditArtifactsConfig: PropertyConfig = {
     providedFeature: "artifacts",
@@ -2175,6 +2252,8 @@ const EditArtifactsConfig: PropertyConfig = {
     },
 }
 
+
+
 const ColourConfig = {
     // entityHighlighting: "aqua"
     // entityHighlighting: "cyan"
@@ -2184,6 +2263,6 @@ const ColourConfig = {
 
 export {
     PropertyContent, ParentRelation, DetailsSidebarConfig,
-    EntityDetailsConfig, EditArtifactsConfig, ColourConfig,
+    EntityDetailsConfig, EntityRelationsConfig, EditArtifactsConfig, ColourConfig,
     dataAggregateSvgRepresentation, backingDataSvgRepresentation
 };

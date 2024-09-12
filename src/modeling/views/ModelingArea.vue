@@ -138,7 +138,7 @@ onMounted(() => {
             if (cellView.model.prop("entity/type") === EntityTypes.REQUEST_TRACE) {
 
                 // get involved Links
-                const involvedLinks = cellView.model.prop("entity/properties/involved_links");
+                const involvedLinks = cellView.model.prop("entity/relations/involved_links");
 
                 if (involvedLinks && involvedLinks.length > 0) {
                     for (const involvedLink of involvedLinks) {

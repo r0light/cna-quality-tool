@@ -123,4 +123,9 @@ relationship_types:
     derived_from: Root
     description: Relationship Type to connect Components to Proxy Backing Services which act as a proxy for them
     valid_target_node_types: [cna.qualityModel.entities.ProxyBackingService]
+
+  cna-modeling.relationships.UseAddressResolution:
+    derived_from: Root
+    description: Relationship Type to connect Components to entities which provide address resolution
+    valid_target_node_types: [cna.qualityModel.entities.BackingService, cna.qualityModel.entities.Infrastructure, Network ]
     

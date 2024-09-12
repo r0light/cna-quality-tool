@@ -358,13 +358,13 @@ function onSelectRequestTrace(element: dia.Element) {
     highlightRequestTrace(element);
 
     // get involved Links
-    const involvedLinks = element.prop("entity/properties/involved_links");
+    const involvedLinks = element.prop("entity/relations/involved_links");
 
     let allInvolvedEntities = new Set(involvedLinks);
     // add Request Trace entity itself 
     allInvolvedEntities.add(element.id);
     // add referred External Endpoint
-    allInvolvedEntities.add(element.prop("entity/properties/referred_endpoint"));
+    allInvolvedEntities.add(element.prop("entity/relations/referred_endpoint"));
 
     if (involvedLinks && involvedLinks.length > 0) {
         for (const involvedLink of involvedLinks) {
@@ -372,8 +372,8 @@ function onSelectRequestTrace(element: dia.Element) {
             allInvolvedEntities.add(linkEntity.getTargetElement().id);
             allInvolvedEntities.add(linkEntity.getTargetElement().parent());
             allInvolvedEntities.add(linkEntity.getSourceElement().id);
-            if (linkEntity.getTargetElement().prop("entity/properties/uses_data")) {
-                for (const usedData of linkEntity.getTargetElement().prop("entity/properties/uses_data")) {
+            if (linkEntity.getTargetElement().prop("entity/relations/uses_data")) {
+                for (const usedData of linkEntity.getTargetElement().prop("entity/relations/uses_data")) {
                     allInvolvedEntities.add(currentSystemGraph.value.getCell(usedData).id);
                 }
             }

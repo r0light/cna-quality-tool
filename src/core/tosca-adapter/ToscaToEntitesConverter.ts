@@ -380,10 +380,24 @@ class ToscaToEntitesConverter {
 
                 let requestTrace = this.#importedSystem.getRequestTraceEntities.get(this.#keyIdMap.getId(key));
 
-                let externalEndpoint = node.properties && node.properties["referred_endpoint"] ? endpoints.get(this.#keyIdMap.getId(node.properties["referred_endpoint"])) : null; // TODO something better than null?
+                if (node.requirements) {
+                    for (const requirementAssignment of node.requirements) {
+                        for (const [requirementKey, requirement] of Object.entries(requirementAssignment)) {
+                            if (requirementKey === "external_endpoint") {
+                                if (typeof requirement === "string") {
+                                    // TODO 
+                                } else {
+                                    if (requirement.node) {
+                                        let externalEndpoint = endpoints.get(requirement.node);
+                                        if (externalEndpoint) {
+                                            requestTrace.setExternalEndpoint = externalEndpoint;
+                                        }
+                                    }
+                                }
 
-                if (externalEndpoint) {
-                    requestTrace.setExternalEndpoint = externalEndpoint;
+                            }
+                        }
+                    }
                 }
 
                 let links = node.properties && node.properties["involved_links"] ? node.properties["involved_links"].map(linkKey => this.#importedSystem.getLinkEntities.get(this.#keyIdMap.getId(linkKey))) : [];
@@ -393,12 +407,6 @@ class ToscaToEntitesConverter {
                 if (node.properties) {
                     for (const [key, value] of Object.entries(node.properties)) {
                         switch (key) {
-                            case "involved_links":
-                                requestTrace.setPropertyValue(key, value.map(linkKey => this.#keyIdMap.getId(linkKey)));
-                                break;
-                            case "referred_endpoint":
-                                requestTrace.setPropertyValue(key, this.#keyIdMap.getId(value));
-                                break;
                             case "nodes":
                                 requestTrace.setPropertyValue(key, value.map(nodeKey => this.#keyIdMap.getId(nodeKey)));
                                 break;

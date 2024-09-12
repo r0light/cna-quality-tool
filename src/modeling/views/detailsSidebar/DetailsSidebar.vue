@@ -59,7 +59,7 @@
 
 
 <script lang="ts" setup>
-import { PropertyContent, DetailsSidebarConfig, EntityDetailsConfig, PropertyConfig, EditArtifactsConfig, } from '../../config/detailsSidebarConfig';
+import { PropertyContent, DetailsSidebarConfig, EntityDetailsConfig, PropertyConfig, EditArtifactsConfig, EntityRelationsConfig, } from '../../config/detailsSidebarConfig';
 import { dia } from '@joint/core';
 import { ref, computed, onUpdated, onMounted } from 'vue';
 import EntityTypes from '@/modeling/config/entityTypes';
@@ -253,11 +253,9 @@ onUpdated(() => {
         return;
     }
 
-    selectedEntity = props.selectedEntity;
-
-    //console.log(props.selectedEntity.model.id);
     // selected entity has changed! only now update the values
-    selectedEntityId.value = props.selectedEntity.model.id.toString();
+    selectedEntity = props.selectedEntity;
+    selectedEntityId.value = selectedEntity.model.id.toString();
 
     // clear current property sections
     selectedEntityPropertyGroups.value.length = 0;
@@ -285,6 +283,14 @@ onUpdated(() => {
     )[1];
     const currentOptions: EditPropertySection[] = selectedEntityPropertyGroups.value.find(propertyGroup => propertyGroup.groupId === "entity").options;
     currentOptions.push(...toPropertySections(entityConfig.specificProperties))
+
+    //add relation properties for current entity
+    const relationsConfig: { type: string, relations: PropertyConfig[] } = Object.entries(EntityRelationsConfig).find(entry => {
+        return entry[1].type === selectedEntity.model.prop("entity/type")
+    }
+    )[1];
+    const currentRelations: EditPropertySection[] = selectedEntityPropertyGroups.value.find(propertyGroup => propertyGroup.groupId === "relations").options;
+    currentRelations.push(...toPropertySections(relationsConfig.relations))
 
     for (let propertyGroup of selectedEntityPropertyGroups.value) {
         for (let option of propertyGroup.options) {
@@ -896,34 +902,9 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
         } else if (propertyOption.jointJsConfig.propertyType === "property") {
             selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, propertyOption.value);
         } else if (propertyOption.jointJsConfig.propertyType === "customProperty") {
-
             switch (selectedEntityElement.prop("entity/type")) {
-                case EntityTypes.COMPONENT:
-                case EntityTypes.SERVICE:
-                case EntityTypes.BACKING_SERVICE:
-                case EntityTypes.STORAGE_BACKING_SERVICE:
-                case EntityTypes.PROXY_BACKING_SERVICE:
-                case EntityTypes.BROKER_BACKING_SERVICE:
-                    if (propertyOption.providedFeature === "assigned_to_networks") {
-                        let assignedNetworks = [];
-                        propertyOption.tableRows.forEach(network => {
-                            if (network.columns["assigned"]["checked"]) {
-                                assignedNetworks.push(network.columns["assigned"]["id"]);
-                            }
-                        })
-                        selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, assignedNetworks, { rewrite: true });
-                    }
-                    break;
                 case EntityTypes.INFRASTRUCTURE:
-                    if (propertyOption.providedFeature === "assigned_to_networks") {
-                        let assignedNetworks = [];
-                        propertyOption.tableRows.forEach(network => {
-                            if (network.columns["assigned"]["checked"]) {
-                                assignedNetworks.push(network.columns["assigned"]["id"]);
-                            }
-                        })
-                        selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, assignedNetworks, { rewrite: true });
-                    } else if (propertyOption.providedFeature === "supported_artifacts") {
+                    if (propertyOption.providedFeature === "supported_artifacts") {
                         let supportedArtifacts = [];
                         propertyOption.tableRows.forEach(artifactType => {
                             if (artifactType.columns["supported"]["checked"]) {
@@ -988,6 +969,41 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                         selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, toObject(propertyOption.value as any[]), { rewrite: true });
                     }
                     break;
+                default:
+                    console.error("no custom handling for this property defined: " + propertyOption.providedFeature);
+            }
+
+        } else if (propertyOption.jointJsConfig.propertyType === "relation") {
+            switch (selectedEntityElement.prop("entity/type")) {
+                case EntityTypes.COMPONENT:
+                case EntityTypes.SERVICE:
+                case EntityTypes.BACKING_SERVICE:
+                case EntityTypes.STORAGE_BACKING_SERVICE:
+                case EntityTypes.PROXY_BACKING_SERVICE:
+                case EntityTypes.BROKER_BACKING_SERVICE:
+                    if (propertyOption.providedFeature === "assigned_to_networks") {
+                        let assignedNetworks = [];
+                        propertyOption.tableRows.forEach(network => {
+                            if (network.columns["assigned"]["checked"]) {
+                                assignedNetworks.push(network.columns["assigned"]["id"]);
+                            }
+                        })
+                        selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, assignedNetworks, { rewrite: true });
+                    } else if (propertyOption.providedFeature === "proxiedBy") {
+                        selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, propertyOption.value, { rewrite: true });
+                    }
+                    break;
+                case EntityTypes.INFRASTRUCTURE:
+                    if (propertyOption.providedFeature === "assigned_to_networks") {
+                        let assignedNetworks = [];
+                        propertyOption.tableRows.forEach(network => {
+                            if (network.columns["assigned"]["checked"]) {
+                                assignedNetworks.push(network.columns["assigned"]["id"]);
+                            }
+                        })
+                        selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, assignedNetworks, { rewrite: true });
+                    }
+                    break;
                 case EntityTypes.ENDPOINT:
                 case EntityTypes.EXTERNAL_ENDPOINT:
                     if (propertyOption.providedFeature === "uses_data") {
@@ -1003,6 +1019,8 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                             .map(row => row.columns["included"]["id"]);
                         selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, selectedLinkIDs, { rewrite: true });
                         continue;
+                    } else if (propertyOption.providedFeature === "referred_endpoint") {
+                        selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, propertyOption.value);
                     }
                     break;
                 default:

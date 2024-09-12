@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import EntityTypes from './config/entityTypes';
 import * as Entities from '../core/entities';
 import ErrorMessage, { ErrorType } from './errorMessage'
-import { DetailsSidebarConfig, EntityDetailsConfig } from './config/detailsSidebarConfig';
+import { DetailsSidebarConfig, EntityDetailsConfig, EntityRelationsConfig } from './config/detailsSidebarConfig';
 import { MetaData, getEmptyMetaData } from "../core/common/entityDataTypes";
 import { convertToServiceTemplate, importFromServiceTemplate } from "../core/tosca-adapter/ToscaAdapter";
 import {
@@ -486,7 +486,7 @@ class SystemEntityManager {
             }
         }
 
-        const proxyId = graphElement.prop("entity/properties/proxied_by");
+        const proxyId = graphElement.prop("entity/relations/proxied_by");
         if (proxyId) {
             const backingService = [...(this.#currentSystemEntity.getComponentEntities)].find(([id, component]) => { return id === proxyId });
             if (backingService) {
@@ -496,7 +496,7 @@ class SystemEntityManager {
             }
         }
 
-        const assignedNetworks = graphElement.prop("entity/properties/assigned_to_networks");
+        const assignedNetworks = graphElement.prop("entity/relations/assigned_to_networks");
         if (assignedNetworks && assignedNetworks.length > 0) {
             for (const networkId of assignedNetworks) {
                 let network = this.#currentSystemEntity.getNetworkEntities.get(networkId);
@@ -561,7 +561,7 @@ class SystemEntityManager {
             }
         }
 
-        const assignedNetworks = infrastructureElement.prop("entity/properties/assigned_to_networks");
+        const assignedNetworks = infrastructureElement.prop("entity/relations/assigned_to_networks");
         if (assignedNetworks && assignedNetworks.length > 0) {
             for (const networkId of assignedNetworks) {
                 let network = this.#currentSystemEntity.getNetworkEntities.get(networkId);
@@ -710,9 +710,9 @@ class SystemEntityManager {
             property.value = graphElement.prop("entity/properties/" + property.getKey);
         }
 
-        if (graphElement.prop("entity/properties/uses_data")) {
+        if (graphElement.prop("entity/relations/uses_data")) {
 
-            let dataAggregateIds = graphElement.prop("entity/properties/uses_data");
+            let dataAggregateIds = graphElement.prop("entity/relations/uses_data");
 
 
             for (const dataAggregateId of dataAggregateIds) {
@@ -844,7 +844,7 @@ class SystemEntityManager {
 
         const requestTrace = new Entities.RequestTrace(graphElement.id, graphElement.attr("label/textWrap/text"), this.#parseMetaDataFromElement(graphElement));
 
-        const externalEndpointId = graphElement.prop("entity/properties/referred_endpoint");
+        const externalEndpointId = graphElement.prop("entity/relations/referred_endpoint");
         const externalEndpoint = [...(this.#currentSystemEntity.getComponentEntities)].map(([id, component]) => component).flatMap(component => component.getExternalEndpointEntities).find(endpoint => endpoint.getId === externalEndpointId);
         if (externalEndpoint) {
             requestTrace.setExternalEndpoint = externalEndpoint;
@@ -852,11 +852,12 @@ class SystemEntityManager {
             console.log(`External Endpoint ${externalEndpointId} not found in any component`)
         }
 
-        const involvedLinkIds = graphElement.prop("entity/properties/involved_links");
+        const involvedLinkIds = graphElement.prop("entity/relations/involved_links");
 
-        const involvedLinks = involvedLinkIds.map(linkId => this.#currentSystemEntity.getLinkEntities.get(linkId));
-
-        requestTrace.setLinks = involvedLinks;
+        if (involvedLinkIds) {
+            const involvedLinks = involvedLinkIds.map(linkId => this.#currentSystemEntity.getLinkEntities.get(linkId));
+            requestTrace.setLinks = involvedLinks;
+        }
 
         // set entity properties
         for (let property of requestTrace.getProperties()) {
@@ -969,19 +970,19 @@ class SystemEntityManager {
             let componentElement: dia.Element = this.#currentSystemGraph.getCell(id) as dia.Element;
 
             if (component.constructor.name === Entities.Service.name) {
-                this.#configureServiceCell(component, componentElement);
+                this.#configureComponentCell(component, componentElement);
                 createdCells.push(componentElement);
             } else if (component.constructor.name === Entities.BackingService.name) {
-                this.#configureBackingServiceCell(component, componentElement);
+                this.#configureComponentCell(component, componentElement);
                 createdCells.push(componentElement);
             } else if (component.constructor.name === Entities.StorageBackingService.name) {
-                this.#configureStorageBackingServiceCell(component, componentElement);
+                this.#configureComponentCell(component, componentElement);
                 createdCells.push(componentElement);
             } else if (component.constructor.name === Entities.ProxyBackingService.name) {
-                this.#configureProxyBackingServiceCell(component, componentElement);
+                this.#configureComponentCell(component, componentElement);
                 createdCells.push(componentElement);
             } else if (component.constructor.name === Entities.BrokerBackingService.name) {
-                this.#configureBrokerBackingServiceCell(component, componentElement);
+                this.#configureComponentCell(component, componentElement);
                 createdCells.push(componentElement);
             } else if (component.constructor.name === Entities.Component.name) {
                 this.#configureComponentCell(component, componentElement);
@@ -1114,7 +1115,7 @@ class SystemEntityManager {
         for (const property of EntityDetailsConfig.Infrastructure.specificProperties) {
             switch (property.providedFeature) {
                 case "assigned_to_networks":
-                    infrastructureElement.prop("entity/properties/assigned_to_networks", infrastructure.getNetworks.keys().toArray());
+                    infrastructureElement.prop(property.jointJsConfig.modelPath, infrastructure.getNetworks.keys().toArray());
                     break;
                 default:
                     if (property.jointJsConfig.modelPath) {
@@ -1155,32 +1156,6 @@ class SystemEntityManager {
         return newService;
     }
 
-    #configureServiceCell(service: Entities.Service, serviceElement: dia.Element) {
-        for (const property of EntityDetailsConfig.Service.specificProperties) {
-            switch (property.providedFeature) {
-                case "proxiedBy":
-                    if (service.getProxiedBy) {
-                        serviceElement.prop("entity/properties/proxied_by", service.getProxiedBy.getId);
-                    }
-                    break;
-                case "assigned_to_networks":
-                    serviceElement.prop("entity/properties/assigned_to_networks", [...service.getNetworks.keys()]);
-                    break;
-                default:
-                    if (property.jointJsConfig.modelPath) {
-                        serviceElement.prop(property.jointJsConfig.modelPath, service.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
-                    }
-            }
-        }
-
-        let artifacts = [];
-        for (const [artifactKey, artifact] of service.getArtifacts.entries()) {
-            artifacts.push(artifact.getAsSimpleObject(artifactKey));
-        }
-        serviceElement.prop(DetailsSidebarConfig.GeneralProperties.artifacts.options[0].jointJsConfig.modelPath, artifacts)
-
-        return serviceElement;
-    }
 
     #createBackingServiceCell(backingService: Entities.BackingService) {
         let newBackingService: dia.Element = new BackingServiceElement({
@@ -1203,33 +1178,6 @@ class SystemEntityManager {
             }
         })
         return newBackingService;
-    }
-
-    #configureBackingServiceCell(backingService: Entities.BackingService, backingServiceElement: dia.Element) {
-        for (const property of EntityDetailsConfig.BackingService.specificProperties) {
-            switch (property.providedFeature) {
-                case "proxiedBy":
-                    if (backingService.getProxiedBy) {
-                        backingServiceElement.prop("entity/properties/proxied_by", backingService.getProxiedBy.getId);
-                    }
-                    break;
-                case "assigned_to_networks":
-                    backingServiceElement.prop("entity/properties/assigned_to_networks", [...backingService.getNetworks.keys()]);
-                    break;
-                default:
-                    if (property.jointJsConfig.modelPath) {
-                        backingServiceElement.prop(property.jointJsConfig.modelPath, backingService.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
-                    }
-            }
-        }
-
-        let artifacts = [];
-        for (const [artifactKey, artifact] of backingService.getArtifacts.entries()) {
-            artifacts.push(artifact.getAsSimpleObject(artifactKey));
-        }
-        backingServiceElement.prop(DetailsSidebarConfig.GeneralProperties.artifacts.options[0].jointJsConfig.modelPath, artifacts)
-
-        return backingServiceElement;
     }
 
     #createStorageBackingServiceCell(storageBackingService: Entities.StorageBackingService) {
@@ -1255,34 +1203,6 @@ class SystemEntityManager {
         return newStorageBackingService;
     }
 
-    #configureStorageBackingServiceCell(storageBackingService: Entities.StorageBackingService, storageBackingServiceElement: dia.Element) {
-        for (const property of EntityDetailsConfig.StorageBackingService.specificProperties) {
-            switch (property.providedFeature) {
-                case "proxiedBy":
-                    if (storageBackingService.getProxiedBy) {
-                        storageBackingServiceElement.prop("entity/properties/proxied_by", storageBackingService.getProxiedBy.getId);
-                    }
-                    break;
-                case "assigned_to_networks":
-                    storageBackingServiceElement.prop("entity/properties/assigned_to_networks", [...storageBackingService.getNetworks.keys()]);
-                    break;
-                default:
-                    if (property.jointJsConfig.modelPath) {
-                        storageBackingServiceElement.prop(property.jointJsConfig.modelPath, storageBackingService.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
-                    }
-            }
-        }
-
-        let artifacts = [];
-        for (const [artifactKey, artifact] of storageBackingService.getArtifacts.entries()) {
-            artifacts.push(artifact.getAsSimpleObject(artifactKey));
-        }
-        storageBackingServiceElement.prop(DetailsSidebarConfig.GeneralProperties.artifacts.options[0].jointJsConfig.modelPath, artifacts)
-
-
-        return storageBackingServiceElement;
-    }
-
     #createProxyBackingServiceCell(proxyBackingService: Entities.ProxyBackingService) {
         let newProxyBackingService: dia.Element = new ProxyBackingServiceElement({
             id: proxyBackingService.getId,
@@ -1306,35 +1226,6 @@ class SystemEntityManager {
         return newProxyBackingService;
     }
 
-    #configureProxyBackingServiceCell(proxyBackingService: Entities.ProxyBackingService, proxyBackingServiceElement: dia.Element) {
-
-        for (const property of EntityDetailsConfig.ProxyBackingService.specificProperties) {
-            switch (property.providedFeature) {
-                case "proxiedBy":
-                    if (proxyBackingService.getProxiedBy) {
-                        proxyBackingServiceElement.prop("entity/properties/proxied_by", proxyBackingService.getProxiedBy.getId);
-                    }
-                    break;
-                case "assigned_to_networks":
-                    proxyBackingServiceElement.prop("entity/properties/assigned_to_networks", [...proxyBackingService.getNetworks.keys()]);
-                    break;
-                default:
-                    if (property.jointJsConfig.modelPath) {
-                        proxyBackingServiceElement.prop(property.jointJsConfig.modelPath, proxyBackingService.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
-                    }
-            }
-        }
-
-        let artifacts = [];
-        for (const [artifactKey, artifact] of proxyBackingService.getArtifacts.entries()) {
-            artifacts.push(artifact.getAsSimpleObject(artifactKey));
-        }
-        proxyBackingServiceElement.prop(DetailsSidebarConfig.GeneralProperties.artifacts.options[0].jointJsConfig.modelPath, artifacts)
-
-
-        return proxyBackingServiceElement;
-    }
-
     #createBrokerBackingServiceCell(brokerBackingService: Entities.BrokerBackingService) {
         let newBrokerBackingService: dia.Element = new BrokerBackingServiceElement({
             id: brokerBackingService.getId,
@@ -1356,35 +1247,6 @@ class SystemEntityManager {
             }
         })
         return newBrokerBackingService;
-    }
-
-
-    #configureBrokerBackingServiceCell(brokerBackingService: Entities.BrokerBackingService, brokerBackingServiceElement: dia.Element) {
-        for (const property of EntityDetailsConfig.BrokerBackingService.specificProperties) {
-            switch (property.providedFeature) {
-                case "proxiedBy":
-                    if (brokerBackingService.getProxiedBy) {
-                        brokerBackingServiceElement.prop("entity/properties/proxied_by", brokerBackingService.getProxiedBy.getId);
-                    }
-                    break;
-                case "assigned_to_networks":
-                    brokerBackingServiceElement.prop("entity/properties/assigned_to_networks", [...brokerBackingService.getNetworks.keys()]);
-                    break;
-                default:
-                    if (property.jointJsConfig.modelPath) {
-                        brokerBackingServiceElement.prop(property.jointJsConfig.modelPath, brokerBackingService.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
-                    }
-            }
-        }
-
-        let artifacts = [];
-        for (const [artifactKey, artifact] of brokerBackingService.getArtifacts.entries()) {
-            artifacts.push(artifact.getAsSimpleObject(artifactKey));
-        }
-        brokerBackingServiceElement.prop(DetailsSidebarConfig.GeneralProperties.artifacts.options[0].jointJsConfig.modelPath, artifacts)
-
-
-        return brokerBackingServiceElement;
     }
 
     #createComponentCell(component: Entities.Component) {
@@ -1412,20 +1274,24 @@ class SystemEntityManager {
 
     #configureComponentCell(component: Entities.Component, componentElement: dia.Element) {
 
-        for (const property of EntityDetailsConfig.Service.specificProperties) {
-            switch (property.providedFeature) {
+        for (const property of EntityDetailsConfig[component.constructor.name].specificProperties) {
+            if (property.jointJsConfig.modelPath) {
+                componentElement.prop(property.jointJsConfig.modelPath, component.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
+            }
+        }
+
+        for (const relation of EntityRelationsConfig[component.constructor.name].relations) {
+            switch (relation.providedFeature) {
                 case "proxiedBy":
                     if (component.getProxiedBy) {
-                        componentElement.prop("entity/properties/proxied_by", component.getProxiedBy.getId);
+                        componentElement.prop(relation.jointJsConfig.modelPath, component.getProxiedBy.getId);
                     }
                     break;
                 case "assigned_to_networks":
-                    componentElement.prop("entity/properties/assigned_to_networks", [...component.getNetworks.keys()]);
+                    componentElement.prop(relation.jointJsConfig.modelPath, [...component.getNetworks.keys()]);
                     break;
                 default:
-                    if (property.jointJsConfig.modelPath) {
-                        componentElement.prop(property.jointJsConfig.modelPath, component.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
-                    }
+                    throw new Error(`Unknown relation ${relation.providedFeature} found for ${component.constructor.name}.`)
             }
         }
 
@@ -1573,8 +1439,6 @@ class SystemEntityManager {
             if (property.jointJsConfig.modelPath) {
                 if (property.providedFeature === "embedded") {
                     newEndpoint.prop(property.jointJsConfig.modelPath, parent.id.toString());
-                } else if (property.providedFeature === "uses_data") {
-                    continue;
                 } else {
                     newEndpoint.prop(property.jointJsConfig.modelPath, endpoint.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
                 }
@@ -1582,7 +1446,7 @@ class SystemEntityManager {
         }
 
         if (endpoint.getDataAggregateEntities.length > 0) {
-            newEndpoint.prop("entity/properties/uses_data", endpoint.getDataAggregateEntities.map(usedData => {
+            newEndpoint.prop("entity/relations/uses_data", endpoint.getDataAggregateEntities.map(usedData => {
                 return parent.getEmbeddedCells().find(cell => cell.prop("entity/assignedFamily") === usedData.data.getName).id;
             }));
         }
@@ -1618,8 +1482,6 @@ class SystemEntityManager {
             if (property.jointJsConfig.modelPath) {
                 if (property.providedFeature === "embedded") {
                     newExternalEndpoint.prop(property.jointJsConfig.modelPath, parent.id.toString());
-                } else if (property.providedFeature === "uses_data") {
-                    continue;
                 } else {
                     newExternalEndpoint.prop(property.jointJsConfig.modelPath, externalEndpoint.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
                 }
@@ -1627,7 +1489,7 @@ class SystemEntityManager {
         }
 
         if (externalEndpoint.getDataAggregateEntities.length > 0) {
-            newExternalEndpoint.prop("entity/properties/uses_data", externalEndpoint.getDataAggregateEntities.map(usedData => {
+            newExternalEndpoint.prop("entity/relations/uses_data", externalEndpoint.getDataAggregateEntities.map(usedData => {
                 return parent.getEmbeddedCells().find(cell => cell.prop("entity/assignedFamily") === usedData.data.getName).id;
             }));
         }
@@ -1656,19 +1518,25 @@ class SystemEntityManager {
         })
 
         for (const property of EntityDetailsConfig.RequestTrace.specificProperties) {
-            switch (property.providedFeature) {
+            if (property.jointJsConfig.modelPath) {
+                newRequestTrace.prop(property.jointJsConfig.modelPath, requestTrace.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
+            }
+        }
+
+        for (const relation of EntityRelationsConfig.RequestTrace.relations) {
+            switch (relation.providedFeature) {
                 case "referred_endpoint":
                     if (requestTrace.getExternalEndpoint) {
-                        newRequestTrace.prop(property.jointJsConfig.modelPath, requestTrace.getExternalEndpoint.getId);
+                        newRequestTrace.prop(relation.jointJsConfig.modelPath, requestTrace.getExternalEndpoint.getId);
                     } else {
-                        newRequestTrace.prop(property.jointJsConfig.modelPath, "");
+                        newRequestTrace.prop(relation.jointJsConfig.modelPath, "");
                     }
+                    break;
+                case "involved_links":
+                    newRequestTrace.prop(relation.jointJsConfig.modelPath, Array.from(requestTrace.getLinks).map(link => link.getId));
                     break;
                 default:
-                    if (property.jointJsConfig.modelPath) {
-                        newRequestTrace.prop(property.jointJsConfig.modelPath, requestTrace.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
-                    }
-                    break;
+                    throw new Error(`unknown relation ${relation.providedFeature} in request trace.`)
             }
         }
         return newRequestTrace;
