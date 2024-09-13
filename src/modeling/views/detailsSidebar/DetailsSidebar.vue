@@ -354,9 +354,6 @@ onUpdated(() => {
             })
 
             const proxyBackingServices = props.graph.getElements().filter(element => element.prop("entity/type") === EntityTypes.PROXY_BACKING_SERVICE);
-            let proxyOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "proxiedBy");
-            proxyOption.includeFormCheck = false;
-            const selectedProxyBackingService = selectedEntity.model.prop(proxyOption.jointJsConfig.modelPath);
             const proxyDropdownOptions = proxyBackingServices.map((proxyBackingService) => {
                 return {
                     optionValue: proxyBackingService.id,
@@ -366,8 +363,24 @@ onUpdated(() => {
                     disabled: false,
                 };
             })
-            proxyOption.dropdownOptions = [EMPTY_DROPDOWN_VALUE, ...proxyDropdownOptions];
-            proxyOption.value = selectedProxyBackingService;
+
+            let externalIngressProxyOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "externalIngressProxiedBy");
+            externalIngressProxyOption.includeFormCheck = false;
+            const selectedExternalIngressProxyBackingService = selectedEntity.model.prop(externalIngressProxyOption.jointJsConfig.modelPath);
+            externalIngressProxyOption.dropdownOptions = [EMPTY_DROPDOWN_VALUE, ...proxyDropdownOptions];
+            externalIngressProxyOption.value = selectedExternalIngressProxyBackingService;
+
+            let ingressProxyOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "ingressProxiedBy");
+            ingressProxyOption.includeFormCheck = false;
+            const selectedIngressProxyBackingService = selectedEntity.model.prop(ingressProxyOption.jointJsConfig.modelPath);
+            ingressProxyOption.dropdownOptions = [EMPTY_DROPDOWN_VALUE, ...proxyDropdownOptions];
+            ingressProxyOption.value = selectedIngressProxyBackingService;
+
+            let egressProxyOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "egressProxiedBy");
+            egressProxyOption.includeFormCheck = false;
+            const selectedEgressProxyBackingService = selectedEntity.model.prop(egressProxyOption.jointJsConfig.modelPath);
+            egressProxyOption.dropdownOptions = [EMPTY_DROPDOWN_VALUE, ...proxyDropdownOptions];
+            egressProxyOption.value = selectedEgressProxyBackingService;
 
             const addressResolutionEntities = props.graph.getElements().filter(element =>
                 (element.prop("entity/type") === EntityTypes.BACKING_SERVICE && element.prop("entity/properties/providedFunctionality") === "naming/addressing")
@@ -1019,7 +1032,11 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                             }
                         })
                         selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, assignedNetworks, { rewrite: true });
-                    } else if (propertyOption.providedFeature === "proxiedBy") {
+                    } else if (propertyOption.providedFeature === "externalIngressProxiedBy") {
+                        selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, propertyOption.value, { rewrite: true });
+                    } else if (propertyOption.providedFeature === "ingressProxiedBy") {
+                        selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, propertyOption.value, { rewrite: true });
+                    } else if (propertyOption.providedFeature === "egressProxiedBy") {
                         selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, propertyOption.value, { rewrite: true });
                     } else if (propertyOption.providedFeature === "addressResolutionBy") {
                         selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, propertyOption.value, { rewrite: true });

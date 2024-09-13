@@ -56,7 +56,11 @@ class Component {
 
     #dataAggregateEntities = new Array<{ data: DataAggregate, relation: RelationToDataAggregate }>();
 
-    #proxiedBy: ProxyBackingService;
+    #externalIngressProxiedBy: ProxyBackingService;
+
+    #ingressProxiedBy: ProxyBackingService;
+
+    #egressProxiedBy: ProxyBackingService;
 
     #addressResolutionBy: BackingService | Infrastructure | Network;
 
@@ -178,12 +182,28 @@ class Component {
         return this.#backingDataEntities;
     }
 
-    get getProxiedBy() {
-        return this.#proxiedBy;
+    get getExternalIngressProxiedBy() {
+        return this.#externalIngressProxiedBy;
     }
 
-    set setProxiedBy(proxy: ProxyBackingService | undefined) {
-        this.#proxiedBy = proxy;
+    set setExternalIngressProxiedBy(proxy: ProxyBackingService | undefined) {
+        this.#externalIngressProxiedBy = proxy;
+    }
+
+    get getIngressProxiedBy() {
+        return this.#ingressProxiedBy;
+    }
+
+    set setIngressProxiedBy(proxy: ProxyBackingService | undefined) {
+        this.#ingressProxiedBy = proxy;
+    }
+
+    get getEgressProxiedBy() {
+        return this.#egressProxiedBy;
+    }
+
+    set setEgressProxiedBy(proxy: ProxyBackingService | undefined) {
+        this.#egressProxiedBy = proxy;
     }
 
     get getAddressResolutionBy() {

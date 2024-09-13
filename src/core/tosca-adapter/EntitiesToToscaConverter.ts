@@ -261,18 +261,46 @@ class EntitiesToToscaConverter {
             }
 
 
-            if (component.getProxiedBy) {
+            if (component.getExternalIngressProxiedBy) {
                 if (!node.requirements) {
                     node.requirements = [];
                 }
 
                 node.requirements.push({
-                    "proxied_by": {
-                        node: this.#keyIdMap.getKey(component.getProxiedBy.getId),
+                    "external_ingress_proxied_by": {
+                        node: this.#keyIdMap.getKey(component.getExternalIngressProxiedBy.getId),
                         relationship: "cna-modeling.relationships.ProxiedBy.BackingService"
                     }
                 });
             }
+
+            if (component.getIngressProxiedBy) {
+                if (!node.requirements) {
+                    node.requirements = [];
+                }
+
+                node.requirements.push({
+                    "ingress_proxied_by": {
+                        node: this.#keyIdMap.getKey(component.getIngressProxiedBy.getId),
+                        relationship: "cna-modeling.relationships.ProxiedBy.BackingService"
+                    }
+                });
+            }
+
+
+            if (component.getEgressProxiedBy) {
+                if (!node.requirements) {
+                    node.requirements = [];
+                }
+
+                node.requirements.push({
+                    "egress_proxied_by": {
+                        node: this.#keyIdMap.getKey(component.getEgressProxiedBy.getId),
+                        relationship: "cna-modeling.relationships.ProxiedBy.BackingService"
+                    }
+                });
+            }
+
 
             if (component.getAddressResolutionBy) {
 

@@ -528,11 +528,25 @@ class ToscaToEntitesConverter {
                                 // TODO add to Component (includedLinks?)
                             }
                             break;
-                        case "proxied_by":
+                        case "external_ingress_proxied_by":
                             if (typeof requirement === "string") {
                                 // TODO requirement is of type string
                             } else if (typeof requirement === "object") {
-                                component.setProxiedBy = this.#importedSystem.getComponentEntities.get(this.#keyIdMap.getId(requirement.node));
+                                component.setExternalIngressProxiedBy = this.#importedSystem.getComponentEntities.get(this.#keyIdMap.getId(requirement.node));
+                            }
+                            break;
+                        case "ingress_proxied_by":
+                            if (typeof requirement === "string") {
+                                // TODO requirement is of type string
+                            } else if (typeof requirement === "object") {
+                                component.setIngressProxiedBy = this.#importedSystem.getComponentEntities.get(this.#keyIdMap.getId(requirement.node));
+                            }
+                            break;
+                        case "egress_proxied_by":
+                            if (typeof requirement === "string") {
+                                // TODO requirement is of type string
+                            } else if (typeof requirement === "object") {
+                                component.setEgressProxiedBy = this.#importedSystem.getComponentEntities.get(this.#keyIdMap.getId(requirement.node));
                             }
                             break;
                         case "address_resolution_by":

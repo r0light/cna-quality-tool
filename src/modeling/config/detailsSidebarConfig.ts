@@ -1384,11 +1384,11 @@ const getAssignedNetworksRelationConfig: ()=>PropertyConfig = () => {
     };
 }
 
-const getProxiedByRelationConfig: ()=>PropertyConfig = () => {
+const getExternalIngressProxiedByRelationConfig: ()=>PropertyConfig = () => {
     return {
-        providedFeature: "proxiedBy",
+        providedFeature: "externalIngressProxiedBy",
         contentType: PropertyContent.DROPDOWN,
-        label: "Proxied by:",
+        label: "External Ingress proxied by:",
         inputProperties: {
             disabled: false,
             required: true,
@@ -1396,7 +1396,7 @@ const getProxiedByRelationConfig: ()=>PropertyConfig = () => {
             selected: false,
             readonly: false,
         },
-        helpText: "The proxy backing service acting as a proxy for this component.",
+        helpText: "The proxy backing service acting as an external ingress proxy for this component.",
         show: true,
         attributes: {
             placeholder: "Choose Proxy Backing Service...",
@@ -1407,7 +1407,71 @@ const getProxiedByRelationConfig: ()=>PropertyConfig = () => {
         provideEnterButton: false,
         jointJsConfig: {
             propertyType: "relation",
-            modelPath: "entity/relations/proxied_by",
+            modelPath: "entity/relations/external_ingress_proxied_by",
+            defaultPropPath: "",
+            minPath: "",
+            min: ""
+        },
+        dropdownOptions: []
+    }
+}
+
+const getIngressProxiedByRelationConfig: ()=>PropertyConfig = () => {
+    return {
+        providedFeature: "ingressProxiedBy",
+        contentType: PropertyContent.DROPDOWN,
+        label: "Ingress proxied by:",
+        inputProperties: {
+            disabled: false,
+            required: true,
+            checked: false,
+            selected: false,
+            readonly: false,
+        },
+        helpText: "The proxy backing service acting as an ingress proxy for this component.",
+        show: true,
+        attributes: {
+            placeholder: "Choose Proxy Backing Service...",
+            svgRepresentation: "",
+            defaultValue: ""
+
+        },
+        provideEnterButton: false,
+        jointJsConfig: {
+            propertyType: "relation",
+            modelPath: "entity/relations/ingress_proxied_by",
+            defaultPropPath: "",
+            minPath: "",
+            min: ""
+        },
+        dropdownOptions: []
+    }
+}
+
+const getEgressProxiedByRelationConfig: ()=>PropertyConfig = () => {
+    return {
+        providedFeature: "egressProxiedBy",
+        contentType: PropertyContent.DROPDOWN,
+        label: "Egress proxied by:",
+        inputProperties: {
+            disabled: false,
+            required: true,
+            checked: false,
+            selected: false,
+            readonly: false,
+        },
+        helpText: "The proxy backing service acting as an egress proxy for this component.",
+        show: true,
+        attributes: {
+            placeholder: "Choose Proxy Backing Service...",
+            svgRepresentation: "",
+            defaultValue: ""
+
+        },
+        provideEnterButton: false,
+        jointJsConfig: {
+            propertyType: "relation",
+            modelPath: "entity/relations/egress_proxied_by",
             defaultPropPath: "",
             minPath: "",
             min: ""
@@ -1458,7 +1522,9 @@ const EntityRelationsConfig: {
         type: EntityTypes.COMPONENT,
         relations: [
             getAssignedNetworksRelationConfig(),
-            getProxiedByRelationConfig(),
+            getExternalIngressProxiedByRelationConfig(),
+            getIngressProxiedByRelationConfig(),
+            getEgressProxiedByRelationConfig(),
             getAddressResolutionByRelationConfig()
         ]
     },
@@ -1466,7 +1532,9 @@ const EntityRelationsConfig: {
         type: EntityTypes.SERVICE,
         relations: [
             getAssignedNetworksRelationConfig(),
-            getProxiedByRelationConfig(),
+            getExternalIngressProxiedByRelationConfig(),
+            getIngressProxiedByRelationConfig(),
+            getEgressProxiedByRelationConfig(),
             getAddressResolutionByRelationConfig()
         ]
     },
@@ -1474,7 +1542,9 @@ const EntityRelationsConfig: {
         type: EntityTypes.BACKING_SERVICE,
         relations: [
             getAssignedNetworksRelationConfig(),
-            getProxiedByRelationConfig(),
+            getExternalIngressProxiedByRelationConfig(),
+            getIngressProxiedByRelationConfig(),
+            getEgressProxiedByRelationConfig(),
             getAddressResolutionByRelationConfig()
         ]
     },
@@ -1482,7 +1552,9 @@ const EntityRelationsConfig: {
         type: EntityTypes.STORAGE_BACKING_SERVICE,
         relations: [
             getAssignedNetworksRelationConfig(),
-            getProxiedByRelationConfig(),
+            getExternalIngressProxiedByRelationConfig(),
+            getIngressProxiedByRelationConfig(),
+            getEgressProxiedByRelationConfig(),
             getAddressResolutionByRelationConfig()
         ]
     },
@@ -1490,7 +1562,9 @@ const EntityRelationsConfig: {
         type: EntityTypes.BROKER_BACKING_SERVICE,
         relations: [
             getAssignedNetworksRelationConfig(),
-            getProxiedByRelationConfig(),
+            getExternalIngressProxiedByRelationConfig(),
+            getIngressProxiedByRelationConfig(),
+            getEgressProxiedByRelationConfig(),
             getAddressResolutionByRelationConfig()
         ]
     },
@@ -1498,7 +1572,9 @@ const EntityRelationsConfig: {
         type: EntityTypes.PROXY_BACKING_SERVICE,
         relations: [
             getAssignedNetworksRelationConfig(),
-            getProxiedByRelationConfig(),
+            getExternalIngressProxiedByRelationConfig(),
+            getIngressProxiedByRelationConfig(),
+            getEgressProxiedByRelationConfig(),
             getAddressResolutionByRelationConfig()
         ]
     },

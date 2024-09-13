@@ -486,13 +486,33 @@ class SystemEntityManager {
             }
         }
 
-        const proxyId = graphElement.prop("entity/relations/proxied_by");
-        if (proxyId) {
-            const backingService = [...(this.#currentSystemEntity.getComponentEntities)].find(([id, component]) => { return id === proxyId });
+        const externalIngressProxyId = graphElement.prop("entity/relations/external_ingress_proxied_by");
+        if (externalIngressProxyId) {
+            const backingService = [...(this.#currentSystemEntity.getComponentEntities)].find(([id, component]) => { return id === externalIngressProxyId });
             if (backingService) {
-                entity.setProxiedBy = backingService[1];
+                entity.setExternalIngressProxiedBy = backingService[1];
             } else {
-                console.log(`Backing Service ${proxyId} not found`)
+                console.log(`Backing Service ${externalIngressProxyId} not found`)
+            }
+        }
+
+        const ingressProxyId = graphElement.prop("entity/relations/ingress_proxied_by");
+        if (ingressProxyId) {
+            const backingService = [...(this.#currentSystemEntity.getComponentEntities)].find(([id, component]) => { return id === ingressProxyId });
+            if (backingService) {
+                entity.setIngressProxiedBy = backingService[1];
+            } else {
+                console.log(`Backing Service ${ingressProxyId} not found`)
+            }
+        }
+
+        const egressProxyId = graphElement.prop("entity/relations/egress_proxied_by");
+        if (egressProxyId) {
+            const backingService = [...(this.#currentSystemEntity.getComponentEntities)].find(([id, component]) => { return id === egressProxyId });
+            if (backingService) {
+                entity.setEgressProxiedBy = backingService[1];
+            } else {
+                console.log(`Backing Service ${egressProxyId} not found`)
             }
         }
 
@@ -1302,9 +1322,19 @@ class SystemEntityManager {
 
         for (const relation of EntityRelationsConfig[component.constructor.name].relations) {
             switch (relation.providedFeature) {
-                case "proxiedBy":
-                    if (component.getProxiedBy) {
-                        componentElement.prop(relation.jointJsConfig.modelPath, component.getProxiedBy.getId);
+                case "externalIngressProxiedBy":
+                    if (component.getExternalIngressProxiedBy) {
+                        componentElement.prop(relation.jointJsConfig.modelPath, component.getExternalIngressProxiedBy.getId);
+                    }
+                    break;
+                case "ingressProxiedBy":
+                    if (component.getIngressProxiedBy) {
+                        componentElement.prop(relation.jointJsConfig.modelPath, component.getIngressProxiedBy.getId);
+                    }
+                    break;
+                case "egressProxiedBy":
+                    if (component.getEgressProxiedBy) {
+                        componentElement.prop(relation.jointJsConfig.modelPath, component.getEgressProxiedBy.getId);
                     }
                     break;
                 case "addressResolutionBy":

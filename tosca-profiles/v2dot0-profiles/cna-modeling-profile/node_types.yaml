@@ -67,7 +67,17 @@ node_types:
           node: cna-modeling.entities.BackingData
           relationship: cna-modeling.relationships.AttachesTo.BackingData
           count_range: [0, UNBOUNDED]
-      - proxied_by:
+      - external_ingress_proxied_by:
+          capability: cna-modeling.capabilities.Proxy
+          node: cna-modeling.entities.ProxyBackingService
+          relationship: cna-modeling.relationships.ProxiedBy.ProxyBackingService
+          count_range: [0,1]
+      - ingress_proxied_by:
+          capability: cna-modeling.capabilities.Proxy
+          node: cna-modeling.entities.ProxyBackingService
+          relationship: cna-modeling.relationships.ProxiedBy.ProxyBackingService
+          count_range: [0,1]
+      - egress_proxied_by:
           capability: cna-modeling.capabilities.Proxy
           node: cna-modeling.entities.ProxyBackingService
           relationship: cna-modeling.relationships.ProxiedBy.ProxyBackingService
