@@ -1376,7 +1376,7 @@ export const qualityModel: QualityModelSpec = {
         },
         "serviceDiscoveryUsage": {
             "name": "Service Discovery Usage",
-            "calculation": "",
+            "calculation": "Number of Links whose outgoing component is using address resolution / Total number of Links",
             "sources": ["Apel2019"]
         },
         "averageNumberOfEndpointsPerService": {

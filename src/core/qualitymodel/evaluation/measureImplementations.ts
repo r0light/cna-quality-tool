@@ -1436,6 +1436,26 @@ export const distributedTracingSupport: Calculation<System> = (system) => {
     return numberOfComponentsConnectedToTracingService / allTraceableComponents.length;
 }
 
+export const serviceDiscoveryUsage: Calculation<System> = (system) => {
+
+    let allLinks = [...system.getLinkEntities.entries()];
+
+    if (allLinks.length === 0) {
+        return 0;
+    }
+
+    let linksWithServiceDiscovery = 0;
+
+    for (const [linkId, link] of allLinks) {
+        let sourceComponent = link.getSourceEntity;
+        if (sourceComponent.getAddressResolutionBy && sourceComponent.getAddressResolutionBy.getProperty("address_resolution_kind").value !== "none") {
+            linksWithServiceDiscovery++;
+        }
+    }
+
+    return linksWithServiceDiscovery / allLinks.length;
+}
+
 
 export const systemMeasureImplementations: { [measureKey: string]: Calculation<System> } = {
     "serviceReplicationLevel": serviceReplicationLevel,
@@ -1503,7 +1523,8 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation<S
     "ratioOfComponentsThatSupportMonitoring": ratioOfComponentsThatSupportMonitoring,
     "ratioOfComponentsOrInfrastructureNodesThatExportLogsToACentralService": ratioOfComponentsOrInfrastructureNodesThatExportLogsToACentralService,
     "ratioOfComponentsOrInfrastructureNodesThatExportMetrics": ratioOfComponentsOrInfrastructureNodesThatExportMetrics,
-    "distributedTracingSupport": distributedTracingSupport
+    "distributedTracingSupport": distributedTracingSupport,
+    "serviceDiscoveryUsage": serviceDiscoveryUsage
 }
 
 export const serviceInterfaceDataCohesion: Calculation<{ component: Component, system: System }> = (parameters) => {

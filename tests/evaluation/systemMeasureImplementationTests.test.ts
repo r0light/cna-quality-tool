@@ -2146,3 +2146,42 @@ test("distributedTracingSupport", () => {
     let measureValue = systemMeasureImplementations["distributedTracingSupport"](system);
     expect(measureValue).toEqual(3/4);
 })
+
+
+test("serviceDiscoveryUsage", () => {
+
+    let system = new System("testSystem");
+
+    let discoveryService = new BackingService("b1", "discoveryService", getEmptyMetaData());
+    discoveryService.setPropertyValue("address_resolution_kind", "discovery");
+
+    let serviceA = new Service("s1", "testService 1", getEmptyMetaData());
+    serviceA.setAddressResolutionBy = discoveryService;
+    
+    let serviceB = new Service("s2", "testService 2", getEmptyMetaData());
+    let endpointB = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+    let serviceC = new Service("s3", "testService 3", getEmptyMetaData());
+    let endpointC = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+
+    let serviceD = new Service("s4", "testService 3", getEmptyMetaData());
+    let endpointD = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceD.addEndpoint(endpointD);
+
+    let storageBackingService = new StorageBackingService("sbs1", "storageBackingService", getEmptyMetaData());
+    let endpointSBS = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    storageBackingService.addEndpoint(endpointSBS);
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+    let linkAC = new Link("l2", serviceA, endpointC);
+    let linkASBS = new Link("l3", serviceA, endpointSBS);
+    let linkBD = new Link("l4", serviceB, endpointD);
+    let linkBSBS = new Link("l5", serviceB, endpointSBS);
+
+    system.addEntities([serviceA, serviceB, serviceC, serviceD, storageBackingService]);
+    system.addEntities([linkAB, linkAC, linkASBS, linkBD, linkBSBS]);
+
+    let measureValue = systemMeasureImplementations["serviceDiscoveryUsage"](system);
+    expect(measureValue).toEqual(3/5);
+})
