@@ -96,8 +96,8 @@ class RequestTrace {
       * @param {ExternalEndpoint} newExternalEndpoint The {@link ExternalEndpoint} for of this RequestTrace entity.
       * @throws {TypeError} If a wrong entity type is being provided
       */
-    set setExternalEndpoint(newExternalEndpoint) {
-        if (!(newExternalEndpoint instanceof ExternalEndpoint)) {
+    set setExternalEndpoint(newExternalEndpoint: ExternalEndpoint | undefined) {
+        if (newExternalEndpoint && (newExternalEndpoint.constructor.name !== ExternalEndpoint.name)) {
             const errorMessage = "Wrong entity type provided. Only an ExternalEndpoint entity is allowed. However, the provided entity was: " + Object.getPrototypeOf(newExternalEndpoint) + JSON.stringify(newExternalEndpoint);
             throw new TypeError(errorMessage);
         }

@@ -81,6 +81,14 @@ const toArray = (o: object, keyName: string, valueName: string) => {
     return asArray;
 }
 
+const EMPTY_DROPDOWN_VALUE = {
+    optionValue: "",
+    optionText: "",
+    optionTitle: "none",
+    optionRepresentationClass: "validOption",
+    disabled: false,
+};
+
 
 const props = defineProps<{
     graph: dia.Graph;
@@ -347,6 +355,7 @@ onUpdated(() => {
 
             const proxyBackingServices = props.graph.getElements().filter(element => element.prop("entity/type") === EntityTypes.PROXY_BACKING_SERVICE);
             let proxyOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "proxiedBy");
+            proxyOption.includeFormCheck = false;
             const selectedProxyBackingService = selectedEntity.model.prop(proxyOption.jointJsConfig.modelPath);
             const proxyDropdownOptions = proxyBackingServices.map((proxyBackingService) => {
                 return {
@@ -357,15 +366,16 @@ onUpdated(() => {
                     disabled: false,
                 };
             })
-            proxyOption.dropdownOptions = proxyDropdownOptions;
+            proxyOption.dropdownOptions = [EMPTY_DROPDOWN_VALUE, ...proxyDropdownOptions];
             proxyOption.value = selectedProxyBackingService;
 
-            const addressResolutionEntities = props.graph.getElements().filter(element => 
-            (element.prop("entity/type") === EntityTypes.BACKING_SERVICE && element.prop("entity/properties/providedFunctionality") === "naming/addressing")
-            || element.prop("entity/type") === EntityTypes.INFRASTRUCTURE
-            || element.prop("entity/type") === EntityTypes.NETWORK
-        );
+            const addressResolutionEntities = props.graph.getElements().filter(element =>
+                (element.prop("entity/type") === EntityTypes.BACKING_SERVICE && element.prop("entity/properties/providedFunctionality") === "naming/addressing")
+                || element.prop("entity/type") === EntityTypes.INFRASTRUCTURE
+                || element.prop("entity/type") === EntityTypes.NETWORK
+            );
             let addressResolutionOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "addressResolutionBy");
+            addressResolutionOption.includeFormCheck = false;
             const selectedResolutionEntity = selectedEntity.model.prop(addressResolutionOption.jointJsConfig.modelPath);
             const resolutionDropdownOptions = addressResolutionEntities.map((entity) => {
                 return {
@@ -376,7 +386,7 @@ onUpdated(() => {
                     disabled: false,
                 };
             })
-            addressResolutionOption.dropdownOptions = resolutionDropdownOptions;
+            addressResolutionOption.dropdownOptions = [EMPTY_DROPDOWN_VALUE, ...resolutionDropdownOptions];
             addressResolutionOption.value = selectedResolutionEntity;
 
             let artifactOption = findInSectionsByFeature(selectedEntityPropertyGroups.value, "artifacts");
@@ -628,6 +638,7 @@ onUpdated(() => {
         case EntityTypes.REQUEST_TRACE:
             const externalEndpoints = props.graph.getElements().filter(element => element.prop("entity/type") === EntityTypes.EXTERNAL_ENDPOINT);
             let externalEndpointOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "referred_endpoint");
+            externalEndpointOption.includeFormCheck = false;
             const selectedExternalEndpoint = selectedEntity.model.prop(externalEndpointOption.jointJsConfig.modelPath);
             const dropdownOptions = externalEndpoints.map((endpoint) => {
 
@@ -653,7 +664,7 @@ onUpdated(() => {
                     disabled: invalid,
                 };
             })
-            externalEndpointOption.dropdownOptions = dropdownOptions;
+            externalEndpointOption.dropdownOptions = [EMPTY_DROPDOWN_VALUE, ...dropdownOptions];
             externalEndpointOption.value = selectedExternalEndpoint;
 
             // prepare involved links selection

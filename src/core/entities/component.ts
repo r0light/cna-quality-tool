@@ -182,7 +182,7 @@ class Component {
         return this.#proxiedBy;
     }
 
-    set setProxiedBy(proxy: ProxyBackingService) {
+    set setProxiedBy(proxy: ProxyBackingService | undefined) {
         this.#proxiedBy = proxy;
     }
 
@@ -190,7 +190,7 @@ class Component {
         return this.#addressResolutionBy;
     }
 
-    set setAddressResolutionBy(resolutionEntity: BackingService | Infrastructure | Network) {
+    set setAddressResolutionBy(resolutionEntity: BackingService | Infrastructure | Network | undefined) {
         this.#addressResolutionBy = resolutionEntity;
     }
 
