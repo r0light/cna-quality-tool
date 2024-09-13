@@ -692,7 +692,7 @@ export const qualityModel: QualityModelSpec = {
             "categories": ["networkCommunication", "applicationAdministration"],
             "relevantEntities": ["service", "endpoint"],
             "sources": [{ "key": "Scholl2019", "section": "6 Implement Rate Limiting and Throttling" }, { "key": "Adkins2019", "section": "8 Throttling (Delaying processing or responding to remain functional and decrease traffic from individual clients) (should be automated, part of graceful degradation)" }, { "key": "Adkins2019", "section": "8 Load shedding (In case of traffic spike, deny low priority requests to remain functional) (should be automated, part of graceful degradation)" }, { "key": "Goniwada2021", "section": "5 Throttling " }],
-            "measures": ["ratioOfEndpointsWhoseIngressIsGuarded"]
+            "measures": ["ratioOfComponentsWhoseIngressIsProxied"]
         },
         "distribution": {
             "name": "Distribution",
@@ -1444,9 +1444,14 @@ export const qualityModel: QualityModelSpec = {
             "calculation": "",
             "sources": ["Apel2019"]
         },
-        "ratioOfEndpointsWhoseIngressIsGuarded": {
-            "name": "Ratio of endpoints whose ingress is guarded",
-            "calculation": "",
+        "ratioOfComponentsWhoseIngressIsProxied": {
+            "name": "Ratio of components whose ingress is proxied",
+            "calculation": "Number of components with an ingress proxy / Total number of components",
+            "sources": ["Ntentos2022"]
+        },
+        "ratioOfComponentsWhoseEgressIsProxied": {
+            "name": "Ratio of components whose egress is proxied",
+            "calculation": "Number of components with an egress proxy / Total number of components",
             "sources": ["Ntentos2022"]
         },
         "componentDensity": {

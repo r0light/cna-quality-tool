@@ -82,7 +82,7 @@ const toArray = (o: object, keyName: string, valueName: string) => {
 }
 
 const EMPTY_DROPDOWN_VALUE = {
-    optionValue: "",
+    optionValue: undefined,
     optionText: "",
     optionTitle: "none",
     optionRepresentationClass: "validOption",

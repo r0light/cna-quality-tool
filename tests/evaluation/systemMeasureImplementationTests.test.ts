@@ -1874,13 +1874,13 @@ test("ratioOfRequestTracesThroughGateway", () => {
 
     let gatewayServiceA = new ProxyBackingService("p1", "proxy 1", getEmptyMetaData());
     gatewayServiceA.setPropertyValue("kind", "API Gateway");
-    serviceA.setProxiedBy = gatewayServiceA;
+    serviceA.setExternalIngressProxiedBy = gatewayServiceA;
 
     let gatewayServiceB = new ProxyBackingService("p2", "proxy 2", getEmptyMetaData());
     gatewayServiceB.setPropertyValue("kind", "API Gateway");
     let externalEndpointPB = new ExternalEndpoint("ee3", "external endpoint 3", getEmptyMetaData());
     gatewayServiceB.addEndpoint(externalEndpointPB);
-    serviceB.setProxiedBy = gatewayServiceB;
+    serviceB.setExternalIngressProxiedBy = gatewayServiceB;
 
     let linkPAA = new Link("l1", gatewayServiceA, externalEndpointA);
     let linkASBS = new Link("l2", serviceA, endpointSBS);
@@ -2183,5 +2183,86 @@ test("serviceDiscoveryUsage", () => {
     system.addEntities([linkAB, linkAC, linkASBS, linkBD, linkBSBS]);
 
     let measureValue = systemMeasureImplementations["serviceDiscoveryUsage"](system);
+    expect(measureValue).toEqual(3/5);
+})
+
+test("ratioOfComponentsWhoseIngressIsProxied", () => {
+    let system = new System("testSystem");
+
+    let serviceA = new Service("s1", "testService 1", getEmptyMetaData());
+    let externalEndpointA = new ExternalEndpoint("ee1", "external endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(externalEndpointA);
+    let serviceB = new Service("s2", "testService 2", getEmptyMetaData());
+    let endpointB = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+    let serviceC = new Service("s3", "testService 3", getEmptyMetaData());
+    let externalEndpointC = new ExternalEndpoint("ee2", "external endpoint 2", getEmptyMetaData());
+    serviceC.addEndpoint(externalEndpointC);
+
+    let serviceD = new Service("s4", "testService 3", getEmptyMetaData());
+    let endpointD = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceD.addEndpoint(endpointD);
+
+    let storageBackingService = new StorageBackingService("sbs1", "storageBackingService", getEmptyMetaData());
+    let endpointSBS = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    storageBackingService.addEndpoint(endpointSBS);
+
+    let gatewayServiceA = new ProxyBackingService("p1", "proxy 1", getEmptyMetaData());
+    gatewayServiceA.setPropertyValue("kind", "API Gateway");
+
+    let serviceMesh = new ProxyBackingService("p2", "proxy ", getEmptyMetaData());
+    serviceMesh.setPropertyValue("kind", "Service Mesh");
+
+    serviceA.setExternalIngressProxiedBy = gatewayServiceA;
+    serviceA.setIngressProxiedBy = serviceMesh;
+
+    serviceB.setIngressProxiedBy = serviceMesh
+
+    storageBackingService.setExternalIngressProxiedBy = gatewayServiceA;
+    storageBackingService.setIngressProxiedBy = serviceMesh;
+
+
+    system.addEntities([serviceA, serviceB, serviceC, serviceD, storageBackingService, gatewayServiceA, serviceMesh]);
+
+    let measureValue = systemMeasureImplementations["ratioOfComponentsWhoseIngressIsProxied"](system);
+    expect(measureValue).toEqual(2/5);
+})
+
+test("ratioOfComponentsWhoseEgressIsProxied", () => {
+    let system = new System("testSystem");
+
+    let serviceA = new Service("s1", "testService 1", getEmptyMetaData());
+    let externalEndpointA = new ExternalEndpoint("ee1", "external endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(externalEndpointA);
+    let serviceB = new Service("s2", "testService 2", getEmptyMetaData());
+    let endpointB = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+    let serviceC = new Service("s3", "testService 3", getEmptyMetaData());
+    let externalEndpointC = new ExternalEndpoint("ee2", "external endpoint 2", getEmptyMetaData());
+    serviceC.addEndpoint(externalEndpointC);
+
+    let serviceD = new Service("s4", "testService 3", getEmptyMetaData());
+    let endpointD = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceD.addEndpoint(endpointD);
+
+    let storageBackingService = new StorageBackingService("sbs1", "storageBackingService", getEmptyMetaData());
+    let endpointSBS = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    storageBackingService.addEndpoint(endpointSBS);
+
+    let gatewayServiceA = new ProxyBackingService("p1", "proxy 1", getEmptyMetaData());
+    gatewayServiceA.setPropertyValue("kind", "API Gateway");
+
+    let serviceMesh = new ProxyBackingService("p2", "proxy ", getEmptyMetaData());
+    serviceMesh.setPropertyValue("kind", "Service Mesh");
+
+    serviceA.setEgressProxiedBy = serviceMesh;
+
+    serviceB.setEgressProxiedBy = serviceMesh;
+
+    storageBackingService.setEgressProxiedBy = serviceMesh;
+
+    system.addEntities([serviceA, serviceB, serviceC, serviceD, storageBackingService, gatewayServiceA, serviceMesh]);
+
+    let measureValue = systemMeasureImplementations["ratioOfComponentsWhoseEgressIsProxied"](system);
     expect(measureValue).toEqual(3/5);
 })

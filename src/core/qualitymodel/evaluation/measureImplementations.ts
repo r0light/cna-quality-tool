@@ -13,6 +13,19 @@ const average: (list: number[]) => number = list => {
     return list.reduce((e1, e2) => e1 + e2, 0) / list.length
 }
 
+const partition = <T,>(
+    array: T[],
+    callback: (element: T, index: number, array: T[]) => boolean
+  ) => {
+    return array.reduce(function(result, element, i) {
+      callback(element, i, array)
+        ? result[0].push(element) 
+        : result[1].push(element);
+  
+      return result;
+    }, [[],[]]);
+  };
+
 export const serviceReplicationLevel: Calculation<System> = (system) => {
     let replicasPerService: Map<String, number> = new Map();
     for (const [id, deploymentMapping] of system.getDeploymentMappingEntities.entries()) {
@@ -1149,7 +1162,7 @@ export const ratioOfRequestTracesThroughGateway: Calculation<System> = (system) 
 
         if (requestTrace.getExternalEndpoint) {
             let componentWithExternalEndpoint = system.searchComponentOfEndpoint(requestTrace.getExternalEndpoint.getId);
-            let proxy = componentWithExternalEndpoint.getProxiedBy;
+            let proxy = componentWithExternalEndpoint.getExternalIngressProxiedBy;
             if (proxy && proxy.constructor.name === ProxyBackingService.name && proxy.getProperty("kind").value === "API Gateway") {
                 numberOfRequestTracesThroughGateway++;
                 continue requestTraceLoop;
@@ -1456,6 +1469,44 @@ export const serviceDiscoveryUsage: Calculation<System> = (system) => {
     return linksWithServiceDiscovery / allLinks.length;
 }
 
+export const ratioOfComponentsWhoseIngressIsProxied: Calculation<System> = (system) => {
+
+    const [allNonProxyComponents, proxyComponents] = partition([...system.getComponentEntities.entries()], ([componentId, component]) => component.constructor.name !== ProxyBackingService.name);
+
+    if (proxyComponents.length === 0 || allNonProxyComponents.length === 0) {
+        return 0;
+    }
+
+    let numberOfComponentsWithProxiedIngress = 0;
+
+    for (const [componentId, component] of allNonProxyComponents) {
+        if (component.getExternalIngressProxiedBy && component.getIngressProxiedBy) {
+            numberOfComponentsWithProxiedIngress++;
+        }
+    }
+
+    return numberOfComponentsWithProxiedIngress / allNonProxyComponents.length;
+}
+
+export const ratioOfComponentsWhoseEgressIsProxied: Calculation<System> = (system) => {
+
+    const [allNonProxyComponents, proxyComponents] = partition([...system.getComponentEntities.entries()], ([componentId, component]) => component.constructor.name !== ProxyBackingService.name);
+
+    if (proxyComponents.length === 0 || allNonProxyComponents.length === 0) {
+        return 0;
+    }
+
+    let numberOfComponentsWithProxiedEgress = 0;
+
+    for (const [componentId, component] of allNonProxyComponents) {
+        if (component.getEgressProxiedBy) {
+            numberOfComponentsWithProxiedEgress++;
+        }
+    }
+
+    return numberOfComponentsWithProxiedEgress / allNonProxyComponents.length;
+}
+
 
 export const systemMeasureImplementations: { [measureKey: string]: Calculation<System> } = {
     "serviceReplicationLevel": serviceReplicationLevel,
@@ -1524,7 +1575,9 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation<S
     "ratioOfComponentsOrInfrastructureNodesThatExportLogsToACentralService": ratioOfComponentsOrInfrastructureNodesThatExportLogsToACentralService,
     "ratioOfComponentsOrInfrastructureNodesThatExportMetrics": ratioOfComponentsOrInfrastructureNodesThatExportMetrics,
     "distributedTracingSupport": distributedTracingSupport,
-    "serviceDiscoveryUsage": serviceDiscoveryUsage
+    "serviceDiscoveryUsage": serviceDiscoveryUsage,
+    "ratioOfComponentsWhoseIngressIsProxied": ratioOfComponentsWhoseIngressIsProxied,
+    "ratioOfComponentsWhoseEgressIsProxied": ratioOfComponentsWhoseEgressIsProxied
 }
 
 export const serviceInterfaceDataCohesion: Calculation<{ component: Component, system: System }> = (parameters) => {
