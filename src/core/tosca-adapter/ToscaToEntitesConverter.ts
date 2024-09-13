@@ -188,6 +188,16 @@ class ToscaToEntitesConverter {
                     }
                 }
 
+                if (node.capabilities) {
+                    for (const [capabilityKey, capability] of Object.entries(node.capabilities)) {
+                        if (capability.properties) {
+                            for (const [key, value] of Object.entries(capability.properties)) {
+                                infrastructure.setPropertyValue(key, value);
+                            }
+                        }
+                    }
+                }
+
                 if (node.artifacts) {
                     for (const [key, value] of Object.entries(node.artifacts)) {
                         infrastructure.setArtifact(key, new Artifact(
@@ -214,6 +224,16 @@ class ToscaToEntitesConverter {
                 if (node.properties) {
                     for (const [key, value] of Object.entries(node.properties)) {
                         network.setPropertyValue(key, value);
+                    }
+                }
+
+                if (node.capabilities) {
+                    for (const [capabilityKey, capability] of Object.entries(node.capabilities)) {
+                        if (capability.properties) {
+                            for (const [key, value] of Object.entries(capability.properties)) {
+                                network.setPropertyValue(key, value);
+                            }
+                        }
                     }
                 }
             }
@@ -513,6 +533,23 @@ class ToscaToEntitesConverter {
                                 // TODO requirement is of type string
                             } else if (typeof requirement === "object") {
                                 component.setProxiedBy = this.#importedSystem.getComponentEntities.get(this.#keyIdMap.getId(requirement.node));
+                            }
+                            break;
+                        case "address_resolution_by":
+                            if (typeof requirement === "string") {
+                                // TODO requirement is of type string
+                            } else if (typeof requirement === "object") {
+                                let addressResolutionEntity: Entities.Component | Entities.Infrastructure | Entities.Network = this.#importedSystem.getComponentEntities.get(this.#keyIdMap.getId(requirement.node));
+                                if (!addressResolutionEntity) {
+                                    addressResolutionEntity = this.#importedSystem.getInfrastructureEntities.get(this.#keyIdMap.getId(requirement.node));
+                                }
+                                if (!addressResolutionEntity) {
+                                    addressResolutionEntity = this.#importedSystem.getNetworkEntities.get(this.#keyIdMap.getId(requirement.node));
+                                }
+                                if (!addressResolutionEntity) {
+                                    throw new Error(`Node with key ${requirement.node} not found!`);
+                                }
+                                component.setAddressResolutionBy = addressResolutionEntity;
                             }
                             break;
                         case "assigned_to_network":

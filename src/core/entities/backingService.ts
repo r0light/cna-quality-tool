@@ -1,4 +1,4 @@
-import { EntityProperty, parseProperties } from '../common/entityProperty.js'
+import { EntityProperty, mergeAllCapabilitiesProperties, parseCapabilitiesProperties, parseProperties } from '../common/entityProperty.js'
 import { Component } from './component.js'
 import { Infrastructure } from './infrastructure.js'
 import { cna_modeling_profile } from '../../totypa/parsedProfiles/v2dot0-profiles/cna_modeling_profile.js'
@@ -14,7 +14,7 @@ const BACKING_SERVICE_TOSCA_EQUIVALENT = cna_modeling_profile.node_types[BACKING
 
 
 function getBackingServiceProperties(): EntityProperty[] {
-    let parsed = parseProperties(BACKING_SERVICE_TOSCA_EQUIVALENT.properties);
+    let parsed = parseProperties(BACKING_SERVICE_TOSCA_EQUIVALENT.properties).concat(mergeAllCapabilitiesProperties(parseCapabilitiesProperties(BACKING_SERVICE_TOSCA_EQUIVALENT.capabilities)));
 
     for (const prop of parsed) {
         switch (prop.getKey) {

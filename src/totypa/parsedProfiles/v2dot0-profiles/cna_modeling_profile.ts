@@ -84,7 +84,25 @@ export const cna_modeling_profile: TOSCA_File = {
     },
     "cna-modeling.capabilities.AdressResolution": {
       "description": "When included, the Node is able to provide address resolution, meaning that symbolic names can be translated into specific IP adresses",
-      "derived_from": "Node"
+      "derived_from": "Node",
+      "properties": {
+        "address_resolution_kind": {
+          "description": "If address resolution is provided, state the kind here, otherwise leave as 'none'",
+          "type": "string",
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "none",
+                "discovery",
+                "DNS",
+                "other"
+              ]
+            ]
+          },
+          "default": "none"
+        }
+      }
     }
   },
   "interface_types": {},
@@ -347,6 +365,20 @@ export const cna_modeling_profile: TOSCA_File = {
       "valid_target_node_types": [
         "cna.qualityModel.entities.ProxyBackingService"
       ]
+    },
+    "cna-modeling.relationships.UseAddressResolution": {
+      "description": "Relationship Type to connect Components to entities which provide address resolution",
+      "interfaces": {
+        "Configure": {
+          "type": "Relationship.Configure"
+        }
+      },
+      "derived_from": "Root",
+      "valid_target_node_types": [
+        "cna.qualityModel.entities.BackingService",
+        "cna.qualityModel.entities.Infrastructure",
+        "Network"
+      ]
     }
   },
   "node_types": {
@@ -450,6 +482,16 @@ export const cna_modeling_profile: TOSCA_File = {
             "capability": "Linkable",
             "node": "Network",
             "relationship": "LinksTo",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
+        },
+        {
+          "address_resolution_by": {
+            "capability": "cna-modeling.capabilities.AdressResolution",
+            "relationship": "cna-modeling.relationships.UseAddressResolution",
             "count_range": [
               0,
               "UNBOUNDED"
@@ -614,6 +656,16 @@ export const cna_modeling_profile: TOSCA_File = {
               "UNBOUNDED"
             ]
           }
+        },
+        {
+          "address_resolution_by": {
+            "capability": "cna-modeling.capabilities.AdressResolution",
+            "relationship": "cna-modeling.relationships.UseAddressResolution",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
         }
       ],
       "interfaces": {
@@ -679,7 +731,7 @@ export const cna_modeling_profile: TOSCA_File = {
         "feature": {
           "type": "Node"
         },
-        "addressResolution": {
+        "address_resolution": {
           "type": "cna-modeling.capabilities.AdressResolution",
           "valid_source_node_types": [
             "cna-modeling.entities.Component",
@@ -779,6 +831,16 @@ export const cna_modeling_profile: TOSCA_File = {
             "capability": "Linkable",
             "node": "Network",
             "relationship": "LinksTo",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
+        },
+        {
+          "address_resolution_by": {
+            "capability": "cna-modeling.capabilities.AdressResolution",
+            "relationship": "cna-modeling.relationships.UseAddressResolution",
             "count_range": [
               0,
               "UNBOUNDED"
@@ -974,6 +1036,16 @@ export const cna_modeling_profile: TOSCA_File = {
               "UNBOUNDED"
             ]
           }
+        },
+        {
+          "address_resolution_by": {
+            "capability": "cna-modeling.capabilities.AdressResolution",
+            "relationship": "cna-modeling.relationships.UseAddressResolution",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
         }
       ],
       "interfaces": {
@@ -1144,6 +1216,16 @@ export const cna_modeling_profile: TOSCA_File = {
             "capability": "Linkable",
             "node": "Network",
             "relationship": "LinksTo",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
+        },
+        {
+          "address_resolution_by": {
+            "capability": "cna-modeling.capabilities.AdressResolution",
+            "relationship": "cna-modeling.relationships.UseAddressResolution",
             "count_range": [
               0,
               "UNBOUNDED"
@@ -1324,6 +1406,16 @@ export const cna_modeling_profile: TOSCA_File = {
               "UNBOUNDED"
             ]
           }
+        },
+        {
+          "address_resolution_by": {
+            "capability": "cna-modeling.capabilities.AdressResolution",
+            "relationship": "cna-modeling.relationships.UseAddressResolution",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
         }
       ],
       "interfaces": {
@@ -1404,7 +1496,7 @@ export const cna_modeling_profile: TOSCA_File = {
           "type": "Compute",
           "valid_source_node_types": []
         },
-        "addressResolution": {
+        "address_resolution": {
           "type": "cna-modeling.capabilities.AdressResolution",
           "valid_source_node_types": [
             "cna-modeling.entities.Component",

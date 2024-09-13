@@ -10,6 +10,8 @@ import { RelationToBackingData } from './relationToBackingData.js'
 import { Artifact } from '../common/artifact.js'
 import { ProxyBackingService } from './proxyBackingService.js'
 import { Network } from './network.js'
+import { Infrastructure } from './infrastructure.js'
+import { BackingService } from './backingService.js'
 
 
 /**
@@ -55,6 +57,8 @@ class Component {
     #dataAggregateEntities = new Array<{ data: DataAggregate, relation: RelationToDataAggregate }>();
 
     #proxiedBy: ProxyBackingService;
+
+    #addressResolutionBy: BackingService | Infrastructure | Network;
 
     #artifacts: Map<string, Artifact> = new Map<string, Artifact>();
 
@@ -180,6 +184,14 @@ class Component {
 
     set setProxiedBy(proxy: ProxyBackingService) {
         this.#proxiedBy = proxy;
+    }
+
+    get getAddressResolutionBy() {
+        return this.#addressResolutionBy;
+    }
+
+    set setAddressResolutionBy(resolutionEntity: BackingService | Infrastructure | Network) {
+        this.#addressResolutionBy = resolutionEntity;
     }
 
     get getArtifacts() {

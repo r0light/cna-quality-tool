@@ -9,7 +9,7 @@ import { LINK_TOSCA_KEY } from '../entities/link';
 import { EntityProperty, parseCapabilitiesProperties, parseProperties } from '../common/entityProperty';
 import { DATA_AGGREGATE_TOSCA_KEY } from '../entities/dataAggregate';
 import { BACKING_DATA_TOSCA_KEY } from '../entities/backingData';
-import { INFRASTRUCTURE_TOSCA_KEY } from '../entities/infrastructure';
+import { INFRASTRUCTURE_TOSCA_EQUIVALENT, INFRASTRUCTURE_TOSCA_KEY } from '../entities/infrastructure';
 import { SERVICE_TOSCA_EQUIVALENT, SERVICE_TOSCA_KEY } from '../entities/service';
 import { BACKING_SERVICE_TOSCA_EQUIVALENT, BACKING_SERVICE_TOSCA_KEY } from '../entities/backingService';
 import { STORAGE_BACKING_SERVICE_TOSCA_EQUIVALENT, STORAGE_BACKING_SERVICE_TOSCA_KEY } from '../entities/storageBackingService';
@@ -274,6 +274,20 @@ class EntitiesToToscaConverter {
                 });
             }
 
+            if (component.getAddressResolutionBy) {
+
+                if (!node.requirements) {
+                    node.requirements = [];
+                }
+
+                node.requirements.push({
+                    "address_resolution_by": {
+                        node: this.#keyIdMap.getKey(component.getAddressResolutionBy.getId),
+                        relationship: "cna-modeling.relationships.UseAddressResolution"
+                    }
+                });
+            }
+
             if (component.getNetworks.size > 0) {
                 if (!node.requirements) {
                     node.requirements = [];
@@ -442,6 +456,32 @@ class EntitiesToToscaConverter {
             template.properties = this.#parsePropertiesForYaml(infrastructure.getProperties());
         }
 
+        let infrastructureNodePropertyKeys = parseProperties(INFRASTRUCTURE_TOSCA_EQUIVALENT.properties).map(property => property.getKey);
+        let nodeProperties = this.#parsePropertiesForYaml(infrastructure.getProperties().filter(property => infrastructureNodePropertyKeys.includes(property.getKey)));
+        if (this.#isNonEmpty(nodeProperties)) {
+            template.properties = nodeProperties;
+        }
+
+        [...parseCapabilitiesProperties(INFRASTRUCTURE_TOSCA_EQUIVALENT.capabilities).entries()].forEach(([capabilityKey, capabilityProperties]) => {
+            switch (capabilityKey) {
+                case "address_resolution":
+                    if (infrastructure.getProperty("address_resolution_kind").value === "none") {
+                        return;
+                    }
+                default:
+                    let propertyKeys = Object.keys(capabilityProperties);
+                    if (propertyKeys.length > 0) {
+                        if (!template.capabilities) {
+                            template.capabilities = {};
+                        }
+                        template.capabilities[capabilityKey] = {
+                            properties: this.#parsePropertiesForYaml(infrastructure.getProperties().filter(property => propertyKeys.includes(property.getKey)))
+                        }
+                    }
+                    break;
+            }
+        })
+
         if (infrastructure.getArtifacts.size > 0) {
             template.artifacts = {};
             for (const [key, artifact] of infrastructure.getArtifacts.entries()) {
@@ -503,14 +543,22 @@ class EntitiesToToscaConverter {
         }
 
         [...parseCapabilitiesProperties(toscaEquivalent.capabilities).entries()].forEach(([capabilityKey, capabilityProperties]) => {
-            let propertyKeys = Object.keys(capabilityProperties);
-            if (propertyKeys.length > 0) {
-                if (!template.capabilities) {
-                    template.capabilities = {};
-                }
-                template.capabilities[capabilityKey] = {
-                    properties: this.#parsePropertiesForYaml(component.getProperties().filter(property => propertyKeys.includes(property.getKey)))
-                }
+            switch (capabilityKey) {
+                case "address_resolution":
+                    if (component.getProperty("address_resolution_kind").value === "none") {
+                        return;
+                    }
+                default:
+                    let propertyKeys = Object.keys(capabilityProperties);
+                    if (propertyKeys.length > 0) {
+                        if (!template.capabilities) {
+                            template.capabilities = {};
+                        }
+                        template.capabilities[capabilityKey] = {
+                            properties: this.#parsePropertiesForYaml(component.getProperties().filter(property => propertyKeys.includes(property.getKey)))
+                        }
+                    }
+                    break;
             }
         })
 
@@ -579,8 +627,8 @@ class EntitiesToToscaConverter {
                 template.requirements = [];
                 template.requirements.push({
                     "external_endpoint": {
-                            node: this.#keyIdMap.getKey(requestTrace.getExternalEndpoint.getId),
-                            relationship: "ConnectsTo"
+                        node: this.#keyIdMap.getKey(requestTrace.getExternalEndpoint.getId),
+                        relationship: "ConnectsTo"
                     }
                 })
             }

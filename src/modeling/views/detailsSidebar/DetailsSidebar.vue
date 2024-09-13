@@ -360,6 +360,25 @@ onUpdated(() => {
             proxyOption.dropdownOptions = proxyDropdownOptions;
             proxyOption.value = selectedProxyBackingService;
 
+            const addressResolutionEntities = props.graph.getElements().filter(element => 
+            (element.prop("entity/type") === EntityTypes.BACKING_SERVICE && element.prop("entity/properties/providedFunctionality") === "naming/addressing")
+            || element.prop("entity/type") === EntityTypes.INFRASTRUCTURE
+            || element.prop("entity/type") === EntityTypes.NETWORK
+        );
+            let addressResolutionOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "addressResolutionBy");
+            const selectedResolutionEntity = selectedEntity.model.prop(addressResolutionOption.jointJsConfig.modelPath);
+            const resolutionDropdownOptions = addressResolutionEntities.map((entity) => {
+                return {
+                    optionValue: entity.id,
+                    optionText: entity.attr("label/textWrap/text"),
+                    optionTitle: entity.attr("label/textWrap/text"),
+                    optionRepresentationClass: "validOption",
+                    disabled: false,
+                };
+            })
+            addressResolutionOption.dropdownOptions = resolutionDropdownOptions;
+            addressResolutionOption.value = selectedResolutionEntity;
+
             let artifactOption = findInSectionsByFeature(selectedEntityPropertyGroups.value, "artifacts");
             artifactOption.includeFormCheck = false;
             artifactOption.attributes.listElementFields.find(field => field.key === "type")["dropdownOptions"] = getAvailableArtifactTypes();
@@ -990,6 +1009,8 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                         })
                         selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, assignedNetworks, { rewrite: true });
                     } else if (propertyOption.providedFeature === "proxiedBy") {
+                        selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, propertyOption.value, { rewrite: true });
+                    } else if (propertyOption.providedFeature === "addressResolutionBy") {
                         selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, propertyOption.value, { rewrite: true });
                     }
                     break;

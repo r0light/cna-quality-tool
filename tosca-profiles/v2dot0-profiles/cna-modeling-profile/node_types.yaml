@@ -77,7 +77,7 @@ node_types:
           node: Network
           relationship: LinksTo
           count_range: [0, UNBOUNDED]
-      - use_address_resolution:
+      - address_resolution_by:
           capability: cna-modeling.capabilities.AdressResolution
           relationship: cna-modeling.relationships.UseAddressResolution
           count_range: [0, UNBOUNDED]
@@ -97,7 +97,7 @@ node_types:
         validation: { $valid_values: [ $value, [ "naming/addressing", "configuration", "authentication/authorization", "logging", "metrics", "tracing", "other" ]]}
         default: other
     capabilities:
-      addressResolution:
+      address_resolution:
         type: cna-modeling.capabilities.AdressResolution
         valid_source_node_types:
           - cna-modeling.entities.Component
@@ -225,7 +225,7 @@ node_types:
         description: Set to true if the infrastructure enforces resource bounds on deployed components, for example regarding cpu shares or memory size. Deployed entities can then only use resources up to a certain bound. Otherwise entities can use resources as available.
         default: false
     capabilities:
-      addressResolution:
+      address_resolution:
         type: cna-modeling.capabilities.AdressResolution
         valid_source_node_types:
           - cna-modeling.entities.Component

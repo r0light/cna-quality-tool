@@ -22,4 +22,11 @@ capability_types:
   cna-modeling.capabilities.AdressResolution:
     derived_from: Node
     description: When included, the Node is able to provide address resolution, meaning that symbolic names can be translated into specific IP adresses
+    properties:
+      address_resolution_kind:
+        description: If address resolution is provided, state the kind here, otherwise leave as 'none'
+        type: string
+        validation: { $valid_values: [ $value, [ "none", "discovery", "DNS", "other" ]]}
+        default: none
+
     

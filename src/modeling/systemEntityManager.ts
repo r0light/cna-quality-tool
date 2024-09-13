@@ -496,6 +496,26 @@ class SystemEntityManager {
             }
         }
 
+        const addressResolutionId = graphElement.prop("entity/relations/address_resolution_by");
+        if (addressResolutionId) {
+            const resolutionComponent = [...(this.#currentSystemEntity.getComponentEntities)].find(([id, component]) => { return id === addressResolutionId });
+            if (resolutionComponent) {
+                entity.setAddressResolutionBy = resolutionComponent[1];
+            } else {
+                const resolutionInfrastructure = [...(this.#currentSystemEntity.getInfrastructureEntities)].find(([id, infrastructure]) => { return id === addressResolutionId });
+                if (resolutionInfrastructure) {
+                    entity.setAddressResolutionBy = resolutionInfrastructure[1];
+                } else {
+                    const resolutionNetwork = [...(this.#currentSystemEntity.getNetworkEntities)].find(([id, network]) => { return id === addressResolutionId });
+                    if (resolutionNetwork) {
+                        entity.setAddressResolutionBy = resolutionNetwork[1];
+                    } else {
+                        console.log(`Entity ${addressResolutionId} not found`)
+                    }
+                }
+            }
+        }
+
         const assignedNetworks = graphElement.prop("entity/relations/assigned_to_networks");
         if (assignedNetworks && assignedNetworks.length > 0) {
             for (const networkId of assignedNetworks) {
@@ -1285,6 +1305,11 @@ class SystemEntityManager {
                 case "proxiedBy":
                     if (component.getProxiedBy) {
                         componentElement.prop(relation.jointJsConfig.modelPath, component.getProxiedBy.getId);
+                    }
+                    break;
+                case "addressResolutionBy":
+                    if (component.getAddressResolutionBy) {
+                        componentElement.prop(relation.jointJsConfig.modelPath, component.getAddressResolutionBy.getId);
                     }
                     break;
                 case "assigned_to_networks":
