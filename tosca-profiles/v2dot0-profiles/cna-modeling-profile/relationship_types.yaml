@@ -81,7 +81,6 @@ relationship_types:
     valid_target_node_types: [ cna-modeling.entities.Infrastructure ]
 
   cna-modeling.relationships.Provides.Endpoint:
-    derived_from: Root
     description: Relationship Type to connect Endpoints to the Components which provide them
     valid_capability_types: [ Endpoint, Endpoint.Public]
     valid_target_node_types: [ cna-modeling.entities.Endpoint, cna-modeling.entities.Endpoint.External ]
@@ -120,7 +119,6 @@ relationship_types:
     valid_target_node_types: [ cna-modeling.entities.BackingData ]
         
   cna-modeling.relationships.ProxiedBy.BackingService:
-    derived_from: Root
     description: Relationship Type to connect Components to Backing Services which act as a proxy for them
     valid_target_node_types: [cna.qualityModel.entities.BackingService]
     
