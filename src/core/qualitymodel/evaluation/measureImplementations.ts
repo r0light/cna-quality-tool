@@ -1091,7 +1091,7 @@ export const configurationExternalization: Calculation<System> = (system) => {
         "persistedBy": string[],
     }> = new Map();
 
-    system.getBackingDataEntities.entries()
+    [...system.getBackingDataEntities.entries()]
         .filter(([backingDataId, backingData]) => { return backingData.getProperty("kind").value === BACKING_DATA_CONFIG_KIND })
         .forEach(([configId, config]) => { configurationRelations.set(configId, { "usedBy": [], "persistedBy": [] }) });
 
@@ -1132,7 +1132,7 @@ export const configurationExternalization: Calculation<System> = (system) => {
 
     let nonExternalizedConfigurations = 0;
     let externalizedConfigurations = 0;
-    configurationRelations.entries().forEach(([configId, relations]) => {
+    [...configurationRelations.entries()].forEach(([configId, relations]) => {
         for (const usingComponent of relations.usedBy) {
             if (!relations.persistedBy.includes(usingComponent) && relations.persistedBy.length > 0) {
                 externalizedConfigurations++;

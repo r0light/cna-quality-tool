@@ -1,3 +1,5 @@
+import { ENTITIES } from "./entities"
+
 type QualityModelSpec = {
     qualityAspects: { [highLevelAspectKey: string]: HighLevelQualityAspecSpec},
     factorCategories: { [categoryKey: string]: CategorySpec},
@@ -27,7 +29,7 @@ type ProductFactorSpec = {
         name: string,
         description: string,
         categories: string[],
-        relevantEntities: string[],
+        relevantEntities: `${ENTITIES}`[],
         sources: SourceSpec[],
         measures: string[]
 }
@@ -56,7 +58,7 @@ type ProductFactorEvaluationSpec = {
 }
 
 type QualityAspectEvaluationSpec = {
-    targetAspect: string,
+    targetAspect: string
     evaluation: string,
     reasoning: string
 }
@@ -212,7 +214,7 @@ export const qualityModel: QualityModelSpec = {
             "name": "Data encryption in transit",
             "description": "Data which is sent or received through a link from one component to or from an endpoint of another component is encrypted so that even when an attacker has access to the network layer, the data is protected.",
             "categories": ["networkCommunication"],
-            "relevantEntities": ["link", "endpoint"],
+            "relevantEntities": [ENTITIES.LINK, "endpoint"],
             "sources": [
                 { "key": "Scholl2019", "section": "6 Encrypt Data in Transit" },
                 { "key": "Indrasiri2021", "section": "2 Security (Use TLS for synchronous communications)" }
@@ -223,7 +225,7 @@ export const qualityModel: QualityModelSpec = {
             "name": "Secrets management",
             "description": "Secrets (e.g. passwords, access tokens, encryption keys) which allow access to other components or data are managed specifically to make sure they stay confidential and only authorized components or persons can access them. Managed in this case refers to where and how secrets are stored and how components which need them can access them.",
             "categories": ["applicationAdministration", "cloudInfrastructure", "dataManagement"],
-            "relevantEntities": ["component"],
+            "relevantEntities": [ENTITIES.COMPONENT],
             "sources": [],
             "measures": []
         },
@@ -231,7 +233,7 @@ export const qualityModel: QualityModelSpec = {
             "name": "Isolated secrets",
             "description": "Secrets (e.g. passwords, access tokens, encryption keys) are not stored in component artifacts (e.g. binaries, images). Instead, secrets are stored for example in the deployment environment and components are given access at runtime only to those secrets which they actually need and only when they need it.",
             "categories": ["applicationAdministration"],
-            "relevantEntities": ["component", "backingData"],
+            "relevantEntities": [ENTITIES.COMPONENT, "backingData"],
             "sources": [{ "key": "Scholl2019", "section": "6 Never Store Secrets or Configuration Inside an Image" }, { "key": "Adkins2019", "section": "14 Don't Check In Secrets" }],
             "measures": []
         },
@@ -249,7 +251,7 @@ export const qualityModel: QualityModelSpec = {
             "name": "Access restriction",
             "description": "Access to components is restricted to those who actually need it. Also, within a system access controls are put in place to have multiple layers of defense. A dedicated component to manage access policies can be used.",
             "categories": ["networkCommunication", "applicationAdministration"],
-            "relevantEntities": ["component", "endpoint"],
+            "relevantEntities": [ENTITIES.COMPONENT, "endpoint"],
             "sources": [],
             "measures": []
         },
@@ -257,7 +259,7 @@ export const qualityModel: QualityModelSpec = {
             "name": "Least-privileged access",
             "description": "Access to endpoints is given as restrictive as possible so that only components who really need it can access an endpoint.",
             "categories": ["networkCommunication", "applicationAdministration"],
-            "relevantEntities": ["component", "endpoint"],
+            "relevantEntities": [ENTITIES.COMPONENT, "endpoint"],
             "sources": [{ "key": "Scholl2019", "section": "6 Grant Least-Privileged Access" }, { "key": "Arundel2019", "section": "11 Access Control and Permissions" }],
             "measures": []
         },
@@ -265,7 +267,7 @@ export const qualityModel: QualityModelSpec = {
             "name": "Access control management consistency",
             "description": "Access control for endpoints is managed in a consistent way, that means for example always the same format is used for access control lists or a single account directory in a dedicated backing service exists for all components. Access control configurations can then be made always in the same known style and only in a dedicated place. Based on such a consistent access control configuration, also verifications can be performed to ensure that access restrictions are implemented correctly.",
             "categories": ["applicationAdministration", "networkCommunication"],
-            "relevantEntities": ["component"],
+            "relevantEntities": [ENTITIES.COMPONENT],
             "sources": [{ "key": "Adkins2019", "section": "6 Access Control (Access control managed by framework)" }, { "key": "Goniwada2021", "section": "9 Policy as Code (consistently describe your security policies in form of code)" }],
             "measures": ["ratioOfEndpointsThatSupportTokenBasedAuthentication", "ratioOfEndpointsThatSupportApiKeys", "ratioOfEndpointsThatSupportPlaintextAuthentication", "ratioOfEndpointsThatAreIncludedInASingleSignOnApproach"]
         },
@@ -273,7 +275,7 @@ export const qualityModel: QualityModelSpec = {
             "name": "Account separation",
             "description": "Components are separated by assigning them different accounts. Ideally each component has an individual account. Through this, it is possible to trace which component performed which actions and it is possible to restrict access to other components on a fine-grained level, so that for example in the case of an attack, compromised components can be isolated based on their account.",
             "categories": ["applicationAdministration", "businessDomain"],
-            "relevantEntities": ["component"],
+            "relevantEntities": [ENTITIES.COMPONENT],
             "sources": [{ "key": "Scholl2019", "section": "6 Use Separate Accounts/Subscriptions/Tenants”" }, { "key": "Adkins2019", "section": "8 Role separation”(let different services run with different roles to restrict access)" }, { "key": "Adkins2019", "section": "8 “Location separation (use different roles for a service in different locations to limit attack impacts)" }],
             "measures": []
         },
@@ -329,7 +331,7 @@ export const qualityModel: QualityModelSpec = {
             "name": "Separation by gateways",
             "description": "Individual components or groups of components are separated through gateways. That means communication is proxied and controlled at specific gateway components. It also abstracts one part of a system from another so that it can be reused by different components without needing direct links to components that actually provide the needed functionality. This way, communication can also be redirected when component endpoints change without changing the gateway endpoint. Also incoming communication from outside of a system can be directed at external endpoints of a central component (the gateway).",
             "categories": ["networkCommunication", "businessDomain"],
-            "relevantEntities": ["system", "component", "endpoint"],
+            "relevantEntities": ["system", ENTITIES.COMPONENT, "endpoint"],
             "sources": [{ "key": "Davis2019", "section": "10.2" },
             { "key": "Richardson2019", "section": "8.2" }, { "key": "Bastani2017", "section": "8 Edge Services: Filtering and Proxying with Netflix Zuul" }, { "key": "Indrasiri2021", "section": "7 API Gateway Pattern" }, { "key": "Indrasiri2021", "section": "7 API Microgateway Pattern (Smaller API microgateways to avoid having a monolithic API gateway)" }, { "key": "Goniwada2021", "section": "4 “Mediator” (Use a mediator pattern between clients and servers)" }],
             "measures": ["externallyAvailableEndpoints", "centralizationOfExternallyAvailableEndpoints", "apiCompositionUtilizationMetric", "ratioOfRequestTracesThroughGateway"]
@@ -338,7 +340,7 @@ export const qualityModel: QualityModelSpec = {
             "name": "Isolated state",
             "description": "Services are structured by clearly separating stateless from stateful services. Stateful services should be reduced to a minimum. That way, state is isolated within these specifically stateful services which can be managed accordingly. The majority of stateless services is easier to deploy and modify.",
             "categories": ["dataManagement", "businessDomain"],
-            "relevantEntities": ["system", "component", "storageBackingService"],
+            "relevantEntities": ["system", ENTITIES.COMPONENT, "storageBackingService"],
             "sources": [{ "key": "Goniwada2021", "section": "3 Coupling (Services should be as loosely coupled as possible)" }],
             "measures": []
         },
@@ -346,7 +348,7 @@ export const qualityModel: QualityModelSpec = {
             "name": "Mostly stateless services",
             "description": "Most services in a system are kept stateless, that means not requiring durable disk space on the infrastructure that they run on. Stateless services can be replaced, updated or replicated at any time. Stateful services are reduced to a minimum.",
             "categories": ["dataManagement", "businessDomain"],
-            "relevantEntities": ["component"],
+            "relevantEntities": [ENTITIES.COMPONENT],
             "sources": [{ "key": "Davis2019", "section": "5.4" }, { "key": "Scholl2019", "section": "6 “Design Stateless Services That Scale Out" }, { "key": "Goniwada2021", "section": "3 Be Smart with State Principle, 5 Stateless Services" }],
             "measures": ["ratioOfStateDependencyOfEndpoints", "ratioOfStatefulComponents", "ratioOfStatelessComponents", "degreeToWhichComponentsAreLinkedToStatefulComponents"]
         },
@@ -354,7 +356,7 @@ export const qualityModel: QualityModelSpec = {
             "name": "Specialized stateful services",
             "description": "For stateful components, that means components that do require durable disk space on the infrastructure that they run on, specialized software or frameworks are used that can handle distributed state by replicating it over several components or component instances while still ensuring consistency requirements for that state.",
             "categories": ["dataManagement", "businessDomain"],
-            "relevantEntities": ["component", "storageBackingService"],
+            "relevantEntities": [ENTITIES.COMPONENT, "storageBackingService"],
             "sources": [{ "key": "Davis2019", "section": "5.4" }, { "key": "Ibryam2020", "section": "11 “Stateful Service”" }],
             "measures": []
         },
@@ -362,7 +364,7 @@ export const qualityModel: QualityModelSpec = {
             "name": "Loose coupling",
             "description": "In cloud-native applications communication between components is loosely coupled in time, location, and language to achieve greater independence.",
             "categories": ["businessDomain", "networkCommunication"],
-            "relevantEntities": ["system", "component", "link"],
+            "relevantEntities": ["system", ENTITIES.COMPONENT, ENTITIES.LINK],
             "sources": [],
             "measures": []
         },
@@ -370,7 +372,7 @@ export const qualityModel: QualityModelSpec = {
             "name": "Asynchronous communication",
             "description": "Asynchronous links (e.g. based on messaging backing services) are preferred for the communication between components. That way, components are decoupled in time meaning that not all linked components need to be available at the same time for a successful communication. Additionally, callers do not await a response.",
             "categories": ["networkCommunication", "businessDomain"],
-            "relevantEntities": ["link"],
+            "relevantEntities": [ENTITIES.LINK],
             "sources": [{ "key": "Davis2019", "section": "4.2" }, { "key": "Scholl2019", "section": "6 Prefer Asynchronous Communication" }, { "key": "Richardson2019", "section": "3.3.2, 3.4 Using asynchronous messaging to improve availability" }, { "key": "Indrasiri2021", "section": "3 Service Choreography Pattern" }, { "key": "Ruecker2021", "section": "9 Asynchronous Request/Response (Use asynchronous communication to make services more robust)" }, { "key": "Goniwada2021", "section": "4 Asynchronous Nonblocking I/O" }],
             "measures": ["numberOfAsynchronousEndpointsOfferedByAService", "numberOfSynchronousOutgoingLinks", "numberOfAsynchronousOutgoingLinks", "ratioOfAsynchronousOutgoingLinks", "degreeOfAsynchronousCommunication", "asynchronousCommunicationUtilization"]
         },
@@ -378,7 +380,7 @@ export const qualityModel: QualityModelSpec = {
             "name": "Communication partner abstraction",
             "description": "Communication via links is not based on specific communication partners (specific components) but abstracted based on the content of communication. An example is event-driven communication where events are published to channels without the publisher knowing which components receive events and events can therefore also be received by components which are created later in time.",
             "categories": ["networkCommunication"],
-            "relevantEntities": ["link", "backingService"],
+            "relevantEntities": [ENTITIES.LINK, "backingService"],
             "sources": [{ "key": "Richardson2019", "section": "6 Event-driven communication" }, { "key": "Ruecker2021", "section": "8: Event-driven systems “event chains emerge over time and therefore lack visibility." }],
             "measures": ["eventSourcingUtilizationMetric"]
         },
@@ -386,7 +388,7 @@ export const qualityModel: QualityModelSpec = {
             "name": "Persistent communication",
             "description": "Links persist messages which have been sent (e.g. based on messaging backing services). That way, components are decoupled, because components need not yet exist at the time a message is sent, but can still receive a message. Communication can also be repeated, because persisted messages can be retrieved again.",
             "categories": ["networkCommunication"],
-            "relevantEntities": ["link"],
+            "relevantEntities": [ENTITIES.LINK],
             "sources": [{ "key": "Indrasiri2021", "section": "5 Event Sourcing Pattern: Log-based message brokers" }],
             "measures": ["serviceInteractionViaBackingService", "eventSourcingUtilizationMetric"]
         },
@@ -394,7 +396,7 @@ export const qualityModel: QualityModelSpec = {
             "name": "Usage of existing solutions for non-core capabilities",
             "description": "For non-core capabilities readily available solutions are used. This means solutions which are based on a standard or a specification, are widely adopted and ideally open source so that their well-functioning is ensured by a broader community. Non-core capabilities include interface technologies or protocols for endpoints, infrastructure technologies (for example container orchestration engines), and software for backing services. That way capabilities don't need to self-implemented and existing integration options can be used.",
             "categories": ["cloudInfrastructure", "applicationAdministration"],
-            "relevantEntities": ["component", "backingService"],
+            "relevantEntities": [ENTITIES.COMPONENT, "backingService"],
             "sources": [{ "key": "Reznik2019", "section": "9 Avoid Reinventing the Wheel" }, { "key": "Adkins2019", "section": "12 Frameworks to Enforce Security and Reliability" }],
             "measures": []
         },
@@ -402,7 +404,7 @@ export const qualityModel: QualityModelSpec = {
             "name": "Standardization",
             "description": "By using standardized technologies within components, for interfaces, and especially for the infrastructure, backing services and other non-business concerns, reusability can be increased and the effort to develop additional functionality which integrates with existing components can be reduced.",
             "categories": ["applicationAdministration"],
-            "relevantEntities": ["system", "component", "link"],
+            "relevantEntities": ["system", ENTITIES.COMPONENT, ENTITIES.LINK],
             "sources": [],
             "measures": []
         },
@@ -410,7 +412,7 @@ export const qualityModel: QualityModelSpec = {
             "name": "Component similarity",
             "description": "The more similar components are, the easier it is for developers to work on an unfamiliar component. Furthermore, similar components can be more easily integrated and maintained in the same way. Similarity considers mainly the libraries and technologies used for implementing service logic and service endpoints, as well as their deployment.",
             "categories": ["applicationAdministration"],
-            "relevantEntities": ["component"],
+            "relevantEntities": [ENTITIES.COMPONENT],
             "sources": [{ "key": "Reznik2019", "section": "9 Reference Architecture" }],
             "measures": []
         },
@@ -418,7 +420,7 @@ export const qualityModel: QualityModelSpec = {
             "name": "Automated Monitoring",
             "description": "Cloud-native applications enable monitoring at various levels (business functionalities in services, backing-service functionalities, infrastructure) in an automated fashion to enable observable and autonomous reactions to changing system conditions.",
             "categories": ["applicationAdministration", "businessDomain", "networkCommunication", "dataManagement"],
-            "relevantEntities": ["service", "link", "infrastructure"],
+            "relevantEntities": ["service", ENTITIES.LINK, "infrastructure"],
             "sources": [{ "key": "Goniwada2021", "section": "3 High Observability Principle" }],
             "measures": ["ratioOfInfrastructureNodesThatSupportMonitoring", "ratioOfComponentsThatSupportMonitoring"]
         },
@@ -442,7 +444,7 @@ export const qualityModel: QualityModelSpec = {
             "name": "Distributed tracing of invocations",
             "description": "For request traces that span multiple components in a system, distributed tracing is enabled so that traces based on correlation IDs are captured automatically and stored in a backing service where they can be analyzed and problems within request traces can be clearly attributed to single components.",
             "categories": ["applicationAdministration", "networkCommunication"],
-            "relevantEntities": ["service", "link", "requestTrace"],
+            "relevantEntities": ["service", ENTITIES.LINK, "requestTrace"],
             "sources": [{ "key": "Davis2019", "section": "11.3" }, { "key": "Scholl2019", "section": "6 Use Correlation IDs" }, { "key": "Richardson2019", "section": "11.3.3 AUsing the Distributed tracing pattern" }, { "key": "Garrison2017", "section": "7 Debugging and Tracing" }, { "key": "Reznik2019", "section": "10 Observability" }, { "key": "Arundel2019", "section": "15 Tracing" }, { "key": "Bastani2017", "section": "13 Distributed Tracing" }, { "key": "Ruecker2021", "section": "11 Observability and Distributed Tracing Tools (Use Distributed Tracing)" }, { "key": "Goniwada2021", "section": "19 One Source of Truth" }],
             "measures": ["distributedTracingSupport"]
         },
@@ -482,7 +484,7 @@ export const qualityModel: QualityModelSpec = {
             "name": "Service independence",
             "description": "Services are as independent as possible throughout their lifecycle, that means development, operation, and evolution. Changes to one service have a minimum impact on other services.",
             "categories": ["businessDomain", "networkCommunication", "cloudInfrastructure", "applicationAdministration", "dataManagement"],
-            "relevantEntities": ["service", "link"],
+            "relevantEntities": ["service", ENTITIES.LINK],
             "sources": [{ "key": "Goniwada2021", "section": "3 Decentralize Everything Principle (Decentralize deployment, governance)" }],
             "measures": []
         },
@@ -490,7 +492,7 @@ export const qualityModel: QualityModelSpec = {
             "name": "Low coupling",
             "description": "The coupling in a system is low in terms of links between components. Each link represents a dependency and therefore decreases service independence.",
             "categories": ["businessDomain"],
-            "relevantEntities": ["service", "link"],
+            "relevantEntities": ["service", ENTITIES.LINK],
             "sources": [],
             "measures": ["numberOfLinksPerComponent", "numberOfConsumedEndpoints", "incomingOutgoingRatioOfAComponent", "ratioOfOutgoingLinksOfAService", "couplingDegreeBasedOnPotentialCoupling", "interactionDensityBasedOnComponents", "interactionDensityBasedOnLinks", "serviceCouplingBasedOnEndpointEntropy", "systemCouplingBasedOnEndpointEntropy", "modularityQualityBasedOnCohesionAndCoupling", "combinedMetricForIndirectDependency", "servicesInterdependenceInTheSystem", "indirectInteractionDensity", "averageNumberOfDirectlyConnectedServices", "numberOfComponentsThatAreLinkedToAComponent", "numberOfComponentsAComponentIsLinkedTo", "numberOfLinksBetweenTwoServices", "aggregateSystemMetricToMeasureServiceCoupling", "numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfComponents", "degreeOfCouplingInASystem", "serviceCouplingBasedOnDataExchangeComplexity", "simpleDegreeOfCouplingInASystem", "directServiceSharing", "transitivelySharedServices", "ratioOfSharedNonExternalComponentsToNonExternalComponents", "ratioOfSharedDependenciesOfNonExternalComponentsToPossibleDependencies", "degreeOfDependenceOnOtherComponents", "averageSystemCoupling", "couplingOfServicesBasedOnUsedDataAggregates", "couplingOfServicesBasedServicesWhichCallThem", "couplingOfServicesBasedServicesWhichAreCalledByThem", "couplingOfServicesBasedOnAmountOfRequestTracesThatIncludeASpecificLink", "couplingOfServicesBasedTimesThatTheyOccurInTheSameRequestTrace"]
         },
@@ -498,7 +500,7 @@ export const qualityModel: QualityModelSpec = {
             "name": "Functional decentralization",
             "description": "Business functionality is decentralized over the system as a whole to separate unrelated functionalities from each other and make components more independent.",
             "categories": ["businessDomain"],
-            "relevantEntities": ["system", "service", "link"],
+            "relevantEntities": ["system", "service", ENTITIES.LINK],
             "sources": [],
             "measures": ["conceptualModularityQualityBasedOnDataAggregateCohesionAndCoupling", "cyclicCommunication", "numberOfSynchronousCycles", "relativeImportanceOfTheService", "extentOfAggregationComponents", "systemCentralization", "densityOfAggregation", "aggregatorCentralization", "dataAggregateConvergenceAcrossComponents", "serviceCriticality", "ratioOfCyclicRequestTraces", "numberOfPotentialCyclesInASystem"]
         },
@@ -530,7 +532,7 @@ export const qualityModel: QualityModelSpec = {
             "name": "Addressing abstraction",
             "description": "In a link from one component to another the specific addresses for reaching the other component is not used, but instead an abstract address is used. That way, the specific addresses of components can be changed without impacting the link between components. This can be achieved for example through service discovery where components are addressed through abstract service names and specific addresses are resolved through service discovery which can be implemented in the infrastructure or a backing service.",
             "categories": ["networkCommunication"],
-            "relevantEntities": ["link", "backingService"],
+            "relevantEntities": [ENTITIES.LINK, "backingService"],
             "sources": [{ "key": "Davis2019", "section": "8.3" }, { "key": "Ibryam2020", "section": "12 Service Discovery" }, { "key": "Richardson2019", "section": "Using service discovery" }, { "key": "Garrison2017", "section": "7 Service Discovery" }, { "key": "Indrasiri2021", "section": "3 Service Registry and Discovery Pattern" }, { "key": "Bastani2017", "section": "7 Routing (Use service discovery with support for health checks and respect varying workloads)" }, { "key": "Indrasiri2021", "section": "3 Service Abstraction Pattern (Use an abstraction layer in front of services (for example Kubernetes Service))" }, { "key": "Goniwada2021", "section": "4 Service Discovery" }],
             "measures": ["serviceDiscoveryUsage"]
         },
@@ -538,7 +540,7 @@ export const qualityModel: QualityModelSpec = {
             "name": "Sparsity",
             "description": "The more sparse a system is, the less components there are which need to be operated and maintained by the developers of a system. This covers all types of components, such as services, backing services, storage backing services, and also the infrastructure.",
             "categories": ["applicationAdministration", "businessDomain"],
-            "relevantEntities": ["system", "component", "infrastructure"],
+            "relevantEntities": ["system", ENTITIES.COMPONENT, "infrastructure"],
             "sources": [],
             "measures": ["averageNumberOfEndpointsPerService", "numberOfDependencies", "numberOfVersionsPerService", "concurrentlyAvailableVersionsComplexity", "serviceSupportForTransactions", "numberOfComponents"]
         },
@@ -570,7 +572,7 @@ export const qualityModel: QualityModelSpec = {
             "name": "Replication",
             "description": "Business logic and needed data is replicated at various points in a system so that latencies can be minimized and requests can be distributed for fast request handling.",
             "categories": ["applicationAdministration", "dataManagement", "cloudInfrastructure"],
-            "relevantEntities": ["system", "component"],
+            "relevantEntities": ["system", ENTITIES.COMPONENT],
             "sources": [],
             "measures": []
         },
@@ -610,7 +612,7 @@ export const qualityModel: QualityModelSpec = {
             "name": "Enforcement of appropriate resource boundaries",
             "description": "The resources required by a component are predictable as precisely as possible and specified accordingly for each component in terms of lower and upper boundaries. Resources include CPU, memory, GPU, or Network requirements. This information is used by the infrastructure to enforce these resource boundaries. Thereby it is ensured that a component has the resources available that it needs to function properly, that the infrastructure can optimize the amount of allocated resource, and that components are not negatively impacted by defective components which excessively consume resources.",
             "categories": ["applicationAdministration", "cloudInfrastructure"],
-            "relevantEntities": ["component"],
+            "relevantEntities": [ENTITIES.COMPONENT],
             "sources": [{ "key": "Scholl2019", "section": "6 Define CPU and Memory Limits for Your Containers" }, { "key": "Arundel2019", "section": "5 Resource Limits" }, { "key": "Ibryam2020", "section": "2 Defined Resource requirements" }, { "key": "Arundel2019", "section": "5 Resource Quotas (limit maximum resources for a namespace)" }, { "key": "Goniwada2021", "section": "3 Runtime Confinement Principle, 6 Predictable Demands" }],
             "measures": []
         },
@@ -618,7 +620,7 @@ export const qualityModel: QualityModelSpec = {
             "name": "Built-in autoscaling",
             "description": "Horizontal up- and down-scaling of components is automated and built into the infrastructure on which components run. Horizontal scaling means that component instances are replicated when the load increases and components instances are removed when load decreases. This autoscaling is based on rules which can be configured according to system needs.",
             "categories": ["applicationAdministration", "cloudInfrastructure"],
-            "relevantEntities": ["component", "infrastructure"],
+            "relevantEntities": [ENTITIES.COMPONENT, "infrastructure"],
             "sources": [{ "key": "Scholl2019", "section": "6 Use Platform Autoscaling Features" }, { "key": "Ibryam2020", "section": "24 Elastic Scale" }, { "key": "Bastani2017", "section": "13 Autoscaling" }, { "key": "Indrasiri2021", "section": "1 Why container orchestration?; Scaling" }, { "key": "Goniwada2021", "section": "5 Elasticity in Microservices" }],
             "measures": []
         },
@@ -642,7 +644,7 @@ export const qualityModel: QualityModelSpec = {
             "name": "Configuration management",
             "description": "Configuration values which are specific to an environment are managed separately in a consistent way. Through this, components are more portable across environments and configuration can change independently from components.",
             "categories": ["applicationAdministration", "dataManagement"],
-            "relevantEntities": ["component", "backingData"],
+            "relevantEntities": [ENTITIES.COMPONENT, "backingData"],
             "sources": [],
             "measures": []
         },
@@ -666,7 +668,7 @@ export const qualityModel: QualityModelSpec = {
             "name": "Contract-based links",
             "description": "Contracts are defined for the communication via links so that changes to endpoints can be evaluated by their impact on the contract and delayed when a contract would be broken. That way consumers of endpoints can adapt to changes when necessary without suddenly breaking communication via a link due to a changed endpoint.",
             "categories": ["networkCommunication", "businessDomain"],
-            "relevantEntities": ["service", "endpoint", "link"],
+            "relevantEntities": ["service", "endpoint", ENTITIES.LINK],
             "sources": [{ "key": "Bastani2017", "section": "4 Consumer-Driven Contract Testing (Use contracts for APIs to test against)" }],
             "measures": []
         },
@@ -674,7 +676,7 @@ export const qualityModel: QualityModelSpec = {
             "name": "Standardized self-contained deployment unit",
             "description": "The components are deployed as standardized self-contained units so that the same artifact can reliably be installed and run in different environments and on different infrastructure.",
             "categories": ["cloudInfrastructure", "applicationAdministration"],
-            "relevantEntities": ["component"],
+            "relevantEntities": [ENTITIES.COMPONENT],
             "sources": [{ "key": "Reznik2019", "section": "10 Containerized Apps" }, { "key": "Adkins2019", "section": "7 Use Containers (smaller deployments, separated operating system, portable);" }, { "key": "Indrasiri2021", "section": "1 Use Containerization and Container Orchestration" }, { "key": "Garrison2017", "section": "7 Application Runtime and Isolation" }, { "key": "Goniwada2021", "section": "3 Deploy Independently Principle (deploy services in independent containers), Self-Containment Principle, 5 Containerization" }],
             "measures": []
         },
@@ -714,7 +716,7 @@ export const qualityModel: QualityModelSpec = {
             "name": "Physical service distribution",
             "description": "Components are distributed through replication across physical locations (e.g. availability zones of a cloud vendor) so that even in the case of a failure of one physical location, another physical location is still useable.",
             "categories": ["cloudInfrastructure"],
-            "relevantEntities": ["component", "infrastructure"],
+            "relevantEntities": [ENTITIES.COMPONENT, "infrastructure"],
             "sources": [{ "key": "Winn2017", "section": "2 Resiliency Through Availability Zones" }],
             "measures": ["numberOfAvailabilityZonesUsed"]
         },
@@ -722,7 +724,7 @@ export const qualityModel: QualityModelSpec = {
             "name": "Seamless upgrades",
             "description": "Upgrades of services do not interfere with availability. There are different strategies, like rolling upgrades, to achieve this which should be provided as a capability by the infrastructure.",
             "categories": ["applicationAdministration", "cloudInfrastructure", "networkCommunication", "businessDomain"],
-            "relevantEntities": ["component"],
+            "relevantEntities": [ENTITIES.COMPONENT],
             "sources": [],
             "measures": []
         },
@@ -730,7 +732,7 @@ export const qualityModel: QualityModelSpec = {
             "name": "Rolling upgrades enabled",
             "description": "The infrastructure on which components are deployed provides the ability for rolling upgrades. That means upgrades of components can be performed seamlessly in an automated manner. Seamlessly means that upgrades of components do not necessitate planned downtime.",
             "categories": ["applicationAdministration", "cloudInfrastructure"],
-            "relevantEntities": ["component", "infrastructure"],
+            "relevantEntities": [ENTITIES.COMPONENT, "infrastructure"],
             "sources": [{ "key": "Davis2019", "section": "7.2" }, { "key": "Scholl2019", "section": "6 Use Zero-Downtime Releases" }, { "key": "Ibryam2020", "section": "3 Declarative Deployment" }, { "key": "Reznik2019", "section": "10 Risk-Reducing Deployment Strategies" }, { "key": "Arundel2019", "section": "13 Rolling Updates" }, { "key": "Indrasiri2021", "section": "1 Why container orchestration?; Rolling upgrades" }],
             "measures": ["rollingUpdateOption"]
         },
@@ -746,7 +748,7 @@ export const qualityModel: QualityModelSpec = {
             "name": "Autonomous fault handling",
             "description": "Services expect faults at different levels and either handle them or minimize their impact by relying on the capabilities of cloud environments.",
             "categories": ["networkCommunication", "cloudInfrastructure"],
-            "relevantEntities": ["service", "link", "infrastructure"],
+            "relevantEntities": ["service", ENTITIES.LINK, "infrastructure"],
             "sources": [],
             "measures": []
         },
@@ -754,7 +756,7 @@ export const qualityModel: QualityModelSpec = {
             "name": "Invocation timeouts",
             "description": "For links between components, timeouts are defined to avoid infinite waiting on a service that is unavailable and a timely handling of problems.",
             "categories": ["networkCommunication"],
-            "relevantEntities": ["link"],
+            "relevantEntities": [ENTITIES.LINK],
             "sources": [{ "key": "Indrasiri2021", "section": "3 Resilient Connectivity Pattern: Time-out" }, { "key": "Richardson2019", "section": "3.2.3 Handling partial failures using the Circuit Breaker pattern" }, { "key": "Goniwada2021", "section": "5 Timeout" }],
             "measures": []
         },
@@ -762,7 +764,7 @@ export const qualityModel: QualityModelSpec = {
             "name": "Retries for safe invocations",
             "description": "Links that are safe to invoke multiple times without leading to unintended state changes, are automatically retried in case of errors to transparently handle transient faults in communication. That way faults can be prevented from being propagated higher up in a request trace.",
             "categories": ["networkCommunication"],
-            "relevantEntities": ["link"],
+            "relevantEntities": [ENTITIES.LINK],
             "sources": [{ "key": "Davis2019", "section": "9.1" }, { "key": "Scholl2019", "section": "6 Handle Transient Failures with Retries" }, { "key": "Scholl2019", "section": "6 Use a Finite Number of Retries" }, { "key": "Bastani2017", "section": "12 Isolating Failures and Graceful Degradation: Use retries" }, { "key": "Indrasiri2021", "section": "3 Resilient Connectivity Pattern: Retry" }, { "key": "Ruecker2021", "section": "9 Synchronous Request/Response (Use retries in synchronous communications)" }, { "key": "Ruecker2021", "section": "9 The Importance of Idempotency (Communication which is retried needs idempotency)" }, { "key": "Goniwada2021", "section": "Idempotent Service Operation, Retry, 5 Retry " }],
             "measures": ["numberOfLinksWithRetryLogic"]
         },
@@ -770,7 +772,7 @@ export const qualityModel: QualityModelSpec = {
             "name": "Circuit breaked communication",
             "description": "For links a circuit breaker implementation is used which avoids unnecessary communication and therefore waiting time if a communication is known to fail. Instead the circuit breaker immediately returns an error response of a default response, is possible, while periodically retrying communication in the background.",
             "categories": ["networkCommunication"],
-            "relevantEntities": ["link"],
+            "relevantEntities": [ENTITIES.LINK],
             "sources": [{ "key": "Davis2019", "section": "10.1" }, { "key": "Scholl2019", "section": "6 Use Circuit Breakers for Nontransient Failures" }, { "key": "Richardson2019", "section": "3.2.3 Handling partial failures using the Circuit Breaker pattern" }, { "key": "Bastani2017", "section": "12 Isolating Failures and Graceful Degradation: circuit breaker" }, { "key": "Indrasiri2021", "section": "3 Resilient Connectivity Pattern: Circuit breaker" }, { "key": " Goniwada2021", "section": "4 Circuit Breaker" }],
             "measures": ["numberOfLinksWithComplexFailover"]
         },
@@ -778,7 +780,7 @@ export const qualityModel: QualityModelSpec = {
             "name": "Automated restarts",
             "description": "When a component is found to be unhealthy, that means not functioning as expected, it is directly and automatically restarted. Ideally this capability is provided by the infrastructure on which a component is running.",
             "categories": ["cloudInfrastructure", "applicationAdministration"],
-            "relevantEntities": ["component"],
+            "relevantEntities": [ENTITIES.COMPONENT],
             "sources": [{ "key": "Winn2017", "section": "2 Self-Healing Processes; Self-Healing VMs" }, { "key": "Bastani2017", "section": "13 automatic remediation" }, { "key": "Indrasiri2021", "section": "1 Why container orchestration?; High availability" }, { "key": "Goniwada2021", "section": "5 Self-Healing" }],
             "measures": []
         },
@@ -786,7 +788,7 @@ export const qualityModel: QualityModelSpec = {
             "name": "API-based communication",
             "description": "All endpoints that are offered by a service are part of a well-defined and documented API. That means, the APIs are based on common principles, are declarative instead of imperative, and are documented in a standardized or specified format (such as the OpenAPI specification). Communication only happens via endpoints that are part of such APIs and can be both synchronous or asynchronous.",
             "categories": ["networkCommunication", "businessDomain"],
-            "relevantEntities": ["service", "endpoint", "link"],
+            "relevantEntities": ["service", "endpoint", ENTITIES.LINK],
             "sources": [{ "key": "Reznik2019", "section": "9 Communicate Through APIs" }, { "key": "Adkins2019", "section": "6 Understandable Interface Specifications (Use Interface specifications for understandability" }, { "key": "Bastani2017", "section": "6 Everything is an API (Services are integrated via APIs)" }, { "key": "Indrasiri2021", "section": "2 Service Definitions in Synchronous Communication (Use a service definition for each service);" }, { "key": "Indrasiri2021", "section": "2 Service Definition in Asynchronous Communication (Use schemas to define message formats);" }, { "key": "Goniwada2021", "section": "3 API First Principle" }],
             "measures": []
         },
@@ -794,7 +796,7 @@ export const qualityModel: QualityModelSpec = {
             "name": "Consistently mediated communication",
             "description": "By mediating communication through additional components, there is no direct dependence on the other communication partner and additional operations can be performed to manage the communication, such as load balancing, monitoring, or the enforcement of policies. By using centralized mediation approaches, such as Service Meshes, management actions can be performed universally and consistently across the components of an application.",
             "categories": ["networkCommunication"],
-            "relevantEntities": ["component", "link"],
+            "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.LINK],
             "sources": [{ "key": "Indrasiri2021", "section": "3 Sidecar Pattern, Service Mesh Pattern, Service Abstraction Pattern (Proxy communication with services to include service discovery and load balancing)" }, { "key": "Davis2019", "section": "10.3" }, { "key": "Richardson2019", "section": "11.4.2" }],
             "measures": ["serviceInteractionViaBackingService"]
         }
@@ -1615,7 +1617,12 @@ export const qualityModel: QualityModelSpec = {
             "targetFactor": "shardedDataStoreReplication",
             "evaluation": "shardedDataStoreReplication",
             "reasoning": ""
-        }
+        },
+        /*{
+            "targetFactor": "verticalDataReplication",
+            "evaluation": "verticalDataReplication",
+            "reasoning": "TODO"
+        }*/
     ],
     "qualityAspectEvaluations": [
         {

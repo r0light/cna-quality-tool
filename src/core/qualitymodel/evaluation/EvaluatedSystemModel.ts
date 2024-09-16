@@ -4,9 +4,12 @@ import { QualityAspect } from "../quamoco/QualityAspect";
 import { ProductFactor } from "../quamoco/ProductFactor";
 import { ImpactType } from "../quamoco/Impact";
 import { MeasureValue } from "../quamoco/Measure";
+import { ENTITIES } from "../specifications/entities";
 
 type CalculatedMeasure = {
     name: string,
+    type: "system" | "component" | "componentPair" | "infrastructure" | "requestTrace",
+    entity: `${ENTITIES}`,
     value: MeasureValue,
     description: string
 }
@@ -114,7 +117,7 @@ class EvaluatedSystemModel {
                     return;
                 }
                 if (measure.isCalculationAvailable()) {
-                    let calculatedMeasure = { name: measure.getName, value: measure.calculate(this.#system), description: measure.getCalculationDescription };
+                    let calculatedMeasure: CalculatedMeasure = { name: measure.getName, type: 'system', entity: ENTITIES.SYSTEM, value: measure.calculate(this.#system), description: measure.getCalculationDescription };
 
                     measuresForThisFactor.set(measure.getId, calculatedMeasure)
                     this.#calculatedMeasures.set(measure.getId, calculatedMeasure);
