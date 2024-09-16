@@ -5,8 +5,8 @@
         <div class="accordion">
             <div v-for="productFactor of factorGroup" class="card">
                 <h3 class="card-header">
-                    <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse"
-                        :data-target="`#${productFactor.id}-details`" aria-expanded="true"
+                    <button class="btn btn-link btn-block text-left" type="button" data-bs-toggle="collapse"
+                        :data-bs-target="`#${productFactor.id}-details`" aria-expanded="true"
                         :aria-controls="`${productFactor.id}-details`">
                         Details for {{ productFactor.name }}
                     </button>
