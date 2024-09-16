@@ -81,7 +81,6 @@ relationship_types:
     valid_target_node_types: [ cna-modeling.entities.Infrastructure ]
 
   cna-modeling.relationships.Provides.Endpoint:
-    derived_from: Root
     description: Relationship Type to connect Endpoints to the Components which provide them
     valid_capability_types: [ Endpoint, Endpoint.Public]
     valid_target_node_types: [ cna-modeling.entities.Endpoint, cna-modeling.entities.Endpoint.External ]
@@ -119,13 +118,10 @@ relationship_types:
     valid_capability_types: [Attachment]
     valid_target_node_types: [ cna-modeling.entities.BackingData ]
         
-  cna-modeling.relationships.ProxiedBy.ProxyBackingService:
-    derived_from: Root
-    description: Relationship Type to connect Components to Proxy Backing Services which act as a proxy for them
+  cna-modeling.relationships.ProxiedBy.BackingService:
+    description: Relationship Type to connect Components to Backing Services which act as a proxy for them
     valid_target_node_types: [cna.qualityModel.entities.ProxyBackingService]
-
-  cna-modeling.relationships.UseAddressResolution:
-    derived_from: Root
-    description: Relationship Type to connect Components to entities which provide address resolution
-    valid_target_node_types: [cna.qualityModel.entities.BackingService, cna.qualityModel.entities.Infrastructure, Network ]
     
+  cna-modeling.relationships.UseAddressResolution:
+    description: Relationship Type to connect Components to entities which provide address resolution
+    valid_target_node_types: [cna.qualityModel.entities.BackingService, cna.qualityModel.entities.ProxyBackingService, cna.qualityModel.entities.Infrastructure, Network ]

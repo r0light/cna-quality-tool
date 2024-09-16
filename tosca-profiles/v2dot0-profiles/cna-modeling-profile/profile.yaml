@@ -9,7 +9,9 @@ metadata:
 
 description: >-
   This TOSCA definitions document contains the CNA Modeling TOSCA profile
+
 imports:
-  - capability_types.yaml
-  - relationship_types.yaml
-  - node_types.yaml
+  - url: artifact_types.yaml
+  - url: capability_types.yaml
+  - url: relationship_types.yaml
+  - url: node_types.yaml

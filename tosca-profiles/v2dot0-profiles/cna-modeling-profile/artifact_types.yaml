@@ -10,7 +10,6 @@ artifact_types:
   Kubernetes.Resource:
     description: >
       A Kubernetes resource (like Deployment, Service, etc) which is described in a file
-    derived_from: Root
     file_ext: [ yaml, yml ]
 
   Implementation.Java:
@@ -21,30 +20,27 @@ artifact_types:
     
   Terraform.Script:
     description: A configuration file which can be used by Terraform to set up components or infrastructure.
-    derived_from: Root
     file_ext: [ tf, tf.json ] 
 
   CloudFormation.Script:
     description: A configuration file which can be used by AWS tools to set up components or infrastructure.
-    derived_from: Root
     file_ext: [ yaml, yml, json ]
 
   AWS.Resource:
     description: An abstract type for resources created in the AWS cloud.
-    derived_from: Root
 
   AWS.EKS.Cluster:
     description: An AWS EKS Cluster
     derived_from: AWS.Resource
 
   AWS.EC2.Instance:
-    desription: An AWS EC2 Instance
+    description: An AWS EC2 Instance
     derived_from: AWS.Resource
 
   AWS.Beanstalk.Application:
-    descriptio: An AWS Beanstalk application
+    description: An AWS Beanstalk application
     derived_from: AWS.Resource
 
   AWS.RDS.Instance:
-    descriptioN: An AWS RDS instance
+    description: An AWS RDS instance
     derived_from: AWS.Resource

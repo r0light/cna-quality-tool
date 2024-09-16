@@ -18,7 +18,6 @@ export const cna_modeling_profile: TOSCA_File = {
   "artifact_types": {
     "Kubernetes.Resource": {
       "description": "A Kubernetes resource (like Deployment, Service, etc) which is described in a file\n",
-      "derived_from": "Root",
       "file_ext": [
         "yaml",
         "yml"
@@ -33,7 +32,6 @@ export const cna_modeling_profile: TOSCA_File = {
     },
     "Terraform.Script": {
       "description": "A configuration file which can be used by Terraform to set up components or infrastructure.",
-      "derived_from": "Root",
       "file_ext": [
         "tf",
         "tf.json"
@@ -41,7 +39,6 @@ export const cna_modeling_profile: TOSCA_File = {
     },
     "CloudFormation.Script": {
       "description": "A configuration file which can be used by AWS tools to set up components or infrastructure.",
-      "derived_from": "Root",
       "file_ext": [
         "yaml",
         "yml",
@@ -49,23 +46,22 @@ export const cna_modeling_profile: TOSCA_File = {
       ]
     },
     "AWS.Resource": {
-      "description": "An abstract type for resources created in the AWS cloud.",
-      "derived_from": "Root"
+      "description": "An abstract type for resources created in the AWS cloud."
     },
     "AWS.EKS.Cluster": {
       "description": "An AWS EKS Cluster",
       "derived_from": "AWS.Resource"
     },
     "AWS.EC2.Instance": {
-      "description": "An abstract type for resources created in the AWS cloud.",
+      "description": "An AWS EC2 Instance",
       "derived_from": "AWS.Resource"
     },
     "AWS.Beanstalk.Application": {
-      "description": "An abstract type for resources created in the AWS cloud.",
+      "description": "An AWS Beanstalk application",
       "derived_from": "AWS.Resource"
     },
     "AWS.RDS.Instance": {
-      "description": "An abstract type for resources created in the AWS cloud.",
+      "description": "An AWS RDS instance",
       "derived_from": "AWS.Resource"
     }
   },
@@ -249,12 +245,6 @@ export const cna_modeling_profile: TOSCA_File = {
     },
     "cna-modeling.relationships.Provides.Endpoint": {
       "description": "Relationship Type to connect Endpoints to the Components which provide them",
-      "interfaces": {
-        "Configure": {
-          "type": "Relationship.Configure"
-        }
-      },
-      "derived_from": "Root",
       "valid_capability_types": [
         "Endpoint",
         "Endpoint.Public"
@@ -354,28 +344,17 @@ export const cna_modeling_profile: TOSCA_File = {
         "Attachment"
       ]
     },
-    "cna-modeling.relationships.ProxiedBy.ProxyBackingService": {
-      "description": "Relationship Type to connect Components to Proxy Backing Services which act as a proxy for them",
-      "interfaces": {
-        "Configure": {
-          "type": "Relationship.Configure"
-        }
-      },
-      "derived_from": "Root",
+    "cna-modeling.relationships.ProxiedBy.BackingService": {
+      "description": "Relationship Type to connect Components to Backing Services which act as a proxy for them",
       "valid_target_node_types": [
         "cna.qualityModel.entities.ProxyBackingService"
       ]
     },
     "cna-modeling.relationships.UseAddressResolution": {
       "description": "Relationship Type to connect Components to entities which provide address resolution",
-      "interfaces": {
-        "Configure": {
-          "type": "Relationship.Configure"
-        }
-      },
-      "derived_from": "Root",
       "valid_target_node_types": [
         "cna.qualityModel.entities.BackingService",
+        "cna.qualityModel.entities.ProxyBackingService",
         "cna.qualityModel.entities.Infrastructure",
         "Network"
       ]
@@ -467,7 +446,29 @@ export const cna_modeling_profile: TOSCA_File = {
           }
         },
         {
-          "proxied_by": {
+          "external_ingress_proxied_by": {
+            "capability": "cna-modeling.capabilities.Proxy",
+            "node": "cna-modeling.entities.ProxyBackingService",
+            "relationship": "cna-modeling.relationships.ProxiedBy.ProxyBackingService",
+            "count_range": [
+              0,
+              1
+            ]
+          }
+        },
+        {
+          "ingress_proxied_by": {
+            "capability": "cna-modeling.capabilities.Proxy",
+            "node": "cna-modeling.entities.ProxyBackingService",
+            "relationship": "cna-modeling.relationships.ProxiedBy.ProxyBackingService",
+            "count_range": [
+              0,
+              1
+            ]
+          }
+        },
+        {
+          "egress_proxied_by": {
             "capability": "cna-modeling.capabilities.Proxy",
             "node": "cna-modeling.entities.ProxyBackingService",
             "relationship": "cna-modeling.relationships.ProxiedBy.ProxyBackingService",
@@ -636,7 +637,29 @@ export const cna_modeling_profile: TOSCA_File = {
           }
         },
         {
-          "proxied_by": {
+          "external_ingress_proxied_by": {
+            "capability": "cna-modeling.capabilities.Proxy",
+            "node": "cna-modeling.entities.ProxyBackingService",
+            "relationship": "cna-modeling.relationships.ProxiedBy.ProxyBackingService",
+            "count_range": [
+              0,
+              1
+            ]
+          }
+        },
+        {
+          "ingress_proxied_by": {
+            "capability": "cna-modeling.capabilities.Proxy",
+            "node": "cna-modeling.entities.ProxyBackingService",
+            "relationship": "cna-modeling.relationships.ProxiedBy.ProxyBackingService",
+            "count_range": [
+              0,
+              1
+            ]
+          }
+        },
+        {
+          "egress_proxied_by": {
             "capability": "cna-modeling.capabilities.Proxy",
             "node": "cna-modeling.entities.ProxyBackingService",
             "relationship": "cna-modeling.relationships.ProxiedBy.ProxyBackingService",
@@ -816,7 +839,29 @@ export const cna_modeling_profile: TOSCA_File = {
           }
         },
         {
-          "proxied_by": {
+          "external_ingress_proxied_by": {
+            "capability": "cna-modeling.capabilities.Proxy",
+            "node": "cna-modeling.entities.ProxyBackingService",
+            "relationship": "cna-modeling.relationships.ProxiedBy.ProxyBackingService",
+            "count_range": [
+              0,
+              1
+            ]
+          }
+        },
+        {
+          "ingress_proxied_by": {
+            "capability": "cna-modeling.capabilities.Proxy",
+            "node": "cna-modeling.entities.ProxyBackingService",
+            "relationship": "cna-modeling.relationships.ProxiedBy.ProxyBackingService",
+            "count_range": [
+              0,
+              1
+            ]
+          }
+        },
+        {
+          "egress_proxied_by": {
             "capability": "cna-modeling.capabilities.Proxy",
             "node": "cna-modeling.entities.ProxyBackingService",
             "relationship": "cna-modeling.relationships.ProxiedBy.ProxyBackingService",
@@ -1016,7 +1061,29 @@ export const cna_modeling_profile: TOSCA_File = {
           }
         },
         {
-          "proxied_by": {
+          "external_ingress_proxied_by": {
+            "capability": "cna-modeling.capabilities.Proxy",
+            "node": "cna-modeling.entities.ProxyBackingService",
+            "relationship": "cna-modeling.relationships.ProxiedBy.ProxyBackingService",
+            "count_range": [
+              0,
+              1
+            ]
+          }
+        },
+        {
+          "ingress_proxied_by": {
+            "capability": "cna-modeling.capabilities.Proxy",
+            "node": "cna-modeling.entities.ProxyBackingService",
+            "relationship": "cna-modeling.relationships.ProxiedBy.ProxyBackingService",
+            "count_range": [
+              0,
+              1
+            ]
+          }
+        },
+        {
+          "egress_proxied_by": {
             "capability": "cna-modeling.capabilities.Proxy",
             "node": "cna-modeling.entities.ProxyBackingService",
             "relationship": "cna-modeling.relationships.ProxiedBy.ProxyBackingService",
@@ -1201,7 +1268,29 @@ export const cna_modeling_profile: TOSCA_File = {
           }
         },
         {
-          "proxied_by": {
+          "external_ingress_proxied_by": {
+            "capability": "cna-modeling.capabilities.Proxy",
+            "node": "cna-modeling.entities.ProxyBackingService",
+            "relationship": "cna-modeling.relationships.ProxiedBy.ProxyBackingService",
+            "count_range": [
+              0,
+              1
+            ]
+          }
+        },
+        {
+          "ingress_proxied_by": {
+            "capability": "cna-modeling.capabilities.Proxy",
+            "node": "cna-modeling.entities.ProxyBackingService",
+            "relationship": "cna-modeling.relationships.ProxiedBy.ProxyBackingService",
+            "count_range": [
+              0,
+              1
+            ]
+          }
+        },
+        {
+          "egress_proxied_by": {
             "capability": "cna-modeling.capabilities.Proxy",
             "node": "cna-modeling.entities.ProxyBackingService",
             "relationship": "cna-modeling.relationships.ProxiedBy.ProxyBackingService",
@@ -1386,7 +1475,29 @@ export const cna_modeling_profile: TOSCA_File = {
           }
         },
         {
-          "proxied_by": {
+          "external_ingress_proxied_by": {
+            "capability": "cna-modeling.capabilities.Proxy",
+            "node": "cna-modeling.entities.ProxyBackingService",
+            "relationship": "cna-modeling.relationships.ProxiedBy.ProxyBackingService",
+            "count_range": [
+              0,
+              1
+            ]
+          }
+        },
+        {
+          "ingress_proxied_by": {
+            "capability": "cna-modeling.capabilities.Proxy",
+            "node": "cna-modeling.entities.ProxyBackingService",
+            "relationship": "cna-modeling.relationships.ProxiedBy.ProxyBackingService",
+            "count_range": [
+              0,
+              1
+            ]
+          }
+        },
+        {
+          "egress_proxied_by": {
             "capability": "cna-modeling.capabilities.Proxy",
             "node": "cna-modeling.entities.ProxyBackingService",
             "relationship": "cna-modeling.relationships.ProxiedBy.ProxyBackingService",
@@ -1696,49 +1807,6 @@ export const cna_modeling_profile: TOSCA_File = {
     },
     "cna-modeling.entities.Endpoint": {
       "description": "Endpoint type to explicitly model endpoints as entities",
-      "attributes": {
-        "state": {
-          "type": "string"
-        }
-      },
-      "capabilities": {
-        "feature": {
-          "type": "Node"
-        },
-        "endpoint": {
-          "type": "Endpoint"
-        }
-      },
-      "requirements": [
-        {
-          "dependency": {
-            "capability": "Node",
-            "node": "Root",
-            "relationship": "DependsOn",
-            "count_range": [
-              0,
-              "UNBOUNDED"
-            ]
-          }
-        },
-        {
-          "uses_data": {
-            "capability": "Attachment",
-            "node": "cna-modeling.entities.DataAggregate",
-            "relationship": "cna-modeling.relationships.AttachesTo.DataAggregate",
-            "count_range": [
-              0,
-              "UNBOUNDED"
-            ]
-          }
-        }
-      ],
-      "interfaces": {
-        "Standard": {
-          "type": "Lifecycle.Standard"
-        }
-      },
-      "derived_from": "Root",
       "properties": {
         "kind": {
           "type": "string",
@@ -1786,19 +1854,77 @@ export const cna_modeling_profile: TOSCA_File = {
           "description": "Flag to specify whether this endpoint is used as a health check",
           "default": false
         }
-      }
+      },
+      "capabilities": {
+        "endpoint": {
+          "type": "Endpoint"
+        }
+      },
+      "requirements": [
+        {
+          "uses_data": {
+            "capability": "Attachment",
+            "node": "cna-modeling.entities.DataAggregate",
+            "relationship": "cna-modeling.relationships.AttachesTo.DataAggregate",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
+        }
+      ]
     },
     "cna-modeling.entities.Endpoint.External": {
       "description": "Endpoint type to explicitly model external endpoints as entities",
-      "attributes": {
-        "state": {
-          "type": "string"
+      "properties": {
+        "kind": {
+          "type": "string",
+          "required": true,
+          "description": "The kind of endpoint which can be either \"query\", \"command\", or \"event\". A \"query\" is a synchronous request for data which the client needs for further processing. A \"command\" is a synchronous send of data for which the client needs a corresponding answer for further processing. An \"event\" is an asynchronous send of data for which the client does not expect data to be returned for further processing.",
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "query",
+                "command",
+                "send event",
+                "subscribe"
+              ]
+            ]
+          },
+          "default": "query"
+        },
+        "method_name": {
+          "type": "string",
+          "required": false,
+          "description": "An optional name of the method/action used. For REST APIs it can for example be specified whether it is a GET or POST method. For message brokers it can be specified whether it is a publish or subscribe action."
+        },
+        "rate_limiting": {
+          "type": "string",
+          "required": true,
+          "description": "If for this endpoint rate limiting is enforced, the limit can be stated here, otherwise it is \"none\".",
+          "default": "none"
+        },
+        "idempotent": {
+          "type": "boolean",
+          "required": true,
+          "description": "Flag to specify whether this endpoint is idempotent, meaning that the effect of a successful invocation is independent of the number of times it is invoked.",
+          "default": false
+        },
+        "readiness_check": {
+          "type": "boolean",
+          "required": true,
+          "description": "Flag to specify whether this endpoint is used as a readiness check",
+          "default": false
+        },
+        "health_check": {
+          "type": "boolean",
+          "required": true,
+          "description": "Flag to specify whether this endpoint is used as a health check",
+          "default": false
         }
       },
       "capabilities": {
-        "feature": {
-          "type": "Node"
-        },
         "endpoint": {
           "type": "Endpoint"
         },
@@ -1808,17 +1934,6 @@ export const cna_modeling_profile: TOSCA_File = {
       },
       "requirements": [
         {
-          "dependency": {
-            "capability": "Node",
-            "node": "Root",
-            "relationship": "DependsOn",
-            "count_range": [
-              0,
-              "UNBOUNDED"
-            ]
-          }
-        },
-        {
           "uses_data": {
             "capability": "Attachment",
             "node": "cna-modeling.entities.DataAggregate",
@@ -1830,102 +1945,10 @@ export const cna_modeling_profile: TOSCA_File = {
           }
         }
       ],
-      "interfaces": {
-        "Standard": {
-          "type": "Lifecycle.Standard"
-        }
-      },
-      "derived_from": "cna-modeling.entities.Endpoint",
-      "properties": {
-        "kind": {
-          "type": "string",
-          "required": true,
-          "description": "The kind of endpoint which can be either \"query\", \"command\", or \"event\". A \"query\" is a synchronous request for data which the client needs for further processing. A \"command\" is a synchronous send of data for which the client needs a corresponding answer for further processing. An \"event\" is an asynchronous send of data for which the client does not expect data to be returned for further processing.",
-          "validation": {
-            "$valid_values": [
-              "$value",
-              [
-                "query",
-                "command",
-                "send event",
-                "subscribe"
-              ]
-            ]
-          },
-          "default": "query"
-        },
-        "method_name": {
-          "type": "string",
-          "required": false,
-          "description": "An optional name of the method/action used. For REST APIs it can for example be specified whether it is a GET or POST method. For message brokers it can be specified whether it is a publish or subscribe action."
-        },
-        "rate_limiting": {
-          "type": "string",
-          "required": true,
-          "description": "If for this endpoint rate limiting is enforced, the limit can be stated here, otherwise it is \"none\".",
-          "default": "none"
-        },
-        "idempotent": {
-          "type": "boolean",
-          "required": true,
-          "description": "Flag to specify whether this endpoint is idempotent, meaning that the effect of a successful invocation is independent of the number of times it is invoked.",
-          "default": false
-        },
-        "readiness_check": {
-          "type": "boolean",
-          "required": true,
-          "description": "Flag to specify whether this endpoint is used as a readiness check",
-          "default": false
-        },
-        "health_check": {
-          "type": "boolean",
-          "required": true,
-          "description": "Flag to specify whether this endpoint is used as a health check",
-          "default": false
-        }
-      }
+      "derived_from": "cna-modeling.entities.Endpoint"
     },
     "cna-modeling.entities.BackingData": {
       "description": "Node Type to model Backing Data entities",
-      "attributes": {
-        "state": {
-          "type": "string"
-        }
-      },
-      "capabilities": {
-        "feature": {
-          "type": "Node"
-        },
-        "provides_data": {
-          "type": "Attachment",
-          "valid_source_node_types": [
-            "cna-modeling.entities.Component",
-            "cna-modeling.entities.Service",
-            "cna-modeling.entities.BackingService",
-            "cna-modeling.entities.StorageBackingService",
-            "cna-modeling.entities.Infrastructure"
-          ]
-        }
-      },
-      "requirements": [
-        {
-          "dependency": {
-            "capability": "Node",
-            "node": "Root",
-            "relationship": "DependsOn",
-            "count_range": [
-              0,
-              "UNBOUNDED"
-            ]
-          }
-        }
-      ],
-      "interfaces": {
-        "Standard": {
-          "type": "Lifecycle.Standard"
-        }
-      },
-      "derived_from": "Root",
       "properties": {
         "kind": {
           "type": "string",
@@ -1956,19 +1979,23 @@ export const cna_modeling_profile: TOSCA_File = {
             "description": "The value of the individual Backing Data element"
           }
         }
+      },
+      "capabilities": {
+        "provides_data": {
+          "type": "Attachment",
+          "valid_source_node_types": [
+            "cna-modeling.entities.Component",
+            "cna-modeling.entities.Service",
+            "cna-modeling.entities.BackingService",
+            "cna-modeling.entities.StorageBackingService",
+            "cna-modeling.entities.Infrastructure"
+          ]
+        }
       }
     },
     "cna-modeling.entities.DataAggregate": {
       "description": "Node Type to model Data Aggregate entities",
-      "attributes": {
-        "state": {
-          "type": "string"
-        }
-      },
       "capabilities": {
-        "feature": {
-          "type": "Node"
-        },
         "provides_data": {
           "type": "Attachment",
           "valid_source_node_types": [
@@ -1978,68 +2005,10 @@ export const cna_modeling_profile: TOSCA_File = {
             "cna-modeling.entities.StorageBackingService"
           ]
         }
-      },
-      "requirements": [
-        {
-          "dependency": {
-            "capability": "Node",
-            "node": "Root",
-            "relationship": "DependsOn",
-            "count_range": [
-              0,
-              "UNBOUNDED"
-            ]
-          }
-        }
-      ],
-      "interfaces": {
-        "Standard": {
-          "type": "Lifecycle.Standard"
-        }
-      },
-      "derived_from": "Root"
+      }
     },
     "cna-modeling.entities.RequestTrace": {
       "description": "Node Type to model Request Trace entities",
-      "attributes": {
-        "state": {
-          "type": "string"
-        }
-      },
-      "capabilities": {
-        "feature": {
-          "type": "Node"
-        }
-      },
-      "requirements": [
-        {
-          "dependency": {
-            "capability": "Node",
-            "node": "Root",
-            "relationship": "DependsOn",
-            "count_range": [
-              0,
-              "UNBOUNDED"
-            ]
-          }
-        },
-        {
-          "external_endpoint": {
-            "capability": "Endpoint.Public",
-            "relationship": "ConnectsTo",
-            "count_range": [
-              1,
-              1
-            ]
-          }
-        }
-      ],
-      "interfaces": {
-        "Standard": {
-          "type": "Lifecycle.Standard"
-        }
-      },
-      "derived_from": "Root",
       "properties": {
         "nodes": {
           "type": "list",
@@ -2057,7 +2026,19 @@ export const cna_modeling_profile: TOSCA_File = {
             "type": "string"
           }
         }
-      }
+      },
+      "requirements": [
+        {
+          "external_endpoint": {
+            "capability": "Endpoint.Public",
+            "relationship": "ConnectsTo",
+            "count_range": [
+              1,
+              1
+            ]
+          }
+        }
+      ]
     }
   },
   "group_types": {},
