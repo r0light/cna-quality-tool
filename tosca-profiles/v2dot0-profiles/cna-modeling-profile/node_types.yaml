@@ -8,8 +8,11 @@ metadata:
 description: >-
   This TOSCA definitions document contains the CNA Modeling node types.
 
-node_types:
+imports:
+  - url: capability_types.yaml
+  - url: relationship_types.yaml
 
+node_types:
   cna-modeling.entities.Component:
     derived_from: SoftwareComponent
     description: Node Type to model Component entities
@@ -206,7 +209,6 @@ node_types:
           count_range: [0, UNBOUNDED]
 
   cna-modeling.entities.Endpoint:
-    derived_from: Root
     description: Endpoint type to explicitly model endpoints as entities
     properties:
       kind:
@@ -269,7 +271,6 @@ node_types:
           count_range: [0, UNBOUNDED]
 
   cna-modeling.entities.BackingData:
-    derived_from: Root
     description: Node Type to model Backing Data entities
     properties:
       included_data:
@@ -293,7 +294,6 @@ node_types:
         #count_range: [1, UNBOUNDED]
 
   cna-modeling.entities.DataAggregate:
-    derived_from: Root
     description: Node Type to model Data Aggregate entities
     capabilities:
       # Allows Data Aggregate to be used by other entities
@@ -307,7 +307,6 @@ node_types:
         #count_range: [1, UNBOUNDED]
 
   cna-modeling.entities.RequestTrace:
-    derived_from: Root
     description: Node Type to model Request Trace entities
     properties:
       referred_endpoint:
