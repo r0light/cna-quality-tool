@@ -1,5 +1,5 @@
 import { QualityAspect } from "../quamoco/QualityAspect";
-import { EvaluatedProductFactor, ForwardImpactingPath, QualityAspectEvaluationResult } from "./EvaluatedSystemModel";
+import { EvaluatedProductFactor, ForwardImpactingPath, QualityAspectEvaluationResult } from "./EvaluationTypes";
 
 type QualityAspectEvaluationFunction = (factor: QualityAspect, incomingImpacts: ForwardImpactingPath[], evaluatedProductFactors: Map<string, EvaluatedProductFactor>) => QualityAspectEvaluationResult;
 

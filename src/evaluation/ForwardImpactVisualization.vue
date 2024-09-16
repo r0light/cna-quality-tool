@@ -6,12 +6,11 @@
 
 <script lang="ts" setup>
 import $ from 'jquery';
-import { EvaluatedProductFactor, EvaluatedQualityAspect, ImpactWeight } from '@/core/qualitymodel/evaluation/EvaluatedSystemModel';
 import mermaid from 'mermaid';
 import { onMounted } from 'vue';
-import { ImpactType } from '@/core/qualitymodel/quamoco/Impact';
 import { MermaidBuffer } from './MermaidBuffer';
 import { describeFactor, describeFactorStyle, describeImpact, describeImpactStyle, describeNodeStyleClasses } from './evaluation-commons';
+import { EvaluatedProductFactor } from '@/core/qualitymodel/evaluation/EvaluationTypes';
 
 
 onMounted(() => {

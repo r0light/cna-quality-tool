@@ -1,4 +1,4 @@
-import { EvaluatedProductFactor, EvaluatedQualityAspect, ImpactWeight } from "@/core/qualitymodel/evaluation/EvaluatedSystemModel";
+import { EvaluatedProductFactor, EvaluatedQualityAspect, ImpactWeight } from "@/core/qualitymodel/evaluation/Evaluation";
 import { ImpactType } from "@/core/qualitymodel/quamoco/Impact";
 
 export function describeNodeStyleClasses(): string {

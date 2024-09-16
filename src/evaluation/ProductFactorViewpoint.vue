@@ -34,10 +34,9 @@
 </template>
 
 <script lang="ts" setup>
-import { EvaluatedProductFactor } from '@/core/qualitymodel/evaluation/EvaluatedSystemModel';
 import ForwardImpactVisualization from './ForwardImpactVisualization.vue';
 import { ComputedRef, computed } from 'vue';
-import { ProductFactor } from '@/core/qualitymodel/quamoco/ProductFactor';
+import { EvaluatedProductFactor } from '@/core/qualitymodel/evaluation/EvaluationTypes';
 
 const props = defineProps<{
     evaluatedProductFactors: Map<string, EvaluatedProductFactor>,

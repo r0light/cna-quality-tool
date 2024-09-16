@@ -1,5 +1,5 @@
 import { ProductFactor } from "../quamoco/ProductFactor";
-import { CalculatedMeasure, EvaluatedProductFactor, ForwardImpactingPath, ProductFactorEvaluationResult } from "./EvaluatedSystemModel";
+import { CalculatedMeasure, EvaluatedProductFactor, ForwardImpactingPath, ProductFactorEvaluationResult } from "./EvaluationTypes";
 
 
 type ProductFactorEvaluationFunction = (factor: ProductFactor, incomingImpacts: ForwardImpactingPath[], calculatedMeasures: Map<string, CalculatedMeasure>, evaluatedProductFactors: Map<string, EvaluatedProductFactor>) => ProductFactorEvaluationResult;

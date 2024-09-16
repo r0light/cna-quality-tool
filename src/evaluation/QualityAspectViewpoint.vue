@@ -34,11 +34,11 @@
 
 <script lang="ts" setup>
 import $ from 'jquery';
-import { EvaluatedProductFactor, EvaluatedQualityAspect } from '@/core/qualitymodel/evaluation/EvaluatedSystemModel';
 import { ComputedRef, computed } from 'vue';
 import { MermaidBuffer } from './MermaidBuffer';
 import mermaid from 'mermaid';
 import { describeNodeStyleClasses, describeFactor, describeFactorStyle, describeImpact, describeImpactStyle } from './evaluation-commons';
+import { EvaluatedProductFactor, EvaluatedQualityAspect } from '@/core/qualitymodel/evaluation/EvaluationTypes';
 
 const props = defineProps<{
     evaluatedQualityAspects: Map<string, EvaluatedQualityAspect>,

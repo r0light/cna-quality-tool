@@ -1,8 +1,8 @@
 import { ProductFactorEvaluationFunction } from "./ProductFactorEvaluation";
 import { QualityAspectEvaluationFunction } from "./QualityAspectEvaluation";
 import { ProductFactor } from "../quamoco/ProductFactor";
-import { CalculatedMeasure, EvaluatedProductFactor, ImpactWeight } from "./EvaluatedSystemModel";
 import { data } from "jquery";
+import { ImpactWeight } from "./EvaluationTypes";
 
 const average: (list: number[]) => number = list => {
     return list.reduce((e1, e2) => e1 + e2, 0) / list.length

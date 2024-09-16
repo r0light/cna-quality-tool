@@ -1,10 +1,7 @@
 
-import { a } from "vitest/dist/suite-IbNSsUWN.js";
-import { BackingService, BrokerBackingService, Component, DeploymentMapping, Infrastructure, Link, ProxyBackingService, RequestTrace, Service, StorageBackingService, System } from "../../entities.js";
+import { BackingService, BrokerBackingService, Component, Infrastructure, Link, ProxyBackingService, RequestTrace, Service, StorageBackingService, System } from "../../entities.js";
 import { Calculation } from "../quamoco/Measure.js";
 import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, EVENT_SOURCING_KIND, getEndpointKindWeight, getUsageRelationWeight, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MESSAGE_BROKER_KIND, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SEND_EVENT_ENDPOINT_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "../specifications/featureModel.js";
-import { c } from "vite/dist/node/types.d-aGj9QkWt.js";
-import { param } from "jquery";
 
 const average: (list: number[]) => number = list => {
     if (list.length === 0) {

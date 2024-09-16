@@ -44,13 +44,14 @@
 import { onMounted, onUpdated, ref, toRaw } from 'vue';
 import { ModelingData } from '../App.vue';
 import { QualityModelInstance, getQualityModel } from '@/core/qualitymodel/QualityModelInstance';
-import { CalculatedMeasure, EvaluatedProductFactor, EvaluatedQualityAspect, EvaluatedSystemModel, ForwardImpactingPath } from '@/core/qualitymodel/evaluation/EvaluatedSystemModel';
+import { EvaluatedSystemModel } from '@/core/qualitymodel/evaluation/Evaluation';
 import ProductFactorViewpoint from './ProductFactorViewpoint.vue';
 import QualityAspectViewpoint from './QualityAspectViewpoint.vue';
 import FilterToolbar, { ItemFilter, createFactorCategoryFilter, createHighLevelAspectFilter, getActiveElements, getActiveFilterItems } from '../qualitymodel/FilterToolbar.vue';
 import SystemEntityManager from '@/modeling/systemEntityManager';
 import { entityShapes } from '@/modeling/config/entityShapes';
 import { dia } from '@joint/core';
+import { CalculatedMeasure, EvaluatedProductFactor, EvaluatedQualityAspect } from '@/core/qualitymodel/evaluation/EvaluationTypes';
 
 const props = defineProps<{
     systemsData: ModelingData[],
@@ -141,18 +142,18 @@ function evaluateSystem() {
 
     evaluatedSystem.evaluate(activeElements.activeQualityAspects, activeElements.activeProductFactors);
 
-    evaluatedSystem.getCalculatedMeasures.forEach((value, key, map) => {
+    evaluatedSystem.getCalculatedMeasures().forEach((value, key, map) => {
         calculatedMeasures.value.set(key, value);
     });
 
-    evaluatedSystem.getEvaluatedProductFactors.forEach((value, key, map) => {
+    evaluatedSystem.getEvaluatedProductFactors().forEach((value, key, map) => {
         // only add leaf factors ? Otherwise also a specific entry for aggregating factors would be possible
         if (value.productFactor.getImpactingFactors().length === 0) {
             evaluatedProductFactors.value.set(key, value);
         }
     });
 
-    evaluatedSystem.getEvaluatedQualityAspects.forEach((value, key, map) => {
+    evaluatedSystem.getEvaluatedQualityAspects().forEach((value, key, map) => {
         evaluatedQualityAspects.value.set(key, value);
     });
 
