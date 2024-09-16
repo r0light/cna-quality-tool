@@ -30,7 +30,7 @@
                                 <li v-for="source of (selectedFactor as ProductFactor).getSources">
                                     <span><a :href="source.getUrl"><span>{{ source.getKey }}</span></a>: {{
                                         source.getInfo
-                                    }}</span>
+                                        }}</span>
                                 </li>
                             </ul>
                         </div>
@@ -48,13 +48,14 @@
                                                 <span> (</span>
                                                 <span v-for="source of measure.getSources">
                                                     <a v-if="!!source.getUrl" :href="source.getUrl"><span>{{
-                                                            source.getKey }},
+                                                        source.getKey }},
                                                         </span></a>
                                                     <span v-else="!source.getUrl.length">{{ source.getKey }}</span>
                                                 </span>
                                                 <span> )</span>
                                             </summary>
-                                            <span class="indented">Calculation: {{ measure.getCalculationDescription }}</span>
+                                            <span class="indented">Calculation: {{ measure.getCalculationDescription
+                                                }}</span>
                                         </details>
                                     </li>
                                 </ul>
@@ -426,11 +427,22 @@ function unselectElement() {
     justify-content: center;
 }
 
+@media (max-width: 576px) {
+    .qualityModelView {
+        display: flex;
+        flex-direction: column;
+        overflow: auto;
+        justify-content: center;
+    }
+}
+
+
 .paperContainer {
     display: flex;
     overflow: auto;
     border-left: 4px solid var(--menu-background-colour);
     border-bottom: 4px solid var(--menu-background-colour);
+    min-height: 90%;
 }
 
 #qmPaper {
@@ -478,5 +490,4 @@ function unselectElement() {
 .indented {
     padding-left: 13px;
 }
-
 </style>
