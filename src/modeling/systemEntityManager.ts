@@ -440,18 +440,9 @@ class SystemEntityManager {
             entity.setArtifact(artifactData.key, artifact);
         }
 
-
-        for (const embeddedCell of graphElement.getEmbeddedCells()) {
+        // start with data entities, because endpoints might refer to data entities
+        for (const embeddedCell of graphElement.getEmbeddedCells().filter(cell => cell.prop("entity/type") === EntityTypes.DATA_AGGREGATE || cell.prop("entity/type") === EntityTypes.BACKING_DATA)) {
             switch (embeddedCell.prop("entity/type")) {
-                case EntityTypes.ENDPOINT:
-                case EntityTypes.EXTERNAL_ENDPOINT:
-                    const endpoint = this.#createEndpointEntity(embeddedCell, graphElement, entity);
-                    if (!endpoint) {
-                        // ErrorMessages already created while creating entity 
-                        break;
-                    }
-                    entity.addEndpoint(endpoint);
-                    break;
                 case EntityTypes.DATA_AGGREGATE:
                     let dataAggregateName: string = embeddedCell.attr("label/textWrap/text");
                     let referencedDataAggregate = [...(this.#currentSystemEntity.getDataAggregateEntities)].filter(([id, dataAggregate]) => dataAggregate.getName === dataAggregateName);
@@ -484,6 +475,16 @@ class SystemEntityManager {
                 default:
                     break;
             }
+        }
+
+        // now process endpoints
+        for (const embeddedCell of graphElement.getEmbeddedCells().filter(cell => cell.prop("entity/type") === EntityTypes.ENDPOINT || cell.prop("entity/type") === EntityTypes.EXTERNAL_ENDPOINT)) {
+            const endpoint = this.#createEndpointEntity(embeddedCell, graphElement, entity);
+            if (!endpoint) {
+                // ErrorMessages already created while creating entity 
+                break;
+            }
+            entity.addEndpoint(endpoint);
         }
 
         const externalIngressProxyId = graphElement.prop("entity/relations/external_ingress_proxied_by");
@@ -753,7 +754,6 @@ class SystemEntityManager {
         if (graphElement.prop("entity/relations/uses_data")) {
 
             let dataAggregateIds = graphElement.prop("entity/relations/uses_data");
-
 
             for (const dataAggregateId of dataAggregateIds) {
 

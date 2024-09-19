@@ -408,7 +408,7 @@ class ToscaToEntitesConverter {
                                     // TODO 
                                 } else {
                                     if (requirement.node) {
-                                        let externalEndpoint = endpoints.get(requirement.node);
+                                        let externalEndpoint = endpoints.get(this.#keyIdMap.getId(requirement.node));
                                         if (externalEndpoint) {
                                             requestTrace.setExternalEndpoint = externalEndpoint;
                                         }
@@ -429,6 +429,9 @@ class ToscaToEntitesConverter {
                         switch (key) {
                             case "nodes":
                                 requestTrace.setPropertyValue(key, value.map(nodeKey => this.#keyIdMap.getId(nodeKey)));
+                                break;
+                            case "involved_links":
+                                // ignore, because it has been set already
                                 break;
                             default:
                                 requestTrace.setPropertyValue(key, value);
