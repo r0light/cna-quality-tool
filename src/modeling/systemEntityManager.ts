@@ -14,7 +14,7 @@ import {
     RequestTrace as RequestTraceElement, DataAggregate as DataAggregateElement, BackingData as BackingDataElement, Network as NetworkElement,
     entityShapes
 } from './config/entityShapes'
-import { DataAggregate } from "../core/entities";
+import { DataAggregate, Link } from "../core/entities";
 import { FormContentConfig } from "./config/actionDialogConfig";
 import { RelationToDataAggregate } from "../core/entities/relationToDataAggregate";
 import { RelationToBackingData } from "../core/entities/relationToBackingData";
@@ -729,7 +729,7 @@ class SystemEntityManager {
             if (!requestTrace.getExternalEndpoint) {
                 errors.push(`Request Trace ${requestTrace.getName} has no external endpoint to which it refers.`);
             }
-            if (requestTrace.getLinks.size === 0) {
+            if (requestTrace.getLinks.length === 0) {
                 errors.push(`Request Trace ${requestTrace.getName} has no links added to it.`);
             }
         }
@@ -892,10 +892,10 @@ class SystemEntityManager {
             console.log(`External Endpoint ${externalEndpointId} not found in any component`)
         }
 
-        const involvedLinkIds = graphElement.prop("entity/relations/involved_links");
+        const involvedLinkIds: string[] = graphElement.prop("entity/relations/involved_links");
 
         if (involvedLinkIds) {
-            const involvedLinks = involvedLinkIds.map(linkId => this.#currentSystemEntity.getLinkEntities.get(linkId));
+            const involvedLinks: Link[] = involvedLinkIds.map(linkId => this.#currentSystemEntity.getLinkEntities.get(linkId));
             requestTrace.setLinks = involvedLinks;
         }
 
@@ -1588,7 +1588,7 @@ class SystemEntityManager {
                     }
                     break;
                 case "involved_links":
-                    newRequestTrace.prop(relation.jointJsConfig.modelPath, Array.from(requestTrace.getLinks).map(link => link.getId));
+                    newRequestTrace.prop(relation.jointJsConfig.modelPath, requestTrace.getLinks.map(link => link.getId));
                     break;
                 default:
                     throw new Error(`unknown relation ${relation.providedFeature} in request trace.`)

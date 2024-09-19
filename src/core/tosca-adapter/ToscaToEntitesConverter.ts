@@ -5,7 +5,7 @@ import { DATA_AGGREGATE_TOSCA_KEY } from '../entities/dataAggregate';
 import { BACKING_DATA_TOSCA_KEY } from '../entities/backingData';
 import { getEmptyMetaData, readToscaMetaData } from '../common/entityDataTypes';
 import { DEPLOYMENT_MAPPING_TOSCA_KEY } from '../entities/deploymentMapping';
-import { LINK_TOSCA_KEY } from '../entities/link';
+import { Link, LINK_TOSCA_KEY } from '../entities/link';
 import { INFRASTRUCTURE_TOSCA_KEY } from '../entities/infrastructure';
 import { ENDPOINT_TOSCA_KEY } from '../entities/endpoint';
 import { EXTERNAL_ENDPOINT_TOSCA_KEY } from '../entities/externalEndpoint';
@@ -420,7 +420,7 @@ class ToscaToEntitesConverter {
                     }
                 }
 
-                let links = node.properties && node.properties["involved_links"] ? node.properties["involved_links"].map(linkKey => this.#importedSystem.getLinkEntities.get(this.#keyIdMap.getId(linkKey))) : [];
+                let links: Link[] = node.properties && node.properties["involved_links"] ? node.properties["involved_links"].map(linkKey => this.#importedSystem.getLinkEntities.get(this.#keyIdMap.getId(linkKey))) : [];
 
                 requestTrace.setLinks = links;
 

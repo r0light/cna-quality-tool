@@ -1,4 +1,3 @@
-
 import { ExternalEndpoint } from "./externalEndpoint.js";
 import { Link } from "./link.js";
 import { cna_modeling_profile } from '../../totypa/parsedProfiles/v2dot0-profiles/cna_modeling_profile.js'
@@ -36,7 +35,7 @@ class RequestTrace {
 
     #externalEndpoint: ExternalEndpoint;
 
-    #links = new Set<Link>();
+    #links = [];
 
     #properties: EntityProperty[] = new Array();
 
@@ -118,10 +117,7 @@ class RequestTrace {
      * Sets the {@link Link} entities involved in this RequestTrace entity.
      */
     set setLinks(links: Link[]) {
-        this.#links.clear();
-        for (const link of links) {
-            this.#links.add(link);
-        }
+        this.#links = links;
     }
 
     /**
