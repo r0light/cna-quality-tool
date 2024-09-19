@@ -1506,6 +1506,31 @@ export const ratioOfComponentsWhoseEgressIsProxied: Calculation<System> = (syste
     return numberOfComponentsWithProxiedEgress / allNonProxyComponents.length;
 }
 
+export const ratioOfCachedDataAggregates: Calculation<System> = (system) => {
+    
+    const allComponents = [...system.getComponentEntities.entries()];
+
+    let cachedUsages = 0;
+    let allUsages = 0;
+
+    allComponents.forEach(([componentId, component]) => {
+
+        component.getDataAggregateEntities.forEach(dataAggregateUsage => {
+            if (DATA_USAGE_RELATION_USAGE.includes(dataAggregateUsage.relation.getProperty("usage_relation").value)) {
+                allUsages++;
+                if (dataAggregateUsage.relation.getProperty("usage_relation").value === "cached-usage") {
+                    cachedUsages++;
+                }
+            }
+        })
+    })
+
+    if (allUsages > 0) {
+        return cachedUsages / allUsages;
+    }
+    return 0;
+}
+
 
 export const systemMeasureImplementations: { [measureKey: string]: Calculation<System> } = {
     "serviceReplicationLevel": serviceReplicationLevel,
@@ -1576,7 +1601,8 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation<S
     "distributedTracingSupport": distributedTracingSupport,
     "serviceDiscoveryUsage": serviceDiscoveryUsage,
     "ratioOfComponentsWhoseIngressIsProxied": ratioOfComponentsWhoseIngressIsProxied,
-    "ratioOfComponentsWhoseEgressIsProxied": ratioOfComponentsWhoseEgressIsProxied
+    "ratioOfComponentsWhoseEgressIsProxied": ratioOfComponentsWhoseEgressIsProxied,
+    "ratioOfCachedDataAggregates": ratioOfCachedDataAggregates
 }
 
 export const serviceInterfaceDataCohesion: Calculation<{ component: Component, system: System }> = (parameters) => {

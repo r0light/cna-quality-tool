@@ -2266,3 +2266,46 @@ test("ratioOfComponentsWhoseEgressIsProxied", () => {
     let measureValue = systemMeasureImplementations["ratioOfComponentsWhoseEgressIsProxied"](system);
     expect(measureValue).toEqual(3/5);
 })
+
+test("ratioOfCachedDataAggregates", () => {
+    let system = new System("testSystem");
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+
+    let dataAggregateX = new DataAggregate("da1", "data aggregate 1", getEmptyMetaData());
+    let dataAggregateY = new DataAggregate("da2", "data aggregate 2", getEmptyMetaData());
+    let dataAggregateZ = new DataAggregate("da3", "data aggregate 3", getEmptyMetaData());
+
+    let usageAX = new RelationToDataAggregate("r1", getEmptyMetaData());
+    usageAX.setPropertyValue("usage_relation", "cached-usage");
+    let usageAY = new RelationToDataAggregate("r2", getEmptyMetaData());
+    usageAY.setPropertyValue("usage_relation", "cached-usage");
+    serviceA.addDataAggregateEntity(dataAggregateX, usageAX);
+    serviceA.addDataAggregateEntity(dataAggregateY, usageAY);
+
+    let usageBX = new RelationToDataAggregate("r3", getEmptyMetaData());
+    usageBX.setPropertyValue("usage_relation", "usage");
+    let usageBY = new RelationToDataAggregate("r4", getEmptyMetaData());
+    usageBY.setPropertyValue("usage_relation", "cached-usage");
+    serviceB.addDataAggregateEntity(dataAggregateX,usageBX);
+    serviceB.addDataAggregateEntity(dataAggregateY, usageBY);
+
+    let usageCX = new RelationToDataAggregate("r5", getEmptyMetaData());
+    usageCX.setPropertyValue("usage_relation", "persistence");
+    let usageCY = new RelationToDataAggregate("r6", getEmptyMetaData());
+    usageCY.setPropertyValue("usage_relation", "persistence");
+    let usageCZ = new RelationToDataAggregate("r7", getEmptyMetaData());
+    usageCZ.setPropertyValue("usage_relation", "usage");
+    serviceC.addDataAggregateEntity(dataAggregateX, usageCX);
+    serviceC.addDataAggregateEntity(dataAggregateY, usageCY);
+    serviceC.addDataAggregateEntity(dataAggregateZ, usageCZ);
+
+    system.addEntities([serviceA, serviceB, serviceC]);
+    system.addEntities([dataAggregateX, dataAggregateY, dataAggregateZ]);
+
+    let measureValue = systemMeasureImplementations["ratioOfCachedDataAggregates"](system);
+    expect(measureValue).toBe(3/5);
+
+})
