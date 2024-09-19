@@ -420,7 +420,7 @@ class ToscaToEntitesConverter {
                     }
                 }
 
-                let links: Link[] = node.properties && node.properties["involved_links"] ? node.properties["involved_links"].map(linkKey => this.#importedSystem.getLinkEntities.get(this.#keyIdMap.getId(linkKey))) : [];
+                let links: Link[][] = node.properties && node.properties["involved_links"] ? node.properties["involved_links"].map(index => index.map(linkKey => this.#importedSystem.getLinkEntities.get(this.#keyIdMap.getId(linkKey)))) : [];
 
                 requestTrace.setLinks = links;
 

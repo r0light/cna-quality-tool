@@ -125,6 +125,11 @@
                                                         :disabled="columnValue.disabled" :checked="columnValue.checked"
                                                         v-model="columnValue.checked">
                                                 </div>
+                                                <div v-if="typeof columnValue === 'object' && columnValue.contentType === PropertyContent.INPUT_NUMBERBOX"
+                                                    class="form-check">
+                                                    <input class="position-static form-control" :id="columnValue.id"
+                                                        type="number" :min="columnValue.min" :max="columnValue.max"  :step="columnValue.step" :value="columnValue.value" :disabled="columnValue.disabled" v-model="columnValue.value" :class="option.validationState">
+                                                </div>
                                             </td>
                                         </tr>
                                     </tbody>
@@ -274,15 +279,25 @@ export type EditPropertySection = {
 export type TableRowConfig = {
     attributes: { isTheCurrentEntity?: boolean, representationClass: string, disabled: boolean },
     columns: {
-        [key: string]: string | TableRowContentConfig
+        [key: string]: string | TableRowCheckboxConfig | TableRowNumberConfig
     }
 }
 
-export type TableRowContentConfig = {
+export type TableRowCheckboxConfig = {
     contentType: "checkbox-without-label",
     disabled: boolean,
     checked: boolean,
     id: dia.Cell.ID
+}
+
+export type TableRowNumberConfig = {
+    contentType: "number",
+    disabled: boolean,
+    min: number,
+    max: number,
+    step: number,
+    value: number,
+    id: string
 }
 
 export function toPropertySections(propertyConfigs: PropertyConfig[]): EditPropertySection[] {

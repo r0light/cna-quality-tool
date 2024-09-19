@@ -892,10 +892,16 @@ class SystemEntityManager {
             console.log(`External Endpoint ${externalEndpointId} not found in any component`)
         }
 
-        const involvedLinkIds: string[] = graphElement.prop("entity/relations/involved_links");
+        const involvedLinkIds: string[][] = graphElement.prop("entity/relations/involved_links");
 
         if (involvedLinkIds) {
-            const involvedLinks: Link[] = involvedLinkIds.map(linkId => this.#currentSystemEntity.getLinkEntities.get(linkId));
+            const involvedLinks: Link[][] = involvedLinkIds.map(index => {
+                if (index) {
+                    return index.map(linkId => this.#currentSystemEntity.getLinkEntities.get(linkId))
+                } else {
+                    return [];
+                }
+            });
             requestTrace.setLinks = involvedLinks;
         }
 
@@ -1588,7 +1594,7 @@ class SystemEntityManager {
                     }
                     break;
                 case "involved_links":
-                    newRequestTrace.prop(relation.jointJsConfig.modelPath, requestTrace.getLinks.map(link => link.getId));
+                    newRequestTrace.prop(relation.jointJsConfig.modelPath, requestTrace.getLinks.map(index => index.map(link => link.getId)));
                     break;
                 default:
                     throw new Error(`unknown relation ${relation.providedFeature} in request trace.`)

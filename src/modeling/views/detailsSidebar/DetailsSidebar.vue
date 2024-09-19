@@ -685,7 +685,7 @@ onUpdated(() => {
             involvedLinksConfig.includeFormCheck = false;
 
             const existingLinks = props.graph.getLinks().filter((link) => { return link.prop("entity/type") === EntityTypes.LINK });
-            const selectedLinks: Set<dia.Cell.ID> = new Set(selectedEntity.model.prop(involvedLinksConfig.jointJsConfig.modelPath));
+            const selectedLinks: dia.Cell.ID[][] = selectedEntity.model.prop(involvedLinksConfig.jointJsConfig.modelPath);
 
             // clear table rows
             involvedLinksConfig.tableRows.length = 0;
@@ -710,16 +710,21 @@ onUpdated(() => {
                 const fromElement = link.getSourceElement() ? link.getSourceElement().attr("label/textWrap/text") : "-";
                 const toElement = link.getTargetElement() ? link.getTargetElement().attr("label/textWrap/text") : "-";
 
+                let linkIndex = selectedLinks.findIndex(index => !!index && index.includes(link.id));
+
                 involvedLinksConfig.tableRows.push({
                     columns: {
                         from: fromElement,
                         to: toElement,
                         parent: parentName,
                         included: {
-                            contentType: PropertyContent.CHECKBOX_WITHOUT_LABEL,
+                            contentType: PropertyContent.INPUT_NUMBERBOX,
                             disabled: isInvalid,
-                            checked: selectedLinks.has(link.id),
-                            id: link.id
+                            min: -1,
+                            max: Number.MAX_SAFE_INTEGER,
+                            step: 1,
+                            value: linkIndex,
+                            id: link.id.toString()
                         }
                     },
                     attributes: {
@@ -1064,9 +1069,19 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                     break;
                 case EntityTypes.REQUEST_TRACE:
                     if (propertyOption.providedFeature === "involved_links") {
-                        let selectedLinkIDs = propertyOption.tableRows.filter(row => row.columns["included"]["checked"])
-                            .map(row => row.columns["included"]["id"]);
-                        selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, selectedLinkIDs, { rewrite: true });
+
+                        let linkIndices: string[][] = [];
+
+                        propertyOption.tableRows.forEach(row => {
+                            let linkId = row.columns["included"]["id"];
+                            let linkIndex = row.columns["included"]["value"];
+                            if (!linkIndices[linkIndex]) {
+                                linkIndices[linkIndex] = [linkId];
+                            } else {
+                                linkIndices[linkIndex].push(linkId);
+                            }
+                        })
+                        selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, linkIndices, { rewrite: true });
                         continue;
                     } else if (propertyOption.providedFeature === "referred_endpoint") {
                         selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, propertyOption.value);

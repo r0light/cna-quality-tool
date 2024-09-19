@@ -1789,8 +1789,7 @@ const EntityRelationsConfig: {
                     },
                     dialogInfo: `The following table shows all Link entities that currently exist for this System. 
                     Invalid Links, such as non-connected ones or if they are connected to an Endpoint without
-                    a parent entity cannot be selected and are thus deactivated. By selecting the respective 
-                    checkbox the Link entity will be added to this Request Trace. The selection at the beginning 
+                    a parent entity cannot be selected and are thus deactivated. To include a link in the request trace, specify its index which signifies when a link is used. An index of \"-1\" means that a link is not included. Links with a higher index are used after links with lower indices. When links are used in parallel, they can also be assigned to the same index. The selection at the beginning 
                     shows the currently saved state for this entity. Your changes won't be adopted until you 
                     clicked "Save". In case you cancel and change your entity selection, all your changes will be 
                     lost. While you keep the selection of this Request Trace entity, your changes will be remembered.`,
@@ -1805,7 +1804,7 @@ const EntityRelationsConfig: {
                             text: "Endpoint Parent"
                         },
                         {
-                            text: "Include"
+                            text: "Trace Index"
                         }
                     ],
                 },

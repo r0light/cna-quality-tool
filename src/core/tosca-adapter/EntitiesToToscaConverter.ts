@@ -662,16 +662,18 @@ class EntitiesToToscaConverter {
             }
         }
 
-        let linkKeys: string[] = [];
+        let linkKeys: string[][] = [];
         let nodeKeys = new Set<string>();
-        for (const link of requestTrace.getLinks) {
+        for (const linkIndex of requestTrace.getLinks) {
             //template.properties.links.push(keyIdMap.getKey(link.getId));
-            linkKeys.push(keyIdMap.getKey(link.getId));
-            nodeKeys.add(keyIdMap.getKey(link.getSourceEntity.getId));
-            let targetComponent = systemEntity.searchComponentOfEndpoint(link.getTargetEndpoint.getId);
-            if (targetComponent) {
-                nodeKeys.add(keyIdMap.getKey(targetComponent.getId));
-            }
+            linkKeys.push(linkIndex.map(link => keyIdMap.getKey(link.getId)));
+            linkIndex.forEach(link => {
+                nodeKeys.add(keyIdMap.getKey(link.getSourceEntity.getId));
+                let targetComponent = systemEntity.searchComponentOfEndpoint(link.getTargetEndpoint.getId);
+                if (targetComponent) {
+                    nodeKeys.add(keyIdMap.getKey(targetComponent.getId));
+                }
+            })
         }
         template.properties.involved_links = linkKeys;
         template.properties.nodes = [...nodeKeys];

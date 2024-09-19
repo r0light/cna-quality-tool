@@ -138,21 +138,25 @@ onMounted(() => {
             if (cellView.model.prop("entity/type") === EntityTypes.REQUEST_TRACE) {
 
                 // get involved Links
-                const involvedLinks = cellView.model.prop("entity/relations/involved_links");
+                const involvedLinkIndices: string[][] = cellView.model.prop("entity/relations/involved_links");
 
-                if (involvedLinks && involvedLinks.length > 0) {
-                    for (const involvedLink of involvedLinks) {
-                        const linkEntity = props.graph.getCell(involvedLink) as dia.Link;
-                        if (linkEntity.attr("root/visibility") === "visible") {
-                            highlighters.stroke.add(props.paper.requireView(linkEntity), { selector: 'line' }, 'my-element-highlight', {
-                                layer: 'back',
-                                attrs: {
-                                    'stroke': '#feb663',
-                                    'stroke-width': 5,
+                if (involvedLinkIndices && involvedLinkIndices.length > 0) {
+                    involvedLinkIndices.forEach(index => {
+                        if (index && index.length > 0) {
+                            index.forEach(involvedLink => {
+                                const linkEntity = props.graph.getCell(involvedLink) as dia.Link;
+                                if (linkEntity.attr("root/visibility") === "visible") {
+                                    highlighters.stroke.add(props.paper.requireView(linkEntity), { selector: 'line' }, 'my-element-highlight', {
+                                        layer: 'back',
+                                        attrs: {
+                                            'stroke': '#feb663',
+                                            'stroke-width': 5,
+                                        }
+                                    });
                                 }
-                            });
+                            })
                         }
-                    }
+                    })
                 }
             }
 

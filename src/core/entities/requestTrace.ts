@@ -35,7 +35,7 @@ class RequestTrace {
 
     #externalEndpoint: ExternalEndpoint;
 
-    #links = [];
+    #links: Link[][] = [];
 
     #properties: EntityProperty[] = new Array();
 
@@ -116,7 +116,7 @@ class RequestTrace {
     /**
      * Sets the {@link Link} entities involved in this RequestTrace entity.
      */
-    set setLinks(links: Link[]) {
+    set setLinks(links: Link[][]) {
         this.#links = links;
     }
 
