@@ -764,11 +764,11 @@ test("ratioOfCyclicRequestTraces", () => {
 
 
     let requestTraceA = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
-    requestTraceA.setLinks = [linkAB, linkBC];
+    requestTraceA.setLinks = [[linkAB], [linkBC]];
     requestTraceA.setExternalEndpoint = externalEndpointA;
 
     let requestTraceB = new RequestTrace("rq2", "request trace 2", getEmptyMetaData());
-    requestTraceB.setLinks = [linkED, linkDB, linkBC, linkCD];
+    requestTraceB.setLinks = [[linkED], [linkDB], [linkBC], [linkCD]];
     requestTraceB.setExternalEndpoint = externalEndpointE;
 
     system.addEntities([serviceA, serviceB, serviceC, serviceD, serviceE]);
@@ -846,11 +846,11 @@ test("maximumLengthOfServiceLinkChainPerRequestTrace", () => {
     let linkDB = new Link("l4", serviceD, endpointB);
 
     let requestTraceA = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
-    requestTraceA.setLinks = [linkAB, linkBC];
+    requestTraceA.setLinks = [[linkAB], [linkBC]];
     requestTraceA.setExternalEndpoint = externalEndpointA;
 
     let requestTraceB = new RequestTrace("rq2", "request trace 2", getEmptyMetaData());
-    requestTraceB.setLinks = [linkED, linkDB, linkBC];
+    requestTraceB.setLinks = [[linkED], [linkDB], [linkBC]];
     requestTraceB.setExternalEndpoint = externalEndpointE;
 
     system.addEntities([serviceA, serviceB, serviceC, serviceD, serviceE]);
@@ -895,11 +895,11 @@ test("maximumNumberOfServicesWithinARequestTrace", () => {
     let linkDB = new Link("l4", serviceD, endpointB);
 
     let requestTraceA = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
-    requestTraceA.setLinks = [linkAB, linkBC];
+    requestTraceA.setLinks = [[linkAB], [linkBC]];
     requestTraceA.setExternalEndpoint = externalEndpointA;
 
     let requestTraceB = new RequestTrace("rq2", "request trace 2", getEmptyMetaData());
-    requestTraceB.setLinks = [linkED, linkDB, linkBC];
+    requestTraceB.setLinks = [[linkED], [linkDB], [linkBC]];
     requestTraceB.setExternalEndpoint = externalEndpointE;
 
     system.addEntities([serviceA, serviceB, serviceC, serviceD, serviceE]);
@@ -1628,11 +1628,11 @@ test("numberOfRequestTraces", () => {
 
 
     let requestTraceA = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
-    requestTraceA.setLinks = [linkAB, linkBC];
+    requestTraceA.setLinks = [[linkAB], [linkBC]];
     requestTraceA.setExternalEndpoint = externalEndpointA;
 
     let requestTraceB = new RequestTrace("rq2", "request trace 2", getEmptyMetaData());
-    requestTraceB.setLinks = [linkED, linkDB, linkBC];
+    requestTraceB.setLinks = [[linkED], [linkDB], [linkBC]];
     requestTraceB.setExternalEndpoint = externalEndpointE;
 
     system.addEntities([serviceA, serviceB, serviceC, serviceD, serviceE]);
@@ -1679,11 +1679,11 @@ test("averageComplexityOfRequestTraces", () => {
 
 
     let requestTraceA = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
-    requestTraceA.setLinks = [linkAB, linkBC];
+    requestTraceA.setLinks = [[linkAB], [linkBC]];
     requestTraceA.setExternalEndpoint = externalEndpointA;
 
     let requestTraceB = new RequestTrace("rq2", "request trace 2", getEmptyMetaData());
-    requestTraceB.setLinks = [linkED, linkDB, linkBC];
+    requestTraceB.setLinks = [[linkED], [linkDB], [linkBC]];
     requestTraceB.setExternalEndpoint = externalEndpointE;
 
     system.addEntities([serviceA, serviceB, serviceC, serviceD, serviceE]);
@@ -1889,15 +1889,15 @@ test("ratioOfRequestTracesThroughGateway", () => {
     let linkCD = new Link("l5", serviceC, endpointD);
 
     let requestTraceA = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
-    requestTraceA.setLinks = [linkPAA, linkASBS];
+    requestTraceA.setLinks = [[linkPAA], [linkASBS]];
     requestTraceA.setExternalEndpoint = externalEndpointA;
 
     let requestTraceB = new RequestTrace("rq2", "request trace 2", getEmptyMetaData());
-    requestTraceB.setLinks = [linkPBB, linkBSBS];
+    requestTraceB.setLinks = [[linkPBB], [linkBSBS]];
     requestTraceB.setExternalEndpoint = externalEndpointPB
 
     let requestTraceC = new RequestTrace("rq3", "request trace 3", getEmptyMetaData());
-    requestTraceC.setLinks = [linkCD]
+    requestTraceC.setLinks = [[linkCD]]
     requestTraceC.setExternalEndpoint = externalEndpointC;
 
     system.addEntities([serviceA, serviceB, serviceC, serviceD, storageBackingService, gatewayServiceA, gatewayServiceB]);

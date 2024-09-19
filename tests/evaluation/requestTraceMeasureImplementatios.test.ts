@@ -63,7 +63,7 @@ test("requestTraceLength", () => {
     let linkCD = new Link("l3", serviceC, endpointD);
 
     let requestTrace = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
-    requestTrace.setLinks = [linkAB, linkBC, linkCD];
+    requestTrace.setLinks = [[linkAB], [linkBC], [linkCD]];
     requestTrace.setExternalEndpoint = externalEndpointA;
 
 
@@ -112,7 +112,7 @@ test("numberOfCyclesInRequestTraces", () => {
     let linkCD = new Link("l5", serviceC, endpointD);
 
     let requestTrace = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
-    requestTrace.setLinks = [linkAB, linkBC, linkDB];
+    requestTrace.setLinks = [[linkAB], [linkBC], [linkDB]];
     requestTrace.setExternalEndpoint = externalEndpointA;
 
     system.addEntities([serviceA, serviceB, serviceC, serviceD, serviceE]);

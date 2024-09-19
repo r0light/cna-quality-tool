@@ -1595,6 +1595,11 @@ export const qualityModel: QualityModelSpec = {
             "name" : "Level of sharding across storage backing services",
             "calculation": "Average number of shards per Storage Backing Service",
             "sources": ["new"]
+        },
+        "ratioOfCachedDataAggregates": {
+            "name": "Ratio of Cached Data Aggregates",
+            "calculation": "Sum-of(Cached usage of a Data Aggregate in a Component) / Sum-of(Cached and uncached usage of a Data Aggregate in a Component",
+            "sources": ["new"] 
         }
     },
     "productFactorEvaluations": [

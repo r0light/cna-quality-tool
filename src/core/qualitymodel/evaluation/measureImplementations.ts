@@ -679,14 +679,16 @@ export const numberOfPotentialCyclesInASystem: Calculation<System> = (system) =>
 export const maximumLengthOfServiceLinkChainPerRequestTrace: Calculation<System> = (system) => {
     let allRequestTraces = [...system.getRequestTraceEntities.entries()].map(requestTrace => requestTrace[1]);
 
-    return Math.max(...allRequestTraces.map(requestTrace => requestTrace.getLinks.size));
+
+
+    return Math.max(...allRequestTraces.map(requestTrace => requestTrace.getLinks.length));
 }
 
 export const maximumNumberOfServicesWithinARequestTrace: Calculation<System> = (system) => {
     let allRequestTraces = [...system.getRequestTraceEntities.entries()].map(requestTrace => requestTrace[1]);
 
     return Math.max(...allRequestTraces.map(requestTrace => {
-        let nodes = [...requestTrace.getLinks].flatMap(link => [link.getSourceEntity, system.searchComponentOfEndpoint(link.getTargetEndpoint.getId)]).map(component => component.getId);
+        let nodes = [...requestTrace.getLinks].flatMap(traceIndex => traceIndex.map(link => [link.getSourceEntity, system.searchComponentOfEndpoint(link.getTargetEndpoint.getId)]).flatMap(components => components.map(component => component.getId)));
         return new Set(nodes).size;
     }));
 }
@@ -931,7 +933,7 @@ export const averageComplexityOfRequestTraces: Calculation<System> = (system) =>
         return 0;
     }
 
-    return average(system.getRequestTraceEntities.entries().map(([requestTraceId, requestTrace]) => requestTrace.getLinks.size).toArray());
+    return average(system.getRequestTraceEntities.entries().map(([requestTraceId, requestTrace]) => requestTrace.getLinks.length).toArray());
 }
 
 export const amountOfRedundancy: Calculation<System> = (system) => {
@@ -1166,7 +1168,7 @@ export const ratioOfRequestTracesThroughGateway: Calculation<System> = (system) 
             }
         }
 
-        for (const link of requestTrace.getLinks) {
+        for (const link of requestTrace.getLinks.flat(1)) {
             let linkSource = link.getSourceEntity;
             if (linkSource.constructor.name === ProxyBackingService.name && linkSource.getProperty("kind").value === "API Gateway") {
                 numberOfRequestTracesThroughGateway++;
@@ -2063,7 +2065,7 @@ export const couplingOfServicesBasedOnAmountOfRequestTracesThatIncludeASpecificL
     let requestTracesInWhichBCallsA = new Set<string>();
 
     for (const [requestTraceId, requestTrace] of allRequestTraces.entries()) {
-        for (const link of requestTrace.getLinks) {
+        for (const link of requestTrace.getLinks.flat()) {
             let callingComponentId = link.getSourceEntity.getId;
             let calledComponentId = parameters.system.searchComponentOfEndpoint(link.getTargetEndpoint.getId).getId;
 
@@ -2104,7 +2106,7 @@ export const couplingOfServicesBasedTimesThatTheyOccurInTheSameRequestTrace: Cal
     let requestTracesIncludingB = new Set<string>();
 
     for (const [requestTraceId, requestTrace] of allRequestTraces.entries()) {
-        for (const link of requestTrace.getLinks) {
+        for (const link of requestTrace.getLinks.flat()) {
             let callingComponentId = link.getSourceEntity.getId;
             let calledComponentId = parameters.system.searchComponentOfEndpoint(link.getTargetEndpoint.getId).getId;
 
@@ -2168,7 +2170,7 @@ export const infrastructureMeasureImplementations: { [measureKey: string]: Calcu
 }
 
 export const requestTraceLength: Calculation<{ requestTrace: RequestTrace, system: System }> = (parameters) => {
-    return parameters.requestTrace.getLinks.size;
+    return parameters.requestTrace.getLinks.length;
 }
 
 
@@ -2177,7 +2179,7 @@ export const numberOfCyclesInRequestTraces: Calculation<{ requestTrace: RequestT
     let links = parameters.requestTrace.getLinks;
     let numberOfCycles = 0;
 
-    for (const link of links) {
+    for (const link of links.flat()) {
         includedNodes.push(link.getSourceEntity.getId);
         let targetComponent = parameters.system.searchComponentOfEndpoint(link.getTargetEndpoint.getId);
         if (includedNodes.includes(targetComponent.getId)) {
