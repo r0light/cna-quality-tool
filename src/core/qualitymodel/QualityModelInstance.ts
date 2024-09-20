@@ -8,7 +8,7 @@ import { qualityModel } from "./specifications/qualitymodel.js";
 import { literature } from "./specifications/literature.js";
 import { LiteratureSource } from "./quamoco/LiteratureSource.js";
 import { Entity } from "./quamoco/Entity.js";
-import { productFactorEvaluationImplementation, qualityAspectEvaluationImplementation } from "./evaluation/evaluationImplementations.js";
+import { generalEvaluationImplementation, productFactorEvaluationImplementation, qualityAspectEvaluationImplementation } from "./evaluation/evaluationImplementations.js";
 import { ProductFactorEvaluation } from "./evaluation/ProductFactorEvaluation.js";
 import { componentMeasureImplementations, componentPairMeasureImplementations, infrastructureMeasureImplementations, requestTraceMeasureImplementations, systemMeasureImplementations } from "./evaluation/measureImplementations.js";
 import { QualityAspectEvaluation } from "./evaluation/QualityAspectEvaluation.js";
@@ -187,7 +187,13 @@ function getQualityModel(): QualityModelInstance {
                 newEvaluation.addEvaluation(availableImplementation);
                 evaluatedProductFactor.addEvaluation(newEvaluation);
             } else {
-                throw new Error(`No evaluation implementation found with id ${newEvaluation.getEvaluationId}`);
+                availableImplementation = generalEvaluationImplementation[newEvaluation.getEvaluationId];
+                if (availableImplementation) {
+                    newEvaluation.addEvaluation(availableImplementation);
+                    evaluatedProductFactor.addEvaluation(newEvaluation);
+                } else {
+                    throw new Error(`No evaluation implementation found with id ${newEvaluation.getEvaluationId}`);
+                }
             }
         } else {
             throw new Error(`There is no product factor with key ${productFactorEvaluation.targetFactor}`);
@@ -207,6 +213,7 @@ function getQualityModel(): QualityModelInstance {
                 newEvaluation.addEvaluation(availableImplementation);
                 evaluatedQualityAspect.addEvaluation(newEvaluation);
             } else {
+                //availableImplementation = generalEvaluationImplementation[newEvaluation.getEvaluationId];
                 throw new Error(`No evaluation implementation found with id ${newEvaluation.getEvaluationId}`);
             }
         } else {

@@ -685,7 +685,7 @@ onUpdated(() => {
             involvedLinksConfig.includeFormCheck = false;
 
             const existingLinks = props.graph.getLinks().filter((link) => { return link.prop("entity/type") === EntityTypes.LINK });
-            const selectedLinks: dia.Cell.ID[][] = selectedEntity.model.prop(involvedLinksConfig.jointJsConfig.modelPath);
+            const selectedLinks: dia.Cell.ID[][] = selectedEntity.model.prop(involvedLinksConfig.jointJsConfig.modelPath) ? selectedEntity.model.prop(involvedLinksConfig.jointJsConfig.modelPath) : [];
 
             // clear table rows
             involvedLinksConfig.tableRows.length = 0;

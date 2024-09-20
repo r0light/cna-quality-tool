@@ -1,6 +1,6 @@
 import { ENTITIES } from "./entities"
 
-type QualityModelSpec = {
+export type QualityModelSpec = {
     qualityAspects: { [highLevelAspectKey: string]: HighLevelQualityAspecSpec},
     factorCategories: { [categoryKey: string]: CategorySpec},
     productFactors: { [productFatorKey: string]: ProductFactorSpec},
@@ -63,7 +63,7 @@ type QualityAspectEvaluationSpec = {
     reasoning: string
 }
 
-export const qualityModel: QualityModelSpec = {
+export const qualityModel = {
     "qualityAspects": {
         "security": {
             "name": "Security",
@@ -340,7 +340,7 @@ export const qualityModel: QualityModelSpec = {
             "name": "Isolated state",
             "description": "Services are structured by clearly separating stateless from stateful services. Stateful services should be reduced to a minimum. That way, state is isolated within these specifically stateful services which can be managed accordingly. The majority of stateless services is easier to deploy and modify.",
             "categories": ["dataManagement", "businessDomain"],
-            "relevantEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, "storageBackingService"],
+            "relevantEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.STORAGE_BACKING_SERVICE],
             "sources": [{ "key": "Goniwada2021", "section": "3 Coupling (Services should be as loosely coupled as possible)" }],
             "measures": []
         },
@@ -356,7 +356,7 @@ export const qualityModel: QualityModelSpec = {
             "name": "Specialized stateful services",
             "description": "For stateful components, that means components that do require durable disk space on the infrastructure that they run on, specialized software or frameworks are used that can handle distributed state by replicating it over several components or component instances while still ensuring consistency requirements for that state.",
             "categories": ["dataManagement", "businessDomain"],
-            "relevantEntities": [ENTITIES.COMPONENT, "storageBackingService"],
+            "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.STORAGE_BACKING_SERVICE],
             "sources": [{ "key": "Davis2019", "section": "5.4" }, { "key": "Ibryam2020", "section": "11 “Stateful Service”" }],
             "measures": []
         },
@@ -588,7 +588,7 @@ export const qualityModel: QualityModelSpec = {
             "name": "Horizontal data replication",
             "description": "Data is replicated horizontally, that means duplicated across several instances of a storage backing service so that a higher load can be handled and replicas closer to the service where data is needed can be used to reduce latency.",
             "categories": ["applicationAdministration", "dataManagement"],
-            "relevantEntities": ["storageBackingService", ENTITIES.DATA_AGGREGATE],
+            "relevantEntities": [ENTITIES.STORAGE_BACKING_SERVICE, ENTITIES.DATA_AGGREGATE],
             "sources": [{ "key": "Scholl2019", "section": "6 Use Data Partitioning and Replication for Scale" }, { "key": "Goniwada2021", "section": "4 Data Replication" }],
             "measures": ["storageReplicationLevel"]
         },
@@ -596,15 +596,15 @@ export const qualityModel: QualityModelSpec = {
             "name": "Vertical data replication",
             "description": "Data is replicated vertically, that means across a request trace so that it is available closer to where a request initially comes in. Typically caching is used for vertical data replication.",
             "categories": ["applicationAdministration", "dataManagement"],
-            "relevantEntities": [ENTITIES.SERVICE, ENTITIES.DATA_AGGREGATE],
+            "relevantEntities": [ENTITIES.SERVICE, ENTITIES.DATA_AGGREGATE, ENTITIES.REQUEST_TRACE],
             "sources": [{ "key": "Scholl2019", "section": "6 Use Caching" }, { "key": "Bastani2017", "section": "9 Caching (Use an In-Memory cache for queries to relieve datastore from traffic; replication into faster data storage)" }, { "key": "Indrasiri2021", "section": "4 Caching Pattern" }],
-            "measures": ["ratioOfCachedDataAggregates"]
+            "measures": ["ratioOfCachedDataAggregates", "dataReplicationAlongRequestTrace"]
         },
         "shardedDataStoreReplication": {
             "name": "Sharded data store replication",
             "description": "Data storage is sharded, that means data is split into several storage backing service instances by a certain strategy so that requests can be distributed across shards to increase performance. One example strategy could be to shard data geographically, that means user data from one location is stored in one shard while user data from another location is stored in a different shard. One storage backing service instance is then less likely to be overloaded with requests, because the number of potential requests is limited by the amount of data in that instance.",
             "categories": ["applicationAdministration", "dataManagement"],
-            "relevantEntities": ["storageBackingService", ENTITIES.DATA_AGGREGATE],
+            "relevantEntities": [ENTITIES.STORAGE_BACKING_SERVICE, ENTITIES.DATA_AGGREGATE],
             "sources": [{ "key": "Indrasiri2014", "section": "4 Data Sharding Pattern" }, { "key": "Goniwada2021", "section": "4 Data Partitioning Pattern" }],
             "measures": ["dataShardingLevel"]
         },
@@ -708,7 +708,7 @@ export const qualityModel: QualityModelSpec = {
             "name": "Physical data distribution",
             "description": "Storage Backing Service instances where Data aggregates are persisted are distributed across physical locations (e.g. availability zones of a cloud vendor) so that even in the case of a failure of one physical location, another physical location is still useable.",
             "categories": ["dataManagement", "cloudInfrastructure"],
-            "relevantEntities": ["storageBackingService", ENTITIES.INFRASTRUCTURE],
+            "relevantEntities": [ENTITIES.STORAGE_BACKING_SERVICE, ENTITIES.INFRASTRUCTURE],
             "sources": [{ "key": "Scholl2019", "section": "6 Keep Data in Multiple Regions or Zones" }, { "key": "Indrasiri2021", "section": "4 Data Sharding Pattern: Geographically distribute data" }],
             "measures": ["numberOfAvailabilityZonesUsed"]
         },
@@ -1600,6 +1600,11 @@ export const qualityModel: QualityModelSpec = {
             "name": "Ratio of Cached Data Aggregates",
             "calculation": "Sum-of(Cached usage of a Data Aggregate in a Component) / Sum-of(Cached and uncached usage of a Data Aggregate in a Component",
             "sources": ["new"] 
+        },
+        "dataReplicationAlongRequestTrace": {
+            "name": "Data Replication Along Request Trace",
+            "calculation": "Average(Replication of Data Aggregates along request trace)",
+            "sources": ["new"]
         }
     },
     "productFactorEvaluations": [
@@ -1636,4 +1641,7 @@ export const qualityModel: QualityModelSpec = {
             "reasoning": "TODO"
         }
     ]
-}
+} satisfies QualityModelSpec;
+
+const productFactorKeys = Object.freeze(qualityModel.productFactors);
+export type ProductFactorKey = keyof typeof productFactorKeys;

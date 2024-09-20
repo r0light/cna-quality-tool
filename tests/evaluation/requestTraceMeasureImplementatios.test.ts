@@ -1,5 +1,6 @@
 import { getEmptyMetaData } from "@/core/common/entityDataTypes";
-import { Endpoint, ExternalEndpoint, Link, RequestTrace, Service, System } from "@/core/entities";
+import { DataAggregate, Endpoint, ExternalEndpoint, Link, RequestTrace, Service, StorageBackingService, System } from "@/core/entities";
+import { RelationToDataAggregate } from "@/core/entities/relationToDataAggregate";
 import { requestTraceMeasureImplementations } from "@/core/qualitymodel/evaluation/measureImplementations";
 import { getQualityModel } from "@/core/qualitymodel/QualityModelInstance";
 import { expect, test } from "vitest";
@@ -121,5 +122,120 @@ test("numberOfCyclesInRequestTraces", () => {
 
     let measureValue = requestTraceMeasureImplementations["numberOfCyclesInRequestTraces"]({ requestTrace: requestTrace, system: system});
     expect(measureValue).toEqual(1);
+
+})
+
+
+test("dataReplicationAlongRequestTrace", () => {
+    let system = new System("testSystem");
+
+    let serviceA = new Service("s1", "testService A", getEmptyMetaData());
+    let externalEndpoint = new ExternalEndpoint("ee1", "external endpoint", getEmptyMetaData());
+    serviceA.addEndpoint(externalEndpoint);
+
+    let serviceB = new Service("s2", "testService B", getEmptyMetaData());
+    let endpointB = new Endpoint("e2", "endpoint B", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+
+    let serviceC = new Service("s3", "testService C", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint C", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+
+    let dataAggregateA = new DataAggregate("da1", "data aggregate A", getEmptyMetaData());
+    let dataAggregateB = new DataAggregate("da2", "data aggregate B", getEmptyMetaData());
+
+    let storageServiceA = new StorageBackingService("sbs1", "storage service A", getEmptyMetaData());
+    let endpointSA = new Endpoint("e4", "endpoint SA", getEmptyMetaData());
+    storageServiceA.addEndpoint(endpointSA);
+
+    let storageServiceB = new StorageBackingService("sbs2", "storage service B", getEmptyMetaData());
+    let endpointSB = new Endpoint("e5", "endpoint SB", getEmptyMetaData());
+    storageServiceB.addEndpoint(endpointSB);
+
+   
+    let usageAA = new RelationToDataAggregate("r1", getEmptyMetaData());
+    usageAA.setPropertyValue("usage_relation", "usage");
+    serviceA.addDataAggregateEntity(dataAggregateA, usageAA);
+
+    let usageAB = new RelationToDataAggregate("r2", getEmptyMetaData());
+    usageAB.setPropertyValue("usage_relation", "usage");
+    serviceA.addDataAggregateEntity(dataAggregateB, usageAB);
+
+    let usageEAA = new RelationToDataAggregate("r3", getEmptyMetaData());
+    usageEAA.setPropertyValue("usage_relation", "usage");
+    externalEndpoint.addDataAggregateEntity(dataAggregateA, usageEAA);
+
+    let usageEAB = new RelationToDataAggregate("r4", getEmptyMetaData());
+    usageEAB.setPropertyValue("usage_relation", "usage");
+    externalEndpoint.addDataAggregateEntity(dataAggregateB, usageEAB);
+
+
+    let usageBA = new RelationToDataAggregate("r5", getEmptyMetaData());
+    usageBA.setPropertyValue("usage_relation", "cached-usage");
+    serviceB.addDataAggregateEntity(dataAggregateA, usageBA);
+
+    let usageBB = new RelationToDataAggregate("r6", getEmptyMetaData());
+    usageBB.setPropertyValue("usage_relation", "cached-usage");
+    serviceB.addDataAggregateEntity(dataAggregateB, usageBB);
+
+    let usageEBA = new RelationToDataAggregate("r7", getEmptyMetaData());
+    usageEBA.setPropertyValue("usage_relation", "cached-usage");
+    endpointB.addDataAggregateEntity(dataAggregateA, usageEBA);
+
+    let usageEBB = new RelationToDataAggregate("r8", getEmptyMetaData());
+    usageEBB.setPropertyValue("usage_relation", "cached-usage");
+    endpointB.addDataAggregateEntity(dataAggregateB, usageEBB);
+
+
+
+    let usageCB = new RelationToDataAggregate("r9", getEmptyMetaData());
+    usageCB.setPropertyValue("usage_relation", "cached-usage");
+    serviceC.addDataAggregateEntity(dataAggregateB, usageCB);
+
+    let usageECB = new RelationToDataAggregate("r10", getEmptyMetaData());
+    usageECB.setPropertyValue("usage_relation", "cached-usage");
+    endpointC.addDataAggregateEntity(dataAggregateB, usageECB);
+
+
+    let usageSAA = new RelationToDataAggregate("r11", getEmptyMetaData());
+    usageSAA.setPropertyValue("usage_relation", "persistence");
+    storageServiceA.addDataAggregateEntity(dataAggregateA, usageSAA);
+
+    let usageESAA = new RelationToDataAggregate("r12", getEmptyMetaData());
+    usageESAA.setPropertyValue("usage_relation", "persistence");
+    endpointSA.addDataAggregateEntity(dataAggregateA, usageESAA);
+
+
+    let usageSBB = new RelationToDataAggregate("r13", getEmptyMetaData());
+    usageSBB.setPropertyValue("usage_relation", "persistence");
+    storageServiceB.addDataAggregateEntity(dataAggregateB, usageSBB);
+
+    let usageESBB = new RelationToDataAggregate("r14", getEmptyMetaData());
+    usageESBB.setPropertyValue("usage_relation", "persistence");
+    endpointSB.addDataAggregateEntity(dataAggregateB, usageESBB);
+
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+    let linkBSA = new Link("l2", serviceB, endpointSA);
+    let linkBC = new Link("l3", serviceB, endpointC);
+    let linkCSB = new Link("l4", serviceC, endpointSB);
+
+    let requestTrace = new RequestTrace("r1", "request trace 1", getEmptyMetaData());
+    requestTrace.setLinks = [
+        [linkAB],
+        [linkBSA, linkBC],
+        [linkCSB]
+    ]
+    requestTrace.setExternalEndpoint = externalEndpoint;
+
+    system.addEntities([dataAggregateA, dataAggregateB]);
+    system.addEntities([serviceA, serviceB, serviceC]);
+    system.addEntities([storageServiceA, storageServiceB]);
+    system.addEntities([linkAB, linkBSA, linkBC, linkCSB]);
+    system.addEntities([requestTrace]);
+
+
+    let measureValue = requestTraceMeasureImplementations["dataReplicationAlongRequestTrace"]({ requestTrace: requestTrace, system: system});
+    expect(measureValue).toBeCloseTo(17/24, 5);
 
 })

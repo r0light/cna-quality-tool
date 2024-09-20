@@ -3,13 +3,58 @@ import { QualityAspectEvaluationFunction } from "./QualityAspectEvaluation";
 import { ProductFactor } from "../quamoco/ProductFactor";
 import { data } from "jquery";
 import { ImpactWeight } from "./EvaluationTypes";
+import { ProductFactorKey, qualityModel, QualityModelSpec } from "../specifications/qualitymodel";
 
 const average: (list: number[]) => number = list => {
     return list.reduce((e1, e2) => e1 + e2, 0) / list.length
 }
 
+const generalEvaluationImplementation: {
+    [evaluationKey: string]: ProductFactorEvaluationFunction | QualityAspectEvaluationFunction
+} = {
+    "aggregateImpacts": (factor, incomingPaths, calculatedMeasures, evaluatedProductFactors) => {
+        let aggregateResult: ImpactWeight[] = incomingPaths.map(impact => impact.weight);
+        
+        if (aggregateResult.length === 0) {
+            return "n/a";
+        }
+
+        if (aggregateResult.every(result => result === "n/a")) {
+            return {
+                tendency: "n/a",
+                impacts: aggregateResult
+            }
+        }
+
+        let averageValue = average(aggregateResult.filter(result => result !== "n/a").map(result => {
+            switch(result) {
+                case "negative": return -2;
+                case "slightly negative": return -1;
+                case "neutral": return 0;
+                case "slightly positive": return 1;
+                case "positive": return 2;
+            }
+        }))
+
+        let tendency = ((averageValue) => {
+            if (averageValue < 0) {
+                return "negative";
+            } else if (averageValue === 0) {
+                return "neutral";
+            } else {
+                return "positive";
+            }
+        })(averageValue);
+
+        return {
+            tendency: tendency,
+            impacts: aggregateResult
+        }
+    }
+}   
+
 const productFactorEvaluationImplementation: {
-    [factorKey: string]: ProductFactorEvaluationFunction
+    [ factorKey in ProductFactorKey ]?: ProductFactorEvaluationFunction
 } = {
     "serviceReplication": (factor , incomingPaths, calculatedMeasures, evaluatedProductFactors) => {
         let serviceReplicationLevel = calculatedMeasures.get("serviceReplicationLevel").value;
@@ -57,45 +102,6 @@ const productFactorEvaluationImplementation: {
             }
         } else {
             throw new Error(`dataShardingLevel is of type ${typeof dataShardingLevel}, but should be of type number`);
-        }
-    },
-    "aggregateImpacts": (factor, incomingPaths, calculatedMeasures, evaluatedProductFactors) => {
-        let aggregateResult: ImpactWeight[] = incomingPaths.map(impact => impact.weight);
-        
-        if (aggregateResult.length === 0) {
-            return "n/a";
-        }
-
-        if (aggregateResult.every(result => result === "n/a")) {
-            return {
-                tendency: "n/a",
-                impacts: aggregateResult
-            }
-        }
-
-        let averageValue = average(aggregateResult.filter(result => result !== "n/a").map(result => {
-            switch(result) {
-                case "negative": return -2;
-                case "slightly negative": return -1;
-                case "neutral": return 0;
-                case "slightly positive": return 1;
-                case "positive": return 2;
-            }
-        }))
-
-        let tendency = ((averageValue) => {
-            if (averageValue < 0) {
-                return "negative";
-            } else if (averageValue === 0) {
-                return "neutral";
-            } else {
-                return "positive";
-            }
-        })(averageValue);
-
-        return {
-            tendency: tendency,
-            impacts: aggregateResult
         }
     }
 };
@@ -145,4 +151,4 @@ const qualityAspectEvaluationImplementation: {
     }
 };
 
-export { productFactorEvaluationImplementation, qualityAspectEvaluationImplementation }
+export { generalEvaluationImplementation, productFactorEvaluationImplementation, qualityAspectEvaluationImplementation }

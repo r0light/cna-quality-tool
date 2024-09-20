@@ -358,23 +358,23 @@ function onSelectRequestTrace(element: dia.Element) {
     highlightRequestTrace(element);
 
     // get involved Links
-    const involvedLinks = element.prop("entity/relations/involved_links");
+    const involvedLinks: string[] = element.prop("entity/relations/involved_links").flat();
 
     let allInvolvedEntities = new Set(involvedLinks);
     // add Request Trace entity itself 
-    allInvolvedEntities.add(element.id);
+    allInvolvedEntities.add(element.id.toString());
     // add referred External Endpoint
     allInvolvedEntities.add(element.prop("entity/relations/referred_endpoint"));
 
     if (involvedLinks && involvedLinks.length > 0) {
         for (const involvedLink of involvedLinks) {
             const linkEntity = currentSystemGraph.value.getCell(involvedLink) as dia.Link;
-            allInvolvedEntities.add(linkEntity.getTargetElement().id);
+            allInvolvedEntities.add(linkEntity.getTargetElement().id.toString());
             allInvolvedEntities.add(linkEntity.getTargetElement().parent());
-            allInvolvedEntities.add(linkEntity.getSourceElement().id);
+            allInvolvedEntities.add(linkEntity.getSourceElement().id.toString());
             if (linkEntity.getTargetElement().prop("entity/relations/uses_data")) {
                 for (const usedData of linkEntity.getTargetElement().prop("entity/relations/uses_data")) {
-                    allInvolvedEntities.add(currentSystemGraph.value.getCell(usedData).id);
+                    allInvolvedEntities.add(currentSystemGraph.value.getCell(usedData).id.toString());
                 }
             }
         }
@@ -383,7 +383,7 @@ function onSelectRequestTrace(element: dia.Element) {
     // hide all other entities
     const allSystemEntities = currentSystemGraph.value.getCells();
     for (const entity of allSystemEntities) {
-        if (allInvolvedEntities.has(entity.id)) {
+        if (allInvolvedEntities.has(entity.id.toString())) {
             continue;
         }
         entity.attr("root/visibility", "hidden", { isolate: true }); // TODO check isolate

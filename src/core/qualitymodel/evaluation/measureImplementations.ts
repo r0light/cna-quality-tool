@@ -13,15 +13,15 @@ const average: (list: number[]) => number = list => {
 const partition = <T,>(
     array: T[],
     callback: (element: T, index: number, array: T[]) => boolean
-  ) => {
-    return array.reduce(function(result, element, i) {
-      callback(element, i, array)
-        ? result[0].push(element) 
-        : result[1].push(element);
-  
-      return result;
-    }, [[],[]]);
-  };
+) => {
+    return array.reduce(function (result, element, i) {
+        callback(element, i, array)
+            ? result[0].push(element)
+            : result[1].push(element);
+
+        return result;
+    }, [[], []]);
+};
 
 export const serviceReplicationLevel: Calculation<System> = (system) => {
     let replicasPerService: Map<String, number> = new Map();
@@ -933,7 +933,7 @@ export const averageComplexityOfRequestTraces: Calculation<System> = (system) =>
         return 0;
     }
 
-    return average(system.getRequestTraceEntities.entries().map(([requestTraceId, requestTrace]) => requestTrace.getLinks.length).toArray());
+    return average([...system.getRequestTraceEntities.entries()].map(([requestTraceId, requestTrace]) => requestTrace.getLinks.length));
 }
 
 export const amountOfRedundancy: Calculation<System> = (system) => {
@@ -1423,8 +1423,8 @@ export const distributedTracingSupport: Calculation<System> = (system) => {
     let allTraceableComponents = [...system.getComponentEntities.entries()].filter(([componentId, component]) => {
         return component.constructor.name !== BackingService.name || component.getProperty("providedFunctionality").value !== "tracing";
     })
-    
-    let tracingServices =  [...system.getComponentEntities.entries()].filter(([componentId, component]) => {
+
+    let tracingServices = [...system.getComponentEntities.entries()].filter(([componentId, component]) => {
         return component.constructor.name === BackingService.name && component.getProperty("providedFunctionality").value === "tracing";
     })
 
@@ -1507,7 +1507,7 @@ export const ratioOfComponentsWhoseEgressIsProxied: Calculation<System> = (syste
 }
 
 export const ratioOfCachedDataAggregates: Calculation<System> = (system) => {
-    
+
     const allComponents = [...system.getComponentEntities.entries()];
 
     let cachedUsages = 0;
@@ -2216,8 +2216,53 @@ export const numberOfCyclesInRequestTraces: Calculation<{ requestTrace: RequestT
     return numberOfCycles;
 }
 
+const dataReplicationAlongRequestTrace: Calculation<{ requestTrace: RequestTrace, system: System }> = (parameters) => {
+
+    let dataAggregateUsages = new Map<string, Map<string, string>>();
+
+    if (parameters.requestTrace.getExternalEndpoint) {
+        let endpoint = parameters.requestTrace.getExternalEndpoint;
+        let parentComponent = parameters.system.searchComponentOfEndpoint(endpoint.getId);
+        endpoint.getDataAggregateEntities.forEach(dataAggregateUsage => {
+            if (dataAggregateUsages.get(dataAggregateUsage.data.getId)) {
+                dataAggregateUsages.get(dataAggregateUsage.data.getId).set(parentComponent.getId, dataAggregateUsage.relation.getProperty("usage_relation").value);
+            } else {
+                let firstUsage = new Map();
+                firstUsage.set(parentComponent.getId, dataAggregateUsage.relation.getProperty("usage_relation").value);
+                dataAggregateUsages.set(dataAggregateUsage.data.getId, firstUsage);
+            }
+        })
+    }
+
+    parameters.requestTrace.getLinks.flat().forEach(link => {
+        let calledEndpoint = link.getTargetEndpoint;
+        let parentComponent = parameters.system.searchComponentOfEndpoint(calledEndpoint.getId);
+        calledEndpoint.getDataAggregateEntities.forEach(dataAggregateUsage => {
+            if (dataAggregateUsages.get(dataAggregateUsage.data.getId)) {
+                dataAggregateUsages.get(dataAggregateUsage.data.getId).set(parentComponent.getId, dataAggregateUsage.relation.getProperty("usage_relation").value);
+            } else {
+                let firstUsage = new Map();
+                firstUsage.set(parentComponent.getId, dataAggregateUsage.relation.getProperty("usage_relation").value);
+                dataAggregateUsages.set(dataAggregateUsage.data.getId, firstUsage);
+            }
+        })
+
+    })
+
+    return average([...dataAggregateUsages.values()].map(usageByComponents => average([...usageByComponents.values()].map(usage => {
+        if (["cached-usage", "persistence"].includes(usage)) {
+            return 1
+        }
+        else {
+            return 0;
+        }
+    }))))
+
+}
+
 export const requestTraceMeasureImplementations: { [measureKey: string]: Calculation<{ requestTrace: RequestTrace, system: System }> } = {
     "requestTraceLength": requestTraceLength,
-    "numberOfCyclesInRequestTraces": numberOfCyclesInRequestTraces
+    "numberOfCyclesInRequestTraces": numberOfCyclesInRequestTraces,
+    "dataReplicationAlongRequestTrace": dataReplicationAlongRequestTrace
 }
 
