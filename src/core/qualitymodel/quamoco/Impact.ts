@@ -1,7 +1,8 @@
 import { ProductFactor } from "./ProductFactor";
 import { QualityAspect } from "./QualityAspect";
 
-type ImpactType = "--" | "-" | "o" | "+" | "++";
+type ImpactType = "negative" | "positive";
+//type ImpactSymbol =  "--" | "-" | "o" | "+" | "++";
 
 class Impact {
 

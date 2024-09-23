@@ -42,7 +42,7 @@ type SourceSpec = {
 type ImpactSpec = {
     impactedFactor: string, 
     sourceFactor: string,
-    impactType: string
+    impactType: "positive" | "negative"
 }
 
 type MeasureSpec = {
@@ -51,16 +51,27 @@ type MeasureSpec = {
     sources : string[]
 }
 
+export const DEFAULT_PRECONDITION: EvaluationPrecondition = "at-least-one";
+export type EvaluationPrecondition =  "at-least-one" | "all" | "majority";
+export const DEFAULT_IMPACTS_INTERPRETATION: IncomingImpactsInterpretation = "mean";
+export type IncomingImpactsInterpretation = "lowest" | "highest" | "mean" | "median" | "custom"
+
 type ProductFactorEvaluationSpec = {
     targetFactor: string,
     evaluation: string,
-    reasoning: string
+    reasoning: string,
+    precondition?: EvaluationPrecondition,
+    impactsInterpretation?: IncomingImpactsInterpretation,
+    customImpactInterpretation?: (list: number[]) => number
 }
 
 type QualityAspectEvaluationSpec = {
     targetAspect: string
     evaluation: string,
-    reasoning: string
+    reasoning: string,
+    precondition?: EvaluationPrecondition,
+    impactsInterpretation?: IncomingImpactsInterpretation,
+    customImpactInterpretation?: (list: number[]) => number
 }
 
 export const qualityModel = {

@@ -1,23 +1,23 @@
 import { HighLevelAspect } from "./quamoco/HighLevelAspect.js";
-import { Impact, ImpactType } from "./quamoco/Impact.js";
-import { Calculation, Measure } from "./quamoco/Measure.js";
+import { Impact } from "./quamoco/Impact.js";
+import { Measure } from "./quamoco/Measure.js";
 import { ProductFactor } from "./quamoco/ProductFactor.js";
 import { QualityAspect } from "./quamoco/QualityAspect.js";
 import { entities } from "./specifications/entities.js";
-import { qualityModel } from "./specifications/qualitymodel.js";
+import { DEFAULT_IMPACTS_INTERPRETATION, DEFAULT_PRECONDITION, qualityModel, QualityModelSpec } from "./specifications/qualitymodel.js";
 import { literature } from "./specifications/literature.js";
 import { LiteratureSource } from "./quamoco/LiteratureSource.js";
 import { Entity } from "./quamoco/Entity.js";
 import { generalEvaluationImplementation, productFactorEvaluationImplementation, qualityAspectEvaluationImplementation } from "./evaluation/evaluationImplementations.js";
-import { ProductFactorEvaluation } from "./evaluation/ProductFactorEvaluation.js";
 import { componentMeasureImplementations, componentPairMeasureImplementations, infrastructureMeasureImplementations, requestTraceMeasureImplementations, systemMeasureImplementations } from "./evaluation/measureImplementations.js";
-import { QualityAspectEvaluation } from "./evaluation/QualityAspectEvaluation.js";
 import { Component, Infrastructure, RequestTrace, System } from "../entities.js";
+import { FactorEvaluation } from "./evaluation/FactorEvaluation.js";
 
 
 function getQualityModel(): QualityModelInstance {
 
     const newQualityModel = new QualityModelInstance();
+    const specifiedQualityModel = qualityModel as QualityModelSpec;
 
     // add all entities
     for (const [entityKey, entity] of Object.entries(entities)) {
@@ -26,7 +26,7 @@ function getQualityModel(): QualityModelInstance {
     }
 
     // add all HighLevel Aspects and Quality Aspects
-    for (const [highLevelQualityAspectKey, highLevelQualityAspect] of Object.entries(qualityModel.qualityAspects)) {
+    for (const [highLevelQualityAspectKey, highLevelQualityAspect] of Object.entries(specifiedQualityModel.qualityAspects)) {
         let highLevelAspect = new HighLevelAspect(highLevelQualityAspectKey, highLevelQualityAspect.name);
         newQualityModel.highLevelAspects.push(highLevelAspect);
         for (const [qualityAspectKey, qualityAspect] of Object.entries(highLevelQualityAspect.aspects)) {
@@ -36,7 +36,7 @@ function getQualityModel(): QualityModelInstance {
     }
 
     // add all factor categories
-    for (const [categoryKey, category] of Object.entries(qualityModel.factorCategories)) {
+    for (const [categoryKey, category] of Object.entries(specifiedQualityModel.factorCategories)) {
         newQualityModel.factorCategories.push({
             categoryKey: categoryKey,
             categoryName: category.name
@@ -45,7 +45,7 @@ function getQualityModel(): QualityModelInstance {
 
     // add all Measures
 
-    for (const [measureKey, measure] of Object.entries(qualityModel.measures)) {
+    for (const [measureKey, measure] of Object.entries(specifiedQualityModel.measures)) {
         let newMeasure = new Measure(measureKey, measure.name, measure.calculation);
         measure.sources.forEach(sourceKey => {
             let url = literature[sourceKey] ? literature[sourceKey].url : "";
@@ -74,7 +74,7 @@ function getQualityModel(): QualityModelInstance {
     }
 
     // add all Product Factors
-    for (const [productFactorKey, productFactor] of Object.entries(qualityModel.productFactors)) {
+    for (const [productFactorKey, productFactor] of Object.entries(specifiedQualityModel.productFactors)) {
 
         let assignedCategories = productFactor.categories.map(categoryKey => {
             if (newQualityModel.findFactorCategory(categoryKey)) {
@@ -132,7 +132,7 @@ function getQualityModel(): QualityModelInstance {
     }
 
     // add all Impacts
-    for (const impact of qualityModel.impacts) {
+    for (const impact of specifiedQualityModel.impacts) {
 
         let impacted = (() => {
             let foundQualityAspect = newQualityModel.findQualityAspect(impact.impactedFactor);
@@ -157,31 +157,25 @@ function getQualityModel(): QualityModelInstance {
             }
         })();
 
-        let impactType: ImpactType = (() => {
-            switch (impact.impactType) {
-                case "positive":
-                    return "+";
-                case "negative":
-                    return "-";
-                default:
-                    return "o";
-            }
-        })();
-
-
-        let newImpact = new Impact(impacted, impacter, impactType);
+        let newImpact = new Impact(impacted, impacter, impact.impactType);
         impacted.addIncomingImpact(newImpact);
         impacter.addOutgoingImpact(newImpact);
         newQualityModel.impacts.push(newImpact);
     }
 
     // add all product factor evaluations
-    for (const productFactorEvaluation of qualityModel.productFactorEvaluations) {
+    for (const productFactorEvaluation of specifiedQualityModel.productFactorEvaluations) {
 
         let evaluatedProductFactor = newQualityModel.findProductFactor(productFactorEvaluation.targetFactor);
         if (evaluatedProductFactor) {
 
-            let newEvaluation = new ProductFactorEvaluation(evaluatedProductFactor, productFactorEvaluation.evaluation, productFactorEvaluation.reasoning);
+            let newEvaluation = new FactorEvaluation(evaluatedProductFactor, 
+                productFactorEvaluation.evaluation, 
+                productFactorEvaluation.reasoning,
+                productFactorEvaluation.precondition ? productFactorEvaluation.precondition : DEFAULT_PRECONDITION,
+                productFactorEvaluation.impactsInterpretation ? productFactorEvaluation.impactsInterpretation : DEFAULT_IMPACTS_INTERPRETATION,
+                productFactorEvaluation.customImpactInterpretation ? productFactorEvaluation.customImpactInterpretation : (impacts: number[]) => 0
+            );
             let availableImplementation = productFactorEvaluationImplementation[newEvaluation.getEvaluationId]
             if (availableImplementation) {
                 newEvaluation.addEvaluation(availableImplementation);
@@ -202,12 +196,18 @@ function getQualityModel(): QualityModelInstance {
     }
 
     // add all quality aspect evaluations
-    for (const qualityAspectEvaluation of qualityModel.qualityAspectEvaluations) {
+    for (const qualityAspectEvaluation of specifiedQualityModel.qualityAspectEvaluations) {
 
         let evaluatedQualityAspect = newQualityModel.findQualityAspect(qualityAspectEvaluation.targetAspect);
         if (evaluatedQualityAspect) {
 
-            let newEvaluation = new QualityAspectEvaluation(evaluatedQualityAspect, qualityAspectEvaluation.evaluation, qualityAspectEvaluation.reasoning);
+            let newEvaluation = new FactorEvaluation(evaluatedQualityAspect, 
+                qualityAspectEvaluation.evaluation, 
+                qualityAspectEvaluation.reasoning,
+                qualityAspectEvaluation.precondition ? qualityAspectEvaluation.precondition : DEFAULT_PRECONDITION,
+                qualityAspectEvaluation.impactsInterpretation ? qualityAspectEvaluation.impactsInterpretation : DEFAULT_IMPACTS_INTERPRETATION,
+                qualityAspectEvaluation.customImpactInterpretation ? qualityAspectEvaluation.customImpactInterpretation : (impacts: number[]) => 0
+            );
             let availableImplementation = qualityAspectEvaluationImplementation[newEvaluation.getEvaluationId]
             if (availableImplementation) {
                 newEvaluation.addEvaluation(availableImplementation);

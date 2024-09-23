@@ -4,8 +4,9 @@ import { ImpactType } from "@/core/qualitymodel/quamoco/Impact";
 export function describeNodeStyleClasses(): string {
     return `     classDef factor-not-applicable fill:#f2f2f2,stroke:#d9d9d9,stroke-width:2px;
     classDef factor-applicable fill:#d9d9d9,stroke:#000,stroke-width:2px;
-    classDef factor-low fill:#b3d9ff,stroke:#000,stroke-width:2px;
-    classDef factor-high fill:#80bfff,stroke:#000,stroke-width:3px;`;
+    classDef factor-low fill:#e6f2ff,stroke:#000,stroke-width:2px;
+    classDef factor-moderate fill:#b3d9ff,stroke:#000,stroke-width:2px;
+    classDef factor-high fill:#80bfff,stroke:#000,stroke-width:2px;`;
 }
 
 export function describeFactor(factor: EvaluatedProductFactor | EvaluatedQualityAspect): string {
@@ -14,8 +15,6 @@ export function describeFactor(factor: EvaluatedProductFactor | EvaluatedQuality
         result = factor.result;
     } else if (typeof factor.result === "number") {
         result = factor.result.toString();
-    } else if (factor.result.tendency && factor.result.impacts) {
-        result = `${factor.result.impacts.join(" #124; ")}`;
     }
     return `\n\t${factor.id}[${factor.name}\n\t<span class="evaluation-result">${result}</span>]`;
 }
@@ -32,6 +31,9 @@ export function describeFactorStyle(factor: EvaluatedProductFactor | EvaluatedQu
             case "low":
                 styleClass = "factor-low";
                 break;
+            case "moderate":
+                styleClass = "factor-moderate";
+                break;
             case "high":
                 styleClass = "factor-high";
                 break;
@@ -42,28 +44,9 @@ export function describeFactorStyle(factor: EvaluatedProductFactor | EvaluatedQu
         }
     } else if (typeof factor.result === "number") {
         styleClass = "factor-applicable"; // TODO better solution
-    } else if (factor.result.tendency) {
-        switch (factor.result.tendency) {
-            case "negative":
-                styleClass = "factor-negative";
-                break;
-            case "neutral":
-                styleClass = "factor-applicable";
-                break;
-            case "positive":
-                styleClass = "factor-positive";
-                break;
-            case "n/a":
-            default:
-                styleClass = "factor-not-applicable";
-                break;
-        }
     }
-
     return `\n\tclass ${factor.id} ${styleClass}`;
 }
-
-
 
 export function describeImpact(sourceFactorKey: string, impactWeight: ImpactWeight, impactType: ImpactType, targetFactorKey: string) {
     let impactLabel = "";
@@ -72,16 +55,26 @@ export function describeImpact(sourceFactorKey: string, impactWeight: ImpactWeig
             impactLabel = "o";
             break;
         case "positive":
+            impactLabel = "++";
+            break;
         case "slightly positive":
             impactLabel = "+";
             break;
         case "negative":
+            impactLabel = "--";
+            break;
         case "slightly negative":
             impactLabel = "-";
             break;
         case "n/a":
         default:
-            impactLabel = impactType;
+            if (impactType === "positive") {
+                impactLabel = "+";
+            } else if (impactType === "negative") {
+                impactLabel = "-";
+            } else {
+                impactLabel = impactType;
+            }
             break;
     }
     return `\n\t${sourceFactorKey}-->|${impactLabel}|${targetFactorKey}`;
@@ -89,16 +82,23 @@ export function describeImpact(sourceFactorKey: string, impactWeight: ImpactWeig
 
 export function describeImpactStyle(count: number, impactWeight: ImpactWeight): string {
     let color = "#000";
+    let strokeWidth = "2px"; 
 
     switch (impactWeight) {
         case "neutral":
             color = "#000";
             break;
         case "positive":
+            color = "#33cc33";
+            strokeWidth = "4px";
+            break;
         case "slightly positive":
             color = "#33cc33";
             break;
         case "negative":
+            color = "#ff5050";
+            strokeWidth = "4px";
+            break;
         case "slightly negative":
             color = "#ff5050";
             break;
@@ -108,6 +108,6 @@ export function describeImpactStyle(count: number, impactWeight: ImpactWeight): 
             break;
     }
 
-    return `\n\tlinkStyle ${count} stroke-width:2px,fill:none,stroke:${color},color:#000`;
+    return `\n\tlinkStyle ${count} stroke-width:${strokeWidth},fill:none,stroke:${color},color:#000`;
 }
 

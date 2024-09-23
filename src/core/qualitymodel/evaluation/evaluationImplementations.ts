@@ -1,11 +1,18 @@
-import { ProductFactor } from "../quamoco/ProductFactor";
-import { data } from "jquery";
-import { FactorEvaluationFunction, ImpactWeight } from "./Evaluation";
-import { ProductFactorKey, qualityModel, QualityModelSpec } from "../specifications/qualitymodel";
+import { FactorEvaluationFunction, FactorEvaluationParameters, ImpactWeight, impactWeightNumericMapping, interpretNumericalResultAsFactorEvaluation } from "./Evaluation";
+import { ProductFactorKey } from "../specifications/qualitymodel";
 
-const average: (list: number[]) => number = list => {
+const mean: (list: number[]) => number = list => {
     return list.reduce((e1, e2) => e1 + e2, 0) / list.length
 }
+const median = (arr: number[]): number | undefined => {
+    if (!arr.length) return undefined;
+    const s = [...arr].sort((a, b) => a - b);
+    const mid = Math.floor(s.length / 2);
+    return s.length % 2 ? s[mid] : ((s[mid - 1] + s[mid]) / 2);
+  };
+const lowest: (list: number[]) => number = list => { return Math.min(...list)}
+const highest: (list: number[]) => number = list => { return Math.max(...list)} 
+
 
 const generalEvaluationImplementation: {
     [evaluationKey: string]: FactorEvaluationFunction
@@ -17,37 +24,44 @@ const generalEvaluationImplementation: {
             return "n/a";
         }
 
-        if (aggregateResult.every(result => result === "n/a")) {
-            return {
-                tendency: "n/a",
-                impacts: aggregateResult
-            }
+        let valuedImpacts = aggregateResult.filter(result => result !== "n/a");
+        let numberOfValuedImpacts = valuedImpacts.length;
+
+        // if there is no valued impact, directly return 
+        if (numberOfValuedImpacts === 0) {
+            return "n/a";
         }
 
-        let averageValue = average(aggregateResult.filter(result => result !== "n/a").map(result => {
-            switch (result) {
-                case "negative": return -2;
-                case "slightly negative": return -1;
-                case "neutral": return 0;
-                case "slightly positive": return 1;
-                case "positive": return 2;
-            }
-        }))
-
-        let tendency = ((averageValue) => {
-            if (averageValue < 0) {
-                return "negative";
-            } else if (averageValue === 0) {
-                return "neutral";
-            } else {
-                return "positive";
-            }
-        })(averageValue);
-
-        return {
-            tendency: tendency,
-            impacts: aggregateResult
+        // if precondition is all, all incoming impacts need to have a value
+        if (parameters.precondition === "all" && numberOfValuedImpacts < aggregateResult.length) {
+            return "n/a";
         }
+
+        // if precondition is majority, a majority needs to be valued
+        if (parameters.precondition === "majority" && numberOfValuedImpacts < Math.ceil(aggregateResult.length / 2)) {
+            return "n/a";
+        }
+
+        let numericalImpacts = valuedImpacts.map(impact => impactWeightNumericMapping(impact));
+
+        // else: precondition is at-least-one
+        let numericalResult = ((parameters: FactorEvaluationParameters) => { 
+            switch(parameters.impactsInterpretation) {
+            case "highest":
+                return highest(numericalImpacts);
+            case "lowest":
+                return lowest(numericalImpacts);
+            case "mean":
+                return mean(numericalImpacts);
+            case "median":
+                return median(numericalImpacts);
+            case "custom":
+                return parameters.customImpactInterpretation(numericalImpacts);
+            default:
+                throw new Error("Unknown impacts interpretation: " + parameters.impactsInterpretation);
+        }})(parameters);
+
+        return interpretNumericalResultAsFactorEvaluation(numericalResult);
     }
 }
 
@@ -61,8 +75,10 @@ const productFactorEvaluationImplementation: {
         } else if (typeof serviceReplicationLevel === "number") {
             if (serviceReplicationLevel <= 1) {
                 return "none";
-            } else if (serviceReplicationLevel > 1 && serviceReplicationLevel < 3) {
+            } else if (serviceReplicationLevel > 1 && serviceReplicationLevel < 1.5) {
                 return "low";
+            } else if (serviceReplicationLevel >= 1.5 && serviceReplicationLevel < 3) {
+                return "moderate";
             } else {
                 return "high";
             }
@@ -77,8 +93,10 @@ const productFactorEvaluationImplementation: {
         } else if (typeof storageReplicationLevel === "number") {
             if (storageReplicationLevel <= 1) {
                 return "none";
-            } else if (storageReplicationLevel > 1 && storageReplicationLevel < 3) {
+            } else if (storageReplicationLevel > 1 && storageReplicationLevel < 1.5) {
                 return "low";
+            } else if (storageReplicationLevel >= 1.5 && storageReplicationLevel < 3) {
+                return "moderate";
             } else {
                 return "high";
             }
@@ -93,8 +111,10 @@ const productFactorEvaluationImplementation: {
         } else if (typeof dataShardingLevel === "number") {
             if (dataShardingLevel <= 1) {
                 return "none";
-            } else if (dataShardingLevel > 1 && dataShardingLevel < 10) {
+            } else if (dataShardingLevel > 1 && dataShardingLevel < 1.5) {
                 return "low";
+            } else if (dataShardingLevel >= 1.5 && dataShardingLevel < 3) {
+                return "moderate";
             } else {
                 return "high";
             }

@@ -93,6 +93,12 @@ function addImpacts(currentFactor: EvaluatedProductFactor, buffer: MermaidBuffer
 }
 
 .factor-low {
+    fill: #e6f2ff !important;
+    stroke: #000 !important;
+    stroke-width: 3px !important;
+}
+
+.factor-moderate {
     fill: #b3d9ff !important;
     stroke: #000 !important;
     stroke-width: 3px !important;
@@ -101,9 +107,10 @@ function addImpacts(currentFactor: EvaluatedProductFactor, buffer: MermaidBuffer
 .factor-high {
     fill: #66b3ff !important;
     stroke: #000 !important;
-    stroke-width: 4px !important;
+    stroke-width: 3px !important;
 }
 
+/*
 .factor-negative {
     fill: #ff9999 !important;
     stroke: #000 !important;
@@ -115,4 +122,5 @@ function addImpacts(currentFactor: EvaluatedProductFactor, buffer: MermaidBuffer
     stroke: #000 !important;
     stroke-width: 2px !important;
 }
+    */
 </style>

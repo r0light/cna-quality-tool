@@ -1,6 +1,6 @@
 import { Component, Infrastructure, RequestTrace, System } from "@/core/entities";
 import { Evaluation } from "../evaluation/EvaluationModels";
-import { ProductFactorEvaluation } from "../evaluation/ProductFactorEvaluation";
+import { ProductFactorEvaluation } from "../evaluation/FactorEvaluation";
 import { Impact } from "./Impact";
 import { LiteratureSource } from "./LiteratureSource";
 import { Measure } from "./Measure";
