@@ -38,7 +38,7 @@ import { ComputedRef, computed } from 'vue';
 import { MermaidBuffer } from './MermaidBuffer';
 import mermaid from 'mermaid';
 import { describeNodeStyleClasses, describeFactor, describeFactorStyle, describeImpact, describeImpactStyle } from './evaluation-commons';
-import { EvaluatedProductFactor, EvaluatedQualityAspect } from '@/core/qualitymodel/evaluation/EvaluationTypes';
+import { EvaluatedProductFactor, EvaluatedQualityAspect } from '@/core/qualitymodel/evaluation/Evaluation';
 
 const props = defineProps<{
     evaluatedQualityAspects: Map<string, EvaluatedQualityAspect>,

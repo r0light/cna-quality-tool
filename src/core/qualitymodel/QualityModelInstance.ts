@@ -213,8 +213,13 @@ function getQualityModel(): QualityModelInstance {
                 newEvaluation.addEvaluation(availableImplementation);
                 evaluatedQualityAspect.addEvaluation(newEvaluation);
             } else {
-                //availableImplementation = generalEvaluationImplementation[newEvaluation.getEvaluationId];
-                throw new Error(`No evaluation implementation found with id ${newEvaluation.getEvaluationId}`);
+                availableImplementation = generalEvaluationImplementation[newEvaluation.getEvaluationId];
+                if (availableImplementation) {
+                    newEvaluation.addEvaluation(availableImplementation);
+                    evaluatedQualityAspect.addEvaluation(newEvaluation);
+                } else {
+                    throw new Error(`No evaluation implementation found with id ${newEvaluation.getEvaluationId}`);
+                }
             }
         } else {
             throw new Error(`There is no quality aspect with key ${qualityAspectEvaluation.targetAspect}`);

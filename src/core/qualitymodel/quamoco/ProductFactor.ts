@@ -1,11 +1,11 @@
 import { Component, Infrastructure, RequestTrace, System } from "@/core/entities";
-import { Evaluation } from "../evaluation/Evaluation";
+import { Evaluation } from "../evaluation/EvaluationModels";
 import { ProductFactorEvaluation } from "../evaluation/ProductFactorEvaluation";
 import { Impact } from "./Impact";
 import { LiteratureSource } from "./LiteratureSource";
 import { Measure } from "./Measure";
 import { QualityAspect } from "./QualityAspect";
-import { ProductFactorEvaluationResult } from "../evaluation/EvaluationTypes";
+import { FactorEvaluationResult } from "../evaluation/Evaluation";
 
 class ProductFactor {
 
@@ -208,9 +208,9 @@ class ProductFactor {
         return this.#evaluation !== undefined;
     }
 
-    evaluate(evaluation: Evaluation): ProductFactorEvaluationResult {
+    evaluate(evaluation: Evaluation): FactorEvaluationResult {
         return this.#evaluation.evaluate(evaluation.getCalculatedMeasures(), evaluation.getEvaluatedProductFactors());
-    }evaluation
+    }
 
 }
 

@@ -1,13 +1,11 @@
 import { QualityAspect } from "../quamoco/QualityAspect";
-import { EvaluatedProductFactor, ForwardImpactingPath, QualityAspectEvaluationResult } from "./EvaluationTypes";
-
-type QualityAspectEvaluationFunction = (factor: QualityAspect, incomingImpacts: ForwardImpactingPath[], evaluatedProductFactors: Map<string, EvaluatedProductFactor>) => QualityAspectEvaluationResult;
+import { CalculatedMeasure, EvaluatedProductFactor, FactorEvaluationFunction, ForwardImpactingPath } from "./Evaluation";
 
 class QualityAspectEvaluation {
 
     #evaluatedAspect: QualityAspect;
     #evaluationId: string;
-    #evaluate: QualityAspectEvaluationFunction;
+    #evaluate: FactorEvaluationFunction;
     #reasoning: string;
 
     constructor(evaluatedFactor: QualityAspect, evaluationId: string,  reasoning: string) {
@@ -28,11 +26,11 @@ class QualityAspectEvaluation {
         return this.#reasoning;
     }
 
-    addEvaluation(evaluationFunction: QualityAspectEvaluationFunction) {
+    addEvaluation(evaluationFunction: FactorEvaluationFunction) {
         this.#evaluate = evaluationFunction;
     }
 
-    evaluate(evaluatedProductFactors: Map<string, EvaluatedProductFactor>) {
+    evaluate(calculatedMeasures: Map<string, CalculatedMeasure>, evaluatedProductFactors: Map<string, EvaluatedProductFactor>) {
 
         let impacts: ForwardImpactingPath[] = [];
 
@@ -47,8 +45,8 @@ class QualityAspectEvaluation {
         }
 
 
-        return this.#evaluate(this.#evaluatedAspect, impacts, evaluatedProductFactors);
+        return this.#evaluate({factor: this.#evaluatedAspect, incomingImpacts: impacts, calculatedMeasures: calculatedMeasures, evaluatedProductFactors: evaluatedProductFactors});
     }
 }
 
-export { QualityAspectEvaluation, QualityAspectEvaluationFunction}
+export { QualityAspectEvaluation }

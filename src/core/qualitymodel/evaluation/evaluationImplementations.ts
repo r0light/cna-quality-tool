@@ -1,8 +1,6 @@
-import { ProductFactorEvaluationFunction } from "./ProductFactorEvaluation";
-import { QualityAspectEvaluationFunction } from "./QualityAspectEvaluation";
 import { ProductFactor } from "../quamoco/ProductFactor";
 import { data } from "jquery";
-import { ImpactWeight } from "./EvaluationTypes";
+import { FactorEvaluationFunction, ImpactWeight } from "./Evaluation";
 import { ProductFactorKey, qualityModel, QualityModelSpec } from "../specifications/qualitymodel";
 
 const average: (list: number[]) => number = list => {
@@ -10,11 +8,11 @@ const average: (list: number[]) => number = list => {
 }
 
 const generalEvaluationImplementation: {
-    [evaluationKey: string]: ProductFactorEvaluationFunction | QualityAspectEvaluationFunction
+    [evaluationKey: string]: FactorEvaluationFunction
 } = {
-    "aggregateImpacts": (factor, incomingPaths, calculatedMeasures, evaluatedProductFactors) => {
-        let aggregateResult: ImpactWeight[] = incomingPaths.map(impact => impact.weight);
-        
+    "aggregateImpacts": (parameters) => {
+        let aggregateResult: ImpactWeight[] = parameters.incomingImpacts.map(impact => impact.weight);
+
         if (aggregateResult.length === 0) {
             return "n/a";
         }
@@ -27,7 +25,7 @@ const generalEvaluationImplementation: {
         }
 
         let averageValue = average(aggregateResult.filter(result => result !== "n/a").map(result => {
-            switch(result) {
+            switch (result) {
                 case "negative": return -2;
                 case "slightly negative": return -1;
                 case "neutral": return 0;
@@ -51,13 +49,13 @@ const generalEvaluationImplementation: {
             impacts: aggregateResult
         }
     }
-}   
+}
 
 const productFactorEvaluationImplementation: {
-    [ factorKey in ProductFactorKey ]?: ProductFactorEvaluationFunction
+    [factorKey in ProductFactorKey]?: FactorEvaluationFunction
 } = {
-    "serviceReplication": (factor , incomingPaths, calculatedMeasures, evaluatedProductFactors) => {
-        let serviceReplicationLevel = calculatedMeasures.get("serviceReplicationLevel").value;
+    "serviceReplication": (parameters) => {
+        let serviceReplicationLevel = parameters.calculatedMeasures.get("serviceReplicationLevel").value;
         if (serviceReplicationLevel === "n/a") {
             return "n/a";
         } else if (typeof serviceReplicationLevel === "number") {
@@ -72,8 +70,8 @@ const productFactorEvaluationImplementation: {
             throw new Error(`serviceReplicationLevel is of type ${typeof serviceReplicationLevel}, but should be of type number`);
         }
     },
-    "horizontalDataReplication": (factor, incomingPaths, calculatedMeasures, evaluatedProductFactors) => {
-        let storageReplicationLevel = calculatedMeasures.get("storageReplicationLevel").value;
+    "horizontalDataReplication": (parameters) => {
+        let storageReplicationLevel = parameters.calculatedMeasures.get("storageReplicationLevel").value;
         if (storageReplicationLevel === "n/a") {
             return "n/a";
         } else if (typeof storageReplicationLevel === "number") {
@@ -88,8 +86,8 @@ const productFactorEvaluationImplementation: {
             throw new Error(`storageReplicationLevel is of type ${typeof storageReplicationLevel}, but should be of type number`);
         }
     },
-    "shardedDataStoreReplication": (factor, incomingPaths, calculatedMeasures, evaluatedProductFactors) => {
-        let dataShardingLevel = calculatedMeasures.get("dataShardingLevel").value;
+    "shardedDataStoreReplication": (parameters) => {
+        let dataShardingLevel = parameters.calculatedMeasures.get("dataShardingLevel").value;
         if (dataShardingLevel === "n/a") {
             return "n/a";
         } else if (typeof dataShardingLevel === "number") {
@@ -107,48 +105,9 @@ const productFactorEvaluationImplementation: {
 };
 
 const qualityAspectEvaluationImplementation: {
-    [aspectKey: string]: QualityAspectEvaluationFunction
+    [aspectKey: string]: FactorEvaluationFunction
 } = {
-    "aggregateImpacts": (factor, incomingPaths, evaluatedProductFactors) => {
 
-        let aggregateResult: ImpactWeight[] = incomingPaths.map(impact => impact.weight);
-        
-        if (aggregateResult.length === 0) {
-            return "n/a";
-        }
-
-        if (aggregateResult.every(result => result === "n/a")) {
-            return {
-                tendency: "n/a",
-                impacts: aggregateResult
-            }
-        }
-
-        let averageValue = average(aggregateResult.filter(result => result !== "n/a").map(result => {
-            switch(result) {
-                case "negative": return -2;
-                case "slightly negative": return -1;
-                case "neutral": return 0;
-                case "slightly positive": return 1;
-                case "positive": return 2;
-            }
-        }))
-
-        let tendency = ((averageValue) => {
-            if (averageValue < 0) {
-                return "negative";
-            } else if (averageValue === 0) {
-                return "neutral";
-            } else {
-                return "positive";
-            }
-        })(averageValue);
-
-        return {
-            tendency: tendency,
-            impacts: aggregateResult
-        }
-    }
 };
 
 export { generalEvaluationImplementation, productFactorEvaluationImplementation, qualityAspectEvaluationImplementation }

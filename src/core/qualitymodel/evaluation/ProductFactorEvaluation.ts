@@ -1,14 +1,11 @@
 import { ProductFactor } from "../quamoco/ProductFactor";
-import { CalculatedMeasure, EvaluatedProductFactor, ForwardImpactingPath, ProductFactorEvaluationResult } from "./EvaluationTypes";
-
-
-type ProductFactorEvaluationFunction = (factor: ProductFactor, incomingImpacts: ForwardImpactingPath[], calculatedMeasures: Map<string, CalculatedMeasure>, evaluatedProductFactors: Map<string, EvaluatedProductFactor>) => ProductFactorEvaluationResult;
+import { CalculatedMeasure, EvaluatedProductFactor, FactorEvaluationFunction, ForwardImpactingPath } from "./Evaluation";
 
 class ProductFactorEvaluation {
 
     #evaluatedFactor: ProductFactor;
     #evaluationId: string;
-    #evaluate: ProductFactorEvaluationFunction;
+    #evaluate: FactorEvaluationFunction;
     #reasoning: string;
 
     constructor(evaluatedFactor: ProductFactor, evaluationId: string, reasoning: string) {
@@ -29,7 +26,7 @@ class ProductFactorEvaluation {
         return this.#reasoning;
     }
 
-    addEvaluation(evaluationFunction: ProductFactorEvaluationFunction) {
+    addEvaluation(evaluationFunction: FactorEvaluationFunction) {
         this.#evaluate = evaluationFunction;
     }
 
@@ -48,8 +45,8 @@ class ProductFactorEvaluation {
         }
 
 
-        return this.#evaluate(this.#evaluatedFactor, impacts, calculatedMeasures, evaluatedProductFactors);
+        return this.#evaluate({factor: this.#evaluatedFactor, incomingImpacts: impacts, calculatedMeasures: calculatedMeasures, evaluatedProductFactors: evaluatedProductFactors});
     }
 }
 
-export { ProductFactorEvaluation, ProductFactorEvaluationFunction }
+export { ProductFactorEvaluation }

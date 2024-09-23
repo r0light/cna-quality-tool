@@ -44,14 +44,14 @@
 import { onMounted, onUpdated, ref, toRaw } from 'vue';
 import { ModelingData } from '../App.vue';
 import { QualityModelInstance, getQualityModel } from '@/core/qualitymodel/QualityModelInstance';
-import { EvaluatedSystemModel } from '@/core/qualitymodel/evaluation/Evaluation';
+import { EvaluatedSystemModel } from '@/core/qualitymodel/evaluation/EvaluationModels';
 import ProductFactorViewpoint from './ProductFactorViewpoint.vue';
 import QualityAspectViewpoint from './QualityAspectViewpoint.vue';
 import FilterToolbar, { ItemFilter, createFactorCategoryFilter, createHighLevelAspectFilter, getActiveElements, getActiveFilterItems } from '../qualitymodel/FilterToolbar.vue';
 import SystemEntityManager from '@/modeling/systemEntityManager';
 import { entityShapes } from '@/modeling/config/entityShapes';
 import { dia } from '@joint/core';
-import { CalculatedMeasure, EvaluatedProductFactor, EvaluatedQualityAspect } from '@/core/qualitymodel/evaluation/EvaluationTypes';
+import { CalculatedMeasure, EvaluatedProductFactor, EvaluatedQualityAspect } from '@/core/qualitymodel/evaluation/Evaluation';
 
 const props = defineProps<{
     systemsData: ModelingData[],

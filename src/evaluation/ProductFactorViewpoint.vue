@@ -36,7 +36,7 @@
 <script lang="ts" setup>
 import ForwardImpactVisualization from './ForwardImpactVisualization.vue';
 import { ComputedRef, computed } from 'vue';
-import { EvaluatedProductFactor } from '@/core/qualitymodel/evaluation/EvaluationTypes';
+import { EvaluatedProductFactor } from '@/core/qualitymodel/evaluation/Evaluation';
 
 const props = defineProps<{
     evaluatedProductFactors: Map<string, EvaluatedProductFactor>,

@@ -1,8 +1,8 @@
 import { Impact } from "./Impact";
 import { ProductFactor } from "./ProductFactor";
 import { QualityAspectEvaluation } from "../evaluation/QualityAspectEvaluation";
-import { Evaluation } from "../evaluation/Evaluation";
-import { QualityAspectEvaluationResult } from "../evaluation/EvaluationTypes";
+import { Evaluation } from "../evaluation/EvaluationModels";
+import { FactorEvaluationResult } from "../evaluation/Evaluation";
 
 class QualityAspect {
 
@@ -62,8 +62,8 @@ class QualityAspect {
         return this.#evaluation !== undefined;
     }
 
-    evaluate(evaluation: Evaluation): QualityAspectEvaluationResult {
-        return this.#evaluation.evaluate(evaluation.getEvaluatedProductFactors());
+    evaluate(evaluation: Evaluation): FactorEvaluationResult {
+        return this.#evaluation.evaluate(evaluation.getCalculatedMeasures(), evaluation.getEvaluatedProductFactors());
     }
 
 }

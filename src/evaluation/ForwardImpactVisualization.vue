@@ -10,7 +10,7 @@ import mermaid from 'mermaid';
 import { onMounted } from 'vue';
 import { MermaidBuffer } from './MermaidBuffer';
 import { describeFactor, describeFactorStyle, describeImpact, describeImpactStyle, describeNodeStyleClasses } from './evaluation-commons';
-import { EvaluatedProductFactor } from '@/core/qualitymodel/evaluation/EvaluationTypes';
+import { EvaluatedProductFactor } from '@/core/qualitymodel/evaluation/Evaluation';
 
 
 onMounted(() => {
