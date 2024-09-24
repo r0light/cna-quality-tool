@@ -1631,19 +1631,21 @@ export const qualityModel = {
         },
         {
             "targetFactor": "replication",
-            "evaluation": "aggregateImpacts", // TODO more general evaluation, like aggregate?
-            "reasoning": "TODO write a suitable reasoning"
+            "evaluation": "aggregateImpacts",
+            "reasoning": "Replication can be achieved in different ways, each way already having a positive impact. Therefore if any of the underlying factors is present, replication is increased.",
+            "precondition": "at-least-one",
+            "impactsInterpretation": "mean"
         },
         {
             "targetFactor": "shardedDataStoreReplication",
             "evaluation": "shardedDataStoreReplication",
             "reasoning": ""
         },
-        /*{
+        {
             "targetFactor": "verticalDataReplication",
             "evaluation": "verticalDataReplication",
             "reasoning": "TODO"
-        }*/
+        }
     ],
     "qualityAspectEvaluations": [
         {
@@ -1656,3 +1658,6 @@ export const qualityModel = {
 
 const productFactorKeys = Object.freeze(qualityModel.productFactors);
 export type ProductFactorKey = keyof typeof productFactorKeys;
+
+const measureKeys = Object.freeze(qualityModel.measures);
+export type MeasureKey = keyof typeof measureKeys;

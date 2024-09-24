@@ -1,4 +1,4 @@
-import { FactorEvaluationFunction, FactorEvaluationParameters, ImpactWeight, impactWeightNumericMapping, interpretNumericalResultAsFactorEvaluation } from "./Evaluation";
+import { FactorEvaluationFunction, FactorEvaluationParameters, ImpactWeight, impactWeightNumericMapping, interpretNumericalResultAsFactorEvaluation, linearNumericalMapping } from "./Evaluation";
 import { ProductFactorKey } from "../specifications/qualitymodel";
 
 const mean: (list: number[]) => number = list => {
@@ -120,6 +120,17 @@ const productFactorEvaluationImplementation: {
             }
         } else {
             throw new Error(`dataShardingLevel is of type ${typeof dataShardingLevel}, but should be of type number`);
+        }
+    },
+    "verticalDataReplication": (parameters) => {
+        let ratioOfCachedDataAggregates = parameters.calculatedMeasures.get("ratioOfCachedDataAggregates").value;
+
+        if (ratioOfCachedDataAggregates === "n/a") {
+            return "n/a";
+        } else if (typeof ratioOfCachedDataAggregates === "number") {
+            return linearNumericalMapping(ratioOfCachedDataAggregates);
+        } else {
+            throw new Error(`ratioOfCachedDataAggregates is of type ${typeof ratioOfCachedDataAggregates}, but should be of type number`);
         }
     }
 };

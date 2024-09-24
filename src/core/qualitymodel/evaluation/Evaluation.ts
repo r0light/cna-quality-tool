@@ -3,7 +3,7 @@ import { MeasureValue } from "../quamoco/Measure";
 import { ProductFactor } from "../quamoco/ProductFactor";
 import { QualityAspect } from "../quamoco/QualityAspect";
 import { ENTITIES } from "../specifications/entities";
-import { EvaluationPrecondition, IncomingImpactsInterpretation } from "../specifications/qualitymodel";
+import { EvaluationPrecondition, IncomingImpactsInterpretation, MeasureKey } from "../specifications/qualitymodel";
 
 export type CalculatedMeasure = {
     name: string,
@@ -82,7 +82,7 @@ export type FactorEvaluationParameters = {
     precondition: EvaluationPrecondition,
     impactsInterpretation: IncomingImpactsInterpretation,
     customImpactInterpretation: (impactWeights: number[]) => number,
-    calculatedMeasures: Map<string, CalculatedMeasure>, 
+    calculatedMeasures: Map<MeasureKey, CalculatedMeasure>, 
     evaluatedProductFactors: Map<string, EvaluatedProductFactor>
 }
 
@@ -91,7 +91,7 @@ export type FactorEvaluationFunction = (parameters: FactorEvaluationParameters) 
 const ONE_THIRD = 1/3;
 const TWO_THIRD = 2/3;
 
-function linearNumericalMapping(result: NumericEvaluationResult): OrdinalEvaluationResult {
+export function linearNumericalMapping(result: NumericEvaluationResult): OrdinalEvaluationResult {
     if (Number.isNaN(result) || result === 0) {
         return "none";
     }
