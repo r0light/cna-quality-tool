@@ -22,7 +22,8 @@
                             <span v-if="productFactor.measures.size > 0">Relevant measures:</span>
                             <ul>
                                 <li v-for="[key, measure] of productFactor.measures">
-                                    <span>{{ measure.name }}</span>: <span class="font-weight-bold"> {{ measure.value }}</span><span> ({{ measure.description }})</span>
+                                    <span>{{ measure.name }}</span>: <span class="font-weight-bold"> {{ measure.value
+                                        }}</span><span> ({{ measure.description }})</span>
                                 </li>
                             </ul>
                         </div>
@@ -40,6 +41,7 @@ import { EvaluatedProductFactor } from '@/core/qualitymodel/evaluation/Evaluatio
 
 const props = defineProps<{
     evaluatedProductFactors: Map<string, EvaluatedProductFactor>,
+    showInconclusiveEvaluations: boolean,
 }>()
 
 const factorGroups: ComputedRef<EvaluatedProductFactor[][]> = computed(() => {
@@ -94,9 +96,14 @@ function getGroupsOfRelatedFactors() {
 
     };
 
-    return relatedFactorGroups.map(relatedFactors => relatedFactors.factors);
-
-
+    return relatedFactorGroups
+        .filter(relatedFactors => {
+            if (!props.showInconclusiveEvaluations && relatedFactors.factors.every(factor => factor.result === "n/a")) {
+                return false;
+            }
+            return true;
+        })
+        .map(relatedFactors => relatedFactors.factors);
 }
 
 function searchForImpactedFactors(evaluatedProductFactor: EvaluatedProductFactor, recursively: boolean): string[] {

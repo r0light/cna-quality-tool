@@ -20,22 +20,27 @@
                         <option v-for="system of systemsData" :value="system.id">{{ system.name }}</option>
                     </select>
                 </div>
+                <div class="m-1">
+                    <span>Show inconclusive evaluations? </span>
+                    <input type="checkbox" v-model="showInconclusive">
+                </div>
             </div>
             <div v-if="selectedSystemId > -1">
                 <div v-if="selectedViewpoint === 'perProductFactor'">
                     <ProductFactorViewpoint
-                        :evaluatedProductFactors="(evaluatedProductFactors as Map<string, EvaluatedProductFactor>)">
+                        :evaluatedProductFactors="(evaluatedProductFactors as Map<string, EvaluatedProductFactor>)" :showInconclusiveEvaluations="showInconclusive">
                     </ProductFactorViewpoint>
                 </div>
                 <div v-if="selectedViewpoint === 'perQualityAspect'">
                     <QualityAspectViewpoint
-                        :evaluatedQualityAspects="(evaluatedQualityAspects as Map<string, EvaluatedQualityAspect>)">
+                        :evaluatedQualityAspects="(evaluatedQualityAspects as Map<string, EvaluatedQualityAspect>)" :showInconclusiveEvaluations="showInconclusive">
                     </QualityAspectViewpoint>
                 </div>
                 <!--<div v-for="[key, calculatedMeasure] of calculatedMeasures">
                     <span>{{ calculatedMeasure.name }}</span>: <span> {{ calculatedMeasure.value }}</span>
                 </div>-->
             </div>
+
         </div>
     </div>
 </template>
@@ -75,6 +80,8 @@ const factorCategoryFilter: ItemFilter = (() => {
 const selectedSystemId = ref<number>(-1);
 
 const selectedViewpoint = ref<"perQualityAspect" | "perProductFactor">("perProductFactor");
+
+const showInconclusive = ref<boolean>(false);
 
 const calculatedMeasures = ref<Map<string, CalculatedMeasure>>(new Map());
 

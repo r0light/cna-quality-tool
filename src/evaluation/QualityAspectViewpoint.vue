@@ -1,5 +1,5 @@
 <template>
-    <div v-for="[qualityAspectKey, qualityAspect] of evaluatedQualityAspects" class="aspectGroup">
+    <div v-for="[qualityAspectKey, qualityAspect] of qualityAspectGroups" class="aspectGroup">
         <div :id="`${qualityAspectKey}-impacts`" v-html="renderAspectGraph(`${qualityAspectKey}-impacts`, qualityAspect)"></div>
         <div class="accordion">
             <div v-for="productFactor of getRelevantFactors(qualityAspect)" class="card">
@@ -42,7 +42,18 @@ import { EvaluatedProductFactor, EvaluatedQualityAspect } from '@/core/qualitymo
 
 const props = defineProps<{
     evaluatedQualityAspects: Map<string, EvaluatedQualityAspect>,
+    showInconclusiveEvaluations: boolean,
 }>()
+
+const qualityAspectGroups:  ComputedRef<Map<string, EvaluatedQualityAspect>>= computed(() => {
+    return new Map([...props.evaluatedQualityAspects.entries()]
+    .filter(([qualityAspectKey, qualityAspect])  => {
+            if (!props.showInconclusiveEvaluations && getRelevantFactors(qualityAspect).every(factor => factor.result === "n/a")) {
+                return false;
+            }
+            return true;
+        }))
+});
 
 function renderAspectGraph(nodeId: string, evaluatedQualityAspect: EvaluatedQualityAspect) {
     let graphDefinition = "graph BT";

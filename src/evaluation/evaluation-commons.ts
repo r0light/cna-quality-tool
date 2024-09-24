@@ -90,14 +90,14 @@ export function describeImpactStyle(count: number, impactWeight: ImpactWeight): 
             break;
         case "positive":
             color = "#33cc33";
-            strokeWidth = "4px";
+            strokeWidth = "3px";
             break;
         case "slightly positive":
             color = "#33cc33";
             break;
         case "negative":
             color = "#ff5050";
-            strokeWidth = "4px";
+            strokeWidth = "3px";
             break;
         case "slightly negative":
             color = "#ff5050";
