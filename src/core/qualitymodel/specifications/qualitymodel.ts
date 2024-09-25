@@ -1651,7 +1651,9 @@ export const qualityModel = {
         {
             "targetAspect": "timeBehaviour",
             "evaluation": "aggregateImpacts",
-            "reasoning": "TODO"
+            "reasoning": "TODO",
+            "precondition": "at-least-one",
+            "impactsInterpretation": "mean"
         }
     ]
 } satisfies QualityModelSpec;

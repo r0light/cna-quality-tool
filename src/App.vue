@@ -95,7 +95,8 @@
       <router-view :key="$route.path"
         @store:modelingData="(id, systemEntityManager, toImport, importDone, appSettings) => storeModelingData(id, toImport, systemEntityManager, importDone, appSettings)"
         @update:systemName="(newName, id) => updatePageName(newName, id)"
-        @update:evaluatedSystem="(systemId) => storeSelectedSystemToEvaluate(systemId)">
+        @update:evaluatedSystem="(systemId) => storeSelectedSystemToEvaluate(systemId)"
+        @update:evaluationConfig="(evaluationConfig) => storeEvaluationConfig(evaluationConfig)">
       </router-view>
     </div>
   </main>
@@ -193,9 +194,12 @@ function storeModelingData(id: number, toImport: ImportData, systemEntityManager
 }
 
 const selectedSystemToEvaluate = ref<number>(-1);
-
 function storeSelectedSystemToEvaluate(systemId: number) {
   selectedSystemToEvaluate.value = systemId;
+}
+const evaluationConfig = ref<object>({});
+function storeEvaluationConfig(config: object) {
+  evaluationConfig.value = config;
 }
 
 const overlayState = ref<"none" | "initial" | "startNew" | "startImport">("none");
@@ -278,7 +282,8 @@ onMounted(() => {
         component: EvaluationApp,
         props: route => ({
           systemsData: sharedSystemsData.value,
-          evaluatedSystemId: selectedSystemToEvaluate.value
+          evaluatedSystemId: selectedSystemToEvaluate.value,
+          evaluationConfig: evaluationConfig.value
         })
       })
     }
@@ -333,6 +338,10 @@ onMounted(() => {
   let importDone: Promise<void> = Promise.resolve();
 
   let lastRoute = sessionStorage.getItem("lastRoute") ? sessionStorage.getItem("lastRoute") : "";
+
+  let selectedId = sessionStorage.getItem("selectedSystemToEvaluate") ? parseInt(sessionStorage.getItem("selectedSystemToEvaluate")) : -1;
+  let systemSelectedToEvaluateId = isNaN(selectedId) ? -1 : selectedId;
+  selectedSystemToEvaluate.value = systemSelectedToEvaluateId;
 
   if (sessionStorage.getItem("modelingData")) {
     let modelingDataToImport: ModelingData[] = JSON.parse(sessionStorage.getItem("modelingData"));
@@ -424,6 +433,7 @@ onMounted(() => {
 
     sessionStorage.setItem("modelingData", JSON.stringify(modelingDataToStore));
     sessionStorage.setItem("lastRoute", router.currentRoute.value.path);
+    sessionStorage.setItem("selectedSystemToEvaluate", selectedSystemToEvaluate.value.toString());
   }
 
 });

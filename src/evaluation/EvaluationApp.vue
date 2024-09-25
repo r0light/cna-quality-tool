@@ -4,11 +4,11 @@
             <h2>Evaluation</h2>
             <p class="font-weight-bold">The evaluation feature is still in development...</p>
             <FilterToolbar :highLevelAspectFilter="highLevelAspectFilter" :factorCategoryFilter="factorCategoryFilter"
-                @update:filters="evaluateSystem"></FilterToolbar>
+                @update:filters="saveEvaluationConfig(); evaluateSystem()"></FilterToolbar>
             <div class="d-flex flex-row selection-bar">
                 <div class="m-1">
                     <span>Select the evaluation viewpoint: </span>
-                    <select v-model="selectedViewpoint">
+                    <select v-model="selectedViewpoint" @change="saveEvaluationConfig">
                         <option value="perQualityAspect">per Quality Aspect</option>
                         <option value="perProductFactor">per Product Factor</option>
                     </select>
@@ -22,7 +22,7 @@
                 </div>
                 <div class="m-1">
                     <span>Show inconclusive evaluations? </span>
-                    <input type="checkbox" v-model="showInconclusive">
+                    <input type="checkbox" v-model="showInconclusive" @change="saveEvaluationConfig">
                 </div>
             </div>
             <div v-if="selectedSystemId > -1">
@@ -58,30 +58,46 @@ import { entityShapes } from '@/modeling/config/entityShapes';
 import { dia } from '@joint/core';
 import { CalculatedMeasure, EvaluatedProductFactor, EvaluatedQualityAspect } from '@/core/qualitymodel/evaluation/Evaluation';
 
+type EvaluationViewpoint = "perQualityAspect" | "perProductFactor";
+
+type EvaluationConfig = {
+    highLevelAspectFilter?: ItemFilter,
+    factorCategoryFilter?: ItemFilter,
+    selectedViewpoint?: EvaluationViewpoint,
+    showInconclusive?: boolean
+}
+
 const props = defineProps<{
     systemsData: ModelingData[],
-    evaluatedSystemId: number
+    evaluatedSystemId: number,
+    evaluationConfig: EvaluationConfig
 }>()
 
 const emit = defineEmits<{
     (e: "update:evaluatedSystem", systemId: number): void;
+    (e: "update:evaluationConfig", evaluationConfig: EvaluationConfig): void;
 }>()
 
 const qualityModel: QualityModelInstance = getQualityModel();
 
-const highLevelAspectFilter: ItemFilter = (() => {
-    return createHighLevelAspectFilter(qualityModel);
-})();
+const highLevelAspectFilter = ref<ItemFilter>(createHighLevelAspectFilter(qualityModel));
 
-const factorCategoryFilter: ItemFilter = (() => {
-    return createFactorCategoryFilter(qualityModel);
-})();
+const factorCategoryFilter= ref<ItemFilter>(createFactorCategoryFilter(qualityModel));
 
 const selectedSystemId = ref<number>(-1);
 
-const selectedViewpoint = ref<"perQualityAspect" | "perProductFactor">("perProductFactor");
+const selectedViewpoint = ref<EvaluationViewpoint>("perProductFactor");
 
 const showInconclusive = ref<boolean>(false);
+
+function saveEvaluationConfig() {
+    emit("update:evaluationConfig", {
+        highLevelAspectFilter: highLevelAspectFilter.value,
+        factorCategoryFilter: factorCategoryFilter.value,
+        selectedViewpoint: selectedViewpoint.value,
+        showInconclusive: showInconclusive.value
+    })
+}
 
 const calculatedMeasures = ref<Map<string, CalculatedMeasure>>(new Map());
 
@@ -96,6 +112,23 @@ onMounted(() => {
         evaluateSystem();
     }
 
+    if (props.evaluationConfig) {
+        if(props.evaluationConfig.highLevelAspectFilter) {
+            highLevelAspectFilter.value = props.evaluationConfig.highLevelAspectFilter;
+        }
+
+        if(props.evaluationConfig.factorCategoryFilter) {
+            factorCategoryFilter.value = props.evaluationConfig.factorCategoryFilter;
+        }
+
+        if (props.evaluationConfig.selectedViewpoint) {
+            selectedViewpoint.value = props.evaluationConfig.selectedViewpoint;
+        }
+
+        if (props.evaluationConfig.showInconclusive) {
+            showInconclusive.value = props.evaluationConfig.showInconclusive
+        }
+    }
 });
 
 onUpdated(() => {
@@ -145,7 +178,7 @@ function evaluateSystem() {
 
     console.time('evaluation');
 
-    let activeElements = getActiveElements(getActiveFilterItems(highLevelAspectFilter), getActiveFilterItems(factorCategoryFilter), qualityModel);
+    let activeElements = getActiveElements(getActiveFilterItems(highLevelAspectFilter.value), getActiveFilterItems(factorCategoryFilter.value), qualityModel);
 
     evaluatedSystem.evaluate(activeElements.activeQualityAspects, activeElements.activeProductFactors);
 

@@ -19,27 +19,6 @@ export type FactorEvaluationResult = NumericEvaluationResult | OrdinalEvaluation
 
 export type ImpactWeight = "negative" | "slightly negative" | "neutral" | "slightly positive" | "positive" | "n/a";
 
-export function impactWeightNumericMapping(ordinalWeight: ImpactWeight) {
-    switch (ordinalWeight) {
-        case "negative": return -1;
-        case "slightly negative": return -0.5;
-        case "neutral": return 0;
-        case "slightly positive": return 0.5;
-        case "positive": return 1;
-        default:
-        case "n/a": 
-            return NaN;
-    }
-}
-
-export function interpretNumericalResultAsFactorEvaluation(result: number): OrdinalEvaluationResult {
-    if (result <= 0) {
-        return "none";
-    } else {
-        return linearNumericalMapping(result);
-    }
-}
-
 export type EvaluatedProductFactor = {
     id: string,
     name: string,
@@ -88,6 +67,28 @@ export type FactorEvaluationParameters = {
 
 export type FactorEvaluationFunction = (parameters: FactorEvaluationParameters) => FactorEvaluationResult;
 
+
+export function impactWeightNumericMapping(ordinalWeight: ImpactWeight) {
+    switch (ordinalWeight) {
+        case "negative": return -1;
+        case "slightly negative": return -0.5;
+        case "neutral": return 0;
+        case "slightly positive": return 0.5;
+        case "positive": return 1;
+        default:
+        case "n/a": 
+            return NaN;
+    }
+}
+
+export function interpretNumericalResultAsFactorEvaluation(result: number): OrdinalEvaluationResult {
+    if (result <= 0) {
+        return "none";
+    } else {
+        return linearNumericalMapping(result);
+    }
+}
+
 const ONE_THIRD = 1/3;
 const TWO_THIRD = 2/3;
 
@@ -95,22 +96,59 @@ export function linearNumericalMapping(result: NumericEvaluationResult): Ordinal
     if (Number.isNaN(result) || result === 0) {
         return "none";
     }
-
     if (result > 0 && result < ONE_THIRD) {
         return "low";
     }
-
     if (result >= ONE_THIRD && result < TWO_THIRD) {
         return "moderate";
     }
-
     if (result >= TWO_THIRD && result <= 1) {
         return "high";
     }
-
     // else
     throw new Error("A numeric evaluation result for a product factor should be between 0 and 1, here it is: " + result);
 }
+
+const EXPONENTIAL_ONE_THIRD = Math.pow(ONE_THIRD, 2);
+const EXPONENTIAL_TWO_THIRD = Math.pow(TWO_THIRD, 2);
+
+export function exponentialNumericalMapping(result: NumericEvaluationResult): OrdinalEvaluationResult {
+    if (Number.isNaN(result) || result === 0) {
+        return "none";
+    }
+    if (result > 0 && result < EXPONENTIAL_ONE_THIRD) {
+        return "low";
+    }
+    if (result >= EXPONENTIAL_ONE_THIRD && result < EXPONENTIAL_TWO_THIRD) {
+        return "moderate";
+    }
+    if (result >= EXPONENTIAL_TWO_THIRD && result <= 1) {
+        return "high";
+    }
+    // else
+    throw new Error("A numeric evaluation result for a product factor should be between 0 and 1, here it is: " + result);
+}
+
+const ROOTED_ONE_THIRD = Math.sqrt(ONE_THIRD);
+const ROOTED_TWO_THIRD = Math.sqrt(TWO_THIRD);
+
+export function squareRootedNumericalMapping(result: NumericEvaluationResult): OrdinalEvaluationResult {
+    if (Number.isNaN(result) || result === 0) {
+        return "none";
+    }
+    if (result > 0 && result < ROOTED_ONE_THIRD) {
+        return "low";
+    }
+    if (result >= ROOTED_ONE_THIRD && result < ROOTED_TWO_THIRD) {
+        return "moderate";
+    }
+    if (result >= ROOTED_TWO_THIRD && result <= 1) {
+        return "high";
+    }
+    // else
+    throw new Error("A numeric evaluation result for a product factor should be between 0 and 1, here it is: " + result);
+}
+
 
 function defaultFactorImpactMapping(evaluationResult: FactorEvaluationResult, impactType: ImpactType) {
     if (evaluationResult === "n/a") {
