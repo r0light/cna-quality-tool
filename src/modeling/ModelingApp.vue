@@ -55,6 +55,7 @@ import { dia } from '@joint/core';
 
 const props = defineProps<{
     systemName: string,
+    systemId: string,
     pageId: number,
     modelingData: ModelingData
 }>()
@@ -94,9 +95,9 @@ const systemEntityManager: SystemEntityManager = (() => {
     if (props.modelingData.entityManager) {
         return props.modelingData.entityManager;
     } else {
-        const newEntityManager = new SystemEntityManager(currentSystemGraph.value as dia.Graph);
+        const newEntityManager = new SystemEntityManager(currentSystemGraph.value as dia.Graph, props.systemId);
         emit("store:modelingData", props.modelingData.id, newEntityManager, props.modelingData.toImport, true, props.modelingData.appSettings);
-        return new SystemEntityManager(currentSystemGraph.value as dia.Graph);
+        return new SystemEntityManager(currentSystemGraph.value as dia.Graph, props.systemId);
     }
 })();
 
@@ -254,7 +255,7 @@ function requestLoadFromTosca(yamlString: string, fileName: string) {
 function loadFromTosca(yamlString: string, fileName: string, strategy: "replace" | "merge"): Promise<void> {
     resetAllHighlighting();
 
-    let loadResult = systemEntityManager.loadFromCustomTosca(yamlString, fileName, strategy);
+    let loadResult = systemEntityManager.loadFromCustomTosca(props.systemId, yamlString, fileName, strategy);
 
     if (loadResult.error) {
         showError("Import from TOSCA failed", loadResult.error);

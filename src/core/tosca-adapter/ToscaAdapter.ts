@@ -13,13 +13,13 @@ export function convertToServiceTemplate(systemEntity: Entities.System): TOSCA_F
     return entitiesToToscaConverter.convert();
 }
 
-export function importFromServiceTemplate(fileName: string, stringifiedServiceTemplate: string): Entities.System {
+export function importFromServiceTemplate(id: string, fileName: string, stringifiedServiceTemplate: string): Entities.System {
 
     const toscaFile: TOSCA_File = yaml.load(stringifiedServiceTemplate) as TOSCA_File;
 
     const systemName = fileName.replace(/\..*$/g, "");
 
-    const toscaToEntitesConverter = new ToscaToEntitesConverter(toscaFile, systemName);
+    const toscaToEntitesConverter = new ToscaToEntitesConverter(id, toscaFile, systemName);
 
     return toscaToEntitesConverter.convert();
 }

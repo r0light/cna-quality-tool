@@ -52,7 +52,7 @@
 import { onMounted, onUpdated, ref, toRaw } from 'vue';
 import { ModelingData } from '../App.vue';
 import { QualityModelInstance, getQualityModel } from '@/core/qualitymodel/QualityModelInstance';
-import { EvaluatedSystemModel } from '@/core/qualitymodel/evaluation/EvaluationModels';
+import { EvaluatedComponentModel, EvaluatedSystemModel } from '@/core/qualitymodel/evaluation/EvaluationModels';
 import ProductFactorViewpoint from './ProductFactorViewpoint.vue';
 import QualityAspectViewpoint from './QualityAspectViewpoint.vue';
 import FilterToolbar, { ItemFilter, createFactorCategoryFilter, createHighLevelAspectFilter, getActiveElements, getActiveFilterItems } from '../qualitymodel/FilterToolbar.vue';
@@ -61,6 +61,8 @@ import { entityShapes } from '@/modeling/config/entityShapes';
 import { dia } from '@joint/core';
 import { CalculatedMeasure, EvaluatedProductFactor, EvaluatedQualityAspect } from '@/core/qualitymodel/evaluation/Evaluation';
 import { triggerDownload } from '@/modeling/utilities';
+import { ProductFactorKey, QualityAspectKey } from '@/core/qualitymodel/specifications/qualitymodel';
+import { EvaluationModelsWrapper } from '@/core/qualitymodel/evaluation/EvaluationModelsWrapper';
 
 type EvaluationViewpoint = "perQualityAspect" | "perProductFactor";
 
@@ -103,11 +105,13 @@ function saveEvaluationConfig() {
     })
 }
 
+const evaluationModelsWrapper = ref<EvaluationModelsWrapper>(null);
+
 const calculatedMeasures = ref<Map<string, CalculatedMeasure>>(new Map());
 
-const evaluatedProductFactors = ref<Map<string, EvaluatedProductFactor>>(new Map());
+const evaluatedProductFactors = ref<Map<ProductFactorKey, EvaluatedProductFactor>>(new Map());
 
-const evaluatedQualityAspects = ref<Map<string, EvaluatedQualityAspect>>(new Map());
+const evaluatedQualityAspects = ref<Map<QualityAspectKey, EvaluatedQualityAspect>>(new Map());
 
 onMounted(() => {
 
@@ -179,13 +183,13 @@ function evaluateSystem() {
     let systemEntityManager = selectedSystem.entityManager ? toRaw(selectedSystem.entityManager) : createTemporaryEntityManager(selectedSystem);
     let currentSystemEntity = systemEntityManager.getSystemEntity();
 
-    let evaluatedSystem = new EvaluatedSystemModel(currentSystemEntity, qualityModel);
+    evaluationModelsWrapper.value = new EvaluationModelsWrapper(currentSystemEntity, qualityModel);
 
     console.time('evaluation');
 
     let activeElements = getActiveElements(getActiveFilterItems(highLevelAspectFilter.value), getActiveFilterItems(factorCategoryFilter.value), qualityModel);
 
-    evaluatedSystem.evaluate(activeElements.activeQualityAspects, activeElements.activeProductFactors);
+    let evaluatedSystem = evaluationModelsWrapper.value.getEvaluatedSystemModel(activeElements.activeQualityAspects, activeElements.activeProductFactors);
 
     evaluatedSystem.getCalculatedMeasures().forEach((value, key, map) => {
         calculatedMeasures.value.set(key, value);
@@ -210,19 +214,47 @@ function createTemporaryEntityManager(selectedSystem: ModelingData): SystemEntit
     // workaround to fix the problem that if the page has been reloaded and the modeled system in question has not been opened in the modeling tab, then it has not been imported yet and the entityManager has not been created yet
     // not the best solution, because the evaluation now depends on jointjs
 
-    let newEntityManager = new SystemEntityManager(new dia.Graph({}, { cellNamespace: entityShapes }));
+    let newEntityManager = new SystemEntityManager(new dia.Graph({}, { cellNamespace: entityShapes }), "0");
     newEntityManager.loadFromJson(selectedSystem.toImport.fileContent, selectedSystem.toImport.fileName, "replace");
     return newEntityManager;
 }
 
 function exportMeasures() {
 
-    let systemName = props.systemsData.find(data => data.id === selectedSystemId.value).name;
+    let systemData = props.systemsData.find(data => data.id === selectedSystemId.value);
+    let system = (systemData.entityManager ? toRaw(systemData.entityManager) : createTemporaryEntityManager(systemData)).getSystemEntity();
+    let systemName = systemData.name;
 
-    let headers = '"measureKey";"measureName";"systemName";"entityType";"entityId";"value"';
+    let headers = '"measureKey";"measureName";"systemName";"entityName";"entityType";"entityId";"value"';
     let measuresAsCsv = [...calculatedMeasures.value.entries()].map(([measureKey, calculatedMeasure]) => 
-        `"${measureKey}";"${calculatedMeasure.name}";"${systemName}";"${calculatedMeasure.entity}";"${selectedSystemId.value}";"${calculatedMeasure.value}"`)
+        `"${measureKey}";"${calculatedMeasure.name}";"${systemName}";"${systemName}";"${calculatedMeasure.entity}";"${selectedSystemId.value}";"${calculatedMeasure.value}"`)
+
+    let activeElements = getActiveElements(getActiveFilterItems(highLevelAspectFilter.value), getActiveFilterItems(factorCategoryFilter.value), qualityModel);
+
+    evaluationModelsWrapper.value.getAvailableComponents().forEach(componentId => {
+        let componentName = system.getComponentEntities.get(componentId).getName;
+        let evaluatedComponentModel = evaluationModelsWrapper.value.getEvaluatedComponentModel(componentId, activeElements.activeQualityAspects, activeElements.activeProductFactors);
+        let componentMeasures = [...evaluatedComponentModel.getCalculatedMeasures().entries()].map(([measureKey, calculatedMeasure]) => 
+        `"${measureKey}";"${calculatedMeasure.name}";"${systemName}";"${componentName}";"${calculatedMeasure.entity}";"${componentId}";"${calculatedMeasure.value}"`)
+        measuresAsCsv = measuresAsCsv.concat(componentMeasures);
+    });
     
+    evaluationModelsWrapper.value.getAvailableInfrastructureEntities().forEach(infrastructureId => {
+        let infrastructureName = system.getInfrastructureEntities.get(infrastructureId).getName;
+        let evaluatedInfrastructureModel = evaluationModelsWrapper.value.getEvaluatedInfrastructureModel(infrastructureId, activeElements.activeQualityAspects, activeElements.activeProductFactors);
+        let infrastructureMeasures = [...evaluatedInfrastructureModel.getCalculatedMeasures().entries()].map(([measureKey, calculatedMeasure]) => 
+        `"${measureKey}";"${calculatedMeasure.name}";"${systemName}";"${infrastructureName}";"${calculatedMeasure.entity}";"${infrastructureId}";"${calculatedMeasure.value}"`)
+        measuresAsCsv = measuresAsCsv.concat(infrastructureMeasures);
+    });
+
+    evaluationModelsWrapper.value.getAvailableRequestTraces().forEach(requestTraceId => {
+        let requestTraceName = system.getRequestTraceEntities.get(requestTraceId).getName;
+        let evaluatedRequestTraceModel = evaluationModelsWrapper.value.getEvaluatedRequestTraceModel(requestTraceId, activeElements.activeQualityAspects, activeElements.activeProductFactors);
+        let requestTraceMeasures = [...evaluatedRequestTraceModel.getCalculatedMeasures().entries()].map(([measureKey, calculatedMeasure]) => 
+        `"${measureKey}";"${calculatedMeasure.name}";"${systemName}";"${requestTraceName}";"${calculatedMeasure.entity}";"${requestTraceId}";"${calculatedMeasure.value}"`)
+        measuresAsCsv = measuresAsCsv.concat(requestTraceMeasures);
+    });
+
     triggerDownload(headers.concat("\n").concat(measuresAsCsv.join("\n")), "text/csv", `${systemName}-measures.csv`);
 }
 

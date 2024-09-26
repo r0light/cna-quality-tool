@@ -23,6 +23,8 @@ import { StorageBackingService } from "./storageBackingService.js";
  */
 class System { // TODO use ID's as keys instead of name?
 
+    #id: string;
+
     #systemName: string;
 
     #componentEntities: Map<string, Component> = new Map();
@@ -45,7 +47,8 @@ class System { // TODO use ID's as keys instead of name?
      * Create a System entity.
      * @param {string} applicationName The name of the application, which the System entity represents. 
      */
-    constructor(applicationName: string) {
+    constructor(id: string, applicationName: string) {
+        this.#id = id;
         this.#systemName = applicationName;
     }
 
@@ -114,6 +117,10 @@ class System { // TODO use ID's as keys instead of name?
         this.#dataAggregateEntities = new Map();    
         this.#backingDataEntities = new Map();
         this.#networkEntities = new Map();
+    }
+
+    get getId() {
+        return this.#id;
     }
 
     set setSystemName(updatedSystemName: string) {

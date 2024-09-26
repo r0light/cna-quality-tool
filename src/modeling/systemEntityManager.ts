@@ -33,10 +33,10 @@ class SystemEntityManager {
 
     #includedDataAggregateEntities = new Map();
 
-    constructor(currentGraph: dia.Graph) {
+    constructor(currentGraph: dia.Graph, id: string) {
 
         this.#currentSystemGraph = currentGraph;
-        this.#currentSystemEntity = new Entities.System("test");
+        this.#currentSystemEntity = new Entities.System(id, "test");
 
         // needed because javascript (https://stackoverflow.com/questions/67416881/es6-proxied-class-access-private-property-cannot-read-private-member-hidden-f)
         this.getSystemEntity = this.getSystemEntity.bind(this);
@@ -84,10 +84,10 @@ class SystemEntityManager {
     }
 
 
-    loadFromCustomTosca(stringifiedTOSCA: string, fileName: string, strategy: "replace" | "merge"): { createdCells: dia.Cell[], error: string } {
-        let system = new Entities.System("imported");
+    loadFromCustomTosca(id: string, stringifiedTOSCA: string, fileName: string, strategy: "replace" | "merge"): { createdCells: dia.Cell[], error: string } {
+        let system = new Entities.System(id, "imported");
         try {
-            system = importFromServiceTemplate(fileName, stringifiedTOSCA);
+            system = importFromServiceTemplate(id, fileName, stringifiedTOSCA);
         } catch (err) {
             console.trace();
             console.log(err);

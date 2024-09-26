@@ -3,7 +3,7 @@ import { MeasureValue } from "../quamoco/Measure";
 import { ProductFactor } from "../quamoco/ProductFactor";
 import { QualityAspect } from "../quamoco/QualityAspect";
 import { ENTITIES } from "../specifications/entities";
-import { EvaluationPrecondition, IncomingImpactsInterpretation, MeasureKey } from "../specifications/qualitymodel";
+import { EvaluationPrecondition, IncomingImpactsInterpretation, MeasureKey, ProductFactorKey, QualityAspectKey } from "../specifications/qualitymodel";
 
 export type CalculatedMeasure = {
     name: string,
@@ -20,7 +20,7 @@ export type FactorEvaluationResult = NumericEvaluationResult | OrdinalEvaluation
 export type ImpactWeight = "negative" | "slightly negative" | "neutral" | "slightly positive" | "positive" | "n/a";
 
 export type EvaluatedProductFactor = {
-    id: string,
+    id: ProductFactorKey,
     name: string,
     factorType: 'productFactor', //TODO has to be "productFactor"
     productFactor: ProductFactor,
@@ -31,7 +31,7 @@ export type EvaluatedProductFactor = {
 }
 
 export type EvaluatedQualityAspect = {
-    id: string,
+    id: QualityAspectKey,
     name: string,
     factorType: 'qualityAspect',  //TODO has to be "qualityAspect"
     qualityAspect: QualityAspect,

@@ -4,7 +4,7 @@ import { ImpactType } from "../quamoco/Impact";
 import { ProductFactor } from "../quamoco/ProductFactor";
 import { QualityAspect } from "../quamoco/QualityAspect";
 import { ENTITIES } from "../specifications/entities";
-import { MeasureKey, ProductFactorKey } from "../specifications/qualitymodel";
+import { MeasureKey, ProductFactorKey, QualityAspectKey } from "../specifications/qualitymodel";
 import { CalculatedMeasure, deriveImpactWeight, EvaluatedProductFactor, EvaluatedQualityAspect, FactorEvaluationResult, ImpactWeight } from "./Evaluation";
 
 export interface Evaluation {
@@ -18,7 +18,7 @@ class EvaluationModel {
 
     calculatedMeasures: Map<MeasureKey, CalculatedMeasure>;
     evaluatedProductFactors: Map<ProductFactorKey, EvaluatedProductFactor>;
-    evaluatedQualityAspects: Map<string, EvaluatedQualityAspect>;
+    evaluatedQualityAspects: Map<QualityAspectKey, EvaluatedQualityAspect>;
 
     constructor() {
         this.calculatedMeasures = new Map();
@@ -104,6 +104,15 @@ class EvaluatedComponentModel implements Evaluation {
 
         let factorsToEvaluate = this.#qualityModel.productFactors.slice(0).filter(factor => activeProductFactors.includes(factor.getId));
         let aspectsToEvaluate = this.#qualityModel.qualityAspects.slice(0).filter(aspect => activeQualityAspects.includes(aspect.getId));
+
+        // TODO remove when properly implemented; for now disable evaluations, because they rely on system measures
+        factorsToEvaluate.forEach(factor => {
+            factor.addEvaluation(undefined);
+        })
+        aspectsToEvaluate.forEach(factor => {
+            factor.addEvaluation(undefined);
+        })
+        // --- 
 
         evaluateBasedOnQualityModel(this, factorsToEvaluate, aspectsToEvaluate, this.#evaluationModel, (factor: ProductFactor) => {
             let measuresForThisFactor = new Map();
@@ -205,6 +214,16 @@ class EvaluatedInfrastructureModel implements Evaluation {
         let factorsToEvaluate = this.#qualityModel.productFactors.slice(0).filter(factor => activeProductFactors.includes(factor.getId));
         let aspectsToEvaluate = this.#qualityModel.qualityAspects.slice(0).filter(aspect => activeQualityAspects.includes(aspect.getId));
 
+
+        // TODO remove when properly implemented; for now disable evaluations, because they rely on system measures
+        factorsToEvaluate.forEach(factor => {
+            factor.addEvaluation(undefined);
+        })
+        aspectsToEvaluate.forEach(factor => {
+            factor.addEvaluation(undefined);
+        })
+        // --- 
+
         evaluateBasedOnQualityModel(this, factorsToEvaluate, aspectsToEvaluate, this.#evaluationModel, (factor: ProductFactor) => {
             let measuresForThisFactor = new Map();
             factor.getInfrastructureMeasures.forEach(measure => {
@@ -253,6 +272,16 @@ class EvaluatedRequestTraceModel implements Evaluation {
 
         let factorsToEvaluate = this.#qualityModel.productFactors.slice(0).filter(factor => activeProductFactors.includes(factor.getId));
         let aspectsToEvaluate = this.#qualityModel.qualityAspects.slice(0).filter(aspect => activeQualityAspects.includes(aspect.getId));
+
+
+        // TODO remove when properly implemented; for now disable evaluations, because they rely on system measures
+        factorsToEvaluate.forEach(factor => {
+            factor.addEvaluation(undefined);
+        })
+        aspectsToEvaluate.forEach(factor => {
+            factor.addEvaluation(undefined);
+        })
+        // --- 
 
         evaluateBasedOnQualityModel(this, factorsToEvaluate, aspectsToEvaluate, this.#evaluationModel, (factor: ProductFactor) => {
             let measuresForThisFactor = new Map();

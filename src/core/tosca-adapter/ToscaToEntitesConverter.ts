@@ -37,10 +37,10 @@ class ToscaToEntitesConverter {
     #toscaFile: TOSCA_File;
     #serviceTemplate: TOSCA_Service_Template;
 
-    constructor(toscaFile: TOSCA_File, systemName: string) {
+    constructor(id: string, toscaFile: TOSCA_File, systemName: string) {
         this.#toscaFile = toscaFile;
         this.#serviceTemplate = this.#toscaFile.service_template;
-        this.#importedSystem = new Entities.System(systemName);
+        this.#importedSystem = new Entities.System(id, systemName);
     }
 
     convert(): Entities.System {

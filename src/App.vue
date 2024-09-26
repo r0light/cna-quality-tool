@@ -374,6 +374,7 @@ onMounted(() => {
             component: ModelingApp,
             props: route => ({
               systemName: modeledSystemsData.value.find(data => data.id === modelingData.id) ? modeledSystemsData.value.find(data => data.id === modelingData.id).name : "",
+              systemId: modelingData.id.toString(),
               pageId: modelingData.id,
               modelingData: modeledSystemsData.value.find(data => data.id === modelingData.id),
             })
@@ -476,6 +477,7 @@ function addNewModelingPage(name: string, toImport: ImportData) {
     component: ModelingApp,
     props: route => ({
       systemName: modeledSystemsData.value.find(systemData => systemData.id === newId) ? modeledSystemsData.value.find(systemData => systemData.id === newId).name : "",
+      systemId: newId.toString(),
       pageId: newId,
       modelingData: (modeledSystemsData.value.find(systemData => systemData.id === newId) as ModelingData)
     })
