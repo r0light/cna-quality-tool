@@ -1,7 +1,7 @@
 <template>
     <div class="qualitymodel-container" ref="qmContainer">
         <FilterToolbar :highLevelAspectFilter="highLevelAspectFilter" :factorCategoryFilter="factorCategoryFilter"
-            @update:filters="redrawWithFilter"></FilterToolbar>
+            @update:filters="saveFilterConfig(); redrawWithFilter()"></FilterToolbar>
         <div class="qualityModelView">
             <div class="paperContainer">
                 <div id="qmPaper" ref="qmPaper"></div>
@@ -95,15 +95,26 @@ import { ProductFactor } from '@/core/qualitymodel/quamoco/ProductFactor';
 import { QualityAspect } from '@/core/qualitymodel/quamoco/QualityAspect';
 import { entities } from '@/core/qualitymodel/specifications/entities';
 import { orderQualityAspects, placeProductFactors, placeQualityAspects } from './placementAlgorithm';
-import FilterToolbar, { createFactorCategoryFilter, createHighLevelAspectFilter, getActiveElements, getActiveFilterItems } from './FilterToolbar.vue';
+import FilterToolbar, { createFactorCategoryFilter, createHighLevelAspectFilter, getActiveElements, getActiveFilterItems, ItemFilter } from './FilterToolbar.vue';
 import { useRouter } from 'vue-router';
+
+type QualityModelFilterConfig = {
+    highLevelAspectFilter: ItemFilter,
+    factorCategoryFilter: ItemFilter,
+}
 
 let initialized = true;
 let doRearrange = false;
 const props = defineProps<{
     active: boolean,
     path: string,
+    filterConfig: QualityModelFilterConfig
 }>()
+
+const emit = defineEmits<{
+    (e: "update:filterConfig", filterConfig: QualityModelFilterConfig): void;
+}>()
+
 const watchInView = computed(() => props.active);
 
 const router = useRouter();
@@ -118,13 +129,16 @@ const paperRef = ref<dia.Paper>(null);
 
 const qualityModel = getQualityModel();
 
-const highLevelAspectFilter: { [key: string]: { key: string, name: string, checked: boolean } } = (() => {
-    return createHighLevelAspectFilter(qualityModel);
-})();
+const highLevelAspectFilter = ref<ItemFilter>(createHighLevelAspectFilter(qualityModel));
 
-const factorCategoryFilter: { [key: string]: { key: string, name: string, checked: boolean } } = (() => {
-    return createFactorCategoryFilter(qualityModel);
-})();
+const factorCategoryFilter= ref<ItemFilter>(createFactorCategoryFilter(qualityModel));
+
+function saveFilterConfig() {
+    emit("update:filterConfig", {
+        highLevelAspectFilter: highLevelAspectFilter.value,
+        factorCategoryFilter: factorCategoryFilter.value
+    })
+}
 
 const qualityAspectElements: dia.Element[] = [];
 const productFactorElements: dia.Element[] = [];
@@ -161,7 +175,17 @@ onMounted(() => {
 
     paperRef.value.render();
 
-    drawQualityModelElements(getActiveFilterItems(highLevelAspectFilter), getActiveFilterItems(factorCategoryFilter));
+    if (props.filterConfig) {
+        if(props.filterConfig.highLevelAspectFilter) {
+            highLevelAspectFilter.value = props.filterConfig.highLevelAspectFilter;
+        }
+
+        if(props.filterConfig.factorCategoryFilter) {
+            factorCategoryFilter.value = props.filterConfig.factorCategoryFilter;
+        }
+    }
+
+    drawQualityModelElements(getActiveFilterItems(highLevelAspectFilter.value), getActiveFilterItems(factorCategoryFilter.value));
 
 
     paperRef.value.on({
@@ -367,7 +391,7 @@ function updateLinkRoutes() {
 }
 
 function redrawWithFilter() {
-    drawQualityModelElements(getActiveFilterItems(highLevelAspectFilter), getActiveFilterItems(factorCategoryFilter));
+    drawQualityModelElements(getActiveFilterItems(highLevelAspectFilter.value), getActiveFilterItems(factorCategoryFilter.value));
     arrangeQualityModelElements();
 }
 

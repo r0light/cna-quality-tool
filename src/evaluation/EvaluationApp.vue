@@ -61,10 +61,10 @@ import { CalculatedMeasure, EvaluatedProductFactor, EvaluatedQualityAspect } fro
 type EvaluationViewpoint = "perQualityAspect" | "perProductFactor";
 
 type EvaluationConfig = {
-    highLevelAspectFilter?: ItemFilter,
-    factorCategoryFilter?: ItemFilter,
-    selectedViewpoint?: EvaluationViewpoint,
-    showInconclusive?: boolean
+    highLevelAspectFilter: ItemFilter,
+    factorCategoryFilter: ItemFilter,
+    selectedViewpoint: EvaluationViewpoint,
+    showInconclusive: boolean
 }
 
 const props = defineProps<{
@@ -107,11 +107,6 @@ const evaluatedQualityAspects = ref<Map<string, EvaluatedQualityAspect>>(new Map
 
 onMounted(() => {
 
-    if (props.evaluatedSystemId && props.systemsData.find(system => system.id === props.evaluatedSystemId)) {
-        selectedSystemId.value = props.evaluatedSystemId;
-        evaluateSystem();
-    }
-
     if (props.evaluationConfig) {
         if(props.evaluationConfig.highLevelAspectFilter) {
             highLevelAspectFilter.value = props.evaluationConfig.highLevelAspectFilter;
@@ -129,6 +124,12 @@ onMounted(() => {
             showInconclusive.value = props.evaluationConfig.showInconclusive
         }
     }
+
+    if (props.evaluatedSystemId && props.systemsData.find(system => system.id === props.evaluatedSystemId)) {
+        selectedSystemId.value = props.evaluatedSystemId;
+        evaluateSystem();
+    }
+
 });
 
 onUpdated(() => {

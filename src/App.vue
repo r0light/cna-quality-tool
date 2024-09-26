@@ -96,7 +96,8 @@
         @store:modelingData="(id, systemEntityManager, toImport, importDone, appSettings) => storeModelingData(id, toImport, systemEntityManager, importDone, appSettings)"
         @update:systemName="(newName, id) => updatePageName(newName, id)"
         @update:evaluatedSystem="(systemId) => storeSelectedSystemToEvaluate(systemId)"
-        @update:evaluationConfig="(evaluationConfig) => storeEvaluationConfig(evaluationConfig)">
+        @update:evaluationConfig="(evaluationConfig) => storeEvaluationConfig(evaluationConfig)"
+        @update:filterConfig="(qualityModelViewConfig) => storeQualityModelViewConfig(qualityModelViewConfig)">
       </router-view>
     </div>
   </main>
@@ -201,6 +202,11 @@ const evaluationConfig = ref<object>({});
 function storeEvaluationConfig(config: object) {
   evaluationConfig.value = config;
 }
+const qualityModelViewConfig = ref<object>({});
+function storeQualityModelViewConfig(config: object) {
+  qualityModelViewConfig.value = config;
+}
+
 
 const overlayState = ref<"none" | "initial" | "startNew" | "startImport">("none");
 const newSystemName = ref<string>("");
@@ -265,7 +271,8 @@ onMounted(() => {
         component: QualityModelApp,
         props: route => ({
           active: page.active,
-          path: page.path
+          path: page.path,
+          filterConfig: qualityModelViewConfig.value
         })
       })
       router.addRoute({
