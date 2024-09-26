@@ -46,7 +46,7 @@ import { addSelectionToolToEntity } from './views/tools/entitySelectionTools';
 import { ImportData, ModelingData } from '@/App.vue';
 import EntityTypes from './config/entityTypes';
 import { entityShapes } from './config/entityShapes';
-import { ensureCorrectRendering } from './renderingUtilities';
+import { ensureCorrectRendering, triggerDownload } from './utilities';
 import ModalConfirmationDialog, { ConfirmationModalProps, getDefaultConfirmationDialogData } from './views/components/ModalConfirmationDialog.vue';
 import { DialogSize } from './config/actionDialogConfig';
 import { ModelingAppSettings, getDefaultAppSettings } from './config/appSettings';
@@ -215,11 +215,7 @@ function saveToJson() {
 
     let jsonSerializedGraph = systemEntityManager.convertToJson();
 
-    // download created yaml taken from https://stackoverflow.com/a/22347908
-    let downloadElement = document.createElement("a");
-    downloadElement.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify(jsonSerializedGraph)));
-    downloadElement.setAttribute('download', `${currentSystemName.value}.json`);
-    downloadElement.click();
+    triggerDownload(JSON.stringify(jsonSerializedGraph), "text/plain", `${currentSystemName.value}.json`);
 }
 
 function requestLoadFromTosca(yamlString: string, fileName: string) {
@@ -311,11 +307,7 @@ function saveToTosca() {
     let result = systemEntityManager.convertToCustomTosca();
 
     function continueExport() {
-        // download created yaml taken from https://stackoverflow.com/a/22347908
-        let downloadElement = document.createElement("a");
-        downloadElement.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(result.tosca));
-        downloadElement.setAttribute('download', `${currentSystemName.value}.yaml`);
-        downloadElement.click();
+        triggerDownload(result.tosca, "text/plain", `${currentSystemName.value}.yaml`);
     }
 
     if (result.errors.length > 0) {
@@ -478,11 +470,7 @@ function onSvgExportRequested() {
     let asString = svgElement.outerHTML;
     asString = asString.replaceAll("&nbsp;", " ");
 
-    // download created svg (taken from https://stackoverflow.com/a/22347908)
-    let downloadElement = document.createElement("a");
-    downloadElement.setAttribute('href', 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(asString));
-    downloadElement.setAttribute('download', `${currentSystemName.value}.svg`);
-    downloadElement.click();
+    triggerDownload(asString, "image/svg+xml", `${currentSystemName.value}.svg`);
 }
 
 function triggerValidation() {

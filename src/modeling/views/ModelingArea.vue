@@ -22,7 +22,7 @@ import EntityTypes from "../config/entityTypes";
 import { DeploymentMapping, Link, entityShapes } from "../config/entityShapes";
 import { DialogSize } from '../config/actionDialogConfig';
 import ModalConfirmationDialog, { ConfirmationModalProps, getDefaultConfirmationDialogData } from './components/ModalConfirmationDialog.vue';
-import { ensureCorrectRendering } from '../renderingUtilities';
+import { ensureCorrectRendering } from '../utilities';
 import { ModelingAppSettings, getRouterConfig } from '../config/appSettings';
 
 const props = defineProps<{

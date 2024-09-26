@@ -24,6 +24,9 @@
                     <span>Show inconclusive evaluations? </span>
                     <input type="checkbox" v-model="showInconclusive" @change="saveEvaluationConfig">
                 </div>
+                <div class="m-1">
+                    <button class="btn btn-secondary selection-bar-button" :disabled="selectedSystemId === -1" @click="exportMeasures">Export measures as CSV</button>
+                </div>
             </div>
             <div v-if="selectedSystemId > -1">
                 <div v-if="selectedViewpoint === 'perProductFactor'">
@@ -57,6 +60,7 @@ import SystemEntityManager from '@/modeling/systemEntityManager';
 import { entityShapes } from '@/modeling/config/entityShapes';
 import { dia } from '@joint/core';
 import { CalculatedMeasure, EvaluatedProductFactor, EvaluatedQualityAspect } from '@/core/qualitymodel/evaluation/Evaluation';
+import { triggerDownload } from '@/modeling/utilities';
 
 type EvaluationViewpoint = "perQualityAspect" | "perProductFactor";
 
@@ -211,6 +215,17 @@ function createTemporaryEntityManager(selectedSystem: ModelingData): SystemEntit
     return newEntityManager;
 }
 
+function exportMeasures() {
+
+    let systemName = props.systemsData.find(data => data.id === selectedSystemId.value).name;
+
+    let headers = '"measureKey";"measureName";"systemName";"entityType";"entityId";"value"';
+    let measuresAsCsv = [...calculatedMeasures.value.entries()].map(([measureKey, calculatedMeasure]) => 
+        `"${measureKey}";"${calculatedMeasure.name}";"${systemName}";"${calculatedMeasure.entity}";"${selectedSystemId.value}";"${calculatedMeasure.value}"`)
+    
+    triggerDownload(headers.concat("\n").concat(measuresAsCsv.join("\n")), "text/csv", `${systemName}-measures.csv`);
+}
+
 </script>
 
 <style>
@@ -224,6 +239,16 @@ function createTemporaryEntityManager(selectedSystem: ModelingData): SystemEntit
 
 .selection-bar {
     background-color: #fff;
+}
+
+.selection-bar div {
+    display: flex;
+    column-gap: 4px;
+    align-items: center;
+}
+
+.selection-bar-button {
+    padding: 0.2rem;
 }
 
 </style>
