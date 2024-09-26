@@ -1,20 +1,21 @@
 import { Impact } from "./Impact";
 import { ProductFactor } from "./ProductFactor";
-import { QualityAspectEvaluation } from "../evaluation/QualityAspectEvaluation";
 import { Evaluation } from "../evaluation/EvaluationModels";
 import { FactorEvaluationResult } from "../evaluation/Evaluation";
+import { FactorEvaluation } from "../evaluation/FactorEvaluation";
+import { QualityAspectKey } from "../specifications/qualitymodel";
 
 class QualityAspect {
 
-    #id: string;
+    #id: QualityAspectKey;
     #name: string;
     #highLevelAspectKey: string;
     #description: string;
-    #evaluation: QualityAspectEvaluation;
+    #evaluation: FactorEvaluation;
 
     #incomingImpacts: Impact[];
 
-    constructor(id: string, name: string, highLevelAspectKey: string, description: string) {
+    constructor(id: QualityAspectKey, name: string, highLevelAspectKey: string, description: string) {
         this.#id = id;
         this.#name = name;
         this.#highLevelAspectKey = highLevelAspectKey;
@@ -50,7 +51,7 @@ class QualityAspect {
         this.#incomingImpacts.push(impact);
     }
 
-    addEvaluation(evaluation: QualityAspectEvaluation) {
+    addEvaluation(evaluation: FactorEvaluation) {
         this.#evaluation = evaluation;
     }
 

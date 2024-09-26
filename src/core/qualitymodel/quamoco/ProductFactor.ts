@@ -1,15 +1,16 @@
 import { Component, Infrastructure, RequestTrace, System } from "@/core/entities";
 import { Evaluation } from "../evaluation/EvaluationModels";
-import { ProductFactorEvaluation } from "../evaluation/FactorEvaluation";
+import { FactorEvaluation } from "../evaluation/FactorEvaluation";
 import { Impact } from "./Impact";
 import { LiteratureSource } from "./LiteratureSource";
 import { Measure } from "./Measure";
 import { QualityAspect } from "./QualityAspect";
 import { FactorEvaluationResult } from "../evaluation/Evaluation";
+import { ProductFactorKey } from "../specifications/qualitymodel";
 
 class ProductFactor {
 
-    #id: string;
+    #id: ProductFactorKey;
     #name: string;
     #description: string;
     #categories: string[];
@@ -20,12 +21,12 @@ class ProductFactor {
     #componentPairMeasures: Measure<{ componentA: Component, componentB: Component, system: System }>[];
     #infrastructureMeasures: Measure<{ infrastructure: Infrastructure, system: System }>[];
     #requestTraceMeasures: Measure<{requestTrace: RequestTrace, system: System}>[];
-    #evaluation: ProductFactorEvaluation;
+    #evaluation: FactorEvaluation;
 
     #outgoingImpacts: Impact[];
     #incomingImpacts: Impact[];
 
-    constructor(id: string, name: string, description: string, categories: string[]) {
+    constructor(id: ProductFactorKey, name: string, description: string, categories: string[]) {
         this.#id = id;
         this.#name = name;
         this.#description = description;
@@ -137,7 +138,7 @@ class ProductFactor {
         this.#incomingImpacts.push(impact);
     }
 
-    addEvaluation(evaluation: ProductFactorEvaluation) {
+    addEvaluation(evaluation: FactorEvaluation) {
         this.#evaluation = evaluation;
     }
 

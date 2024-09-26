@@ -4,7 +4,7 @@ import { Measure } from "./quamoco/Measure.js";
 import { ProductFactor } from "./quamoco/ProductFactor.js";
 import { QualityAspect } from "./quamoco/QualityAspect.js";
 import { entities } from "./specifications/entities.js";
-import { DEFAULT_IMPACTS_INTERPRETATION, DEFAULT_PRECONDITION, qualityModel, QualityModelSpec } from "./specifications/qualitymodel.js";
+import { DEFAULT_IMPACTS_INTERPRETATION, DEFAULT_PRECONDITION, MeasureKey, ProductFactorKey, ProductFactorSpec, QualityAspectKey, qualityModel, QualityModelSpec } from "./specifications/qualitymodel.js";
 import { literature } from "./specifications/literature.js";
 import { LiteratureSource } from "./quamoco/LiteratureSource.js";
 import { Entity } from "./quamoco/Entity.js";
@@ -30,7 +30,7 @@ function getQualityModel(): QualityModelInstance {
         let highLevelAspect = new HighLevelAspect(highLevelQualityAspectKey, highLevelQualityAspect.name);
         newQualityModel.highLevelAspects.push(highLevelAspect);
         for (const [qualityAspectKey, qualityAspect] of Object.entries(highLevelQualityAspect.aspects)) {
-            let newQualityAspect = new QualityAspect(qualityAspectKey, qualityAspect.name, highLevelQualityAspectKey, qualityAspect.description);
+            let newQualityAspect = new QualityAspect(qualityAspectKey as QualityAspectKey, qualityAspect.name, highLevelQualityAspectKey, qualityAspect.description);
             newQualityModel.qualityAspects.push(newQualityAspect);
         }
     }
@@ -46,7 +46,7 @@ function getQualityModel(): QualityModelInstance {
     // add all Measures
 
     for (const [measureKey, measure] of Object.entries(specifiedQualityModel.measures)) {
-        let newMeasure = new Measure(measureKey, measure.name, measure.calculation);
+        let newMeasure = new Measure(measureKey as MeasureKey, measure.name, measure.calculation);
         measure.sources.forEach(sourceKey => {
             let url = literature[sourceKey] ? literature[sourceKey].url : "";
             newMeasure.addSource(new LiteratureSource(sourceKey, "", url));
@@ -84,7 +84,7 @@ function getQualityModel(): QualityModelInstance {
             }
         })
 
-        let newProductFactor = new ProductFactor(productFactorKey, productFactor.name, productFactor.description, productFactor.categories);
+        let newProductFactor = new ProductFactor(productFactorKey as ProductFactorKey, productFactor.name, productFactor.description, productFactor.categories);
 
         //TODO also add categories and explicit attribute of categories to quality model?
 

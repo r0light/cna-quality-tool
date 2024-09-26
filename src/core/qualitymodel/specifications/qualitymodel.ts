@@ -11,21 +11,21 @@ export type QualityModelSpec = {
 
 }
 
-type HighLevelQualityAspecSpec = {
+export type HighLevelQualityAspecSpec = {
     name: string,
     aspects: { [aspectKey: string]: QualityAspectSpec}
 }
 
-type QualityAspectSpec = {
+export type QualityAspectSpec = {
     name: string,
     description: string
 }
 
-type CategorySpec = {
+export type CategorySpec = {
     name: string
 }
 
-type ProductFactorSpec = {
+export type ProductFactorSpec = {
         name: string,
         description: string,
         categories: string[],
@@ -1657,6 +1657,9 @@ export const qualityModel = {
         }
     ]
 } satisfies QualityModelSpec;
+
+const qualityAspectKeys = Object.freeze(qualityModel.qualityAspects);
+export type QualityAspectKey = keyof typeof qualityAspectKeys;
 
 const productFactorKeys = Object.freeze(qualityModel.productFactors);
 export type ProductFactorKey = keyof typeof productFactorKeys;

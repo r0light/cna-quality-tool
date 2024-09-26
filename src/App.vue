@@ -280,7 +280,8 @@ onMounted(() => {
         component: QualityModelApp,
         props: route => ({
           active: page.active,
-          path: page.path
+          path: page.path,
+          filterConfig: qualityModelViewConfig.value
         })
       })
     } else if (page.pageType === "evaluation") {

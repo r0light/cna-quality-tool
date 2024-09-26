@@ -4,19 +4,20 @@ import { ImpactType } from "../quamoco/Impact";
 import { ProductFactor } from "../quamoco/ProductFactor";
 import { QualityAspect } from "../quamoco/QualityAspect";
 import { ENTITIES } from "../specifications/entities";
+import { MeasureKey, ProductFactorKey } from "../specifications/qualitymodel";
 import { CalculatedMeasure, deriveImpactWeight, EvaluatedProductFactor, EvaluatedQualityAspect, FactorEvaluationResult, ImpactWeight } from "./Evaluation";
 
 export interface Evaluation {
     evaluate(activeQualityAspects: string[], activeProductFactors: string[]): void,
-    getCalculatedMeasures(): Map<string, CalculatedMeasure>,
-    getEvaluatedProductFactors(): Map<string, EvaluatedProductFactor>,
+    getCalculatedMeasures(): Map<MeasureKey, CalculatedMeasure>,
+    getEvaluatedProductFactors(): Map<ProductFactorKey, EvaluatedProductFactor>,
     getEvaluatedQualityAspects(): Map<string, EvaluatedQualityAspect>,
 }
 
 class EvaluationModel {
 
-    calculatedMeasures: Map<string, CalculatedMeasure>;
-    evaluatedProductFactors: Map<string, EvaluatedProductFactor>;
+    calculatedMeasures: Map<MeasureKey, CalculatedMeasure>;
+    evaluatedProductFactors: Map<ProductFactorKey, EvaluatedProductFactor>;
     evaluatedQualityAspects: Map<string, EvaluatedQualityAspect>;
 
     constructor() {

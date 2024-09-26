@@ -1,4 +1,5 @@
 import { Component, System } from "../../entities";
+import { MeasureKey } from "../specifications/qualitymodel";
 import { LiteratureSource } from "./LiteratureSource";
 
 type MeasureValue = number | string | "n/a";
@@ -6,13 +7,13 @@ type Calculation<T> = (parameters: T) => MeasureValue;
 
 class Measure<T> {
 
-    #id: string;
+    #id: MeasureKey;
     #name: string;
     #calculationDescription: string;
     #calculation: Calculation<T>;
     #sources: LiteratureSource[];
 
-    constructor(id: string, name: string, calculationDescription: string) {
+    constructor(id: MeasureKey, name: string, calculationDescription: string) {
         this.#id = id;
         this.#name = name;
         this.#calculationDescription = calculationDescription;

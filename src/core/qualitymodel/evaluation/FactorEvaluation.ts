@@ -1,6 +1,6 @@
 import { ProductFactor } from "../quamoco/ProductFactor";
 import { QualityAspect } from "../quamoco/QualityAspect";
-import { EvaluationPrecondition, IncomingImpactsInterpretation } from "../specifications/qualitymodel";
+import { EvaluationPrecondition, IncomingImpactsInterpretation, MeasureKey, ProductFactorKey } from "../specifications/qualitymodel";
 import { CalculatedMeasure, EvaluatedProductFactor, FactorEvaluationFunction, ForwardImpactingPath } from "./Evaluation";
 
 class FactorEvaluation {
@@ -50,7 +50,7 @@ class FactorEvaluation {
         this.#evaluate = evaluationFunction;
     }
 
-    evaluate(calculatedMeasures: Map<string, CalculatedMeasure>, evaluatedProductFactors: Map<string, EvaluatedProductFactor>) {
+    evaluate(calculatedMeasures: Map<MeasureKey, CalculatedMeasure>, evaluatedProductFactors: Map<ProductFactorKey, EvaluatedProductFactor>) {
 
         let impacts: ForwardImpactingPath[] = [];
 
