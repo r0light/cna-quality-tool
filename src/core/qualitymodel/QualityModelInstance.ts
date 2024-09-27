@@ -3,8 +3,8 @@ import { Impact } from "./quamoco/Impact.js";
 import { Measure } from "./quamoco/Measure.js";
 import { ProductFactor } from "./quamoco/ProductFactor.js";
 import { QualityAspect } from "./quamoco/QualityAspect.js";
-import { entities } from "./specifications/entities.js";
-import { DEFAULT_IMPACTS_INTERPRETATION, DEFAULT_PRECONDITION, MeasureKey, ProductFactorKey, ProductFactorSpec, QualityAspectKey, qualityModel, QualityModelSpec } from "./specifications/qualitymodel.js";
+import { ENTITIES, entities } from "./specifications/entities.js";
+import { DEFAULT_IMPACTS_INTERPRETATION, DEFAULT_PRECONDITION, FactorCategoryKey, MeasureKey, ProductFactorKey, ProductFactorSpec, QualityAspectKey, qualityModel, QualityModelSpec } from "./specifications/qualitymodel.js";
 import { literature } from "./specifications/literature.js";
 import { LiteratureSource } from "./quamoco/LiteratureSource.js";
 import { Entity } from "./quamoco/Entity.js";
@@ -38,7 +38,7 @@ function getQualityModel(): QualityModelInstance {
     // add all factor categories
     for (const [categoryKey, category] of Object.entries(specifiedQualityModel.factorCategories)) {
         newQualityModel.factorCategories.push({
-            categoryKey: categoryKey,
+            categoryKey: categoryKey as FactorCategoryKey,
             categoryName: category.name
         })
     }
@@ -135,11 +135,11 @@ function getQualityModel(): QualityModelInstance {
     for (const impact of specifiedQualityModel.impacts) {
 
         let impacted = (() => {
-            let foundQualityAspect = newQualityModel.findQualityAspect(impact.impactedFactor);
+            let foundQualityAspect = newQualityModel.findQualityAspect(impact.impactedFactor as QualityAspectKey);
             if (foundQualityAspect) {
                 return foundQualityAspect;
             } else {
-                let foundProductFactor = newQualityModel.findProductFactor(impact.impactedFactor);
+                let foundProductFactor = newQualityModel.findProductFactor(impact.impactedFactor as ProductFactorKey);
                 if (foundProductFactor) {
                     return foundProductFactor;
                 } else {
@@ -241,7 +241,7 @@ class QualityModelInstance {
 
     productFactors: ProductFactor[];
 
-    factorCategories: { categoryKey: string, categoryName: string }[];
+    factorCategories: { categoryKey: FactorCategoryKey, categoryName: string }[];
 
     impacts: Impact[];
 
@@ -271,39 +271,39 @@ class QualityModelInstance {
         this.entities = [];
     }
 
-    findQualityAspect(qualityAspectKey: string): QualityAspect {
+    findQualityAspect(qualityAspectKey: QualityAspectKey): QualityAspect {
         return this.qualityAspects.find(qa => qa.getId === qualityAspectKey);
     }
 
-    findFactorCategory(categoryKey: string): { categoryKey: string, categoryName: string } {
+    findFactorCategory(categoryKey: FactorCategoryKey): { categoryKey: string, categoryName: string } {
         return this.factorCategories.find(category => category.categoryKey === categoryKey);
     }
 
-    findProductFactor(productFactorKey: string): ProductFactor {
+    findProductFactor(productFactorKey: ProductFactorKey): ProductFactor {
         return this.productFactors.find(pf => pf.getId === productFactorKey);
     }
 
-    findSystemMeasure(measureKey: string): Measure<System> {
+    findSystemMeasure(measureKey: MeasureKey): Measure<System> {
         return this.systemMeasures.find(m => m.getId === measureKey);
     }
 
-    findComponentMeasure(measureKey: string): Measure<{ component: Component, system: System }> {
+    findComponentMeasure(measureKey: MeasureKey): Measure<{ component: Component, system: System }> {
         return this.componentMeasures.find(m => m.getId === measureKey);
     }
 
-    findComponentPairMeasure(measureKey: string): Measure<{ componentA: Component, componentB: Component, system: System }> {
+    findComponentPairMeasure(measureKey: MeasureKey): Measure<{ componentA: Component, componentB: Component, system: System }> {
         return this.componentPairMeasures.find(m => m.getId === measureKey);
     }
 
-    findInfrastructureMeasure(measureKey: string): Measure<{ infrastructure: Infrastructure, system: System }> {
+    findInfrastructureMeasure(measureKey: MeasureKey): Measure<{ infrastructure: Infrastructure, system: System }> {
         return this.infrastructureMeasures.find(m => m.getId === measureKey);
     }
 
-    findRequestTraceMeasure(measureKey: string): Measure<{ requestTrace: RequestTrace, system: System }> {
+    findRequestTraceMeasure(measureKey: MeasureKey): Measure<{ requestTrace: RequestTrace, system: System }> {
         return this.requestTraceMeasures.find(m => m.getId === measureKey);
     }
 
-    findEntity(entityKey: string): Entity {
+    findEntity(entityKey: `${ENTITIES}`): Entity {
         return this.entities.find(e => e.getKey === entityKey);
     }
 }

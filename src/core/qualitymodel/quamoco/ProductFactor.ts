@@ -6,14 +6,14 @@ import { LiteratureSource } from "./LiteratureSource";
 import { Measure } from "./Measure";
 import { QualityAspect } from "./QualityAspect";
 import { FactorEvaluationResult } from "../evaluation/Evaluation";
-import { ProductFactorKey } from "../specifications/qualitymodel";
+import { FactorCategoryKey, ProductFactorKey } from "../specifications/qualitymodel";
 
 class ProductFactor {
 
     #id: ProductFactorKey;
     #name: string;
     #description: string;
-    #categories: string[];
+    #categories: FactorCategoryKey[];
     #relevantEntities: string[];
     #sources: LiteratureSource[];
     #systemMeasures: Measure<System>[];
@@ -26,7 +26,7 @@ class ProductFactor {
     #outgoingImpacts: Impact[];
     #incomingImpacts: Impact[];
 
-    constructor(id: ProductFactorKey, name: string, description: string, categories: string[]) {
+    constructor(id: ProductFactorKey, name: string, description: string, categories: FactorCategoryKey[]) {
         this.#id = id;
         this.#name = name;
         this.#description = description;

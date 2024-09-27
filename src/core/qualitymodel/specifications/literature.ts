@@ -6,7 +6,7 @@ type LiteratureSpec = {
     url: string
 }
 
-export const literature: {[literatureKey: string]: LiteratureSpec }= {
+export const literature = {
     "Davis2019": {
         "title": "Cloud Native Patterns",
         "year": 2019,
@@ -602,8 +602,6 @@ export const literature: {[literatureKey: string]: LiteratureSpec }= {
         "publisher": "Gesellschaft für Informatik, Bonn",
         "url": ""
     },
-
-
     "Abgaz2023": {
         "title": "Decomposition of Monolith Applications Into Microservices Architectures: A Systematic Review",
         "year": 2023,
@@ -681,4 +679,7 @@ export const literature: {[literatureKey: string]: LiteratureSpec }= {
         "publisher": "IEEE",
         "url": "https://doi.org/10.1109/TDSC.2023.3276487"
     },
-}
+} satisfies {[literatureKey: string]: LiteratureSpec }
+
+const literatureKeys = Object.freeze(literature);
+export type LiteratureKey = keyof typeof literatureKeys;
