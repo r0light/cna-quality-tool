@@ -88,7 +88,7 @@ function getQualityModel(): QualityModelInstance {
 
         //TODO also add categories and explicit attribute of categories to quality model?
 
-        productFactor.relevantEntities.forEach(entity => newProductFactor.addRelevantEntity(entity));
+        productFactor.applicableEntities.forEach(entity => newProductFactor.addRelevantEntity(entity));
         productFactor.sources.forEach(source => {
             let url = literature[source.key] ? literature[source.key].url : "";
             newProductFactor.addSource(new LiteratureSource(source.key, source.section, url));
