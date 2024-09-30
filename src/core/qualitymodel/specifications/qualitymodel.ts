@@ -1758,6 +1758,7 @@ export type IncomingImpactsInterpretation = "lowest" | "highest" | "mean" | "med
 
 type ProductFactorEvaluationSpec = {
     targetFactor: ProductFactorKey,
+    targetEntity: `${ENTITIES}`,
     evaluation: string,
     reasoning: string,
     precondition?: EvaluationPrecondition,
@@ -1768,16 +1769,19 @@ type ProductFactorEvaluationSpec = {
 const productFactorEvaluations = [
     {
         "targetFactor": "serviceReplication",
+        "targetEntity": ENTITIES.SYSTEM,
         "evaluation": "serviceReplication",
         "reasoning": "TODO write a suitable reasoning"
     },
     {
         "targetFactor": "horizontalDataReplication",
+        "targetEntity": ENTITIES.SYSTEM,
         "evaluation": "horizontalDataReplication",
         "reasoning": ""
     },
     {
         "targetFactor": "replication",
+        "targetEntity": ENTITIES.SYSTEM,
         "evaluation": "aggregateImpacts",
         "reasoning": "Replication can be achieved in different ways, each way already having a positive impact. Therefore if any of the underlying factors is present, replication is increased.",
         "precondition": "at-least-one",
@@ -1785,11 +1789,13 @@ const productFactorEvaluations = [
     },
     {
         "targetFactor": "shardedDataStoreReplication",
+        "targetEntity": ENTITIES.SYSTEM,
         "evaluation": "shardedDataStoreReplication",
         "reasoning": ""
     },
     {
         "targetFactor": "verticalDataReplication",
+        "targetEntity": ENTITIES.SYSTEM,
         "evaluation": "verticalDataReplication",
         "reasoning": "TODO"
     }

@@ -1,16 +1,18 @@
-import { Component, System } from "../../entities";
+import { Component, Infrastructure, RequestTrace, System } from "@/core/entities";
+import { ENTITIES } from "../specifications/entities";
 import { MeasureKey } from "../specifications/qualitymodel";
 import { LiteratureSource } from "./LiteratureSource";
 
 type MeasureValue = number | string | "n/a";
-type Calculation<T> = (parameters: T) => MeasureValue;
+type CalculationParameters<T> = { entity: T, system: System };
+type Calculation = (parameters: CalculationParameters<any>) => MeasureValue;
 
-class Measure<T> {
+class Measure {
 
     #id: MeasureKey;
     #name: string;
     #calculationDescription: string;
-    #calculation: Calculation<T>;
+    #calculation: Calculation;
     #sources: LiteratureSource[];
 
     constructor(id: MeasureKey, name: string, calculationDescription: string) {
@@ -41,7 +43,7 @@ class Measure<T> {
         this.#sources.push(literatureSource);
     }
 
-    addCalculation(calculation: Calculation<T>) {
+    addCalculation(calculation: Calculation) {
         this.#calculation = calculation;
     }
 
@@ -49,9 +51,9 @@ class Measure<T> {
         return !!this.#calculation;
     }
 
-    calculate(parameters: T) {
+    calculate(parameters: CalculationParameters<any>) {
         return this.#calculation(parameters);
     }
 }
 
-export { Measure, MeasureValue, Calculation }
+export { Measure, MeasureValue, Calculation, CalculationParameters }

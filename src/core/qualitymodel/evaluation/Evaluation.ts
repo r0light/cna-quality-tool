@@ -7,7 +7,6 @@ import { EvaluationPrecondition, IncomingImpactsInterpretation, MeasureKey, Prod
 
 export type CalculatedMeasure = {
     name: string,
-    type: "system" | "component" | "componentPair" | "infrastructure" | "requestTrace",
     entity: `${ENTITIES}`,
     value: MeasureValue,
     description: string

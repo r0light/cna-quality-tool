@@ -44,6 +44,9 @@ function getQualityModel(): QualityModelInstance {
     }
 
     // add all Measures
+    Object.values(ENTITIES).forEach(entityKey => {
+        newQualityModel.measures.set(entityKey as `${ENTITIES}`, []);
+    });
 
     for (const [measureKey, measure] of Object.entries(specifiedQualityModel.measures)) {
         let newMeasure = new Measure(measureKey as MeasureKey, measure.name, measure.calculation);
@@ -51,28 +54,24 @@ function getQualityModel(): QualityModelInstance {
             let url = literature[sourceKey] ? literature[sourceKey].url : "";
             newMeasure.addSource(new LiteratureSource(sourceKey, "", url));
         });
-        if (systemMeasureImplementations[measureKey]) {
-            newMeasure.addCalculation(systemMeasureImplementations[measureKey]);
-            newQualityModel.systemMeasures.push(newMeasure as Measure<System>);
-        } else if (componentMeasureImplementations[measureKey]) {
-            newMeasure.addCalculation(componentMeasureImplementations[measureKey]);
-            newQualityModel.componentMeasures.push(newMeasure as Measure<{ component: Component, system: System }>);
-        } else if (componentPairMeasureImplementations[measureKey]) {
-            newMeasure.addCalculation(componentPairMeasureImplementations[measureKey]);
-            newQualityModel.componentPairMeasures.push(newMeasure as Measure<{ componentA: Component, componentB: Component, system: System }>);
-        } else if (infrastructureMeasureImplementations[measureKey]) {
-            newMeasure.addCalculation(infrastructureMeasureImplementations[measureKey]);
-            newQualityModel.infrastructureMeasures.push(newMeasure as Measure<{ infrastructure: Infrastructure, system: System }>);
-        } else if (requestTraceMeasureImplementations[measureKey]) {
-            newMeasure.addCalculation(requestTraceMeasureImplementations[measureKey]);
-            newQualityModel.requestTraceMeasures.push(newMeasure as Measure<{ requestTrace: RequestTrace, system: System }>);
-        } else {
-            //console.log(`No measure implementation found for measure ${measureKey}`);
-            //default:
-            newQualityModel.systemMeasures.push(newMeasure as Measure<System>);
-        }
-    }
 
+        switch (measure.applicableEntity) {
+            case ENTITIES.SYSTEM:
+                newMeasure.addCalculation(systemMeasureImplementations[measureKey]);
+                break;
+            case ENTITIES.COMPONENT:
+                newMeasure.addCalculation(componentMeasureImplementations[measureKey]);
+                break;
+            case ENTITIES.INFRASTRUCTURE:
+                newMeasure.addCalculation(infrastructureMeasureImplementations[measureKey]);
+                break;
+            case ENTITIES.REQUEST_TRACE:
+                newMeasure.addCalculation(requestTraceMeasureImplementations[measureKey]);
+                break;
+        }
+        newQualityModel.measures.get(measure.applicableEntity).push(newMeasure);
+    }
+    
     // add all Product Factors
     for (const [productFactorKey, productFactor] of Object.entries(specifiedQualityModel.productFactors)) {
 
@@ -86,8 +85,6 @@ function getQualityModel(): QualityModelInstance {
 
         let newProductFactor = new ProductFactor(productFactorKey as ProductFactorKey, productFactor.name, productFactor.description, productFactor.categories);
 
-        //TODO also add categories and explicit attribute of categories to quality model?
-
         productFactor.applicableEntities.forEach(entity => newProductFactor.addRelevantEntity(entity));
         productFactor.sources.forEach(source => {
             let url = literature[source.key] ? literature[source.key].url : "";
@@ -95,36 +92,16 @@ function getQualityModel(): QualityModelInstance {
         });
 
         for (const measureKey of productFactor.measures) {
-            let foundSystemMeasure = newQualityModel.findSystemMeasure(measureKey);
-            if (foundSystemMeasure) {
-                newProductFactor.addSystemMeasure(foundSystemMeasure);
-                continue;
+            let entityKey = specifiedQualityModel.measures[measureKey].applicableEntity;
+            if (!entityKey) {
+                throw Error(`No measure with key ${measureKey} as specified in product factor ${productFactorKey} could be found, please check the quality model definition.`)
             }
 
-            let foundComponentMeasure = newQualityModel.findComponentMeasure(measureKey);
-            if (foundComponentMeasure) {
-                newProductFactor.addComponentMeasure(foundComponentMeasure);
+            let foundMeasure = newQualityModel.findMeasure(entityKey, measureKey);
+            if (foundMeasure) {
+                newProductFactor.addMeasure(entityKey, foundMeasure);
                 continue;
             }
-
-            let foundComponentPairMeasure = newQualityModel.findComponentPairMeasure(measureKey);
-            if (foundComponentPairMeasure) {
-                newProductFactor.addComponentPairMeasure(foundComponentPairMeasure);
-                continue;
-            }
-
-            let foundInfrastructureMeasure = newQualityModel.findInfrastructureMeasure(measureKey);
-            if (foundInfrastructureMeasure) {
-                newProductFactor.addInfrastructureMeasures(foundInfrastructureMeasure);
-                continue;
-            }
-
-            let foundRequestTraceMeasure = newQualityModel.findRequestTraceMeasure(measureKey);
-            if (foundRequestTraceMeasure) {
-                newProductFactor.addRequestTraceMeasure(foundRequestTraceMeasure);
-                continue;
-            }
-
             // else
             throw Error("No measure with key " + measureKey + " could be found, please check the quality model definition.")
         }
@@ -169,8 +146,8 @@ function getQualityModel(): QualityModelInstance {
         let evaluatedProductFactor = newQualityModel.findProductFactor(productFactorEvaluation.targetFactor);
         if (evaluatedProductFactor) {
 
-            let newEvaluation = new FactorEvaluation(evaluatedProductFactor, 
-                productFactorEvaluation.evaluation, 
+            let newEvaluation = new FactorEvaluation(evaluatedProductFactor,
+                productFactorEvaluation.evaluation,
                 productFactorEvaluation.reasoning,
                 productFactorEvaluation.precondition ? productFactorEvaluation.precondition : DEFAULT_PRECONDITION,
                 productFactorEvaluation.impactsInterpretation ? productFactorEvaluation.impactsInterpretation : DEFAULT_IMPACTS_INTERPRETATION,
@@ -179,12 +156,12 @@ function getQualityModel(): QualityModelInstance {
             let availableImplementation = productFactorEvaluationImplementation[newEvaluation.getEvaluationId]
             if (availableImplementation) {
                 newEvaluation.addEvaluation(availableImplementation);
-                evaluatedProductFactor.addEvaluation(newEvaluation);
+                evaluatedProductFactor.addEvaluation(productFactorEvaluation.targetEntity, newEvaluation);
             } else {
                 availableImplementation = generalEvaluationImplementation[newEvaluation.getEvaluationId];
                 if (availableImplementation) {
                     newEvaluation.addEvaluation(availableImplementation);
-                    evaluatedProductFactor.addEvaluation(newEvaluation);
+                    evaluatedProductFactor.addEvaluation(productFactorEvaluation.targetEntity, newEvaluation);
                 } else {
                     throw new Error(`No evaluation implementation found with id ${newEvaluation.getEvaluationId}`);
                 }
@@ -201,8 +178,8 @@ function getQualityModel(): QualityModelInstance {
         let evaluatedQualityAspect = newQualityModel.findQualityAspect(qualityAspectEvaluation.targetAspect);
         if (evaluatedQualityAspect) {
 
-            let newEvaluation = new FactorEvaluation(evaluatedQualityAspect, 
-                qualityAspectEvaluation.evaluation, 
+            let newEvaluation = new FactorEvaluation(evaluatedQualityAspect,
+                qualityAspectEvaluation.evaluation,
                 qualityAspectEvaluation.reasoning,
                 qualityAspectEvaluation.precondition ? qualityAspectEvaluation.precondition : DEFAULT_PRECONDITION,
                 qualityAspectEvaluation.impactsInterpretation ? qualityAspectEvaluation.impactsInterpretation : DEFAULT_IMPACTS_INTERPRETATION,
@@ -245,15 +222,9 @@ class QualityModelInstance {
 
     impacts: Impact[];
 
-    systemMeasures: (Measure<System>)[];
+    measures: Map<`${ENTITIES}`, Measure[]>;
 
-    componentMeasures: Measure<{ component: Component, system: System }>[];
-
-    componentPairMeasures: Measure<{ componentA: Component, componentB: Component, system: System }>[];
-
-    infrastructureMeasures: Measure<{ infrastructure: Infrastructure, system: System }>[];
-
-    requestTraceMeasures: Measure<{ requestTrace: RequestTrace, system: System }>[];
+    unusedMeasures: Measure[];
 
     entities: Entity[];
 
@@ -263,11 +234,8 @@ class QualityModelInstance {
         this.productFactors = [];
         this.factorCategories = [];
         this.impacts = [];
-        this.systemMeasures = [];
-        this.componentMeasures = [];
-        this.componentPairMeasures = [];
-        this.infrastructureMeasures = [];
-        this.requestTraceMeasures = [];
+        this.measures = new Map();
+        this.unusedMeasures = [];
         this.entities = [];
     }
 
@@ -283,24 +251,12 @@ class QualityModelInstance {
         return this.productFactors.find(pf => pf.getId === productFactorKey);
     }
 
-    findSystemMeasure(measureKey: MeasureKey): Measure<System> {
-        return this.systemMeasures.find(m => m.getId === measureKey);
+    findMeasure(forEntity: `${ENTITIES}`, measureKey: MeasureKey) {
+        return this.measures.get(forEntity).find(m => m.getId === measureKey);
     }
 
-    findComponentMeasure(measureKey: MeasureKey): Measure<{ component: Component, system: System }> {
-        return this.componentMeasures.find(m => m.getId === measureKey);
-    }
-
-    findComponentPairMeasure(measureKey: MeasureKey): Measure<{ componentA: Component, componentB: Component, system: System }> {
-        return this.componentPairMeasures.find(m => m.getId === measureKey);
-    }
-
-    findInfrastructureMeasure(measureKey: MeasureKey): Measure<{ infrastructure: Infrastructure, system: System }> {
-        return this.infrastructureMeasures.find(m => m.getId === measureKey);
-    }
-
-    findRequestTraceMeasure(measureKey: MeasureKey): Measure<{ requestTrace: RequestTrace, system: System }> {
-        return this.requestTraceMeasures.find(m => m.getId === measureKey);
+    findMeasureByKey(measureKey: MeasureKey) {
+        return [...this.measures.values()].flatMap(measures => measures).find(m => m.getId === measureKey);
     }
 
     findEntity(entityKey: `${ENTITIES}`): Entity {

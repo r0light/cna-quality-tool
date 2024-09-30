@@ -1,33 +1,34 @@
-import { System } from "@/core/entities";
+import { Component, Infrastructure, RequestTrace, System } from "@/core/entities";
 import { QualityModelInstance } from "../QualityModelInstance";
-import { EvaluatedComponentModel, EvaluatedInfrastructureModel, EvaluatedRequestTraceModel, EvaluatedSystemModel } from "./EvaluationModels";
+import { EvaluatedEntityModel } from "./EvaluationModels";
+import { ENTITIES } from "../specifications/entities";
 
 export class EvaluationModelsWrapper {
 
     #qualityModel: QualityModelInstance;
     #system: System;
-    #evaluatedSystemModel: EvaluatedSystemModel;
-    #evaluatedComponentModels: Map<string, EvaluatedComponentModel>;
-    #evaluatedInfrastructureModels: Map<string,EvaluatedInfrastructureModel>;
-    #evaluatedRequestTraceModels: Map<string, EvaluatedRequestTraceModel>;
+    #evaluatedSystemModel: EvaluatedEntityModel<ENTITIES.SYSTEM, System>;
+    #evaluatedComponentModels: Map<string, EvaluatedEntityModel<ENTITIES.COMPONENT, Component>>;
+    #evaluatedInfrastructureModels: Map<string, EvaluatedEntityModel<ENTITIES.INFRASTRUCTURE, Infrastructure>>;
+    #evaluatedRequestTraceModels: Map<string, EvaluatedEntityModel<ENTITIES.REQUEST_TRACE, RequestTrace>>;
 
     constructor(system: System, qualityModel: QualityModelInstance) {
         this.#qualityModel = qualityModel;
         this.#system = system;
-        this.#evaluatedSystemModel = new EvaluatedSystemModel(system, qualityModel);
+        this.#evaluatedSystemModel = new EvaluatedEntityModel(ENTITIES.SYSTEM, system, system, qualityModel);
         this.#evaluatedComponentModels = new Map();
         [...system.getComponentEntities.entries()].forEach(([componentId, component]) => {
-            this.#evaluatedComponentModels.set(componentId, new EvaluatedComponentModel(system, component, qualityModel));
+            this.#evaluatedComponentModels.set(componentId, new EvaluatedEntityModel(ENTITIES.COMPONENT, component, system, qualityModel));
         })
 
         this.#evaluatedInfrastructureModels = new Map();
         [...system.getInfrastructureEntities.entries()].forEach(([infrastructureId, infrastructure]) => {
-            this.#evaluatedInfrastructureModels.set(infrastructureId, new EvaluatedInfrastructureModel(system, infrastructure, qualityModel));
+            this.#evaluatedInfrastructureModels.set(infrastructureId, new EvaluatedEntityModel(ENTITIES.INFRASTRUCTURE, infrastructure, system, qualityModel));
         })
 
         this.#evaluatedRequestTraceModels = new Map();
         [...system.getRequestTraceEntities.entries()].forEach(([requestTraceId, requestTrace]) => {
-            this.#evaluatedRequestTraceModels.set(requestTraceId, new EvaluatedRequestTraceModel(system, requestTrace, qualityModel));
+            this.#evaluatedRequestTraceModels.set(requestTraceId, new EvaluatedEntityModel(ENTITIES.REQUEST_TRACE, requestTrace, system, qualityModel));
         })
 
         this.getEvaluatedSystemModel = this.getEvaluatedSystemModel.bind(this);
