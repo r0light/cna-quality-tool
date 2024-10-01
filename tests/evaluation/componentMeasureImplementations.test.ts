@@ -1,7 +1,7 @@
 import { getEmptyMetaData } from "@/core/common/entityDataTypes";
 import { DataAggregate, Endpoint, ExternalEndpoint, Link, Service, StorageBackingService, System } from "@/core/entities";
 import { RelationToDataAggregate } from "@/core/entities/relationToDataAggregate";
-import { componentMeasureImplementations, serviceCriticality } from "@/core/qualitymodel/evaluation/measureImplementations";
+import { componentMeasureImplementations, serviceCriticality } from "@/core/qualitymodel/evaluation/measure-implementations/measureImplementations";
 import { getQualityModel } from "@/core/qualitymodel/QualityModelInstance";
 import { ASYNCHRONOUS_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "@/core/qualitymodel/specifications/featureModel";
 import { expect, test } from "vitest";

@@ -1,7 +1,7 @@
 import { getEmptyMetaData } from "@/core/common/entityDataTypes";
 import { DataAggregate, Endpoint, ExternalEndpoint, Link, RequestTrace, Service, StorageBackingService, System } from "@/core/entities";
 import { RelationToDataAggregate } from "@/core/entities/relationToDataAggregate";
-import { requestTraceMeasureImplementations } from "@/core/qualitymodel/evaluation/measureImplementations";
+import { requestTraceMeasureImplementations } from "@/core/qualitymodel/evaluation/measure-implementations/measureImplementations";
 import { getQualityModel } from "@/core/qualitymodel/QualityModelInstance";
 import { expect, test } from "vitest";
 

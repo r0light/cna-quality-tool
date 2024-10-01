@@ -1,6 +1,6 @@
 import { getEmptyMetaData } from "@/core/common/entityDataTypes";
 import { DeploymentMapping, Infrastructure, Service, System } from "@/core/entities";
-import { infrastructureMeasureImplementations } from "@/core/qualitymodel/evaluation/measureImplementations";
+import { infrastructureMeasureImplementations } from "@/core/qualitymodel/evaluation/measure-implementations/measureImplementations";
 import { getQualityModel } from "@/core/qualitymodel/QualityModelInstance";
 import { expect, test } from "vitest";
 

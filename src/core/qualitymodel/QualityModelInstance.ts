@@ -9,8 +9,11 @@ import { literature } from "./specifications/literature.js";
 import { LiteratureSource } from "./quamoco/LiteratureSource.js";
 import { Entity } from "./quamoco/Entity.js";
 import { generalEvaluationImplementation, productFactorEvaluationImplementation, qualityAspectEvaluationImplementation } from "./evaluation/evaluationImplementations.js";
-import { componentMeasureImplementations, infrastructureMeasureImplementations, requestTraceMeasureImplementations, systemMeasureImplementations } from "./evaluation/measureImplementations.js";
 import { FactorEvaluation } from "./evaluation/FactorEvaluation.js";
+import { systemMeasureImplementations } from "./evaluation/measure-implementations/systemMeasures.js";
+import { componentMeasureImplementations } from "./evaluation/measure-implementations/componentMeasures.js";
+import { infrastructureMeasureImplementations } from "./evaluation/measure-implementations/infrastructureMeasures.js";
+import { requestTraceMeasureImplementations } from "./evaluation/measure-implementations/requestTraceMeasures.js";
 
 
 function getQualityModel(): QualityModelInstance {
