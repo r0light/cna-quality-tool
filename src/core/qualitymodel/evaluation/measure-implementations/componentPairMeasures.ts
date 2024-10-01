@@ -1,9 +1,9 @@
-import { Component } from "../../../entities.js";
-import { Calculation, CalculationParameters } from "../../quamoco/Measure.js";
+import { Component, System } from "../../../entities.js";
+import { Calculation, CalculationParameters, MeasureValue } from "../../quamoco/Measure.js";
 
-export const couplingOfServicesBasedOnUsedDataAggregates: Calculation= (parameters: CalculationParameters<{entityA: Component, entityB: Component}>) => {
-    let dataAggregatesUsedByA = new Set<string>(parameters.entity.entityA.getDataAggregateEntities.map(dataAggregate => dataAggregate.data.getId));
-    let dataAggregatesUsedByB = new Set<string>(parameters.entity.entityB.getDataAggregateEntities.map(dataAggregate => dataAggregate.data.getId));
+export const couplingOfServicesBasedOnUsedDataAggregates= (parameters: {entityA: Component, entityB: Component, system: System}) => {
+    let dataAggregatesUsedByA = new Set<string>(parameters.entityA.getDataAggregateEntities.map(dataAggregate => dataAggregate.data.getId));
+    let dataAggregatesUsedByB = new Set<string>(parameters.entityB.getDataAggregateEntities.map(dataAggregate => dataAggregate.data.getId));
 
     if (dataAggregatesUsedByA.union(dataAggregatesUsedByB).size === 0) {
         return 0;
@@ -12,9 +12,9 @@ export const couplingOfServicesBasedOnUsedDataAggregates: Calculation= (paramete
     return dataAggregatesUsedByA.intersection(dataAggregatesUsedByB).size / dataAggregatesUsedByA.union(dataAggregatesUsedByB).size;
 }
 
-export const couplingOfServicesBasedServicesWhichCallThem: Calculation = (parameters: CalculationParameters<{entityA: Component, entityB: Component}>) => {
-    let servicesWhichCallA = new Set<string>(parameters.system.getIncomingLinksOfComponent(parameters.entity.entityA.getId).map(link => link.getSourceEntity.getId));
-    let servicesWhichCallB = new Set<string>(parameters.system.getIncomingLinksOfComponent(parameters.entity.entityB.getId).map(link => link.getSourceEntity.getId));
+export const couplingOfServicesBasedServicesWhichCallThem = (parameters: {entityA: Component, entityB: Component, system: System}) => {
+    let servicesWhichCallA = new Set<string>(parameters.system.getIncomingLinksOfComponent(parameters.entityA.getId).map(link => link.getSourceEntity.getId));
+    let servicesWhichCallB = new Set<string>(parameters.system.getIncomingLinksOfComponent(parameters.entityB.getId).map(link => link.getSourceEntity.getId));
 
     if (servicesWhichCallA.union(servicesWhichCallB).size === 0) {
         return 0;
@@ -23,10 +23,10 @@ export const couplingOfServicesBasedServicesWhichCallThem: Calculation = (parame
     return servicesWhichCallA.intersection(servicesWhichCallB).size / servicesWhichCallA.union(servicesWhichCallB).size;
 }
 
-export const couplingOfServicesBasedServicesWhichAreCalledByThem: Calculation = (parameters: CalculationParameters<{entityA: Component, entityB: Component}>) => {
-    let servicesCalledByA = new Set<string>(parameters.system.getOutgoingLinksOfComponent(parameters.entity.entityA.getId).map(link => parameters.system.searchComponentOfEndpoint(link.getTargetEndpoint.getId).getId));
+export const couplingOfServicesBasedServicesWhichAreCalledByThem = (parameters: {entityA: Component, entityB: Component, system: System}) => {
+    let servicesCalledByA = new Set<string>(parameters.system.getOutgoingLinksOfComponent(parameters.entityA.getId).map(link => parameters.system.searchComponentOfEndpoint(link.getTargetEndpoint.getId).getId));
 
-    let servicesCalledByB = new Set<string>(parameters.system.getOutgoingLinksOfComponent(parameters.entity.entityB.getId).map(link => parameters.system.searchComponentOfEndpoint(link.getTargetEndpoint.getId).getId));
+    let servicesCalledByB = new Set<string>(parameters.system.getOutgoingLinksOfComponent(parameters.entityB.getId).map(link => parameters.system.searchComponentOfEndpoint(link.getTargetEndpoint.getId).getId));
 
     if (servicesCalledByA.union(servicesCalledByB).size === 0) {
         return 0;
@@ -36,7 +36,7 @@ export const couplingOfServicesBasedServicesWhichAreCalledByThem: Calculation = 
 }
 
 
-export const couplingOfServicesBasedOnAmountOfRequestTracesThatIncludeASpecificLink: Calculation = (parameters: CalculationParameters<{entityA: Component, entityB: Component}>) => {
+export const couplingOfServicesBasedOnAmountOfRequestTracesThatIncludeASpecificLink = (parameters:{entityA: Component, entityB: Component, system: System}) => {
 
     let allRequestTraces = parameters.system.getRequestTraceEntities;
 
@@ -50,10 +50,10 @@ export const couplingOfServicesBasedOnAmountOfRequestTracesThatIncludeASpecificL
             let callingComponentId = link.getSourceEntity.getId;
             let calledComponentId = parameters.system.searchComponentOfEndpoint(link.getTargetEndpoint.getId).getId;
 
-            let aIsCalling = callingComponentId === parameters.entity.entityA.getId;
-            let bIsCalled = calledComponentId === parameters.entity.entityB.getId;
-            let bIsCalling = callingComponentId === parameters.entity.entityB.getId;
-            let aIsCalled = calledComponentId === parameters.entity.entityA.getId;
+            let aIsCalling = callingComponentId === parameters.entityA.getId;
+            let bIsCalled = calledComponentId === parameters.entityB.getId;
+            let bIsCalling = callingComponentId === parameters.entityB.getId;
+            let aIsCalled = calledComponentId === parameters.entityA.getId;
 
             if (aIsCalling || aIsCalled) {
                 requestTracesIncludingA.add(requestTraceId);
@@ -76,7 +76,7 @@ export const couplingOfServicesBasedOnAmountOfRequestTracesThatIncludeASpecificL
     return Math.max(probA, probB);
 }
 
-export const couplingOfServicesBasedTimesThatTheyOccurInTheSameRequestTrace: Calculation = (parameters: CalculationParameters<{entityA: Component, entityB: Component}>) => {
+export const couplingOfServicesBasedTimesThatTheyOccurInTheSameRequestTrace = (parameters: {entityA: Component, entityB: Component, system: System}) => {
     let allRequestTraces = parameters.system.getRequestTraceEntities;
 
     if (allRequestTraces.size === 0) {
@@ -91,10 +91,10 @@ export const couplingOfServicesBasedTimesThatTheyOccurInTheSameRequestTrace: Cal
             let callingComponentId = link.getSourceEntity.getId;
             let calledComponentId = parameters.system.searchComponentOfEndpoint(link.getTargetEndpoint.getId).getId;
 
-            let aIsCalling = callingComponentId === parameters.entity.entityA.getId;
-            let bIsCalled = calledComponentId === parameters.entity.entityB.getId;
-            let bIsCalling = callingComponentId === parameters.entity.entityB.getId;
-            let aIsCalled = calledComponentId === parameters.entity.entityA.getId;
+            let aIsCalling = callingComponentId === parameters.entityA.getId;
+            let bIsCalled = calledComponentId === parameters.entityB.getId;
+            let bIsCalling = callingComponentId === parameters.entityB.getId;
+            let aIsCalled = calledComponentId === parameters.entityA.getId;
 
             if (aIsCalling || aIsCalled) {
                 requestTracesIncludingA.add(requestTraceId);
@@ -108,10 +108,10 @@ export const couplingOfServicesBasedTimesThatTheyOccurInTheSameRequestTrace: Cal
     return requestTracesIncludingA.intersection(requestTracesIncludingB).size / allRequestTraces.size;
 }
 
-export const numberOfLinksBetweenTwoServices: Calculation = (parameters: CalculationParameters<{entityA: Component, entityB: Component}>) => {
+export const numberOfLinksBetweenTwoServices = (parameters: {entityA: Component, entityB: Component, system: System}) => {
     let numberOfLinksFromAToB = 0;
-    let idA: string = parameters.entity.entityA.getId;
-    let endpointIdsOfB: string[] = parameters.entity.entityB.getEndpointEntities.concat(parameters.entity.entityB.getExternalEndpointEntities).map(endpoint => endpoint.getId);
+    let idA: string = parameters.entityA.getId;
+    let endpointIdsOfB: string[] = parameters.entityB.getEndpointEntities.concat(parameters.entityB.getExternalEndpointEntities).map(endpoint => endpoint.getId);
 
     for (const [linkId, link] of parameters.system.getLinkEntities) {
         if (link.getSourceEntity.getId === idA && endpointIdsOfB.includes(link.getTargetEndpoint.getId)) {
@@ -122,7 +122,7 @@ export const numberOfLinksBetweenTwoServices: Calculation = (parameters: Calcula
     return numberOfLinksFromAToB;
 }
 
-export const componentPairMeasureImplementations: { [measureKey: string]: Calculation } = {
+export const componentPairMeasureImplementations: { [measureKey: string]: (parameters: {entityA: Component, entityB: Component, system: System}) => MeasureValue } = {
     "couplingOfServicesBasedOnUsedDataAggregates": couplingOfServicesBasedOnUsedDataAggregates,
     "couplingOfServicesBasedServicesWhichCallThem": couplingOfServicesBasedServicesWhichCallThem,
     "couplingOfServicesBasedServicesWhichAreCalledByThem": couplingOfServicesBasedServicesWhichAreCalledByThem,

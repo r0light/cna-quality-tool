@@ -1,12 +1,13 @@
 import { getEmptyMetaData } from "@/core/common/entityDataTypes";
 import { DataAggregate, Endpoint, ExternalEndpoint, Link, RequestTrace, Service, StorageBackingService, System } from "@/core/entities";
 import { RelationToDataAggregate } from "@/core/entities/relationToDataAggregate";
-import { requestTraceMeasureImplementations } from "@/core/qualitymodel/evaluation/measure-implementations/measureImplementations";
+import { requestTraceMeasureImplementations } from "@/core/qualitymodel/evaluation/measure-implementations/requestTraceMeasures";
 import { getQualityModel } from "@/core/qualitymodel/QualityModelInstance";
+import { ENTITIES } from "@/core/qualitymodel/specifications/entities";
 import { expect, test } from "vitest";
 
 test("all implementation names refer to an existing measure", () => {
-    let measureKeys = getQualityModel().requestTraceMeasures.map(measure => measure.getId);
+    let measureKeys = getQualityModel().measures.get(ENTITIES.REQUEST_TRACE).map(measure => measure.getId);
     expect(measureKeys.length).toStrictEqual(new Set(measureKeys).size);
 
     let measureImplementationKeys = Object.keys(requestTraceMeasureImplementations);
@@ -18,7 +19,7 @@ test("all implementation names refer to an existing measure", () => {
 })
 
 test("all implemented measure must provide information on the calculation", () => {
-    let measures = getQualityModel().requestTraceMeasures;
+    let measures = getQualityModel().measures.get(ENTITIES.REQUEST_TRACE);
     let measureKeys = measures.map(measure => measure.getId);
     expect(measureKeys.length).toStrictEqual(new Set(measureKeys).size);
 
@@ -33,7 +34,7 @@ test("all implemented measure must provide information on the calculation", () =
 })
 
 test("requestTraceLength", () => {
-    let system = new System("testSystem");
+    let system = new System("sys1", "testSystem");;
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
     let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
@@ -73,7 +74,7 @@ test("requestTraceLength", () => {
     system.addEntities([linkAB, linkBC, linkCD]);
     system.addEntity(requestTrace);
 
-    let measureValue = requestTraceMeasureImplementations["requestTraceLength"]({ requestTrace: requestTrace, system: system});
+    let measureValue = requestTraceMeasureImplementations["requestTraceLength"]({ entity: requestTrace, system: system});
     expect(measureValue).toEqual(3);
 
 
@@ -81,7 +82,7 @@ test("requestTraceLength", () => {
 
 test("numberOfCyclesInRequestTraces", () => {
 
-    let system = new System("testSystem");
+    let system = new System("sys1", "testSystem");;
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
     let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
@@ -120,14 +121,14 @@ test("numberOfCyclesInRequestTraces", () => {
     system.addEntities([linkAB, linkBC, linkDB, linkCD]);
     system.addEntity(requestTrace);
 
-    let measureValue = requestTraceMeasureImplementations["numberOfCyclesInRequestTraces"]({ requestTrace: requestTrace, system: system});
+    let measureValue = requestTraceMeasureImplementations["numberOfCyclesInRequestTraces"]({ entity: requestTrace, system: system});
     expect(measureValue).toEqual(1);
 
 })
 
 
 test("dataReplicationAlongRequestTrace", () => {
-    let system = new System("testSystem");
+    let system = new System("sys1", "testSystem");;
 
     let serviceA = new Service("s1", "testService A", getEmptyMetaData());
     let externalEndpoint = new ExternalEndpoint("ee1", "external endpoint", getEmptyMetaData());
@@ -235,7 +236,7 @@ test("dataReplicationAlongRequestTrace", () => {
     system.addEntities([requestTrace]);
 
 
-    let measureValue = requestTraceMeasureImplementations["dataReplicationAlongRequestTrace"]({ requestTrace: requestTrace, system: system});
+    let measureValue = requestTraceMeasureImplementations["dataReplicationAlongRequestTrace"]({ entity: requestTrace, system: system});
     expect(measureValue).toBeCloseTo(17/24, 5);
 
 })

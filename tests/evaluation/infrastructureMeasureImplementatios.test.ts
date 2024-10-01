@@ -1,12 +1,13 @@
 import { getEmptyMetaData } from "@/core/common/entityDataTypes";
 import { DeploymentMapping, Infrastructure, Service, System } from "@/core/entities";
-import { infrastructureMeasureImplementations } from "@/core/qualitymodel/evaluation/measure-implementations/measureImplementations";
+import { infrastructureMeasureImplementations } from "@/core/qualitymodel/evaluation/measure-implementations/infrastructureMeasures";
 import { getQualityModel } from "@/core/qualitymodel/QualityModelInstance";
+import { ENTITIES } from "@/core/qualitymodel/specifications/entities";
 import { expect, test } from "vitest";
 
 
 test("all implementation names refer to an existing measure", () => {
-    let measureKeys = getQualityModel().infrastructureMeasures.map(measure => measure.getId);
+    let measureKeys = getQualityModel().measures.get(ENTITIES.INFRASTRUCTURE).map(measure => measure.getId);
     expect(measureKeys.length).toStrictEqual(new Set(measureKeys).size);
 
     let measureImplementationKeys = Object.keys(infrastructureMeasureImplementations);
@@ -18,7 +19,7 @@ test("all implementation names refer to an existing measure", () => {
 })
 
 test("all implemented measure must provide information on the calculation", () => {
-    let measures = getQualityModel().infrastructureMeasures;
+    let measures = getQualityModel().measures.get(ENTITIES.INFRASTRUCTURE);
     let measureKeys = measures.map(measure => measure.getId);
     expect(measureKeys.length).toStrictEqual(new Set(measureKeys).size);
 
@@ -34,7 +35,7 @@ test("all implemented measure must provide information on the calculation", () =
 
 
 test("numberOfServiceHostedOnOneInfrastructure", () => {
-    let system = new System("testSystem");
+    let system = new System("sys1", "testSystem");;
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
     let serviceB = new Service("s2", "testService", getEmptyMetaData());
@@ -52,6 +53,6 @@ test("numberOfServiceHostedOnOneInfrastructure", () => {
     system.addEntities([infrastructureA, infrastructureB, infrastructureC]);
     system.addEntities([deploymentMappingA, deploymentMappingB, deploymentMappingC]);
 
-    let measureValue = infrastructureMeasureImplementations["numberOfServiceHostedOnOneInfrastructure"]({infrastructure: infrastructureA, system: system});
+    let measureValue = infrastructureMeasureImplementations["numberOfServiceHostedOnOneInfrastructure"]({entity: infrastructureA, system: system});
     expect(measureValue).toEqual(2);
 })

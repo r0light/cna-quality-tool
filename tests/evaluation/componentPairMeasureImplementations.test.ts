@@ -1,41 +1,13 @@
 import { getEmptyMetaData } from "@/core/common/entityDataTypes";
 import { DataAggregate, Endpoint, ExternalEndpoint, Link, RequestTrace, Service, System } from "@/core/entities";
 import { RelationToDataAggregate } from "@/core/entities/relationToDataAggregate";
-import { componentPairMeasureImplementations } from "@/core/qualitymodel/evaluation/measure-implementations/measureImplementations";
+import { componentPairMeasureImplementations } from "@/core/qualitymodel/evaluation/measure-implementations/componentPairMeasures";
 import { getQualityModel } from "@/core/qualitymodel/QualityModelInstance";
 import { expect, test } from "vitest";
 
 
-test("all implementation names refer to an existing measure", () => {
-    let measureKeys = getQualityModel().componentPairMeasures.map(measure => measure.getId);
-    expect(measureKeys.length).toStrictEqual(new Set(measureKeys).size);
-
-    let measureImplementationKeys = Object.keys(componentPairMeasureImplementations);
-    expect(measureImplementationKeys.length).toStrictEqual(new Set(measureImplementationKeys).size);
-
-    expect(measureKeys).toEqual(
-        expect.arrayContaining(measureImplementationKeys)
-      )
-})
-
-test("all implemented measure must provide information on the calculation", () => {
-    let measures = getQualityModel().componentPairMeasures;
-    let measureKeys = measures.map(measure => measure.getId);
-    expect(measureKeys.length).toStrictEqual(new Set(measureKeys).size);
-
-    let measureImplementationKeys = Object.keys(componentPairMeasureImplementations);
-    expect(measureImplementationKeys.length).toStrictEqual(new Set(measureImplementationKeys).size);
-
-    for (const measure of measures) {
-        if (measureImplementationKeys.includes(measure.getId)) {
-            expect(measure.getCalculationDescription.length, `Implemented measure ${measure.getId} does not provide a calculation description`).toBeGreaterThan(0)
-        }
-    }
-})
-
-
 test("couplingOfServicesBasedOnUsedDataAggregates", () => {
-    let system = new System("testSystem");
+    let system = new System("sys1", "testSystem");
 
 
     let dataAggregateA = new DataAggregate("d1", "data 1", getEmptyMetaData());
@@ -56,14 +28,14 @@ test("couplingOfServicesBasedOnUsedDataAggregates", () => {
     system.addEntities([dataAggregateA, dataAggregateB, dataAggregateC, dataAggregateD]);
     system.addEntities([serviceA, serviceB]);
 
-    let measureValue = componentPairMeasureImplementations["couplingOfServicesBasedOnUsedDataAggregates"]({componentA: serviceA, componentB: serviceB,  system: system});
+    let measureValue = componentPairMeasureImplementations["couplingOfServicesBasedOnUsedDataAggregates"]({entityA: serviceA, entityB: serviceB,  system: system});
     expect(measureValue).toEqual(1/4);
 
     })
 
 
 test("couplingOfServicesBasedServicesWhichCallThem", () => {
-    let system = new System("testSystem");
+    let system = new System("sys1", "testSystem");
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
 
@@ -87,12 +59,12 @@ test("couplingOfServicesBasedServicesWhichCallThem", () => {
     system.addEntities([serviceA, serviceB, serviceC, serviceD, serviceE, serviceF]);
     system.addEntities([linkAB, linkAC, linkDB, linkEC]);
 
-    let measureValue = componentPairMeasureImplementations["couplingOfServicesBasedServicesWhichCallThem"]({componentA: serviceB, componentB: serviceC, system: system});
+    let measureValue = componentPairMeasureImplementations["couplingOfServicesBasedServicesWhichCallThem"]({entityA: serviceB, entityB: serviceC, system: system});
     expect(measureValue).toEqual(1/3);
 })
 
 test("couplingOfServicesBasedServicesWhichAreCalledByThem", () => {
-    let system = new System("testSystem");
+    let system = new System("sys1", "testSystem");
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
 
@@ -116,13 +88,13 @@ test("couplingOfServicesBasedServicesWhichAreCalledByThem", () => {
     system.addEntities([serviceA, serviceB, serviceC, serviceD, serviceE, serviceF]);
     system.addEntities([linkAB, linkAC, linkDB, linkEC]);
 
-    let measureValue = componentPairMeasureImplementations["couplingOfServicesBasedServicesWhichAreCalledByThem"]({componentA: serviceA, componentB: serviceD, system: system});
+    let measureValue = componentPairMeasureImplementations["couplingOfServicesBasedServicesWhichAreCalledByThem"]({entityA: serviceA, entityB: serviceD, system: system});
     expect(measureValue).toEqual(1/2);
 
 })
 
 test("couplingOfServicesBasedOnAmountOfRequestTracesThatIncludeASpecificLink", () => {
-    let system = new System("testSystem");
+    let system = new System("sys1", "testSystem");
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
 
@@ -141,21 +113,21 @@ test("couplingOfServicesBasedOnAmountOfRequestTracesThatIncludeASpecificLink", (
     let linkDB = new Link("l4", serviceD, endpointB);
 
     let requestTraceX = new RequestTrace("rq1", "Request Trace X", getEmptyMetaData());
-    requestTraceX.setLinks = [linkAB, linkBC];
+    requestTraceX.setLinks = [[linkAB], [linkBC]];
 
     let requestTraceY = new RequestTrace("rq2", "Request Trace Y", getEmptyMetaData());
-    requestTraceY.setLinks = [linkDB, linkBC]
+    requestTraceY.setLinks = [[linkDB], [linkBC]]
 
     system.addEntities([serviceA, serviceB, serviceC, serviceD]);
     system.addEntities([linkAB, linkBC, linkDB]);
     system.addEntities([requestTraceX, requestTraceY]);
 
-    let measureValue = componentPairMeasureImplementations["couplingOfServicesBasedOnAmountOfRequestTracesThatIncludeASpecificLink"]({componentA: serviceD, componentB: serviceB, system: system});
+    let measureValue = componentPairMeasureImplementations["couplingOfServicesBasedOnAmountOfRequestTracesThatIncludeASpecificLink"]({entityA: serviceD, entityB: serviceB, system: system});
     expect(measureValue).toEqual(1/2);
 })
 
 test("couplingOfServicesBasedTimesThatTheyOccurInTheSameRequestTrace", () => {
-    let system = new System("testSystem");
+    let system = new System("sys1", "testSystem");
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
 
@@ -174,21 +146,21 @@ test("couplingOfServicesBasedTimesThatTheyOccurInTheSameRequestTrace", () => {
     let linkDB = new Link("l4", serviceD, endpointB);
 
     let requestTraceX = new RequestTrace("rq1", "Request Trace X", getEmptyMetaData());
-    requestTraceX.setLinks = [linkAB, linkBC];
+    requestTraceX.setLinks = [[linkAB], [linkBC]];
 
     let requestTraceY = new RequestTrace("rq2", "Request Trace Y", getEmptyMetaData());
-    requestTraceY.setLinks = [linkDB, linkBC]
+    requestTraceY.setLinks = [[linkDB], [linkBC]]
 
     system.addEntities([serviceA, serviceB, serviceC, serviceD]);
     system.addEntities([linkAB, linkBC, linkDB]);
     system.addEntities([requestTraceX, requestTraceY]);
 
-    let measureValue = componentPairMeasureImplementations["couplingOfServicesBasedTimesThatTheyOccurInTheSameRequestTrace"]({componentA: serviceA, componentB: serviceB, system: system});
+    let measureValue = componentPairMeasureImplementations["couplingOfServicesBasedTimesThatTheyOccurInTheSameRequestTrace"]({entityA: serviceA, entityB: serviceB, system: system});
     expect(measureValue).toEqual(1/2);
 })
 
 test("numberOfLinksBetweenTwoServices", () => {
-    let system = new System("testSystem");
+    let system = new System("sys1", "testSystem");
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
 
@@ -211,6 +183,6 @@ test("numberOfLinksBetweenTwoServices", () => {
     system.addEntities([serviceA, serviceB, serviceC]);
     system.addEntities([linkAB1, linkAB2, linkAC]);
 
-    let measureValue = componentPairMeasureImplementations["numberOfLinksBetweenTwoServices"]({componentA: serviceA, componentB: serviceB, system: system});
+    let measureValue = componentPairMeasureImplementations["numberOfLinksBetweenTwoServices"]({entityA: serviceA, entityB: serviceB, system: system});
     expect(measureValue).toEqual(2);
 })

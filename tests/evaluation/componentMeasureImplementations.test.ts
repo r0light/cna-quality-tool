@@ -1,14 +1,15 @@
 import { getEmptyMetaData } from "@/core/common/entityDataTypes";
 import { DataAggregate, Endpoint, ExternalEndpoint, Link, Service, StorageBackingService, System } from "@/core/entities";
 import { RelationToDataAggregate } from "@/core/entities/relationToDataAggregate";
-import { componentMeasureImplementations, serviceCriticality } from "@/core/qualitymodel/evaluation/measure-implementations/measureImplementations";
+import { componentMeasureImplementations } from "@/core/qualitymodel/evaluation/measure-implementations/componentMeasures";
 import { getQualityModel } from "@/core/qualitymodel/QualityModelInstance";
+import { ENTITIES } from "@/core/qualitymodel/specifications/entities";
 import { ASYNCHRONOUS_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "@/core/qualitymodel/specifications/featureModel";
 import { expect, test } from "vitest";
 
 
 test("all implementation names refer to an existing measure", () => {
-    let measureKeys = getQualityModel().componentMeasures.map(measure => measure.getId);
+    let measureKeys = getQualityModel().measures.get(ENTITIES.COMPONENT).map(measure => measure.getId);
     expect(measureKeys.length).toStrictEqual(new Set(measureKeys).size);
 
     let measureImplementationKeys = Object.keys(componentMeasureImplementations);
@@ -20,7 +21,7 @@ test("all implementation names refer to an existing measure", () => {
 })
 
 test("all implemented measure must provide information on the calculation", () => {
-    let measures = getQualityModel().componentMeasures;
+    let measures = getQualityModel().measures.get(ENTITIES.COMPONENT);
     let measureKeys = measures.map(measure => measure.getId);
     expect(measureKeys.length).toStrictEqual(new Set(measureKeys).size);
 
@@ -35,7 +36,7 @@ test("all implemented measure must provide information on the calculation", () =
 })
 
 test("serviceInterfaceDataCohesion", () => {
-    let system = new System("testSystem");
+    let system = new System("sys1", "testSystem");
 
     let service = new Service("s1", "testService", getEmptyMetaData());
     let dataAggregateA = new DataAggregate("d1", "data 1", getEmptyMetaData());
@@ -63,14 +64,14 @@ test("serviceInterfaceDataCohesion", () => {
     system.addEntities([dataAggregateA, dataAggregateB]);
     system.addEntity(service);
 
-    let measureValue = componentMeasureImplementations["serviceInterfaceDataCohesion"]({component: service, system: system});
+    let measureValue = componentMeasureImplementations["serviceInterfaceDataCohesion"]({entity: service, system: system});
     expect(measureValue).toEqual(2);
 
 })
 
 
 test("serviceInterfaceUsageCohesion", () => {
-    let system = new System("testSystem");
+    let system = new System("sys1", "testSystem");
 
     let serviceA = new Service("s1", "service A", getEmptyMetaData());
 
@@ -94,13 +95,13 @@ test("serviceInterfaceUsageCohesion", () => {
     system.addEntities([serviceA, serviceB, serviceC]);
     system.addEntities([linkBA1, linkBA2, linkCA2]);
 
-    let measureValue = componentMeasureImplementations["serviceInterfaceUsageCohesion"]({component: serviceA, system: system});
+    let measureValue = componentMeasureImplementations["serviceInterfaceUsageCohesion"]({entity: serviceA, system: system});
     expect(measureValue).toEqual(3/4);
 })
 
 test("totalServiceInterfaceCohesion", () => {
 
-    let system = new System("testSystem");
+    let system = new System("sys1", "testSystem");
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
     let dataAggregateA = new DataAggregate("d1", "data 1", getEmptyMetaData());
@@ -136,12 +137,12 @@ test("totalServiceInterfaceCohesion", () => {
     system.addEntities([serviceA, serviceB, serviceC]);
     system.addEntities([linkBA1, linkBA2, linkCA2]);
 
-    let measureValue = componentMeasureImplementations["totalServiceInterfaceCohesion"]({component: serviceA, system: system});
+    let measureValue = componentMeasureImplementations["totalServiceInterfaceCohesion"]({entity: serviceA, system: system});
     expect(measureValue).toEqual(7/6);
 })
 
 test("cohesionBetweenEndpointsBasedOnDataAggregateUsage", () => {
-    let system = new System("testSystem");
+    let system = new System("sys1", "testSystem");
 
     let service = new Service("s1", "testService", getEmptyMetaData());
     let dataAggregateA = new DataAggregate("d1", "data 1", getEmptyMetaData());
@@ -169,13 +170,13 @@ test("cohesionBetweenEndpointsBasedOnDataAggregateUsage", () => {
     system.addEntities([dataAggregateA, dataAggregateB]);
     system.addEntity(service);
 
-    let measureValue = componentMeasureImplementations["cohesionBetweenEndpointsBasedOnDataAggregateUsage"]({component: service, system: system});
+    let measureValue = componentMeasureImplementations["cohesionBetweenEndpointsBasedOnDataAggregateUsage"]({entity: service, system: system});
     expect(measureValue).toEqual(1/3);
 
 })
 
 test("numberOfProvidedSynchronousAndAsynchronousEndpoints", () => {
-    let system = new System("testSystem");
+    let system = new System("sys1", "testSystem");
 
     let service = new Service("s1", "testService", getEmptyMetaData());
 
@@ -193,12 +194,12 @@ test("numberOfProvidedSynchronousAndAsynchronousEndpoints", () => {
 
     system.addEntity(service);
 
-    let measureValue = componentMeasureImplementations["numberOfProvidedSynchronousAndAsynchronousEndpoints"]({component: service, system: system});
+    let measureValue = componentMeasureImplementations["numberOfProvidedSynchronousAndAsynchronousEndpoints"]({entity: service, system: system});
     expect(measureValue).toEqual(4);
 })
 
 test("numberOfSynchronousEndpointsOfferedByAService", () => {
-    let system = new System("testSystem");
+    let system = new System("sys1", "testSystem");
 
     let service = new Service("s1", "testService", getEmptyMetaData());
 
@@ -220,13 +221,13 @@ test("numberOfSynchronousEndpointsOfferedByAService", () => {
 
     system.addEntity(service);
 
-    let measureValue = componentMeasureImplementations["numberOfSynchronousEndpointsOfferedByAService"]({component: service, system: system});
+    let measureValue = componentMeasureImplementations["numberOfSynchronousEndpointsOfferedByAService"]({entity: service, system: system});
     expect(measureValue).toEqual(2);
 
 })
 
 test("numberOfAsynchronousEndpointsOfferedByAService", () => {
-    let system = new System("testSystem");
+    let system = new System("sys1", "testSystem");
 
     let service = new Service("s1", "testService", getEmptyMetaData());
 
@@ -248,13 +249,13 @@ test("numberOfAsynchronousEndpointsOfferedByAService", () => {
 
     system.addEntity(service);
 
-    let measureValue = componentMeasureImplementations["numberOfAsynchronousEndpointsOfferedByAService"]({component: service, system: system});
+    let measureValue = componentMeasureImplementations["numberOfAsynchronousEndpointsOfferedByAService"]({entity: service, system: system});
     expect(measureValue).toEqual(2);
 
 })
 
 test("numberOfSynchronousOutgoingLinks", () => {
-    let system = new System("testSystem");
+    let system = new System("sys1", "testSystem");
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
 
@@ -285,13 +286,13 @@ test("numberOfSynchronousOutgoingLinks", () => {
     system.addEntities([serviceA, serviceB, serviceC]);
     system.addEntities([linkAB1, linkAB2, linkAC1, linkAC2]);
 
-    let measureValue = componentMeasureImplementations["numberOfSynchronousOutgoingLinks"]({component: serviceA, system: system});
+    let measureValue = componentMeasureImplementations["numberOfSynchronousOutgoingLinks"]({entity: serviceA, system: system});
     expect(measureValue).toEqual(2);
 
 })
 
 test("numberOfAsynchronousOutgoingLinks", () => {
-    let system = new System("testSystem");
+    let system = new System("sys1", "testSystem");
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
 
@@ -322,12 +323,12 @@ test("numberOfAsynchronousOutgoingLinks", () => {
     system.addEntities([serviceA, serviceB, serviceC]);
     system.addEntities([linkAB1, linkAB2, linkAC1, linkAC2]);
 
-    let measureValue = componentMeasureImplementations["numberOfAsynchronousOutgoingLinks"]({component: serviceA, system: system});
+    let measureValue = componentMeasureImplementations["numberOfAsynchronousOutgoingLinks"]({entity: serviceA, system: system});
     expect(measureValue).toEqual(3);
 })
 
 test("ratioOfAsynchronousOutgoingLinks", () => {
-    let system = new System("testSystem");
+    let system = new System("sys1", "testSystem");
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
 
@@ -358,12 +359,12 @@ test("ratioOfAsynchronousOutgoingLinks", () => {
     system.addEntities([serviceA, serviceB, serviceC]);
     system.addEntities([linkAB1, linkAB2, linkAC1, linkAC2]);
 
-    let measureValue = componentMeasureImplementations["ratioOfAsynchronousOutgoingLinks"]({component: serviceA, system: system});
+    let measureValue = componentMeasureImplementations["ratioOfAsynchronousOutgoingLinks"]({entity: serviceA, system: system});
     expect(measureValue).toEqual(3/4);
 })
 
 test("numberOfLinksPerComponent", () => {
-    let system = new System("testSystem");
+    let system = new System("sys1", "testSystem");
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
 
@@ -390,14 +391,14 @@ test("numberOfLinksPerComponent", () => {
     system.addEntities([serviceA, serviceB, serviceC]);
     system.addEntities([linkAB1, linkAB2, linkBC1, linkBC2]);
 
-    let measureValue = componentMeasureImplementations["numberOfLinksPerComponent"]({component: serviceB, system: system});
+    let measureValue = componentMeasureImplementations["numberOfLinksPerComponent"]({entity: serviceB, system: system});
     expect(measureValue).toEqual(4);
 
 })
 
 
 test("numberOfConsumedEndpoints", () => {
-    let system = new System("testSystem");
+    let system = new System("sys1", "testSystem");
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
 
@@ -423,13 +424,13 @@ test("numberOfConsumedEndpoints", () => {
     system.addEntities([serviceA, serviceB, serviceC]);
     system.addEntities([linkAB1, linkAB2, linkBC1, linkBC2]);
 
-    let measureValue = componentMeasureImplementations["numberOfConsumedEndpoints"]({component: serviceA, system: system});
+    let measureValue = componentMeasureImplementations["numberOfConsumedEndpoints"]({entity: serviceA, system: system});
     expect(measureValue).toEqual(2);
 
 })
 
 test("incomingOutgoingRatioOfAComponent", () => {
-    let system = new System("testSystem");
+    let system = new System("sys1", "testSystem");
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
 
@@ -455,12 +456,12 @@ test("incomingOutgoingRatioOfAComponent", () => {
     system.addEntities([serviceA, serviceB, serviceC]);
     system.addEntities([linkAB1, linkAB2, linkBC1, linkBC2]);
 
-    let measureValue = componentMeasureImplementations["incomingOutgoingRatioOfAComponent"]({component: serviceB, system: system});
+    let measureValue = componentMeasureImplementations["incomingOutgoingRatioOfAComponent"]({entity: serviceB, system: system});
     expect(measureValue).toEqual(1);
 })
 
 test("ratioOfOutgoingLinksOfAService", () => {
-    let system = new System("testSystem");
+    let system = new System("sys1", "testSystem");
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
 
@@ -486,13 +487,13 @@ test("ratioOfOutgoingLinksOfAService", () => {
     system.addEntities([serviceA, serviceB, serviceC]);
     system.addEntities([linkAB1, linkAB2, linkBC1, linkBC2]);
 
-    let measureValue = componentMeasureImplementations["ratioOfOutgoingLinksOfAService"]({component: serviceB, system: system});
+    let measureValue = componentMeasureImplementations["ratioOfOutgoingLinksOfAService"]({entity: serviceB, system: system});
     expect(measureValue).toEqual(50);
 
 })
 
 test("indirectInteractionDensity", () => {
-    let system = new System("testSystem");
+    let system = new System("sys1", "testSystem");
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
 
@@ -514,13 +515,13 @@ test("indirectInteractionDensity", () => {
     system.addEntities([serviceA, serviceB, serviceC, serviceD]);
     system.addEntities([linkAB1, linkBC1]);
 
-    let measureValue = componentMeasureImplementations["indirectInteractionDensity"]({component: serviceA, system: system});
+    let measureValue = componentMeasureImplementations["indirectInteractionDensity"]({entity: serviceA, system: system});
     expect(measureValue).toEqual(0.5);
 
 })
 
 test("serviceCouplingBasedOnEndpointEntropy", () => {
-    let system = new System("testSystem");
+    let system = new System("sys1", "testSystem");
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
     let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
@@ -538,13 +539,13 @@ test("serviceCouplingBasedOnEndpointEntropy", () => {
     system.addEntities([serviceA, serviceB, serviceC]);
     system.addEntities([linkBA1, linkBA2, linkCA1]);
 
-    let measureValue = componentMeasureImplementations["serviceCouplingBasedOnEndpointEntropy"]({component: serviceA, system: system});
+    let measureValue = componentMeasureImplementations["serviceCouplingBasedOnEndpointEntropy"]({entity: serviceA, system: system});
     expect(measureValue).toBeCloseTo(0.389075, 5)
 })
 
 test("ratioOfStorageBackendSharing", () => {
 
-    let system = new System("testSystem");
+    let system = new System("sys1", "testSystem");
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
 
@@ -566,12 +567,12 @@ test("ratioOfStorageBackendSharing", () => {
     system.addEntities([serviceA, serviceB, serviceC, storageServiceD]);
     system.addEntities([linkAD, linkBD]);
 
-    let measureValue = componentMeasureImplementations["ratioOfStorageBackendSharing"]({component: serviceA, system: system});
+    let measureValue = componentMeasureImplementations["ratioOfStorageBackendSharing"]({entity: serviceA, system: system});
     expect(measureValue).toEqual(1/3);
 })
 
 test("combinedMetricForIndirectDependency", () => {
-    let system = new System("testSystem");
+    let system = new System("sys1", "testSystem");
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
 
@@ -599,12 +600,12 @@ test("combinedMetricForIndirectDependency", () => {
     system.addEntities([serviceA, serviceB, serviceC, storageServiceD, serviceE]);
     system.addEntities([linkAD, linkBD, linkAB, linkBC]);
 
-    let measureValue = componentMeasureImplementations["combinedMetricForIndirectDependency"]({component: serviceA, system: system});
+    let measureValue = componentMeasureImplementations["combinedMetricForIndirectDependency"]({entity: serviceA, system: system});
     expect(measureValue).toEqual(1/6);
 })
 
 test("numberOfComponentsThatAreLinkedToAComponent", () => {
-    let system = new System("testSystem");
+    let system = new System("sys1", "testSystem");
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
 
@@ -628,14 +629,14 @@ test("numberOfComponentsThatAreLinkedToAComponent", () => {
     system.addEntities([serviceA, serviceB, serviceC, serviceD]);
     system.addEntities([linkAB, linkBC, linkDB, linkDC]);
 
-    let measureValue = componentMeasureImplementations["numberOfComponentsThatAreLinkedToAComponent"]({component: serviceB, system: system});
+    let measureValue = componentMeasureImplementations["numberOfComponentsThatAreLinkedToAComponent"]({entity: serviceB, system: system});
     expect(measureValue).toEqual(2);
 
 
 })
 
 test("numberOfComponentsAComponentIsLinkedTo", () => {
-    let system = new System("testSystem");
+    let system = new System("sys1", "testSystem");
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
 
@@ -659,13 +660,13 @@ test("numberOfComponentsAComponentIsLinkedTo", () => {
     system.addEntities([serviceA, serviceB, serviceC, serviceD]);
     system.addEntities([linkAB, linkBC, linkDB, linkDC]);
 
-    let measureValue = componentMeasureImplementations["numberOfComponentsAComponentIsLinkedTo"]({component: serviceD, system: system});
+    let measureValue = componentMeasureImplementations["numberOfComponentsAComponentIsLinkedTo"]({entity: serviceD, system: system});
     expect(measureValue).toEqual(2);
 
 })
 
 test("averageNumberOfDirectlyConnectedServices", () => {
-    let system = new System("testSystem");
+    let system = new System("sys1", "testSystem");
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
 
@@ -689,13 +690,13 @@ test("averageNumberOfDirectlyConnectedServices", () => {
     system.addEntities([serviceA, serviceB, serviceC, serviceD]);
     system.addEntities([linkAB, linkBC, linkDB, linkDC]);
 
-    let measureValue = componentMeasureImplementations["averageNumberOfDirectlyConnectedServices"]({component: serviceB, system: system});
+    let measureValue = componentMeasureImplementations["averageNumberOfDirectlyConnectedServices"]({entity: serviceB, system: system});
     expect(measureValue).toEqual(3/4);
 
 })
 
 test("numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfComponents", () => {
-    let system = new System("testSystem");
+    let system = new System("sys1", "testSystem");
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
 
@@ -719,12 +720,12 @@ test("numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfComponents
     system.addEntities([serviceA, serviceB, serviceC, serviceD]);
     system.addEntities([linkAB, linkBC, linkDB, linkDC]);
 
-    let measureValue = componentMeasureImplementations["numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfComponents"]({component: serviceD, system: system});
+    let measureValue = componentMeasureImplementations["numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfComponents"]({entity: serviceD, system: system});
     expect(measureValue).toEqual(0.5);
 })
 
 test("cyclicCommunication cycle found", () => {
-    let system = new System("testSystem");
+    let system = new System("sys1", "testSystem");
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
     let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
@@ -750,12 +751,12 @@ test("cyclicCommunication cycle found", () => {
     system.addEntities([serviceA, serviceB, serviceC, serviceD]);
     system.addEntities([linkAB, linkBC, linkCD, linkDA]);
 
-    let measureValue = componentMeasureImplementations["cyclicCommunication"]({component: serviceA, system: system});
+    let measureValue = componentMeasureImplementations["cyclicCommunication"]({entity: serviceA, system: system});
     expect(measureValue).toEqual(1);
 } )
 
 test("cyclicCommunication no cycle found", () => {
-    let system = new System("testSystem");
+    let system = new System("sys1", "testSystem");
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
     let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
@@ -780,12 +781,12 @@ test("cyclicCommunication no cycle found", () => {
     system.addEntities([serviceA, serviceB, serviceC, serviceD]);
     system.addEntities([linkAB, linkBC, linkCD]);
 
-    let measureValue = componentMeasureImplementations["cyclicCommunication"]({component: serviceA, system: system});
+    let measureValue = componentMeasureImplementations["cyclicCommunication"]({entity: serviceA, system: system});
     expect(measureValue).toEqual(0);
 } )
 
 test("relativeImportanceOfTheService", () => {
-    let system = new System("testSystem");
+    let system = new System("sys1", "testSystem");
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
     let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
@@ -801,12 +802,12 @@ test("relativeImportanceOfTheService", () => {
     system.addEntities([serviceA, serviceB, serviceC, serviceD]);
     system.addEntities([linkBA, linkCA])
 
-    let measureValue = componentMeasureImplementations["relativeImportanceOfTheService"]({component: serviceA, system: system});
+    let measureValue = componentMeasureImplementations["relativeImportanceOfTheService"]({entity: serviceA, system: system});
     expect(measureValue).toEqual(0.5)
 })
 
 test("serviceCriticality", () => {
-    let system = new System("testSystem");
+    let system = new System("sys1", "testSystem");
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
     let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
@@ -831,12 +832,12 @@ test("serviceCriticality", () => {
     system.addEntities([serviceA, serviceB, serviceC, serviceD, serviceE]);
     system.addEntities([linkBA, linkCA, linkAD, linkAE])
 
-    let measureValue = componentMeasureImplementations["serviceCriticality"]({component: serviceA, system: system});
+    let measureValue = componentMeasureImplementations["serviceCriticality"]({entity: serviceA, system: system});
     expect(measureValue).toEqual(4)
 })
 
 test("degreeOfStorageBackendSharing", () => {
-    let system = new System("testSystem");
+    let system = new System("sys1", "testSystem");
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
 
@@ -860,13 +861,13 @@ test("degreeOfStorageBackendSharing", () => {
     system.addEntity(storageBackingService);
     system.addEntities([linkAS, linkBS, linkCS, linkAB]);
 
-    let measureValue = componentMeasureImplementations["degreeOfStorageBackendSharing"]({component: storageBackingService, system: system});
+    let measureValue = componentMeasureImplementations["degreeOfStorageBackendSharing"]({entity: storageBackingService, system: system});
     expect(measureValue).toEqual(3);
 
 })
 
 test("resourceCount", () => {
-    let system = new System("testSystem");
+    let system = new System("sys1", "testSystem");
 
     let service = new Service("s1", "testService", getEmptyMetaData());
     let dataAggregateA = new DataAggregate("d1", "data 1", getEmptyMetaData());
@@ -877,12 +878,12 @@ test("resourceCount", () => {
     system.addEntities([dataAggregateA, dataAggregateB]);
     system.addEntity(service);
 
-    let measureValue = componentMeasureImplementations["resourceCount"]({component: service, system: system});
+    let measureValue = componentMeasureImplementations["resourceCount"]({entity: service, system: system});
     expect(measureValue).toEqual(2);
 })
 
 test("serviceSize", () => {
-    let system = new System("testSystem");
+    let system = new System("sys1", "testSystem");
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
     let dataAggregateA = new DataAggregate("d1", "data 1", getEmptyMetaData());
@@ -906,12 +907,12 @@ test("serviceSize", () => {
     system.addEntities([serviceA, serviceB, serviceC]);
     system.addEntities([linkBA, linkCA, linkCB]);
 
-    let measureValue = componentMeasureImplementations["serviceSize"]({component: serviceA, system: system});
+    let measureValue = componentMeasureImplementations["serviceSize"]({entity: serviceA, system: system});
     expect(measureValue).toEqual(4);
 })
 
 test("unusedEndpointCount", () => {
-    let system = new System("testSystem");
+    let system = new System("sys1", "testSystem");
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
     let endpointA1 = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
@@ -934,12 +935,12 @@ test("unusedEndpointCount", () => {
     system.addEntities([serviceA, serviceB, serviceC]);
     system.addEntities([linkBA, linkCA, linkCB]);
 
-    let measureValue = componentMeasureImplementations["unusedEndpointCount"]({component: serviceA, system: system});
+    let measureValue = componentMeasureImplementations["unusedEndpointCount"]({entity: serviceA, system: system});
     expect(measureValue).toEqual(2);
 })
 
 test("numberOfReadEndpointsProvidedByAService", () => {
-    let system = new System("testSystem");
+    let system = new System("sys1", "testSystem");
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
     let endpointA1 = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
@@ -965,12 +966,12 @@ test("numberOfReadEndpointsProvidedByAService", () => {
     system.addEntities([serviceA, serviceB, serviceC]);
     system.addEntities([linkBA, linkCA, linkCB]);
 
-    let measureValue = componentMeasureImplementations["numberOfReadEndpointsProvidedByAService"]({component: serviceA, system: system});
+    let measureValue = componentMeasureImplementations["numberOfReadEndpointsProvidedByAService"]({entity: serviceA, system: system});
     expect(measureValue).toEqual(2);
 })
 
 test("numberOfWriteEndpointsProvidedByAService", () => {
-    let system = new System("testSystem");
+    let system = new System("sys1", "testSystem");
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
     let endpointA1 = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
@@ -996,13 +997,13 @@ test("numberOfWriteEndpointsProvidedByAService", () => {
     system.addEntities([serviceA, serviceB, serviceC]);
     system.addEntities([linkBA, linkCA, linkCB]);
 
-    let measureValue = componentMeasureImplementations["numberOfWriteEndpointsProvidedByAService"]({component: serviceA, system: system});
+    let measureValue = componentMeasureImplementations["numberOfWriteEndpointsProvidedByAService"]({entity: serviceA, system: system});
     expect(measureValue).toEqual(2);
 
 })
 
 test("ratioOfStateDependencyOfEndpoints", () => {
-   let system = new System("testSystem");
+   let system = new System("sys1", "testSystem");
 
     let service = new Service("s1", "testService", getEmptyMetaData());
     let dataAggregateA = new DataAggregate("d1", "data 1", getEmptyMetaData());
@@ -1028,7 +1029,7 @@ test("ratioOfStateDependencyOfEndpoints", () => {
     system.addEntities([dataAggregateA, dataAggregateB]);
     system.addEntity(service);
 
-    let measureValue = componentMeasureImplementations["ratioOfStateDependencyOfEndpoints"]({component: service, system: system});
+    let measureValue = componentMeasureImplementations["ratioOfStateDependencyOfEndpoints"]({entity: service, system: system});
     expect(measureValue).toEqual(0.5);
 
 })
