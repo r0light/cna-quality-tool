@@ -4,6 +4,7 @@ import { RelationToDataAggregate } from "@/core/entities/relationToDataAggregate
 import { requestTraceMeasureImplementations } from "@/core/qualitymodel/evaluation/measure-implementations/requestTraceMeasures";
 import { getQualityModel } from "@/core/qualitymodel/QualityModelInstance";
 import { ENTITIES } from "@/core/qualitymodel/specifications/entities";
+import { SEND_EVENT_ENDPOINT_KIND, SUBSCRIBE_ENDPOINT_KIND } from "@/core/qualitymodel/specifications/featureModel";
 import { expect, test } from "vitest";
 
 test("all implementation names refer to an existing measure", () => {
@@ -429,6 +430,88 @@ test("ratioOfStatefulComponents", () => {
 
     let measureValue = requestTraceMeasureImplementations["ratioOfStatefulComponents"]({ entity: requestTrace, system: system});
     expect(measureValue).toEqual(0.5);
+})
 
+
+test("ratioOfStatelessComponents", () => {
+
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA);
+    serviceA.addEndpoint(externalEndpointA);
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    serviceB.setPropertyValue("stateless", true);
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    serviceC.setPropertyValue("stateless", false);
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+
+    let serviceD = new Service("s4", "testService", getEmptyMetaData());
+    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    serviceD.addEndpoint(endpointD);
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+    let linkBC = new Link("l2", serviceB, endpointC);
+    let linkDB = new Link("l3", serviceD, endpointB);
+    let linkCD = new Link("l5", serviceC, endpointD);
+
+    let requestTrace = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
+    requestTrace.setLinks = [[linkAB], [linkBC], [linkCD], [linkDB]];
+    requestTrace.setExternalEndpoint = externalEndpointA;
+
+    system.addEntities([serviceA, serviceB, serviceC, serviceD]);
+    system.addEntities([linkAB, linkBC, linkDB, linkCD]);
+    system.addEntity(requestTrace);
+
+    let measureValue = requestTraceMeasureImplementations["ratioOfStatelessComponents"]({ entity: requestTrace, system: system});
+    expect(measureValue).toEqual(0.75);
+})
+
+test("asynchronousCommunicationUtilization", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA);
+    serviceA.addEndpoint(externalEndpointA);
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointB1 = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    endpointB1.setPropertyValue("kind", SEND_EVENT_ENDPOINT_KIND);
+    serviceB.addEndpoint(endpointB1);
+    let endpointB2 = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    endpointB2.setPropertyValue("kind", SUBSCRIBE_ENDPOINT_KIND);
+    serviceB.addEndpoint(endpointB2);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+
+    let serviceD = new Service("s4", "testService", getEmptyMetaData());
+    let endpointD = new Endpoint("e5", "endpoint 5", getEmptyMetaData());
+    serviceD.addEndpoint(endpointD);
+
+    let linkAB = new Link("l1", serviceA, endpointB1);
+    let linkCB = new Link("l2", serviceC, endpointB2);
+    let linkCD = new Link("l3", serviceC, endpointD);
+
+    let requestTrace = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
+    requestTrace.setLinks = [[linkAB], [linkCB], [linkCD] ];
+    requestTrace.setExternalEndpoint = externalEndpointA;
+
+    system.addEntities([serviceA, serviceB, serviceC, serviceD]);
+    system.addEntities([linkAB, linkCB, linkCD]);
+    system.addEntity(requestTrace);
+
+    let measureValue = requestTraceMeasureImplementations["asynchronousCommunicationUtilization"]({ entity: requestTrace, system: system});
+    expect(measureValue).toEqual(2/3);
 
 })

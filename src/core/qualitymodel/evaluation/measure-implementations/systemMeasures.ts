@@ -108,7 +108,6 @@ export const calculateRatioOfStatefulComponents: (allComponents: Component[]) =>
     if (allComponents.length === 0) {
         return 0;
     }
-
     return numberOfStatefulComponents / allComponents.length;
 
 }
@@ -118,15 +117,18 @@ export const ratioOfStatefulComponents: Calculation = (parameters: CalculationPa
     return calculateRatioOfStatefulComponents(allComponents);
 }
 
-export const ratioOfStatelessComponents: Calculation = (parameters: CalculationParameters<System>) => {
-    let allComponents = [...parameters.entity.getComponentEntities.entries()];
-    let numberOfStatelessComponents = allComponents.filter(entry => (entry[1].getProperties().find(property => property.getKey === "stateless").value)).length;
+export const calculateRatioOfStatelessComponents: (allComponents: Component[]) => number = (allComponents) => {
+    let numberOfStatelessComponents = allComponents.filter(entry => (entry.getProperties().find(property => property.getKey === "stateless").value)).length;
 
     if (allComponents.length === 0) {
         return 0;
     }
-
     return numberOfStatelessComponents / allComponents.length;
+}
+
+export const ratioOfStatelessComponents: Calculation = (parameters: CalculationParameters<System>) => {
+    let allComponents = [...parameters.entity.getComponentEntities.values()];
+    return calculateRatioOfStatelessComponents(allComponents)
 }
 
 export const degreeToWhichComponentsAreLinkedToStatefulComponents: Calculation = (parameters: CalculationParameters<System>) => {
@@ -172,22 +174,26 @@ export const degreeOfAsynchronousCommunication: Calculation = (parameters: Calcu
     return average(degreesOfAsynchronousEndpoints);
 }
 
-export const asynchronousCommunicationUtilization: Calculation = (parameters: CalculationParameters<System>) => {
+export const calculateRatioOfLinksToAsynchronousEndpoints: (allLinks: Link[]) => number = (allLinks) => {
 
-    let allLinks = parameters.entity.getLinkEntities;
-
-    if (allLinks.size === 0) {
+    if (allLinks.length === 0) {
         return 0;
     }
 
     let numberOfLinksToAnAsynchronousEndpoint = 0;
-    for (const [linkId, link] of allLinks) {
+    for (const link of allLinks) {
         if (ASYNCHRONOUS_ENDPOINT_KIND.includes(link.getTargetEndpoint.getProperty("kind").value)) {
             numberOfLinksToAnAsynchronousEndpoint++;
         }
     }
 
-    return numberOfLinksToAnAsynchronousEndpoint / allLinks.size;
+    return numberOfLinksToAnAsynchronousEndpoint / allLinks.length;
+}
+
+export const asynchronousCommunicationUtilization: Calculation = (parameters: CalculationParameters<System>) => {
+
+    let allLinks = [...parameters.entity.getLinkEntities.values()];
+    return calculateRatioOfLinksToAsynchronousEndpoints(allLinks);
 }
 
 export const ratioOfServicesThatProvideHealthEndpoints: Calculation = (parameters: CalculationParameters<System>) => {

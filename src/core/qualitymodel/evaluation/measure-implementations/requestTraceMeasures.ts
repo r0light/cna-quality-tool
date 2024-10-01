@@ -2,7 +2,7 @@ import { RequestTrace } from "@/core/entities";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure";
 import { average } from "./general-functions";
 import { calculateRatioOfEndpointsSupportingSsl } from "./componentMeasures";
-import { calculateRatioOfSecuredLinks, calculateRatioOfStatefulComponents } from "./systemMeasures";
+import { calculateRatioOfLinksToAsynchronousEndpoints, calculateRatioOfSecuredLinks, calculateRatioOfStatefulComponents, calculateRatioOfStatelessComponents } from "./systemMeasures";
 
 
 export const ratioOfEndpointsSupportingSsl = (parameters: CalculationParameters<RequestTrace>) => {
@@ -106,6 +106,20 @@ export const ratioOfStatefulComponents: Calculation = (parameters: CalculationPa
 }
 
 
+export const ratioOfStatelessComponents: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+    let includedUniqueComponents = new Set(parameters.entity.getLinks
+        .flat()
+        .map(link => {
+            return [link.getSourceEntity, parameters.system.searchComponentOfEndpoint(link.getTargetEndpoint.getId)]
+        }).flat());
+    return calculateRatioOfStatelessComponents(Array.from(includedUniqueComponents));
+}
+
+export const asynchronousCommunicationUtilization: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+    let allLinks = parameters.entity.getLinks.flat();
+    return calculateRatioOfLinksToAsynchronousEndpoints(allLinks);
+}
+
 export const requestTraceMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
     "ratioOfSecuredLinks": ratioOfSecuredLinks,
@@ -113,6 +127,8 @@ export const requestTraceMeasureImplementations: { [measureKey: string]: Calcula
     "numberOfCyclesInRequestTraces": numberOfCyclesInRequestTraces,
     "dataReplicationAlongRequestTrace": dataReplicationAlongRequestTrace,
     "ratioOfStateDependencyOfEndpoints": ratioOfStateDependencyOfEndpoints,
-    "ratioOfStatefulComponents": ratioOfStatefulComponents
+    "ratioOfStatefulComponents": ratioOfStatefulComponents,
+    "ratioOfStatelessComponents": ratioOfStatelessComponents,
+    "asynchronousCommunicationUtilization": asynchronousCommunicationUtilization
 }
 
