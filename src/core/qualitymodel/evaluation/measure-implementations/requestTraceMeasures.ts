@@ -1,9 +1,23 @@
 import { RequestTrace } from "@/core/entities";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure";
 import { average } from "./general-functions";
+import { calculateRatioOfEndpointsSupportingSsl } from "./componentMeasures";
+import { calculateRatioOfSecuredLinks } from "./systemMeasures";
+
+
+export const ratioOfEndpointsSupportingSsl = (parameters: CalculationParameters<RequestTrace>) => {
+    let traceEndpoints = parameters.entity.getLinks.flatMap(links => links).map(link => link.getTargetEndpoint);
+    let uniqueEndpoints = new Set(traceEndpoints);
+    return calculateRatioOfEndpointsSupportingSsl(Array.from(uniqueEndpoints));
+}
 
 export const requestTraceLength: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
     return parameters.entity.getLinks.length;
+}
+
+export const ratioOfSecuredLinks: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+    let allLinks = parameters.entity.getLinks.flatMap(links => links);
+    return calculateRatioOfSecuredLinks(allLinks);
 }
 
 
@@ -67,9 +81,28 @@ const dataReplicationAlongRequestTrace: Calculation = (parameters: CalculationPa
 
 }
 
+export const ratioOfStateDependencyOfEndpoints: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+    let allEndpoints = parameters.entity.getLinks.flatMap(links => links).map(link => link.getTargetEndpoint);
+    if (parameters.entity.getExternalEndpoint) {
+        allEndpoints.push(parameters.entity.getExternalEndpoint);
+    }
+
+    if (allEndpoints.length === 0) {
+        return 0;
+    }
+
+    let numberOfDependingEndpoints = allEndpoints.filter(endpoint => endpoint.getDataAggregateEntities.length > 0).length;
+
+    return numberOfDependingEndpoints / allEndpoints.length;
+}
+
+
 export const requestTraceMeasureImplementations: { [measureKey: string]: Calculation } = {
+    "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
+    "ratioOfSecuredLinks": ratioOfSecuredLinks,
     "requestTraceLength": requestTraceLength,
     "numberOfCyclesInRequestTraces": numberOfCyclesInRequestTraces,
-    "dataReplicationAlongRequestTrace": dataReplicationAlongRequestTrace
+    "dataReplicationAlongRequestTrace": dataReplicationAlongRequestTrace,
+    "ratioOfStateDependencyOfEndpoints": ratioOfStateDependencyOfEndpoints
 }
 

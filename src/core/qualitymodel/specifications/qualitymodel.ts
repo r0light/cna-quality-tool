@@ -908,13 +908,13 @@ const measures = {
         "name": "Ratio of external endpoints that support TLS",
         "calculation": "External Endpoints that support TLS / All External Endpoints",
         "sources": ["new"],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT],
     },
     "ratioOfSecuredLinks": {
         "name": "Ratio of secured links",
         "calculation": "Links secured by SSL / All links",
         "sources": ["Zdun2023", "Zdun2023a"],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
     },
     "ratioOfEndpointsThatSupportTokenBasedAuthentication": {
         "name": "Ratio of endpoints that support token-based authentication ",

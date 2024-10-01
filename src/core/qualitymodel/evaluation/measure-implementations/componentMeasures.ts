@@ -1,8 +1,46 @@
 
-import { Component, Service, StorageBackingService } from "../../../entities.js";
+import { Component, Endpoint, Service, StorageBackingService } from "../../../entities.js";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure.js";
-import { ASYNCHRONOUS_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "../../specifications/featureModel.js";
+import { ASYNCHRONOUS_ENDPOINT_KIND, PROTOCOLS_SUPPORTING_TLS, SYNCHRONOUS_ENDPOINT_KIND } from "../../specifications/featureModel.js";
 import { average } from "./general-functions.js";
+
+
+export const calculateRatioOfEndpointsSupportingSsl: (endpoints: Endpoint[]) => number = (allEndpoints) => {
+    let numberOfEndpointsSupportingSsl = allEndpoints.map(endpoint => endpoint.getProperties().find(property => property.getKey === "protocol").value)
+        .filter(protocol => PROTOCOLS_SUPPORTING_TLS.includes(protocol))
+        .length;
+
+    if ((allEndpoints.length - numberOfEndpointsSupportingSsl) === 0) {
+        return 0;
+    }
+
+    return numberOfEndpointsSupportingSsl / (allEndpoints.length - numberOfEndpointsSupportingSsl);
+}
+
+
+export const ratioOfEndpointsSupportingSsl: Calculation = (parameters: CalculationParameters<Component>) => {
+
+    let allEndpoints = parameters.entity.getEndpointEntities.concat(parameters.entity.getExternalEndpointEntities);
+    return calculateRatioOfEndpointsSupportingSsl(allEndpoints);
+}
+
+export const calculateRatioOfExternalEndpointsSupportingTls: (endpoints: Endpoint[]) => number = (allExternalEndpoints) => {
+    let numberOfExternalEndpointsSupportingTLS = allExternalEndpoints.map(endpoint => endpoint.getProperties().find(property => property.getKey === "protocol").value)
+        .filter(protocol => PROTOCOLS_SUPPORTING_TLS.includes(protocol))
+        .length;
+    if (allExternalEndpoints.length === 0) {
+        return 0;
+    }
+
+    return numberOfExternalEndpointsSupportingTLS / allExternalEndpoints.length;
+}
+
+export const ratioOfExternalEndpointsSupportingTls: Calculation = (parameters: CalculationParameters<Component>) => {
+    let allExternalEndpoints = parameters.entity.getExternalEndpointEntities;
+    return calculateRatioOfExternalEndpointsSupportingTls(allExternalEndpoints);
+
+}
+
 
 export const serviceInterfaceDataCohesion: Calculation = (parameters: CalculationParameters<Component>) => {
     let dataAggregateUsage = new Map<string, string[]>();
@@ -409,6 +447,8 @@ export const numberOfWriteEndpointsProvidedByAService: Calculation = (parameters
 
 
 export const componentMeasureImplementations: { [measureKey: string]: Calculation } = {
+    "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
+    "ratioOfExternalEndpointsSupportingTls": ratioOfExternalEndpointsSupportingTls,
     "serviceInterfaceDataCohesion": serviceInterfaceDataCohesion,
     "serviceInterfaceUsageCohesion": serviceInterfaceUsageCohesion,
     "totalServiceInterfaceCohesion": totalServiceInterfaceCohesion,

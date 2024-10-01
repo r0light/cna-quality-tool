@@ -1033,3 +1033,46 @@ test("ratioOfStateDependencyOfEndpoints", () => {
     expect(measureValue).toEqual(0.5);
 
 })
+
+test("ratioOfEndpointsSupportingSsl", () => {
+
+    let system = new System("sys1", "testSystem");
+
+    let service = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint A",  getEmptyMetaData());
+    endpointA.setPropertyValue("protocol", "https");
+    let endpointB = new Endpoint("e2", "endpoint B",  getEmptyMetaData());
+    endpointB.setPropertyValue("protocol", "https");
+    let endpointC = new Endpoint("e3", "endpoint C",  getEmptyMetaData());
+
+    service.addEndpoint(endpointA);
+    service.addEndpoint(endpointB);
+    service.addEndpoint(endpointC);
+
+    system.addEntity(service);
+
+    let measureValue = componentMeasureImplementations["ratioOfEndpointsSupportingSsl"]({entity: service, system: system});
+    expect(measureValue).toEqual(2);
+
+})
+
+test("ratioOfExternalEndpointsSupportingTls", () => {
+    let system = new System("sys1", "testSystem");
+
+    let service = new Service("s1", "testService", getEmptyMetaData());
+    let externalEndpointA = new ExternalEndpoint("e1", "endpoint A",  getEmptyMetaData());
+    externalEndpointA.setPropertyValue("protocol", "https");
+    let externalEndpointB = new ExternalEndpoint("e2", "endpoint B",  getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint C",  getEmptyMetaData());
+
+    service.addEndpoint(externalEndpointA);
+    service.addEndpoint(externalEndpointB);
+    service.addEndpoint(endpointC);
+
+    system.addEntity(service);
+
+    let measureValue = componentMeasureImplementations["ratioOfExternalEndpointsSupportingTls"]({entity: service, system: system});
+    expect(measureValue).toEqual(0.5);
+
+
+})

@@ -2,7 +2,7 @@ import { BackingService, BrokerBackingService, Infrastructure, Link, ProxyBackin
 import { Calculation, CalculationParameters } from "../../quamoco/Measure";
 import { average, partition } from "./general-functions";
 import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, EVENT_SOURCING_KIND, getEndpointKindWeight, getUsageRelationWeight, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MESSAGE_BROKER_KIND, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SEND_EVENT_ENDPOINT_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "../../specifications/featureModel";
-import { numberOfAsynchronousEndpointsOfferedByAService, numberOfComponentsAComponentIsLinkedTo, numberOfSynchronousEndpointsOfferedByAService, serviceCouplingBasedOnEndpointEntropy } from "./componentMeasures";
+import { calculateRatioOfEndpointsSupportingSsl, calculateRatioOfExternalEndpointsSupportingTls, numberOfAsynchronousEndpointsOfferedByAService, numberOfComponentsAComponentIsLinkedTo, numberOfSynchronousEndpointsOfferedByAService, serviceCouplingBasedOnEndpointEntropy } from "./componentMeasures";
 import { numberOfCyclesInRequestTraces } from "./requestTraceMeasures";
 
 export const serviceReplicationLevel: Calculation = (parameters: CalculationParameters<System>) => {
@@ -72,30 +72,15 @@ export const dataShardingLevel: Calculation = (parameters: CalculationParameters
 
 export const ratioOfEndpointsSupportingSsl: Calculation = (parameters: CalculationParameters<System>) => {
     let allEndpoints = [...parameters.entity.getComponentEntities.entries()].flatMap(entry => entry[1].getEndpointEntities.concat(entry[1].getExternalEndpointEntities));
-    let numberOfEndpointsSupportingSsl = allEndpoints.map(endpoint => endpoint.getProperties().find(property => property.getKey === "protocol").value)
-        .filter(protocol => PROTOCOLS_SUPPORTING_TLS.includes(protocol))
-        .length;
-    if ((allEndpoints.length - numberOfEndpointsSupportingSsl) === 0) {
-        return 0;
-    }
-
-    return numberOfEndpointsSupportingSsl / (allEndpoints.length - numberOfEndpointsSupportingSsl);
+    return calculateRatioOfEndpointsSupportingSsl(allEndpoints);
 }
 
 export const ratioOfExternalEndpointsSupportingTls: Calculation = (parameters: CalculationParameters<System>) => {
     let allExternalEndpoints = [...parameters.entity.getComponentEntities.entries()].flatMap(entry => entry[1].getExternalEndpointEntities);
-    let numberOfExternalEndpointsSupportingTLS = allExternalEndpoints.map(endpoint => endpoint.getProperties().find(property => property.getKey === "protocol").value)
-        .filter(protocol => PROTOCOLS_SUPPORTING_TLS.includes(protocol))
-        .length;
-    if (allExternalEndpoints.length === 0) {
-        return 0;
-    }
-
-    return numberOfExternalEndpointsSupportingTLS / allExternalEndpoints.length;
+    return calculateRatioOfExternalEndpointsSupportingTls(allExternalEndpoints);
 }
 
-export const ratioOfSecuredLinks: Calculation = (parameters: CalculationParameters<System>) => {
-    let allLinks = [...parameters.entity.getLinkEntities.entries()].map(link => link[1]);
+export const calculateRatioOfSecuredLinks: (allLinks: Link[]) => number = (allLinks) => {
     let linksConnectedToSecureEndpoints = allLinks.filter(link => {
         let protocol = link.getTargetEndpoint.getProperties().find(property => property.getKey === "protocol").value;
         return PROTOCOLS_SUPPORTING_TLS.includes(protocol);
@@ -106,6 +91,11 @@ export const ratioOfSecuredLinks: Calculation = (parameters: CalculationParamete
     }
 
     return linksConnectedToSecureEndpoints / allLinks.length;
+}
+
+export const ratioOfSecuredLinks: Calculation = (parameters: CalculationParameters<System>) => {
+    let allLinks = [...parameters.entity.getLinkEntities.entries()].map(link => link[1]);
+    return calculateRatioOfSecuredLinks(allLinks);
 }
 
 export const dataAggregateScope: Calculation = (parameters: CalculationParameters<System>) => {
@@ -1514,6 +1504,19 @@ export const ratioOfCachedDataAggregates: Calculation = (parameters: Calculation
     return 0;
 }
 
+export const ratioOfStateDependencyOfEndpoints: Calculation = (parameters: CalculationParameters<System>) => {
+
+    const allEndpoints = [...parameters.entity.getComponentEntities.entries()].flatMap(([componentId, component]) => component.getEndpointEntities.concat(component.getExternalEndpointEntities));
+
+    if (allEndpoints.length === 0) {
+        return 0;
+    }
+
+    let numberOfDependingEndpoints = allEndpoints.filter(endpoint => endpoint.getDataAggregateEntities.length > 0).length;
+
+    return numberOfDependingEndpoints / allEndpoints.length;
+}
+
 
 export const systemMeasureImplementations: { [measureKey: string]: Calculation } = {
     "serviceReplicationLevel": serviceReplicationLevel,
@@ -1585,5 +1588,6 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation }
     "serviceDiscoveryUsage": serviceDiscoveryUsage,
     "ratioOfComponentsWhoseIngressIsProxied": ratioOfComponentsWhoseIngressIsProxied,
     "ratioOfComponentsWhoseEgressIsProxied": ratioOfComponentsWhoseEgressIsProxied,
-    "ratioOfCachedDataAggregates": ratioOfCachedDataAggregates
+    "ratioOfCachedDataAggregates": ratioOfCachedDataAggregates,
+    "ratioOfStateDependencyOfEndpoints": ratioOfStateDependencyOfEndpoints
 }

@@ -2310,3 +2310,32 @@ test("ratioOfCachedDataAggregates", () => {
     expect(measureValue).toBe(3 / 5);
 
 })
+
+test("ratioOfStateDependencyOfEndpoints", () => {
+
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint A", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA);
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointB= new Endpoint("e2", "endpoint B", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+
+    let dataAggregateX = new DataAggregate("da1", "data aggregate 1", getEmptyMetaData());
+
+    let usageAX = new RelationToDataAggregate("r1", getEmptyMetaData());
+    usageAX.setPropertyValue("usage_relation", "cached-usage");
+    let usageEAX = new RelationToDataAggregate("r2", getEmptyMetaData());
+    usageEAX.setPropertyValue("usage_relation", "cached-usage");
+    endpointA.addDataAggregateEntity(dataAggregateX, usageEAX);
+
+    system.addEntity(dataAggregateX);
+    system.addEntities([serviceA, serviceB]);
+
+
+    let measureValue = systemMeasureImplementations["ratioOfStateDependencyOfEndpoints"]({ entity: system, system: system });
+    expect(measureValue).toBe(0.5);
+
+})
