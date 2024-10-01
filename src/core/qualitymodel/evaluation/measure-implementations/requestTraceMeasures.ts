@@ -2,7 +2,7 @@ import { RequestTrace } from "@/core/entities";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure";
 import { average } from "./general-functions";
 import { calculateRatioOfEndpointsSupportingSsl } from "./componentMeasures";
-import { calculateRatioOfSecuredLinks } from "./systemMeasures";
+import { calculateRatioOfSecuredLinks, calculateRatioOfStatefulComponents } from "./systemMeasures";
 
 
 export const ratioOfEndpointsSupportingSsl = (parameters: CalculationParameters<RequestTrace>) => {
@@ -96,6 +96,15 @@ export const ratioOfStateDependencyOfEndpoints: Calculation = (parameters: Calcu
     return numberOfDependingEndpoints / allEndpoints.length;
 }
 
+export const ratioOfStatefulComponents: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+    let includedUniqueComponents = new Set(parameters.entity.getLinks
+        .flat()
+        .map(link => {
+            return [link.getSourceEntity, parameters.system.searchComponentOfEndpoint(link.getTargetEndpoint.getId)]
+        }).flat());
+    return calculateRatioOfStatefulComponents(Array.from(includedUniqueComponents));
+}
+
 
 export const requestTraceMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
@@ -103,6 +112,7 @@ export const requestTraceMeasureImplementations: { [measureKey: string]: Calcula
     "requestTraceLength": requestTraceLength,
     "numberOfCyclesInRequestTraces": numberOfCyclesInRequestTraces,
     "dataReplicationAlongRequestTrace": dataReplicationAlongRequestTrace,
-    "ratioOfStateDependencyOfEndpoints": ratioOfStateDependencyOfEndpoints
+    "ratioOfStateDependencyOfEndpoints": ratioOfStateDependencyOfEndpoints,
+    "ratioOfStatefulComponents": ratioOfStatefulComponents
 }
 

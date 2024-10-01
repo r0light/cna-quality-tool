@@ -1,4 +1,4 @@
-import { BackingService, BrokerBackingService, Infrastructure, Link, ProxyBackingService, Service, StorageBackingService, System } from "@/core/entities";
+import { BackingService, BrokerBackingService, Component, Infrastructure, Link, ProxyBackingService, Service, StorageBackingService, System } from "@/core/entities";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure";
 import { average, partition } from "./general-functions";
 import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, EVENT_SOURCING_KIND, getEndpointKindWeight, getUsageRelationWeight, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MESSAGE_BROKER_KIND, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SEND_EVENT_ENDPOINT_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "../../specifications/featureModel";
@@ -102,15 +102,20 @@ export const dataAggregateScope: Calculation = (parameters: CalculationParameter
     return [...parameters.entity.getDataAggregateEntities.keys()].length;
 }
 
-export const ratioOfStatefulComponents: Calculation = (parameters: CalculationParameters<System>) => {
-    let allComponents = [...parameters.entity.getComponentEntities.entries()];
-    let numberOfStatefulComponents = allComponents.filter(entry => !(entry[1].getProperties().find(property => property.getKey === "stateless").value)).length;
+export const calculateRatioOfStatefulComponents: (allComponents: Component[]) => number = (allComponents) => {
+    let numberOfStatefulComponents = allComponents.filter(entry => !(entry.getProperties().find(property => property.getKey === "stateless").value)).length;
 
     if (allComponents.length === 0) {
         return 0;
     }
 
     return numberOfStatefulComponents / allComponents.length;
+
+}
+
+export const ratioOfStatefulComponents: Calculation = (parameters: CalculationParameters<System>) => {
+    let allComponents = [...parameters.entity.getComponentEntities.values()];
+    return calculateRatioOfStatefulComponents(allComponents);
 }
 
 export const ratioOfStatelessComponents: Calculation = (parameters: CalculationParameters<System>) => {
