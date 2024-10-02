@@ -1076,7 +1076,7 @@ const measures = {
         "name": "Degree of asynchronous communication",
         "calculation": "Average-of(Ratio of asynchronous endpoints) over all components",
         "sources": ["Qian2006"],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.SYSTEM],
     },
     "asynchronousCommunicationUtilization": {
         "name": "Asynchronous Communication Utilization",

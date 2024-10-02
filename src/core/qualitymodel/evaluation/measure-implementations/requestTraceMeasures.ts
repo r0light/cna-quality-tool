@@ -1,8 +1,19 @@
-import { RequestTrace } from "@/core/entities";
+import { Component, RequestTrace, System } from "@/core/entities";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure";
 import { average } from "./general-functions";
 import { calculateRatioOfEndpointsSupportingSsl } from "./componentMeasures";
-import { calculateRatioOfLinksToAsynchronousEndpoints, calculateRatioOfSecuredLinks, calculateRatioOfStatefulComponents, calculateRatioOfStatelessComponents } from "./systemMeasures";
+import { calculateRatioOfLinksToAsynchronousEndpoints, calculateRatioOfSecuredLinks, calculateRatioOfStatefulComponents, calculateRatioOfStatelessComponents, getServiceInteractions } from "./systemMeasures";
+import { EVENT_SOURCING_KIND } from "../../specifications/featureModel";
+
+export const getIncludedComponents: (requestTrace: RequestTrace, system: System) => Component[] = (requestTrace, system) => {
+    let includedUniqueComponents = new Set(requestTrace.getLinks
+        .flat()
+        .map(link => {
+            return [link.getSourceEntity, system.searchComponentOfEndpoint(link.getTargetEndpoint.getId)]
+        }).flat());
+
+    return Array.from(includedUniqueComponents);
+}
 
 
 export const ratioOfEndpointsSupportingSsl = (parameters: CalculationParameters<RequestTrace>) => {
@@ -120,6 +131,29 @@ export const asynchronousCommunicationUtilization: Calculation = (parameters: Ca
     return calculateRatioOfLinksToAsynchronousEndpoints(allLinks);
 }
 
+export const eventSourcingUtilizationMetric: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+
+    let serviceInteractions = getServiceInteractions(
+        getIncludedComponents(parameters.entity, parameters.system),
+        parameters.entity.getLinks.flat(),
+        parameters.system
+    );
+
+    let numberOfEventSourcingConnections = [...serviceInteractions.asynchronousConnections.entries()]
+        .filter(([connectionId, connection]) => {
+            return EVENT_SOURCING_KIND.includes(connection.broker.getProperty("kind").value);
+        })
+        .map(([connectionId, connection]) => {
+            return connection.in.size * connection.out.size;
+        }).reduce((accumulator, currentValue) => { return accumulator + currentValue }, 0);
+
+    if ((numberOfEventSourcingConnections + serviceInteractions.synchronousConnections.size) === 0) {
+        return 0;
+    }
+
+    return numberOfEventSourcingConnections / (numberOfEventSourcingConnections + serviceInteractions.synchronousConnections.size);
+}
+
 export const requestTraceMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
     "ratioOfSecuredLinks": ratioOfSecuredLinks,
@@ -129,6 +163,7 @@ export const requestTraceMeasureImplementations: { [measureKey: string]: Calcula
     "ratioOfStateDependencyOfEndpoints": ratioOfStateDependencyOfEndpoints,
     "ratioOfStatefulComponents": ratioOfStatefulComponents,
     "ratioOfStatelessComponents": ratioOfStatelessComponents,
-    "asynchronousCommunicationUtilization": asynchronousCommunicationUtilization
+    "asynchronousCommunicationUtilization": asynchronousCommunicationUtilization,
+    "eventSourcingUtilizationMetric": eventSourcingUtilizationMetric
 }
 

@@ -1,10 +1,10 @@
 import { getEmptyMetaData } from "@/core/common/entityDataTypes";
-import { DataAggregate, Endpoint, ExternalEndpoint, Link, RequestTrace, Service, StorageBackingService, System } from "@/core/entities";
+import { BrokerBackingService, DataAggregate, Endpoint, ExternalEndpoint, Link, RequestTrace, Service, StorageBackingService, System } from "@/core/entities";
 import { RelationToDataAggregate } from "@/core/entities/relationToDataAggregate";
 import { requestTraceMeasureImplementations } from "@/core/qualitymodel/evaluation/measure-implementations/requestTraceMeasures";
 import { getQualityModel } from "@/core/qualitymodel/QualityModelInstance";
 import { ENTITIES } from "@/core/qualitymodel/specifications/entities";
-import { SEND_EVENT_ENDPOINT_KIND, SUBSCRIBE_ENDPOINT_KIND } from "@/core/qualitymodel/specifications/featureModel";
+import { COMMAND_ENDPOINT_KIND, QUERY_ENDPOINT_KIND, SEND_EVENT_ENDPOINT_KIND, SUBSCRIBE_ENDPOINT_KIND } from "@/core/qualitymodel/specifications/featureModel";
 import { expect, test } from "vitest";
 
 test("all implementation names refer to an existing measure", () => {
@@ -513,5 +513,45 @@ test("asynchronousCommunicationUtilization", () => {
 
     let measureValue = requestTraceMeasureImplementations["asynchronousCommunicationUtilization"]({ entity: requestTrace, system: system});
     expect(measureValue).toEqual(2/3);
+
+})
+
+test("eventSourcingUtilizationMetric", () => {
+
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService 1", getEmptyMetaData());
+    let externalEndpoint = new ExternalEndpoint("ee1", "external endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(externalEndpoint);
+    let serviceB = new Service("s2", "testService 2", getEmptyMetaData());
+    let serviceC = new Service("s3", "testService 3", getEmptyMetaData());
+
+    let brokerService = new BrokerBackingService("bs1", "broker service", getEmptyMetaData());
+    brokerService.setPropertyValue("kind", "log");
+    let inEndpoint = new Endpoint("e1", "in endpoint", getEmptyMetaData());
+    inEndpoint.setPropertyValue("kind", SEND_EVENT_ENDPOINT_KIND);
+    inEndpoint.setPropertyValue("url_path", "orders");
+    brokerService.addEndpoint(inEndpoint);
+    let outEndpoint = new Endpoint("e2", "out endpoint", getEmptyMetaData());
+    outEndpoint.setPropertyValue("kind", SUBSCRIBE_ENDPOINT_KIND);
+    outEndpoint.setPropertyValue("url_path", "orders");
+    brokerService.addEndpoint(outEndpoint);
+
+    let linkABS = new Link("l1", serviceA, inEndpoint);
+    let linkBBS = new Link("l2", serviceB, outEndpoint);
+    let linkCBS = new Link("l3", serviceC, outEndpoint);
+
+    let requestTrace = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
+    requestTrace.setLinks = [[linkABS], [linkBBS], [linkCBS]];
+    requestTrace.setExternalEndpoint = externalEndpoint;
+
+    system.addEntities([serviceA, serviceB, serviceC]);
+    system.addEntities([brokerService]);
+    system.addEntities([linkABS, linkBBS, linkCBS]);
+    system.addEntity(requestTrace);
+
+
+    let measureValue = requestTraceMeasureImplementations["eventSourcingUtilizationMetric"]({ entity: requestTrace, system: system });
+    expect(measureValue).toEqual(1);
 
 })

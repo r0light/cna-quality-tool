@@ -939,7 +939,7 @@ export const amountOfRedundancy: Calculation = (parameters: CalculationParameter
 
 }
 
-const getServiceInteractions: (parameters: CalculationParameters<System>) => {
+export const getServiceInteractions: (components: Component[], links: Link[], system: System) => {
     asynchronousConnections: Map<string, {
         "in-endpoint-ids": Set<string>,
         "in": Set<string>,
@@ -948,7 +948,7 @@ const getServiceInteractions: (parameters: CalculationParameters<System>) => {
         "out": Set<string>
     }>,
     synchronousConnections: Map<string, Link>
-} = (parameters: CalculationParameters<System>) => {
+} = (components: Component[], links: Link[], system: System) => {
 
     let asynchronousConnections: Map<string, {
         "in-endpoint-ids": Set<string>,
@@ -959,12 +959,12 @@ const getServiceInteractions: (parameters: CalculationParameters<System>) => {
     }> = new Map();
 
     // initialize potential asynchronous connection points
-    let allBrokerBackingServices = [...parameters.entity.getComponentEntities.entries()].filter(([componentId, component]) => component.constructor.name === BrokerBackingService.name);
-    for (const [brokerServiceId, brokerService] of allBrokerBackingServices) {
+    let allBrokerBackingServices = components.filter(component => component.constructor.name === BrokerBackingService.name);
+    for (const brokerService of allBrokerBackingServices) {
         for (const endpoint of brokerService.getEndpointEntities) {
             let endpointPath = endpoint.getProperty("url_path").value;
             let endpointKind = endpoint.getProperty("kind").value;
-            let connectionPointId = brokerServiceId.concat(endpointPath);
+            let connectionPointId = brokerService.getId.concat(endpointPath);
 
             // initialize entry, if not present yet
             if (!asynchronousConnections.has(connectionPointId)) {
@@ -994,12 +994,12 @@ const getServiceInteractions: (parameters: CalculationParameters<System>) => {
     let directServiceConnections: Map<string, Link> = new Map<string, Link>();
 
     //check all links to find asynchronous service connections and direct service connections.  
-    for (const [linkId, link] of parameters.entity.getLinkEntities) {
+    for (const link of links) {
         if (link.getSourceEntity.constructor.name === Service.name) {
-            let targetComponent = parameters.entity.searchComponentOfEndpoint(link.getTargetEndpoint.getId);
+            let targetComponent = system.searchComponentOfEndpoint(link.getTargetEndpoint.getId);
             if (targetComponent && targetComponent.constructor.name === Service.name
                 && SYNCHRONOUS_ENDPOINT_KIND.includes(link.getTargetEndpoint.getProperty("kind").value)) {
-                directServiceConnections.set(linkId, link);
+                directServiceConnections.set(link.getId, link);
             }
             if (targetComponent && targetComponent.constructor.name === BrokerBackingService.name) {
                 let connectionPointId = targetComponent.getId.concat(link.getTargetEndpoint.getProperty("url_path").value);
@@ -1020,7 +1020,10 @@ const getServiceInteractions: (parameters: CalculationParameters<System>) => {
 
 export const serviceInteractionViaBackingService: Calculation = (parameters: CalculationParameters<System>) => {
 
-    let serviceInteractions = getServiceInteractions(parameters);
+    let serviceInteractions = getServiceInteractions([...parameters.entity.getComponentEntities.values()],
+    [...parameters.entity.getLinkEntities.values()],
+    parameters.entity
+);
 
     let numberOfAsynchronousConnectionsViaBroker = [...serviceInteractions.asynchronousConnections.entries()]
         .filter(([connectionId, connection]) => {
@@ -1039,7 +1042,10 @@ export const serviceInteractionViaBackingService: Calculation = (parameters: Cal
 
 export const eventSourcingUtilizationMetric: Calculation = (parameters: CalculationParameters<System>) => {
 
-    let serviceInteractions = getServiceInteractions(parameters);
+    let serviceInteractions = getServiceInteractions([...parameters.entity.getComponentEntities.values()],
+    [...parameters.entity.getLinkEntities.values()],
+    parameters.entity
+);
 
     let numberOfEventSourcingConnections = [...serviceInteractions.asynchronousConnections.entries()]
         .filter(([connectionId, connection]) => {
