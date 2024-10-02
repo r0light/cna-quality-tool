@@ -2,7 +2,7 @@ import { BackingService, BrokerBackingService, Component, Infrastructure, Link, 
 import { Calculation, CalculationParameters } from "../../quamoco/Measure";
 import { average, partition } from "./general-functions";
 import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, EVENT_SOURCING_KIND, getEndpointKindWeight, getUsageRelationWeight, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MESSAGE_BROKER_KIND, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SEND_EVENT_ENDPOINT_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "../../specifications/featureModel";
-import { calculateRatioOfEndpointsSupportingSsl, calculateRatioOfExternalEndpointsSupportingTls, numberOfAsynchronousEndpointsOfferedByAService, numberOfComponentsAComponentIsLinkedTo, numberOfSynchronousEndpointsOfferedByAService, serviceCouplingBasedOnEndpointEntropy } from "./componentMeasures";
+import { calculateRatioOfEndpointsSupportingSsl, calculateRatioOfExternalEndpointsSupportingTls, numberOfAsynchronousEndpointsOfferedByAService, numberOfComponentsAComponentIsLinkedTo, numberOfSynchronousEndpointsOfferedByAService, providesHealthAndReadinessEndpoints, serviceCouplingBasedOnEndpointEntropy } from "./componentMeasures";
 import { numberOfCyclesInRequestTraces } from "./requestTraceMeasures";
 import { supportsMonitoring as infrastructureSupportsMonitoring} from "./infrastructureMeasures";
 import { supportsMonitoring as componentSupportsMonitoring} from "./componentMeasures";
@@ -211,9 +211,7 @@ export const ratioOfServicesThatProvideHealthEndpoints: Calculation = (parameter
     let numberOfServicesWithHealthAndReadinessEndpoint = 0;
 
     for (const service of allServices) {
-        let hasHealthEndpoint = [...service.getEndpointEntities.entries()].filter(service => service[1].getProperty("health_check").value).length > 0;
-        let hasReadinessEndpoint = [...service.getEndpointEntities.entries()].filter(service => service[1].getProperty("readiness_check").value).length > 0;
-        if (hasHealthEndpoint && hasReadinessEndpoint) {
+        if (providesHealthAndReadinessEndpoints(service)) {
             numberOfServicesWithHealthAndReadinessEndpoint++;
         }
     }

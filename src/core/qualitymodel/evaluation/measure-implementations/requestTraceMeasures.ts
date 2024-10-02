@@ -1,11 +1,11 @@
-import { Component, Infrastructure, RequestTrace, System } from "@/core/entities";
+import { Component, Infrastructure, RequestTrace, Service, System } from "@/core/entities";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure";
 import { average } from "./general-functions";
-import { calculateRatioOfEndpointsSupportingSsl } from "./componentMeasures";
+import { calculateRatioOfEndpointsSupportingSsl, providesHealthAndReadinessEndpoints } from "./componentMeasures";
 import { calculateRatioOfLinksToAsynchronousEndpoints, calculateRatioOfSecuredLinks, calculateRatioOfStatefulComponents, calculateRatioOfStatelessComponents, getServiceInteractions } from "./systemMeasures";
 import { EVENT_SOURCING_KIND } from "../../specifications/featureModel";
-import { supportsMonitoring as infrastructureSupportsMonitoring} from "./infrastructureMeasures";
-import { supportsMonitoring as componentSupportsMonitoring} from "./componentMeasures";
+import { supportsMonitoring as infrastructureSupportsMonitoring } from "./infrastructureMeasures";
+import { supportsMonitoring as componentSupportsMonitoring } from "./componentMeasures";
 
 export const getIncludedComponents: (requestTrace: RequestTrace, system: System) => Component[] = (requestTrace, system) => {
     let includedUniqueComponents = new Set(requestTrace.getLinks
@@ -157,7 +157,7 @@ export const eventSourcingUtilizationMetric: Calculation = (parameters: Calculat
 }
 
 export const ratioOfInfrastructureNodesThatSupportMonitoring: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
-let includedComponents =  getIncludedComponents(parameters.entity, parameters.system).map(component => component.getId);
+    let includedComponents = getIncludedComponents(parameters.entity, parameters.system).map(component => component.getId);
 
 
     let supportingInfrastructure = new Set<Infrastructure>();
@@ -165,7 +165,7 @@ let includedComponents =  getIncludedComponents(parameters.entity, parameters.sy
     for (const [deploymentMappingId, deploymentMapping] of parameters.system.getDeploymentMappingEntities.entries()) {
         if (includedComponents.includes(deploymentMapping.getDeployedEntity.getId)) {
             supportingInfrastructure.add(deploymentMapping.getUnderlyingInfrastructure);
-        } 
+        }
     }
 
     if (supportingInfrastructure.size === 0) {
@@ -202,6 +202,26 @@ export const ratioOfComponentsThatSupportMonitoring: Calculation = (parameters: 
     return numberOfComponentsSupportingMonitoring / components.length;
 }
 
+export const ratioOfServicesThatProvideHealthEndpoints: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+
+    let allServices = getIncludedComponents(parameters.entity, parameters.system).filter(component => component.constructor.name === Service.name);
+
+
+    if (allServices.length === 0) {
+        return 0;
+    }
+
+    let numberOfServicesWithHealthAndReadinessEndpoint = 0;
+
+    for (const service of allServices) {
+        if (providesHealthAndReadinessEndpoints(service)) {
+            numberOfServicesWithHealthAndReadinessEndpoint++;
+        }
+    }
+
+    return numberOfServicesWithHealthAndReadinessEndpoint / allServices.length;
+}
+
 
 export const requestTraceMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
@@ -215,6 +235,7 @@ export const requestTraceMeasureImplementations: { [measureKey: string]: Calcula
     "asynchronousCommunicationUtilization": asynchronousCommunicationUtilization,
     "eventSourcingUtilizationMetric": eventSourcingUtilizationMetric,
     "ratioOfInfrastructureNodesThatSupportMonitoring": ratioOfInfrastructureNodesThatSupportMonitoring,
-    "ratioOfComponentsThatSupportMonitoring": ratioOfComponentsThatSupportMonitoring
+    "ratioOfComponentsThatSupportMonitoring": ratioOfComponentsThatSupportMonitoring,
+    "ratioOfServicesThatProvideHealthEndpoints": ratioOfServicesThatProvideHealthEndpoints
 }
 

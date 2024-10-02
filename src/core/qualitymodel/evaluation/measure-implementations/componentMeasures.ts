@@ -5,7 +5,7 @@ import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRIC
 import { average } from "./general-functions.js";
 
 
-export const supportsMonitoring: (component: Component) => boolean = (component: Component) => {
+export const supportsMonitoring: (component: Component) => boolean = (component) => {
 
     let supportsMetrics = false;
     let supportsLogging = false;
@@ -21,6 +21,14 @@ export const supportsMonitoring: (component: Component) => boolean = (component:
     }
 
     return supportsMetrics && supportsLogging;
+}
+
+export const providesHealthAndReadinessEndpoints: (component: Component) => boolean = (component) => {
+    let hasHealthEndpoint = [...component.getEndpointEntities.entries()].filter(endpoint => endpoint[1].getProperty("health_check").value).length > 0;
+    let hasReadinessEndpoint = [...component.getEndpointEntities.entries()].filter(endpoint => endpoint[1].getProperty("readiness_check").value).length > 0;
+
+    return hasHealthEndpoint && hasReadinessEndpoint;
+
 }
 
 export const calculateRatioOfEndpointsSupportingSsl: (endpoints: Endpoint[]) => number = (allEndpoints) => {
