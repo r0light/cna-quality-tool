@@ -4,6 +4,8 @@ import { average, partition } from "./general-functions";
 import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, EVENT_SOURCING_KIND, getEndpointKindWeight, getUsageRelationWeight, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MESSAGE_BROKER_KIND, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SEND_EVENT_ENDPOINT_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "../../specifications/featureModel";
 import { calculateRatioOfEndpointsSupportingSsl, calculateRatioOfExternalEndpointsSupportingTls, numberOfAsynchronousEndpointsOfferedByAService, numberOfComponentsAComponentIsLinkedTo, numberOfSynchronousEndpointsOfferedByAService, serviceCouplingBasedOnEndpointEntropy } from "./componentMeasures";
 import { numberOfCyclesInRequestTraces } from "./requestTraceMeasures";
+import { supportsMonitoring as infrastructureSupportsMonitoring} from "./infrastructureMeasures";
+import { supportsMonitoring as componentSupportsMonitoring} from "./componentMeasures";
 
 export const serviceReplicationLevel: Calculation = (parameters: CalculationParameters<System>) => {
 
@@ -1180,20 +1182,7 @@ export const ratioOfInfrastructureNodesThatSupportMonitoring: Calculation = (par
     let numberOfInfrastructureNodesSupportingMonitoring = 0;
 
     for (const [infrastructureId, infrastructure] of allInfrastructure) {
-        let supportsMetrics = false;
-        let supportsLogging = false;
-
-        for (const backingData of infrastructure.getBackingDataEntities) {
-            if (backingData.backingData.getProperty("kind").value === BACKING_DATA_METRICS_KIND) {
-                supportsMetrics = true;
-                continue;
-            }
-            if (backingData.backingData.getProperty("kind").value === BACKING_DATA_LOGS_KIND) {
-                supportsLogging = true;
-            }
-        }
-
-        if (supportsMetrics && supportsLogging) {
+        if (infrastructureSupportsMonitoring(infrastructure)) {
             numberOfInfrastructureNodesSupportingMonitoring++;
         }
     }
@@ -1211,20 +1200,7 @@ export const ratioOfComponentsThatSupportMonitoring: Calculation = (parameters: 
     let numberOfComponentsSupportingMonitoring = 0;
 
     for (const [componentId, component] of allComponents) {
-        let supportsMetrics = false;
-        let supportsLogging = false;
-
-        for (const backingData of component.getBackingDataEntities) {
-            if (backingData.backingData.getProperty("kind").value === BACKING_DATA_METRICS_KIND) {
-                supportsMetrics = true;
-                continue;
-            }
-            if (backingData.backingData.getProperty("kind").value === BACKING_DATA_LOGS_KIND) {
-                supportsLogging = true;
-            }
-        }
-
-        if (supportsMetrics && supportsLogging) {
+        if (componentSupportsMonitoring(component)) {
             numberOfComponentsSupportingMonitoring++;
         }
     }

@@ -1,9 +1,27 @@
 
 import { Component, Endpoint, Service, StorageBackingService } from "../../../entities.js";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure.js";
-import { ASYNCHRONOUS_ENDPOINT_KIND, PROTOCOLS_SUPPORTING_TLS, SYNCHRONOUS_ENDPOINT_KIND } from "../../specifications/featureModel.js";
+import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, PROTOCOLS_SUPPORTING_TLS, SYNCHRONOUS_ENDPOINT_KIND } from "../../specifications/featureModel.js";
 import { average } from "./general-functions.js";
 
+
+export const supportsMonitoring: (component: Component) => boolean = (component: Component) => {
+
+    let supportsMetrics = false;
+    let supportsLogging = false;
+
+    for (const backingData of component.getBackingDataEntities) {
+        if (backingData.backingData.getProperty("kind").value === BACKING_DATA_METRICS_KIND) {
+            supportsMetrics = true;
+            continue;
+        }
+        if (backingData.backingData.getProperty("kind").value === BACKING_DATA_LOGS_KIND) {
+            supportsLogging = true;
+        }
+    }
+
+    return supportsMetrics && supportsLogging;
+}
 
 export const calculateRatioOfEndpointsSupportingSsl: (endpoints: Endpoint[]) => number = (allEndpoints) => {
     let numberOfEndpointsSupportingSsl = allEndpoints.map(endpoint => endpoint.getProperties().find(property => property.getKey === "protocol").value)
