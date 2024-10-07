@@ -471,6 +471,38 @@ export const numberOfWriteEndpointsProvidedByAService: Calculation = (parameters
     }).length;
 }
 
+export const numberOfLinksWithRetryLogic: Calculation = (parameters: CalculationParameters<Component>) => {
+
+    let outgoingLinks = parameters.system.getOutgoingLinksOfComponent(parameters.entity.getId);
+
+    // TODO also limit to endpoints which are safe/idempotent
+    let linksToSynchronousEndpoints = outgoingLinks.filter((link) => SYNCHRONOUS_ENDPOINT_KIND.includes(link.getTargetEndpoint.getProperty("kind").value));
+
+    if (linksToSynchronousEndpoints.length === 0) {
+        return 0;
+    }
+
+    let linksWithRetryLogic = linksToSynchronousEndpoints.filter(link => link.getProperty("retries").value > 0);
+
+    return linksWithRetryLogic.length;
+}
+
+export const numberOfLinksWithComplexFailover: Calculation = (parameters: CalculationParameters<Component>) => {
+
+    let outgoingLinks = parameters.system.getOutgoingLinksOfComponent(parameters.entity.getId);
+
+    // TODO also limit to endpoints which are safe/idempotent
+    let linksToSynchronousEndpoints = outgoingLinks.filter((link) => SYNCHRONOUS_ENDPOINT_KIND.includes(link.getTargetEndpoint.getProperty("kind").value));
+
+    if (linksToSynchronousEndpoints.length === 0) {
+        return 0;
+    }
+
+    let linksWithCircuitBreaker = linksToSynchronousEndpoints.filter(link => link.getProperty("circuit_breaker").value !== "none");
+
+    return linksWithCircuitBreaker.length;
+}
+
 
 export const componentMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
@@ -507,6 +539,8 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "serviceSize": serviceSize,
     "unusedEndpointCount": unusedEndpointCount,
     "numberOfReadEndpointsProvidedByAService": numberOfReadEndpointsProvidedByAService,
-    "numberOfWriteEndpointsProvidedByAService": numberOfWriteEndpointsProvidedByAService
+    "numberOfWriteEndpointsProvidedByAService": numberOfWriteEndpointsProvidedByAService,
+    "numberOfLinksWithRetryLogic": numberOfLinksWithRetryLogic,
+    "numberOfLinksWithComplexFailover": numberOfLinksWithComplexFailover
 }
 

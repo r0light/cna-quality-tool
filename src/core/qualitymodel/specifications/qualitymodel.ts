@@ -1588,7 +1588,8 @@ const measures = {
         "name": "Component density",
         "calculation": "Number of deployed components / Number of infrastructure entities on which one or more components are deployed",
         "sources": ["Guerron2020", "Rizvi2017"],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE],
+        "applicableEntities": [ENTITIES.SYSTEM],
+        "aggregateOf": "numberOfServiceHostedOnOneInfrastructure"
     },
     "numberOfAvailabilityZonesUsed": {
         "name": "Number of Availability Zones used",

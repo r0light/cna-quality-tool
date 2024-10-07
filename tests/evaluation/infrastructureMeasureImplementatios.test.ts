@@ -56,3 +56,27 @@ test("numberOfServiceHostedOnOneInfrastructure", () => {
     let measureValue = infrastructureMeasureImplementations["numberOfServiceHostedOnOneInfrastructure"]({ entity: infrastructureA, system: system });
     expect(measureValue).toEqual(2);
 })
+
+test("numberOfAvailabilityZonesUsed", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    infrastructureA.setPropertyValue("availability_zone", "privateA,privateB,public")
+
+    system.addEntities([infrastructureA]);
+
+    let measureValue = infrastructureMeasureImplementations["numberOfAvailabilityZonesUsed"]({ entity: infrastructureA, system: system });
+    expect(measureValue).toEqual(3);
+})
+
+test("rollingUpdateOption", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    infrastructureA.setPropertyValue("supported_update_strategies", ["rolling"]);
+
+    system.addEntities([infrastructureA]);
+
+    let measureValue = infrastructureMeasureImplementations["rollingUpdateOption"]({ entity: infrastructureA, system: system });
+    expect(measureValue).toEqual(1);
+})

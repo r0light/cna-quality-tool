@@ -5,7 +5,7 @@ import { RelationToDataAggregate } from "@/core/entities/relationToDataAggregate
 import { requestTraceMeasureImplementations } from "@/core/qualitymodel/evaluation/measure-implementations/requestTraceMeasures";
 import { getQualityModel } from "@/core/qualitymodel/QualityModelInstance";
 import { ENTITIES } from "@/core/qualitymodel/specifications/entities";
-import { BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, COMMAND_ENDPOINT_KIND, QUERY_ENDPOINT_KIND, SEND_EVENT_ENDPOINT_KIND, SUBSCRIBE_ENDPOINT_KIND } from "@/core/qualitymodel/specifications/featureModel";
+import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, COMMAND_ENDPOINT_KIND, QUERY_ENDPOINT_KIND, SEND_EVENT_ENDPOINT_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "@/core/qualitymodel/specifications/featureModel";
 import { expect, test } from "vitest";
 
 test("all implementation names refer to an existing measure", () => {
@@ -1090,5 +1090,195 @@ test("smallestReplicationValue", () => {
     system.addEntity(requestTrace);
 
     let measureValue = requestTraceMeasureImplementations["smallestReplicationValue"]({ entity: requestTrace, system: system });
+    expect(measureValue).toEqual(1);
+})
+
+test("storageReplicationLevel", () => {
+
+    let system = new System("sys1", "testSystem");
+
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    let infrastructureB = new Infrastructure("i2", "infratstructure 2", getEmptyMetaData());
+
+    let serviceA = new Service("s1", "testService A", getEmptyMetaData());
+    let externalEndpoint = new ExternalEndpoint("ee1", "external endpoint", getEmptyMetaData());
+    serviceA.addEndpoint(externalEndpoint);
+
+    let serviceB = new Service("s2", "testService B", getEmptyMetaData());
+    let endpointB = new Endpoint("e2", "endpoint B", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+
+    let serviceC = new Service("s3", "testService C", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint C", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+
+    let storageServiceA = new StorageBackingService("sbs1", "storage service A", getEmptyMetaData());
+    let endpointSA = new Endpoint("e4", "endpoint SA", getEmptyMetaData());
+    storageServiceA.addEndpoint(endpointSA);
+    let deploymentMappingA = new DeploymentMapping("dm1", storageServiceA, infrastructureA);
+    deploymentMappingA.setPropertyValue("replicas", 2);
+
+    let storageServiceB = new StorageBackingService("sbs2", "storage service B", getEmptyMetaData());
+    let endpointSB = new Endpoint("e5", "endpoint SB", getEmptyMetaData());
+    storageServiceB.addEndpoint(endpointSB);
+    let deploymentMappingB = new DeploymentMapping("dm2", storageServiceB, infrastructureB);
+    deploymentMappingB.setPropertyValue("replicas", 3);
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+    let linkBSA = new Link("l2", serviceB, endpointSA);
+    let linkBC = new Link("l3", serviceB, endpointC);
+    let linkCSB = new Link("l4", serviceC, endpointSB);
+
+    let requestTrace = new RequestTrace("r1", "request trace 1", getEmptyMetaData());
+    requestTrace.setLinks = [
+        [linkAB],
+        [linkBSA, linkBC],
+        [linkCSB]
+    ]
+    requestTrace.setExternalEndpoint = externalEndpoint;
+
+    system.addEntities([infrastructureA, infrastructureB]);
+    system.addEntities([serviceA, serviceB, serviceC]);
+    system.addEntities([storageServiceA, storageServiceB]);
+    system.addEntities([deploymentMappingA, deploymentMappingB]);
+    system.addEntities([linkAB, linkBSA, linkBC, linkCSB]);
+    system.addEntities([requestTrace]);
+
+    let measureValue = requestTraceMeasureImplementations["storageReplicationLevel"]({ entity: requestTrace, system: system });
+    expect(measureValue).toEqual(2.5);
+
+})
+
+test("numberOfAvailabilityZonesUsed", () => {
+    let system = new System("sys1", "testSystem");
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    infrastructureA.setPropertyValue("availability_zone", "privateA,privateB,public")
+    let infrastructureB = new Infrastructure("i2", "infratstructure 2", getEmptyMetaData());
+    infrastructureA.setPropertyValue("availability_zone", "privateA,privateC,public")
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA);
+    serviceA.addEndpoint(externalEndpointA);
+    let deploymentMappingA = new DeploymentMapping("dm1", serviceA, infrastructureA);
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+    let deploymentMappingB = new DeploymentMapping("dm2", serviceB, infrastructureA);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+    let deploymentMappingC = new DeploymentMapping("dm3", serviceC, infrastructureB);
+
+    let serviceD = new Service("s4", "testService", getEmptyMetaData());
+    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    serviceD.addEndpoint(endpointD);
+    let deploymentMappingD = new DeploymentMapping("dm4", serviceD, infrastructureB);
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+    let linkBC = new Link("l2", serviceB, endpointC);
+    let linkCD = new Link("l3", serviceC, endpointD);
+
+    let requestTrace = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
+    requestTrace.setLinks = [[linkAB], [linkBC], [linkCD]];
+    requestTrace.setExternalEndpoint = externalEndpointA;
+
+    system.addEntities([infrastructureA, infrastructureB]);
+    system.addEntities([serviceA, serviceB, serviceC, serviceD]);
+    system.addEntities([deploymentMappingA, deploymentMappingB, deploymentMappingC, deploymentMappingD]);
+    system.addEntities([linkAB, linkBC, linkCD]);
+    system.addEntity(requestTrace);
+
+    let measureValue = requestTraceMeasureImplementations["numberOfAvailabilityZonesUsed"]({ entity: requestTrace, system: system });
+    expect(measureValue).toEqual(4);
+})
+
+test("numberOfLinksWithRetryLogic", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA);
+    serviceA.addEndpoint(externalEndpointA);
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    endpointB.setPropertyValue("kind", SYNCHRONOUS_ENDPOINT_KIND[0]);
+    serviceB.addEndpoint(endpointB);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    endpointC.setPropertyValue("kind", ASYNCHRONOUS_ENDPOINT_KIND[0]);
+    serviceC.addEndpoint(endpointC);
+
+    let serviceD = new Service("s4", "testService", getEmptyMetaData());
+    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    endpointD.setPropertyValue("kind", SYNCHRONOUS_ENDPOINT_KIND[0]);
+    serviceD.addEndpoint(endpointD);
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+    linkAB.setPropertyValue("retries", 3);
+    let linkBC = new Link("l2", serviceB, endpointC);
+    let linkCD = new Link("l3", serviceC, endpointD);
+    linkCD.setPropertyValue("retries", 2);
+
+    let requestTrace = new RequestTrace("rq1", "request trace", getEmptyMetaData());
+    requestTrace.setExternalEndpoint = externalEndpointA;
+    requestTrace.setLinks = [[linkAB], [linkBC], [linkCD]];
+
+    system.addEntities([serviceA, serviceB, serviceC, serviceD]);
+    system.addEntities([linkAB, linkBC, linkCD]);
+    system.addEntity(requestTrace);
+
+    let measureValue = requestTraceMeasureImplementations["numberOfLinksWithRetryLogic"]({ entity: requestTrace, system: system });
+    expect(measureValue).toEqual(2);
+})
+
+
+test("numberOfLinksWithComplexFailover", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA);
+    serviceA.addEndpoint(externalEndpointA);
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    endpointB.setPropertyValue("kind", SYNCHRONOUS_ENDPOINT_KIND[0]);
+    serviceB.addEndpoint(endpointB);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    endpointC.setPropertyValue("kind", ASYNCHRONOUS_ENDPOINT_KIND[0]);
+    serviceC.addEndpoint(endpointC);
+
+    let serviceD = new Service("s4", "testService", getEmptyMetaData());
+    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    endpointD.setPropertyValue("kind", SYNCHRONOUS_ENDPOINT_KIND[0]);
+    serviceD.addEndpoint(endpointD);
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+    linkAB.setPropertyValue("circuit_breaker", "with default value");
+    let linkBC = new Link("l2", serviceB, endpointC);
+    let linkCD = new Link("l3", serviceC, endpointD);
+    linkCD.setPropertyValue("circuit_breaker", "none");
+
+    let requestTrace = new RequestTrace("rq1", "request trace", getEmptyMetaData());
+    requestTrace.setExternalEndpoint = externalEndpointA;
+    requestTrace.setLinks = [[linkAB], [linkBC], [linkCD]];
+
+    system.addEntities([serviceA, serviceB, serviceC, serviceD]);
+    system.addEntities([linkAB, linkBC, linkCD]);
+    system.addEntity(requestTrace);
+
+    let measureValue = requestTraceMeasureImplementations["numberOfLinksWithComplexFailover"]({ entity: requestTrace, system: system });
     expect(measureValue).toEqual(1);
 })

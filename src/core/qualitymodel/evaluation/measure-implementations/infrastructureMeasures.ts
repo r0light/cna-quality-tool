@@ -1,6 +1,6 @@
 import { Infrastructure } from "@/core/entities";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure";
-import { BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND } from "../../specifications/featureModel";
+import { BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, ROLLING_UPDATE_STRATEGY_OPTIONS } from "../../specifications/featureModel";
 
 
 export const supportsMonitoring: (infrastructure: Infrastructure) => boolean = (infrastructure: Infrastructure) => {
@@ -21,6 +21,12 @@ export const supportsMonitoring: (infrastructure: Infrastructure) => boolean = (
     return supportsMetrics && supportsLogging;
 }
 
+export const rollingUpdateOption: Calculation = (parameters: CalculationParameters<Infrastructure>) => {
+
+    return parameters.entity.getProperty("supported_update_strategies").value.some(strategy => ROLLING_UPDATE_STRATEGY_OPTIONS.includes(strategy)) ? 1 : 0;
+
+}
+
 export const numberOfServiceHostedOnOneInfrastructure: Calculation = (parameters: CalculationParameters<Infrastructure>) => {
 
     let numberOfServicesHostedOnInfrastructure = 0;
@@ -34,7 +40,18 @@ export const numberOfServiceHostedOnOneInfrastructure: Calculation = (parameters
     return numberOfServicesHostedOnInfrastructure;
 }
 
+export const numberOfAvailabilityZonesUsed: Calculation = (parameters: CalculationParameters<Infrastructure>) => {
+
+    let availabilityZones: Set<string> = new Set();
+
+    let usedAvailabilityZones = (parameters.entity.getProperty("availability_zone").value as string).split(",");
+    usedAvailabilityZones.forEach(zoneId => availabilityZones.add(zoneId));
+
+    return availabilityZones.size;
+}
 
 export const infrastructureMeasureImplementations: { [measureKey: string]: Calculation } = {
-    "numberOfServiceHostedOnOneInfrastructure": numberOfServiceHostedOnOneInfrastructure
+    "numberOfServiceHostedOnOneInfrastructure": numberOfServiceHostedOnOneInfrastructure,
+    "numberOfAvailabilityZonesUsed": numberOfAvailabilityZonesUsed,
+    "rollingUpdateOption": rollingUpdateOption
 }

@@ -3,7 +3,7 @@ import { Calculation, CalculationParameters } from "../../quamoco/Measure";
 import { average, lowest, median } from "./general-functions";
 import { calculateRatioOfEndpointsSupportingSsl, providesHealthAndReadinessEndpoints } from "./componentMeasures";
 import { calculateNumberOfLinksWithServiceDiscovery, calculateRatioOfLinksToAsynchronousEndpoints, calculateRatioOfSecuredLinks, calculateRatioOfStatefulComponents, calculateRatioOfStatelessComponents, calculateReplicasPerService, countComponentsConnectedToCertainEndpoints, getServiceInteractions } from "./systemMeasures";
-import { EVENT_SOURCING_KIND } from "../../specifications/featureModel";
+import { EVENT_SOURCING_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "../../specifications/featureModel";
 import { supportsMonitoring as infrastructureSupportsMonitoring } from "./infrastructureMeasures";
 import { supportsMonitoring as componentSupportsMonitoring } from "./componentMeasures";
 
@@ -345,6 +345,83 @@ export const smallestReplicationValue: Calculation = (parameters: CalculationPar
     }
 }
 
+export const storageReplicationLevel: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+
+    let includedServiceIds = getIncludedComponents(parameters.entity, parameters.system).map(component => component.getId);
+
+    let replicasPerStorageService: Map<String, number> = new Map();
+    for (const [id, deploymentMapping] of parameters.system.getDeploymentMappingEntities.entries()) {
+        let deployedEntity = deploymentMapping.getDeployedEntity
+        if (deployedEntity.constructor.name === StorageBackingService.name && includedServiceIds.includes(deployedEntity.getId)) {
+            let noOfReplicas = deploymentMapping.getProperties().find(prop => prop.getKey === "replicas").value
+            if (replicasPerStorageService.has(deployedEntity.getId)) {
+                replicasPerStorageService.set(deployedEntity.getId, replicasPerStorageService.get(deployedEntity.getId) + noOfReplicas);
+            } else {
+                replicasPerStorageService.set(deployedEntity.getId, noOfReplicas);
+            }
+        }
+    }
+
+    if (replicasPerStorageService.size === 0) {
+        return "n/a";
+    } else {
+        return average(
+            Array.from(replicasPerStorageService.values())
+        );
+    }
+}
+
+export const numberOfAvailabilityZonesUsed: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+    let includedServiceIds = getIncludedComponents(parameters.entity, parameters.system).map(component => component.getId);
+
+    let availabilityZones: Set<string> = new Set();
+
+    for (const [id, deploymentMapping] of parameters.system.getDeploymentMappingEntities.entries()) {
+        let deployedEntity = deploymentMapping.getDeployedEntity
+        if (deployedEntity.constructor.name === Service.name && includedServiceIds.includes(deployedEntity.getId)) {
+
+            let usedAvailabilityZones = (deploymentMapping.getUnderlyingInfrastructure.getProperty("availability_zone").value as string).split(",");
+            usedAvailabilityZones.forEach(zoneId => availabilityZones.add(zoneId));
+        }
+    }
+
+    return availabilityZones.size;
+}
+
+export const numberOfLinksWithRetryLogic: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+    let allLinks = parameters.entity.getLinks.flat();
+
+    // TODO also limit to endpoints which are safe/idempotent
+    let linksToSynchronousEndpoints = allLinks.filter((link) => SYNCHRONOUS_ENDPOINT_KIND.includes(link.getTargetEndpoint.getProperty("kind").value));
+
+    if (linksToSynchronousEndpoints.length === 0) {
+        return 0;
+    }
+
+    let linksWithRetryLogic = linksToSynchronousEndpoints.filter(link => link.getProperty("retries").value > 0);
+
+    return linksWithRetryLogic.length;
+
+}
+
+
+export const numberOfLinksWithComplexFailover: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+
+    let allLinks = parameters.entity.getLinks.flat();
+
+    // TODO also limit to endpoints which are safe/idempotent
+    let linksToSynchronousEndpoints = allLinks.filter((link) => SYNCHRONOUS_ENDPOINT_KIND.includes(link.getTargetEndpoint.getProperty("kind").value));
+
+    if (linksToSynchronousEndpoints.length === 0) {
+        return 0;
+    }
+
+    let linksWithCircuitBreaker = linksToSynchronousEndpoints.filter(link => link.getProperty("circuit_breaker").value !== "none");
+
+    return linksWithCircuitBreaker.length;
+}
+
+
 export const requestTraceMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
     "ratioOfSecuredLinks": ratioOfSecuredLinks,
@@ -367,5 +444,9 @@ export const requestTraceMeasureImplementations: { [measureKey: string]: Calcula
     "serviceReplicationLevel": serviceReplicationLevel,
     "medianServiceReplication": medianServiceReplication,
     "smallestReplicationValue": smallestReplicationValue,
+    "storageReplicationLevel": storageReplicationLevel,
+    "numberOfAvailabilityZonesUsed": numberOfAvailabilityZonesUsed,
+    "numberOfLinksWithRetryLogic": numberOfLinksWithRetryLogic,
+    "numberOfLinksWithComplexFailover": numberOfLinksWithComplexFailover
 }
 

@@ -1076,3 +1076,79 @@ test("ratioOfExternalEndpointsSupportingTls", () => {
 
 
 })
+
+
+test ("numberOfLinksWithRetryLogic", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA);
+    serviceA.addEndpoint(externalEndpointA);
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    endpointB.setPropertyValue("kind", SYNCHRONOUS_ENDPOINT_KIND[0]);
+    serviceB.addEndpoint(endpointB);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    endpointC.setPropertyValue("kind", ASYNCHRONOUS_ENDPOINT_KIND[0]);
+    serviceC.addEndpoint(endpointC);
+
+    let serviceD = new Service("s4", "testService", getEmptyMetaData());
+    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    endpointD.setPropertyValue("kind", SYNCHRONOUS_ENDPOINT_KIND[0]);
+    serviceD.addEndpoint(endpointD);
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+    linkAB.setPropertyValue("retries", 3);
+    let linkAC = new Link("l2", serviceA, endpointC);
+    linkAC.setPropertyValue("retries", 2);
+    let linkAD = new Link("l3", serviceA, endpointD);
+    linkAD.setPropertyValue("retries", 2);
+
+    system.addEntities([serviceA, serviceB, serviceC, serviceD]);
+    system.addEntities([linkAB, linkAC, linkAD]);
+
+    let measureValue = componentMeasureImplementations["numberOfLinksWithRetryLogic"]({ entity: serviceA, system: system });
+    expect(measureValue).toEqual(2);
+})
+
+test ("numberOfLinksWithComplexFailover", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA);
+    serviceA.addEndpoint(externalEndpointA);
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    endpointB.setPropertyValue("kind", SYNCHRONOUS_ENDPOINT_KIND[0]);
+    serviceB.addEndpoint(endpointB);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    endpointC.setPropertyValue("kind", ASYNCHRONOUS_ENDPOINT_KIND[0]);
+    serviceC.addEndpoint(endpointC);
+
+    let serviceD = new Service("s4", "testService", getEmptyMetaData());
+    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    endpointD.setPropertyValue("kind", SYNCHRONOUS_ENDPOINT_KIND[0]);
+    serviceD.addEndpoint(endpointD);
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+    linkAB.setPropertyValue("circuit_breaker", "with default value");
+    let linkAC = new Link("l2", serviceA, endpointC);
+    let linkAD = new Link("l3", serviceA, endpointD);
+    linkAD.setPropertyValue("circuit_breaker", "none");
+
+    system.addEntities([serviceA, serviceB, serviceC, serviceD]);
+    system.addEntities([linkAB, linkAC, linkAD]);
+
+    let measureValue = componentMeasureImplementations["numberOfLinksWithComplexFailover"]({ entity: serviceA, system: system });
+    expect(measureValue).toEqual(1);
+})
