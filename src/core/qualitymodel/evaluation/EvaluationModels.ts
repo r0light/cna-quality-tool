@@ -12,7 +12,7 @@ export interface Evaluation {
     evaluate(activeQualityAspects: string[], activeProductFactors: string[]): void,
     getCalculatedMeasures(): Map<MeasureKey, CalculatedMeasure>,
     getEvaluatedProductFactors(): Map<ProductFactorKey, EvaluatedProductFactor>,
-    getEvaluatedQualityAspects(): Map<string, EvaluatedQualityAspect>,
+    getEvaluatedQualityAspects(): Map<QualityAspectKey, EvaluatedQualityAspect>,
 }
 
 class EvaluationModel {

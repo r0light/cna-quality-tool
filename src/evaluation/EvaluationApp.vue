@@ -1,42 +1,68 @@
 <template>
     <div class="full-width">
         <div class="d-flex flex-column p-1 evaluation-background">
-            <h2>Evaluation</h2>
+            <h2>Evaluation {{ currentEvaluationName }}</h2>
             <p class="font-weight-bold">The evaluation feature is still in development...</p>
             <FilterToolbar :highLevelAspectFilter="highLevelAspectFilter" :factorCategoryFilter="factorCategoryFilter"
-                @update:filters="saveEvaluationConfig(); evaluateSystem()"></FilterToolbar>
+                @update:filters="saveEvaluationConfig(); triggerEvaluation()"></FilterToolbar>
             <div class="d-flex flex-row selection-bar">
-                <div class="m-1">
+                <div class="m-1 evaluation-tool">
                     <span>Select the evaluation viewpoint: </span>
                     <select v-model="selectedViewpoint" @change="saveEvaluationConfig">
                         <option value="perQualityAspect">per Quality Aspect</option>
                         <option value="perProductFactor">per Product Factor</option>
                     </select>
                 </div>
-                <div class="m-1">
+                <div class="m-1 evaluation-tool">
                     <span>Select the modeled system to evaluate: </span>
                     <select @change="onSelectSystem" v-model="selectedSystemId">
                         <option value=-1>Select a system...</option>
                         <option v-for="system of systemsData" :value="system.id">{{ system.name }}</option>
                     </select>
                 </div>
-                <div class="m-1">
+                <div class="m-1 evaluation-tool">
                     <span>Show inconclusive evaluations? </span>
                     <input type="checkbox" v-model="showInconclusive" @change="saveEvaluationConfig">
                 </div>
-                <div class="m-1">
-                    <button class="btn btn-secondary selection-bar-button" :disabled="selectedSystemId === -1" @click="exportMeasures">Export measures as CSV</button>
+                <div class="m-1 evaluation-tool">
+                    <button class="btn btn-secondary selection-bar-button" :disabled="selectedSystemId === -1"
+                        @click="exportMeasures">Export measures as CSV</button>
+                </div>
+            </div>
+            <div class="d-flex flex-row selection-bar" v-if="selectedSystemId > -1">
+                <div class="m-1 evaluation-tool">
+                    <span>Select a component to evaluate: </span>
+                    <select @change="onSelectEntity('component')" v-model="selectedComponentId">
+                        <option v-for="component of selectableEntities.components" :value="component.id">{{
+                            component.name }}</option>
+                    </select>
+                </div>
+                <div class="m-1 evaluation-tool">
+                    <span>Select an infrastructure to evaluate: </span>
+                    <select @change="onSelectEntity('infrastructure')" v-model="selectedInfrastructureId">
+                        <option v-for="infrastructure of selectableEntities.infrastructures" :value="infrastructure.id">
+                            {{ infrastructure.name }}</option>
+                    </select>
+                </div>
+                <div class="m-1 evaluation-tool">
+                    <span>Select a request trace to evaluate: </span>
+                    <select @change="onSelectEntity('requestTrace')" v-model="selectedRequestTraceId">
+                        <option v-for="requestTrace of selectableEntities.requestTraces" :value="requestTrace.id">{{
+                            requestTrace.name }}</option>
+                    </select>
                 </div>
             </div>
             <div v-if="selectedSystemId > -1">
                 <div v-if="selectedViewpoint === 'perProductFactor'">
                     <ProductFactorViewpoint
-                        :evaluatedProductFactors="(evaluatedProductFactors as Map<string, EvaluatedProductFactor>)" :showInconclusiveEvaluations="showInconclusive">
+                        :evaluatedProductFactors="(evaluatedProductFactors as Map<string, EvaluatedProductFactor>)"
+                        :showInconclusiveEvaluations="showInconclusive">
                     </ProductFactorViewpoint>
                 </div>
                 <div v-if="selectedViewpoint === 'perQualityAspect'">
                     <QualityAspectViewpoint
-                        :evaluatedQualityAspects="(evaluatedQualityAspects as Map<string, EvaluatedQualityAspect>)" :showInconclusiveEvaluations="showInconclusive">
+                        :evaluatedQualityAspects="(evaluatedQualityAspects as Map<string, EvaluatedQualityAspect>)"
+                        :showInconclusiveEvaluations="showInconclusive">
                     </QualityAspectViewpoint>
                 </div>
                 <!--<div v-for="[key, calculatedMeasure] of calculatedMeasures">
@@ -49,10 +75,9 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onUpdated, ref, toRaw } from 'vue';
+import { computed, ComputedRef, onMounted, onUpdated, ref, toRaw } from 'vue';
 import { ModelingData } from '../App.vue';
 import { QualityModelInstance, getQualityModel } from '@/core/qualitymodel/QualityModelInstance';
-import { EvaluatedComponentModel, EvaluatedSystemModel } from '@/core/qualitymodel/evaluation/EvaluationModels';
 import ProductFactorViewpoint from './ProductFactorViewpoint.vue';
 import QualityAspectViewpoint from './QualityAspectViewpoint.vue';
 import FilterToolbar, { ItemFilter, createFactorCategoryFilter, createHighLevelAspectFilter, getActiveElements, getActiveFilterItems } from '../qualitymodel/FilterToolbar.vue';
@@ -63,6 +88,8 @@ import { CalculatedMeasure, EvaluatedProductFactor, EvaluatedQualityAspect } fro
 import { triggerDownload } from '@/modeling/utilities';
 import { ProductFactorKey, QualityAspectKey } from '@/core/qualitymodel/specifications/qualitymodel';
 import { EvaluationModelsWrapper } from '@/core/qualitymodel/evaluation/EvaluationModelsWrapper';
+import { System } from '@/core/entities';
+import { Evaluation } from '@/core/qualitymodel/evaluation/EvaluationModels';
 
 type EvaluationViewpoint = "perQualityAspect" | "perProductFactor";
 
@@ -76,11 +103,13 @@ type EvaluationConfig = {
 const props = defineProps<{
     systemsData: ModelingData[],
     evaluatedSystemId: number,
+    evaluatedEntityId: string,
     evaluationConfig: EvaluationConfig
 }>()
 
 const emit = defineEmits<{
     (e: "update:evaluatedSystem", systemId: number): void;
+    (e: "update:evaluatedEntity", entityId: string): void,
     (e: "update:evaluationConfig", evaluationConfig: EvaluationConfig): void;
 }>()
 
@@ -88,7 +117,7 @@ const qualityModel: QualityModelInstance = getQualityModel();
 
 const highLevelAspectFilter = ref<ItemFilter>(createHighLevelAspectFilter(qualityModel));
 
-const factorCategoryFilter= ref<ItemFilter>(createFactorCategoryFilter(qualityModel));
+const factorCategoryFilter = ref<ItemFilter>(createFactorCategoryFilter(qualityModel));
 
 const selectedSystemId = ref<number>(-1);
 
@@ -105,6 +134,14 @@ function saveEvaluationConfig() {
     })
 }
 
+const selectedEntityId = ref<string>("");
+type SelectatableEntity = { id: string, name: string };
+const unselectedEntity = { id: "none", name: "" };
+const selectableEntities = ref<{ components: SelectatableEntity[], infrastructures: SelectatableEntity[], requestTraces: SelectatableEntity[] }>({ components: [unselectedEntity], infrastructures: [unselectedEntity], requestTraces: [unselectedEntity] });
+const selectedComponentId = ref<string>("none");
+const selectedInfrastructureId = ref<string>("none");
+const selectedRequestTraceId = ref<string>("none");
+
 const evaluationModelsWrapper = ref<EvaluationModelsWrapper>(null);
 
 const calculatedMeasures = ref<Map<string, CalculatedMeasure>>(new Map());
@@ -113,21 +150,32 @@ const evaluatedProductFactors = ref<Map<ProductFactorKey, EvaluatedProductFactor
 
 const evaluatedQualityAspects = ref<Map<QualityAspectKey, EvaluatedQualityAspect>>(new Map());
 
+const currentEvaluationName: ComputedRef<string> = computed(() => {
+    let nameToShow = "";
+    if (selectedComponentId.value && selectedComponentId.value !== "none") {
+        nameToShow = " of ".concat(selectableEntities.value.components.find(component => component.id === selectedComponentId.value).name);
+    } else if (selectedInfrastructureId.value && selectedInfrastructureId.value !== "none") {
+        nameToShow = " of ".concat(selectableEntities.value.infrastructures.find(infrastructure => infrastructure.id === selectedInfrastructureId.value).name);
+    } else if (selectedRequestTraceId.value && selectedRequestTraceId.value !== "none") {
+        nameToShow = " of ".concat(selectableEntities.value.requestTraces.find(requestTrace => requestTrace.id === selectedRequestTraceId.value).name);
+    } else if (selectedSystemId.value && props.systemsData.find(system => system.id === selectedSystemId.value)) {
+        nameToShow = " of ".concat(props.systemsData.find(system => system.id === selectedSystemId.value).name);
+    }
+    return nameToShow;
+});
+
 onMounted(() => {
 
     if (props.evaluationConfig) {
-        if(props.evaluationConfig.highLevelAspectFilter) {
+        if (props.evaluationConfig.highLevelAspectFilter) {
             highLevelAspectFilter.value = props.evaluationConfig.highLevelAspectFilter;
         }
-
-        if(props.evaluationConfig.factorCategoryFilter) {
+        if (props.evaluationConfig.factorCategoryFilter) {
             factorCategoryFilter.value = props.evaluationConfig.factorCategoryFilter;
         }
-
         if (props.evaluationConfig.selectedViewpoint) {
             selectedViewpoint.value = props.evaluationConfig.selectedViewpoint;
         }
-
         if (props.evaluationConfig.showInconclusive) {
             showInconclusive.value = props.evaluationConfig.showInconclusive
         }
@@ -135,9 +183,22 @@ onMounted(() => {
 
     if (props.evaluatedSystemId && props.systemsData.find(system => system.id === props.evaluatedSystemId)) {
         selectedSystemId.value = props.evaluatedSystemId;
-        evaluateSystem();
+        onSelectSystem();
+        if (props.evaluatedEntityId) {
+            if (selectableEntities.value.components.find(selectableComponent => selectableComponent.id === props.evaluatedEntityId)) {
+                selectedComponentId.value = props.evaluatedEntityId;
+                onSelectEntity("component");
+            }
+            if (selectableEntities.value.infrastructures.find(selectableInfrastructure => selectableInfrastructure.id === props.evaluatedEntityId)) {
+                selectedInfrastructureId.value = props.evaluatedEntityId;
+                onSelectEntity("infrastructure");
+            }
+            if (selectableEntities.value.requestTraces.find(selectableRequestTrace => selectableRequestTrace.id === props.evaluatedEntityId)) {
+                selectedRequestTraceId.value = props.evaluatedEntityId;
+                onSelectEntity("requestTrace");
+            }
+        }
     }
-
 });
 
 onUpdated(() => {
@@ -149,16 +210,56 @@ onUpdated(() => {
 
 });
 
+
 function onSelectSystem() {
 
-    if (selectedSystemId.value == -1) {
+    let selectedSystem = props.systemsData.find(system => system.id === selectedSystemId.value);
+
+    if (!selectedSystem) {
+        // selectedSystem might not be findable, if it has been deleted
+        selectedSystemId.value = -1;
         clearEvaluation();
         return;
-    } else {
-        emit("update:evaluatedSystem", selectedSystemId.value);
-        evaluateSystem();
     }
+    emit("update:evaluatedSystem", selectedSystemId.value);
+    resetEntitySelection();
 
+    let systemEntityManager = selectedSystem.entityManager ? toRaw(selectedSystem.entityManager) : createTemporaryEntityManager(selectedSystem);
+    let currentSystemEntity = systemEntityManager.getSystemEntity();
+
+    currentSystemEntity.getComponentEntities.entries().forEach(([componentId, component]) => {
+        selectableEntities.value.components.push({ id: componentId, name: component.getName });
+    })
+    currentSystemEntity.getInfrastructureEntities.entries().forEach(([infrastructureId, infrastructure]) => {
+        selectableEntities.value.infrastructures.push({ id: infrastructureId, name: infrastructure.getName });
+    })
+    currentSystemEntity.getRequestTraceEntities.entries().forEach(([requestTraceId, requestTrace]) => {
+        selectableEntities.value.requestTraces.push({ id: requestTraceId, name: requestTrace.getName });
+    })
+    // ------------
+
+    triggerEvaluation();
+}
+
+function onSelectEntity(type: "component" | "infrastructure" | "requestTrace") {
+    switch (type) {
+        case "component":
+            selectedInfrastructureId.value = "none";
+            selectedRequestTraceId.value = "none";
+            emit("update:evaluatedEntity", selectedComponentId.value);
+            break;
+        case "infrastructure":
+            selectedComponentId.value = "none";
+            selectedRequestTraceId.value = "none";
+            emit("update:evaluatedEntity", selectedInfrastructureId.value);
+            break;
+        case "requestTrace":
+            selectedComponentId.value = "none";
+            selectedInfrastructureId.value = "none";
+            emit("update:evaluatedEntity", selectedRequestTraceId.value);
+            break;
+    }
+    triggerEvaluation();
 }
 
 function clearEvaluation() {
@@ -167,9 +268,14 @@ function clearEvaluation() {
     evaluatedQualityAspects.value.clear();
 }
 
-function evaluateSystem() {
-    //TODO split in different functions (depending on system or filter select) for better performance?
+function resetEntitySelection() {
+    selectableEntities.value.components = [unselectedEntity];
+    selectableEntities.value.infrastructures = [unselectedEntity];
+    selectableEntities.value.requestTraces = [unselectedEntity];
+}
 
+
+function triggerEvaluation() {
     clearEvaluation();
 
     let selectedSystem = props.systemsData.find(system => system.id === selectedSystemId.value);
@@ -177,6 +283,8 @@ function evaluateSystem() {
     if (!selectedSystem) {
         // selectedSystem might not be findable, if it has been deleted
         selectedSystemId.value = -1;
+        emit("update:evaluatedSystem", selectedSystemId.value);
+        clearEvaluation();
         return;
     }
 
@@ -185,29 +293,76 @@ function evaluateSystem() {
 
     evaluationModelsWrapper.value = new EvaluationModelsWrapper(currentSystemEntity, qualityModel);
 
+    if (selectedComponentId.value && selectedComponentId.value !== "none") {
+        evaluateComponent(selectedComponentId.value);
+    } else if (selectedInfrastructureId.value && selectedInfrastructureId.value !== "none") {
+        evaluateInfrastructure(selectedInfrastructureId.value);
+    } else if (selectedRequestTraceId.value && selectedRequestTraceId.value !== "none") {
+        evaluateRequestTrace(selectedRequestTraceId.value);
+    } else {
+        evaluateSystem();
+    }
+}
+
+function evaluateSystem() {
     console.time('evaluation');
 
     let activeElements = getActiveElements(getActiveFilterItems(highLevelAspectFilter.value), getActiveFilterItems(factorCategoryFilter.value), qualityModel);
 
     let evaluatedSystem = evaluationModelsWrapper.value.getEvaluatedSystemModel(activeElements.activeQualityAspects, activeElements.activeProductFactors);
 
-    evaluatedSystem.getCalculatedMeasures().forEach((value, key, map) => {
+    updateEvaluation(evaluatedSystem);
+    console.timeEnd('evaluation');
+}
+
+function evaluateComponent(componentId: string) {
+    console.time('evaluation');
+
+    let activeElements = getActiveElements(getActiveFilterItems(highLevelAspectFilter.value), getActiveFilterItems(factorCategoryFilter.value), qualityModel);
+
+    let evaluatedComponent = evaluationModelsWrapper.value.getEvaluatedComponentModel(componentId, activeElements.activeQualityAspects, activeElements.activeProductFactors);
+
+    updateEvaluation(evaluatedComponent);
+    console.timeEnd('evaluation');
+}
+
+function evaluateInfrastructure(infrastructureId: string) {
+    console.time('evaluation');
+
+    let activeElements = getActiveElements(getActiveFilterItems(highLevelAspectFilter.value), getActiveFilterItems(factorCategoryFilter.value), qualityModel);
+
+    let evaluatedInfrastructure = evaluationModelsWrapper.value.getEvaluatedInfrastructureModel(infrastructureId, activeElements.activeQualityAspects, activeElements.activeProductFactors);
+
+    updateEvaluation(evaluatedInfrastructure);
+    console.timeEnd('evaluation');
+}
+
+function evaluateRequestTrace(requestTraceId: string) {
+    console.time('evaluation');
+
+    let activeElements = getActiveElements(getActiveFilterItems(highLevelAspectFilter.value), getActiveFilterItems(factorCategoryFilter.value), qualityModel);
+
+    let evaluatedRequestTrace = evaluationModelsWrapper.value.getEvaluatedRequestTraceModel(requestTraceId, activeElements.activeQualityAspects, activeElements.activeProductFactors);
+
+    updateEvaluation(evaluatedRequestTrace);
+    console.timeEnd('evaluation');
+}
+
+function updateEvaluation(evaluation: Evaluation) {
+    evaluation.getCalculatedMeasures().forEach((value, key, map) => {
         calculatedMeasures.value.set(key, value);
     });
 
-    evaluatedSystem.getEvaluatedProductFactors().forEach((value, key, map) => {
+    evaluation.getEvaluatedProductFactors().forEach((value, key, map) => {
         // only add leaf factors ? Otherwise also a specific entry for aggregating factors would be possible
         if (value.productFactor.getImpactingFactors().length === 0) {
             evaluatedProductFactors.value.set(key, value);
         }
     });
 
-    evaluatedSystem.getEvaluatedQualityAspects().forEach((value, key, map) => {
+    evaluation.getEvaluatedQualityAspects().forEach((value, key, map) => {
         evaluatedQualityAspects.value.set(key, value);
     });
-
-    console.timeEnd('evaluation');
-
 }
 
 function createTemporaryEntityManager(selectedSystem: ModelingData): SystemEntityManager {
@@ -226,7 +381,7 @@ function exportMeasures() {
     let systemName = systemData.name;
 
     let headers = '"measureKey";"measureName";"systemName";"entityName";"entityType";"entityId";"value"';
-    let measuresAsCsv = [...calculatedMeasures.value.entries()].map(([measureKey, calculatedMeasure]) => 
+    let measuresAsCsv = [...calculatedMeasures.value.entries()].map(([measureKey, calculatedMeasure]) =>
         `"${measureKey}";"${calculatedMeasure.name}";"${systemName}";"${systemName}";"${calculatedMeasure.entity}";"${selectedSystemId.value}";"${calculatedMeasure.value}"`)
 
     let activeElements = getActiveElements(getActiveFilterItems(highLevelAspectFilter.value), getActiveFilterItems(factorCategoryFilter.value), qualityModel);
@@ -234,24 +389,24 @@ function exportMeasures() {
     evaluationModelsWrapper.value.getAvailableComponents().forEach(componentId => {
         let componentName = system.getComponentEntities.get(componentId).getName;
         let evaluatedComponentModel = evaluationModelsWrapper.value.getEvaluatedComponentModel(componentId, activeElements.activeQualityAspects, activeElements.activeProductFactors);
-        let componentMeasures = [...evaluatedComponentModel.getCalculatedMeasures().entries()].map(([measureKey, calculatedMeasure]) => 
-        `"${measureKey}";"${calculatedMeasure.name}";"${systemName}";"${componentName}";"${calculatedMeasure.entity}";"${componentId}";"${calculatedMeasure.value}"`)
+        let componentMeasures = [...evaluatedComponentModel.getCalculatedMeasures().entries()].map(([measureKey, calculatedMeasure]) =>
+            `"${measureKey}";"${calculatedMeasure.name}";"${systemName}";"${componentName}";"${calculatedMeasure.entity}";"${componentId}";"${calculatedMeasure.value}"`)
         measuresAsCsv = measuresAsCsv.concat(componentMeasures);
     });
-    
+
     evaluationModelsWrapper.value.getAvailableInfrastructureEntities().forEach(infrastructureId => {
         let infrastructureName = system.getInfrastructureEntities.get(infrastructureId).getName;
         let evaluatedInfrastructureModel = evaluationModelsWrapper.value.getEvaluatedInfrastructureModel(infrastructureId, activeElements.activeQualityAspects, activeElements.activeProductFactors);
-        let infrastructureMeasures = [...evaluatedInfrastructureModel.getCalculatedMeasures().entries()].map(([measureKey, calculatedMeasure]) => 
-        `"${measureKey}";"${calculatedMeasure.name}";"${systemName}";"${infrastructureName}";"${calculatedMeasure.entity}";"${infrastructureId}";"${calculatedMeasure.value}"`)
+        let infrastructureMeasures = [...evaluatedInfrastructureModel.getCalculatedMeasures().entries()].map(([measureKey, calculatedMeasure]) =>
+            `"${measureKey}";"${calculatedMeasure.name}";"${systemName}";"${infrastructureName}";"${calculatedMeasure.entity}";"${infrastructureId}";"${calculatedMeasure.value}"`)
         measuresAsCsv = measuresAsCsv.concat(infrastructureMeasures);
     });
 
     evaluationModelsWrapper.value.getAvailableRequestTraces().forEach(requestTraceId => {
         let requestTraceName = system.getRequestTraceEntities.get(requestTraceId).getName;
         let evaluatedRequestTraceModel = evaluationModelsWrapper.value.getEvaluatedRequestTraceModel(requestTraceId, activeElements.activeQualityAspects, activeElements.activeProductFactors);
-        let requestTraceMeasures = [...evaluatedRequestTraceModel.getCalculatedMeasures().entries()].map(([measureKey, calculatedMeasure]) => 
-        `"${measureKey}";"${calculatedMeasure.name}";"${systemName}";"${requestTraceName}";"${calculatedMeasure.entity}";"${requestTraceId}";"${calculatedMeasure.value}"`)
+        let requestTraceMeasures = [...evaluatedRequestTraceModel.getCalculatedMeasures().entries()].map(([measureKey, calculatedMeasure]) =>
+            `"${measureKey}";"${calculatedMeasure.name}";"${systemName}";"${requestTraceName}";"${calculatedMeasure.entity}";"${requestTraceId}";"${calculatedMeasure.value}"`)
         measuresAsCsv = measuresAsCsv.concat(requestTraceMeasures);
     });
 
@@ -273,6 +428,10 @@ function exportMeasures() {
     background-color: #fff;
 }
 
+.selection-bar:not(:last-child) {
+    border-bottom: 2px solid var(--toolbar-line-colour);
+}
+
 .selection-bar div {
     display: flex;
     column-gap: 4px;
@@ -283,4 +442,8 @@ function exportMeasures() {
     padding: 0.2rem;
 }
 
+.evaluation-tool:not(:last-child) {
+    padding-right: 5px;
+    border-right: 2px solid var(--toolbar-line-colour);
+}
 </style>

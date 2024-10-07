@@ -96,6 +96,7 @@
         @store:modelingData="(id, systemEntityManager, toImport, importDone, appSettings) => storeModelingData(id, toImport, systemEntityManager, importDone, appSettings)"
         @update:systemName="(newName, id) => updatePageName(newName, id)"
         @update:evaluatedSystem="(systemId) => storeSelectedSystemToEvaluate(systemId)"
+        @update:evaluatedEntity="(entityId) => storeSelectedEntityToEvaluate(entityId)"
         @update:evaluationConfig="(evaluationConfig) => storeEvaluationConfig(evaluationConfig)"
         @update:filterConfig="(qualityModelViewConfig) => storeQualityModelViewConfig(qualityModelViewConfig)">
       </router-view>
@@ -198,6 +199,10 @@ const selectedSystemToEvaluate = ref<number>(-1);
 function storeSelectedSystemToEvaluate(systemId: number) {
   selectedSystemToEvaluate.value = systemId;
 }
+const selectedEntityToEvaluate = ref<string>("");
+function storeSelectedEntityToEvaluate(entityId: string) {
+  selectedEntityToEvaluate.value = entityId;
+}
 const evaluationConfig = ref<object>({});
 function storeEvaluationConfig(config: object) {
   evaluationConfig.value = config;
@@ -291,6 +296,7 @@ onMounted(() => {
         props: route => ({
           systemsData: sharedSystemsData.value,
           evaluatedSystemId: selectedSystemToEvaluate.value,
+          evaluatedEntityId: selectedEntityToEvaluate.value,
           evaluationConfig: evaluationConfig.value
         })
       })
@@ -350,6 +356,8 @@ onMounted(() => {
   let selectedId = sessionStorage.getItem("selectedSystemToEvaluate") ? parseInt(sessionStorage.getItem("selectedSystemToEvaluate")) : -1;
   let systemSelectedToEvaluateId = isNaN(selectedId) ? -1 : selectedId;
   selectedSystemToEvaluate.value = systemSelectedToEvaluateId;
+  let selectedEntityId = sessionStorage.getItem("selectedEntityToEvaluate") ? sessionStorage.getItem("selectedEntityToEvaluate") : "";
+  selectedEntityToEvaluate.value = selectedEntityId;
 
   if (sessionStorage.getItem("modelingData")) {
     let modelingDataToImport: ModelingData[] = JSON.parse(sessionStorage.getItem("modelingData"));
@@ -443,6 +451,7 @@ onMounted(() => {
     sessionStorage.setItem("modelingData", JSON.stringify(modelingDataToStore));
     sessionStorage.setItem("lastRoute", router.currentRoute.value.path);
     sessionStorage.setItem("selectedSystemToEvaluate", selectedSystemToEvaluate.value.toString());
+    sessionStorage.setItem("selectedEntityToEvaluate", selectedEntityToEvaluate.value);
   }
 
 });

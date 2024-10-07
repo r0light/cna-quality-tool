@@ -556,7 +556,7 @@ const productFactors = {
         "name": "Service replication",
         "description": "Services and therefore their provided functionalities are replicated across different locations so that the latency for accesses from different locations is minimized and the incoming load can be distributed among replicas.",
         "categories": ["applicationAdministration", "cloudInfrastructure"],
-        "applicableEntities": [ENTITIES.SERVICE],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.SERVICE],
         "sources": [],
         "measures": ["amountOfRedundancy", "serviceReplicationLevel"]
     },
@@ -1791,14 +1791,26 @@ const productFactorEvaluations = [
     {
         "targetFactor": "serviceReplication",
         "targetEntity": ENTITIES.SYSTEM,
-        "evaluation": "serviceReplication",
-        "reasoning": "TODO write a suitable reasoning"
+        "evaluation": "systemServiceReplication",
+        "reasoning": "Service replication is measured by the number of replicas per deployed service and the redundancy introduced by deploying a service on multiple infrastructure instances."
+    },
+    {
+        "targetFactor": "serviceReplication",
+        "targetEntity": ENTITIES.REQUEST_TRACE,
+        "evaluation": "requestTraceServiceReplication",
+        "reasoning": "Service replication is measured by the number of replicas per service within a request trace."
     },
     {
         "targetFactor": "horizontalDataReplication",
         "targetEntity": ENTITIES.SYSTEM,
         "evaluation": "horizontalDataReplication",
-        "reasoning": ""
+        "reasoning": "Horizontal data replication is measured by the number of replicas for storage backing services."
+    },
+    {
+        "targetFactor": "horizontalDataReplication",
+        "targetEntity": ENTITIES.REQUEST_TRACE,
+        "evaluation": "horizontalDataReplication",
+        "reasoning": "Horizontal data replication is measured by the number of replicas for storage backing services involved in the request trace."
     },
     {
         "targetFactor": "replication",
@@ -1812,13 +1824,19 @@ const productFactorEvaluations = [
         "targetFactor": "shardedDataStoreReplication",
         "targetEntity": ENTITIES.SYSTEM,
         "evaluation": "shardedDataStoreReplication",
-        "reasoning": ""
+        "reasoning": "Sharding is a specific form of replication and is measured by the amount of shards used by each storage backing service."
     },
     {
         "targetFactor": "verticalDataReplication",
         "targetEntity": ENTITIES.SYSTEM,
-        "evaluation": "verticalDataReplication",
-        "reasoning": "TODO"
+        "evaluation": "systemVerticalDataReplication",
+        "reasoning": "Data is replicated vertically if data aggregates are cached by those components using them."
+    },
+    {
+        "targetFactor": "verticalDataReplication",
+        "targetEntity": ENTITIES.REQUEST_TRACE,
+        "evaluation": "requestTraceVerticalDataReplication",
+        "reasoning": "Data is replicated vertically if data aggregates used throughout a request trace are cached by the involved components."
     }
 ] satisfies ProductFactorEvaluationSpec[]
 
