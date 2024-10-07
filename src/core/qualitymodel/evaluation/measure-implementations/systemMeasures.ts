@@ -1,6 +1,6 @@
 import { BackingService, BrokerBackingService, Component, Infrastructure, Link, ProxyBackingService, Service, StorageBackingService, System } from "@/core/entities";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure";
-import { average, partition } from "./general-functions";
+import { average, median, lowest, partition } from "./general-functions";
 import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, EVENT_SOURCING_KIND, getEndpointKindWeight, getUsageRelationWeight, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MESSAGE_BROKER_KIND, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SEND_EVENT_ENDPOINT_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "../../specifications/featureModel";
 import { calculateRatioOfEndpointsSupportingSsl, calculateRatioOfExternalEndpointsSupportingTls, numberOfAsynchronousEndpointsOfferedByAService, numberOfComponentsAComponentIsLinkedTo, numberOfSynchronousEndpointsOfferedByAService, providesHealthAndReadinessEndpoints, serviceCouplingBasedOnEndpointEntropy } from "./componentMeasures";
 import { numberOfCyclesInRequestTraces, requestTraceComplexity } from "./requestTraceMeasures";
@@ -23,10 +23,10 @@ export const countComponentsConnectedToCertainEndpoints: (components: Component[
 }
 
 
-export const serviceReplicationLevel: Calculation = (parameters: CalculationParameters<System>) => {
+export const calculateReplicasPerService: (system: System) => Map<string, number> = (system) => {
 
-    let replicasPerService: Map<String, number> = new Map();
-    for (const [id, deploymentMapping] of parameters.entity.getDeploymentMappingEntities.entries()) {
+    let replicasPerService: Map<string, number> = new Map();
+    for (const [id, deploymentMapping] of system.getDeploymentMappingEntities.entries()) {
         let deployedEntity = deploymentMapping.getDeployedEntity
         if (deployedEntity.constructor.name === Service.name) {
             let noOfReplicas = deploymentMapping.getProperties().find(prop => prop.getKey === "replicas").value
@@ -37,6 +37,13 @@ export const serviceReplicationLevel: Calculation = (parameters: CalculationPara
             }
         }
     }
+    return replicasPerService;
+}
+
+
+export const serviceReplicationLevel: Calculation = (parameters: CalculationParameters<System>) => {
+
+    let replicasPerService = calculateReplicasPerService(parameters.system);
 
     if (replicasPerService.size === 0) {
         return "n/a";
@@ -45,6 +52,31 @@ export const serviceReplicationLevel: Calculation = (parameters: CalculationPara
             Array.from(replicasPerService.values())
         );
     }
+}
+
+export const medianServiceReplication: Calculation = (parameters: CalculationParameters<System>) => {
+    let replicasPerService = calculateReplicasPerService(parameters.system);
+
+    if (replicasPerService.size === 0) {
+        return "n/a";
+    } else {
+        return median(
+            Array.from(replicasPerService.values())
+        );
+    }
+}
+
+export const smallestReplicationValue: Calculation = (parameters: CalculationParameters<System>) => {
+    let replicasPerService = calculateReplicasPerService(parameters.system);
+
+    if (replicasPerService.size === 0) {
+        return "n/a";
+    } else {
+        return lowest(
+            Array.from(replicasPerService.values())
+        );
+    }
+
 }
 
 export const storageReplicationLevel: Calculation = (parameters: CalculationParameters<System>) => {
@@ -1419,24 +1451,28 @@ export const distributedTracingSupport: Calculation = (parameters: CalculationPa
     return countComponentsConnectedToCertainEndpoints(allTraceableComponents, tracingEndpoints, parameters.system) / allTraceableComponents.length;
 }
 
-export const serviceDiscoveryUsage: Calculation = (parameters: CalculationParameters<System>) => {
-
-    let allLinks = [...parameters.entity.getLinkEntities.entries()];
-
-    if (allLinks.length === 0) {
-        return 0;
-    }
-
+export const calculateNumberOfLinksWithServiceDiscovery: (links: Link[]) => number = (links) => {
     let linksWithServiceDiscovery = 0;
 
-    for (const [linkId, link] of allLinks) {
+    for (const link of links) {
         let sourceComponent = link.getSourceEntity;
         if (sourceComponent.getAddressResolutionBy && sourceComponent.getAddressResolutionBy.getProperty("address_resolution_kind").value !== "none") {
             linksWithServiceDiscovery++;
         }
     }
 
-    return linksWithServiceDiscovery / allLinks.length;
+    return linksWithServiceDiscovery;
+} 
+
+export const serviceDiscoveryUsage: Calculation = (parameters: CalculationParameters<System>) => {
+
+    let allLinks = [...parameters.entity.getLinkEntities.values()];
+
+    if (allLinks.length === 0) {
+        return 0;
+    }
+
+    return calculateNumberOfLinksWithServiceDiscovery(allLinks) as number / allLinks.length;
 }
 
 export const ratioOfComponentsWhoseIngressIsProxied: Calculation = (parameters: CalculationParameters<System>) => {
@@ -1518,6 +1554,8 @@ export const ratioOfStateDependencyOfEndpoints: Calculation = (parameters: Calcu
 
 export const systemMeasureImplementations: { [measureKey: string]: Calculation } = {
     "serviceReplicationLevel": serviceReplicationLevel,
+    "medianServiceReplication": medianServiceReplication,
+    "smallestReplicationValue": smallestReplicationValue,
     "storageReplicationLevel": storageReplicationLevel,
     "externallyAvailableEndpoints": externallyAvailableEndpoints,
     "dataShardingLevel": dataShardingLevel,

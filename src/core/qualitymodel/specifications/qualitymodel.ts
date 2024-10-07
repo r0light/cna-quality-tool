@@ -1536,6 +1536,18 @@ const measures = {
         "sources": ["Guerron2020", "Souza2016"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
     },
+    "medianServiceReplication": {
+        "name": "Median Service Replication level",
+        "calculation": "The median value of replicas per service",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+    },
+    "smallestReplicationValue": {
+        "name": "Smallelst Service Replication Value",
+        "calculation": "minimum(value of replicas per service)",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+    },
     "storageReplicationLevel": {
         "name": "Storage Replication level",
         "calculation": "The average value of replicas per storage backing service",

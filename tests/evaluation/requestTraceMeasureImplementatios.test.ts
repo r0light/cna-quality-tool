@@ -894,3 +894,201 @@ test("databaseTypeUtilization", () => {
     let measureValue = requestTraceMeasureImplementations["databaseTypeUtilization"]({ entity: requestTrace, system: system });
     expect(measureValue).toEqual(1);
 })
+
+test("serviceDiscoveryUsage", () => {
+
+    let system = new System("sys1", "testSystem");
+
+    let discoveryService = new BackingService("b1", "discoveryService", getEmptyMetaData());
+    discoveryService.setPropertyValue("address_resolution_kind", "discovery");
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA);
+    serviceA.addEndpoint(externalEndpointA);
+    serviceA.setAddressResolutionBy = discoveryService;
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+    serviceB.setAddressResolutionBy = discoveryService;
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+
+    let serviceD = new Service("s4", "testService", getEmptyMetaData());
+    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    serviceD.addEndpoint(endpointD);
+
+    let serviceE = new Service("s5", "testService", getEmptyMetaData());
+    let endpointE = new Endpoint("e5", "endpoint 5", getEmptyMetaData());
+    serviceE.addEndpoint(endpointE);
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+    let linkBC = new Link("l2", serviceB, endpointC);
+    let linkBE = new Link("l3", serviceB, endpointE);
+    let linkCD = new Link("l4", serviceC, endpointD);
+
+    let requestTrace = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
+    requestTrace.setLinks = [[linkAB], [linkBC, linkBE], [linkCD]];
+    requestTrace.setExternalEndpoint = externalEndpointA;
+
+    system.addEntities([discoveryService, serviceA, serviceB, serviceC, serviceD]);
+    system.addEntities([linkAB, linkBC, linkCD]);
+    system.addEntity(requestTrace);
+
+    let measureValue = requestTraceMeasureImplementations["serviceDiscoveryUsage"]({ entity: requestTrace, system: system });
+    expect(measureValue).toEqual(3/4);
+})
+
+test("serviceReplicationLevel", () => {
+    let system = new System("sys1", "testSystem");
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    let infrastructureB = new Infrastructure("i2", "infratstructure 2", getEmptyMetaData());
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA);
+    serviceA.addEndpoint(externalEndpointA);
+    let deploymentMappingA = new DeploymentMapping("dm1", serviceA, infrastructureA);
+    deploymentMappingA.setPropertyValue("replicas", 2);
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+    let deploymentMappingB = new DeploymentMapping("dm2", serviceB, infrastructureA);
+    deploymentMappingB.setPropertyValue("replicas", 1);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+    let deploymentMappingC = new DeploymentMapping("dm3", serviceC, infrastructureB);
+    deploymentMappingC.setPropertyValue("replicas", 2);
+
+    let serviceD = new Service("s4", "testService", getEmptyMetaData());
+    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    serviceD.addEndpoint(endpointD);
+    let deploymentMappingD = new DeploymentMapping("dm4", serviceD, infrastructureB);
+    deploymentMappingD.setPropertyValue("replicas", 1);
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+    let linkBC = new Link("l2", serviceB, endpointC);
+    let linkCD = new Link("l3", serviceC, endpointD);
+
+    let requestTrace = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
+    requestTrace.setLinks = [[linkAB], [linkBC], [linkCD]];
+    requestTrace.setExternalEndpoint = externalEndpointA;
+
+    system.addEntities([infrastructureA, infrastructureB]);
+    system.addEntities([serviceA, serviceB, serviceC, serviceD]);
+    system.addEntities([deploymentMappingA, deploymentMappingB, deploymentMappingC, deploymentMappingD]);
+    system.addEntities([linkAB, linkBC, linkCD]);
+    system.addEntity(requestTrace);
+
+    let measureValue = requestTraceMeasureImplementations["serviceReplicationLevel"]({ entity: requestTrace, system: system });
+    expect(measureValue).toEqual(1.5);
+})
+
+test("medianServiceReplication", () => {
+    let system = new System("sys1", "testSystem");
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    let infrastructureB = new Infrastructure("i2", "infratstructure 2", getEmptyMetaData());
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA);
+    serviceA.addEndpoint(externalEndpointA);
+    let deploymentMappingA = new DeploymentMapping("dm1", serviceA, infrastructureA);
+    deploymentMappingA.setPropertyValue("replicas", 2);
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+    let deploymentMappingB = new DeploymentMapping("dm2", serviceB, infrastructureA);
+    deploymentMappingB.setPropertyValue("replicas", 2);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+    let deploymentMappingC = new DeploymentMapping("dm3", serviceC, infrastructureB);
+    deploymentMappingC.setPropertyValue("replicas", 2);
+
+    let serviceD = new Service("s4", "testService", getEmptyMetaData());
+    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    serviceD.addEndpoint(endpointD);
+    let deploymentMappingD = new DeploymentMapping("dm4", serviceD, infrastructureB);
+    deploymentMappingD.setPropertyValue("replicas", 1);
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+    let linkBC = new Link("l2", serviceB, endpointC);
+    let linkCD = new Link("l3", serviceC, endpointD);
+
+    let requestTrace = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
+    requestTrace.setLinks = [[linkAB], [linkBC], [linkCD]];
+    requestTrace.setExternalEndpoint = externalEndpointA;
+
+    system.addEntities([infrastructureA, infrastructureB]);
+    system.addEntities([serviceA, serviceB, serviceC, serviceD]);
+    system.addEntities([deploymentMappingA, deploymentMappingB, deploymentMappingC, deploymentMappingD]);
+    system.addEntities([linkAB, linkBC, linkCD]);
+    system.addEntity(requestTrace);
+
+    let measureValue = requestTraceMeasureImplementations["medianServiceReplication"]({ entity: requestTrace, system: system });
+    expect(measureValue).toEqual(2);
+})
+
+test("smallestReplicationValue", () => {
+    let system = new System("sys1", "testSystem");
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    let infrastructureB = new Infrastructure("i2", "infratstructure 2", getEmptyMetaData());
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA);
+    serviceA.addEndpoint(externalEndpointA);
+    let deploymentMappingA = new DeploymentMapping("dm1", serviceA, infrastructureA);
+    deploymentMappingA.setPropertyValue("replicas", 2);
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+    let deploymentMappingB = new DeploymentMapping("dm2", serviceB, infrastructureA);
+    deploymentMappingB.setPropertyValue("replicas", 3);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+    let deploymentMappingC = new DeploymentMapping("dm3", serviceC, infrastructureB);
+    deploymentMappingC.setPropertyValue("replicas", 2);
+
+    let serviceD = new Service("s4", "testService", getEmptyMetaData());
+    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    serviceD.addEndpoint(endpointD);
+    let deploymentMappingD = new DeploymentMapping("dm4", serviceD, infrastructureB);
+    deploymentMappingD.setPropertyValue("replicas", 1);
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+    let linkBC = new Link("l2", serviceB, endpointC);
+    let linkCD = new Link("l3", serviceC, endpointD);
+
+    let requestTrace = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
+    requestTrace.setLinks = [[linkAB], [linkBC], [linkCD]];
+    requestTrace.setExternalEndpoint = externalEndpointA;
+
+    system.addEntities([infrastructureA, infrastructureB]);
+    system.addEntities([serviceA, serviceB, serviceC, serviceD]);
+    system.addEntities([deploymentMappingA, deploymentMappingB, deploymentMappingC, deploymentMappingD]);
+    system.addEntities([linkAB, linkBC, linkCD]);
+    system.addEntity(requestTrace);
+
+    let measureValue = requestTraceMeasureImplementations["smallestReplicationValue"]({ entity: requestTrace, system: system });
+    expect(measureValue).toEqual(1);
+})

@@ -2343,3 +2343,138 @@ test("ratioOfStateDependencyOfEndpoints", () => {
     expect(measureValue).toBe(0.5);
 
 })
+
+test("serviceReplicationLevel", () => {
+    let system = new System("sys1", "testSystem");
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    let infrastructureB = new Infrastructure("i2", "infratstructure 2", getEmptyMetaData());
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA);
+    serviceA.addEndpoint(externalEndpointA);
+    let deploymentMappingA = new DeploymentMapping("dm1", serviceA, infrastructureA);
+    deploymentMappingA.setPropertyValue("replicas", 2);
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+    let deploymentMappingB = new DeploymentMapping("dm2", serviceB, infrastructureA);
+    deploymentMappingB.setPropertyValue("replicas", 1);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+    let deploymentMappingC = new DeploymentMapping("dm3", serviceC, infrastructureB);
+    deploymentMappingC.setPropertyValue("replicas", 2);
+
+    let serviceD = new Service("s4", "testService", getEmptyMetaData());
+    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    serviceD.addEndpoint(endpointD);
+    let deploymentMappingD = new DeploymentMapping("dm4", serviceD, infrastructureB);
+    deploymentMappingD.setPropertyValue("replicas", 1);
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+    let linkBC = new Link("l2", serviceB, endpointC);
+    let linkCD = new Link("l3", serviceC, endpointD);
+
+    system.addEntities([infrastructureA, infrastructureB]);
+    system.addEntities([serviceA, serviceB, serviceC, serviceD]);
+    system.addEntities([deploymentMappingA, deploymentMappingB, deploymentMappingC, deploymentMappingD]);
+    system.addEntities([linkAB, linkBC, linkCD]);
+
+    let measureValue = systemMeasureImplementations["serviceReplicationLevel"]({ entity: system, system: system });
+    expect(measureValue).toEqual(1.5);
+})
+
+test("medianServiceReplication", () => {
+    let system = new System("sys1", "testSystem");
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    let infrastructureB = new Infrastructure("i2", "infratstructure 2", getEmptyMetaData());
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA);
+    serviceA.addEndpoint(externalEndpointA);
+    let deploymentMappingA = new DeploymentMapping("dm1", serviceA, infrastructureA);
+    deploymentMappingA.setPropertyValue("replicas", 2);
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+    let deploymentMappingB = new DeploymentMapping("dm2", serviceB, infrastructureA);
+    deploymentMappingB.setPropertyValue("replicas", 2);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+    let deploymentMappingC = new DeploymentMapping("dm3", serviceC, infrastructureB);
+    deploymentMappingC.setPropertyValue("replicas", 3);
+
+    let serviceD = new Service("s4", "testService", getEmptyMetaData());
+    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    serviceD.addEndpoint(endpointD);
+    let deploymentMappingD = new DeploymentMapping("dm4", serviceD, infrastructureB);
+    deploymentMappingD.setPropertyValue("replicas", 3);
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+    let linkBC = new Link("l2", serviceB, endpointC);
+    let linkCD = new Link("l3", serviceC, endpointD);
+
+    system.addEntities([infrastructureA, infrastructureB]);
+    system.addEntities([serviceA, serviceB, serviceC, serviceD]);
+    system.addEntities([deploymentMappingA, deploymentMappingB, deploymentMappingC, deploymentMappingD]);
+    system.addEntities([linkAB, linkBC, linkCD]);
+
+    let measureValue = systemMeasureImplementations["medianServiceReplication"]({ entity: system, system: system });
+    expect(measureValue).toEqual(2.5);
+})
+
+test("smallestReplicationValue", () => {
+    let system = new System("sys1", "testSystem");
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    let infrastructureB = new Infrastructure("i2", "infratstructure 2", getEmptyMetaData());
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA);
+    serviceA.addEndpoint(externalEndpointA);
+    let deploymentMappingA = new DeploymentMapping("dm1", serviceA, infrastructureA);
+    deploymentMappingA.setPropertyValue("replicas", 1);
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+    let deploymentMappingB = new DeploymentMapping("dm2", serviceB, infrastructureA);
+    deploymentMappingB.setPropertyValue("replicas", 2);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+    let deploymentMappingC = new DeploymentMapping("dm3", serviceC, infrastructureB);
+    deploymentMappingC.setPropertyValue("replicas", 3);
+
+    let serviceD = new Service("s4", "testService", getEmptyMetaData());
+    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    serviceD.addEndpoint(endpointD);
+    let deploymentMappingD = new DeploymentMapping("dm4", serviceD, infrastructureB);
+    deploymentMappingD.setPropertyValue("replicas", 3);
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+    let linkBC = new Link("l2", serviceB, endpointC);
+    let linkCD = new Link("l3", serviceC, endpointD);
+
+    system.addEntities([infrastructureA, infrastructureB]);
+    system.addEntities([serviceA, serviceB, serviceC, serviceD]);
+    system.addEntities([deploymentMappingA, deploymentMappingB, deploymentMappingC, deploymentMappingD]);
+    system.addEntities([linkAB, linkBC, linkCD]);
+
+    let measureValue = systemMeasureImplementations["smallestReplicationValue"]({ entity: system, system: system });
+    expect(measureValue).toEqual(1);
+})

@@ -1,8 +1,8 @@
 import { BackingService, Component, Infrastructure, RequestTrace, Service, StorageBackingService, System } from "@/core/entities";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure";
-import { average } from "./general-functions";
+import { average, lowest, median } from "./general-functions";
 import { calculateRatioOfEndpointsSupportingSsl, providesHealthAndReadinessEndpoints } from "./componentMeasures";
-import { calculateRatioOfLinksToAsynchronousEndpoints, calculateRatioOfSecuredLinks, calculateRatioOfStatefulComponents, calculateRatioOfStatelessComponents, countComponentsConnectedToCertainEndpoints, getServiceInteractions } from "./systemMeasures";
+import { calculateNumberOfLinksWithServiceDiscovery, calculateRatioOfLinksToAsynchronousEndpoints, calculateRatioOfSecuredLinks, calculateRatioOfStatefulComponents, calculateRatioOfStatelessComponents, calculateReplicasPerService, countComponentsConnectedToCertainEndpoints, getServiceInteractions } from "./systemMeasures";
 import { EVENT_SOURCING_KIND } from "../../specifications/featureModel";
 import { supportsMonitoring as infrastructureSupportsMonitoring } from "./infrastructureMeasures";
 import { supportsMonitoring as componentSupportsMonitoring } from "./componentMeasures";
@@ -278,6 +278,72 @@ export const databaseTypeUtilization: Calculation = (parameters: CalculationPara
     return [...componentsPerStorage.values()].filter(componentSet => componentSet.size === 1).length / componentsPerStorage.size;
 }
 
+export const serviceDiscoveryUsage: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+    let allLinks = [...parameters.entity.getLinks.flat()];
+
+    if (allLinks.length === 0) {
+        return 0;
+    }
+
+    return calculateNumberOfLinksWithServiceDiscovery(allLinks) as number / allLinks.length;
+}
+
+export const serviceReplicationLevel: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+
+    let includedServiceIds = getIncludedComponents(parameters.entity, parameters.system).map(component => component.getId);
+
+    let replicasPerService = calculateReplicasPerService(parameters.system);
+
+    let replicasOfRequestTraceServices = [...replicasPerService.entries()]
+    .filter(([serviceId, replicas]) => {
+        return includedServiceIds.includes(serviceId);
+    })
+    .map(([serviceId, replicas]) => replicas);
+
+    if (replicasOfRequestTraceServices.length === 0) {
+        return "n/a";
+    } else {
+        return average(replicasOfRequestTraceServices);
+    }
+}
+
+export const medianServiceReplication: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+
+    let includedServiceIds = getIncludedComponents(parameters.entity, parameters.system).map(component => component.getId);
+
+    let replicasPerService = calculateReplicasPerService(parameters.system);
+
+    let replicasOfRequestTraceServices = [...replicasPerService.entries()]
+    .filter(([serviceId, replicas]) => {
+        return includedServiceIds.includes(serviceId);
+    })
+    .map(([serviceId, replicas]) => replicas);
+
+    if (replicasOfRequestTraceServices.length === 0) {
+        return "n/a";
+    } else {
+        return median(replicasOfRequestTraceServices);
+    }
+}
+
+export const smallestReplicationValue: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+
+    let includedServiceIds = getIncludedComponents(parameters.entity, parameters.system).map(component => component.getId);
+
+    let replicasPerService = calculateReplicasPerService(parameters.system);
+
+    let replicasOfRequestTraceServices = [...replicasPerService.entries()]
+    .filter(([serviceId, replicas]) => {
+        return includedServiceIds.includes(serviceId);
+    })
+    .map(([serviceId, replicas]) => replicas);
+
+    if (replicasOfRequestTraceServices.length === 0) {
+        return "n/a";
+    } else {
+        return lowest(replicasOfRequestTraceServices);
+    }
+}
 
 export const requestTraceMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
@@ -296,6 +362,10 @@ export const requestTraceMeasureImplementations: { [measureKey: string]: Calcula
     "distributedTracingSupport": distributedTracingSupport,
     "ratioOfServicesThatProvideHealthEndpoints": ratioOfServicesThatProvideHealthEndpoints,
     "maximumNumberOfServicesWithinARequestTrace": maximumNumberOfServicesWithinARequestTrace,
-    "databaseTypeUtilization": databaseTypeUtilization
+    "databaseTypeUtilization": databaseTypeUtilization,
+    "serviceDiscoveryUsage": serviceDiscoveryUsage,
+    "serviceReplicationLevel": serviceReplicationLevel,
+    "medianServiceReplication": medianServiceReplication,
+    "smallestReplicationValue": smallestReplicationValue,
 }
 
