@@ -3,9 +3,25 @@ import { Calculation, CalculationParameters } from "../../quamoco/Measure";
 import { average, partition } from "./general-functions";
 import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, EVENT_SOURCING_KIND, getEndpointKindWeight, getUsageRelationWeight, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MESSAGE_BROKER_KIND, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SEND_EVENT_ENDPOINT_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "../../specifications/featureModel";
 import { calculateRatioOfEndpointsSupportingSsl, calculateRatioOfExternalEndpointsSupportingTls, numberOfAsynchronousEndpointsOfferedByAService, numberOfComponentsAComponentIsLinkedTo, numberOfSynchronousEndpointsOfferedByAService, providesHealthAndReadinessEndpoints, serviceCouplingBasedOnEndpointEntropy } from "./componentMeasures";
-import { numberOfCyclesInRequestTraces } from "./requestTraceMeasures";
+import { numberOfCyclesInRequestTraces, requestTraceComplexity } from "./requestTraceMeasures";
 import { supportsMonitoring as infrastructureSupportsMonitoring} from "./infrastructureMeasures";
 import { supportsMonitoring as componentSupportsMonitoring} from "./componentMeasures";
+
+
+export const countComponentsConnectedToCertainEndpoints: (components: Component[], endpointIds: Set<string>, system: System) => number = (components, endpointIds, system) => {
+
+    let numberOfComponentsConnected = 0;
+
+    for (const component of components) {
+        let targetedEndpoints = new Set(system.getOutgoingLinksOfComponent(component.getId).map(link => link.getTargetEndpoint.getId));
+        if (targetedEndpoints.intersection(endpointIds).size > 0) {
+            numberOfComponentsConnected++;
+        }
+    }
+    
+    return numberOfComponentsConnected;
+}
+
 
 export const serviceReplicationLevel: Calculation = (parameters: CalculationParameters<System>) => {
 
@@ -917,7 +933,7 @@ export const averageComplexityOfRequestTraces: Calculation = (parameters: Calcul
         return 0;
     }
 
-    return average([...parameters.entity.getRequestTraceEntities.entries()].map(([requestTraceId, requestTrace]) => requestTrace.getLinks.length));
+    return average([...parameters.entity.getRequestTraceEntities.entries()].map(([requestTraceId, requestTrace]) => requestTraceComplexity({entity: requestTrace, system: parameters.system}) as number));
 }
 
 export const amountOfRedundancy: Calculation = (parameters: CalculationParameters<System>) => {
@@ -1384,7 +1400,7 @@ export const distributedTracingSupport: Calculation = (parameters: CalculationPa
 
     // TODO also consider a proxy service that supports tracing and when a component is proxied by that proxy?
 
-    let allTraceableComponents = [...parameters.entity.getComponentEntities.entries()].filter(([componentId, component]) => {
+    let allTraceableComponents = [...parameters.entity.getComponentEntities.values()].filter((component) => {
         return component.constructor.name !== BackingService.name || component.getProperty("providedFunctionality").value !== "tracing";
     })
 
@@ -1400,16 +1416,7 @@ export const distributedTracingSupport: Calculation = (parameters: CalculationPa
         return component.getEndpointEntities.map(endpoint => endpoint.getId);
     }));
 
-    let numberOfComponentsConnectedToTracingService = 0;
-
-    for (const [componentId, component] of allTraceableComponents) {
-        let targetedEndpoints = new Set(parameters.entity.getOutgoingLinksOfComponent(componentId).map(link => link.getTargetEndpoint.getId));
-        if (targetedEndpoints.intersection(tracingEndpoints).size > 0) {
-            numberOfComponentsConnectedToTracingService++;
-        }
-    }
-
-    return numberOfComponentsConnectedToTracingService / allTraceableComponents.length;
+    return countComponentsConnectedToCertainEndpoints(allTraceableComponents, tracingEndpoints, parameters.system) / allTraceableComponents.length;
 }
 
 export const serviceDiscoveryUsage: Calculation = (parameters: CalculationParameters<System>) => {

@@ -10,14 +10,14 @@ import { expect, test } from "vitest";
 
 test("all implementation names refer to an existing measure", () => {
     let measureKeys = getQualityModel().measures.get(ENTITIES.COMPONENT).map(measure => measure.getId);
-    expect(measureKeys.length).toStrictEqual(new Set(measureKeys).size);
-
+    expect(measureKeys.length).toStrictEqual(new Set(measureKeys).size)
+    
     let measureImplementationKeys = Object.keys(componentMeasureImplementations);
     expect(measureImplementationKeys.length).toStrictEqual(new Set(measureImplementationKeys).size);
 
-    expect(measureKeys).toEqual(
-        expect.arrayContaining(measureImplementationKeys)
-      )
+    measureImplementationKeys.forEach(key => {
+        expect(measureKeys).include(key);
+    })
 })
 
 test("all implemented measure must provide information on the calculation", () => {

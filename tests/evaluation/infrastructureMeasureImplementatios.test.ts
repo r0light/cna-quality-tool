@@ -13,9 +13,9 @@ test("all implementation names refer to an existing measure", () => {
     let measureImplementationKeys = Object.keys(infrastructureMeasureImplementations);
     expect(measureImplementationKeys.length).toStrictEqual(new Set(measureImplementationKeys).size);
 
-    expect(measureKeys).toEqual(
-        expect.arrayContaining(measureImplementationKeys)
-      )
+    measureImplementationKeys.forEach(key => {
+        expect(measureKeys).include(key);
+    })
 })
 
 test("all implemented measure must provide information on the calculation", () => {
@@ -53,6 +53,6 @@ test("numberOfServiceHostedOnOneInfrastructure", () => {
     system.addEntities([infrastructureA, infrastructureB, infrastructureC]);
     system.addEntities([deploymentMappingA, deploymentMappingB, deploymentMappingC]);
 
-    let measureValue = infrastructureMeasureImplementations["numberOfServiceHostedOnOneInfrastructure"]({entity: infrastructureA, system: system});
+    let measureValue = infrastructureMeasureImplementations["numberOfServiceHostedOnOneInfrastructure"]({ entity: infrastructureA, system: system });
     expect(measureValue).toEqual(2);
 })

@@ -1106,19 +1106,19 @@ const measures = {
         "name": "Ratio of Components or Infrastructure nodes that export logs to a central service",
         "calculation": "Number of Components or Infrastrcture Entities exporting logs to a central service / Total number of Components and Infrastructure entities",
         "sources": ["Ntentos2022"],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.SYSTEM],
     },
     "ratioOfComponentsOrInfrastructureNodesThatExportMetrics": {
         "name": "Ratio of Components or Infrastructure nodes that export metrics",
-        "calculation": "Number of Components or Infrastrcture Entities exporting metrics to a central service / Total number of Components and Infrastructure entities",
+        "calculation": "Number of Components or Infrastructure Entities exporting metrics to a central service / Total number of Components and Infrastructure entities",
         "sources": ["Ntentos2022"],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.SYSTEM],
     },
     "ratioOfComponentsOrInfrastructureNodesThatEnablePerformanceAnalytics": {
         "name": "Ratio of Components or Infrastructure nodes that enable Performance Analytics",
         "calculation": "",
         "sources": ["Ntentos2022"],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.SYSTEM],
     },
     "distributedTracingSupport": {
         "name": "Distributed Tracing Support",
@@ -1208,7 +1208,7 @@ const measures = {
         "name": "Combined metric for indirect dependency",
         "calculation": "(\"Indirect Interaction density of a system\" + \"Indirect Dependency because of shared data repository\") / 2",
         "sources": ["Karhikeyan2012"],
-        "applicableEntities": [ENTITIES.SYSTEM],
+        "applicableEntities": [ENTITIES.COMPONENT],
     },
     "servicesInterdependenceInTheSystem": {
         "name": "Services Interdependence in the System",
@@ -1412,7 +1412,8 @@ const measures = {
         "name": "Maximum Length of Service Link chain per request trace",
         "calculation": "Maximum of number-of links of request trace for all request traces",
         "sources": ["Apel2019", "Engel2018", "Rosa2020"],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.SYSTEM],
+        "aggregateOf": "requestTraceLength"
     },
     "maximumNumberOfServicesWithinARequestTrace": {
         "name": "Maximum number of services within a request trace",
@@ -1430,12 +1431,19 @@ const measures = {
         "name": "Average Complexity of Request Traces",
         "calculation": "(sum-of(Number of Links in Request Trace) for all Request Traces) / Total number of request traces",
         "sources": ["Zimmermann2015"],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.SYSTEM],
+        "aggregateOf": "requestTraceComplexity"
     },
     "requestTraceLength": {
         "name": "Request Trace Length",
-        "calculation": "Number of links in a request trace",
+        "calculation": "Number of link steps in a request trace",
         "sources": ["Peng2022", "Gamage2021"],
+        "applicableEntities": [ENTITIES.REQUEST_TRACE],
+    },
+    "requestTraceComplexity": {
+        "name": "Request Trace Length",
+        "calculation": "Number of links in a request trace",
+        "sources": ["new"],
         "applicableEntities": [ENTITIES.REQUEST_TRACE],
     },
     "numberOfCyclesInRequestTraces": {
@@ -1448,7 +1456,7 @@ const measures = {
         "name": "Degree of Storage Backend Sharing",
         "calculation": "Number of Services sharing the same Storage Backing Service",
         "sources": ["Rosa2020"],
-        "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.COMPONENT],
     },
     "ratioOfStorageBackendSharing": {
         "name": "Ratio of Storage Backend Sharing",

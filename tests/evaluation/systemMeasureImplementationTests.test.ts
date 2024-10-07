@@ -62,9 +62,13 @@ test("all implementation names refer to an existing measure", () => {
     let measureImplementationKeys = Object.keys(systemMeasureImplementations);
     expect(measureImplementationKeys.length).toStrictEqual(new Set(measureImplementationKeys).size);
 
-    expect(measureKeys).toEqual(
+    /*expect(measureKeys).toEqual(
         expect.arrayContaining(measureImplementationKeys)
-    )
+      )*/
+
+    measureImplementationKeys.forEach(key => {
+        expect(measureKeys).include(key);
+    })
 })
 
 test("all implemented measure must provide information on the calculation", () => {
@@ -2320,7 +2324,7 @@ test("ratioOfStateDependencyOfEndpoints", () => {
     serviceA.addEndpoint(endpointA);
 
     let serviceB = new Service("s2", "testService", getEmptyMetaData());
-    let endpointB= new Endpoint("e2", "endpoint B", getEmptyMetaData());
+    let endpointB = new Endpoint("e2", "endpoint B", getEmptyMetaData());
     serviceB.addEndpoint(endpointB);
 
     let dataAggregateX = new DataAggregate("da1", "data aggregate 1", getEmptyMetaData());

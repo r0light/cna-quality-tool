@@ -1,5 +1,5 @@
 import { getEmptyMetaData } from "@/core/common/entityDataTypes";
-import { BackingData, BrokerBackingService, DataAggregate, DeploymentMapping, Endpoint, ExternalEndpoint, Infrastructure, Link, RequestTrace, Service, StorageBackingService, System } from "@/core/entities";
+import { BackingData, BackingService, BrokerBackingService, DataAggregate, DeploymentMapping, Endpoint, ExternalEndpoint, Infrastructure, Link, RequestTrace, Service, StorageBackingService, System } from "@/core/entities";
 import { RelationToBackingData } from "@/core/entities/relationToBackingData";
 import { RelationToDataAggregate } from "@/core/entities/relationToDataAggregate";
 import { requestTraceMeasureImplementations } from "@/core/qualitymodel/evaluation/measure-implementations/requestTraceMeasures";
@@ -15,9 +15,9 @@ test("all implementation names refer to an existing measure", () => {
     let measureImplementationKeys = Object.keys(requestTraceMeasureImplementations);
     expect(measureImplementationKeys.length).toStrictEqual(new Set(measureImplementationKeys).size);
 
-    expect(measureKeys).toEqual(
-        expect.arrayContaining(measureImplementationKeys)
-      )
+    measureImplementationKeys.forEach(key => {
+        expect(measureKeys).include(key);
+    })
 })
 
 test("all implemented measure must provide information on the calculation", () => {
@@ -76,7 +76,7 @@ test("requestTraceLength", () => {
     system.addEntities([linkAB, linkBC, linkCD]);
     system.addEntity(requestTrace);
 
-    let measureValue = requestTraceMeasureImplementations["requestTraceLength"]({ entity: requestTrace, system: system});
+    let measureValue = requestTraceMeasureImplementations["requestTraceLength"]({ entity: requestTrace, system: system });
     expect(measureValue).toEqual(3);
 
 
@@ -116,14 +116,14 @@ test("numberOfCyclesInRequestTraces", () => {
     let linkCD = new Link("l5", serviceC, endpointD);
 
     let requestTrace = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
-    requestTrace.setLinks = [[linkAB], [linkBC],  [linkCD], [linkDB]];
+    requestTrace.setLinks = [[linkAB], [linkBC], [linkCD], [linkDB]];
     requestTrace.setExternalEndpoint = externalEndpointA;
 
     system.addEntities([serviceA, serviceB, serviceC, serviceD, serviceE]);
-    system.addEntities([linkAB, linkBC, linkCD, linkDB ]);
+    system.addEntities([linkAB, linkBC, linkCD, linkDB]);
     system.addEntity(requestTrace);
 
-    let measureValue = requestTraceMeasureImplementations["numberOfCyclesInRequestTraces"]({ entity: requestTrace, system: system});
+    let measureValue = requestTraceMeasureImplementations["numberOfCyclesInRequestTraces"]({ entity: requestTrace, system: system });
     expect(measureValue).toEqual(1);
 
 })
@@ -155,7 +155,7 @@ test("dataReplicationAlongRequestTrace", () => {
     let endpointSB = new Endpoint("e5", "endpoint SB", getEmptyMetaData());
     storageServiceB.addEndpoint(endpointSB);
 
-   
+
     let usageAA = new RelationToDataAggregate("r1", getEmptyMetaData());
     usageAA.setPropertyValue("usage_relation", "usage");
     serviceA.addDataAggregateEntity(dataAggregateA, usageAA);
@@ -238,8 +238,8 @@ test("dataReplicationAlongRequestTrace", () => {
     system.addEntities([requestTrace]);
 
 
-    let measureValue = requestTraceMeasureImplementations["dataReplicationAlongRequestTrace"]({ entity: requestTrace, system: system});
-    expect(measureValue).toBeCloseTo(17/24, 5);
+    let measureValue = requestTraceMeasureImplementations["dataReplicationAlongRequestTrace"]({ entity: requestTrace, system: system });
+    expect(measureValue).toBeCloseTo(17 / 24, 5);
 
 })
 
@@ -284,7 +284,7 @@ test("ratioOfEndpointsSupportingSsl", () => {
     system.addEntities([linkAB, linkBC, linkDB, linkCD]);
     system.addEntity(requestTrace);
 
-    let measureValue = requestTraceMeasureImplementations["ratioOfEndpointsSupportingSsl"]({ entity: requestTrace, system: system});
+    let measureValue = requestTraceMeasureImplementations["ratioOfEndpointsSupportingSsl"]({ entity: requestTrace, system: system });
     expect(measureValue).toEqual(0.5);
 
 })
@@ -331,7 +331,7 @@ test("ratioOfSecuredLinks", () => {
     system.addEntities([linkAB, linkBC, linkDB, linkCD]);
     system.addEntity(requestTrace);
 
-    let measureValue = requestTraceMeasureImplementations["ratioOfSecuredLinks"]({ entity: requestTrace, system: system});
+    let measureValue = requestTraceMeasureImplementations["ratioOfSecuredLinks"]({ entity: requestTrace, system: system });
     expect(measureValue).toEqual(0.5);
 })
 
@@ -353,7 +353,7 @@ test("ratioOfStateDependencyOfEndpoints", () => {
     serviceC.addEndpoint(endpointC);
 
     let dataAggregateA = new DataAggregate("da1", "data aggregate A", getEmptyMetaData());
-   
+
     let usageAA = new RelationToDataAggregate("r1", getEmptyMetaData());
     usageAA.setPropertyValue("usage_relation", "usage");
     serviceA.addDataAggregateEntity(dataAggregateA, usageAA);
@@ -387,8 +387,8 @@ test("ratioOfStateDependencyOfEndpoints", () => {
     system.addEntities([requestTrace]);
 
 
-    let measureValue = requestTraceMeasureImplementations["ratioOfStateDependencyOfEndpoints"]({ entity: requestTrace, system: system});
-    expect(measureValue).toEqual(2/3);
+    let measureValue = requestTraceMeasureImplementations["ratioOfStateDependencyOfEndpoints"]({ entity: requestTrace, system: system });
+    expect(measureValue).toEqual(2 / 3);
 
 })
 
@@ -429,7 +429,7 @@ test("ratioOfStatefulComponents", () => {
     system.addEntities([linkAB, linkBC, linkDB, linkCD]);
     system.addEntity(requestTrace);
 
-    let measureValue = requestTraceMeasureImplementations["ratioOfStatefulComponents"]({ entity: requestTrace, system: system});
+    let measureValue = requestTraceMeasureImplementations["ratioOfStatefulComponents"]({ entity: requestTrace, system: system });
     expect(measureValue).toEqual(0.5);
 })
 
@@ -471,7 +471,7 @@ test("ratioOfStatelessComponents", () => {
     system.addEntities([linkAB, linkBC, linkDB, linkCD]);
     system.addEntity(requestTrace);
 
-    let measureValue = requestTraceMeasureImplementations["ratioOfStatelessComponents"]({ entity: requestTrace, system: system});
+    let measureValue = requestTraceMeasureImplementations["ratioOfStatelessComponents"]({ entity: requestTrace, system: system });
     expect(measureValue).toEqual(0.75);
 })
 
@@ -505,15 +505,15 @@ test("asynchronousCommunicationUtilization", () => {
     let linkCD = new Link("l3", serviceC, endpointD);
 
     let requestTrace = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
-    requestTrace.setLinks = [[linkAB], [linkCB], [linkCD] ];
+    requestTrace.setLinks = [[linkAB], [linkCB], [linkCD]];
     requestTrace.setExternalEndpoint = externalEndpointA;
 
     system.addEntities([serviceA, serviceB, serviceC, serviceD]);
     system.addEntities([linkAB, linkCB, linkCD]);
     system.addEntity(requestTrace);
 
-    let measureValue = requestTraceMeasureImplementations["asynchronousCommunicationUtilization"]({ entity: requestTrace, system: system});
-    expect(measureValue).toEqual(2/3);
+    let measureValue = requestTraceMeasureImplementations["asynchronousCommunicationUtilization"]({ entity: requestTrace, system: system });
+    expect(measureValue).toEqual(2 / 3);
 
 })
 
@@ -609,7 +609,7 @@ test("ratioOfInfrastructureNodesThatSupportMonitoring", () => {
     system.addEntities([linkAB, linkBC, linkCD]);
     system.addEntity(requestTrace);
 
-    let measureValue = requestTraceMeasureImplementations["ratioOfInfrastructureNodesThatSupportMonitoring"]({ entity: requestTrace, system: system});
+    let measureValue = requestTraceMeasureImplementations["ratioOfInfrastructureNodesThatSupportMonitoring"]({ entity: requestTrace, system: system });
     expect(measureValue).toEqual(0.5);
 
 })
@@ -656,8 +656,8 @@ test("ratioOfComponentsThatSupportMonitoring", () => {
     system.addEntities([linkAB, linkBC, linkCD]);
     system.addEntity(requestTrace);
 
-    let measureValue = requestTraceMeasureImplementations["ratioOfComponentsThatSupportMonitoring"]({ entity: requestTrace, system: system});
-    expect(measureValue).toEqual(1/4);
+    let measureValue = requestTraceMeasureImplementations["ratioOfComponentsThatSupportMonitoring"]({ entity: requestTrace, system: system });
+    expect(measureValue).toEqual(1 / 4);
 })
 
 
@@ -711,7 +711,186 @@ test("ratioOfServicesThatProvideHealthEndpoints", () => {
     system.addEntities([linkAB, linkBC, linkDB, linkCD]);
     system.addEntity(requestTrace);
 
-    let measureValue = requestTraceMeasureImplementations["ratioOfServicesThatProvideHealthEndpoints"]({ entity: requestTrace, system: system});
+    let measureValue = requestTraceMeasureImplementations["ratioOfServicesThatProvideHealthEndpoints"]({ entity: requestTrace, system: system });
     expect(measureValue).toEqual(0.5);
 
+})
+
+test("distributedTracingSupport", () => {
+    let system = new System("sys1", "testSystem");
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA);
+    serviceA.addEndpoint(externalEndpointA);
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+
+    let serviceD = new Service("s4", "testService", getEmptyMetaData());
+    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    serviceD.addEndpoint(endpointD);
+
+    let tracingService = new BackingService("t1", "tracing service", getEmptyMetaData());
+    tracingService.setPropertyValue("providedFunctionality", "tracing");
+    let tracingEndpoint = new Endpoint("te1", "tracing endpoint", getEmptyMetaData());
+    tracingService.addEndpoint(tracingEndpoint)
+
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+    let linkAT = new Link("lt1", serviceA, tracingEndpoint);
+    let linkBC = new Link("l2", serviceB, endpointC);
+    let linkBT = new Link("lt2", serviceB, tracingEndpoint);
+    let linkCD = new Link("l3", serviceC, endpointD);
+
+    let requestTrace = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
+    requestTrace.setLinks = [[linkAB], [linkBC], [linkCD]];
+    requestTrace.setExternalEndpoint = externalEndpointA;
+
+
+    system.addEntities([serviceA, serviceB, serviceC, serviceD, tracingService]);
+    system.addEntities([linkAB, linkBC, linkCD, linkAT, linkBT]);
+    system.addEntity(requestTrace);
+
+    let measureValue = requestTraceMeasureImplementations["distributedTracingSupport"]({ entity: requestTrace, system: system });
+    expect(measureValue).toEqual(1 / 2);
+
+})
+
+test("maximumNumberOfServicesWithinARequestTrace", () => {
+    let system = new System("sys1", "testSystem");
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA);
+    serviceA.addEndpoint(externalEndpointA);
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+
+    let serviceD = new Service("s4", "testService", getEmptyMetaData());
+    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    serviceD.addEndpoint(endpointD);
+
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+    let linkBC = new Link("l2", serviceB, endpointC);
+    let linkCD = new Link("l3", serviceC, endpointD);
+
+    let requestTrace = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
+    requestTrace.setLinks = [[linkAB], [linkBC], [linkCD]];
+    requestTrace.setExternalEndpoint = externalEndpointA;
+
+
+    system.addEntities([serviceA, serviceB, serviceC, serviceD]);
+    system.addEntities([linkAB, linkBC, linkCD]);
+    system.addEntity(requestTrace);
+
+    let measureValue = requestTraceMeasureImplementations["maximumNumberOfServicesWithinARequestTrace"]({ entity: requestTrace, system: system });
+    expect(measureValue).toEqual(4);
+})
+
+test("requestTraceComplexity", () => {
+
+    let system = new System("sys1", "testSystem");
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA);
+    serviceA.addEndpoint(externalEndpointA);
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+
+    let serviceD = new Service("s4", "testService", getEmptyMetaData());
+    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    serviceD.addEndpoint(endpointD);
+
+    let serviceE = new Service("s5", "testService", getEmptyMetaData());
+    let endpointE = new Endpoint("e5", "endpoint 5", getEmptyMetaData());
+    serviceE.addEndpoint(endpointE);
+
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+    let linkBC = new Link("l2", serviceB, endpointC);
+    let linkBE = new Link("l3", serviceB, endpointE);
+    let linkCD = new Link("l4", serviceC, endpointD);
+
+    let requestTrace = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
+    requestTrace.setLinks = [[linkAB], [linkBC, linkBE], [linkCD]];
+    requestTrace.setExternalEndpoint = externalEndpointA;
+
+    system.addEntities([serviceA, serviceB, serviceC, serviceD]);
+    system.addEntities([linkAB, linkBC, linkCD]);
+    system.addEntity(requestTrace);
+
+    let measureValue = requestTraceMeasureImplementations["requestTraceComplexity"]({ entity: requestTrace, system: system });
+    expect(measureValue).toEqual(4);
+
+})
+
+
+test("databaseTypeUtilization", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService A", getEmptyMetaData());
+    let externalEndpoint = new ExternalEndpoint("ee1", "external endpoint", getEmptyMetaData());
+    serviceA.addEndpoint(externalEndpoint);
+
+    let serviceB = new Service("s2", "testService B", getEmptyMetaData());
+    let endpointB = new Endpoint("e2", "endpoint B", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+
+    let serviceC = new Service("s3", "testService C", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint C", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+
+    let storageServiceA = new StorageBackingService("sbs1", "storage service A", getEmptyMetaData());
+    let endpointSA = new Endpoint("e4", "endpoint SA", getEmptyMetaData());
+    storageServiceA.addEndpoint(endpointSA);
+
+    let storageServiceB = new StorageBackingService("sbs2", "storage service B", getEmptyMetaData());
+    let endpointSB = new Endpoint("e5", "endpoint SB", getEmptyMetaData());
+    storageServiceB.addEndpoint(endpointSB);
+
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+    let linkBSA = new Link("l2", serviceB, endpointSA);
+    let linkBC = new Link("l3", serviceB, endpointC);
+    let linkCSB = new Link("l4", serviceC, endpointSB);
+
+    let requestTrace = new RequestTrace("r1", "request trace 1", getEmptyMetaData());
+    requestTrace.setLinks = [
+        [linkAB],
+        [linkBSA, linkBC],
+        [linkCSB]
+    ]
+    requestTrace.setExternalEndpoint = externalEndpoint;
+
+    system.addEntities([serviceA, serviceB, serviceC]);
+    system.addEntities([storageServiceA, storageServiceB]);
+    system.addEntities([linkAB, linkBSA, linkBC, linkCSB]);
+    system.addEntities([requestTrace]);
+
+
+    let measureValue = requestTraceMeasureImplementations["databaseTypeUtilization"]({ entity: requestTrace, system: system });
+    expect(measureValue).toEqual(1);
 })

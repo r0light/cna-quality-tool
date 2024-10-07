@@ -1,8 +1,8 @@
-import { Component, Infrastructure, RequestTrace, Service, System } from "@/core/entities";
+import { BackingService, Component, Infrastructure, RequestTrace, Service, StorageBackingService, System } from "@/core/entities";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure";
 import { average } from "./general-functions";
 import { calculateRatioOfEndpointsSupportingSsl, providesHealthAndReadinessEndpoints } from "./componentMeasures";
-import { calculateRatioOfLinksToAsynchronousEndpoints, calculateRatioOfSecuredLinks, calculateRatioOfStatefulComponents, calculateRatioOfStatelessComponents, getServiceInteractions } from "./systemMeasures";
+import { calculateRatioOfLinksToAsynchronousEndpoints, calculateRatioOfSecuredLinks, calculateRatioOfStatefulComponents, calculateRatioOfStatelessComponents, countComponentsConnectedToCertainEndpoints, getServiceInteractions } from "./systemMeasures";
 import { EVENT_SOURCING_KIND } from "../../specifications/featureModel";
 import { supportsMonitoring as infrastructureSupportsMonitoring } from "./infrastructureMeasures";
 import { supportsMonitoring as componentSupportsMonitoring } from "./componentMeasures";
@@ -26,6 +26,10 @@ export const ratioOfEndpointsSupportingSsl = (parameters: CalculationParameters<
 
 export const requestTraceLength: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
     return parameters.entity.getLinks.length;
+}
+
+export const requestTraceComplexity: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+    return parameters.entity.getLinks.flat().length;
 }
 
 export const ratioOfSecuredLinks: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
@@ -222,11 +226,64 @@ export const ratioOfServicesThatProvideHealthEndpoints: Calculation = (parameter
     return numberOfServicesWithHealthAndReadinessEndpoint / allServices.length;
 }
 
+export const distributedTracingSupport: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+
+    // TODO also consider a proxy service that supports tracing and when a component is proxied by that proxy?
+
+    let allTraceableComponents = getIncludedComponents(parameters.entity, parameters.system).filter((component) => {
+        return component.constructor.name !== BackingService.name || component.getProperty("providedFunctionality").value !== "tracing";
+    })
+
+    let tracingServices = [...parameters.system.getComponentEntities.entries()].filter(([componentId, component]) => {
+        return component.constructor.name === BackingService.name && component.getProperty("providedFunctionality").value === "tracing";
+    })
+
+    if (allTraceableComponents.length === 0 || tracingServices.length === 0) {
+        return 0;
+    }
+
+    let tracingEndpoints = new Set(tracingServices.flatMap(([componentId, component]) => {
+        return component.getEndpointEntities.map(endpoint => endpoint.getId);
+    }));
+
+    return countComponentsConnectedToCertainEndpoints(allTraceableComponents, tracingEndpoints, parameters.system) / allTraceableComponents.length;
+}
+
+export const maximumNumberOfServicesWithinARequestTrace: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+
+    return getIncludedComponents(parameters.entity, parameters.system).length;
+}
+
+export const databaseTypeUtilization: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+
+    let componentsPerStorage = new Map<string, Set<string>>();
+
+    for (const link of parameters.entity.getLinks.flat()) {
+        let targetComponent = parameters.system.searchComponentOfEndpoint(link.getTargetEndpoint.getId);
+        if (targetComponent.constructor.name === StorageBackingService.name) {
+            let storageId = targetComponent.getId;
+            let callerId = link.getSourceEntity.getId;
+
+            if (componentsPerStorage.has(storageId)) {
+                componentsPerStorage.get(storageId).add(callerId);
+            } else {
+                let setOfComponents = new Set<string>();
+                setOfComponents.add(callerId);
+                componentsPerStorage.set(storageId, setOfComponents);
+            }
+
+        }
+    }
+
+    return [...componentsPerStorage.values()].filter(componentSet => componentSet.size === 1).length / componentsPerStorage.size;
+}
+
 
 export const requestTraceMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
     "ratioOfSecuredLinks": ratioOfSecuredLinks,
     "requestTraceLength": requestTraceLength,
+    "requestTraceComplexity": requestTraceComplexity,
     "numberOfCyclesInRequestTraces": numberOfCyclesInRequestTraces,
     "dataReplicationAlongRequestTrace": dataReplicationAlongRequestTrace,
     "ratioOfStateDependencyOfEndpoints": ratioOfStateDependencyOfEndpoints,
@@ -236,6 +293,9 @@ export const requestTraceMeasureImplementations: { [measureKey: string]: Calcula
     "eventSourcingUtilizationMetric": eventSourcingUtilizationMetric,
     "ratioOfInfrastructureNodesThatSupportMonitoring": ratioOfInfrastructureNodesThatSupportMonitoring,
     "ratioOfComponentsThatSupportMonitoring": ratioOfComponentsThatSupportMonitoring,
-    "ratioOfServicesThatProvideHealthEndpoints": ratioOfServicesThatProvideHealthEndpoints
+    "distributedTracingSupport": distributedTracingSupport,
+    "ratioOfServicesThatProvideHealthEndpoints": ratioOfServicesThatProvideHealthEndpoints,
+    "maximumNumberOfServicesWithinARequestTrace": maximumNumberOfServicesWithinARequestTrace,
+    "databaseTypeUtilization": databaseTypeUtilization
 }
 
