@@ -421,6 +421,26 @@ export const numberOfLinksWithComplexFailover: Calculation = (parameters: Calcul
     return linksWithCircuitBreaker.length;
 }
 
+export const amountOfRedundancy: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+    if (parameters.system.getDeploymentMappingEntities.size === 0) {
+        return 0;
+    }
+
+    let includedComponentIds = getIncludedComponents(parameters.entity, parameters.system).map(component => component.getId);
+
+    let deploymentMappings: Set<string> = new Set();
+    let deployedComponents: Set<string> = new Set();
+
+    for (const [deploymentMappingId, deploymentMapping] of parameters.system.getDeploymentMappingEntities) {
+        if (includedComponentIds.includes(deploymentMapping.getDeployedEntity.getId)) {
+            deploymentMappings.add(deploymentMappingId);
+            deployedComponents.add(deploymentMapping.getDeployedEntity.getId);
+        }
+    }
+
+    return deploymentMappings.size / deployedComponents.size
+}
+
 
 export const requestTraceMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
@@ -447,6 +467,7 @@ export const requestTraceMeasureImplementations: { [measureKey: string]: Calcula
     "storageReplicationLevel": storageReplicationLevel,
     "numberOfAvailabilityZonesUsed": numberOfAvailabilityZonesUsed,
     "numberOfLinksWithRetryLogic": numberOfLinksWithRetryLogic,
-    "numberOfLinksWithComplexFailover": numberOfLinksWithComplexFailover
+    "numberOfLinksWithComplexFailover": numberOfLinksWithComplexFailover,
+    "amountOfRedundancy": amountOfRedundancy
 }
 

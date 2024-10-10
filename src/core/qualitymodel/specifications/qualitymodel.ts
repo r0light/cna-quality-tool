@@ -1528,13 +1528,13 @@ const measures = {
         "name": "Amount of redundancy",
         "calculation": "sum-of(deployment mappings) for all Components / Number of deployed Components",
         "sources": ["Zimmermann2015"],
-        "applicableEntities": [ENTITIES.SYSTEM],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE, ENTITIES.COMPONENT],
     },
     "serviceReplicationLevel": {
         "name": "Service Replication level",
         "calculation": "The average value of replicas per service",
         "sources": ["Guerron2020", "Souza2016"],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE, ENTITIES.COMPONENT],
     },
     "medianServiceReplication": {
         "name": "Median Service Replication level",
@@ -1552,7 +1552,7 @@ const measures = {
         "name": "Storage Replication level",
         "calculation": "The average value of replicas per storage backing service",
         "sources": ["Guerron2020", "Souza2016"],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE, ENTITIES.COMPONENT],
     },
     "servicePortability": {
         "name": "Service portability",
@@ -1790,14 +1790,20 @@ type ProductFactorEvaluationSpec = {
 const productFactorEvaluations = [
     {
         "targetFactor": "serviceReplication",
+        "targetEntity": ENTITIES.COMPONENT,
+        "evaluation": "serviceReplication",
+        "reasoning": "Service replication is measured by the number of replicas for a service and the redudancy introduced by deploying it on multiple infrastructure instances."
+    },
+    {
+        "targetFactor": "serviceReplication",
         "targetEntity": ENTITIES.SYSTEM,
-        "evaluation": "systemServiceReplication",
+        "evaluation": "serviceReplication",
         "reasoning": "Service replication is measured by the number of replicas per deployed service and the redundancy introduced by deploying a service on multiple infrastructure instances."
     },
     {
         "targetFactor": "serviceReplication",
         "targetEntity": ENTITIES.REQUEST_TRACE,
-        "evaluation": "requestTraceServiceReplication",
+        "evaluation": "serviceReplication",
         "reasoning": "Service replication is measured by the number of replicas per service within a request trace."
     },
     {
@@ -1811,6 +1817,12 @@ const productFactorEvaluations = [
         "targetEntity": ENTITIES.REQUEST_TRACE,
         "evaluation": "horizontalDataReplication",
         "reasoning": "Horizontal data replication is measured by the number of replicas for storage backing services involved in the request trace."
+    },
+    {
+        "targetFactor": "horizontalDataReplication",
+        "targetEntity": ENTITIES.COMPONENT,
+        "evaluation": "horizontalDataReplication",
+        "reasoning": "Horizontal data replication is measured by the number of replicas for a storage backing service."
     },
     {
         "targetFactor": "replication",

@@ -69,7 +69,7 @@ const generalEvaluationImplementation: {
 const productFactorEvaluationImplementation: {
     [factorKey: string]: FactorEvaluationFunction
 } = {
-    "systemServiceReplication": (parameters) => {
+    "serviceReplication": (parameters) => {
         let serviceReplicationLevel = parameters.calculatedMeasures.get("serviceReplicationLevel").value;
         let deploymentRedundancy = parameters.calculatedMeasures.get("amountOfRedundancy").value;
         if (serviceReplicationLevel === "n/a") {
@@ -87,25 +87,6 @@ const productFactorEvaluationImplementation: {
                 } else {
                     return "moderate";
                 }
-            }
-        } else {
-            throw new Error(`serviceReplicationLevel is of type ${typeof serviceReplicationLevel}, but should be of type number`);
-        }
-    },
-    "requestTraceServiceReplication": (parameters) => {
-        let serviceReplicationLevel = parameters.calculatedMeasures.get("serviceReplicationLevel").value;
-        if (serviceReplicationLevel === "n/a") {
-            return "n/a";
-        } else if (typeof serviceReplicationLevel === "number") {
-            if (serviceReplicationLevel <= 1) {
-                return "none";
-            } else if (serviceReplicationLevel > 1 && serviceReplicationLevel < 1.5) {
-                return "low";
-            } else if (serviceReplicationLevel >= 1.5 && serviceReplicationLevel < 3) {
-                return "moderate";
-            } else {
-                return "high";
-
             }
         } else {
             throw new Error(`serviceReplicationLevel is of type ${typeof serviceReplicationLevel}, but should be of type number`);

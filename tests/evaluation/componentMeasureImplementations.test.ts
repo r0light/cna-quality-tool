@@ -1,5 +1,5 @@
 import { getEmptyMetaData } from "@/core/common/entityDataTypes";
-import { DataAggregate, Endpoint, ExternalEndpoint, Link, Service, StorageBackingService, System } from "@/core/entities";
+import { DataAggregate, DeploymentMapping, Endpoint, ExternalEndpoint, Infrastructure, Link, Service, StorageBackingService, System } from "@/core/entities";
 import { RelationToDataAggregate } from "@/core/entities/relationToDataAggregate";
 import { componentMeasureImplementations } from "@/core/qualitymodel/evaluation/measure-implementations/componentMeasures";
 import { getQualityModel } from "@/core/qualitymodel/QualityModelInstance";
@@ -1151,4 +1151,86 @@ test ("numberOfLinksWithComplexFailover", () => {
 
     let measureValue = componentMeasureImplementations["numberOfLinksWithComplexFailover"]({ entity: serviceA, system: system });
     expect(measureValue).toEqual(1);
+})
+
+
+test("serviceReplicationLevel", () => {
+    let system = new System("sys1", "testSystem");;
+    let infrastructureA = new Infrastructure("i1", "Infrastructure 1", getEmptyMetaData());
+    let infrastructureB = new Infrastructure("i2", "Infrastruture B", getEmptyMetaData());
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+
+    let deploymentMappingA = new DeploymentMapping("dm1", serviceA, infrastructureA);
+    deploymentMappingA.setPropertyValue("replicas", 2);
+
+    let deploymentMappingB = new DeploymentMapping("dm2", serviceA, infrastructureB);
+    deploymentMappingB.setPropertyValue("replicas", 5);
+
+    system.addEntities([serviceA]);
+    system.addEntities([infrastructureA, infrastructureB]);
+    system.addEntities([deploymentMappingA, deploymentMappingB]);
+
+    let measureValue = componentMeasureImplementations["serviceReplicationLevel"]({ entity: serviceA, system: system });
+    expect(measureValue).toEqual(7);
+})
+
+test("amountOfRedundancy", () => {
+    let system = new System("sys1", "testSystem");;
+    let infrastructureA = new Infrastructure("i1", "Infrastructure 1", getEmptyMetaData());
+    let infrastructureB = new Infrastructure("i2", "Infrastruture B", getEmptyMetaData());
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+
+    let deploymentMappingA = new DeploymentMapping("dm1", serviceA, infrastructureA);
+    deploymentMappingA.setPropertyValue("replicas", 2);
+
+    let deploymentMappingB = new DeploymentMapping("dm2", serviceA, infrastructureB);
+    deploymentMappingB.setPropertyValue("replicas", 5);
+
+    system.addEntities([serviceA]);
+    system.addEntities([infrastructureA, infrastructureB]);
+    system.addEntities([deploymentMappingA, deploymentMappingB]);
+
+    let measureValue = componentMeasureImplementations["amountOfRedundancy"]({ entity: serviceA, system: system });
+    expect(measureValue).toEqual(2);
+})
+
+test("storageReplicationLevel", () => {
+    let system = new System("sys1", "testSystem");;
+    let infrastructureA = new Infrastructure("i1", "Infrastructure 1", getEmptyMetaData());
+    let infrastructureB = new Infrastructure("i2", "Infrastruture B", getEmptyMetaData());
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+
+    let deploymentMappingA = new DeploymentMapping("dm1", serviceA, infrastructureA);
+    deploymentMappingA.setPropertyValue("replicas", 2);
+
+    let deploymentMappingB = new DeploymentMapping("dm2", serviceA, infrastructureB);
+    deploymentMappingB.setPropertyValue("replicas", 5);
+
+    system.addEntities([serviceA]);
+    system.addEntities([infrastructureA, infrastructureB]);
+    system.addEntities([deploymentMappingA, deploymentMappingB]);
+
+    let measureValue = componentMeasureImplementations["storageReplicationLevel"]({ entity: serviceA, system: system });
+    expect(measureValue).toEqual("n/a");
+})
+
+test("storageReplicationLevel", () => {
+
+    let system = new System("sys1", "testSystem");;
+    let infrastructureA = new Infrastructure("i1", "Infrastructure 1", getEmptyMetaData());
+    let infrastructureB = new Infrastructure("i2", "Infrastruture B", getEmptyMetaData());
+    let sbs = new StorageBackingService("s1", "testService", getEmptyMetaData());
+
+    let deploymentMappingA = new DeploymentMapping("dm1", sbs, infrastructureA);
+    deploymentMappingA.setPropertyValue("replicas", 2);
+
+    let deploymentMappingB = new DeploymentMapping("dm2", sbs, infrastructureB);
+    deploymentMappingB.setPropertyValue("replicas", 5);
+
+    system.addEntities([sbs]);
+    system.addEntities([infrastructureA, infrastructureB]);
+    system.addEntities([deploymentMappingA, deploymentMappingB]);
+
+    let measureValue = componentMeasureImplementations["storageReplicationLevel"]({ entity: sbs, system: system });
+    expect(measureValue).toEqual(7);
 })

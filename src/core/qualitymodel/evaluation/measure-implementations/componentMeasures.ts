@@ -1,5 +1,5 @@
 
-import { Component, Endpoint, Service, StorageBackingService } from "../../../entities.js";
+import { Component, Endpoint, Service, StorageBackingService, System } from "../../../entities.js";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure.js";
 import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, PROTOCOLS_SUPPORTING_TLS, SYNCHRONOUS_ENDPOINT_KIND } from "../../specifications/featureModel.js";
 import { average } from "./general-functions.js";
@@ -504,6 +504,40 @@ export const numberOfLinksWithComplexFailover: Calculation = (parameters: Calcul
 }
 
 
+export const countReplicasOfThisComponent: (component: Component, system: System) => number = (component, system) => {
+
+    let replicas: number = 0;
+    for (const [id, deploymentMapping] of system.getDeploymentMappingEntities.entries()) {
+        let deployedEntity = deploymentMapping.getDeployedEntity
+        if (deployedEntity.getId === component.getId) {
+            let noOfReplicas = deploymentMapping.getProperties().find(prop => prop.getKey === "replicas").value
+            replicas += noOfReplicas;
+        }
+    }
+    return replicas;
+} 
+
+export const serviceReplicationLevel: Calculation = (parameters: CalculationParameters<Component>) => {
+
+   return countReplicasOfThisComponent(parameters.entity, parameters.system);
+}
+
+export const amountOfRedundancy: Calculation = (parameters: CalculationParameters<Component>) => {
+
+    let deploymentMappingsForThisComponent = [...parameters.system.getDeploymentMappingEntities.values()].filter(deploymentMapping => deploymentMapping.getDeployedEntity.getId === parameters.entity.getId);
+
+    return deploymentMappingsForThisComponent.length;
+}
+
+export const storageReplicationLevel: Calculation = (parameters: CalculationParameters<Component>) => {
+
+    if (parameters.entity.constructor.name !== StorageBackingService.name) {
+        return "n/a";
+    }
+    
+    return countReplicasOfThisComponent(parameters.entity, parameters.system);
+}
+
 export const componentMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
     "ratioOfExternalEndpointsSupportingTls": ratioOfExternalEndpointsSupportingTls,
@@ -541,6 +575,9 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "numberOfReadEndpointsProvidedByAService": numberOfReadEndpointsProvidedByAService,
     "numberOfWriteEndpointsProvidedByAService": numberOfWriteEndpointsProvidedByAService,
     "numberOfLinksWithRetryLogic": numberOfLinksWithRetryLogic,
-    "numberOfLinksWithComplexFailover": numberOfLinksWithComplexFailover
+    "numberOfLinksWithComplexFailover": numberOfLinksWithComplexFailover,
+    "serviceReplicationLevel": serviceReplicationLevel,
+    "amountOfRedundancy": amountOfRedundancy,
+    "storageReplicationLevel": storageReplicationLevel
 }
 

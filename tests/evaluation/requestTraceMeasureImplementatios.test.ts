@@ -1282,3 +1282,55 @@ test("numberOfLinksWithComplexFailover", () => {
     let measureValue = requestTraceMeasureImplementations["numberOfLinksWithComplexFailover"]({ entity: requestTrace, system: system });
     expect(measureValue).toEqual(1);
 })
+
+test("amountOfRedundancy", () => {
+    let system = new System("sys1", "testSystem");
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    let infrastructureB = new Infrastructure("i2", "infratstructure 2", getEmptyMetaData());
+
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA);
+    serviceA.addEndpoint(externalEndpointA);
+    let deploymentMappingAA = new DeploymentMapping("dm1", serviceA, infrastructureA);
+    let deploymentMappingAB = new DeploymentMapping("dm2", serviceA, infrastructureB);
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+    let deploymentMappingBA = new DeploymentMapping("dm3", serviceB, infrastructureA);
+    let deploymentMappingBB = new DeploymentMapping("dm4", serviceB, infrastructureB);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+    let deploymentMappingC = new DeploymentMapping("dm5", serviceC, infrastructureB);
+
+    let serviceD = new Service("s4", "testService", getEmptyMetaData());
+    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    serviceD.addEndpoint(endpointD);
+    let deploymentMappingD = new DeploymentMapping("dm6", serviceD, infrastructureB);
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+    let linkBC = new Link("l2", serviceB, endpointC);
+    let linkCD = new Link("l3", serviceC, endpointD);
+
+    let requestTrace = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
+    requestTrace.setLinks = [[linkAB], [linkBC], [linkCD]];
+    requestTrace.setExternalEndpoint = externalEndpointA;
+
+
+    system.addEntities([infrastructureA, infrastructureB]);
+    system.addEntities([serviceA, serviceB, serviceC, serviceD]);
+    system.addEntities([deploymentMappingAA, deploymentMappingAB, deploymentMappingBA, deploymentMappingBB, deploymentMappingC, deploymentMappingD]);
+    system.addEntities([linkAB, linkBC, linkCD]);
+    system.addEntity(requestTrace);
+
+    let measureValue = requestTraceMeasureImplementations["amountOfRedundancy"]({ entity: requestTrace, system: system });
+    expect(measureValue).toEqual(6/4);
+
+
+})
