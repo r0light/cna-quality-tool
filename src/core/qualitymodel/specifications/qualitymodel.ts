@@ -1752,7 +1752,7 @@ const measures = {
         "name": "Level of sharding across storage backing services",
         "calculation": "Average number of shards per Storage Backing Service",
         "sources": ["new"],
-        "applicableEntities": [ENTITIES.SYSTEM],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
     },
     "ratioOfCachedDataAggregates": {
         "name": "Ratio of Cached Data Aggregates",
@@ -1833,10 +1833,32 @@ const productFactorEvaluations = [
         "impactsInterpretation": "mean"
     },
     {
+        "targetFactor": "replication",
+        "targetEntity": ENTITIES.REQUEST_TRACE,
+        "evaluation": "aggregateImpacts",
+        "reasoning": "Replication can be achieved in different ways, each way already having a positive impact. Therefore if any of the underlying factors is present, replication is increased.",
+        "precondition": "at-least-one",
+        "impactsInterpretation": "mean"
+    },
+    {
+        "targetFactor": "replication",
+        "targetEntity": ENTITIES.COMPONENT,
+        "evaluation": "aggregateImpacts",
+        "reasoning": "Replication can be achieved in different ways, each way already having a positive impact. Therefore if any of the underlying factors is present, replication is increased.",
+        "precondition": "at-least-one",
+        "impactsInterpretation": "mean"
+    },
+    {
         "targetFactor": "shardedDataStoreReplication",
         "targetEntity": ENTITIES.SYSTEM,
         "evaluation": "shardedDataStoreReplication",
         "reasoning": "Sharding is a specific form of replication and is measured by the amount of shards used by each storage backing service."
+    },
+    {
+        "targetFactor": "shardedDataStoreReplication",
+        "targetEntity": ENTITIES.REQUEST_TRACE,
+        "evaluation": "shardedDataStoreReplication",
+        "reasoning": "Sharding is a specific form of replication and is measured by the amount of shards used by storage backing services included in a request trace."
     },
     {
         "targetFactor": "verticalDataReplication",
@@ -1865,9 +1887,23 @@ const qualityAspectEvaluations = [
     {
         "targetAspect": "timeBehaviour",
         "evaluation": "aggregateImpacts",
-        "reasoning": "TODO",
+        "reasoning": "Different fators can influcence the time-behaviour of an application in various ways. Theses influences are not necessarily comparable in the sense that a positive impact could neutralize a negative impact or the other way around. The aspect therefore only provides an overview, but individual impacts need to be reviewed independently.",
         "precondition": "at-least-one",
-        "impactsInterpretation": "mean"
+        "impactsInterpretation": "median"
+    },
+    {
+        "targetAspect": "availability",
+        "evaluation": "aggregateImpacts",
+        "reasoning": "The availability of an application can be influenced in different ways, considering different failure scenarios. The impacts on this aspect are therefore difficult to aggregate in a reasonable way. While this evaluation aims to provide an overview, individual impacts nevertheless need to be reviewed separately.",
+        "precondition": "at-least-one",
+        "impactsInterpretation": "median"
+    },
+    {
+        "targetAspect": "analyzability",
+        "evaluation": "aggregateImpacts",
+        "reasoning": "The analyzability of an application can be influenced in different ways and depends on the specific goal for which a software is analyzed (debugging, refactoring, extension...). The impacts on this aspect are therefore difficult to aggregate. While this evaluation aims to provide an overview, individual impacts nevertheless need to be reviewed separately.",
+        "precondition": "at-least-one",
+        "impactsInterpretation": "median"
     }
 ] satisfies QualityAspectEvaluationSpec[]
 

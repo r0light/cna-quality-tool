@@ -1560,6 +1560,7 @@ class SystemEntityManager {
 
     #createRequestTraceCell(requestTrace: Entities.RequestTrace, elements: dia.Element[], edges: dia.Link[]) {
         let newRequestTrace = new RequestTraceElement({
+            id: requestTrace.getId,
             position: { x: requestTrace.getMetaData.position.xCoord, y: requestTrace.getMetaData.position.yCoord },
             size: { width: requestTrace.getMetaData.size.width, height: requestTrace.getMetaData.size.height },
             attrs: {

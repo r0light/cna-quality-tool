@@ -1331,6 +1331,54 @@ test("amountOfRedundancy", () => {
 
     let measureValue = requestTraceMeasureImplementations["amountOfRedundancy"]({ entity: requestTrace, system: system });
     expect(measureValue).toEqual(6/4);
+})
 
+test("dataShardingLevel", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService A", getEmptyMetaData());
+    let externalEndpoint = new ExternalEndpoint("ee1", "external endpoint", getEmptyMetaData());
+    serviceA.addEndpoint(externalEndpoint);
+
+    let serviceB = new Service("s2", "testService B", getEmptyMetaData());
+    let endpointB = new Endpoint("e2", "endpoint B", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+
+    let serviceC = new Service("s3", "testService C", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint C", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+
+    let storageServiceA = new StorageBackingService("sbs1", "storage service A", getEmptyMetaData());
+    storageServiceA.setPropertyValue("shards", 1);
+    let endpointSA = new Endpoint("e4", "endpoint SA", getEmptyMetaData());
+    storageServiceA.addEndpoint(endpointSA);
+
+    let storageServiceB = new StorageBackingService("sbs2", "storage service B", getEmptyMetaData());
+    let endpointSB = new Endpoint("e5", "endpoint SB", getEmptyMetaData());
+    storageServiceB.addEndpoint(endpointSB);
+    storageServiceA.setPropertyValue("shards", 3);
+
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+    let linkBSA = new Link("l2", serviceB, endpointSA);
+    let linkBC = new Link("l3", serviceB, endpointC);
+    let linkCSB = new Link("l4", serviceC, endpointSB);
+
+    let requestTrace = new RequestTrace("r1", "request trace 1", getEmptyMetaData());
+    requestTrace.setLinks = [
+        [linkAB],
+        [linkBSA, linkBC],
+        [linkCSB]
+    ]
+    requestTrace.setExternalEndpoint = externalEndpoint;
+
+    system.addEntities([serviceA, serviceB, serviceC]);
+    system.addEntities([storageServiceA, storageServiceB]);
+    system.addEntities([linkAB, linkBSA, linkBC, linkCSB]);
+    system.addEntities([requestTrace]);
+
+
+    let measureValue = requestTraceMeasureImplementations["dataShardingLevel"]({ entity: requestTrace, system: system });
+    expect(measureValue).toEqual(2);
 
 })

@@ -442,6 +442,20 @@ export const amountOfRedundancy: Calculation = (parameters: CalculationParameter
 }
 
 
+export const dataShardingLevel: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+
+    let includedStorageBackingServices= getIncludedComponents(parameters.entity, parameters.system).filter(entity => entity.constructor.name === StorageBackingService.name);
+
+    if (includedStorageBackingServices.length === 0) {
+        return "n/a";
+    } else {
+        return average(includedStorageBackingServices
+            .map(storageService => storageService.getProperties()
+                .find(prop => prop.getKey === "shards").value)
+        );
+    }
+}
+
 export const requestTraceMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
     "ratioOfSecuredLinks": ratioOfSecuredLinks,
@@ -468,6 +482,7 @@ export const requestTraceMeasureImplementations: { [measureKey: string]: Calcula
     "numberOfAvailabilityZonesUsed": numberOfAvailabilityZonesUsed,
     "numberOfLinksWithRetryLogic": numberOfLinksWithRetryLogic,
     "numberOfLinksWithComplexFailover": numberOfLinksWithComplexFailover,
-    "amountOfRedundancy": amountOfRedundancy
+    "amountOfRedundancy": amountOfRedundancy,
+    "dataShardingLevel": dataShardingLevel
 }
 
