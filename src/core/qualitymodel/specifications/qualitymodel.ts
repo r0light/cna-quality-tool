@@ -849,7 +849,7 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.ENDPOINT, ENTITIES.LINK, ENTITIES.BACKING_SERVICE, ENTITIES.PROXY_BACKING_SERVICE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Indrasiri2021", "section": "3 Sidecar Pattern, Service Mesh Pattern, Service Abstraction Pattern (Proxy communication with services to include service discovery and load balancing)" }, { "key": "Davis2019", "section": "10.3" }, { "key": "Richardson2019", "section": "11.4.2" }],
-        "measures": ["serviceInteractionViaBackingService"]
+        "measures": ["serviceMeshUsage"]
     }
 } satisfies { [productFactorKey: string]: ProductFactorSpec }
 
@@ -1840,6 +1840,12 @@ const measures = {
         "calculation": "Average(Replication of Data Aggregates along request trace)",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.REQUEST_TRACE],
+    },
+    "serviceMeshUsage": {
+        "name": "Service Mesh Usage",
+        "calculation": "Average(Component Communcation proxied by Service Mesh)",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE]
     }
 } satisfies { [measureKey: string]: MeasureSpec }
 
@@ -1946,7 +1952,25 @@ const productFactorEvaluations = [
         "targetEntity": ENTITIES.REQUEST_TRACE,
         "evaluation": "requestTraceVerticalDataReplication",
         "reasoning": "Data is replicated vertically if data aggregates used throughout a request trace are cached by the involved components."
-    }
+    },
+    {
+        "targetFactor": "consistentlyMediatedCommunication",
+        "targetEntity": ENTITIES.REQUEST_TRACE,
+        "evaluation": "consistentlyMediatedCommunication",
+        "reasoning": "Communication is mediated, if ingress and egress of components is proxied for example by a service mesh"
+    },
+    {
+        "targetFactor": "consistentlyMediatedCommunication",
+        "targetEntity": ENTITIES.COMPONENT,
+        "evaluation": "consistentlyMediatedCommunication",
+        "reasoning": "Communication is mediated, if ingress and egress of components is proxied for example by a service mesh"
+    },
+    {
+        "targetFactor": "consistentlyMediatedCommunication",
+        "targetEntity": ENTITIES.SYSTEM,
+        "evaluation": "consistentlyMediatedCommunication",
+        "reasoning": "Communication is mediated, if ingress and egress of components is proxied for example by a service mesh"
+    },
 ] satisfies ProductFactorEvaluationSpec[]
 
 type QualityAspectEvaluationSpec = {

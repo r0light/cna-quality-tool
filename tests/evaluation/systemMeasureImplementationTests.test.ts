@@ -5,7 +5,7 @@ import { RelationToDataAggregate } from "@/core/entities/relationToDataAggregate
 import { systemMeasureImplementations } from "@/core/qualitymodel/evaluation/measure-implementations/systemMeasures";
 import { getQualityModel } from "@/core/qualitymodel/QualityModelInstance";
 import { ENTITIES } from "@/core/qualitymodel/specifications/entities";
-import { ASYNCHRONOUS_ENDPOINT_KIND, COMMAND_ENDPOINT_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, QUERY_ENDPOINT_KIND, SEND_EVENT_ENDPOINT_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "@/core/qualitymodel/specifications/featureModel";
+import { ASYNCHRONOUS_ENDPOINT_KIND, COMMAND_ENDPOINT_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, QUERY_ENDPOINT_KIND, SEND_EVENT_ENDPOINT_KIND, SERVICE_MESH_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "@/core/qualitymodel/specifications/featureModel";
 import { backingDataSvgRepresentation } from "@/modeling/config/detailsSidebarConfig";
 import { beforeAll, expect, test } from "vitest"
 
@@ -2477,4 +2477,24 @@ test("smallestReplicationValue", () => {
 
     let measureValue = systemMeasureImplementations["smallestReplicationValue"]({ entity: system, system: system });
     expect(measureValue).toEqual(1);
+})
+
+
+test("serviceMeshUsage", () => {
+    let system = new System("sys1", "testSystem");
+    let proxyA = new ProxyBackingService("p1", "proxy 1", getEmptyMetaData());
+    proxyA.setPropertyValue("kind", SERVICE_MESH_KIND);
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    serviceA.setIngressProxiedBy = proxyA;
+    serviceA.setEgressProxiedBy = proxyA;
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    serviceB.setIngressProxiedBy = proxyA;
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    serviceC.setIngressProxiedBy = proxyA;
+
+    system.addEntities([proxyA]);
+    system.addEntities([serviceA, serviceB, serviceC]);
+
+    let measureValue = systemMeasureImplementations["serviceMeshUsage"]({ entity: system, system: system });
+    expect(measureValue).toEqual(2/3);
 })

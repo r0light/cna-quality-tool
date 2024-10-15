@@ -1,7 +1,7 @@
 
 import { Component, Endpoint, Service, StorageBackingService, System } from "../../../entities.js";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure.js";
-import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, PROTOCOLS_SUPPORTING_TLS, SYNCHRONOUS_ENDPOINT_KIND } from "../../specifications/featureModel.js";
+import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, PROTOCOLS_SUPPORTING_TLS, SERVICE_MESH_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "../../specifications/featureModel.js";
 import { average } from "./general-functions.js";
 
 
@@ -538,6 +538,23 @@ export const storageReplicationLevel: Calculation = (parameters: CalculationPara
     return countReplicasOfThisComponent(parameters.entity, parameters.system);
 }
 
+export const serviceMeshUsage: Calculation = (parameters: CalculationParameters<Component>) => {
+    
+    let usage = 0;
+
+    let outgoingProxy = parameters.entity.getEgressProxiedBy;
+    if (outgoingProxy && outgoingProxy.getProperty("kind").value === SERVICE_MESH_KIND) {
+        usage += 0.5;
+    }
+
+    let incomingProxy = parameters.entity.getIngressProxiedBy;
+    if (incomingProxy && incomingProxy.getProperty("kind").value === SERVICE_MESH_KIND) {
+        usage += 0.5;
+    }
+
+    return usage;
+}
+
 export const componentMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
     "ratioOfExternalEndpointsSupportingTls": ratioOfExternalEndpointsSupportingTls,
@@ -578,6 +595,7 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "numberOfLinksWithComplexFailover": numberOfLinksWithComplexFailover,
     "serviceReplicationLevel": serviceReplicationLevel,
     "amountOfRedundancy": amountOfRedundancy,
-    "storageReplicationLevel": storageReplicationLevel
+    "storageReplicationLevel": storageReplicationLevel,
+    "serviceMeshUsage": serviceMeshUsage
 }
 

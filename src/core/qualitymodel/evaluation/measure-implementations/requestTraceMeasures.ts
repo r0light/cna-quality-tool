@@ -1,11 +1,12 @@
-import { BackingService, Component, Infrastructure, RequestTrace, Service, StorageBackingService, System } from "@/core/entities";
+import { BackingService, Component, Infrastructure, ProxyBackingService, RequestTrace, Service, StorageBackingService, System } from "@/core/entities";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure";
 import { average, lowest, median } from "./general-functions";
 import { calculateRatioOfEndpointsSupportingSsl, providesHealthAndReadinessEndpoints } from "./componentMeasures";
 import { calculateNumberOfLinksWithServiceDiscovery, calculateRatioOfLinksToAsynchronousEndpoints, calculateRatioOfSecuredLinks, calculateRatioOfStatefulComponents, calculateRatioOfStatelessComponents, calculateReplicasPerService, countComponentsConnectedToCertainEndpoints, getServiceInteractions } from "./systemMeasures";
-import { EVENT_SOURCING_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "../../specifications/featureModel";
+import { EVENT_SOURCING_KIND, SERVICE_MESH_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "../../specifications/featureModel";
 import { supportsMonitoring as infrastructureSupportsMonitoring } from "./infrastructureMeasures";
 import { supportsMonitoring as componentSupportsMonitoring } from "./componentMeasures";
+import { serviceMeshUsage as componentServiceMeshUsage } from "./componentMeasures";
 
 export const getIncludedComponents: (requestTrace: RequestTrace, system: System) => Component[] = (requestTrace, system) => {
     let includedUniqueComponents = new Set(requestTrace.getLinks
@@ -456,6 +457,15 @@ export const dataShardingLevel: Calculation = (parameters: CalculationParameters
     }
 }
 
+export const serviceMeshUsage: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+
+    let includedComponents =  getIncludedComponents(parameters.entity, parameters.system);
+
+    const componentsToEvaluate = includedComponents.filter(component => component.constructor.name !== ProxyBackingService.name || component.getProperty("kind").value !== SERVICE_MESH_KIND);
+
+    return average(componentsToEvaluate.map(component => componentServiceMeshUsage({entity: component, system: parameters.system}) as number));
+}
+
 export const requestTraceMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
     "ratioOfSecuredLinks": ratioOfSecuredLinks,
@@ -483,6 +493,7 @@ export const requestTraceMeasureImplementations: { [measureKey: string]: Calcula
     "numberOfLinksWithRetryLogic": numberOfLinksWithRetryLogic,
     "numberOfLinksWithComplexFailover": numberOfLinksWithComplexFailover,
     "amountOfRedundancy": amountOfRedundancy,
-    "dataShardingLevel": dataShardingLevel
+    "dataShardingLevel": dataShardingLevel,
+    "serviceMeshUsage": serviceMeshUsage
 }
 

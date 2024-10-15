@@ -1,11 +1,12 @@
 import { BackingService, BrokerBackingService, Component, Infrastructure, Link, ProxyBackingService, Service, StorageBackingService, System } from "@/core/entities";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure";
 import { average, median, lowest, partition } from "./general-functions";
-import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, EVENT_SOURCING_KIND, getEndpointKindWeight, getUsageRelationWeight, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MESSAGE_BROKER_KIND, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SEND_EVENT_ENDPOINT_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "../../specifications/featureModel";
+import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, EVENT_SOURCING_KIND, getEndpointKindWeight, getUsageRelationWeight, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MESSAGE_BROKER_KIND, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SEND_EVENT_ENDPOINT_KIND, SERVICE_MESH_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "../../specifications/featureModel";
 import { calculateRatioOfEndpointsSupportingSsl, calculateRatioOfExternalEndpointsSupportingTls, numberOfAsynchronousEndpointsOfferedByAService, numberOfComponentsAComponentIsLinkedTo, numberOfSynchronousEndpointsOfferedByAService, providesHealthAndReadinessEndpoints, serviceCouplingBasedOnEndpointEntropy } from "./componentMeasures";
 import { numberOfCyclesInRequestTraces, requestTraceComplexity } from "./requestTraceMeasures";
 import { supportsMonitoring as infrastructureSupportsMonitoring} from "./infrastructureMeasures";
 import { supportsMonitoring as componentSupportsMonitoring} from "./componentMeasures";
+import { serviceMeshUsage as componentServiceMeshUsage } from "./componentMeasures";
 
 
 export const countComponentsConnectedToCertainEndpoints: (components: Component[], endpointIds: Set<string>, system: System) => number = (components, endpointIds, system) => {
@@ -1551,6 +1552,13 @@ export const ratioOfStateDependencyOfEndpoints: Calculation = (parameters: Calcu
     return numberOfDependingEndpoints / allEndpoints.length;
 }
 
+export const serviceMeshUsage: Calculation = (parameters: CalculationParameters<System>) => {
+
+    const componentsToEvaluate = [...parameters.entity.getComponentEntities.values()].filter(component => component.constructor.name !== ProxyBackingService.name || component.getProperty("kind").value !== SERVICE_MESH_KIND);
+
+    return average(componentsToEvaluate.map(component => componentServiceMeshUsage({entity: component, system: parameters.system}) as number));
+}
+
 
 export const systemMeasureImplementations: { [measureKey: string]: Calculation } = {
     "serviceReplicationLevel": serviceReplicationLevel,
@@ -1625,5 +1633,6 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation }
     "ratioOfComponentsWhoseIngressIsProxied": ratioOfComponentsWhoseIngressIsProxied,
     "ratioOfComponentsWhoseEgressIsProxied": ratioOfComponentsWhoseEgressIsProxied,
     "ratioOfCachedDataAggregates": ratioOfCachedDataAggregates,
-    "ratioOfStateDependencyOfEndpoints": ratioOfStateDependencyOfEndpoints
+    "ratioOfStateDependencyOfEndpoints": ratioOfStateDependencyOfEndpoints,
+    "serviceMeshUsage": serviceMeshUsage
 }

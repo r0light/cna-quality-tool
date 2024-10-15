@@ -1,10 +1,10 @@
 import { getEmptyMetaData } from "@/core/common/entityDataTypes";
-import { DataAggregate, DeploymentMapping, Endpoint, ExternalEndpoint, Infrastructure, Link, Service, StorageBackingService, System } from "@/core/entities";
+import { DataAggregate, DeploymentMapping, Endpoint, ExternalEndpoint, Infrastructure, Link, ProxyBackingService, Service, StorageBackingService, System } from "@/core/entities";
 import { RelationToDataAggregate } from "@/core/entities/relationToDataAggregate";
 import { componentMeasureImplementations } from "@/core/qualitymodel/evaluation/measure-implementations/componentMeasures";
 import { getQualityModel } from "@/core/qualitymodel/QualityModelInstance";
 import { ENTITIES } from "@/core/qualitymodel/specifications/entities";
-import { ASYNCHRONOUS_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "@/core/qualitymodel/specifications/featureModel";
+import { ASYNCHRONOUS_ENDPOINT_KIND, SERVICE_MESH_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "@/core/qualitymodel/specifications/featureModel";
 import { expect, test } from "vitest";
 
 
@@ -1233,4 +1233,21 @@ test("storageReplicationLevel", () => {
 
     let measureValue = componentMeasureImplementations["storageReplicationLevel"]({ entity: sbs, system: system });
     expect(measureValue).toEqual(7);
+})
+
+
+test("serviceMeshUsage", () => {
+
+    let system = new System("sys1", "testSystem");
+    let proxyA = new ProxyBackingService("p1", "proxy 1", getEmptyMetaData());
+    proxyA.setPropertyValue("kind", SERVICE_MESH_KIND);
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    serviceA.setIngressProxiedBy = proxyA;
+
+    system.addEntities([proxyA]);
+    system.addEntities([serviceA]);
+
+    let measureValue = componentMeasureImplementations["serviceMeshUsage"]({ entity: serviceA, system: system });
+    expect(measureValue).toEqual(0.5);
+
 })

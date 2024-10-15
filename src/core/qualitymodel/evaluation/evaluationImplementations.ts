@@ -1,5 +1,6 @@
 import { FactorEvaluationFunction, FactorEvaluationParameters, ImpactWeight, impactWeightNumericMapping, interpretNumericalResultAsFactorEvaluation, linearNumericalMapping } from "./Evaluation";
 import { ProductFactorKey } from "../specifications/qualitymodel";
+import { param } from "jquery";
 
 const mean: (list: number[]) => number = list => {
     return list.reduce((e1, e2) => e1 + e2, 0) / list.length
@@ -148,6 +149,17 @@ const productFactorEvaluationImplementation: {
             return linearNumericalMapping(requestTraceVerticalReplication);
         } else {
             throw new Error(`dataReplicationAlongRequestTrace is of type ${typeof requestTraceVerticalReplication}, but should be of type number`);
+        }
+    },
+    "consistentlyMediatedCommunication": (parameters) => {
+        let serviceMeshUsage = parameters.calculatedMeasures.get("serviceMeshUsage").value;
+
+        if (serviceMeshUsage === "n/a") {
+            return "n/a";
+        } else if (typeof serviceMeshUsage === "number") {
+            return linearNumericalMapping(serviceMeshUsage);
+        } else {
+            throw new Error(`dataReplicationAlongRequestTrace is of type ${typeof serviceMeshUsage}, but should be of type number`);
         }
     }
 };

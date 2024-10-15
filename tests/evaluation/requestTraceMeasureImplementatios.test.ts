@@ -1,11 +1,12 @@
 import { getEmptyMetaData } from "@/core/common/entityDataTypes";
-import { BackingData, BackingService, BrokerBackingService, DataAggregate, DeploymentMapping, Endpoint, ExternalEndpoint, Infrastructure, Link, RequestTrace, Service, StorageBackingService, System } from "@/core/entities";
+import { BackingData, BackingService, BrokerBackingService, DataAggregate, DeploymentMapping, Endpoint, ExternalEndpoint, Infrastructure, Link, ProxyBackingService, RequestTrace, Service, StorageBackingService, System } from "@/core/entities";
 import { RelationToBackingData } from "@/core/entities/relationToBackingData";
 import { RelationToDataAggregate } from "@/core/entities/relationToDataAggregate";
 import { requestTraceMeasureImplementations } from "@/core/qualitymodel/evaluation/measure-implementations/requestTraceMeasures";
+import { systemMeasureImplementations } from "@/core/qualitymodel/evaluation/measure-implementations/systemMeasures";
 import { getQualityModel } from "@/core/qualitymodel/QualityModelInstance";
 import { ENTITIES } from "@/core/qualitymodel/specifications/entities";
-import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, COMMAND_ENDPOINT_KIND, QUERY_ENDPOINT_KIND, SEND_EVENT_ENDPOINT_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "@/core/qualitymodel/specifications/featureModel";
+import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, COMMAND_ENDPOINT_KIND, QUERY_ENDPOINT_KIND, SEND_EVENT_ENDPOINT_KIND, SERVICE_MESH_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "@/core/qualitymodel/specifications/featureModel";
 import { expect, test } from "vitest";
 
 test("all implementation names refer to an existing measure", () => {
@@ -1381,4 +1382,43 @@ test("dataShardingLevel", () => {
     let measureValue = requestTraceMeasureImplementations["dataShardingLevel"]({ entity: requestTrace, system: system });
     expect(measureValue).toEqual(2);
 
+})
+
+test("serviceMeshUsage", () => {
+    let system = new System("sys1", "testSystem");
+
+    let proxyA = new ProxyBackingService("p1", "proxy 1", getEmptyMetaData());
+    proxyA.setPropertyValue("kind", SERVICE_MESH_KIND);
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA);
+    serviceA.addEndpoint(externalEndpointA);
+    serviceA.setIngressProxiedBy = proxyA;
+    serviceA.setEgressProxiedBy = proxyA;
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+    serviceB.setIngressProxiedBy = proxyA;
+    serviceB.setEgressProxiedBy = proxyA;
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+
+    let requestTrace = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
+    requestTrace.setLinks = [[linkAB]];
+    requestTrace.setExternalEndpoint = externalEndpointA;
+
+    system.addEntity(proxyA);
+    system.addEntities([serviceA, serviceB, serviceC]);
+    system.addEntities([linkAB]);
+    system.addEntity(requestTrace);
+
+    let measureValue = requestTraceMeasureImplementations["serviceMeshUsage"]({ entity: requestTrace, system: system });
+    expect(measureValue).toEqual(1);
 })
