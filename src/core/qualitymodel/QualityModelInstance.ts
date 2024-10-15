@@ -90,7 +90,8 @@ function getQualityModel(): QualityModelInstance {
 
         let newProductFactor = new ProductFactor(productFactorKey as ProductFactorKey, productFactor.name, productFactor.description, productFactor.categories);
 
-        productFactor.applicableEntities.forEach(entity => newProductFactor.addRelevantEntity(entity));
+        productFactor.relevantEntities.forEach(entity => newProductFactor.addRelevantEntity(entity));
+        productFactor.applicableEntities.forEach(entity => newProductFactor.addApplicableEntity(entity));
         productFactor.sources.forEach(source => {
             let url = literature[source.key] ? literature[source.key].url : "";
             newProductFactor.addSource(new LiteratureSource(source.key, source.section, url));

@@ -15,6 +15,7 @@ class ProductFactor {
     #description: string;
     #categories: FactorCategoryKey[];
     #relevantEntities: `${ENTITIES}`[];
+    #applicableEntities: `${ENTITIES}`[];
     #sources: LiteratureSource[];
     #measures: Map<`${ENTITIES}`,Measure[]>;
     #evaluations: Map<`${ENTITIES}`,FactorEvaluation>;
@@ -28,6 +29,7 @@ class ProductFactor {
         this.#description = description;
         this.#categories = categories;
         this.#relevantEntities = [];
+        this.#applicableEntities = [];
         this.#sources = [];
         this.#measures = new Map();
         this.#evaluations = new Map();
@@ -62,6 +64,10 @@ class ProductFactor {
         return this.#relevantEntities;
     }
 
+    get getApplicableEntities() {
+        return this.#applicableEntities;
+    }
+
     get getSources() {
         return this.#sources;
     }
@@ -76,6 +82,10 @@ class ProductFactor {
 
     addRelevantEntity(entity: `${ENTITIES}`) {
         this.#relevantEntities.push(entity);
+    }
+
+    addApplicableEntity(entity: `${ENTITIES}`) {
+        this.#applicableEntities.push(entity);
     }
 
     addSource(literatureSource: LiteratureSource) {
@@ -112,7 +122,9 @@ class ProductFactor {
     }
 
     getAllMeasures(): Measure[] {
-        return [...this.#measures.values()].flatMap(measures => measures);
+        let uniqueMeasures = new Map<string, Measure>();
+        [...this.#measures.values()].flatMap(measures => measures).forEach(measure => uniqueMeasures.set(measure.getId, measure));
+        return [...uniqueMeasures.values()];
     }
 
     getMeasuresFor(entity: `${ENTITIES}`) {

@@ -13,8 +13,13 @@
                         <h3>{{ selectedFactor.getName }}</h3>
                         <p class="font-italic">{{ selectedFactor.getDescription }}</p>
                         <div v-if="selectedFactor.getFactorType === 'productFactor'">
-                            <span>Entities which are relevant for this factor: </span><br><span>{{ (selectedFactor as
+                            <span>Entities which are needed to evaluate this factor: </span><br><span>{{ (selectedFactor as
                                 ProductFactor).getRelevantEntities.map(entityKey => entities[entityKey].name).join(", ")
+                                }}</span>
+                        </div>
+                        <div v-if="selectedFactor.getFactorType === 'productFactor'">
+                            <span>Entities based on which this factor can be evaluated: </span><br><span>{{ (selectedFactor as
+                                ProductFactor).getApplicableEntities.map(entityKey => entities[entityKey].name).join(", ")
                                 }}</span>
                         </div>
                         <div v-if="selectedFactor.getFactorType === 'productFactor'">
@@ -97,6 +102,7 @@ import { entities } from '@/core/qualitymodel/specifications/entities';
 import { orderQualityAspects, placeProductFactors, placeQualityAspects } from './placementAlgorithm';
 import FilterToolbar, { createFactorCategoryFilter, createHighLevelAspectFilter, getActiveElements, getActiveFilterItems, ItemFilter } from './FilterToolbar.vue';
 import { useRouter } from 'vue-router';
+import { ProductFactorKey, QualityAspectKey } from '@/core/qualitymodel/specifications/qualitymodel';
 
 type QualityModelFilterConfig = {
     highLevelAspectFilter: ItemFilter,
@@ -149,11 +155,11 @@ const selectedFactor: ComputedRef<ProductFactor | QualityAspect> = computed(() =
     if (!selectedElement.value) {
         return null;
     }
-    let factor = qualityModel.findQualityAspect(selectedElement.value.model.id.toString());
+    let factor = qualityModel.findQualityAspect(selectedElement.value.model.id.toString() as QualityAspectKey);
     if (factor) {
         return factor;
     } else {
-        return qualityModel.findProductFactor(selectedElement.value.model.id.toString());
+        return qualityModel.findProductFactor(selectedElement.value.model.id.toString() as ProductFactorKey);
     }
 });
 
