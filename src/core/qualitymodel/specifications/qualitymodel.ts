@@ -550,7 +550,7 @@ const productFactors = {
         "description": "In a link from one component to another the specific addresses for reaching the other component is not used, but instead an abstract address is used. That way, the specific addresses of components can be changed without impacting the link between components. This can be achieved for example through service discovery where components are addressed through abstract service names and specific addresses are resolved through service discovery which can be implemented in the infrastructure or a backing service.",
         "categories": ["networkCommunication"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.LINK, ENTITIES.BACKING_SERVICE, ENTITIES.INFRASTRUCTURE],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.LINK],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.LINK, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Davis2019", "section": "8.3" }, { "key": "Ibryam2020", "section": "12 Service Discovery" }, { "key": "Richardson2019", "section": "Using service discovery" }, { "key": "Garrison2017", "section": "7 Service Discovery" }, { "key": "Indrasiri2021", "section": "3 Service Registry and Discovery Pattern" }, { "key": "Bastani2017", "section": "7 Routing (Use service discovery with support for health checks and respect varying workloads)" }, { "key": "Indrasiri2021", "section": "3 Service Abstraction Pattern (Use an abstraction layer in front of services (for example Kubernetes Service))" }, { "key": "Goniwada2021", "section": "4 Service Discovery" }],
         "measures": ["serviceDiscoveryUsage"]
     },
@@ -1860,7 +1860,7 @@ export type IncomingImpactsInterpretation = "lowest" | "highest" | "mean" | "med
 
 type ProductFactorEvaluationSpec = {
     targetFactor: ProductFactorKey,
-    targetEntity: `${ENTITIES}`,
+    targetEntities: `${ENTITIES}`[],
     evaluation: string,
     reasoning: string,
     precondition?: EvaluationPrecondition,
@@ -1871,59 +1871,19 @@ type ProductFactorEvaluationSpec = {
 const productFactorEvaluations = [
     {
         "targetFactor": "serviceReplication",
-        "targetEntity": ENTITIES.COMPONENT,
+        "targetEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
         "evaluation": "serviceReplication",
         "reasoning": "Service replication is measured by the number of replicas for a service and the redudancy introduced by deploying it on multiple infrastructure instances."
     },
     {
-        "targetFactor": "serviceReplication",
-        "targetEntity": ENTITIES.SYSTEM,
-        "evaluation": "serviceReplication",
-        "reasoning": "Service replication is measured by the number of replicas per deployed service and the redundancy introduced by deploying a service on multiple infrastructure instances."
-    },
-    {
-        "targetFactor": "serviceReplication",
-        "targetEntity": ENTITIES.REQUEST_TRACE,
-        "evaluation": "serviceReplication",
-        "reasoning": "Service replication is measured by the number of replicas per service within a request trace."
-    },
-    {
         "targetFactor": "horizontalDataReplication",
-        "targetEntity": ENTITIES.SYSTEM,
+        "targetEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
         "evaluation": "horizontalDataReplication",
         "reasoning": "Horizontal data replication is measured by the number of replicas for storage backing services."
     },
     {
-        "targetFactor": "horizontalDataReplication",
-        "targetEntity": ENTITIES.REQUEST_TRACE,
-        "evaluation": "horizontalDataReplication",
-        "reasoning": "Horizontal data replication is measured by the number of replicas for storage backing services involved in the request trace."
-    },
-    {
-        "targetFactor": "horizontalDataReplication",
-        "targetEntity": ENTITIES.COMPONENT,
-        "evaluation": "horizontalDataReplication",
-        "reasoning": "Horizontal data replication is measured by the number of replicas for a storage backing service."
-    },
-    {
         "targetFactor": "replication",
-        "targetEntity": ENTITIES.SYSTEM,
-        "evaluation": "aggregateImpacts",
-        "reasoning": "Replication can be achieved in different ways, each way already having a positive impact. Therefore if any of the underlying factors is present, replication is increased.",
-        "precondition": "at-least-one",
-        "impactsInterpretation": "mean"
-    },
-    {
-        "targetFactor": "replication",
-        "targetEntity": ENTITIES.REQUEST_TRACE,
-        "evaluation": "aggregateImpacts",
-        "reasoning": "Replication can be achieved in different ways, each way already having a positive impact. Therefore if any of the underlying factors is present, replication is increased.",
-        "precondition": "at-least-one",
-        "impactsInterpretation": "mean"
-    },
-    {
-        "targetFactor": "replication",
-        "targetEntity": ENTITIES.COMPONENT,
+        "targetEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
         "evaluation": "aggregateImpacts",
         "reasoning": "Replication can be achieved in different ways, each way already having a positive impact. Therefore if any of the underlying factors is present, replication is increased.",
         "precondition": "at-least-one",
@@ -1931,46 +1891,34 @@ const productFactorEvaluations = [
     },
     {
         "targetFactor": "shardedDataStoreReplication",
-        "targetEntity": ENTITIES.SYSTEM,
+        "targetEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
         "evaluation": "shardedDataStoreReplication",
         "reasoning": "Sharding is a specific form of replication and is measured by the amount of shards used by each storage backing service."
     },
     {
-        "targetFactor": "shardedDataStoreReplication",
-        "targetEntity": ENTITIES.REQUEST_TRACE,
-        "evaluation": "shardedDataStoreReplication",
-        "reasoning": "Sharding is a specific form of replication and is measured by the amount of shards used by storage backing services included in a request trace."
-    },
-    {
         "targetFactor": "verticalDataReplication",
-        "targetEntity": ENTITIES.SYSTEM,
+        "targetEntities": [ENTITIES.SYSTEM],
         "evaluation": "systemVerticalDataReplication",
         "reasoning": "Data is replicated vertically if data aggregates are cached by those components using them."
     },
     {
         "targetFactor": "verticalDataReplication",
-        "targetEntity": ENTITIES.REQUEST_TRACE,
+        "targetEntities": [ENTITIES.REQUEST_TRACE],
         "evaluation": "requestTraceVerticalDataReplication",
         "reasoning": "Data is replicated vertically if data aggregates used throughout a request trace are cached by the involved components."
     },
     {
         "targetFactor": "consistentlyMediatedCommunication",
-        "targetEntity": ENTITIES.REQUEST_TRACE,
+        "targetEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
         "evaluation": "consistentlyMediatedCommunication",
         "reasoning": "Communication is mediated, if ingress and egress of components is proxied for example by a service mesh"
     },
     {
-        "targetFactor": "consistentlyMediatedCommunication",
-        "targetEntity": ENTITIES.COMPONENT,
-        "evaluation": "consistentlyMediatedCommunication",
-        "reasoning": "Communication is mediated, if ingress and egress of components is proxied for example by a service mesh"
-    },
-    {
-        "targetFactor": "consistentlyMediatedCommunication",
-        "targetEntity": ENTITIES.SYSTEM,
-        "evaluation": "consistentlyMediatedCommunication",
-        "reasoning": "Communication is mediated, if ingress and egress of components is proxied for example by a service mesh"
-    },
+        "targetFactor": "addressingAbstraction",
+        "targetEntities": [ENTITIES.LINK, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+        "evaluation": "addressingAbstraction",
+        "reasoning": "The more communication uses abstract addresses for communication partners, the higher is the adressing abstraction. Usage of abstract addresses can be measured by the usage of service discovery mechanisms."
+    }
 ] satisfies ProductFactorEvaluationSpec[]
 
 type QualityAspectEvaluationSpec = {

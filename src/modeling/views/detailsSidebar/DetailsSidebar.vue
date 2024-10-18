@@ -384,6 +384,7 @@ onUpdated(() => {
 
             const addressResolutionEntities = props.graph.getElements().filter(element =>
                 (element.prop("entity/type") === EntityTypes.BACKING_SERVICE && element.prop("entity/properties/providedFunctionality") === "naming/addressing")
+                || (element.prop("entity/type") === EntityTypes.PROXY_BACKING_SERVICE && element.prop("entity/properties/kind") === "Service Mesh")
                 || element.prop("entity/type") === EntityTypes.INFRASTRUCTURE
                 || element.prop("entity/type") === EntityTypes.NETWORK
             );

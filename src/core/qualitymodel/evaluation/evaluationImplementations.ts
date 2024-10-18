@@ -161,6 +161,17 @@ const productFactorEvaluationImplementation: {
         } else {
             throw new Error(`dataReplicationAlongRequestTrace is of type ${typeof serviceMeshUsage}, but should be of type number`);
         }
+    },
+    "addressingAbstraction": (parameters) => {
+        let serviceDiscoveryUsage = parameters.calculatedMeasures.get("serviceDiscoveryUsage").value;
+
+        if (serviceDiscoveryUsage === "n/a") {
+            return "n/a";
+        } else if (typeof serviceDiscoveryUsage === "number") {
+            return linearNumericalMapping(serviceDiscoveryUsage);
+        } else {
+            throw new Error(`dataReplicationAlongRequestTrace is of type ${typeof serviceDiscoveryUsage}, but should be of type number`);
+        }
     }
 };
 

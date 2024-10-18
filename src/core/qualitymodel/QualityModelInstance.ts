@@ -163,12 +163,16 @@ function getQualityModel(): QualityModelInstance {
             let availableImplementation = productFactorEvaluationImplementation[newEvaluation.getEvaluationId]
             if (availableImplementation) {
                 newEvaluation.addEvaluation(availableImplementation);
-                evaluatedProductFactor.addEvaluation(productFactorEvaluation.targetEntity, newEvaluation);
+                productFactorEvaluation.targetEntities.forEach(targetEntity => {
+                    evaluatedProductFactor.addEvaluation(targetEntity, newEvaluation);
+                })
             } else {
                 availableImplementation = generalEvaluationImplementation[newEvaluation.getEvaluationId];
                 if (availableImplementation) {
                     newEvaluation.addEvaluation(availableImplementation);
-                    evaluatedProductFactor.addEvaluation(productFactorEvaluation.targetEntity, newEvaluation);
+                    productFactorEvaluation.targetEntities.forEach(targetEntity => {
+                        evaluatedProductFactor.addEvaluation(targetEntity, newEvaluation);
+                    })
                 } else {
                     throw new Error(`No evaluation implementation found with id ${newEvaluation.getEvaluationId}`);
                 }

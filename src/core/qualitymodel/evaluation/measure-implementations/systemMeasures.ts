@@ -1457,7 +1457,11 @@ export const calculateNumberOfLinksWithServiceDiscovery: (links: Link[]) => numb
 
     for (const link of links) {
         let sourceComponent = link.getSourceEntity;
-        if (sourceComponent.getAddressResolutionBy && sourceComponent.getAddressResolutionBy.getProperty("address_resolution_kind").value !== "none") {
+        let addressResolutionComponent = sourceComponent.getAddressResolutionBy;
+        if (addressResolutionComponent && 
+            ((addressResolutionComponent.constructor.name === BackingService.name && addressResolutionComponent.getProperty("address_resolution_kind").value !== "none") 
+            || (addressResolutionComponent.constructor.name === ProxyBackingService.name))
+        ) {
             linksWithServiceDiscovery++;
         }
     }

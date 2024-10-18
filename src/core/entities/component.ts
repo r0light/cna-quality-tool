@@ -62,7 +62,7 @@ class Component {
 
     #egressProxiedBy: ProxyBackingService;
 
-    #addressResolutionBy: BackingService | Infrastructure | Network;
+    #addressResolutionBy: BackingService | ProxyBackingService | Infrastructure | Network;
 
     #artifacts: Map<string, Artifact> = new Map<string, Artifact>();
 
@@ -210,7 +210,7 @@ class Component {
         return this.#addressResolutionBy;
     }
 
-    set setAddressResolutionBy(resolutionEntity: BackingService | Infrastructure | Network | undefined) {
+    set setAddressResolutionBy(resolutionEntity: BackingService | ProxyBackingService | Infrastructure | Network | undefined) {
         this.#addressResolutionBy = resolutionEntity;
     }
 
