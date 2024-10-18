@@ -8,12 +8,12 @@ import { DEFAULT_IMPACTS_INTERPRETATION, DEFAULT_PRECONDITION, FactorCategoryKey
 import { literature } from "./specifications/literature.js";
 import { LiteratureSource } from "./quamoco/LiteratureSource.js";
 import { Entity } from "./quamoco/Entity.js";
-import { generalEvaluationImplementation, productFactorEvaluationImplementation, qualityAspectEvaluationImplementation } from "./evaluation/evaluationImplementations.js";
-import { FactorEvaluation } from "./evaluation/FactorEvaluation.js";
+import { generalProductFactorEvaluationImplementation, generalQualityAspectEvaluationImplementation, productFactorEvaluationImplementation, qualityAspectEvaluationImplementation } from "./evaluation/evaluationImplementations.js";
 import { systemMeasureImplementations } from "./evaluation/measure-implementations/systemMeasures.js";
 import { componentMeasureImplementations } from "./evaluation/measure-implementations/componentMeasures.js";
 import { infrastructureMeasureImplementations } from "./evaluation/measure-implementations/infrastructureMeasures.js";
 import { requestTraceMeasureImplementations } from "./evaluation/measure-implementations/requestTraceMeasures.js";
+import { EvaluationDetails, ProductFactorEvaluation, QualityAspectEvaluation } from "./evaluation/FactorEvaluation.js";
 
 
 function getQualityModel(): QualityModelInstance {
@@ -153,28 +153,28 @@ function getQualityModel(): QualityModelInstance {
         let evaluatedProductFactor = newQualityModel.findProductFactor(productFactorEvaluation.targetFactor);
         if (evaluatedProductFactor) {
 
-            let newEvaluation = new FactorEvaluation(evaluatedProductFactor,
-                productFactorEvaluation.evaluation,
-                productFactorEvaluation.reasoning,
+            let evaluationDetails = new EvaluationDetails(productFactorEvaluation.evaluation, 
+                productFactorEvaluation.reasoning, 
                 productFactorEvaluation.precondition ? productFactorEvaluation.precondition : DEFAULT_PRECONDITION,
                 productFactorEvaluation.impactsInterpretation ? productFactorEvaluation.impactsInterpretation : DEFAULT_IMPACTS_INTERPRETATION,
                 productFactorEvaluation.customImpactInterpretation ? productFactorEvaluation.customImpactInterpretation : (impacts: number[]) => 0
-            );
-            let availableImplementation = productFactorEvaluationImplementation[newEvaluation.getEvaluationId]
+            )
+            let newEvaluation = new ProductFactorEvaluation(evaluatedProductFactor, evaluationDetails);
+            let availableImplementation = productFactorEvaluationImplementation[newEvaluation.getEvaluationDetails.getEvaluationId]
             if (availableImplementation) {
                 newEvaluation.addEvaluation(availableImplementation);
                 productFactorEvaluation.targetEntities.forEach(targetEntity => {
                     evaluatedProductFactor.addEvaluation(targetEntity, newEvaluation);
                 })
             } else {
-                availableImplementation = generalEvaluationImplementation[newEvaluation.getEvaluationId];
+                availableImplementation = generalProductFactorEvaluationImplementation[newEvaluation.getEvaluationDetails.getEvaluationId];
                 if (availableImplementation) {
                     newEvaluation.addEvaluation(availableImplementation);
                     productFactorEvaluation.targetEntities.forEach(targetEntity => {
                         evaluatedProductFactor.addEvaluation(targetEntity, newEvaluation);
                     })
                 } else {
-                    throw new Error(`No evaluation implementation found with id ${newEvaluation.getEvaluationId}`);
+                    throw new Error(`No evaluation implementation found with id ${newEvaluation.getEvaluationDetails.getEvaluationId}`);
                 }
             }
         } else {
@@ -189,24 +189,25 @@ function getQualityModel(): QualityModelInstance {
         let evaluatedQualityAspect = newQualityModel.findQualityAspect(qualityAspectEvaluation.targetAspect);
         if (evaluatedQualityAspect) {
 
-            let newEvaluation = new FactorEvaluation(evaluatedQualityAspect,
-                qualityAspectEvaluation.evaluation,
+
+            let evaluationDetails = new EvaluationDetails(qualityAspectEvaluation.evaluation,
                 qualityAspectEvaluation.reasoning,
                 qualityAspectEvaluation.precondition ? qualityAspectEvaluation.precondition : DEFAULT_PRECONDITION,
                 qualityAspectEvaluation.impactsInterpretation ? qualityAspectEvaluation.impactsInterpretation : DEFAULT_IMPACTS_INTERPRETATION,
                 qualityAspectEvaluation.customImpactInterpretation ? qualityAspectEvaluation.customImpactInterpretation : (impacts: number[]) => 0
-            );
-            let availableImplementation = qualityAspectEvaluationImplementation[newEvaluation.getEvaluationId]
+            )
+            let newEvaluation = new QualityAspectEvaluation(evaluatedQualityAspect, evaluationDetails);
+            let availableImplementation = qualityAspectEvaluationImplementation[newEvaluation.getEvaluationDetails.getEvaluationId]
             if (availableImplementation) {
                 newEvaluation.addEvaluation(availableImplementation);
                 evaluatedQualityAspect.addEvaluation(newEvaluation);
             } else {
-                availableImplementation = generalEvaluationImplementation[newEvaluation.getEvaluationId];
+                availableImplementation = generalQualityAspectEvaluationImplementation[newEvaluation.getEvaluationDetails.getEvaluationId];
                 if (availableImplementation) {
                     newEvaluation.addEvaluation(availableImplementation);
                     evaluatedQualityAspect.addEvaluation(newEvaluation);
                 } else {
-                    throw new Error(`No evaluation implementation found with id ${newEvaluation.getEvaluationId}`);
+                    throw new Error(`No evaluation implementation found with id ${newEvaluation.getEvaluationDetails.getEvaluationId}`);
                 }
             }
         } else {

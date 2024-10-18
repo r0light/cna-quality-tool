@@ -15,6 +15,7 @@ export type CalculatedMeasure = {
 export type NumericEvaluationResult = number;
 export type OrdinalEvaluationResult = "none" | "low" | "moderate" | "high";
 export type FactorEvaluationResult = NumericEvaluationResult | OrdinalEvaluationResult | "n/a"
+export type QualityAspectEvaluationResult = "negative" | "slightly negative" | "mixed"| "neutral" | "slightly positive" | "positive" | "n/a";
 
 export type ImpactWeight = "negative" | "slightly negative" | "neutral" | "slightly positive" | "positive" | "n/a";
 
@@ -34,7 +35,7 @@ export type EvaluatedQualityAspect = {
     name: string,
     factorType: 'qualityAspect',  //TODO has to be "qualityAspect"
     qualityAspect: QualityAspect,
-    result: FactorEvaluationResult,
+    result: QualityAspectEvaluationResult,
     backwardImpacts: BackwardImpactingPath[]
 }
 
@@ -65,7 +66,7 @@ export type FactorEvaluationParameters = {
 }
 
 export type FactorEvaluationFunction = (parameters: FactorEvaluationParameters) => FactorEvaluationResult;
-
+export type AspectEvaluationFunction = (parameters: FactorEvaluationParameters) => QualityAspectEvaluationResult;
 
 export function impactWeightNumericMapping(ordinalWeight: ImpactWeight) {
     switch (ordinalWeight) {
@@ -77,6 +78,26 @@ export function impactWeightNumericMapping(ordinalWeight: ImpactWeight) {
         default:
         case "n/a": 
             return NaN;
+    }
+}
+
+export function interpretNumericValueAsOutcome(value: number): QualityAspectEvaluationResult {
+    if (isNaN(value)) {
+        return "n/a";
+    }
+    if (value < -0.5) {
+        return "negative";
+    }
+    if (value < 0 ){
+        return "slightly negative";
+    }
+    if (value === 0) {
+        return "neutral"
+    }
+    if (value < 0.5) {
+        return "slightly positive";
+    } else {
+        return "positive";
     }
 }
 

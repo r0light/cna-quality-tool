@@ -6,7 +6,12 @@ export function describeNodeStyleClasses(): string {
     classDef factor-applicable fill:#d9d9d9,stroke:#000,stroke-width:2px;
     classDef factor-low fill:#e6f2ff,stroke:#000,stroke-width:2px;
     classDef factor-moderate fill:#b3d9ff,stroke:#000,stroke-width:2px;
-    classDef factor-high fill:#80bfff,stroke:#000,stroke-width:2px;`;
+    classDef factor-high fill:#80bfff,stroke:#000,stroke-width:2px;
+    classDef aspect-spositive fill:#e5ffe5,stroke:#000,stroke-width:2px;
+    classDef aspect-positive fill:#b3ffb3,stroke:#000,stroke-width:2px;
+    classDef aspect-snegative fill:#ffe5e5,stroke:#000,stroke-width:2px;
+    classDef aspect-negative fill:#ffb3b3,stroke:#000,stroke-width:2px;
+    `;
 }
 
 export function describeFactor(factor: EvaluatedProductFactor | EvaluatedQualityAspect): string {
@@ -20,7 +25,7 @@ export function describeFactor(factor: EvaluatedProductFactor | EvaluatedQuality
 }
 
 
-export function describeFactorStyle(factor: EvaluatedProductFactor | EvaluatedQualityAspect): string {
+export function describeFactorStyle(factor: EvaluatedProductFactor): string {
     let styleClass = "";
 
     if (typeof factor.result === "string") {
@@ -47,6 +52,39 @@ export function describeFactorStyle(factor: EvaluatedProductFactor | EvaluatedQu
     }
     return `\n\tclass ${factor.id} ${styleClass}`;
 }
+
+export function describeAspectStyle(factor: EvaluatedQualityAspect): string {
+    let styleClass = "";
+
+    if (typeof factor.result === "string") {
+        switch (factor.result) {
+            case "neutral":
+            case "mixed":
+                styleClass = "factor-applicable";
+                break;
+            case "slightly negative":
+                styleClass = "aspect-snegative";
+                break;
+            case "negative":
+                styleClass = "aspect-negative";
+                break;
+            case "slightly positive":
+                styleClass = "aspect-spositive";
+                break;
+            case "positive":
+                styleClass = "aspect-positive";
+                break;
+            case "n/a":
+            default:
+                styleClass = "factor-not-applicable";
+                break;
+        }
+    } else if (typeof factor.result === "number") {
+        styleClass = "factor-applicable"; // TODO better solution
+    }
+    return `\n\tclass ${factor.id} ${styleClass}`;
+}
+
 
 export function describeImpact(sourceFactorKey: string, impactWeight: ImpactWeight, impactType: ImpactType, targetFactorKey: string) {
     let impactLabel = "";

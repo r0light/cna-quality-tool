@@ -1,4 +1,4 @@
-import { FactorEvaluationFunction, FactorEvaluationParameters, ImpactWeight, impactWeightNumericMapping, interpretNumericalResultAsFactorEvaluation, linearNumericalMapping } from "./Evaluation";
+import { AspectEvaluationFunction, FactorEvaluationFunction, FactorEvaluationParameters, ImpactWeight, impactWeightNumericMapping, interpretNumericalResultAsFactorEvaluation, interpretNumericValueAsOutcome, linearNumericalMapping } from "./Evaluation";
 import { ProductFactorKey } from "../specifications/qualitymodel";
 import { param } from "jquery";
 
@@ -15,7 +15,7 @@ const lowest: (list: number[]) => number = list => { return Math.min(...list) }
 const highest: (list: number[]) => number = list => { return Math.max(...list) }
 
 
-const generalEvaluationImplementation: {
+const generalProductFactorEvaluationImplementation: {
     [evaluationKey: string]: FactorEvaluationFunction
 } = {
     "aggregateImpacts": (parameters) => {
@@ -175,10 +175,63 @@ const productFactorEvaluationImplementation: {
     }
 };
 
+
+const generalQualityAspectEvaluationImplementation: {
+    [aspectKey: string]: AspectEvaluationFunction
+} = {
+    "aggregateImpacts": (parameters) => {
+        let aggregateResult: ImpactWeight[] = parameters.incomingImpacts.map(impact => impact.weight);
+
+        if (aggregateResult.length === 0) {
+            return "n/a";
+        }
+
+        let valuedImpacts = aggregateResult.filter(result => result !== "n/a");
+        let numberOfValuedImpacts = valuedImpacts.length;
+
+        // if there is no valued impact, directly return 
+        if (numberOfValuedImpacts === 0) {
+            return "n/a";
+        }
+
+        // if precondition is all, all incoming impacts need to have a value
+        if (parameters.precondition === "all" && numberOfValuedImpacts < aggregateResult.length) {
+            return "n/a";
+        }
+
+        // if precondition is majority, a majority needs to be valued
+        if (parameters.precondition === "majority" && numberOfValuedImpacts < Math.ceil(aggregateResult.length / 2)) {
+            return "n/a";
+        }
+
+        let numericalImpacts = valuedImpacts.map(impact => impactWeightNumericMapping(impact));
+
+        // else: precondition is at-least-one
+        if (numericalImpacts.every(impact => impact >= 0) || numericalImpacts.every(impact => impact < 0)) {
+            switch (parameters.impactsInterpretation) {
+                case "highest":
+                    return interpretNumericValueAsOutcome(highest(numericalImpacts));
+                case "lowest":
+                    return interpretNumericValueAsOutcome(lowest(numericalImpacts));
+                case "mean":
+                    return interpretNumericValueAsOutcome(mean(numericalImpacts));
+                case "median":
+                    return interpretNumericValueAsOutcome(median(numericalImpacts));
+                case "custom":
+                    return interpretNumericValueAsOutcome(parameters.customImpactInterpretation(numericalImpacts));
+                default:
+                    throw new Error("Unknown impacts interpretation: " + parameters.impactsInterpretation);
+            }
+        } else {
+            return "mixed";
+        }
+    }
+};
+
 const qualityAspectEvaluationImplementation: {
-    [aspectKey: string]: FactorEvaluationFunction
+    [aspectKey: string]: AspectEvaluationFunction
 } = {
 
 };
 
-export { generalEvaluationImplementation, productFactorEvaluationImplementation, qualityAspectEvaluationImplementation }
+export { generalProductFactorEvaluationImplementation, productFactorEvaluationImplementation, generalQualityAspectEvaluationImplementation, qualityAspectEvaluationImplementation }

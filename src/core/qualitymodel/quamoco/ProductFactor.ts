@@ -1,5 +1,5 @@
 import { Evaluation } from "../evaluation/EvaluationModels";
-import { FactorEvaluation } from "../evaluation/FactorEvaluation";
+import { ProductFactorEvaluation } from "../evaluation/FactorEvaluation";
 import { Impact } from "./Impact";
 import { LiteratureSource } from "./LiteratureSource";
 import { Measure } from "./Measure";
@@ -18,7 +18,7 @@ class ProductFactor {
     #applicableEntities: `${ENTITIES}`[];
     #sources: LiteratureSource[];
     #measures: Map<`${ENTITIES}`,Measure[]>;
-    #evaluations: Map<`${ENTITIES}`,FactorEvaluation>;
+    #evaluations: Map<`${ENTITIES}`,ProductFactorEvaluation>;
 
     #outgoingImpacts: Impact[];
     #incomingImpacts: Impact[];
@@ -109,7 +109,7 @@ class ProductFactor {
         this.#incomingImpacts.push(impact);
     }
 
-    addEvaluation(forEntity: `${ENTITIES}`, evaluation: FactorEvaluation) {
+    addEvaluation(forEntity: `${ENTITIES}`, evaluation: ProductFactorEvaluation) {
         this.#evaluations.set(forEntity, evaluation);
     }
 

@@ -1,6 +1,7 @@
 <template>
     <div v-for="[qualityAspectKey, qualityAspect] of qualityAspectGroups" class="aspectGroup">
-        <div :id="`${qualityAspectKey}-impacts`" v-html="renderAspectGraph(`${qualityAspectKey}-impacts`, qualityAspect)"></div>
+        <div :id="`${qualityAspectKey}-impacts`"
+            v-html="renderAspectGraph(`${qualityAspectKey}-impacts`, qualityAspect)"></div>
         <div class="accordion">
             <div v-for="productFactor of getRelevantFactors(qualityAspect)" class="card">
                 <h3 class="card-header">
@@ -21,7 +22,8 @@
                             <span v-if="productFactor.measures.size > 0">Relevant measures:</span>
                             <ul>
                                 <li v-for="[key, measure] of productFactor.measures">
-                                    <span>{{ measure.name }}</span>: <span class="font-weight-bold"> {{ measure.value }}</span><span> ({{ measure.description }})</span>
+                                    <span>{{ measure.name }}</span>: <span class="font-weight-bold"> {{ measure.value
+                                        }}</span><span> ({{ measure.description }})</span>
                                 </li>
                             </ul>
                         </div>
@@ -37,7 +39,7 @@ import $ from 'jquery';
 import { ComputedRef, computed } from 'vue';
 import { MermaidBuffer } from './MermaidBuffer';
 import mermaid from 'mermaid';
-import { describeNodeStyleClasses, describeFactor, describeFactorStyle, describeImpact, describeImpactStyle } from './evaluation-commons';
+import { describeNodeStyleClasses, describeFactor, describeFactorStyle, describeImpact, describeImpactStyle, describeAspectStyle } from './evaluation-commons';
 import { EvaluatedProductFactor, EvaluatedQualityAspect } from '@/core/qualitymodel/evaluation/Evaluation';
 
 const props = defineProps<{
@@ -45,9 +47,9 @@ const props = defineProps<{
     showInconclusiveEvaluations: boolean,
 }>()
 
-const qualityAspectGroups:  ComputedRef<Map<string, EvaluatedQualityAspect>>= computed(() => {
+const qualityAspectGroups: ComputedRef<Map<string, EvaluatedQualityAspect>> = computed(() => {
     return new Map([...props.evaluatedQualityAspects.entries()]
-    .filter(([qualityAspectKey, qualityAspect])  => {
+        .filter(([qualityAspectKey, qualityAspect]) => {
             if (!props.showInconclusiveEvaluations && getRelevantFactors(qualityAspect).every(factor => factor.result === "n/a")) {
                 return false;
             }
@@ -60,12 +62,13 @@ function renderAspectGraph(nodeId: string, evaluatedQualityAspect: EvaluatedQual
 
     let mermaidBuffer = new MermaidBuffer();
 
- mermaidBuffer.addStyling(describeNodeStyleClasses());
+    mermaidBuffer.addStyling(describeNodeStyleClasses());
 
-        mermaidBuffer.addElement(evaluatedQualityAspect.id, describeFactor(evaluatedQualityAspect));
-        mermaidBuffer.addStyling(describeFactorStyle(evaluatedQualityAspect));
-
-        addImpacts(evaluatedQualityAspect, mermaidBuffer);
+    mermaidBuffer.addElement(evaluatedQualityAspect.id, describeFactor(evaluatedQualityAspect));
+    if (evaluatedQualityAspect.factorType === "qualityAspect") {
+        mermaidBuffer.addStyling(describeAspectStyle(evaluatedQualityAspect));
+    }
+    addImpacts(evaluatedQualityAspect, mermaidBuffer);
 
     graphDefinition = graphDefinition.concat(mermaidBuffer.getElementSection, "\n", mermaidBuffer.getStylingSection);
 
@@ -82,7 +85,10 @@ function addImpacts(impactedFactor: EvaluatedQualityAspect | EvaluatedProductFac
 
         if (buffer.isNotYetAdded(impact.impactingFactorKey)) {
             buffer.addElement(impact.impactingFactorKey, describeFactor(impact.impactingFactor));
-            buffer.addStyling(describeFactorStyle(impact.impactingFactor));
+
+            if (impact.impactingFactor.factorType === "productFactor") {
+                buffer.addStyling(describeFactorStyle(impact.impactingFactor));
+            }
         }
 
         let impactElementId = `${impact.impactingFactor.id}-impacts-${impactedFactor.id}`;
@@ -128,5 +134,4 @@ function addImpactingFactors(qualityAspect: EvaluatedQualityAspect | EvaluatedPr
 .factorDetails {
     row-gap: 5px;
 }
-
 </style>

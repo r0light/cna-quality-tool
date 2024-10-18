@@ -1,4 +1,3 @@
-
 <template>
     <div :id="graphId" v-html="renderImpactGraph()"></div>
 </template>
@@ -9,7 +8,7 @@ import $ from 'jquery';
 import mermaid from 'mermaid';
 import { onMounted } from 'vue';
 import { MermaidBuffer } from './MermaidBuffer';
-import { describeFactor, describeFactorStyle, describeImpact, describeImpactStyle, describeNodeStyleClasses } from './evaluation-commons';
+import { describeAspectStyle, describeFactor, describeFactorStyle, describeImpact, describeImpactStyle, describeNodeStyleClasses } from './evaluation-commons';
 import { EvaluatedProductFactor } from '@/core/qualitymodel/evaluation/Evaluation';
 
 
@@ -34,7 +33,10 @@ function renderImpactGraph() {
     let rootNodes = props.rootFactors;
     for (const node of rootNodes) {
         mermaidBuffer.addElement(node.id, describeFactor(node));
-        mermaidBuffer.addStyling(describeFactorStyle(node));
+
+        if (node.factorType === "productFactor") {
+            mermaidBuffer.addStyling(describeFactorStyle(node));
+        }
     }
 
     for (const node of rootNodes) {
@@ -55,9 +57,13 @@ function addImpacts(currentFactor: EvaluatedProductFactor, buffer: MermaidBuffer
 
         if (buffer.isNotYetAdded(impact.impactedFactorKey)) {
             buffer.addElement(impact.impactedFactorKey, describeFactor(impact.impactedFactor));
-            buffer.addStyling(describeFactorStyle(impact.impactedFactor));
+            if (impact.impactedFactor.factorType === "productFactor") {
+                buffer.addStyling(describeFactorStyle(impact.impactedFactor));
+            } else  if (impact.impactedFactor.factorType === "qualityAspect") {
+                buffer.addStyling(describeAspectStyle(impact.impactedFactor));
+            }
         }
-        
+
         let impactElementId = `${currentFactor.id}-impacts-${impact.impactedFactorKey}`;
         if (buffer.isNotYetAdded(impactElementId)) {
             buffer.addElement(impactElementId, describeImpact(currentFactor.id, impact.weight, impact.impactType, impact.impactedFactorKey));
@@ -80,7 +86,7 @@ function addImpacts(currentFactor: EvaluatedProductFactor, buffer: MermaidBuffer
     font-style: italic;
 }
 
-.factor-not-applicable > * {
+.factor-not-applicable>* {
     fill: #f2f2f2 !important;
     stroke: #d9d9d9 !important;
     stroke-width: 2px !important;
