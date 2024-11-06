@@ -960,7 +960,6 @@ class SystemEntityManager {
             let newInfrastructure = this.#createInfrastructureCell(infrastructure);
             this.#currentSystemGraph.addCell(newInfrastructure);
             createdCells.push(newInfrastructure);
-
         }
 
         for (const [id, infrastructure] of this.#currentSystemEntity.getInfrastructureEntities) {

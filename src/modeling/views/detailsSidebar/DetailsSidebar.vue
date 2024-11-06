@@ -69,6 +69,7 @@ import { toPropertySections } from './PropertiesEditor.vue';
 import { getAvailableArtifactTypes } from '@/core/common/artifact';
 import { getValidPropertyValues } from '@/core/common/helpers';
 import { DEPLOYMENT_MAPPING_TOSCA_KEY } from '@/core/entities/deploymentMapping';
+import { ENTITIES } from '@/core/qualitymodel/specifications/entities';
 
 const toArray = (o: object, keyName: string, valueName: string) => {
     let asArray = [];
@@ -236,9 +237,13 @@ onMounted(() => {
         refreshHighlightOptions();
     })
 
-    props.graph.on("change", () => {
-        refreshHighlightOptions();
+    
+    props.graph.on("change", (changedObject) => {
+        if (changedObject.prop("entity/type") === EntityTypes.BACKING_DATA || changedObject.prop("entity/type") === EntityTypes.DATA_AGGREGATE) {
+            refreshHighlightOptions();
+        }
     })
+        
 
 })
 
