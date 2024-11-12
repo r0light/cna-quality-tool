@@ -730,7 +730,8 @@ onUpdated(() => {
                             max: Number.MAX_SAFE_INTEGER,
                             step: 1,
                             value: linkIndex,
-                            id: link.id.toString()
+                            id: link.id.toString(),
+                            highlight: (value: number) => value !== -1
                         }
                     },
                     attributes: {

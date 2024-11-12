@@ -1771,7 +1771,7 @@ const EntityRelationsConfig: {
                 show: true,
                 attributes: {
                     svgRepresentation: '<svg width="35" height="20">' + linkSvgRepresentation() + '</svg>',
-                    buttonText: "Add Link entities",
+                    buttonText: "Edit Link entities",
                     buttonIconClass: "bi bi-window-plus",
                     dialogMetaData: {
                         dialogSize: DialogSize.LARGE,

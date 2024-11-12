@@ -113,7 +113,7 @@
                                         <tr v-for="row of option.tableRows" class="tableRow"
                                             :class="[{ 'text-muted': row.attributes.disabled }, row.attributes.representationClass]">
                                             <td v-for="[columnKey, columnValue] of Object.entries(row.columns)"
-                                                :data-table-context="columnKey">
+                                                :data-table-context="columnKey" >
                                                 <span v-if="typeof columnValue === 'string'"
                                                     :class="{ 'font-weight-bold': row.attributes.isTheCurrentEntity }">
                                                     {{
@@ -126,9 +126,9 @@
                                                         v-model="columnValue.checked">
                                                 </div>
                                                 <div v-if="typeof columnValue === 'object' && columnValue.contentType === PropertyContent.INPUT_NUMBERBOX"
-                                                    class="form-check">
-                                                    <input class="position-static form-control" :id="columnValue.id"
-                                                        type="number" :min="columnValue.min" :max="columnValue.max"  :step="columnValue.step" :value="columnValue.value" :disabled="columnValue.disabled" v-model="columnValue.value" :class="option.validationState">
+                                                    class="form-check" >
+                                                    <input class="position-static form-control" :class="[option.validationState, { 'cell-highlighted': columnValue.highlight(columnValue.value) }]" :id="columnValue.id"
+                                                        type="number" :min="columnValue.min" :max="columnValue.max"  :step="columnValue.step" :value="columnValue.value" :disabled="columnValue.disabled" v-model="columnValue.value">
                                                 </div>
                                             </td>
                                         </tr>
@@ -297,7 +297,8 @@ export type TableRowNumberConfig = {
     max: number,
     step: number,
     value: number,
-    id: string
+    id: string,
+    highlight: (value: number) => boolean
 }
 
 export function toPropertySections(propertyConfigs: PropertyConfig[]): EditPropertySection[] {
@@ -493,5 +494,9 @@ function onRemoveFromDynamicList(propertyOption: EditPropertySection, listIndex:
 .overloaded {
     display: flex;
     flex-direction: column;
+}
+
+.cell-highlighted {
+    background-color: #cadde7;
 }
 </style>
