@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import EntityTypes from './config/entityTypes';
 import * as Entities from '../core/entities';
 import ErrorMessage, { ErrorType } from './errorMessage'
-import { DetailsSidebarConfig, EntityDetailsConfig, EntityRelationsConfig } from './config/detailsSidebarConfig';
+import { DetailsSidebarConfig, EntityDetailsConfig, EntityRelationsConfig, PropertyConfig } from './config/detailsSidebarConfig';
 import { MetaData, getEmptyMetaData } from "../core/common/entityDataTypes";
 import { convertToServiceTemplate, importFromServiceTemplate } from "../core/tosca-adapter/ToscaAdapter";
 import {
@@ -1015,22 +1015,22 @@ class SystemEntityManager {
             let componentElement: dia.Element = this.#currentSystemGraph.getCell(id) as dia.Element;
 
             if (component.constructor.name === Entities.Service.name) {
-                this.#configureComponentCell(component, componentElement);
+                this.#configureComponentCell(component, componentElement, EntityDetailsConfig.Service, EntityRelationsConfig.Service);
                 createdCells.push(componentElement);
             } else if (component.constructor.name === Entities.BackingService.name) {
-                this.#configureComponentCell(component, componentElement);
+                this.#configureComponentCell(component, componentElement, EntityDetailsConfig.BackingService, EntityRelationsConfig.BackingService);
                 createdCells.push(componentElement);
             } else if (component.constructor.name === Entities.StorageBackingService.name) {
-                this.#configureComponentCell(component, componentElement);
+                this.#configureComponentCell(component, componentElement, EntityDetailsConfig.StorageBackingService, EntityRelationsConfig.StorageBackingService);
                 createdCells.push(componentElement);
             } else if (component.constructor.name === Entities.ProxyBackingService.name) {
-                this.#configureComponentCell(component, componentElement);
+                this.#configureComponentCell(component, componentElement, EntityDetailsConfig.ProxyBackingService, EntityRelationsConfig.ProxyBackingService);
                 createdCells.push(componentElement);
             } else if (component.constructor.name === Entities.BrokerBackingService.name) {
-                this.#configureComponentCell(component, componentElement);
+                this.#configureComponentCell(component, componentElement, EntityDetailsConfig.BrokerBackingService, EntityRelationsConfig.BrokerBackingService);
                 createdCells.push(componentElement);
             } else if (component.constructor.name === Entities.Component.name) {
-                this.#configureComponentCell(component, componentElement);
+                this.#configureComponentCell(component, componentElement, EntityDetailsConfig.Component, EntityRelationsConfig.Component);
                 createdCells.push(componentElement);
             }
 
@@ -1317,15 +1317,15 @@ class SystemEntityManager {
         return newComponent;
     }
 
-    #configureComponentCell(component: Entities.Component, componentElement: dia.Element) {
+    #configureComponentCell(component: Entities.Component, componentElement: dia.Element, entityConfig: {type: string, specificProperties: PropertyConfig[]}, relationsConfig: {type: string,relations: PropertyConfig[]}) {
 
-        for (const property of EntityDetailsConfig[component.constructor.name].specificProperties) {
+        for (const property of entityConfig.specificProperties) {
             if (property.jointJsConfig.modelPath) {
                 componentElement.prop(property.jointJsConfig.modelPath, component.getProperties().find(entityProperty => entityProperty.getKey === property.providedFeature).value)
             }
         }
 
-        for (const relation of EntityRelationsConfig[component.constructor.name].relations) {
+        for (const relation of relationsConfig.relations) {
             switch (relation.providedFeature) {
                 case "externalIngressProxiedBy":
                     if (component.getExternalIngressProxiedBy) {
