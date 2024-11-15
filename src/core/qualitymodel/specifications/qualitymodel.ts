@@ -525,7 +525,7 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.LINK, ENTITIES.ENDPOINT, ENTITIES.REQUEST_TRACE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
         "sources": [],
-        "measures": ["maximumLengthOfServiceLinkChainPerRequestTrace", "maximumNumberOfServicesWithinARequestTrace", "numberOfRequestTraces", "averageComplexityOfRequestTraces", "requestTraceLength", "numberOfCyclesInRequestTraces"]
+        "measures": ["maximumLengthOfServiceLinkChainPerRequestTrace", "maximumNumberOfServicesWithinARequestTrace", "numberOfRequestTraces", "averageComplexityOfRequestTraces", "requestTraceComplexity", "requestTraceLength", "numberOfCyclesInRequestTraces"]
     },
     "logicalGrouping": {
         "name": "Logical grouping",
@@ -606,7 +606,7 @@ const productFactors = {
         "relevantEntities": [ENTITIES.SYSTEM, ENTITIES.SERVICE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.SERVICE, ENTITIES.REQUEST_TRACE],
         "sources": [],
-        "measures": ["amountOfRedundancy", "serviceReplicationLevel"]
+        "measures": ["amountOfRedundancy", "serviceReplicationLevel", "medianServiceReplication", "smallestReplicationValue"]
     },
     "horizontalDataReplication": {
         "name": "Horizontal data replication",
