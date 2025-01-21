@@ -52,7 +52,7 @@ node_types:
       host:
         type: Compute
         #valid_source_types: []
-        valid_source_node_types: []
+        #valid_source_node_types: []
 
   Compute:
     description: >
