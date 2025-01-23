@@ -34,7 +34,7 @@ relationship_types:
       between two nodes.
     derived_from: Root
     #valid_target_types: [ Node ]
-    valid_target_node_types: [ Node ]
+    valid_capability_types: [ Node ]
 
   HostedOn:
     description: >-
@@ -42,7 +42,7 @@ relationship_types:
       nodes.
     derived_from: Root
     #valid_target_types: [ Container ]
-    valid_target_node_types: [ Container ]
+    valid_capability_types: [ Container ]
 
   ConnectsTo:
     description: >-
@@ -50,7 +50,7 @@ relationship_types:
       between two nodes.
     derived_from: Root
     #valid_target_types: [ Endpoint ]
-    valid_target_node_types: [ Endpoint ]
+    valid_capability_types: [ Endpoint ]
     properties:
       credential:
         description: >-
@@ -66,7 +66,7 @@ relationship_types:
       Compute node).
     derived_from: Root
     #valid_target_types: [ Attachment ]
-    valid_target_node_types: [ Attachment ]
+    valid_capability_types: [ Attachment ]
     properties:
       location:
         description: >-
@@ -87,7 +87,7 @@ relationship_types:
       Port and Network node types.
     derived_from: DependsOn
     #valid_target_types: [ Linkable ]
-    valid_target_node_types: [ Linkable ]
+    valid_capability_types: [ Linkable ]
 
   BindsTo:
     description: >-
@@ -95,7 +95,7 @@ relationship_types:
       Port and Compute node types.
     derived_from: DependsOn
     #valid_target_types: [ Bindable ]
-    valid_target_node_types: [ Bindable ]
+    valid_capability_types: [ Bindable ]
 
   RoutesTo:
     description: >-
@@ -103,4 +103,4 @@ relationship_types:
       between two Endpoints in different networks.
     derived_from: ConnectsTo
     #valid_target_types: [ Endpoint ]
-    valid_target_node_types: [ Endpoint ]
+    valid_capability_types: [ Endpoint ]

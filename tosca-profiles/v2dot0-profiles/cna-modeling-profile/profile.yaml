@@ -13,5 +13,4 @@ description: >-
 imports:
   - url: artifact_types.yaml
   - url: capability_types.yaml
-  - url: relationship_types.yaml
-  - url: node_types.yaml
+  - url: node_relationship_types.yaml
