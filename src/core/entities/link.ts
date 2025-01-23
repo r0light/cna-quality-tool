@@ -13,7 +13,7 @@ import { EntityProperty, parseProperties } from '../common/entityProperty.js';
  * @module entities/link
  */
 
-const LINK_TOSCA_KEY = "cna-modeling.entities.ConnectsTo.Link";
+const LINK_TOSCA_KEY = "cna-modeling.relationships.ConnectsTo.Link";
 const LINK_TOSCA_EQUIVALENT = cna_modeling_profile.relationship_types[LINK_TOSCA_KEY];
 
 function getLinkProperties(): EntityProperty[] {

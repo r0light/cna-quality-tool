@@ -7,7 +7,7 @@ import { cna_modeling_profile } from '../../totypa/parsedProfiles/v2dot0-profile
  * The module for aspects related to a Deployment Mapping quality model entity.
  * @module entities/deploymentMapping
  */
-const DEPLOYMENT_MAPPING_TOSCA_KEY = "cna-modeling.entities.HostedOn.DeploymentMapping";
+const DEPLOYMENT_MAPPING_TOSCA_KEY = "cna-modeling.relationships.HostedOn.DeploymentMapping";
 const DEPLOYMENT_MAPPING_TOSCA_EQUIVALENT = cna_modeling_profile.relationship_types[DEPLOYMENT_MAPPING_TOSCA_KEY];
 
 function getDeploymentMappingProperties(): EntityProperty[] {

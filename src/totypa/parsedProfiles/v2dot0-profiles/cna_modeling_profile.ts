@@ -103,7 +103,7 @@ export const cna_modeling_profile: TOSCA_File = {
   },
   "interface_types": {},
   "relationship_types": {
-    "cna-modeling.entities.ConnectsTo.Link": {
+    "cna-modeling.relationships.ConnectsTo.Link": {
       "description": "Relationship Type to model Link entities",
       "interfaces": {
         "Configure": {
@@ -140,17 +140,16 @@ export const cna_modeling_profile: TOSCA_File = {
           "default": "none"
         }
       },
-      "valid_target_node_types": [
-        "Endpoint",
-        "cna-modeling.entities.Endpoint",
-        "cna-modeling.entities.Endpoint.External"
-      ],
       "valid_capability_types": [
         "Endpoint",
         "Endpoint.Public"
+      ],
+      "valid_target_node_types": [
+        "cna-modeling.entities.Endpoint",
+        "cna-modeling.entities.Endpoint.External"
       ]
     },
-    "cna-modeling.entities.HostedOn.DeploymentMapping": {
+    "cna-modeling.relationships.HostedOn.DeploymentMapping": {
       "description": "Relationship Type to model DeploymentMapping entities",
       "interfaces": {
         "Configure": {
@@ -158,9 +157,9 @@ export const cna_modeling_profile: TOSCA_File = {
         }
       },
       "derived_from": "HostedOn",
-      "valid_target_node_types": [
+      "valid_capability_types": [
         "Container",
-        "cna-modeling.entities.Infrastructure"
+        "Compute"
       ],
       "properties": {
         "deployment": {
@@ -239,8 +238,8 @@ export const cna_modeling_profile: TOSCA_File = {
           "default": "unstated"
         }
       },
-      "valid_capability_types": [
-        "Compute"
+      "valid_target_node_types": [
+        "cna-modeling.entities.Infrastructure"
       ]
     },
     "cna-modeling.relationships.Provides.Endpoint": {
@@ -266,7 +265,7 @@ export const cna_modeling_profile: TOSCA_File = {
         "location": {
           "description": "The relative location (e.g., mount point on the file system) that provides the root location to address the attached node.",
           "type": "string",
-          "required": false
+          "required": true
         },
         "device": {
           "description": "The logical device name for the attached device.",
@@ -296,7 +295,7 @@ export const cna_modeling_profile: TOSCA_File = {
           "description": "Only applicable if data is persisted by a component; If a component persists data, the sharding level describes the number of shards used; 0 acts as a placeholder if data is not persisted; 1 is the default meaning that no sharding is used; >1 is the number of shards"
         }
       },
-      "valid_target_node_types": [
+      "valid_capability_types": [
         "Attachment"
       ]
     },
@@ -312,7 +311,7 @@ export const cna_modeling_profile: TOSCA_File = {
         "location": {
           "description": "The relative location (e.g., mount point on the file system) that provides the root location to address the attached node.",
           "type": "string",
-          "required": false
+          "required": true
         },
         "device": {
           "description": "The logical device name for the attached device.",
@@ -336,26 +335,25 @@ export const cna_modeling_profile: TOSCA_File = {
           "default": "usage"
         }
       },
-      "valid_target_node_types": [
-        "Attachment",
-        "cna-modeling.entities.BackingData"
-      ],
       "valid_capability_types": [
         "Attachment"
+      ],
+      "valid_target_node_types": [
+        "cna-modeling.entities.BackingData"
       ]
     },
-    "cna-modeling.relationships.ProxiedBy.BackingService": {
+    "cna-modeling.relationships.ProxiedBy.ProxyBackingService": {
       "description": "Relationship Type to connect Components to Backing Services which act as a proxy for them",
       "valid_target_node_types": [
-        "cna.qualityModel.entities.ProxyBackingService"
+        "cna-modeling.entities.ProxyBackingService"
       ]
     },
     "cna-modeling.relationships.UseAddressResolution": {
       "description": "Relationship Type to connect Components to entities which provide address resolution",
       "valid_target_node_types": [
-        "cna.qualityModel.entities.BackingService",
-        "cna.qualityModel.entities.ProxyBackingService",
-        "cna.qualityModel.entities.Infrastructure",
+        "cna-modeling.entities.BackingService",
+        "cna-modeling.entities.ProxyBackingService",
+        "cna-modeling.entities.Infrastructure",
         "Network"
       ]
     }
@@ -1175,7 +1173,8 @@ export const cna_modeling_profile: TOSCA_File = {
               [
                 "API Gateway",
                 "Load Balancer",
-                "Service Mesh"
+                "Service Mesh",
+                "other"
               ]
             ]
           },
@@ -1604,8 +1603,7 @@ export const cna_modeling_profile: TOSCA_File = {
           "type": "Node"
         },
         "host": {
-          "type": "Compute",
-          "valid_source_node_types": []
+          "type": "Compute"
         },
         "address_resolution": {
           "type": "cna-modeling.capabilities.AdressResolution",
@@ -2002,7 +2000,8 @@ export const cna_modeling_profile: TOSCA_File = {
             "cna-modeling.entities.Component",
             "cna-modeling.entities.Service",
             "cna-modeling.entities.BackingService",
-            "cna-modeling.entities.StorageBackingService"
+            "cna-modeling.entities.StorageBackingService",
+            "cna-modeling.entities.Endpoint"
           ]
         }
       }

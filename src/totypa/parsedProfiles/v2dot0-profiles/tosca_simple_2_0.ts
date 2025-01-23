@@ -586,7 +586,7 @@ export const tosca_simple_2_0: TOSCA_File = {
         }
       },
       "derived_from": "Root",
-      "valid_target_node_types": [
+      "valid_capability_types": [
         "Node"
       ]
     },
@@ -598,7 +598,7 @@ export const tosca_simple_2_0: TOSCA_File = {
         }
       },
       "derived_from": "Root",
-      "valid_target_node_types": [
+      "valid_capability_types": [
         "Container"
       ]
     },
@@ -617,7 +617,7 @@ export const tosca_simple_2_0: TOSCA_File = {
           "required": false
         }
       },
-      "valid_target_node_types": [
+      "valid_capability_types": [
         "Endpoint"
       ]
     },
@@ -640,7 +640,7 @@ export const tosca_simple_2_0: TOSCA_File = {
           "required": false
         }
       },
-      "valid_target_node_types": [
+      "valid_capability_types": [
         "Attachment"
       ]
     },
@@ -652,7 +652,7 @@ export const tosca_simple_2_0: TOSCA_File = {
         }
       },
       "derived_from": "DependsOn",
-      "valid_target_node_types": [
+      "valid_capability_types": [
         "Node",
         "Linkable"
       ]
@@ -665,7 +665,7 @@ export const tosca_simple_2_0: TOSCA_File = {
         }
       },
       "derived_from": "DependsOn",
-      "valid_target_node_types": [
+      "valid_capability_types": [
         "Node",
         "Bindable"
       ]
@@ -685,7 +685,7 @@ export const tosca_simple_2_0: TOSCA_File = {
           "required": false
         }
       },
-      "valid_target_node_types": [
+      "valid_capability_types": [
         "Endpoint"
       ]
     }
@@ -734,8 +734,7 @@ export const tosca_simple_2_0: TOSCA_File = {
           "type": "Node"
         },
         "host": {
-          "type": "Compute",
-          "valid_source_node_types": []
+          "type": "Compute"
         }
       },
       "requirements": [
@@ -868,7 +867,7 @@ export const tosca_simple_2_0: TOSCA_File = {
         {
           "host": {
             "capability": "Compute",
-            "node": "Compute",
+            "node": "Abstract.Compute",
             "relationship": "HostedOn",
             "count_range": [
               0,
@@ -934,7 +933,7 @@ export const tosca_simple_2_0: TOSCA_File = {
         {
           "host": {
             "capability": "Compute",
-            "node": "Compute",
+            "node": "Abstract.Compute",
             "relationship": "HostedOn",
             "count_range": [
               0,
@@ -1042,7 +1041,7 @@ export const tosca_simple_2_0: TOSCA_File = {
         {
           "host": {
             "capability": "Compute",
-            "node": "Compute",
+            "node": "Abstract.Compute",
             "relationship": "HostedOn",
             "count_range": [
               0,
@@ -1311,7 +1310,7 @@ export const tosca_simple_2_0: TOSCA_File = {
         {
           "host": {
             "capability": "Compute",
-            "node": "Compute",
+            "node": "Abstract.Compute",
             "relationship": "HostedOn",
             "count_range": [
               0,
