@@ -128,7 +128,12 @@ node_types:
     requirements:
       - host:
           capability: Compute
-          node: Compute
+          # node: Compute
+          # cna-modeling.entities.Infrastructure derives from
+          # SoftwareComponent, but its host requirement specifies a
+          # target node type of Abstract.Compute which is not type
+          # compatible with the Compute node type.
+          node: Abstract.Compute
           relationship: HostedOn
           #occurrences: [ 0, 1 ]
           count_range: [ 0, 1 ]
