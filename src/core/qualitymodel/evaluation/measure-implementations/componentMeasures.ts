@@ -1,7 +1,7 @@
 
-import { Component, Endpoint, Service, StorageBackingService, System } from "../../../entities.js";
+import { BackingService, Component, Endpoint, Service, StorageBackingService, System } from "../../../entities.js";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure.js";
-import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, PROTOCOLS_SUPPORTING_TLS, SERVICE_MESH_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "../../specifications/featureModel.js";
+import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, PROTOCOLS_SUPPORTING_TLS, SERVICE_MESH_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "../../specifications/featureModel.js";
 import { average } from "./general-functions.js";
 
 
@@ -555,6 +555,87 @@ export const serviceMeshUsage: Calculation = (parameters: CalculationParameters<
     return usage;
 }
 
+export const secretsExternalization: Calculation = (parameters: CalculationParameters<Component>) => {
+
+    let secrets= parameters.entity.getBackingDataEntities.filter(backingData => backingData.backingData.getProperty("kind").value === BACKING_DATA_SECRET_KIND);
+
+    if (secrets.length === 0) {
+        return 0;
+    }
+
+    let notStoredSecrets = secrets.filter(secret => DATA_USAGE_RELATION_USAGE.includes(secret.relation.getProperty("usage_relation").value));
+    let notStoredSecretIds = notStoredSecrets.map(secret => secret.backingData.getId);
+
+    let allConfigServices = [...parameters.system.getComponentEntities.entries()].filter(([componentId, component]) => {
+        return component.constructor.name === BackingService.name && component.getProperty("providedFunctionality").value === "config";
+    })
+
+    let allInfrastructure = [...parameters.system.getInfrastructureEntities.entries()];
+
+    let secretsStoredOutsideComponent = new Set();
+
+    for (const [configServiceId, configService] of allConfigServices) {
+        let secrets = configService.getBackingDataEntities.filter(backingData => { return backingData.backingData.getProperty("kind").value === BACKING_DATA_SECRET_KIND });
+        secrets.forEach(secret => {
+            if (notStoredSecretIds.includes(secret.backingData.getId) && DATA_USAGE_RELATION_PERSISTENCE.includes(secret.relation.getProperty("usage_relation").value) ) {
+                secretsStoredOutsideComponent.add(secret.backingData.getId);
+            }
+        })
+    }
+
+    for (const [infrastructureId, infrastructure] of allInfrastructure) {
+        let secrets = infrastructure.getBackingDataEntities.filter(backingData => { return backingData.backingData.getProperty("kind").value === BACKING_DATA_SECRET_KIND });
+        secrets.forEach(secret => {
+            if (notStoredSecretIds.includes(secret.backingData.getId) && DATA_USAGE_RELATION_PERSISTENCE.includes(secret.relation.getProperty("usage_relation").value)) {
+                secretsStoredOutsideComponent.add(secret.backingData.getId);
+            }
+        })
+    }
+
+    return secretsStoredOutsideComponent.size / secrets.length;
+}
+
+export const configurationExternalization: Calculation = (parameters: CalculationParameters<Component>) => {
+
+    let configurations= parameters.entity.getBackingDataEntities.filter(backingData => backingData.backingData.getProperty("kind").value === BACKING_DATA_CONFIG_KIND);
+
+    if (configurations.length === 0) {
+        return 0;
+    }
+
+    let notStoredConfigs = configurations.filter(config => DATA_USAGE_RELATION_USAGE.includes(config.relation.getProperty("usage_relation").value));
+    let notStoredConfigIds = notStoredConfigs.map(config => config.backingData.getId);
+
+    let allConfigServices = [...parameters.system.getComponentEntities.entries()].filter(([componentId, component]) => {
+        return component.constructor.name === BackingService.name && component.getProperty("providedFunctionality").value === "config";
+    })
+
+    let allInfrastructure = [...parameters.system.getInfrastructureEntities.entries()];
+
+    let configsStoredOutsideComponent = new Set();
+
+    for (const [configServiceId, configService] of allConfigServices) {
+        let secrets = configService.getBackingDataEntities.filter(backingData => { return backingData.backingData.getProperty("kind").value === BACKING_DATA_CONFIG_KIND });
+        secrets.forEach(config => {
+            if (notStoredConfigIds.includes(config.backingData.getId) && DATA_USAGE_RELATION_PERSISTENCE.includes(config.relation.getProperty("usage_relation").value) ) {
+                configsStoredOutsideComponent.add(config.backingData.getId);
+            }
+        })
+    }
+
+    for (const [infrastructureId, infrastructure] of allInfrastructure) {
+        let secrets = infrastructure.getBackingDataEntities.filter(backingData => { return backingData.backingData.getProperty("kind").value === BACKING_DATA_CONFIG_KIND });
+        secrets.forEach(config => {
+            if (notStoredConfigIds.includes(config.backingData.getId) && DATA_USAGE_RELATION_PERSISTENCE.includes(config.relation.getProperty("usage_relation").value)) {
+                configsStoredOutsideComponent.add(config.backingData.getId);
+            }
+        })
+    }
+
+    return configsStoredOutsideComponent.size / configurations.length;
+
+}
+
 export const componentMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
     "ratioOfExternalEndpointsSupportingTls": ratioOfExternalEndpointsSupportingTls,
@@ -596,6 +677,8 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "serviceReplicationLevel": serviceReplicationLevel,
     "amountOfRedundancy": amountOfRedundancy,
     "storageReplicationLevel": storageReplicationLevel,
-    "serviceMeshUsage": serviceMeshUsage
+    "serviceMeshUsage": serviceMeshUsage,
+    "secretsExternalization": secretsExternalization,
+    "configurationExternalization": configurationExternalization
 }
 

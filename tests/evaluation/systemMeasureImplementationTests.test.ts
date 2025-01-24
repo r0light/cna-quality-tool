@@ -5,7 +5,7 @@ import { RelationToDataAggregate } from "@/core/entities/relationToDataAggregate
 import { systemMeasureImplementations } from "@/core/qualitymodel/evaluation/measure-implementations/systemMeasures";
 import { getQualityModel } from "@/core/qualitymodel/QualityModelInstance";
 import { ENTITIES } from "@/core/qualitymodel/specifications/entities";
-import { ASYNCHRONOUS_ENDPOINT_KIND, COMMAND_ENDPOINT_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, QUERY_ENDPOINT_KIND, SEND_EVENT_ENDPOINT_KIND, SERVICE_MESH_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "@/core/qualitymodel/specifications/featureModel";
+import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_SECRET_KIND, COMMAND_ENDPOINT_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, QUERY_ENDPOINT_KIND, SEND_EVENT_ENDPOINT_KIND, SERVICE_MESH_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "@/core/qualitymodel/specifications/featureModel";
 import { backingDataSvgRepresentation } from "@/modeling/config/detailsSidebarConfig";
 import { beforeAll, expect, test } from "vitest"
 
@@ -2497,4 +2497,54 @@ test("serviceMeshUsage", () => {
 
     let measureValue = systemMeasureImplementations["serviceMeshUsage"]({ entity: system, system: system });
     expect(measureValue).toEqual(2/3);
+})
+
+test("secretsExternalization", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let secretA = new BackingData("c1", "secret A", getEmptyMetaData());
+    secretA.setPropertyValue("kind", BACKING_DATA_SECRET_KIND);
+    let relationAtoA = new RelationToBackingData("r1", getEmptyMetaData());
+    relationAtoA.setPropertyValue("usage_relation", DATA_USAGE_RELATION_USAGE[0]);
+    serviceA.addBackingDataEntity(secretA, relationAtoA);
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let secretB = new BackingData("c2", "config B", getEmptyMetaData());
+    secretB.setPropertyValue("kind", BACKING_DATA_SECRET_KIND);
+    let relationBtoB = new RelationToBackingData("r2", getEmptyMetaData());
+    relationBtoB.setPropertyValue("usage_relation", DATA_USAGE_RELATION_PERSISTENCE[0]);
+    serviceB.addBackingDataEntity(secretB, relationBtoB);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let secretC = new BackingData("c3", "config C", getEmptyMetaData());
+    secretC.setPropertyValue("kind", BACKING_DATA_SECRET_KIND);
+    let relationCtoC = new RelationToBackingData("r3", getEmptyMetaData());
+    relationCtoC.setPropertyValue("usage_relation", DATA_USAGE_RELATION_USAGE[0]);
+    serviceC.addBackingDataEntity(secretC, relationCtoC);
+
+    let backingService = new BackingService("bs1", "backing service 1", getEmptyMetaData());
+    backingService.setPropertyValue("providedFunctionality", "config");
+    let relationBStoA = new RelationToBackingData("r4", getEmptyMetaData());
+    relationBStoA.setPropertyValue("usage_relation", DATA_USAGE_RELATION_PERSISTENCE[0]);
+    backingService.addBackingDataEntity(secretA, relationBStoA);
+
+    let storageBackingService = new StorageBackingService("sbs1", "storage backing service 1", getEmptyMetaData());
+    let relationSBStoA = new RelationToBackingData("r5", getEmptyMetaData());
+    relationSBStoA.setPropertyValue("usage_relation", DATA_USAGE_RELATION_USAGE[0]);
+    storageBackingService.addBackingDataEntity(secretA, relationSBStoA);
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    let relationIAtoC = new RelationToBackingData("r6", getEmptyMetaData());
+    relationIAtoC.setPropertyValue("usage_relation", DATA_USAGE_RELATION_PERSISTENCE[0]);
+    infrastructureA.addBackingDataEntity(secretC, relationIAtoC);
+
+    system.addEntities([secretA, secretB, secretC]);
+    system.addEntities([serviceA, serviceB, serviceC, backingService, storageBackingService]);
+    system.addEntities([infrastructureA]);
+
+    let measureValue = systemMeasureImplementations["secretsExternalization"]({ entity: system, system: system });
+    expect(measureValue).toEqual(3 / 4);
+
+
 })

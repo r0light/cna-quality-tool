@@ -1639,7 +1639,7 @@ const measures = {
         "name": "Configuration externalization",
         "calculation": "Number of configuration usages where config data is stored externally / Total number of configuration usages",
         "sources": ["Apel2019"],
-        "applicableEntities": [ENTITIES.SYSTEM],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
     },
     "numberOfDeploymentTargetEnvironments": {
         "name": "Number of Deployment Target Environments",
@@ -1846,6 +1846,12 @@ const measures = {
         "calculation": "Average(Component Communcation proxied by Service Mesh)",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE]
+    },
+    "secretsExternalization": {
+        "name": "Secrets Externalization",
+        "calculation": "Secrets used in a component but stored in another / All secrets used in a component",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE]
     }
 } satisfies { [measureKey: string]: MeasureSpec }
 

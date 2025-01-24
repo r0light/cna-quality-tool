@@ -1,7 +1,7 @@
 import { BackingService, BrokerBackingService, Component, Infrastructure, Link, ProxyBackingService, Service, StorageBackingService, System } from "@/core/entities";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure";
 import { average, median, lowest, partition } from "./general-functions";
-import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, EVENT_SOURCING_KIND, getEndpointKindWeight, getUsageRelationWeight, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MESSAGE_BROKER_KIND, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SEND_EVENT_ENDPOINT_KIND, SERVICE_MESH_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "../../specifications/featureModel";
+import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, EVENT_SOURCING_KIND, getEndpointKindWeight, getUsageRelationWeight, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MESSAGE_BROKER_KIND, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SEND_EVENT_ENDPOINT_KIND, SERVICE_MESH_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "../../specifications/featureModel";
 import { calculateRatioOfEndpointsSupportingSsl, calculateRatioOfExternalEndpointsSupportingTls, numberOfAsynchronousEndpointsOfferedByAService, numberOfComponentsAComponentIsLinkedTo, numberOfSynchronousEndpointsOfferedByAService, providesHealthAndReadinessEndpoints, serviceCouplingBasedOnEndpointEntropy } from "./componentMeasures";
 import { numberOfCyclesInRequestTraces, requestTraceComplexity } from "./requestTraceMeasures";
 import { supportsMonitoring as infrastructureSupportsMonitoring} from "./infrastructureMeasures";
@@ -1563,6 +1563,80 @@ export const serviceMeshUsage: Calculation = (parameters: CalculationParameters<
     return average(componentsToEvaluate.map(component => componentServiceMeshUsage({entity: component, system: parameters.system}) as number));
 }
 
+export const secretsExternalization: Calculation = (parameters: CalculationParameters<System>) => {
+    let allNonConfigServices = [...parameters.entity.getComponentEntities.entries()].filter(([componentId, component]) => {
+        return component.constructor.name !== BackingService.name || component.getProperty("providedFunctionality").value !== "config";
+    })
+
+    let allConfigServices = [...parameters.entity.getComponentEntities.entries()].filter(([componentId, component]) => {
+        return component.constructor.name === BackingService.name && component.getProperty("providedFunctionality").value === "config";
+    })
+
+    let allInfrastructure = [...parameters.entity.getInfrastructureEntities.entries()];
+
+    let secretRelations: Map<string, {
+        "usedBy": string[],
+        "persistedBy": string[],
+    }> = new Map();
+
+    [...parameters.entity.getBackingDataEntities.entries()]
+        .filter(([backingDataId, backingData]) => { return backingData.getProperty("kind").value === BACKING_DATA_SECRET_KIND })
+        .forEach(([secretId, secret]) => { secretRelations.set(secretId, { "usedBy": [], "persistedBy": [] }) });
+
+    for (const [componentId, component] of allNonConfigServices) {
+        let secrets = component.getBackingDataEntities.filter(backingData => { return backingData.backingData.getProperty("kind").value === BACKING_DATA_SECRET_KIND });
+        secrets.forEach(secret => {
+            // set usedBy in any case
+            secretRelations.get(secret.backingData.getId).usedBy.push(componentId);
+            if (DATA_USAGE_RELATION_PERSISTENCE.includes(secret.relation.getProperty("usage_relation").value)) {
+                secretRelations.get(secret.backingData.getId).persistedBy.push(componentId);
+            }
+        })
+    }
+
+    for (const [configServiceId, configService] of allConfigServices) {
+        let secrets = configService.getBackingDataEntities.filter(backingData => { return backingData.backingData.getProperty("kind").value === BACKING_DATA_SECRET_KIND });
+        secrets.forEach(secret => {
+            if (DATA_USAGE_RELATION_USAGE.includes(secret.relation.getProperty("usage_relation").value)) {
+                secretRelations.get(secret.backingData.getId).usedBy.push(configServiceId);
+            }
+            if (DATA_USAGE_RELATION_PERSISTENCE.includes(secret.relation.getProperty("usage_relation").value)) {
+                secretRelations.get(secret.backingData.getId).persistedBy.push(configServiceId);
+            }
+        })
+    }
+
+    for (const [infrastructureId, infrastructure] of allInfrastructure) {
+        let secrets = infrastructure.getBackingDataEntities.filter(backingData => { return backingData.backingData.getProperty("kind").value === BACKING_DATA_SECRET_KIND });
+        secrets.forEach(secret => {
+            if (DATA_USAGE_RELATION_USAGE.includes(secret.relation.getProperty("usage_relation").value)) {
+                secretRelations.get(secret.backingData.getId).usedBy.push(infrastructureId);
+            }
+            if (DATA_USAGE_RELATION_PERSISTENCE.includes(secret.relation.getProperty("usage_relation").value)) {
+                secretRelations.get(secret.backingData.getId).persistedBy.push(infrastructureId);
+            }
+        })
+    }
+
+    let nonExternalizedSecrets = 0;
+    let externalizedSecrets = 0;
+    [...secretRelations.entries()].forEach(([secretId, relations]) => {
+        for (const usingComponent of relations.usedBy) {
+            if (!relations.persistedBy.includes(usingComponent) && relations.persistedBy.length > 0) {
+                externalizedSecrets++;
+            } else {
+                nonExternalizedSecrets++;
+            }
+        }
+    })
+
+    if (nonExternalizedSecrets + externalizedSecrets === 0) {
+        return 0;
+    }
+    return externalizedSecrets / (nonExternalizedSecrets + externalizedSecrets);
+
+}
+
 
 export const systemMeasureImplementations: { [measureKey: string]: Calculation } = {
     "serviceReplicationLevel": serviceReplicationLevel,
@@ -1638,5 +1712,6 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation }
     "ratioOfComponentsWhoseEgressIsProxied": ratioOfComponentsWhoseEgressIsProxied,
     "ratioOfCachedDataAggregates": ratioOfCachedDataAggregates,
     "ratioOfStateDependencyOfEndpoints": ratioOfStateDependencyOfEndpoints,
-    "serviceMeshUsage": serviceMeshUsage
+    "serviceMeshUsage": serviceMeshUsage,
+    "secretsExternalization": secretsExternalization
 }

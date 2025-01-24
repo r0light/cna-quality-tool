@@ -1,9 +1,9 @@
 import { BackingService, Component, Infrastructure, ProxyBackingService, RequestTrace, Service, StorageBackingService, System } from "@/core/entities";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure";
 import { average, lowest, median } from "./general-functions";
-import { calculateRatioOfEndpointsSupportingSsl, providesHealthAndReadinessEndpoints } from "./componentMeasures";
+import { calculateRatioOfEndpointsSupportingSsl, componentMeasureImplementations, providesHealthAndReadinessEndpoints } from "./componentMeasures";
 import { calculateNumberOfLinksWithServiceDiscovery, calculateRatioOfLinksToAsynchronousEndpoints, calculateRatioOfSecuredLinks, calculateRatioOfStatefulComponents, calculateRatioOfStatelessComponents, calculateReplicasPerService, countComponentsConnectedToCertainEndpoints, getServiceInteractions } from "./systemMeasures";
-import { EVENT_SOURCING_KIND, SERVICE_MESH_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "../../specifications/featureModel";
+import { BACKING_DATA_CONFIG_KIND, BACKING_DATA_SECRET_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, EVENT_SOURCING_KIND, SERVICE_MESH_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "../../specifications/featureModel";
 import { supportsMonitoring as infrastructureSupportsMonitoring } from "./infrastructureMeasures";
 import { supportsMonitoring as componentSupportsMonitoring } from "./componentMeasures";
 import { serviceMeshUsage as componentServiceMeshUsage } from "./componentMeasures";
@@ -466,6 +466,32 @@ export const serviceMeshUsage: Calculation = (parameters: CalculationParameters<
     return average(componentsToEvaluate.map(component => componentServiceMeshUsage({entity: component, system: parameters.system}) as number));
 }
 
+export const configurationExternalization: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+
+    let includedComponents =  getIncludedComponents(parameters.entity, parameters.system);
+
+    let configurationExternalizationValues = includedComponents
+        .filter(component => component.getBackingDataEntities.filter(backingData => backingData.backingData.getProperty("kind").value === BACKING_DATA_CONFIG_KIND).length > 0)
+        .map(component => {
+          return componentMeasureImplementations["configurationExternalization"]({entity: component, system: parameters.system}) as number;
+    })
+
+    return average(configurationExternalizationValues);
+}
+
+export const secretsExternalization: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+
+    let includedComponents =  getIncludedComponents(parameters.entity, parameters.system);
+
+    let secretsExternalizationValues = includedComponents
+        .filter(component => component.getBackingDataEntities.filter(backingData => backingData.backingData.getProperty("kind").value === BACKING_DATA_SECRET_KIND).length > 0)
+        .map(component => {
+        return componentMeasureImplementations["secretsExternalization"]({entity: component, system: parameters.system}) as number;
+    })
+
+    return average(secretsExternalizationValues);
+}
+
 export const requestTraceMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
     "ratioOfSecuredLinks": ratioOfSecuredLinks,
@@ -494,6 +520,8 @@ export const requestTraceMeasureImplementations: { [measureKey: string]: Calcula
     "numberOfLinksWithComplexFailover": numberOfLinksWithComplexFailover,
     "amountOfRedundancy": amountOfRedundancy,
     "dataShardingLevel": dataShardingLevel,
-    "serviceMeshUsage": serviceMeshUsage
+    "serviceMeshUsage": serviceMeshUsage,
+    "configurationExternalization": configurationExternalization,
+    "secretsExternalization": secretsExternalization
 }
 

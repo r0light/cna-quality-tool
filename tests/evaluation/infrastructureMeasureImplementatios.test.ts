@@ -1,8 +1,10 @@
 import { getEmptyMetaData } from "@/core/common/entityDataTypes";
-import { DeploymentMapping, Infrastructure, Service, System } from "@/core/entities";
+import { BackingData, BackingService, DeploymentMapping, Infrastructure, Service, System } from "@/core/entities";
+import { RelationToBackingData } from "@/core/entities/relationToBackingData";
 import { infrastructureMeasureImplementations } from "@/core/qualitymodel/evaluation/measure-implementations/infrastructureMeasures";
 import { getQualityModel } from "@/core/qualitymodel/QualityModelInstance";
 import { ENTITIES } from "@/core/qualitymodel/specifications/entities";
+import { BACKING_DATA_CONFIG_KIND, BACKING_DATA_SECRET_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE } from "@/core/qualitymodel/specifications/featureModel";
 import { expect, test } from "vitest";
 
 
@@ -79,4 +81,91 @@ test("rollingUpdateOption", () => {
 
     let measureValue = infrastructureMeasureImplementations["rollingUpdateOption"]({ entity: infrastructureA, system: system });
     expect(measureValue).toEqual(1);
+})
+
+
+test("secretsExternalization", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let infrastructureA = new Infrastructure("i1", "testInfrastructure", getEmptyMetaData());
+
+    let secretA = new BackingData("b1", "secret A", getEmptyMetaData());
+    secretA.setPropertyValue("kind", BACKING_DATA_SECRET_KIND);
+    let relationAtoA = new RelationToBackingData("r1", getEmptyMetaData());
+    relationAtoA.setPropertyValue("usage_relation", DATA_USAGE_RELATION_USAGE[0]);
+    infrastructureA.addBackingDataEntity(secretA, relationAtoA);
+
+    let secretB = new BackingData("b2", "secret B", getEmptyMetaData());
+    secretB.setPropertyValue("kind", BACKING_DATA_SECRET_KIND);
+    let relationAtoB = new RelationToBackingData("r2", getEmptyMetaData());
+    relationAtoB.setPropertyValue("usage_relation", DATA_USAGE_RELATION_USAGE[0]);
+    infrastructureA.addBackingDataEntity(secretB, relationAtoB);
+
+    let secretC = new BackingData("b3", "secret C", getEmptyMetaData());
+    secretC.setPropertyValue("kind", BACKING_DATA_SECRET_KIND);
+    let relationAtoC = new RelationToBackingData("r3", getEmptyMetaData());
+    relationAtoC.setPropertyValue("usage_relation", DATA_USAGE_RELATION_PERSISTENCE[0]);
+    infrastructureA.addBackingDataEntity(secretC, relationAtoC);
+
+    let backingService = new BackingService("bs1", "backing service 1", getEmptyMetaData());
+    backingService.setPropertyValue("providedFunctionality", "config");
+    let relationBStoA = new RelationToBackingData("r4", getEmptyMetaData());
+    relationBStoA.setPropertyValue("usage_relation", DATA_USAGE_RELATION_PERSISTENCE[0]);
+    backingService.addBackingDataEntity(secretA, relationBStoA);
+
+    let infrastructureB = new Infrastructure("i2", "infrastructure 2", getEmptyMetaData());
+    let relationIBtoB = new RelationToBackingData("r5", getEmptyMetaData());
+    relationIBtoB.setPropertyValue("usage_relation", DATA_USAGE_RELATION_PERSISTENCE[0]);
+    infrastructureB.addBackingDataEntity(secretB, relationIBtoB);
+
+    system.addEntities([secretA, secretB, secretC]);
+    system.addEntities([backingService]);
+    system.addEntities([infrastructureA, infrastructureB]);
+
+    let measureValue = infrastructureMeasureImplementations["secretsExternalization"]({ entity: infrastructureA, system: system });
+    expect(measureValue).toEqual(2 / 3);
+})
+
+test("configurationExternalization", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let infrastructureA = new Infrastructure("i1", "testInfrastructure", getEmptyMetaData());
+
+    let configA = new BackingData("b1", "config A", getEmptyMetaData());
+    configA.setPropertyValue("kind", BACKING_DATA_CONFIG_KIND);
+    let relationAtoA = new RelationToBackingData("r1", getEmptyMetaData());
+    relationAtoA.setPropertyValue("usage_relation", DATA_USAGE_RELATION_USAGE[0]);
+    infrastructureA.addBackingDataEntity(configA, relationAtoA);
+
+    let configB = new BackingData("b2", "secret B", getEmptyMetaData());
+    configB.setPropertyValue("kind", BACKING_DATA_CONFIG_KIND);
+    let relationAtoB = new RelationToBackingData("r2", getEmptyMetaData());
+    relationAtoB.setPropertyValue("usage_relation", DATA_USAGE_RELATION_USAGE[0]);
+    infrastructureA.addBackingDataEntity(configB, relationAtoB);
+
+    let configC = new BackingData("b3", "secret C", getEmptyMetaData());
+    configC.setPropertyValue("kind", BACKING_DATA_CONFIG_KIND);
+    let relationAtoC = new RelationToBackingData("r3", getEmptyMetaData());
+    relationAtoC.setPropertyValue("usage_relation", DATA_USAGE_RELATION_PERSISTENCE[0]);
+    infrastructureA.addBackingDataEntity(configC, relationAtoC);
+
+    let backingService = new BackingService("bs1", "backing service 1", getEmptyMetaData());
+    backingService.setPropertyValue("providedFunctionality", "config");
+    let relationBStoA = new RelationToBackingData("r4", getEmptyMetaData());
+    relationBStoA.setPropertyValue("usage_relation", DATA_USAGE_RELATION_PERSISTENCE[0]);
+    backingService.addBackingDataEntity(configA, relationBStoA);
+
+    let infrastructureB = new Infrastructure("i2", "infrastructure 2", getEmptyMetaData());
+    let relationIBtoB = new RelationToBackingData("r5", getEmptyMetaData());
+    relationIBtoB.setPropertyValue("usage_relation", DATA_USAGE_RELATION_PERSISTENCE[0]);
+    infrastructureB.addBackingDataEntity(configB, relationIBtoB);
+
+    system.addEntities([configA, configB, configC]);
+    system.addEntities([backingService]);
+    system.addEntities([infrastructureA, infrastructureB]);
+
+    let measureValue = infrastructureMeasureImplementations["configurationExternalization"]({ entity: infrastructureA, system: system });
+    expect(measureValue).toEqual(2 / 3);
+
+
 })

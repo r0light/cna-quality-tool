@@ -6,7 +6,7 @@ import { requestTraceMeasureImplementations } from "@/core/qualitymodel/evaluati
 import { systemMeasureImplementations } from "@/core/qualitymodel/evaluation/measure-implementations/systemMeasures";
 import { getQualityModel } from "@/core/qualitymodel/QualityModelInstance";
 import { ENTITIES } from "@/core/qualitymodel/specifications/entities";
-import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, COMMAND_ENDPOINT_KIND, QUERY_ENDPOINT_KIND, SEND_EVENT_ENDPOINT_KIND, SERVICE_MESH_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "@/core/qualitymodel/specifications/featureModel";
+import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, COMMAND_ENDPOINT_KIND, QUERY_ENDPOINT_KIND, SEND_EVENT_ENDPOINT_KIND, SERVICE_MESH_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "@/core/qualitymodel/specifications/featureModel";
 import { expect, test } from "vitest";
 
 test("all implementation names refer to an existing measure", () => {
@@ -1421,4 +1421,163 @@ test("serviceMeshUsage", () => {
 
     let measureValue = requestTraceMeasureImplementations["serviceMeshUsage"]({ entity: requestTrace, system: system });
     expect(measureValue).toEqual(1);
+})
+
+
+test("configurationExternalization", () => {
+
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService A", getEmptyMetaData());
+    let externalEndpoint = new ExternalEndpoint("ee1", "external endpoint", getEmptyMetaData());
+    serviceA.addEndpoint(externalEndpoint);
+
+    let serviceB = new Service("s2", "testService B", getEmptyMetaData());
+    let endpointB = new Endpoint("e2", "endpoint B", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+
+    let serviceC = new Service("s3", "testService C", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint C", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+
+    let configA = new BackingData("c1", "config A", getEmptyMetaData());
+    configA.setPropertyValue("kind", BACKING_DATA_CONFIG_KIND);
+    let configB = new BackingData("c2", "config B", getEmptyMetaData());
+    configB.setPropertyValue("kind", BACKING_DATA_CONFIG_KIND);
+    let configC = new BackingData("c3", "config C", getEmptyMetaData());
+    configC.setPropertyValue("kind", BACKING_DATA_CONFIG_KIND);
+
+    let storageServiceA = new StorageBackingService("sbs1", "storage service A", getEmptyMetaData());
+    let endpointSA = new Endpoint("e4", "endpoint SA", getEmptyMetaData());
+    storageServiceA.addEndpoint(endpointSA);
+
+    let backingService = new BackingService("b1", "backing service", getEmptyMetaData());
+    backingService.setPropertyValue("providedFunctionality", "config");
+
+    let usageBSA = new RelationToBackingData("r1", getEmptyMetaData());
+    usageBSA.setPropertyValue("usage_relation", "persistence");
+    backingService.addBackingDataEntity(configA, usageBSA);
+
+    let usageBSC = new RelationToBackingData("r2", getEmptyMetaData());
+    usageBSC.setPropertyValue("usage_relation", "persistence");
+    backingService.addBackingDataEntity(configC, usageBSC);
+
+    let usageAA = new RelationToBackingData("r3", getEmptyMetaData());
+    usageAA.setPropertyValue("usage_relation", "usage");
+    serviceA.addBackingDataEntity(configA, usageAA);
+
+    let usageAB = new RelationToBackingData("r4", getEmptyMetaData());
+    usageAB.setPropertyValue("usage_relation", "persistence");
+    serviceA.addBackingDataEntity(configB, usageAB);
+
+    let usageBA = new RelationToBackingData("r5", getEmptyMetaData());
+    usageBA.setPropertyValue("usage_relation", "usage");
+    serviceB.addBackingDataEntity(configA, usageBA);
+
+    let usageBC = new RelationToBackingData("r6", getEmptyMetaData());
+    usageBC.setPropertyValue("usage_relation", "cached-usage");
+    serviceB.addBackingDataEntity(configC, usageBC);
+
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+    let linkBSA = new Link("l2", serviceB, endpointSA);
+    let linkBC = new Link("l3", serviceB, endpointC);
+
+    let requestTrace = new RequestTrace("r1", "request trace 1", getEmptyMetaData());
+    requestTrace.setLinks = [
+        [linkAB],
+        [linkBSA, linkBC]
+    ]
+    requestTrace.setExternalEndpoint = externalEndpoint;
+
+    system.addEntities([configA, configB, configC]);
+    system.addEntities([backingService]);
+    system.addEntities([serviceA, serviceB, serviceC]);
+    system.addEntities([storageServiceA]);
+    system.addEntities([linkAB, linkBSA, linkBC]);
+    system.addEntities([requestTrace]);
+
+
+    let measureValue = requestTraceMeasureImplementations["configurationExternalization"]({ entity: requestTrace, system: system });
+    expect(measureValue).toBeCloseTo(1.5 / 2);
+
+})
+
+test("secretsExternalization", () => {
+
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService A", getEmptyMetaData());
+    let externalEndpoint = new ExternalEndpoint("ee1", "external endpoint", getEmptyMetaData());
+    serviceA.addEndpoint(externalEndpoint);
+
+    let serviceB = new Service("s2", "testService B", getEmptyMetaData());
+    let endpointB = new Endpoint("e2", "endpoint B", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+
+    let serviceC = new Service("s3", "testService C", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint C", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+
+    let secretA = new BackingData("c1", "secret A", getEmptyMetaData());
+    secretA.setPropertyValue("kind", BACKING_DATA_SECRET_KIND);
+    let secretB = new BackingData("c2", "secret B", getEmptyMetaData());
+    secretB.setPropertyValue("kind", BACKING_DATA_SECRET_KIND);
+    let secretC = new BackingData("c3", "secret C", getEmptyMetaData());
+    secretC.setPropertyValue("kind", BACKING_DATA_SECRET_KIND);
+
+    let storageServiceA = new StorageBackingService("sbs1", "storage service A", getEmptyMetaData());
+    let endpointSA = new Endpoint("e4", "endpoint SA", getEmptyMetaData());
+    storageServiceA.addEndpoint(endpointSA);
+
+    let backingService = new BackingService("b1", "backing service", getEmptyMetaData());
+    backingService.setPropertyValue("providedFunctionality", "config");
+
+    let usageBSA = new RelationToBackingData("r1", getEmptyMetaData());
+    usageBSA.setPropertyValue("usage_relation", "persistence");
+    backingService.addBackingDataEntity(secretA, usageBSA);
+
+    let usageBSC = new RelationToBackingData("r2", getEmptyMetaData());
+    usageBSC.setPropertyValue("usage_relation", "persistence");
+    backingService.addBackingDataEntity(secretC, usageBSC);
+
+    let usageAA = new RelationToBackingData("r3", getEmptyMetaData());
+    usageAA.setPropertyValue("usage_relation", "usage");
+    serviceA.addBackingDataEntity(secretA, usageAA);
+
+    let usageAB = new RelationToBackingData("r4", getEmptyMetaData());
+    usageAB.setPropertyValue("usage_relation", "persistence");
+    serviceA.addBackingDataEntity(secretB, usageAB);
+
+    let usageBA = new RelationToBackingData("r5", getEmptyMetaData());
+    usageBA.setPropertyValue("usage_relation", "usage");
+    serviceB.addBackingDataEntity(secretA, usageBA);
+
+    let usageBC = new RelationToBackingData("r6", getEmptyMetaData());
+    usageBC.setPropertyValue("usage_relation", "cached-usage");
+    serviceB.addBackingDataEntity(secretC, usageBC);
+
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+    let linkBSA = new Link("l2", serviceB, endpointSA);
+    let linkBC = new Link("l3", serviceB, endpointC);
+
+    let requestTrace = new RequestTrace("r1", "request trace 1", getEmptyMetaData());
+    requestTrace.setLinks = [
+        [linkAB],
+        [linkBSA, linkBC]
+    ]
+    requestTrace.setExternalEndpoint = externalEndpoint;
+
+    system.addEntities([secretA, secretB, secretC]);
+    system.addEntities([backingService]);
+    system.addEntities([serviceA, serviceB, serviceC]);
+    system.addEntities([storageServiceA]);
+    system.addEntities([linkAB, linkBSA, linkBC]);
+    system.addEntities([requestTrace]);
+
+
+    let measureValue = requestTraceMeasureImplementations["secretsExternalization"]({ entity: requestTrace, system: system });
+    expect(measureValue).toBeCloseTo(1.5 / 2);
+
 })
