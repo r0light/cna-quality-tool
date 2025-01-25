@@ -2548,3 +2548,60 @@ test("secretsExternalization", () => {
 
 
 })
+
+test("ratioOfSpecializedStatefulServices", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    serviceA.setPropertyValue("stateless", true);
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    serviceB.setPropertyValue("stateless", false);
+
+    let backingService = new BackingService("bs1", "backing service 1", getEmptyMetaData());
+    backingService.setPropertyValue("providedFunctionality", "config");
+    backingService.setPropertyValue("stateless", true);
+
+    let storageBackingService = new StorageBackingService("sbs1", "storage backing service 1", getEmptyMetaData());
+    storageBackingService.setPropertyValue("stateless", false);
+
+    system.addEntities([serviceA, serviceB, backingService, storageBackingService]);
+
+    let measureValue = systemMeasureImplementations["ratioOfSpecializedStatefulServices"]({ entity: system, system: system });
+    expect(measureValue).toEqual(0.5);
+})
+
+
+test("suitablyReplicatedStatefulService", () => {
+
+    let system = new System("sys1", "testSystem");;
+    let infrastructureA = new Infrastructure("i1", "Infrastructure 1", getEmptyMetaData());
+    let infrastructureB = new Infrastructure("i2", "Infrastruture B", getEmptyMetaData());
+    let storageBackingServiceA = new StorageBackingService("sbs1", "Storage Backing Service A", getEmptyMetaData());
+    storageBackingServiceA.setPropertyValue("stateless", false);
+    storageBackingServiceA.setPropertyValue("replication_strategy", "read-only-replication");
+
+    let storageBackingServiceB = new StorageBackingService("sbs2", "Storage Backing Service B", getEmptyMetaData());
+    storageBackingServiceB.setPropertyValue("stateless", false);
+    storageBackingServiceB.setPropertyValue("replication_strategy", "none");
+
+    let storageBackingServiceC = new StorageBackingService("sbs3", "Storage Backing Service C", getEmptyMetaData());
+    storageBackingServiceC.setPropertyValue("stateless", false);
+    storageBackingServiceC.setPropertyValue("replication_strategy", "none");
+
+    let deploymentMappingA = new DeploymentMapping("dm1", storageBackingServiceA, infrastructureA);
+    deploymentMappingA.setPropertyValue("replicas", 3);
+
+    let deploymentMappingB = new DeploymentMapping("dm2", storageBackingServiceB, infrastructureB);
+    deploymentMappingB.setPropertyValue("replicas", 2);
+
+    let deploymentMappingC = new DeploymentMapping("dm3", storageBackingServiceC, infrastructureA);
+    deploymentMappingC.setPropertyValue("replicas", 1);
+
+    system.addEntities([storageBackingServiceA, storageBackingServiceB, storageBackingServiceC]);
+    system.addEntities([infrastructureA, infrastructureB]);
+    system.addEntities([deploymentMappingA, deploymentMappingB, deploymentMappingC]);
+
+    let measureValue = systemMeasureImplementations["suitablyReplicatedStatefulService"]({ entity: system, system: system });
+    expect(measureValue).toEqual(0.5);
+})

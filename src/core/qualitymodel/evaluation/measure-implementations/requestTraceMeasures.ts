@@ -1,4 +1,4 @@
-import { BackingService, Component, Infrastructure, ProxyBackingService, RequestTrace, Service, StorageBackingService, System } from "@/core/entities";
+import { BackingService, BrokerBackingService, Component, DeploymentMapping, Infrastructure, ProxyBackingService, RequestTrace, Service, StorageBackingService, System } from "@/core/entities";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure";
 import { average, lowest, median } from "./general-functions";
 import { calculateRatioOfEndpointsSupportingSsl, componentMeasureImplementations, providesHealthAndReadinessEndpoints } from "./componentMeasures";
@@ -492,6 +492,51 @@ export const secretsExternalization: Calculation = (parameters: CalculationParam
     return average(secretsExternalizationValues);
 }
 
+export const suitablyReplicatedStatefulService: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+
+    let includedComponents =  getIncludedComponents(parameters.entity, parameters.system);
+
+    let allStatefulBackingServices = includedComponents
+        .filter(component => [StorageBackingService.name, BackingService.name, BrokerBackingService.name].includes(component.constructor.name)
+            && !component.getProperty("stateless").value);
+
+    if (allStatefulBackingServices.length === 0) {
+        return "n/a";
+    }
+
+    let deploymentMappings: Map<string, DeploymentMapping[]> = new Map();
+    allStatefulBackingServices.forEach(service => deploymentMappings.set(service.getId, []));
+
+    [...parameters.system.getDeploymentMappingEntities.entries()].forEach(([mappingId, mapping]) => {
+        let isIncluded = deploymentMappings.keys().find(id => id === mapping.getDeployedEntity.getId)
+        if (isIncluded) {
+            deploymentMappings.get(isIncluded).push(mapping);
+        }
+    })
+
+    let replicated: Set<string> = new Set();
+    let suitablyReplicated: Set<string> = new Set();
+
+    deploymentMappings.entries().forEach(([serviceId, deploymentMappings]) => {
+        if (deploymentMappings.some(mapping => mapping.getProperty("replicas").value > 1)) {
+            replicated.add(serviceId);
+            let replicatedService = allStatefulBackingServices.find(service => {
+                return service.getId == serviceId
+            });
+            if (replicatedService.getProperty("replication_strategy").value !== "none" ) {
+                suitablyReplicated.add(serviceId);
+            }
+        }
+    });
+
+
+    if (replicated.size === 0) {
+        return "n/a";
+    }
+
+    return suitablyReplicated.size / replicated.size;
+}
+
 export const requestTraceMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
     "ratioOfSecuredLinks": ratioOfSecuredLinks,
@@ -522,6 +567,7 @@ export const requestTraceMeasureImplementations: { [measureKey: string]: Calcula
     "dataShardingLevel": dataShardingLevel,
     "serviceMeshUsage": serviceMeshUsage,
     "configurationExternalization": configurationExternalization,
-    "secretsExternalization": secretsExternalization
+    "secretsExternalization": secretsExternalization,
+    "suitablyReplicatedStatefulService": suitablyReplicatedStatefulService
 }
 

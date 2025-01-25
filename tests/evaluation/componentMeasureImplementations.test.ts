@@ -1338,3 +1338,40 @@ test("configurationExternalization", () => {
 
 
 })
+
+test("suitablyReplicatedStatefulService - for service", () => {
+    let system = new System("sys1", "testSystem");;
+    let infrastructureA = new Infrastructure("i1", "Infrastructure 1", getEmptyMetaData());
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    serviceA.setPropertyValue("stateless", false);
+
+    let deploymentMappingA = new DeploymentMapping("dm1", serviceA, infrastructureA);
+    deploymentMappingA.setPropertyValue("replicas", 2);
+
+    system.addEntities([serviceA]);
+    system.addEntities([infrastructureA]);
+    system.addEntities([deploymentMappingA]);
+
+    let measureValue = componentMeasureImplementations["suitablyReplicatedStatefulService"]({ entity: serviceA, system: system });
+    expect(measureValue).toEqual("n/a");
+})
+
+test("suitablyReplicatedStatefulService - for storageBackingService", () => {
+    let system = new System("sys1", "testSystem");;
+    let infrastructureA = new Infrastructure("i1", "Infrastructure 1", getEmptyMetaData());
+    let infrastructureB = new Infrastructure("i2", "Infrastruture B", getEmptyMetaData());
+    let storageBackingService = new StorageBackingService("sbs1", "Storage Backing Service", getEmptyMetaData());
+    storageBackingService.setPropertyValue("stateless", false);
+    storageBackingService.setPropertyValue("replication_strategy", "read-only-replication");
+
+    let deploymentMappingA = new DeploymentMapping("dm1", storageBackingService, infrastructureA);
+    deploymentMappingA.setPropertyValue("replicas", 2);
+
+
+    system.addEntities([storageBackingService]);
+    system.addEntities([infrastructureA, infrastructureB]);
+    system.addEntities([deploymentMappingA]);
+
+    let measureValue = componentMeasureImplementations["suitablyReplicatedStatefulService"]({ entity: storageBackingService, system: system });
+    expect(measureValue).toEqual(1);
+})

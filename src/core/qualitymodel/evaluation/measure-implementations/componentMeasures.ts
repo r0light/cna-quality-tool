@@ -1,5 +1,5 @@
 
-import { BackingService, Component, Endpoint, Service, StorageBackingService, System } from "../../../entities.js";
+import { BackingService, BrokerBackingService, Component, Endpoint, Service, StorageBackingService, System } from "../../../entities.js";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure.js";
 import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, PROTOCOLS_SUPPORTING_TLS, SERVICE_MESH_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "../../specifications/featureModel.js";
 import { average } from "./general-functions.js";
@@ -636,6 +636,35 @@ export const configurationExternalization: Calculation = (parameters: Calculatio
 
 }
 
+
+export const suitablyReplicatedStatefulService: Calculation = (parameters: CalculationParameters<Component>) => {
+
+    /*
+    let allStatefulBackingServices = [...parameters.system.getComponentEntities.entries()]
+        .filter(([componentId, component]) => [StorageBackingService.name, BackingService.name, BrokerBackingService.name].includes(component.constructor.name)
+                                              && !component.getProperty("stateless").value);
+    */
+
+    if (![StorageBackingService.name, BackingService.name, BrokerBackingService.name].includes(parameters.entity.constructor.name) 
+        || parameters.entity.getProperty("stateless").value) {
+            return "n/a";
+    }
+    
+    let deploymentMappings = [...parameters.system.getDeploymentMappingEntities.entries()].filter(([mappingId ,mapping]) => {
+        return mapping.getDeployedEntity.getId === parameters.entity.getId;
+    })
+
+    if (deploymentMappings.length <= 0) {
+        return "n/a";
+    }
+
+    if (deploymentMappings.some(([mappingId, mapping]) => mapping.getProperty("replicas").value > 1)) {
+        return parameters.entity.getProperty("replication_strategy").value !== "none" ? 1 : 0;
+    } else {
+        return "n/a";
+    }
+}
+
 export const componentMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
     "ratioOfExternalEndpointsSupportingTls": ratioOfExternalEndpointsSupportingTls,
@@ -679,6 +708,7 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "storageReplicationLevel": storageReplicationLevel,
     "serviceMeshUsage": serviceMeshUsage,
     "secretsExternalization": secretsExternalization,
-    "configurationExternalization": configurationExternalization
+    "configurationExternalization": configurationExternalization,
+    "suitablyReplicatedStatefulService": suitablyReplicatedStatefulService
 }
 

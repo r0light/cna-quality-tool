@@ -216,7 +216,7 @@ const productFactors = {
         "relevantEntities": [ENTITIES.BACKING_SERVICE, ENTITIES.INFRASTRUCTURE, ENTITIES.BACKING_DATA, ENTITIES.COMPONENT],
         "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Scholl2019", "section": "6 Never Store Secrets or Configuration Inside an Image" }, { "key": "Adkins2020", "section": "14 Don't Check In Secrets" }],
-        "measures": []
+        "measures": ["secretsExternalization"]
     },
     "secretsStoredInSpecializedServices": {
         "name": "Secrets stored in specialized services",
@@ -354,7 +354,7 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.STORAGE_BACKING_SERVICE, ENTITIES.DATA_AGGREGATE],
         "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Davis2019", "section": "5.4" }, { "key": "Ibryam2020", "section": "11 “Stateful Service”" }],
-        "measures": []
+        "measures": ["ratioOfSpecializedStatefulServices", "suitablyReplicatedStatefulService"]
     },
     "looseCoupling": {
         "name": "Loose coupling",
@@ -1852,6 +1852,18 @@ const measures = {
         "calculation": "Secrets used in a component but stored in another / All secrets used in a component",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE]
+    },
+    "ratioOfSpecializedStatefulServices": {
+        "name": "Ratio of specialized stateful services",
+        "calculation": "Stateful services that are Backing Services, Storage Backing Services, or Broker Backing Services / All stateful services",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM]
+    },
+    "suitablyReplicatedStatefulService": {
+        "name": "Ratio of suitably replicated stateful services",
+        "calculation": "Stateful Backing Services, Storage Backing Services, or Broker Backing Services that are replicated with a strategy other than \"none\" / All Stateful Backing Services, Storage Backing Services, or Broker Backing Services",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE ]
     }
 } satisfies { [measureKey: string]: MeasureSpec }
 

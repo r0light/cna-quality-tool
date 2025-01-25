@@ -1581,3 +1581,57 @@ test("secretsExternalization", () => {
     expect(measureValue).toBeCloseTo(1.5 / 2);
 
 })
+
+
+test("suitablyReplicatedStatefulService", () => {
+
+    let system = new System("sys1", "testSystem");
+
+    let serviceA = new Service("s1", "testService A", getEmptyMetaData());
+    let externalEndpoint = new ExternalEndpoint("ee1", "external endpoint", getEmptyMetaData());
+    serviceA.addEndpoint(externalEndpoint);
+
+    let infrastructureA = new Infrastructure("i1", "Infrastructure 1", getEmptyMetaData());
+    let infrastructureB = new Infrastructure("i2", "Infrastruture B", getEmptyMetaData());
+    let storageBackingServiceA = new StorageBackingService("sbs1", "Storage Backing Service A", getEmptyMetaData());
+    storageBackingServiceA.setPropertyValue("stateless", false);
+    storageBackingServiceA.setPropertyValue("replication_strategy", "read-only-replication");
+    let endpointB = new Endpoint("e2", "endpoint B", getEmptyMetaData());
+    storageBackingServiceA.addEndpoint(endpointB);
+
+    let storageBackingServiceB = new StorageBackingService("sbs2", "Storage Backing Service B", getEmptyMetaData());
+    storageBackingServiceB.setPropertyValue("stateless", false);
+    storageBackingServiceB.setPropertyValue("replication_strategy", "none");
+
+    let storageBackingServiceC = new StorageBackingService("sbs3", "Storage Backing Service C", getEmptyMetaData());
+    storageBackingServiceC.setPropertyValue("stateless", false);
+    storageBackingServiceC.setPropertyValue("replication_strategy", "none");
+
+    let deploymentMappingA = new DeploymentMapping("dm1", storageBackingServiceA, infrastructureA);
+    deploymentMappingA.setPropertyValue("replicas", 3);
+
+    let deploymentMappingB = new DeploymentMapping("dm2", storageBackingServiceB, infrastructureB);
+    deploymentMappingB.setPropertyValue("replicas", 2);
+
+    let deploymentMappingC = new DeploymentMapping("dm3", storageBackingServiceC, infrastructureA);
+    deploymentMappingC.setPropertyValue("replicas", 1);
+
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+
+    let requestTrace = new RequestTrace("r1", "request trace 1", getEmptyMetaData());
+    requestTrace.setLinks = [
+        [linkAB]
+    ]
+    requestTrace.setExternalEndpoint = externalEndpoint;
+
+    system.addEntities([serviceA]);
+    system.addEntities([storageBackingServiceA, storageBackingServiceB, storageBackingServiceC]);
+    system.addEntities([infrastructureA, infrastructureB]);
+    system.addEntities([deploymentMappingA, deploymentMappingB, deploymentMappingC]);
+    system.addEntities([linkAB]);
+    system.addEntities([requestTrace]);
+
+    let measureValue = requestTraceMeasureImplementations["suitablyReplicatedStatefulService"]({ entity: requestTrace, system: system });
+    expect(measureValue).toEqual(1);
+})

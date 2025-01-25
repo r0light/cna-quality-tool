@@ -960,6 +960,22 @@ export const cna_modeling_profile: TOSCA_File = {
             ]
           },
           "default": "other"
+        },
+        "replication_strategy": {
+          "type": "string",
+          "description": "The strategy used to replicate data, if multiple replicas of this backing service are deployed.",
+          "required": true,
+          "default": "none",
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "none",
+                "read-only-replication",
+                "active-active-replication"
+              ]
+            ]
+          }
         }
       }
     },
@@ -1386,6 +1402,22 @@ export const cna_modeling_profile: TOSCA_File = {
             ]
           },
           "default": "queue"
+        },
+        "replication_strategy": {
+          "type": "string",
+          "description": "The strategy used to replicate data, if multiple replicas of this broker backing service are deployed.",
+          "required": true,
+          "default": "none",
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "none",
+                "read-only-replication",
+                "active-active-replication"
+              ]
+            ]
+          }
         }
       }
     },
@@ -1588,6 +1620,22 @@ export const cna_modeling_profile: TOSCA_File = {
           "description": "The number of shards this storage service is configured with, the default of 1 means no sharding is used.",
           "required": true,
           "default": 1
+        },
+        "replication_strategy": {
+          "type": "string",
+          "description": "The strategy used to replicate data, if multiple replicas of this storage backing service are deployed.",
+          "required": true,
+          "default": "none",
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "none",
+                "read-only-replication",
+                "active-active-replication"
+              ]
+            ]
+          }
         }
       }
     },

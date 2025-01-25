@@ -232,6 +232,13 @@ node_types:
         required: true
         validation: { $valid_values: [ $value, [ "naming/addressing", "configuration", "authentication/authorization", "logging", "metrics", "tracing", "other" ]]}
         default: other
+      replication_strategy:
+        type: string
+        description: The strategy used to replicate data, if multiple replicas of this backing service are deployed.
+        required: true
+        default: none
+        validation: { $valid_values: [ $value, [ "none", "read-only-replication", "active-active-replication" ]]}
+
     capabilities:
       address_resolution:
         type: cna-modeling.capabilities.AdressResolution
@@ -274,6 +281,12 @@ node_types:
         required: true
         validation: { $valid_values: [ $value, [ "queue", "topic", "log" ]]}
         default: queue
+      replication_strategy:
+        type: string
+        description: The strategy used to replicate data, if multiple replicas of this broker backing service are deployed.
+        required: true
+        default: none
+        validation: { $valid_values: [ $value, [ "none", "read-only-replication", "active-active-replication" ]]}
 
 
   cna-modeling.entities.StorageBackingService:
@@ -295,6 +308,12 @@ node_types:
         description: The number of shards this storage service is configured with, the default of 1 means no sharding is used.
         required: true
         default: 1
+      replication_strategy:
+        type: string
+        description: The strategy used to replicate data, if multiple replicas of this storage backing service are deployed.
+        required: true
+        default: none
+        validation: { $valid_values: [ $value, [ "none", "read-only-replication", "active-active-replication" ]]}
 
   cna-modeling.entities.Infrastructure:
     derived_from: Abstract.Compute

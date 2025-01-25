@@ -1,12 +1,13 @@
-import { BackingService, BrokerBackingService, Component, Infrastructure, Link, ProxyBackingService, Service, StorageBackingService, System } from "@/core/entities";
+import { BackingService, BrokerBackingService, Component, DeploymentMapping, Infrastructure, Link, ProxyBackingService, Service, StorageBackingService, System } from "@/core/entities";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure";
 import { average, median, lowest, partition } from "./general-functions";
 import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, EVENT_SOURCING_KIND, getEndpointKindWeight, getUsageRelationWeight, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MESSAGE_BROKER_KIND, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SEND_EVENT_ENDPOINT_KIND, SERVICE_MESH_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "../../specifications/featureModel";
 import { calculateRatioOfEndpointsSupportingSsl, calculateRatioOfExternalEndpointsSupportingTls, numberOfAsynchronousEndpointsOfferedByAService, numberOfComponentsAComponentIsLinkedTo, numberOfSynchronousEndpointsOfferedByAService, providesHealthAndReadinessEndpoints, serviceCouplingBasedOnEndpointEntropy } from "./componentMeasures";
 import { numberOfCyclesInRequestTraces, requestTraceComplexity } from "./requestTraceMeasures";
-import { supportsMonitoring as infrastructureSupportsMonitoring} from "./infrastructureMeasures";
-import { supportsMonitoring as componentSupportsMonitoring} from "./componentMeasures";
+import { supportsMonitoring as infrastructureSupportsMonitoring } from "./infrastructureMeasures";
+import { supportsMonitoring as componentSupportsMonitoring } from "./componentMeasures";
 import { serviceMeshUsage as componentServiceMeshUsage } from "./componentMeasures";
+import { map } from "jquery";
 
 
 export const countComponentsConnectedToCertainEndpoints: (components: Component[], endpointIds: Set<string>, system: System) => number = (components, endpointIds, system) => {
@@ -19,7 +20,7 @@ export const countComponentsConnectedToCertainEndpoints: (components: Component[
             numberOfComponentsConnected++;
         }
     }
-    
+
     return numberOfComponentsConnected;
 }
 
@@ -966,7 +967,7 @@ export const averageComplexityOfRequestTraces: Calculation = (parameters: Calcul
         return 0;
     }
 
-    return average([...parameters.entity.getRequestTraceEntities.entries()].map(([requestTraceId, requestTrace]) => requestTraceComplexity({entity: requestTrace, system: parameters.system}) as number));
+    return average([...parameters.entity.getRequestTraceEntities.entries()].map(([requestTraceId, requestTrace]) => requestTraceComplexity({ entity: requestTrace, system: parameters.system }) as number));
 }
 
 export const amountOfRedundancy: Calculation = (parameters: CalculationParameters<System>) => {
@@ -1070,9 +1071,9 @@ export const getServiceInteractions: (components: Component[], links: Link[], sy
 export const serviceInteractionViaBackingService: Calculation = (parameters: CalculationParameters<System>) => {
 
     let serviceInteractions = getServiceInteractions([...parameters.entity.getComponentEntities.values()],
-    [...parameters.entity.getLinkEntities.values()],
-    parameters.entity
-);
+        [...parameters.entity.getLinkEntities.values()],
+        parameters.entity
+    );
 
     let numberOfAsynchronousConnectionsViaBroker = [...serviceInteractions.asynchronousConnections.entries()]
         .filter(([connectionId, connection]) => {
@@ -1092,9 +1093,9 @@ export const serviceInteractionViaBackingService: Calculation = (parameters: Cal
 export const eventSourcingUtilizationMetric: Calculation = (parameters: CalculationParameters<System>) => {
 
     let serviceInteractions = getServiceInteractions([...parameters.entity.getComponentEntities.values()],
-    [...parameters.entity.getLinkEntities.values()],
-    parameters.entity
-);
+        [...parameters.entity.getLinkEntities.values()],
+        parameters.entity
+    );
 
     let numberOfEventSourcingConnections = [...serviceInteractions.asynchronousConnections.entries()]
         .filter(([connectionId, connection]) => {
@@ -1458,16 +1459,16 @@ export const calculateNumberOfLinksWithServiceDiscovery: (links: Link[]) => numb
     for (const link of links) {
         let sourceComponent = link.getSourceEntity;
         let addressResolutionComponent = sourceComponent.getAddressResolutionBy;
-        if (addressResolutionComponent && 
-            ((addressResolutionComponent.constructor.name === BackingService.name && addressResolutionComponent.getProperty("address_resolution_kind").value !== "none") 
-            || (addressResolutionComponent.constructor.name === ProxyBackingService.name))
+        if (addressResolutionComponent &&
+            ((addressResolutionComponent.constructor.name === BackingService.name && addressResolutionComponent.getProperty("address_resolution_kind").value !== "none")
+                || (addressResolutionComponent.constructor.name === ProxyBackingService.name))
         ) {
             linksWithServiceDiscovery++;
         }
     }
 
     return linksWithServiceDiscovery;
-} 
+}
 
 export const serviceDiscoveryUsage: Calculation = (parameters: CalculationParameters<System>) => {
 
@@ -1560,7 +1561,7 @@ export const serviceMeshUsage: Calculation = (parameters: CalculationParameters<
 
     const componentsToEvaluate = [...parameters.entity.getComponentEntities.values()].filter(component => component.constructor.name !== ProxyBackingService.name || component.getProperty("kind").value !== SERVICE_MESH_KIND);
 
-    return average(componentsToEvaluate.map(component => componentServiceMeshUsage({entity: component, system: parameters.system}) as number));
+    return average(componentsToEvaluate.map(component => componentServiceMeshUsage({ entity: component, system: parameters.system }) as number));
 }
 
 export const secretsExternalization: Calculation = (parameters: CalculationParameters<System>) => {
@@ -1637,6 +1638,68 @@ export const secretsExternalization: Calculation = (parameters: CalculationParam
 
 }
 
+export const ratioOfSpecializedStatefulServices: Calculation = (parameters: CalculationParameters<System>) => {
+
+    let statefulServices = [...parameters.entity.getComponentEntities.entries()].filter(([componentId, component]) => !component.getProperty("stateless").value);
+
+    if (statefulServices.length === 0) {
+        return "n/a";
+    }
+
+    let specializedServices: string[] = [];
+
+    for (const [componentId, statefulService] of statefulServices) {
+        if ([StorageBackingService.name, BackingService.name, BrokerBackingService.name].includes(statefulService.constructor.name)) {
+            specializedServices.push(componentId);
+        }
+    }
+
+    return specializedServices.length / statefulServices.length;
+}
+
+
+export const suitablyReplicatedStatefulService: Calculation = (parameters: CalculationParameters<System>) => {
+
+    let allStatefulBackingServices = [...parameters.system.getComponentEntities.entries()]
+        .filter(([componentId, component]) => [StorageBackingService.name, BackingService.name, BrokerBackingService.name].includes(component.constructor.name)
+            && !component.getProperty("stateless").value);
+
+    if (allStatefulBackingServices.length === 0) {
+        return "n/a";
+    }
+
+    let deploymentMappings: Map<string, DeploymentMapping[]> = new Map();
+    allStatefulBackingServices.forEach(([serviceId, service]) => deploymentMappings.set(serviceId, []));
+
+    [...parameters.system.getDeploymentMappingEntities.entries()].forEach(([mappingId, mapping]) => {
+        let isIncluded = deploymentMappings.keys().find(id => id === mapping.getDeployedEntity.getId)
+        if (isIncluded) {
+            deploymentMappings.get(isIncluded).push(mapping);
+        }
+    })
+
+    let replicated: Set<string> = new Set();
+    let suitablyReplicated: Set<string> = new Set();
+
+    deploymentMappings.entries().forEach(([serviceId, deploymentMappings]) => {
+        if (deploymentMappings.some(mapping => mapping.getProperty("replicas").value > 1)) {
+            replicated.add(serviceId);
+            let replicatedService = allStatefulBackingServices.find(([id, service]) => {
+                return id == serviceId
+            });
+            if (replicatedService[1].getProperty("replication_strategy").value !== "none" ) {
+                suitablyReplicated.add(serviceId);
+            }
+        }
+    });
+
+
+    if (replicated.size === 0) {
+        return "n/a";
+    }
+
+    return suitablyReplicated.size / replicated.size;
+}
 
 export const systemMeasureImplementations: { [measureKey: string]: Calculation } = {
     "serviceReplicationLevel": serviceReplicationLevel,
@@ -1713,5 +1776,7 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation }
     "ratioOfCachedDataAggregates": ratioOfCachedDataAggregates,
     "ratioOfStateDependencyOfEndpoints": ratioOfStateDependencyOfEndpoints,
     "serviceMeshUsage": serviceMeshUsage,
-    "secretsExternalization": secretsExternalization
+    "secretsExternalization": secretsExternalization,
+    "ratioOfSpecializedStatefulServices": ratioOfSpecializedStatefulServices,
+    "suitablyReplicatedStatefulService": suitablyReplicatedStatefulService
 }
