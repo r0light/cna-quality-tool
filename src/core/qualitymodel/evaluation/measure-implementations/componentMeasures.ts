@@ -639,12 +639,6 @@ export const configurationExternalization: Calculation = (parameters: Calculatio
 
 export const suitablyReplicatedStatefulService: Calculation = (parameters: CalculationParameters<Component>) => {
 
-    /*
-    let allStatefulBackingServices = [...parameters.system.getComponentEntities.entries()]
-        .filter(([componentId, component]) => [StorageBackingService.name, BackingService.name, BrokerBackingService.name].includes(component.constructor.name)
-                                              && !component.getProperty("stateless").value);
-    */
-
     if (![StorageBackingService.name, BackingService.name, BrokerBackingService.name].includes(parameters.entity.constructor.name) 
         || parameters.entity.getProperty("stateless").value) {
             return "n/a";
