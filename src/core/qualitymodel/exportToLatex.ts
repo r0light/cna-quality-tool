@@ -61,7 +61,7 @@ for (const factor of qualityModel.productFactors) {
     output += `\\end{minipage}\n`;
     output += `\n`;
 
-    frameOutput += `\\input{${innerDir}/${factor.getId}}\n\n`;
+    frameOutput += `\\input{${innerDir}/${factor.getId}.tex}\n\n`;
 
     fs.writeFile(`./${outerDir}/${innerDir}/${factor.getId}.tex`, `${output}`, (err) => {
         if (err) {
@@ -70,10 +70,33 @@ for (const factor of qualityModel.productFactors) {
     })
 }
 
-
-
 fs.writeFile(`./${outerDir}/factors-frame.tex`, `${frameOutput}`, (err) => {
     if (err) {
         console.error(`Could not export factor frame to LaTeX`)
+    }
+})
+
+
+let qaOutput = "";
+
+for (const highlevelAspect of qualityModel.highLevelAspects) {
+
+    qaOutput += `\\subsection{${highlevelAspect.getName}}\n\\label{sec:qualitymodel:qualityaspects:${highlevelAspect.getId}}\n\n`;
+
+    // TODO apply filter for non-used aspects?
+    let qualityAspects = qualityModel.qualityAspects.filter(qa => qa.getHighLevelAspectKey === highlevelAspect.getId);
+    for (const qualityAspect of qualityAspects) {
+
+        if (["simplicity", "elasticity"].includes(qualityAspect.getId)) {
+             qaOutput +=  `\\definitionown{${qualityAspect.getName}}{${qualityAspect.getDescription}}\n\n`;
+        } else {
+            qaOutput +=  `\\definitioncited{${qualityAspect.getName}}{${qualityAspect.getDescription}}{\\cite{ISO/IEC2014}}\n\n`;
+        }
+    }
+}
+
+fs.writeFile(`./${outerDir}/qualityAspects.tex`, `${qaOutput}`, (err) => {
+    if (err) {
+        console.error(`Could not export quality aspects to LaTeX`)
     }
 })
