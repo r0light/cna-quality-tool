@@ -537,6 +537,47 @@ export const suitablyReplicatedStatefulService: Calculation = (parameters: Calcu
     return suitablyReplicated.size / replicated.size;
 }
 
+export const ratioOfUniqueAccountUsage: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+
+    let accounts = new Set();
+
+    let includedComponents = getIncludedComponents(parameters.entity, parameters.system);
+
+    for(const component of includedComponents) {
+
+        let account = component.getProperty("account").value;
+        if (!account) {
+            accounts.add("default-account");
+        } else {
+            accounts.add(account);
+        }
+    }
+
+    let includedComponentIds = includedComponents.map(component => component.getId);
+
+    let supportingInfrastructure = new Set<Infrastructure>();
+
+    for (const [deploymentMappingId, deploymentMapping] of parameters.system.getDeploymentMappingEntities.entries()) {
+        if (includedComponentIds.includes(deploymentMapping.getDeployedEntity.getId)) {
+            supportingInfrastructure.add(deploymentMapping.getUnderlyingInfrastructure);
+            let account = deploymentMapping.getUnderlyingInfrastructure.getProperty("account").value;
+            if (!account) {
+                accounts.add("default-account");
+            } else {
+                accounts.add(account);
+            }
+        }
+    }
+
+    let componentsAndInfrastructure = includedComponents.length + supportingInfrastructure.size;
+    if (componentsAndInfrastructure === 0) {
+        return "n/a";
+    }
+
+    return accounts.size / componentsAndInfrastructure;
+}
+
+
 export const requestTraceMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
     "ratioOfSecuredLinks": ratioOfSecuredLinks,
@@ -568,6 +609,7 @@ export const requestTraceMeasureImplementations: { [measureKey: string]: Calcula
     "serviceMeshUsage": serviceMeshUsage,
     "configurationExternalization": configurationExternalization,
     "secretsExternalization": secretsExternalization,
-    "suitablyReplicatedStatefulService": suitablyReplicatedStatefulService
+    "suitablyReplicatedStatefulService": suitablyReplicatedStatefulService,
+    "ratioOfUniqueAccountUsage": ratioOfUniqueAccountUsage
 }
 

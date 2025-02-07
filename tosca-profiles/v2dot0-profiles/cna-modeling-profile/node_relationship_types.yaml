@@ -160,6 +160,11 @@ node_types:
         description: Whether or not this component applies load shedding. That means whether the component rejects incoming load based on certain thresholds (resource usage, concurrent requests).
         required: true
         default: false
+      account:
+        type: string
+        description: The identifier of the account with which this component is executed.
+        default: default-account
+        required: true
     requirements:
       - host:
           capability: Compute
@@ -379,6 +384,11 @@ node_types:
         required: true
         description: Set to true if the infrastructure enforces resource bounds on deployed components, for example regarding cpu shares or memory size. Deployed entities can then only use resources up to a certain bound. Otherwise entities can use resources as available.
         default: false
+      account:
+        type: string
+        description: The identifier of the account with which this component is executed.
+        default: default-account
+        required: true
     capabilities:
       address_resolution:
         type: cna-modeling.capabilities.AdressResolution

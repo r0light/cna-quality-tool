@@ -2605,3 +2605,46 @@ test("suitablyReplicatedStatefulService", () => {
     let measureValue = systemMeasureImplementations["suitablyReplicatedStatefulService"]({ entity: system, system: system });
     expect(measureValue).toEqual(0.5);
 })
+
+test("ratioOfUniqueAccountUsage", () => {
+    let system = new System("sys1", "testSystem");;
+    let infrastructureA = new Infrastructure("i1", "Infrastructure 1", getEmptyMetaData());
+    infrastructureA.setPropertyValue("account", "infraAccount");
+    let infrastructureB = new Infrastructure("i2", "Infrastruture B", getEmptyMetaData());
+    infrastructureB.setPropertyValue("account", "default-account");
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    serviceA.setPropertyValue("account", "serviceAccount");
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    serviceB.setPropertyValue("account", "default-account");
+
+    system.addEntities([infrastructureA, infrastructureB]);
+    system.addEntities([serviceA, serviceB]);
+
+    let measureValue = systemMeasureImplementations["ratioOfUniqueAccountUsage"]({ entity: system, system: system });
+    expect(measureValue).toEqual(0.75);
+})
+
+
+test("ratioOfNonCustomBackingServices", () => {
+    let system = new System("sys1", "testSystem");;
+    let backingService = new BackingService("s1", "backingService", getEmptyMetaData());
+    backingService.setPropertyValue("software_type", "open-source");
+    system.addEntity(backingService);
+
+    let storageBackingService = new StorageBackingService("s2", "storageBackingService", getEmptyMetaData());
+    storageBackingService.setPropertyValue("software_type", "custom");
+    system.addEntity(storageBackingService);
+
+    let proxyBackingService = new ProxyBackingService("s3", "proxyBackingService", getEmptyMetaData());
+    proxyBackingService.setPropertyValue("software_type", "proprietary");
+    system.addEntity(proxyBackingService);
+
+    let brokerBackingService = new BrokerBackingService("s4", "brokerBackingService", getEmptyMetaData());
+    brokerBackingService.setPropertyValue("software_type", "custom");
+    system.addEntity(brokerBackingService);
+
+    let measureValue = systemMeasureImplementations["ratioOfNonCustomBackingServices"]({ entity: system, system: system });
+    expect(measureValue).toEqual(0.5);
+})

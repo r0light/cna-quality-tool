@@ -1,7 +1,7 @@
 import { BackingService, BrokerBackingService, Component, DeploymentMapping, Infrastructure, Link, ProxyBackingService, Service, StorageBackingService, System } from "@/core/entities";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure";
 import { average, median, lowest, partition } from "./general-functions";
-import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, EVENT_SOURCING_KIND, getEndpointKindWeight, getUsageRelationWeight, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MESSAGE_BROKER_KIND, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SEND_EVENT_ENDPOINT_KIND, SERVICE_MESH_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "../../specifications/featureModel";
+import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, CUSTOM_SOFTWARE_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, EVENT_SOURCING_KIND, getEndpointKindWeight, getUsageRelationWeight, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MESSAGE_BROKER_KIND, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SEND_EVENT_ENDPOINT_KIND, SERVICE_MESH_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "../../specifications/featureModel";
 import { calculateRatioOfEndpointsSupportingSsl, calculateRatioOfExternalEndpointsSupportingTls, numberOfAsynchronousEndpointsOfferedByAService, numberOfComponentsAComponentIsLinkedTo, numberOfSynchronousEndpointsOfferedByAService, providesHealthAndReadinessEndpoints, serviceCouplingBasedOnEndpointEntropy } from "./componentMeasures";
 import { numberOfCyclesInRequestTraces, requestTraceComplexity } from "./requestTraceMeasures";
 import { supportsMonitoring as infrastructureSupportsMonitoring } from "./infrastructureMeasures";
@@ -1701,6 +1701,57 @@ export const suitablyReplicatedStatefulService: Calculation = (parameters: Calcu
     return suitablyReplicated.size / replicated.size;
 }
 
+export const ratioOfUniqueAccountUsage: Calculation = (parameters: CalculationParameters<System>) => {
+
+    let accounts = new Set();
+
+    let allComponents = parameters.entity.getComponentEntities;
+
+    for(const [componentId, component] of allComponents) {
+
+        let account = component.getProperty("account").value;
+        if (!account) {
+            accounts.add("default-account");
+        } else {
+            accounts.add(account);
+        }
+    }
+
+    let allInfrastructureInstances = parameters.entity.getInfrastructureEntities;
+
+    for(const [infrastructureId, infrastructure] of allInfrastructureInstances) {
+
+        let account = infrastructure.getProperty("account").value;
+        if (!account) {
+            accounts.add("default-account");
+        } else {
+            accounts.add(account);
+        }
+    }
+
+    let componentsAndInfrastructure = allComponents.size + allInfrastructureInstances.size;
+    if (componentsAndInfrastructure === 0) {
+        return "n/a";
+    }
+
+    return accounts.size / componentsAndInfrastructure;
+}
+
+export const ratioOfNonCustomBackingServices: Calculation = (parameters: CalculationParameters<System>) => {
+
+    let allBackingServices = [...parameters.entity.getComponentEntities].filter(([componentId, component]) => {
+        return [StorageBackingService.name, BackingService.name, BrokerBackingService.name, ProxyBackingService.name].includes(component.constructor.name);
+    });
+
+    if (allBackingServices.length === 0) {
+        return "n/a";
+    }
+
+    let nonCustomBackingServices = allBackingServices.filter(([backingServiceId, backingService]) => backingService.getProperty("software_type").value !== CUSTOM_SOFTWARE_TYPE);
+
+    return nonCustomBackingServices.length / allBackingServices.length;
+}
+
 export const systemMeasureImplementations: { [measureKey: string]: Calculation } = {
     "serviceReplicationLevel": serviceReplicationLevel,
     "medianServiceReplication": medianServiceReplication,
@@ -1723,8 +1774,7 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation }
     "interactionDensityBasedOnLinks": interactionDensityBasedOnLinks,
     "systemCouplingBasedOnEndpointEntropy": systemCouplingBasedOnEndpointEntropy,
     "servicesInterdependenceInTheSystem": servicesInterdependenceInTheSystem,
-    "aggregateSystemMetricToMeasureServiceCoupling":
-        aggregateSystemMetricToMeasureServiceCoupling,
+    "aggregateSystemMetricToMeasureServiceCoupling": aggregateSystemMetricToMeasureServiceCoupling,
     "degreeOfCouplingInASystem": degreeOfCouplingInASystem,
     "simpleDegreeOfCouplingInASystem": simpleDegreeOfCouplingInASystem,
     "directServiceSharing": directServiceSharing,
@@ -1778,5 +1828,7 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation }
     "serviceMeshUsage": serviceMeshUsage,
     "secretsExternalization": secretsExternalization,
     "ratioOfSpecializedStatefulServices": ratioOfSpecializedStatefulServices,
-    "suitablyReplicatedStatefulService": suitablyReplicatedStatefulService
+    "suitablyReplicatedStatefulService": suitablyReplicatedStatefulService,
+    "ratioOfUniqueAccountUsage": ratioOfUniqueAccountUsage,
+    "ratioOfNonCustomBackingServices": ratioOfNonCustomBackingServices
 }

@@ -263,7 +263,7 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT],
         "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Scholl2019", "section": "6 Use Separate Accounts/Subscriptions/Tenants”" }, { "key": "Adkins2020", "section": "8 Role separation”(let different services run with different roles to restrict access)" }, { "key": "Adkins2020", "section": "8 “Location separation (use different roles for a service in different locations to limit attack impacts)" }],
-        "measures": []
+        "measures": ["ratioOfUniqueAccountUsage"]
     },
     "authenticationDelegation": {
         "name": "Authentication delegation",
@@ -399,7 +399,7 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.BACKING_SERVICE, ENTITIES.STORAGE_BACKING_SERVICE, ENTITIES.BROKER_BACKING_SERVICE, ENTITIES.PROXY_BACKING_SERVICE, ENTITIES.INFRASTRUCTURE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE],
         "sources": [{ "key": "Reznik2019", "section": "9 Avoid Reinventing the Wheel" }, { "key": "Adkins2020", "section": "12 Frameworks to Enforce Security and Reliability" }],
-        "measures": []
+        "measures": ["ratioOfNonCustomBackingServices"]
     },
     "standardization": {
         "name": "Standardization",
@@ -1864,7 +1864,19 @@ const measures = {
         "calculation": "Stateful Backing Services, Storage Backing Services, or Broker Backing Services that are replicated with a strategy other than \"none\" / All Stateful Backing Services, Storage Backing Services, or Broker Backing Services",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE ]
-    }
+    },
+    "ratioOfUniqueAccountUsage": {
+        "name": "Ratio of unique account usage",
+        "calculation": "Number of unique accounts used by components and infrastructure / Number of components and infrastructure",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE ]
+    },
+    "ratioOfNonCustomBackingServices": {
+        "name": "Ratio of non-custom backing services",
+        "calculation": "Backing Services, Storage Backing Services, Proxy Backing Services, and Broker Backing Services which are not of type custom / All Backing Services, Storage Backing Services, Proxy Backing Services, and Broker Backing Services",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT]
+    },
 } satisfies { [measureKey: string]: MeasureSpec }
 
 const measureKeys = Object.freeze(measures);

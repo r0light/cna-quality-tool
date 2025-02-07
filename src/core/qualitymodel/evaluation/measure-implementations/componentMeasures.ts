@@ -1,7 +1,7 @@
 
-import { BackingService, BrokerBackingService, Component, Endpoint, Service, StorageBackingService, System } from "../../../entities.js";
+import { BackingService, BrokerBackingService, Component, Endpoint, ProxyBackingService, Service, StorageBackingService, System } from "../../../entities.js";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure.js";
-import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, PROTOCOLS_SUPPORTING_TLS, SERVICE_MESH_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "../../specifications/featureModel.js";
+import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, CUSTOM_SOFTWARE_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, PROTOCOLS_SUPPORTING_TLS, SERVICE_MESH_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "../../specifications/featureModel.js";
 import { average } from "./general-functions.js";
 
 
@@ -659,6 +659,15 @@ export const suitablyReplicatedStatefulService: Calculation = (parameters: Calcu
     }
 }
 
+export const ratioOfNonCustomBackingServices: Calculation = (parameters: CalculationParameters<Component>) => {
+
+    if (![StorageBackingService.name, BackingService.name, BrokerBackingService.name, ProxyBackingService.name].includes(parameters.entity.constructor.name)) {
+            return "n/a";
+    }
+
+    return parameters.entity.getProperty("software_type").value === CUSTOM_SOFTWARE_TYPE ? 0 : 1;
+}
+
 export const componentMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
     "ratioOfExternalEndpointsSupportingTls": ratioOfExternalEndpointsSupportingTls,
@@ -703,6 +712,7 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "serviceMeshUsage": serviceMeshUsage,
     "secretsExternalization": secretsExternalization,
     "configurationExternalization": configurationExternalization,
-    "suitablyReplicatedStatefulService": suitablyReplicatedStatefulService
+    "suitablyReplicatedStatefulService": suitablyReplicatedStatefulService,
+    "ratioOfNonCustomBackingServices": ratioOfNonCustomBackingServices
 }
 

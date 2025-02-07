@@ -83,8 +83,10 @@ for (const highlevelAspect of qualityModel.highLevelAspects) {
 
     qaOutput += `\\subsection{${highlevelAspect.getName}}\n\\label{sec:qualitymodel:qualityaspects:${highlevelAspect.getId}}\n\n`;
 
-    // TODO apply filter for non-used aspects?
     let qualityAspects = qualityModel.qualityAspects.filter(qa => qa.getHighLevelAspectKey === highlevelAspect.getId);
+    // filter out aspects without any impacts
+    qualityAspects = qualityAspects.filter(qualityAspect => qualityModel.impacts.some(impact => impact.getImpactedFactor.getId === qualityAspect.getId));
+
     for (const qualityAspect of qualityAspects) {
 
         if (["simplicity", "elasticity"].includes(qualityAspect.getId)) {

@@ -1375,3 +1375,23 @@ test("suitablyReplicatedStatefulService - for storageBackingService", () => {
     let measureValue = componentMeasureImplementations["suitablyReplicatedStatefulService"]({ entity: storageBackingService, system: system });
     expect(measureValue).toEqual(1);
 })
+
+test("ratioOfNonCustomBackingServices - non-custom", () => {
+    let system = new System("sys1", "testSystem");;
+    let backingServiceA = new BackingService("s1", "backingService", getEmptyMetaData());
+    backingServiceA.setPropertyValue("software_type", "open-source");
+    system.addEntity(backingServiceA);
+
+    let measureValue = componentMeasureImplementations["ratioOfNonCustomBackingServices"]({ entity: backingServiceA, system: system });
+    expect(measureValue).toEqual(1);
+})
+
+test("ratioOfNonCustomBackingServices - custom", () => {
+    let system = new System("sys1", "testSystem");;
+    let backingServiceA = new BackingService("s1", "backingService", getEmptyMetaData());
+    backingServiceA.setPropertyValue("software_type", "custom");
+    system.addEntity(backingServiceA);
+
+    let measureValue = componentMeasureImplementations["ratioOfNonCustomBackingServices"]({ entity: backingServiceA, system: system });
+    expect(measureValue).toEqual(0);
+})

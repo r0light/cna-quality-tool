@@ -547,6 +547,12 @@ export const cna_modeling_profile: TOSCA_File = {
           "description": "Whether or not this component applies load shedding. That means whether the component rejects incoming load based on certain thresholds (resource usage, concurrent requests).",
           "required": true,
           "default": false
+        },
+        "account": {
+          "type": "string",
+          "description": "The identifier of the account with which this component is executed.",
+          "default": "default-account",
+          "required": true
         }
       }
     },
@@ -738,6 +744,12 @@ export const cna_modeling_profile: TOSCA_File = {
           "description": "Whether or not this component applies load shedding. That means whether the component rejects incoming load based on certain thresholds (resource usage, concurrent requests).",
           "required": true,
           "default": false
+        },
+        "account": {
+          "type": "string",
+          "description": "The identifier of the account with which this component is executed.",
+          "default": "default-account",
+          "required": true
         }
       }
     },
@@ -940,6 +952,12 @@ export const cna_modeling_profile: TOSCA_File = {
           "description": "Whether or not this component applies load shedding. That means whether the component rejects incoming load based on certain thresholds (resource usage, concurrent requests).",
           "required": true,
           "default": false
+        },
+        "account": {
+          "type": "string",
+          "description": "The identifier of the account with which this component is executed.",
+          "default": "default-account",
+          "required": true
         },
         "providedFunctionality": {
           "type": "string",
@@ -1179,6 +1197,12 @@ export const cna_modeling_profile: TOSCA_File = {
           "required": true,
           "default": false
         },
+        "account": {
+          "type": "string",
+          "description": "The identifier of the account with which this component is executed.",
+          "default": "default-account",
+          "required": true
+        },
         "kind": {
           "type": "string",
           "description": "The kind of proxy this is.",
@@ -1386,6 +1410,12 @@ export const cna_modeling_profile: TOSCA_File = {
           "description": "Whether or not this component applies load shedding. That means whether the component rejects incoming load based on certain thresholds (resource usage, concurrent requests).",
           "required": true,
           "default": false
+        },
+        "account": {
+          "type": "string",
+          "description": "The identifier of the account with which this component is executed.",
+          "default": "default-account",
+          "required": true
         },
         "kind": {
           "type": "string",
@@ -1609,6 +1639,12 @@ export const cna_modeling_profile: TOSCA_File = {
           "description": "Whether or not this component applies load shedding. That means whether the component rejects incoming load based on certain thresholds (resource usage, concurrent requests).",
           "required": true,
           "default": false
+        },
+        "account": {
+          "type": "string",
+          "description": "The identifier of the account with which this component is executed.",
+          "default": "default-account",
+          "required": true
         },
         "name": {
           "type": "string",
@@ -1848,6 +1884,12 @@ export const cna_modeling_profile: TOSCA_File = {
           "required": true,
           "description": "Set to true if the infrastructure enforces resource bounds on deployed components, for example regarding cpu shares or memory size. Deployed entities can then only use resources up to a certain bound. Otherwise entities can use resources as available.",
           "default": false
+        },
+        "account": {
+          "type": "string",
+          "description": "The identifier of the account with which this component is executed.",
+          "default": "default-account",
+          "required": true
         }
       }
     },
