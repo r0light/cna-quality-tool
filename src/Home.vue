@@ -3,7 +3,7 @@
 </script>
 
 <template>
-    <div class="jumbotron jumbotron-fluid text-center fullwidth" >
+    <div class="jumbotron jumbotron-fluid text-center fullwidth fullheight" >
         <div class="container-fluid d-flex flex-column col-xl-6 col-sm-12">
             <h1>Clounaq - Cloud-native architectural quality</h1>
             <p>This web-based application represents the tooling support for the Clounaq approach. 
@@ -25,6 +25,10 @@
 <style>
 .fullwidth {
     width: 100%;
+}
+
+.fullheight {
+    height: 100%;
 }
 
 .feature-list {

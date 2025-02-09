@@ -5,12 +5,14 @@ class Entity {
     #key: string;
     #name: string;
     #description: string;
+    #formalSpecification: string;
     #relation: RelationType;
 
-    constructor(key: string, name: string, description: string, relation: RelationType) {
+    constructor(key: string, name: string, description: string, formalSpecification: string, relation: RelationType) {
         this.#key = key;
         this.#name = name;
         this.#description = description;
+        this.#formalSpecification = formalSpecification;
         this.#relation = relation;
     }
 
@@ -24,6 +26,10 @@ class Entity {
 
     get getDescription() {
         return this.#description;
+    }
+
+    get getFormalSpecification() {
+        return this.#formalSpecification;
     }
 
     get getRelation() {

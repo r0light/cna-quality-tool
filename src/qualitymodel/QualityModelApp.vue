@@ -83,11 +83,20 @@
                             </div>
                         </div>
                     </div>
-                    <div v-if="!selectedFactor">Select a factor to see it's details here</div>
+
                 </div>
             </div>
         </div>
+
     </div>
+    <div class="entitiesDescription">
+            <h2>Entities of the quality model (Elements of the modeled software architecture)</h2>
+            <div v-for="entity of qualityModel.entities" class="entityDescription">
+                <span class="font-weight-bold">{{ entity.getName }}</span>
+                <span>Prose description: <span class="font-italic">{{ entity.getDescription }}</span></span> 
+                <span>Formal description: <span class="text-monospace">{{ entity.getFormalSpecification }}</span></span>
+            </div>
+        </div>
 </template>
 
 <script lang="ts" setup>
@@ -447,7 +456,8 @@ function unselectElement() {
     display: flex;
     flex-direction: column;
     width: 100%;
-    height: 100%;
+    height: 100vh;
+    max-height: 1447px;
 }
 
 .qualityModelView {
@@ -520,4 +530,19 @@ function unselectElement() {
 .indented {
     padding-left: 13px;
 }
+
+.entitiesDescription {
+    display: flex;
+    flex-direction: column;
+    row-gap: 10px;
+    padding: 20px;
+}
+
+.entityDescription {
+    display: flex;
+    flex-direction: column;
+    border: #343a40 1px solid;
+    padding: 5px;
+}
+
 </style>
