@@ -23,7 +23,7 @@ function getQualityModel(): QualityModelInstance {
 
     // add all entities
     for (const [entityKey, entity] of Object.entries(entities)) {
-        let newEntity = new Entity(entityKey, entity.name, entity.description, entity.formal, entity.relation);
+        let newEntity = new Entity(entityKey, entity.name, entity.description, entity.symbol, entity.formal, entity.relation);
         newQualityModel.entities.push(newEntity);
     }
 

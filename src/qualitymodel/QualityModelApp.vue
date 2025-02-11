@@ -92,9 +92,9 @@
     <div class="entitiesDescription">
             <h2>Entities of the quality model (Elements of the modeled software architecture)</h2>
             <div v-for="entity of qualityModel.entities" class="entityDescription">
-                <span class="font-weight-bold">{{ entity.getName }}</span>
+                <div class="font-weight-bold">{{ entity.getName }} ({{ entity.getSymbol }})</div>
                 <span>Prose description: <span class="font-italic">{{ entity.getDescription }}</span></span> 
-                <span>Formal description: <span class="text-monospace">{{ entity.getFormalSpecification }}</span></span>
+                <div>Formal description: <div class="text-monospace">{{ entity.getFormalSpecification }}</div></div>
             </div>
         </div>
 </template>
@@ -543,6 +543,7 @@ function unselectElement() {
     flex-direction: column;
     border: #343a40 1px solid;
     padding: 5px;
+    white-space: pre-wrap;
 }
 
 </style>

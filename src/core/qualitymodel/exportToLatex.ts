@@ -2,8 +2,6 @@
 
 import * as fs from 'fs';
 import { getQualityModel } from './QualityModelInstance.js';
-import { ProductFactor } from './quamoco/ProductFactor.js';
-import { QualityAspect } from './quamoco/QualityAspect.js';
 import { ImpactType } from './quamoco/Impact.js';
 
 const qualityModel = getQualityModel();
@@ -100,5 +98,59 @@ for (const highlevelAspect of qualityModel.highLevelAspects) {
 fs.writeFile(`./${outerDir}/qualityAspects.tex`, `${qaOutput}`, (err) => {
     if (err) {
         console.error(`Could not export quality aspects to LaTeX`)
+    }
+})
+
+let entitiesTableOutput = "";
+let entitiesListingOutput = "";
+
+for (const entity of qualityModel.entities) {
+    entitiesTableOutput += `        ${entity.getName} & ${entity.getDescription} & ${entity.getRelation.type} ${entity.getRelation.target}\\\\\ \\hline \n`;
+
+    let formalSpecification = entity.getFormalSpecification
+                                    .replaceAll("∪", "\\cup ")
+                                    .replaceAll("⊆", "\\subseteq")
+                                    .replaceAll("→", "\\rightarrow")
+                                    .replaceAll("ℕ", "\\mathbb{N}")
+                                    .replaceAll("∈", "\\in")
+                                    .replaceAll("⨯", "\\times ")
+                                    .replaceAll("\t", "")
+                                    .replaceAll("\n", "$\n$");
+
+    let latexSpec = "";
+    let parts = formalSpecification.split("\n");
+
+    if (parts.length > 1) {
+        parts[0] = `${parts[0]} #${entity.getName}`;
+        latexSpec = `$${parts.join("\n")}$\n`
+    } else {
+        latexSpec = `$${formalSpecification}$ #${entity.getName}\n`;
+    }
+
+    entitiesListingOutput += latexSpec;
+}
+
+entitiesTableOutput = `
+\\begin{table}[h]
+	\\caption{Entities of the modeling approach, adopted from \\cite{Lichtenthaeler2024}}
+	\\label{tab:results:qualitymodel:entities}
+    \\fontsize{12}{14}\\selectfont
+	\\begin{tabular}{p{0.15\\textwidth}|p{0.6\\textwidth}|p{0.15\\textwidth}}
+		\\textbf{Name}         & \\textbf{Description}  & \\textbf{Relation}  \\\\\ \\hline
+        ${entitiesTableOutput}
+	\\end{tabular}%
+\\end{table}
+`;
+
+entitiesListingOutput = `
+\\begin{lstlisting}[caption={Formal specifiation of entities},label=lst:results:qualitymodel:entities,mathescape=true]
+${entitiesListingOutput}
+\\end{lstlisting}
+`;
+
+
+fs.writeFile(`./${outerDir}/entities.tex`, `${entitiesTableOutput}\n${entitiesListingOutput}`, (err) => {
+    if (err) {
+        console.error(`Could not export entities to LaTeX`)
     }
 })
