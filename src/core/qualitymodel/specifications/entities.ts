@@ -133,7 +133,7 @@ export const entities: {[key in ENTITIES]: EntitySpec}  = {
     },
     "network": {
         "name": "Network",
-        "description": "A network or subnet which covers a range of (ip) addresses and to which components can be assigned to.",
+        "description": "A network or subnet which covers a range of (ip) addresses and to which components and infrastructure entities can be assigned to.",,
         "relation": {"type": "part-of", "target": ENTITIES.SYSTEM},
         "symbol": "N",
         "formal": "\tN = (P)\n\tpropertyValue(N,P) → ℕ"
