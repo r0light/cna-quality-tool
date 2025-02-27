@@ -120,11 +120,41 @@ export async function startParsing() {
                         return err;
                     }
                 })
+
+
+
             }))
 
             // merge all definitions to be able to use them
-            //const mergedProfiles = mergeAllProfiles(profiles);
-            // TODO maybe use again when trying to create types for parsed profiles
+            const mergedProfiles = mergeAllProfiles(profiles);
+            
+            let allPropertyKeys: Set<string> = new Set();
+
+            Object.entries(mergedProfiles.node_types).flatMap(([nodeKey, node]) => {
+                return node.properties ? Object.keys(node.properties) : []    
+            }).forEach((propertyKey) => {
+                allPropertyKeys.add(propertyKey)
+            });
+            Object.entries(mergedProfiles.relationship_types).flatMap(([relationshipKey, relationship]) =>  {
+                return relationship.properties ? Object.keys(relationship.properties) : []  
+            }).forEach((propertyKey) => {
+                allPropertyKeys.add(propertyKey)
+            });
+            Object.entries(mergedProfiles.capability_types).flatMap(([capabilityKey, capability]) => {
+                return capability.properties ? Object.keys(capability.properties) : [] 
+            }).forEach((propertyKey) => {
+                allPropertyKeys.add(propertyKey)
+            });
+
+            let propertyKeysOutput = `export type EntityPropertyKey = ${allPropertyKeys.entries().map(([v1,v2]) => `"${v1}"`).toArray().join(" | ")};`;
+
+            fs.writeFile(`../../parsedProfiles/v2dot0-profiles/propertyKeys.ts`, `${propertyKeysOutput}`, (err) => {
+                if (err) {
+                    console.error(`Could not save propertyKeys: ${err}`)
+                    console.trace();
+                    return err;
+                }
+            })
 
             return results;
         })

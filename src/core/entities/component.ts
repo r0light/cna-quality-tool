@@ -12,6 +12,7 @@ import { ProxyBackingService } from './proxyBackingService.js'
 import { Network } from './network.js'
 import { Infrastructure } from './infrastructure.js'
 import { BackingService } from './backingService.js'
+import { EntityPropertyKey } from '@/totypa/parsedProfiles/v2dot0-profiles/propertyKeys.js'
 
 
 /**
@@ -254,7 +255,7 @@ class Component {
         }
     }
 
-    setPropertyValue(propertyKey: string, propertyValue: any) {
+    setPropertyValue(propertyKey: EntityPropertyKey, propertyValue: any) {
         let propertyToSet = (this.#properties.find(property => property.getKey === propertyKey))
         if (propertyToSet) {
             propertyToSet.value = propertyValue
@@ -263,7 +264,7 @@ class Component {
         }
     }
 
-    getProperty(propertyKey: string) {
+    getProperty(propertyKey: EntityPropertyKey) {
         return this.#properties.find(property => property.getKey === propertyKey);
     }
 

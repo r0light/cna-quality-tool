@@ -3,6 +3,7 @@ import { Link } from "./link.js";
 import { cna_modeling_profile } from '../../totypa/parsedProfiles/v2dot0-profiles/cna_modeling_profile.js'
 import { MetaData } from "../common/entityDataTypes.js";
 import { EntityProperty, parseProperties } from "../common/entityProperty.js";
+import { EntityPropertyKey } from "@/totypa/parsedProfiles/v2dot0-profiles/propertyKeys.js";
 
 
 
@@ -128,7 +129,7 @@ class RequestTrace {
         return this.#properties;
     }
 
-    setPropertyValue(propertyKey: string, propertyValue: any) {
+    setPropertyValue(propertyKey: EntityPropertyKey, propertyValue: any) {
         let propertyToSet = (this.#properties.find(property => property.getKey === propertyKey))
         if (propertyToSet) {
             propertyToSet.value = propertyValue

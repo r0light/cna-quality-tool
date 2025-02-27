@@ -5,6 +5,7 @@ import { MetaData } from "../common/entityDataTypes.js";
 import { RelationToBackingData } from "./relationToBackingData.js";
 import { Artifact } from "../common/artifact.js";
 import { Network } from "./network.js";
+import { EntityPropertyKey } from "@/totypa/parsedProfiles/v2dot0-profiles/propertyKeys.js";
 
 
 /**
@@ -144,11 +145,11 @@ class Infrastructure {
         return this.#properties;
     }
 
-    getProperty(propertyKey: string) {
+    getProperty(propertyKey: EntityPropertyKey) {
         return this.#properties.find(property => property.getKey === propertyKey);
     }
 
-    setPropertyValue(propertyKey: string, propertyValue: any) {
+    setPropertyValue(propertyKey: EntityPropertyKey, propertyValue: any) {
         let propertyToSet = (this.#properties.find(property => property.getKey === propertyKey))
         if (propertyToSet) {
             propertyToSet.value = propertyValue

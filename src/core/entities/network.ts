@@ -1,6 +1,7 @@
 import { tosca_simple_2_0 } from "@/totypa/parsedProfiles/v2dot0-profiles/tosca_simple_2_0";
 import { EntityProperty, mergeAllCapabilitiesProperties, parseCapabilitiesProperties, parseProperties } from "../common/entityProperty";
 import { MetaData } from "../common/entityDataTypes";
+import { EntityPropertyKey } from "@/totypa/parsedProfiles/v2dot0-profiles/propertyKeys";
 
 const NETWORK_TOSCA_KEY = "Network"
 const NETWORK_TOSCA_EQUIVALENT = tosca_simple_2_0.node_types[NETWORK_TOSCA_KEY];
@@ -93,7 +94,7 @@ class Network {
         }
     }
 
-    setPropertyValue(propertyKey: string, propertyValue: any) {
+    setPropertyValue(propertyKey: EntityPropertyKey, propertyValue: any) {
         let propertyToSet = (this.#properties.find(property => property.getKey === propertyKey))
         if (propertyToSet) {
             propertyToSet.value = propertyValue
@@ -102,7 +103,7 @@ class Network {
         }
     }
 
-    getProperty(propertyKey: string) {
+    getProperty(propertyKey: EntityPropertyKey) {
         return this.#properties.find(property => property.getKey === propertyKey);
     }
 

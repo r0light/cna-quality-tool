@@ -3,6 +3,7 @@ import { MetaData } from "../common/entityDataTypes.js";
 import { cna_modeling_profile } from '../../totypa/parsedProfiles/v2dot0-profiles/cna_modeling_profile.js'
 import { DataAggregate } from "./dataAggregate.js";
 import { RelationToDataAggregate } from "./relationToDataAggregate.js";
+import { EntityPropertyKey } from "@/totypa/parsedProfiles/v2dot0-profiles/propertyKeys.js";
 
 const ENDPOINT_TOSCA_KEY = "cna-modeling.entities.Endpoint";
 const ENDPOINT_TOSCA_EQUIVALENT = cna_modeling_profile.node_types[ENDPOINT_TOSCA_KEY];
@@ -138,7 +139,7 @@ class Endpoint {
         }
     }
 
-    setPropertyValue(propertyKey: string, propertyValue: any) {
+    setPropertyValue(propertyKey: EntityPropertyKey, propertyValue: any) {
         let propertyToSet = (this.#properties.find(property => property.getKey === propertyKey))
         if (propertyToSet) {
             propertyToSet.value = propertyValue
@@ -147,7 +148,7 @@ class Endpoint {
         }
     }
 
-    getProperty(propertyKey: string) {
+    getProperty(propertyKey: EntityPropertyKey) {
         return this.#properties.find(property => property.getKey === propertyKey);
     }
 

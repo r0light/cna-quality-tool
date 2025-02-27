@@ -6,6 +6,7 @@ import { Service } from './service.js';
 import { StorageBackingService } from './storageBackingService.js';
 import { cna_modeling_profile } from '../../totypa/parsedProfiles/v2dot0-profiles/cna_modeling_profile.js'
 import { EntityProperty, parseProperties } from '../common/entityProperty.js';
+import { EntityPropertyKey } from '@/totypa/parsedProfiles/v2dot0-profiles/propertyKeys.js';
 
 
 /**
@@ -132,12 +133,12 @@ class Link {
         return this.#properties;
     }
 
-    getProperty(propertyKey: string) {
+    getProperty(propertyKey: EntityPropertyKey) {
         return this.#properties.find(property => property.getKey === propertyKey);
     }
 
 
-    setPropertyValue(propertyKey: string, propertyValue: any) {
+    setPropertyValue(propertyKey: EntityPropertyKey, propertyValue: any) {
         let propertyToSet = (this.#properties.find(property => property.getKey === propertyKey))
         if (propertyToSet) {
             propertyToSet.value = propertyValue

@@ -2,6 +2,7 @@ import { Component } from './component.js'
 import { Infrastructure } from './infrastructure.js'
 import { EntityProperty, SelectEntityProperty, parseProperties } from '../common/entityProperty.js';
 import { cna_modeling_profile } from '../../totypa/parsedProfiles/v2dot0-profiles/cna_modeling_profile.js'
+import { EntityPropertyKey } from '@/totypa/parsedProfiles/v2dot0-profiles/propertyKeys.js';
 
 /**
  * The module for aspects related to a Deployment Mapping quality model entity.
@@ -140,12 +141,12 @@ class DeploymentMapping {
         return this.#properties;
     }
 
-    getProperty(propertyKey: string) {
+    getProperty(propertyKey: EntityPropertyKey) {
         return this.#properties.find(property => property.getKey === propertyKey);
     }
 
 
-    setPropertyValue(propertyKey: string, propertyValue: any) {
+    setPropertyValue(propertyKey: EntityPropertyKey, propertyValue: any) {
         let propertyToSet = (this.#properties.find(property => property.getKey === propertyKey))
         if (propertyToSet) {
             propertyToSet.value = propertyValue
