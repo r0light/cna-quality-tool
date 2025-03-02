@@ -1,7 +1,7 @@
 import { BackingService, BrokerBackingService, Component, DeploymentMapping, Infrastructure, Link, ProxyBackingService, Service, StorageBackingService, System } from "@/core/entities";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure";
 import { average, median, lowest, partition } from "./general-functions";
-import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, CUSTOM_SOFTWARE_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, EVENT_SOURCING_KIND, getEndpointKindWeight, getUsageRelationWeight, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MESSAGE_BROKER_KIND, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SEND_EVENT_ENDPOINT_KIND, SERVICE_MESH_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "../../specifications/featureModel";
+import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, CUSTOM_SOFTWARE_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, EVENT_SOURCING_KIND, getEndpointKindWeight, getUsageRelationWeight, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MESSAGE_BROKER_KIND, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SEND_EVENT_ENDPOINT_KIND, SERVICE_MESH_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND, VAULT_KIND } from "../../specifications/featureModel";
 import { calculateRatioOfEndpointsSupportingSsl, calculateRatioOfExternalEndpointsSupportingTls, numberOfAsynchronousEndpointsOfferedByAService, numberOfComponentsAComponentIsLinkedTo, numberOfSynchronousEndpointsOfferedByAService, providesHealthAndReadinessEndpoints, serviceCouplingBasedOnEndpointEntropy } from "./componentMeasures";
 import { numberOfCyclesInRequestTraces, requestTraceComplexity } from "./requestTraceMeasures";
 import { supportsMonitoring as infrastructureSupportsMonitoring } from "./infrastructureMeasures";
@@ -1752,6 +1752,36 @@ export const ratioOfNonCustomBackingServices: Calculation = (parameters: Calcula
     return nonCustomBackingServices.length / allBackingServices.length;
 }
 
+export const secretsStoredInVault: Calculation = (parameters: CalculationParameters<System>) => {
+
+    let allSecrets = [...parameters.entity.getBackingDataEntities.entries()].filter(([backingDataId, backingData]) => backingData.getProperty("kind").value === BACKING_DATA_SECRET_KIND);
+
+    if (allSecrets.length === 0) {
+        return "n/a";
+    }
+
+    let allComponents = [...parameters.entity.getComponentEntities.entries()];
+
+    let secretsStoredInVault: Set<string> = new Set();
+    let secretsStoredElsewhere: Set<string> = new Set();
+
+    for (const [componentId, component] of allComponents ) {
+        let secretsStoredInComponent = component.getBackingDataEntities
+            .filter((backingData) => backingData.backingData.getProperty("kind").value === BACKING_DATA_SECRET_KIND && DATA_USAGE_RELATION_PERSISTENCE.includes(backingData.relation.getProperty("usage_relation").value))
+            .map(backingData => backingData.backingData.getId);
+
+        if ( component.constructor.name === BackingService.name && VAULT_KIND.includes(component.getProperty("providedFunctionality").value)) {
+            secretsStoredInComponent.forEach(secretId => secretsStoredInVault.add(secretId));
+        } else {
+            secretsStoredInComponent.forEach(secretId => secretsStoredElsewhere.add(secretId)); 
+        }
+
+    }
+    let onlyStoredInVault = secretsStoredInVault.difference(secretsStoredElsewhere);
+
+    return onlyStoredInVault.size / allSecrets.length;
+}
+
 export const systemMeasureImplementations: { [measureKey: string]: Calculation } = {
     "serviceReplicationLevel": serviceReplicationLevel,
     "medianServiceReplication": medianServiceReplication,
@@ -1830,5 +1860,6 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation }
     "ratioOfSpecializedStatefulServices": ratioOfSpecializedStatefulServices,
     "suitablyReplicatedStatefulService": suitablyReplicatedStatefulService,
     "ratioOfUniqueAccountUsage": ratioOfUniqueAccountUsage,
-    "ratioOfNonCustomBackingServices": ratioOfNonCustomBackingServices
+    "ratioOfNonCustomBackingServices": ratioOfNonCustomBackingServices,
+    "secretsStoredInVault": secretsStoredInVault
 }

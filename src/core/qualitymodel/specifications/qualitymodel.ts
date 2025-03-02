@@ -227,7 +227,7 @@ const productFactors = {
         "sources": [{ "key": "Scholl2019", "section": "6 Securely Store All Secrets" },
         { "key": "Arundel2019", "section": "10 Kubernetes Secrets" }
         ],
-        "measures": []
+        "measures": ["secretsStoredInVault"]
     },
     "accessRestriction": {
         "name": "Access restriction",
@@ -1516,7 +1516,7 @@ const measures = {
         "applicableEntities": [ENTITIES.REQUEST_TRACE],
     },
     "requestTraceComplexity": {
-        "name": "Request Trace Length",
+        "name": "Request Trace Complexity",
         "calculation": "Number of links in a request trace",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.REQUEST_TRACE],
@@ -1874,6 +1874,12 @@ const measures = {
     "ratioOfNonCustomBackingServices": {
         "name": "Ratio of non-custom backing services",
         "calculation": "Backing Services, Storage Backing Services, Proxy Backing Services, and Broker Backing Services which are not of type custom / All Backing Services, Storage Backing Services, Proxy Backing Services, and Broker Backing Services",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT]
+    },
+    "secretsStoredInVault": {
+        "name": "Secrets stored in vault",
+        "calculation": "Backing Data of type secret stored in vault / All backing data of type secret",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT]
     },

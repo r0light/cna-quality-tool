@@ -1,7 +1,8 @@
 
+import { ref } from "vue";
 import { BackingService, BrokerBackingService, Component, Endpoint, ProxyBackingService, Service, StorageBackingService, System } from "../../../entities.js";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure.js";
-import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, CUSTOM_SOFTWARE_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, PROTOCOLS_SUPPORTING_TLS, SERVICE_MESH_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "../../specifications/featureModel.js";
+import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, CUSTOM_SOFTWARE_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, PROTOCOLS_SUPPORTING_TLS, SERVICE_MESH_KIND, SYNCHRONOUS_ENDPOINT_KIND, VAULT_KIND } from "../../specifications/featureModel.js";
 import { average } from "./general-functions.js";
 
 
@@ -661,12 +662,47 @@ export const suitablyReplicatedStatefulService: Calculation = (parameters: Calcu
 
 export const ratioOfNonCustomBackingServices: Calculation = (parameters: CalculationParameters<Component>) => {
 
-    if (![StorageBackingService.name, BackingService.name, BrokerBackingService.name, ProxyBackingService.name].includes(parameters.entity.constructor.name)) {
+    if (![StorageBackingService.constructor.name, BackingService.name, BrokerBackingService.name, ProxyBackingService.name].includes(parameters.entity.constructor.name)) {
             return "n/a";
     }
 
     return parameters.entity.getProperty("software_type").value === CUSTOM_SOFTWARE_TYPE ? 0 : 1;
 }
+
+export const secretsStoredInVault: Calculation = (parameters: CalculationParameters<Component>) => {
+
+    let referencedSecrets = parameters.entity.getBackingDataEntities.filter(backingData => backingData.backingData.getProperty("kind").value === BACKING_DATA_SECRET_KIND);
+
+    if (referencedSecrets.length === 0) {
+        return "n/a";
+    }
+
+    let usedSecrets = referencedSecrets.filter(backingData => DATA_USAGE_RELATION_USAGE.includes(backingData.relation.getProperty("usage_relation").value));
+    let usedSecretIds = usedSecrets.map(backingData => backingData.backingData.getId);
+    let persistedSecrets = referencedSecrets.filter(backingData => DATA_USAGE_RELATION_PERSISTENCE.includes(backingData.relation.getProperty("usage_relation").value));
+
+    let secretsInVault: Set<string> = new Set();
+
+    let allVaultServices = [...parameters.system.getComponentEntities.entries()].filter(([componentId, component]) => {
+        return component.constructor.name === BackingService.name && VAULT_KIND.includes(component.getProperty("providedFunctionality").value);
+    })
+
+    for (const [valutServiceId, vaultService] of allVaultServices) {
+        let secrets = vaultService.getBackingDataEntities.filter(backingData => { return backingData.backingData.getProperty("kind").value === BACKING_DATA_SECRET_KIND });
+        secrets.forEach(secret => {
+            if (usedSecretIds.includes(secret.backingData.getId) && DATA_USAGE_RELATION_PERSISTENCE.includes(secret.relation.getProperty("usage_relation").value) ) {
+                secretsInVault.add(secret.backingData.getId);
+            }
+        })
+    }
+
+    if (parameters.entity.constructor.name === BackingService.name && VAULT_KIND.includes(parameters.entity.getProperty("providedFunctionality").value)) {
+        persistedSecrets.map(backingData => backingData.backingData.getId).forEach(secretId => secretsInVault.add(secretId));
+    }
+
+    return (secretsInVault.size / referencedSecrets.length);
+}
+
 
 export const componentMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
@@ -713,6 +749,7 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "secretsExternalization": secretsExternalization,
     "configurationExternalization": configurationExternalization,
     "suitablyReplicatedStatefulService": suitablyReplicatedStatefulService,
-    "ratioOfNonCustomBackingServices": ratioOfNonCustomBackingServices
+    "ratioOfNonCustomBackingServices": ratioOfNonCustomBackingServices,
+    "secretsStoredInVault": secretsStoredInVault
 }
 

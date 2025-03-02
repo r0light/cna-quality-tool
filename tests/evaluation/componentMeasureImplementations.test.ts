@@ -1395,3 +1395,53 @@ test("ratioOfNonCustomBackingServices - custom", () => {
     let measureValue = componentMeasureImplementations["ratioOfNonCustomBackingServices"]({ entity: backingServiceA, system: system });
     expect(measureValue).toEqual(0);
 })
+
+
+test("secretsStoredInVault", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+
+    let secretA = new BackingData("b1", "secret A", getEmptyMetaData());
+    secretA.setPropertyValue("kind", BACKING_DATA_SECRET_KIND);
+    let relationAtoA = new RelationToBackingData("r1", getEmptyMetaData());
+    relationAtoA.setPropertyValue("usage_relation", DATA_USAGE_RELATION_USAGE[0]);
+    serviceA.addBackingDataEntity(secretA, relationAtoA);
+
+    let secretB = new BackingData("b2", "secret B", getEmptyMetaData());
+    secretB.setPropertyValue("kind", BACKING_DATA_SECRET_KIND);
+    let relationAtoB = new RelationToBackingData("r2", getEmptyMetaData());
+    relationAtoB.setPropertyValue("usage_relation", DATA_USAGE_RELATION_PERSISTENCE[0]);
+    serviceA.addBackingDataEntity(secretB, relationAtoB);
+
+    let backingService = new BackingService("bs1", "backing service 1", getEmptyMetaData());
+    backingService.setPropertyValue("providedFunctionality", "vault");
+    let relationBStoA = new RelationToBackingData("r4", getEmptyMetaData());
+    relationBStoA.setPropertyValue("usage_relation", DATA_USAGE_RELATION_PERSISTENCE[0]);
+    backingService.addBackingDataEntity(secretA, relationBStoA);
+
+    system.addEntities([secretA, secretB]);
+    system.addEntities([serviceA, backingService]);
+
+    let measureValue = componentMeasureImplementations["secretsStoredInVault"]({ entity: serviceA, system: system });
+    expect(measureValue).toEqual(0.5);
+})
+
+test("secretsStoredInVault", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let secretA = new BackingData("b1", "secret A", getEmptyMetaData());
+    secretA.setPropertyValue("kind", BACKING_DATA_SECRET_KIND);
+
+    let backingService = new BackingService("bs1", "backing service 1", getEmptyMetaData());
+    backingService.setPropertyValue("providedFunctionality", "vault");
+    let relationBStoA = new RelationToBackingData("r4", getEmptyMetaData());
+    relationBStoA.setPropertyValue("usage_relation", DATA_USAGE_RELATION_PERSISTENCE[0]);
+    backingService.addBackingDataEntity(secretA, relationBStoA);
+
+    system.addEntities([secretA]);
+    system.addEntities([backingService]);
+
+    let measureValue = componentMeasureImplementations["secretsStoredInVault"]({ entity: backingService, system: system });
+    expect(measureValue).toEqual(1);
+})

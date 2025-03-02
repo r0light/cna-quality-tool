@@ -235,7 +235,7 @@ node_types:
         type: string
         description: "The functionality provided by this backing service"
         required: true
-        validation: { $valid_values: [ $value, [ "naming/addressing", "configuration", "authentication/authorization", "logging", "metrics", "tracing", "other" ]]}
+        validation: { $valid_values: [ $value, [ "naming/addressing", "configuration", "authentication/authorization", "logging", "metrics", "tracing", "vault" "other" ]]}
         default: other
       replication_strategy:
         type: string
