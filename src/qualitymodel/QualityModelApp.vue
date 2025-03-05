@@ -94,7 +94,7 @@
             <div v-for="entity of qualityModel.entities" class="entityDescription">
                 <div class="font-weight-bold">{{ entity.getName }} ({{ entity.getSymbol }})</div>
                 <span>Prose description: <span class="font-italic">{{ entity.getDescription }}</span></span> 
-                <div>Formal description: <div class="text-monospace">{{ entity.getFormalSpecification }}</div></div>
+                <div>Formal description: <div class="text-monospace" v-html="entity.getFormalSpecification"></div></div>
             </div>
         </div>
 </template>
