@@ -16,28 +16,6 @@ capability_types:
   cna-modeling.capabilities.Endpoint:
     description: >-
       The Endpoint capability enables specifying a relationship to an endpoint.
-    properties:
-      protocol:
-        description: >-
-          The name of the (Layer 4 through 7) protocol that the endpoint accepts.
-        type: string
-        default: tcp
-      port:
-        description: >-
-          The optional port of the endpoint.
-        type: string
-        required: false
-      secure:
-        description: >-
-          If set, the endpoint accepts only secure connections.
-        type: boolean
-        required: false
-        default: false
-      url_path:
-        description: >-
-          The optional URL path of the endpoint's address if applicable for the protocol.
-        type: string
-        required: false
 
   cna-modeling.capabilities.Host:
     description: >-
@@ -63,6 +41,9 @@ capability_types:
         type: string
         validation: { $valid_values: [ $value, [ "none", "discovery", "DNS", "other" ]]}
         default: none
+    
+  cna-modeling.capabilities.Authentication:
+    description: When included, the Node is able to provide authentication services.
 
   cna-modeling.capabilities.Linkable:
     description: >-

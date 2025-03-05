@@ -68,30 +68,7 @@ export const cna_modeling_profile: TOSCA_File = {
   "data_types": {},
   "capability_types": {
     "cna-modeling.capabilities.Endpoint": {
-      "description": "The Endpoint capability enables specifying a relationship to an endpoint.",
-      "properties": {
-        "protocol": {
-          "description": "The name of the (Layer 4 through 7) protocol that the endpoint accepts.",
-          "type": "string",
-          "default": "tcp"
-        },
-        "port": {
-          "description": "The optional port of the endpoint.",
-          "type": "string",
-          "required": false
-        },
-        "secure": {
-          "description": "If set, the endpoint accepts only secure connections.",
-          "type": "boolean",
-          "required": false,
-          "default": false
-        },
-        "url_path": {
-          "description": "The optional URL path of the endpoint's address if applicable for the protocol.",
-          "type": "string",
-          "required": false
-        }
-      }
+      "description": "The Endpoint capability enables specifying a relationship to an endpoint."
     },
     "cna-modeling.capabilities.Host": {
       "description": "Indicates that the node can provide hosting."
@@ -129,6 +106,9 @@ export const cna_modeling_profile: TOSCA_File = {
           "default": "none"
         }
       }
+    },
+    "cna-modeling.capabilities.Authentication": {
+      "description": "When included, the Node is able to provide authentication services."
     },
     "cna-modeling.capabilities.Linkable": {
       "description": "A node type that includes the Linkable capability indicates that it can be pointed to by a LinksTo relationship type."
@@ -354,6 +334,15 @@ export const cna_modeling_profile: TOSCA_File = {
         "Network"
       ]
     },
+    "cna-modeling.relationships.DelegateAuthentication": {
+      "description": "Relationship Type to connect Components to entities which provide authentication",
+      "valid_capability_types": [
+        "cna-modeling.capabilities.Authentication"
+      ],
+      "valid_target_node_types": [
+        "cna-modeling.entities.BackingService"
+      ]
+    },
     "cna-modeling.relationships.PartOf": {
       "description": "Relationship Type to model an endpoint as part of a request trace",
       "valid_capability_types": [
@@ -522,6 +511,16 @@ export const cna_modeling_profile: TOSCA_File = {
               "UNBOUNDED"
             ]
           }
+        },
+        {
+          "authentication_by": {
+            "capability": "cna-modeling.capabilities.Authentication",
+            "relationship": "cna-modeling.relationships.DelegateAuthentication",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
         }
       ]
     },
@@ -677,6 +676,16 @@ export const cna_modeling_profile: TOSCA_File = {
           "address_resolution_by": {
             "capability": "cna-modeling.capabilities.AdressResolution",
             "relationship": "cna-modeling.relationships.UseAddressResolution",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
+        },
+        {
+          "authentication_by": {
+            "capability": "cna-modeling.capabilities.Authentication",
+            "relationship": "cna-modeling.relationships.DelegateAuthentication",
             "count_range": [
               0,
               "UNBOUNDED"
@@ -880,12 +889,33 @@ export const cna_modeling_profile: TOSCA_File = {
               "UNBOUNDED"
             ]
           }
+        },
+        {
+          "authentication_by": {
+            "capability": "cna-modeling.capabilities.Authentication",
+            "relationship": "cna-modeling.relationships.DelegateAuthentication",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
         }
       ],
       "derived_from": "cna-modeling.entities.Component",
       "capabilities": {
         "address_resolution": {
           "type": "cna-modeling.capabilities.AdressResolution",
+          "valid_source_node_types": [
+            "cna-modeling.entities.Component",
+            "cna-modeling.entities.Service",
+            "cna-modeling.entities.BackingService",
+            "cna-modeling.entities.StorageBackingService",
+            "cna-modeling.entities.ProxyBackingService",
+            "cna-modeling.entities.BrokerBackingService"
+          ]
+        },
+        "authentication": {
+          "type": "cna-modeling.capabilities.Authentication",
           "valid_source_node_types": [
             "cna-modeling.entities.Component",
             "cna-modeling.entities.Service",
@@ -1066,6 +1096,16 @@ export const cna_modeling_profile: TOSCA_File = {
           "address_resolution_by": {
             "capability": "cna-modeling.capabilities.AdressResolution",
             "relationship": "cna-modeling.relationships.UseAddressResolution",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
+        },
+        {
+          "authentication_by": {
+            "capability": "cna-modeling.capabilities.Authentication",
+            "relationship": "cna-modeling.relationships.DelegateAuthentication",
             "count_range": [
               0,
               "UNBOUNDED"
@@ -1277,6 +1317,16 @@ export const cna_modeling_profile: TOSCA_File = {
               "UNBOUNDED"
             ]
           }
+        },
+        {
+          "authentication_by": {
+            "capability": "cna-modeling.capabilities.Authentication",
+            "relationship": "cna-modeling.relationships.DelegateAuthentication",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
         }
       ],
       "derived_from": "cna-modeling.entities.Component"
@@ -1460,6 +1510,16 @@ export const cna_modeling_profile: TOSCA_File = {
           "address_resolution_by": {
             "capability": "cna-modeling.capabilities.AdressResolution",
             "relationship": "cna-modeling.relationships.UseAddressResolution",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
+        },
+        {
+          "authentication_by": {
+            "capability": "cna-modeling.capabilities.Authentication",
+            "relationship": "cna-modeling.relationships.DelegateAuthentication",
             "count_range": [
               0,
               "UNBOUNDED"
@@ -1696,6 +1756,36 @@ export const cna_modeling_profile: TOSCA_File = {
           "required": false,
           "description": "An optional name of the method/action used. For REST APIs it can for example be specified whether it is a GET or POST method. For message brokers it can be specified whether it is a publish or subscribe action."
         },
+        "protocol": {
+          "description": "The name of the (Layer 4 through 7) protocol that the endpoint accepts.",
+          "type": "string",
+          "default": "tcp"
+        },
+        "port": {
+          "description": "The optional port of the endpoint.",
+          "type": "string",
+          "required": false
+        },
+        "secure": {
+          "description": "If set, the endpoint accepts only secure connections.",
+          "type": "boolean",
+          "required": false,
+          "default": false
+        },
+        "allow_access_to": {
+          "description": "A list of entities/accounts who are allowed to access this endpoint. If the list is empty anybody can access the endpoint ",
+          "type": "list",
+          "required": true,
+          "entry_schema": {
+            "description": "The id of an account that can access this endpoint.",
+            "type": "string"
+          }
+        },
+        "url_path": {
+          "description": "The optional URL path of the endpoint's address if applicable for the protocol.",
+          "type": "string",
+          "required": false
+        },
         "rate_limiting": {
           "type": "string",
           "required": true,
@@ -1768,6 +1858,36 @@ export const cna_modeling_profile: TOSCA_File = {
           "type": "string",
           "required": false,
           "description": "An optional name of the method/action used. For REST APIs it can for example be specified whether it is a GET or POST method. For message brokers it can be specified whether it is a publish or subscribe action."
+        },
+        "protocol": {
+          "description": "The name of the (Layer 4 through 7) protocol that the endpoint accepts.",
+          "type": "string",
+          "default": "tcp"
+        },
+        "port": {
+          "description": "The optional port of the endpoint.",
+          "type": "string",
+          "required": false
+        },
+        "secure": {
+          "description": "If set, the endpoint accepts only secure connections.",
+          "type": "boolean",
+          "required": false,
+          "default": false
+        },
+        "allow_access_to": {
+          "description": "A list of entities/accounts who are allowed to access this endpoint. If the list is empty anybody can access the endpoint ",
+          "type": "list",
+          "required": true,
+          "entry_schema": {
+            "description": "The id of an account that can access this endpoint.",
+            "type": "string"
+          }
+        },
+        "url_path": {
+          "description": "The optional URL path of the endpoint's address if applicable for the protocol.",
+          "type": "string",
+          "required": false
         },
         "rate_limiting": {
           "type": "string",

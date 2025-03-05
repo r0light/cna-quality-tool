@@ -316,6 +316,20 @@ class EntitiesToToscaConverter {
                 });
             }
 
+            if (component.getAuthenticationBy) {
+                
+                if (!node.requirements) {
+                    node.requirements = [];
+                }
+
+                node.requirements.push({
+                    "authentication_by": {
+                        node: this.#keyIdMap.getKey(component.getAuthenticationBy.getId),
+                        relationship: "cna-modeling.relationships.DelegateAuthentication"
+                    }
+                });
+            }
+
             if (component.getNetworks.size > 0) {
                 if (!node.requirements) {
                     node.requirements = [];

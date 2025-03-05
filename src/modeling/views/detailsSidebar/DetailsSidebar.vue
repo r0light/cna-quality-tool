@@ -237,13 +237,13 @@ onMounted(() => {
         refreshHighlightOptions();
     })
 
-    
+
     props.graph.on("change", (changedObject) => {
         if (changedObject.prop("entity/type") === EntityTypes.BACKING_DATA || changedObject.prop("entity/type") === EntityTypes.DATA_AGGREGATE) {
             refreshHighlightOptions();
         }
     })
-        
+
 
 })
 
@@ -408,6 +408,24 @@ onUpdated(() => {
             addressResolutionOption.dropdownOptions = [EMPTY_DROPDOWN_VALUE, ...resolutionDropdownOptions];
             addressResolutionOption.value = selectedResolutionEntity;
 
+            const authenticationEntities = props.graph.getElements().filter(element =>
+                (element.prop("entity/type") === EntityTypes.BACKING_SERVICE && element.prop("entity/properties/providedFunctionality") === "authentication/authorization")
+            );
+            let authenticationOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "authenticationBy");
+            authenticationOption.includeFormCheck = false;
+            const selectedAuthenticationEntity = selectedEntity.model.prop(authenticationOption.jointJsConfig.modelPath);
+            const authenticationDropdownOptions = authenticationEntities.map((entity) => {
+                return {
+                    optionValue: entity.id,
+                    optionText: entity.attr("label/textWrap/text"),
+                    optionTitle: entity.attr("label/textWrap/text"),
+                    optionRepresentationClass: "validOption",
+                    disabled: false,
+                };
+            })
+            authenticationOption.dropdownOptions = [EMPTY_DROPDOWN_VALUE, ...authenticationDropdownOptions];
+            authenticationOption.value = selectedAuthenticationEntity;
+
             let artifactOption = findInSectionsByFeature(selectedEntityPropertyGroups.value, "artifacts");
             artifactOption.includeFormCheck = false;
             artifactOption.attributes.listElementFields.find(field => field.key === "type")["dropdownOptions"] = getAvailableArtifactTypes();
@@ -416,9 +434,7 @@ onUpdated(() => {
 
             let supportedArtifactsOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "supported_artifacts");
             supportedArtifactsOption.includeFormCheck = false;
-
             let currentlySupportedArtifacts = selectedEntity.model.prop(supportedArtifactsOption.jointJsConfig.modelPath) ? selectedEntity.model.prop(supportedArtifactsOption.jointJsConfig.modelPath) : [];
-
             // clear table rows
             supportedArtifactsOption.tableRows.length = 0;
             getAvailableArtifactTypes().forEach((artifactType) => {
@@ -780,6 +796,31 @@ onUpdated(() => {
                     }
                 });
             })
+
+            let allowedAccountsOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "allow_access_to");
+            allowedAccountsOption.includeFormCheck = false;
+            let currentlyAllowedAccounts = selectedEntity.model.prop(allowedAccountsOption.jointJsConfig.modelPath) ? selectedEntity.model.prop(allowedAccountsOption.jointJsConfig.modelPath) : [];
+            // clear table rows
+            allowedAccountsOption.tableRows.length = 0;
+            getAllAccounts(props.graph).forEach((account) => {
+
+                allowedAccountsOption.tableRows.push({
+                    columns: {
+                        name: account,
+                        allowed: {
+                            contentType: PropertyContent.CHECKBOX_WITHOUT_LABEL,
+                            disabled: false,
+                            checked: currentlyAllowedAccounts.includes(account),
+                            id: account
+                        }
+                    },
+                    attributes: {
+                        representationClass: "validOption",
+                        disabled: false
+                    }
+                });
+            })
+
             break;
         default:
         // do nothing
@@ -1024,6 +1065,18 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                         selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, toObject(propertyOption.value as any[]), { rewrite: true });
                     }
                     break;
+                case EntityTypes.ENDPOINT:
+                case EntityTypes.EXTERNAL_ENDPOINT:
+                    if (propertyOption.providedFeature === "allow_access_to") {
+                        let allowedAccounts = [];
+                        propertyOption.tableRows.forEach(account => {
+                            if (account.columns["allowed"]["checked"]) {
+                                allowedAccounts.push(account.columns["allowed"]["id"]);
+                            }
+                        })
+                        selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, allowedAccounts, { rewrite: true });
+                    }
+                    break;
                 default:
                     console.error("no custom handling for this property defined: " + propertyOption.providedFeature);
             }
@@ -1051,6 +1104,8 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                     } else if (propertyOption.providedFeature === "egressProxiedBy") {
                         selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, propertyOption.value, { rewrite: true });
                     } else if (propertyOption.providedFeature === "addressResolutionBy") {
+                        selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, propertyOption.value, { rewrite: true });
+                    } else if (propertyOption.providedFeature === "authenticationBy") {
                         selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, propertyOption.value, { rewrite: true });
                     }
                     break;
@@ -1101,6 +1156,20 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
             console.error("unknown property type for: " + propertyOption.providedFeature);
         }
     }
+}
+
+function getAllAccounts(graph: dia.Graph) {
+    let accounts: Set<string> = new Set();
+    accounts.add("external account");
+
+    graph.getElements().forEach(element => {
+        let availableAccount = element.prop("entity/properties/account");
+        if (availableAccount) {
+            accounts.add(availableAccount);
+        }
+    })
+
+    return Array.from(accounts);
 }
 
 function isPropertyValueValid(option): boolean {

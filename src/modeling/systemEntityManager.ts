@@ -537,6 +537,16 @@ class SystemEntityManager {
             }
         }
 
+        const authenticationId = graphElement.prop("entity/relations/authentication_by");
+        if (authenticationId) {
+            const authenticationComponent = [...(this.#currentSystemEntity.getComponentEntities)].find(([id, component]) => { return id === authenticationId });
+            if (authenticationComponent) {
+                entity.setAuthenticationBy = authenticationComponent[1];
+            } else {
+                console.log(`Entity ${authenticationId} not found`)
+            }
+        }
+
         const assignedNetworks = graphElement.prop("entity/relations/assigned_to_networks");
         if (assignedNetworks && assignedNetworks.length > 0) {
             for (const networkId of assignedNetworks) {
@@ -1345,6 +1355,11 @@ class SystemEntityManager {
                 case "addressResolutionBy":
                     if (component.getAddressResolutionBy) {
                         componentElement.prop(relation.jointJsConfig.modelPath, component.getAddressResolutionBy.getId);
+                    }
+                    break;
+                case "authenticationBy":
+                    if (component.getAuthenticationBy) {
+                        componentElement.prop(relation.jointJsConfig.modelPath, component.getAuthenticationBy.getId);
                     }
                     break;
                 case "assigned_to_networks":

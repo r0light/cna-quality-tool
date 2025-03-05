@@ -570,6 +570,17 @@ class ToscaToEntitesConverter {
                                 component.setAddressResolutionBy = addressResolutionEntity;
                             }
                             break;
+                        case "authentication_by":
+                            if (typeof requirement === "string") {
+                                // TODO requirement is of type string
+                            } else if (typeof requirement === "object") {
+                                let authenticationEntity: Entities.Component = this.#importedSystem.getComponentEntities.get(this.#keyIdMap.getId(requirement.node));
+                                if (!authenticationEntity) {
+                                    throw new Error(`Node with key ${requirement.node} not found!`);
+                                }
+                                component.setAuthenticationBy = authenticationEntity;
+                            }
+                            break;
                         case "assigned_to_network":
                             if (typeof requirement === "string") {
                                 // TODO requirement is of type string

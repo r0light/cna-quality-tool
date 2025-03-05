@@ -65,6 +65,8 @@ class Component {
 
     #addressResolutionBy: BackingService | ProxyBackingService | Infrastructure | Network;
 
+    #authenticationBy: BackingService;
+
     #artifacts: Map<string, Artifact> = new Map<string, Artifact>();
 
     #networks: Map<string, Network> = new Map();
@@ -213,6 +215,14 @@ class Component {
 
     set setAddressResolutionBy(resolutionEntity: BackingService | ProxyBackingService | Infrastructure | Network | undefined) {
         this.#addressResolutionBy = resolutionEntity;
+    }
+
+    get getAuthenticationBy() {
+        return this.#authenticationBy;
+    }
+
+    set setAuthenticationBy(authenticationEntity: BackingService | undefined) {
+        this.#authenticationBy = authenticationEntity;
     }
 
     get getArtifacts() {
