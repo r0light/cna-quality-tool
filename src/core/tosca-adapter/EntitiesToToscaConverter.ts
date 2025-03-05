@@ -118,7 +118,7 @@ class EntitiesToToscaConverter {
                     node.requirements.push({
                         "assigned_to_network": {
                             node: this.#keyIdMap.getKey(networkId),
-                            relationship: "LinksTo"
+                            relationship: "cna-modeling.relationships.LinksTo"
                         }
                     });
                 }
@@ -165,7 +165,7 @@ class EntitiesToToscaConverter {
                     serviceTemplate.node_templates[endpointNodeKey] = endpointNode;
                     node.requirements.push({
                         "provides_endpoint": {
-                            capability: "Endpoint",
+                            capability: "cna-modeling.capabilities.Endpoint",
                             node: endpointNodeKey,
                             relationship: "cna-modeling.relationships.Provides.Endpoint",
                         }
@@ -198,7 +198,7 @@ class EntitiesToToscaConverter {
                     serviceTemplate.node_templates[endpointNodeKey] = endpointNode;
                     node.requirements.push({
                         "provides_external_endpoint": {
-                            capability: "Endpoint.Public",
+                            capability: "cna-modeling.capabilities.Endpoint",
                             node: endpointNodeKey,
                             relationship: "cna-modeling.relationships.Provides.Endpoint"
                         }
@@ -325,7 +325,7 @@ class EntitiesToToscaConverter {
                     node.requirements.push({
                         "assigned_to_network": {
                             node: this.#keyIdMap.getKey(networkId),
-                            relationship: "LinksTo"
+                            relationship: "cna-modeling.relationships.LinksTo"
                         }
                     });
                 }
@@ -570,26 +570,28 @@ class EntitiesToToscaConverter {
             template.properties = nodeProperties;
         }
 
-        [...parseCapabilitiesProperties(toscaEquivalent.capabilities).entries()].forEach(([capabilityKey, capabilityProperties]) => {
-            switch (capabilityKey) {
-                case "address_resolution":
-                    if (component.getProperty("address_resolution_kind").value === "none") {
-                        return;
-                    }
-                default:
-                    let propertyKeys = Object.keys(capabilityProperties);
-                    if (propertyKeys.length > 0) {
-                        if (!template.capabilities) {
-                            template.capabilities = {};
-                        }
-                        template.capabilities[capabilityKey] = {
-                            properties: this.#parsePropertiesForYaml(component.getProperties().filter(property => propertyKeys.includes(property.getKey)))
-                        }
-                    }
-                    break;
-            }
-        })
+        if (toscaEquivalent.capabilities) {
 
+            [...parseCapabilitiesProperties(toscaEquivalent.capabilities).entries()].forEach(([capabilityKey, capabilityProperties]) => {
+                switch (capabilityKey) {
+                    case "address_resolution":
+                        if (component.getProperty("address_resolution_kind").value === "none") {
+                            return;
+                        }
+                    default:
+                        let propertyKeys = Object.keys(capabilityProperties);
+                        if (propertyKeys.length > 0) {
+                            if (!template.capabilities) {
+                                template.capabilities = {};
+                            }
+                            template.capabilities[capabilityKey] = {
+                                properties: this.#parsePropertiesForYaml(component.getProperties().filter(property => propertyKeys.includes(property.getKey)))
+                            }
+                        }
+                        break;
+                }
+            })
+        }
 
         if (component.getArtifacts.size > 0) {
             template.artifacts = {};
@@ -656,7 +658,7 @@ class EntitiesToToscaConverter {
                 template.requirements.push({
                     "external_endpoint": {
                         node: this.#keyIdMap.getKey(requestTrace.getExternalEndpoint.getId),
-                        relationship: "ConnectsTo"
+                        relationship: "cna-modeling.relationships.PartOf"
                     }
                 })
             }

@@ -23,6 +23,7 @@ import { PROXY_BACKING_SERVICE_TOSCA_KEY } from '../entities/proxyBackingService
 import { BROKER_BACKING_SERVICE_TOSCA_KEY } from '../entities/brokerBackingService';
 import { NETWORK_TOSCA_KEY } from '../entities/network';
 import { valHooks } from 'jquery';
+import { EntityPropertyKey } from '@/totypa/parsedProfiles/v2dot0-profiles/propertyKeys';
 
 const MATCH_UNDERSCORE = new RegExp(/_/g);
 const MATCH_FIRST_CHARACTER = new RegExp(/^./g);
@@ -119,14 +120,14 @@ class ToscaToEntitesConverter {
                 let dataAggregate = this.#importedSystem.getDataAggregateEntities.get(this.#keyIdMap.getId(key));
                 if (node.properties) {
                     for (const [key, value] of Object.entries(node.properties)) {
-                        dataAggregate.setPropertyValue(key, value);
+                        dataAggregate.setPropertyValue(key as EntityPropertyKey, value);
                     }
                 }
             } else if (node.type === BACKING_DATA_TOSCA_KEY) {
                 let backingData = this.#importedSystem.getBackingDataEntities.get(this.#keyIdMap.getId(key));
                 if (node.properties) {
                     for (const [key, value] of Object.entries(node.properties)) {
-                        backingData.setPropertyValue(key, value);
+                        backingData.setPropertyValue(key as EntityPropertyKey, value);
                     }
                 }
             }
@@ -154,7 +155,7 @@ class ToscaToEntitesConverter {
                                         let relation = new RelationToBackingData(requirement.relationship, metaData);
 
                                         for (const [key, value] of Object.entries(relationship.properties)) {
-                                            relation.setPropertyValue(key, value);
+                                            relation.setPropertyValue(key as EntityPropertyKey, value);
                                         }
 
                                         infrastructure.addBackingDataEntity(this.#importedSystem.getBackingDataEntities.get(this.#keyIdMap.getId(requirement.node)), relation);
@@ -184,7 +185,7 @@ class ToscaToEntitesConverter {
 
                 if (node.properties) {
                     for (const [key, value] of Object.entries(node.properties)) {
-                        infrastructure.setPropertyValue(key, value);
+                        infrastructure.setPropertyValue(key as EntityPropertyKey, value);
                     }
                 }
 
@@ -192,7 +193,7 @@ class ToscaToEntitesConverter {
                     for (const [capabilityKey, capability] of Object.entries(node.capabilities)) {
                         if (capability.properties) {
                             for (const [key, value] of Object.entries(capability.properties)) {
-                                infrastructure.setPropertyValue(key, value);
+                                infrastructure.setPropertyValue(key as EntityPropertyKey, value);
                             }
                         }
                     }
@@ -223,7 +224,7 @@ class ToscaToEntitesConverter {
 
                 if (node.properties) {
                     for (const [key, value] of Object.entries(node.properties)) {
-                        network.setPropertyValue(key, value);
+                        network.setPropertyValue(key as EntityPropertyKey, value);
                     }
                 }
 
@@ -231,7 +232,7 @@ class ToscaToEntitesConverter {
                     for (const [capabilityKey, capability] of Object.entries(node.capabilities)) {
                         if (capability.properties) {
                             for (const [key, value] of Object.entries(capability.properties)) {
-                                network.setPropertyValue(key, value);
+                                network.setPropertyValue(key as EntityPropertyKey, value);
                             }
                         }
                     }
@@ -245,14 +246,14 @@ class ToscaToEntitesConverter {
                 let endpoint = endpoints.get(this.#keyIdMap.getId(key));
                 if (node.properties) {
                     for (const [key, value] of Object.entries(node.properties)) {
-                        endpoint.setPropertyValue(key, value);
+                        endpoint.setPropertyValue(key as EntityPropertyKey, value);
                     }
                 }
                 if (node.capabilities) {
                     for (const [capabilityKey, capability] of Object.entries(node.capabilities)) {
                         if (capability.properties) {
                             for (const [key, value] of Object.entries(capability.properties)) {
-                                endpoint.setPropertyValue(key, value);
+                                endpoint.setPropertyValue(key as EntityPropertyKey, value);
                             }
                         }
                     }
@@ -273,7 +274,7 @@ class ToscaToEntitesConverter {
                                         let relation = new RelationToDataAggregate(requirement.relationship, metaData);
 
                                         for (const [key, value] of Object.entries(relationship.properties)) {
-                                            relation.setPropertyValue(key, value);
+                                            relation.setPropertyValue(key as EntityPropertyKey, value);
                                         }
 
                                         endpoint.addDataAggregateEntity(this.#importedSystem.getDataAggregateEntities.get(this.#keyIdMap.getId(requirement.node)), relation);
@@ -288,14 +289,14 @@ class ToscaToEntitesConverter {
                 let externalEndpoint = endpoints.get(this.#keyIdMap.getId(key));
                 if (node.properties) {
                     for (const [key, value] of Object.entries(node.properties)) {
-                        externalEndpoint.setPropertyValue(key, value);
+                        externalEndpoint.setPropertyValue(key as EntityPropertyKey, value);
                     }
                 }
                 if (node.capabilities) {
                     for (const [capabilityKey, capability] of Object.entries(node.capabilities)) {
                         if (capability.properties) {
                             for (const [key, value] of Object.entries(capability.properties)) {
-                                externalEndpoint.setPropertyValue(key, value);
+                                externalEndpoint.setPropertyValue(key as EntityPropertyKey, value);
                             }
                         }
                     }
@@ -316,7 +317,7 @@ class ToscaToEntitesConverter {
                                         let relation = new RelationToDataAggregate(requirement.relationship, metaData);
 
                                         for (const [key, value] of Object.entries(relationship.properties)) {
-                                            relation.setPropertyValue(key, value);
+                                            relation.setPropertyValue(key as EntityPropertyKey, value);
                                         }
 
                                         externalEndpoint.addDataAggregateEntity(this.#importedSystem.getDataAggregateEntities.get(this.#keyIdMap.getId(requirement.node)), relation);
@@ -343,7 +344,7 @@ class ToscaToEntitesConverter {
 
                 if (node.properties) {
                     for (const [key, value] of Object.entries(node.properties)) {
-                        component.setPropertyValue(key, value);
+                        component.setPropertyValue(key as EntityPropertyKey, value);
                     }
                 }
 
@@ -351,7 +352,7 @@ class ToscaToEntitesConverter {
                     for (const [capabilityKey, capability] of Object.entries(node.capabilities)) {
                         if (capability.properties) {
                             for (const [propertyKey, propertyValue] of Object.entries(capability.properties)) {
-                                component.setPropertyValue(propertyKey, propertyValue);
+                                component.setPropertyValue(propertyKey as EntityPropertyKey, propertyValue);
                             }
                         }
                     }
@@ -381,14 +382,14 @@ class ToscaToEntitesConverter {
                 if (relationship.properties) {
                     const linkEntity = this.#importedSystem.getLinkEntities.get(this.#keyIdMap.getId(key));
                     for (const [key, value] of Object.entries(relationship.properties)) {
-                        linkEntity.setPropertyValue(key, value);
+                        linkEntity.setPropertyValue(key as EntityPropertyKey, value);
                     }
                 }
             } else if (relationship.type === DEPLOYMENT_MAPPING_TOSCA_KEY) {
                 if (relationship.properties) {
                     const deploymentMappingEntity = this.#importedSystem.getDeploymentMappingEntities.get(this.#keyIdMap.getId(key));
                     for (const [key, value] of Object.entries(relationship.properties)) {
-                        deploymentMappingEntity.setPropertyValue(key, value);
+                        deploymentMappingEntity.setPropertyValue(key as EntityPropertyKey, value);
                     }
                 }
             }
@@ -428,13 +429,13 @@ class ToscaToEntitesConverter {
                     for (const [key, value] of Object.entries(node.properties)) {
                         switch (key) {
                             case "nodes":
-                                requestTrace.setPropertyValue(key, value.map(nodeKey => this.#keyIdMap.getId(nodeKey)));
+                                requestTrace.setPropertyValue(key as EntityPropertyKey, value.map(nodeKey => this.#keyIdMap.getId(nodeKey)));
                                 break;
                             case "involved_links":
                                 // ignore, because it has been set already
                                 break;
                             default:
-                                requestTrace.setPropertyValue(key, value);
+                                requestTrace.setPropertyValue(key as EntityPropertyKey, value);
                         }
                     }
                 }
@@ -470,7 +471,7 @@ class ToscaToEntitesConverter {
                                     let relation = new RelationToDataAggregate(requirement.relationship, metaData);
 
                                     for (const [key, value] of Object.entries(relationship.properties)) {
-                                        relation.setPropertyValue(key, value);
+                                        relation.setPropertyValue(key as EntityPropertyKey, value);
                                     }
 
                                     component.addDataAggregateEntity(this.#importedSystem.getDataAggregateEntities.get(this.#keyIdMap.getId(requirement.node)), relation);
@@ -489,7 +490,7 @@ class ToscaToEntitesConverter {
                                     let relation = new RelationToBackingData(requirement.relationship, metaData);
 
                                     for (const [key, value] of Object.entries(relationship.properties)) {
-                                        relation.setPropertyValue(key, value);
+                                        relation.setPropertyValue(key as EntityPropertyKey, value);
                                     }
 
                                     component.addBackingDataEntity(this.#importedSystem.getBackingDataEntities.get(this.#keyIdMap.getId(requirement.node)), relation);

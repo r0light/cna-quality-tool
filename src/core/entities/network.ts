@@ -1,25 +1,14 @@
-import { tosca_simple_2_0 } from "@/totypa/parsedProfiles/v2dot0-profiles/tosca_simple_2_0";
 import { EntityProperty, mergeAllCapabilitiesProperties, parseCapabilitiesProperties, parseProperties } from "../common/entityProperty";
 import { MetaData } from "../common/entityDataTypes";
 import { EntityPropertyKey } from "@/totypa/parsedProfiles/v2dot0-profiles/propertyKeys";
+import { cna_modeling_profile } from "@/totypa/parsedProfiles/v2dot0-profiles/cna_modeling_profile";
 
-const NETWORK_TOSCA_KEY = "Network"
-const NETWORK_TOSCA_EQUIVALENT = tosca_simple_2_0.node_types[NETWORK_TOSCA_KEY];
+const NETWORK_TOSCA_KEY = "cna-modeling.entities.Network"
+const NETWORK_TOSCA_EQUIVALENT = cna_modeling_profile.node_types[NETWORK_TOSCA_KEY];
 
 function getNetworkProperties(): EntityProperty[] {
     let parsed = parseProperties(NETWORK_TOSCA_EQUIVALENT.properties).concat(mergeAllCapabilitiesProperties(parseCapabilitiesProperties(NETWORK_TOSCA_EQUIVALENT.capabilities)));
 
-    /*
-    return parsed.map((prop) => {
-        switch (prop.getKey) {
-            case "managed":
-                prop.setName = "Managed cloud service?";
-                prop.setExample = "e.g. yes";
-                return prop;
-            default:
-                return prop;
-        }
-    })*/
    return parsed;
 }
 

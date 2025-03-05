@@ -10,7 +10,7 @@ export const cna_modeling_profile: TOSCA_File = {
   "metadata": {
     "template_name": "profile.yaml",
     "template_author": "Distributed Systems Group",
-    "template_version": 0.4
+    "template_version": 0.5
   },
   "description": "This TOSCA definitions document contains the CNA Modeling TOSCA profile",
   "dsl_definitions": "",
@@ -67,9 +67,40 @@ export const cna_modeling_profile: TOSCA_File = {
   },
   "data_types": {},
   "capability_types": {
+    "cna-modeling.capabilities.Endpoint": {
+      "description": "The Endpoint capability enables specifying a relationship to an endpoint.",
+      "properties": {
+        "protocol": {
+          "description": "The name of the (Layer 4 through 7) protocol that the endpoint accepts.",
+          "type": "string",
+          "default": "tcp"
+        },
+        "port": {
+          "description": "The optional port of the endpoint.",
+          "type": "string",
+          "required": false
+        },
+        "secure": {
+          "description": "If set, the endpoint accepts only secure connections.",
+          "type": "boolean",
+          "required": false,
+          "default": false
+        },
+        "url_path": {
+          "description": "The optional URL path of the endpoint's address if applicable for the protocol.",
+          "type": "string",
+          "required": false
+        }
+      }
+    },
+    "cna-modeling.capabilities.Host": {
+      "description": "Indicates that the node can provide hosting."
+    },
+    "cna-modeling.capabilities.DataUsage": {
+      "description": "The DataUsage capability describes the capability of nodes to use data aggregates or backing data."
+    },
     "cna-modeling.capabilities.Proxy": {
       "description": "When included, the Node is able to act as a proxy. This covers all communication to the endpoints of the proxied component.",
-      "derived_from": "Node",
       "properties": {
         "load_balancing": {
           "description": "Flag whether the proxy functionality includes load balancing",
@@ -80,7 +111,6 @@ export const cna_modeling_profile: TOSCA_File = {
     },
     "cna-modeling.capabilities.AdressResolution": {
       "description": "When included, the Node is able to provide address resolution, meaning that symbolic names can be translated into specific IP adresses",
-      "derived_from": "Node",
       "properties": {
         "address_resolution_kind": {
           "description": "If address resolution is provided, state the kind here, otherwise leave as 'none'",
@@ -99,24 +129,16 @@ export const cna_modeling_profile: TOSCA_File = {
           "default": "none"
         }
       }
+    },
+    "cna-modeling.capabilities.Linkable": {
+      "description": "A node type that includes the Linkable capability indicates that it can be pointed to by a LinksTo relationship type."
     }
   },
   "interface_types": {},
   "relationship_types": {
     "cna-modeling.relationships.ConnectsTo.Link": {
       "description": "Relationship Type to model Link entities",
-      "interfaces": {
-        "Configure": {
-          "type": "Relationship.Configure"
-        }
-      },
-      "derived_from": "ConnectsTo",
       "properties": {
-        "credential": {
-          "description": "The security credential to present to the target endpoint for either authentication or authorization purposes.",
-          "type": "Credential",
-          "required": false
-        },
         "relation_type": {
           "type": "string",
           "required": true,
@@ -141,8 +163,7 @@ export const cna_modeling_profile: TOSCA_File = {
         }
       },
       "valid_capability_types": [
-        "Endpoint",
-        "Endpoint.Public"
+        "cna-modeling.capabilities.Endpoint"
       ],
       "valid_target_node_types": [
         "cna-modeling.entities.Endpoint",
@@ -151,16 +172,6 @@ export const cna_modeling_profile: TOSCA_File = {
     },
     "cna-modeling.relationships.HostedOn.DeploymentMapping": {
       "description": "Relationship Type to model DeploymentMapping entities",
-      "interfaces": {
-        "Configure": {
-          "type": "Relationship.Configure"
-        }
-      },
-      "derived_from": "HostedOn",
-      "valid_capability_types": [
-        "Container",
-        "Compute"
-      ],
       "properties": {
         "deployment": {
           "type": "string",
@@ -238,6 +249,9 @@ export const cna_modeling_profile: TOSCA_File = {
           "default": "unstated"
         }
       },
+      "valid_capability_types": [
+        "Compute"
+      ],
       "valid_target_node_types": [
         "cna-modeling.entities.Infrastructure"
       ]
@@ -245,8 +259,7 @@ export const cna_modeling_profile: TOSCA_File = {
     "cna-modeling.relationships.Provides.Endpoint": {
       "description": "Relationship Type to connect Endpoints to the Components which provide them",
       "valid_capability_types": [
-        "Endpoint",
-        "Endpoint.Public"
+        "cna-modeling.capabilities.Endpoint"
       ],
       "valid_target_node_types": [
         "cna-modeling.entities.Endpoint",
@@ -254,24 +267,7 @@ export const cna_modeling_profile: TOSCA_File = {
       ]
     },
     "cna-modeling.relationships.AttachesTo.DataAggregate": {
-      "description": "The AttachesTo type represents an attachment relationship between two nodes (e.g. for attaching a storage node to a Compute node).",
-      "interfaces": {
-        "Configure": {
-          "type": "Relationship.Configure"
-        }
-      },
-      "derived_from": "AttachesTo",
       "properties": {
-        "location": {
-          "description": "The relative location (e.g., mount point on the file system) that provides the root location to address the attached node.",
-          "type": "string",
-          "required": true
-        },
-        "device": {
-          "description": "The logical device name for the attached device.",
-          "type": "string",
-          "required": false
-        },
         "usage_relation": {
           "type": "string",
           "required": true,
@@ -296,28 +292,14 @@ export const cna_modeling_profile: TOSCA_File = {
         }
       },
       "valid_capability_types": [
-        "Attachment"
+        "cna-modeling.capabilities.DataUsage"
+      ],
+      "valid_target_node_types": [
+        "cna-modeling.entities.DataAggregate"
       ]
     },
     "cna-modeling.relationships.AttachesTo.BackingData": {
-      "description": "The AttachesTo type represents an attachment relationship between two nodes (e.g. for attaching a storage node to a Compute node).",
-      "interfaces": {
-        "Configure": {
-          "type": "Relationship.Configure"
-        }
-      },
-      "derived_from": "AttachesTo",
       "properties": {
-        "location": {
-          "description": "The relative location (e.g., mount point on the file system) that provides the root location to address the attached node.",
-          "type": "string",
-          "required": true
-        },
-        "device": {
-          "description": "The logical device name for the attached device.",
-          "type": "string",
-          "required": false
-        },
         "usage_relation": {
           "type": "string",
           "required": true,
@@ -336,7 +318,7 @@ export const cna_modeling_profile: TOSCA_File = {
         }
       },
       "valid_capability_types": [
-        "Attachment"
+        "cna-modeling.capabilities.DataUsage"
       ],
       "valid_target_node_types": [
         "cna-modeling.entities.BackingData"
@@ -344,55 +326,99 @@ export const cna_modeling_profile: TOSCA_File = {
     },
     "cna-modeling.relationships.ProxiedBy.ProxyBackingService": {
       "description": "Relationship Type to connect Components to Backing Services which act as a proxy for them",
+      "valid_capability_types": [
+        "cna-modeling.capabilities.Proxy"
+      ],
       "valid_target_node_types": [
         "cna-modeling.entities.ProxyBackingService"
       ]
     },
+    "cna-modeling.relationships.LinksTo": {
+      "description": "The LinksTo type represents an association relationship between a component/infrastructure and a network",
+      "valid_capability_types": [
+        "cna-modeling.capabilities.Linkable"
+      ],
+      "valid_target_node_types": [
+        "cna-modeling.entities.Network"
+      ]
+    },
     "cna-modeling.relationships.UseAddressResolution": {
       "description": "Relationship Type to connect Components to entities which provide address resolution",
+      "valid_capability_types": [
+        "cna-modeling.capabilities.AdressResolution"
+      ],
       "valid_target_node_types": [
         "cna-modeling.entities.BackingService",
         "cna-modeling.entities.ProxyBackingService",
         "cna-modeling.entities.Infrastructure",
         "Network"
       ]
+    },
+    "cna-modeling.relationships.PartOf": {
+      "description": "Relationship Type to model an endpoint as part of a request trace",
+      "valid_capability_types": [
+        "cna-modeling.capabilities.Endpoint"
+      ],
+      "valid_target_node_types": [
+        "cna-modeling.entities.Endpoint.External"
+      ]
     }
   },
   "node_types": {
     "cna-modeling.entities.Component": {
       "description": "Node Type to model Component entities",
-      "attributes": {
-        "state": {
-          "type": "string"
-        }
-      },
-      "capabilities": {
-        "feature": {
-          "type": "Node"
+      "properties": {
+        "managed": {
+          "type": "boolean",
+          "description": "A component is managed if it is exclusively operated by someone else, e.g. a cloud provider and the source code of the component instance is inaccessible. If the source code of a component can be changed by yourself, the component is not managed.",
+          "required": true
+        },
+        "software_type": {
+          "type": "string",
+          "description": "The type of the software in the sense of who developed it. If it is a self-written component use \"custom\", if it is an existing open-source solution which is not customized (apart from configuration) use \"open-source\". If it is licensed proprietary software, use \"proprietary\".",
+          "default": "custom",
+          "required": true,
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "custom",
+                "open-source",
+                "proprietary"
+              ]
+            ]
+          }
+        },
+        "stateless": {
+          "type": "boolean",
+          "description": "True if this component is stateless, that means it requires no disk storage space where data is persisted between executions. That means it can store data to disk, but should not rely on this data to be available for following executions. Instead it should be able to restore required data after a restart in a different environment.",
+          "default": true,
+          "required": true
+        },
+        "load_shedding": {
+          "type": "boolean",
+          "description": "Whether or not this component applies load shedding. That means whether the component rejects incoming load based on certain thresholds (resource usage, concurrent requests).",
+          "required": true,
+          "default": false
+        },
+        "account": {
+          "type": "string",
+          "description": "The identifier of the account with which this component is executed.",
+          "default": "default-account",
+          "required": true
         }
       },
       "requirements": [
         {
-          "dependency": {
-            "capability": "Node",
-            "node": "Root",
-            "relationship": "DependsOn",
-            "count_range": [
-              0,
-              "UNBOUNDED"
-            ]
-          }
-        },
-        {
           "host": {
-            "capability": "Compute",
+            "capability": "cna-modeling.capabilities.Host",
             "node": "cna-modeling.entities.Infrastructure",
             "relationship": "cna-modeling.entities.HostedOn.DeploymentMapping"
           }
         },
         {
           "provides_endpoint": {
-            "capability": "Endpoint",
+            "capability": "cna-modeling.capabilities.Endpoint",
             "relationship": "cna-modeling.relationships.Provides.Endpoint",
             "count_range": [
               0,
@@ -402,7 +428,7 @@ export const cna_modeling_profile: TOSCA_File = {
         },
         {
           "provides_external_endpoint": {
-            "capability": "Endpoint.Public",
+            "capability": "cna-modeling.capabilities.Endpoint",
             "relationship": "cna-modeling.relationships.Provides.Endpoint",
             "count_range": [
               0,
@@ -412,7 +438,7 @@ export const cna_modeling_profile: TOSCA_File = {
         },
         {
           "endpoint_link": {
-            "capability": "Endpoint",
+            "capability": "cna-modeling.capabilities.Endpoint",
             "node": "cna-modeling.entities.Endpoint",
             "relationship": "cna-modeling.relationships.ConnectsTo.Link",
             "count_range": [
@@ -423,7 +449,7 @@ export const cna_modeling_profile: TOSCA_File = {
         },
         {
           "uses_data": {
-            "capability": "Attachment",
+            "capability": "cna-modeling.capabilities.DataUsage",
             "node": "cna-modeling.entities.DataAggregate",
             "relationship": "cna-modeling.relationships.AttachesTo.DataAggregate",
             "count_range": [
@@ -434,7 +460,7 @@ export const cna_modeling_profile: TOSCA_File = {
         },
         {
           "uses_backing_data": {
-            "capability": "Attachment",
+            "capability": "cna-modeling.capabilities.DataUsage",
             "node": "cna-modeling.entities.BackingData",
             "relationship": "cna-modeling.relationships.AttachesTo.BackingData",
             "count_range": [
@@ -497,221 +523,11 @@ export const cna_modeling_profile: TOSCA_File = {
             ]
           }
         }
-      ],
-      "interfaces": {
-        "Standard": {
-          "type": "Lifecycle.Standard"
-        }
-      },
-      "derived_from": "SoftwareComponent",
-      "properties": {
-        "component_version": {
-          "description": "Domain-specific software component version.\n",
-          "type": "version",
-          "required": false
-        },
-        "admin_credential": {
-          "description": "The optional credential that can be used to authenticate to the software component.",
-          "type": "Credential",
-          "required": false
-        },
-        "managed": {
-          "type": "boolean",
-          "description": "A component is managed if it is exclusively operated by someone else, e.g. a cloud provider and the source code of the component instance is inaccessible. If the source code of a component can be changed by yourself, the component is not managed.",
-          "required": true
-        },
-        "software_type": {
-          "type": "string",
-          "description": "The type of the software in the sense of who developed it. If it is a self-written component use \"custom\", if it is an existing open-source solution which is not customized (apart from configuration) use \"open-source\". If it is licensed proprietary software, use \"proprietary\".",
-          "default": "custom",
-          "required": true,
-          "validation": {
-            "$valid_values": [
-              "$value",
-              [
-                "custom",
-                "open-source",
-                "proprietary"
-              ]
-            ]
-          }
-        },
-        "stateless": {
-          "type": "boolean",
-          "description": "True if this component is stateless, that means it requires no disk storage space where data is persisted between executions. That means it can store data to disk, but should not rely on this data to be available for following executions. Instead it should be able to restore required data after a restart in a different environment.",
-          "default": true,
-          "required": true
-        },
-        "load_shedding": {
-          "type": "boolean",
-          "description": "Whether or not this component applies load shedding. That means whether the component rejects incoming load based on certain thresholds (resource usage, concurrent requests).",
-          "required": true,
-          "default": false
-        },
-        "account": {
-          "type": "string",
-          "description": "The identifier of the account with which this component is executed.",
-          "default": "default-account",
-          "required": true
-        }
-      }
+      ]
     },
     "cna-modeling.entities.Service": {
       "description": "Node Type to model Service entities",
-      "attributes": {
-        "state": {
-          "type": "string"
-        }
-      },
-      "capabilities": {
-        "feature": {
-          "type": "Node"
-        }
-      },
-      "requirements": [
-        {
-          "dependency": {
-            "capability": "Node",
-            "node": "Root",
-            "relationship": "DependsOn",
-            "count_range": [
-              0,
-              "UNBOUNDED"
-            ]
-          }
-        },
-        {
-          "host": {
-            "capability": "Compute",
-            "node": "cna-modeling.entities.Infrastructure",
-            "relationship": "cna-modeling.entities.HostedOn.DeploymentMapping"
-          }
-        },
-        {
-          "provides_endpoint": {
-            "capability": "Endpoint",
-            "relationship": "cna-modeling.relationships.Provides.Endpoint",
-            "count_range": [
-              0,
-              "UNBOUNDED"
-            ]
-          }
-        },
-        {
-          "provides_external_endpoint": {
-            "capability": "Endpoint.Public",
-            "relationship": "cna-modeling.relationships.Provides.Endpoint",
-            "count_range": [
-              0,
-              "UNBOUNDED"
-            ]
-          }
-        },
-        {
-          "endpoint_link": {
-            "capability": "Endpoint",
-            "node": "cna-modeling.entities.Endpoint",
-            "relationship": "cna-modeling.relationships.ConnectsTo.Link",
-            "count_range": [
-              0,
-              "UNBOUNDED"
-            ]
-          }
-        },
-        {
-          "uses_data": {
-            "capability": "Attachment",
-            "node": "cna-modeling.entities.DataAggregate",
-            "relationship": "cna-modeling.relationships.AttachesTo.DataAggregate",
-            "count_range": [
-              0,
-              "UNBOUNDED"
-            ]
-          }
-        },
-        {
-          "uses_backing_data": {
-            "capability": "Attachment",
-            "node": "cna-modeling.entities.BackingData",
-            "relationship": "cna-modeling.relationships.AttachesTo.BackingData",
-            "count_range": [
-              0,
-              "UNBOUNDED"
-            ]
-          }
-        },
-        {
-          "external_ingress_proxied_by": {
-            "capability": "cna-modeling.capabilities.Proxy",
-            "node": "cna-modeling.entities.ProxyBackingService",
-            "relationship": "cna-modeling.relationships.ProxiedBy.ProxyBackingService",
-            "count_range": [
-              0,
-              1
-            ]
-          }
-        },
-        {
-          "ingress_proxied_by": {
-            "capability": "cna-modeling.capabilities.Proxy",
-            "node": "cna-modeling.entities.ProxyBackingService",
-            "relationship": "cna-modeling.relationships.ProxiedBy.ProxyBackingService",
-            "count_range": [
-              0,
-              1
-            ]
-          }
-        },
-        {
-          "egress_proxied_by": {
-            "capability": "cna-modeling.capabilities.Proxy",
-            "node": "cna-modeling.entities.ProxyBackingService",
-            "relationship": "cna-modeling.relationships.ProxiedBy.ProxyBackingService",
-            "count_range": [
-              0,
-              1
-            ]
-          }
-        },
-        {
-          "assigned_to_network": {
-            "capability": "Linkable",
-            "node": "Network",
-            "relationship": "LinksTo",
-            "count_range": [
-              0,
-              "UNBOUNDED"
-            ]
-          }
-        },
-        {
-          "address_resolution_by": {
-            "capability": "cna-modeling.capabilities.AdressResolution",
-            "relationship": "cna-modeling.relationships.UseAddressResolution",
-            "count_range": [
-              0,
-              "UNBOUNDED"
-            ]
-          }
-        }
-      ],
-      "interfaces": {
-        "Standard": {
-          "type": "Lifecycle.Standard"
-        }
-      },
-      "derived_from": "cna-modeling.entities.Component",
       "properties": {
-        "component_version": {
-          "description": "Domain-specific software component version.\n",
-          "type": "version",
-          "required": false
-        },
-        "admin_credential": {
-          "description": "The optional credential that can be used to authenticate to the software component.",
-          "type": "Credential",
-          "required": false
-        },
         "managed": {
           "type": "boolean",
           "description": "A component is managed if it is exclusively operated by someone else, e.g. a cloud provider and the source code of the component instance is inaccessible. If the source code of a component can be changed by yourself, the component is not managed.",
@@ -751,53 +567,18 @@ export const cna_modeling_profile: TOSCA_File = {
           "default": "default-account",
           "required": true
         }
-      }
-    },
-    "cna-modeling.entities.BackingService": {
-      "description": "Node Type to model Backing Service entities",
-      "attributes": {
-        "state": {
-          "type": "string"
-        }
-      },
-      "capabilities": {
-        "feature": {
-          "type": "Node"
-        },
-        "address_resolution": {
-          "type": "cna-modeling.capabilities.AdressResolution",
-          "valid_source_node_types": [
-            "cna-modeling.entities.Component",
-            "cna-modeling.entities.Service",
-            "cna-modeling.entities.BackingService",
-            "cna-modeling.entities.StorageBackingService",
-            "cna-modeling.entities.ProxyBackingService",
-            "cna-modeling.entities.BrokerBackingService"
-          ]
-        }
       },
       "requirements": [
         {
-          "dependency": {
-            "capability": "Node",
-            "node": "Root",
-            "relationship": "DependsOn",
-            "count_range": [
-              0,
-              "UNBOUNDED"
-            ]
-          }
-        },
-        {
           "host": {
-            "capability": "Compute",
+            "capability": "cna-modeling.capabilities.Host",
             "node": "cna-modeling.entities.Infrastructure",
             "relationship": "cna-modeling.entities.HostedOn.DeploymentMapping"
           }
         },
         {
           "provides_endpoint": {
-            "capability": "Endpoint",
+            "capability": "cna-modeling.capabilities.Endpoint",
             "relationship": "cna-modeling.relationships.Provides.Endpoint",
             "count_range": [
               0,
@@ -807,7 +588,7 @@ export const cna_modeling_profile: TOSCA_File = {
         },
         {
           "provides_external_endpoint": {
-            "capability": "Endpoint.Public",
+            "capability": "cna-modeling.capabilities.Endpoint",
             "relationship": "cna-modeling.relationships.Provides.Endpoint",
             "count_range": [
               0,
@@ -817,7 +598,7 @@ export const cna_modeling_profile: TOSCA_File = {
         },
         {
           "endpoint_link": {
-            "capability": "Endpoint",
+            "capability": "cna-modeling.capabilities.Endpoint",
             "node": "cna-modeling.entities.Endpoint",
             "relationship": "cna-modeling.relationships.ConnectsTo.Link",
             "count_range": [
@@ -828,7 +609,7 @@ export const cna_modeling_profile: TOSCA_File = {
         },
         {
           "uses_data": {
-            "capability": "Attachment",
+            "capability": "cna-modeling.capabilities.DataUsage",
             "node": "cna-modeling.entities.DataAggregate",
             "relationship": "cna-modeling.relationships.AttachesTo.DataAggregate",
             "count_range": [
@@ -839,7 +620,7 @@ export const cna_modeling_profile: TOSCA_File = {
         },
         {
           "uses_backing_data": {
-            "capability": "Attachment",
+            "capability": "cna-modeling.capabilities.DataUsage",
             "node": "cna-modeling.entities.BackingData",
             "relationship": "cna-modeling.relationships.AttachesTo.BackingData",
             "count_range": [
@@ -903,23 +684,11 @@ export const cna_modeling_profile: TOSCA_File = {
           }
         }
       ],
-      "interfaces": {
-        "Standard": {
-          "type": "Lifecycle.Standard"
-        }
-      },
-      "derived_from": "cna-modeling.entities.Component",
+      "derived_from": "cna-modeling.entities.Component"
+    },
+    "cna-modeling.entities.BackingService": {
+      "description": "Node Type to model Backing Service entities",
       "properties": {
-        "component_version": {
-          "description": "Domain-specific software component version.\n",
-          "type": "version",
-          "required": false
-        },
-        "admin_credential": {
-          "description": "The optional credential that can be used to authenticate to the software component.",
-          "type": "Credential",
-          "required": false
-        },
         "managed": {
           "type": "boolean",
           "description": "A component is managed if it is exclusively operated by someone else, e.g. a cloud provider and the source code of the component instance is inaccessible. If the source code of a component can be changed by yourself, the component is not managed.",
@@ -973,6 +742,7 @@ export const cna_modeling_profile: TOSCA_File = {
                 "logging",
                 "metrics",
                 "tracing",
+                "vault",
                 "other"
               ]
             ]
@@ -995,53 +765,18 @@ export const cna_modeling_profile: TOSCA_File = {
             ]
           }
         }
-      }
-    },
-    "cna-modeling.entities.ProxyBackingService": {
-      "description": "Node Type to model Proxy Backing Service entities, typically Load Balancers, API Gateways or other intermediate Services",
-      "attributes": {
-        "state": {
-          "type": "string"
-        }
-      },
-      "capabilities": {
-        "feature": {
-          "type": "Node"
-        },
-        "proxy": {
-          "type": "cna-modeling.capabilities.Proxy",
-          "valid_source_node_types": [
-            "cna-modeling.entities.Component",
-            "cna-modeling.entities.Service",
-            "cna-modeling.entities.BackingService",
-            "cna-modeling.entities.StorageBackingService",
-            "cna-modeling.entities.ProxyBackingService",
-            "cna-modeling.entities.BrokerBackingService"
-          ]
-        }
       },
       "requirements": [
         {
-          "dependency": {
-            "capability": "Node",
-            "node": "Root",
-            "relationship": "DependsOn",
-            "count_range": [
-              0,
-              "UNBOUNDED"
-            ]
-          }
-        },
-        {
           "host": {
-            "capability": "Compute",
+            "capability": "cna-modeling.capabilities.Host",
             "node": "cna-modeling.entities.Infrastructure",
             "relationship": "cna-modeling.entities.HostedOn.DeploymentMapping"
           }
         },
         {
           "provides_endpoint": {
-            "capability": "Endpoint",
+            "capability": "cna-modeling.capabilities.Endpoint",
             "relationship": "cna-modeling.relationships.Provides.Endpoint",
             "count_range": [
               0,
@@ -1051,7 +786,7 @@ export const cna_modeling_profile: TOSCA_File = {
         },
         {
           "provides_external_endpoint": {
-            "capability": "Endpoint.Public",
+            "capability": "cna-modeling.capabilities.Endpoint",
             "relationship": "cna-modeling.relationships.Provides.Endpoint",
             "count_range": [
               0,
@@ -1061,7 +796,7 @@ export const cna_modeling_profile: TOSCA_File = {
         },
         {
           "endpoint_link": {
-            "capability": "Endpoint",
+            "capability": "cna-modeling.capabilities.Endpoint",
             "node": "cna-modeling.entities.Endpoint",
             "relationship": "cna-modeling.relationships.ConnectsTo.Link",
             "count_range": [
@@ -1072,7 +807,7 @@ export const cna_modeling_profile: TOSCA_File = {
         },
         {
           "uses_data": {
-            "capability": "Attachment",
+            "capability": "cna-modeling.capabilities.DataUsage",
             "node": "cna-modeling.entities.DataAggregate",
             "relationship": "cna-modeling.relationships.AttachesTo.DataAggregate",
             "count_range": [
@@ -1083,7 +818,7 @@ export const cna_modeling_profile: TOSCA_File = {
         },
         {
           "uses_backing_data": {
-            "capability": "Attachment",
+            "capability": "cna-modeling.capabilities.DataUsage",
             "node": "cna-modeling.entities.BackingData",
             "relationship": "cna-modeling.relationships.AttachesTo.BackingData",
             "count_range": [
@@ -1147,23 +882,24 @@ export const cna_modeling_profile: TOSCA_File = {
           }
         }
       ],
-      "interfaces": {
-        "Standard": {
-          "type": "Lifecycle.Standard"
-        }
-      },
       "derived_from": "cna-modeling.entities.Component",
+      "capabilities": {
+        "address_resolution": {
+          "type": "cna-modeling.capabilities.AdressResolution",
+          "valid_source_node_types": [
+            "cna-modeling.entities.Component",
+            "cna-modeling.entities.Service",
+            "cna-modeling.entities.BackingService",
+            "cna-modeling.entities.StorageBackingService",
+            "cna-modeling.entities.ProxyBackingService",
+            "cna-modeling.entities.BrokerBackingService"
+          ]
+        }
+      }
+    },
+    "cna-modeling.entities.ProxyBackingService": {
+      "description": "Node Type to model Proxy Backing Service entities, typically Load Balancers, API Gateways or other intermediate Services",
       "properties": {
-        "component_version": {
-          "description": "Domain-specific software component version.\n",
-          "type": "version",
-          "required": false
-        },
-        "admin_credential": {
-          "description": "The optional credential that can be used to authenticate to the software component.",
-          "type": "Credential",
-          "required": false
-        },
         "managed": {
           "type": "boolean",
           "description": "A component is managed if it is exclusively operated by someone else, e.g. a cloud provider and the source code of the component instance is inaccessible. If the source code of a component can be changed by yourself, the component is not managed.",
@@ -1220,42 +956,18 @@ export const cna_modeling_profile: TOSCA_File = {
           },
           "default": "other"
         }
-      }
-    },
-    "cna-modeling.entities.BrokerBackingService": {
-      "description": "Node Type to model Broker Backing Service entities, typically Message Brokers or Event Stores",
-      "attributes": {
-        "state": {
-          "type": "string"
-        }
-      },
-      "capabilities": {
-        "feature": {
-          "type": "Node"
-        }
       },
       "requirements": [
         {
-          "dependency": {
-            "capability": "Node",
-            "node": "Root",
-            "relationship": "DependsOn",
-            "count_range": [
-              0,
-              "UNBOUNDED"
-            ]
-          }
-        },
-        {
           "host": {
-            "capability": "Compute",
+            "capability": "cna-modeling.capabilities.Host",
             "node": "cna-modeling.entities.Infrastructure",
             "relationship": "cna-modeling.entities.HostedOn.DeploymentMapping"
           }
         },
         {
           "provides_endpoint": {
-            "capability": "Endpoint",
+            "capability": "cna-modeling.capabilities.Endpoint",
             "relationship": "cna-modeling.relationships.Provides.Endpoint",
             "count_range": [
               0,
@@ -1265,7 +977,7 @@ export const cna_modeling_profile: TOSCA_File = {
         },
         {
           "provides_external_endpoint": {
-            "capability": "Endpoint.Public",
+            "capability": "cna-modeling.capabilities.Endpoint",
             "relationship": "cna-modeling.relationships.Provides.Endpoint",
             "count_range": [
               0,
@@ -1275,7 +987,7 @@ export const cna_modeling_profile: TOSCA_File = {
         },
         {
           "endpoint_link": {
-            "capability": "Endpoint",
+            "capability": "cna-modeling.capabilities.Endpoint",
             "node": "cna-modeling.entities.Endpoint",
             "relationship": "cna-modeling.relationships.ConnectsTo.Link",
             "count_range": [
@@ -1286,7 +998,7 @@ export const cna_modeling_profile: TOSCA_File = {
         },
         {
           "uses_data": {
-            "capability": "Attachment",
+            "capability": "cna-modeling.capabilities.DataUsage",
             "node": "cna-modeling.entities.DataAggregate",
             "relationship": "cna-modeling.relationships.AttachesTo.DataAggregate",
             "count_range": [
@@ -1297,7 +1009,7 @@ export const cna_modeling_profile: TOSCA_File = {
         },
         {
           "uses_backing_data": {
-            "capability": "Attachment",
+            "capability": "cna-modeling.capabilities.DataUsage",
             "node": "cna-modeling.entities.BackingData",
             "relationship": "cna-modeling.relationships.AttachesTo.BackingData",
             "count_range": [
@@ -1361,23 +1073,24 @@ export const cna_modeling_profile: TOSCA_File = {
           }
         }
       ],
-      "interfaces": {
-        "Standard": {
-          "type": "Lifecycle.Standard"
-        }
-      },
       "derived_from": "cna-modeling.entities.Component",
+      "capabilities": {
+        "proxy": {
+          "type": "cna-modeling.capabilities.Proxy",
+          "valid_source_node_types": [
+            "cna-modeling.entities.Component",
+            "cna-modeling.entities.Service",
+            "cna-modeling.entities.BackingService",
+            "cna-modeling.entities.StorageBackingService",
+            "cna-modeling.entities.ProxyBackingService",
+            "cna-modeling.entities.BrokerBackingService"
+          ]
+        }
+      }
+    },
+    "cna-modeling.entities.BrokerBackingService": {
+      "description": "Node Type to model Broker Backing Service entities, typically Message Brokers or Event Stores",
       "properties": {
-        "component_version": {
-          "description": "Domain-specific software component version.\n",
-          "type": "version",
-          "required": false
-        },
-        "admin_credential": {
-          "description": "The optional credential that can be used to authenticate to the software component.",
-          "type": "Credential",
-          "required": false
-        },
         "managed": {
           "type": "boolean",
           "description": "A component is managed if it is exclusively operated by someone else, e.g. a cloud provider and the source code of the component instance is inaccessible. If the source code of a component can be changed by yourself, the component is not managed.",
@@ -1449,42 +1162,18 @@ export const cna_modeling_profile: TOSCA_File = {
             ]
           }
         }
-      }
-    },
-    "cna-modeling.entities.StorageBackingService": {
-      "description": "Node Type to model Storage Backing Service entities, typically databases",
-      "attributes": {
-        "state": {
-          "type": "string"
-        }
-      },
-      "capabilities": {
-        "feature": {
-          "type": "Node"
-        }
       },
       "requirements": [
         {
-          "dependency": {
-            "capability": "Node",
-            "node": "Root",
-            "relationship": "DependsOn",
-            "count_range": [
-              0,
-              "UNBOUNDED"
-            ]
-          }
-        },
-        {
           "host": {
-            "capability": "Compute",
+            "capability": "cna-modeling.capabilities.Host",
             "node": "cna-modeling.entities.Infrastructure",
             "relationship": "cna-modeling.entities.HostedOn.DeploymentMapping"
           }
         },
         {
           "provides_endpoint": {
-            "capability": "Endpoint",
+            "capability": "cna-modeling.capabilities.Endpoint",
             "relationship": "cna-modeling.relationships.Provides.Endpoint",
             "count_range": [
               0,
@@ -1494,7 +1183,7 @@ export const cna_modeling_profile: TOSCA_File = {
         },
         {
           "provides_external_endpoint": {
-            "capability": "Endpoint.Public",
+            "capability": "cna-modeling.capabilities.Endpoint",
             "relationship": "cna-modeling.relationships.Provides.Endpoint",
             "count_range": [
               0,
@@ -1504,7 +1193,7 @@ export const cna_modeling_profile: TOSCA_File = {
         },
         {
           "endpoint_link": {
-            "capability": "Endpoint",
+            "capability": "cna-modeling.capabilities.Endpoint",
             "node": "cna-modeling.entities.Endpoint",
             "relationship": "cna-modeling.relationships.ConnectsTo.Link",
             "count_range": [
@@ -1515,7 +1204,7 @@ export const cna_modeling_profile: TOSCA_File = {
         },
         {
           "uses_data": {
-            "capability": "Attachment",
+            "capability": "cna-modeling.capabilities.DataUsage",
             "node": "cna-modeling.entities.DataAggregate",
             "relationship": "cna-modeling.relationships.AttachesTo.DataAggregate",
             "count_range": [
@@ -1526,7 +1215,7 @@ export const cna_modeling_profile: TOSCA_File = {
         },
         {
           "uses_backing_data": {
-            "capability": "Attachment",
+            "capability": "cna-modeling.capabilities.DataUsage",
             "node": "cna-modeling.entities.BackingData",
             "relationship": "cna-modeling.relationships.AttachesTo.BackingData",
             "count_range": [
@@ -1590,23 +1279,11 @@ export const cna_modeling_profile: TOSCA_File = {
           }
         }
       ],
-      "interfaces": {
-        "Standard": {
-          "type": "Lifecycle.Standard"
-        }
-      },
-      "derived_from": "cna-modeling.entities.Component",
+      "derived_from": "cna-modeling.entities.Component"
+    },
+    "cna-modeling.entities.StorageBackingService": {
+      "description": "Node Type to model Storage Backing Service entities, typically databases",
       "properties": {
-        "component_version": {
-          "description": "Domain-specific software component version.\n",
-          "type": "version",
-          "required": false
-        },
-        "admin_credential": {
-          "description": "The optional credential that can be used to authenticate to the software component.",
-          "type": "Credential",
-          "required": false
-        },
         "managed": {
           "type": "boolean",
           "description": "A component is managed if it is exclusively operated by someone else, e.g. a cloud provider and the source code of the component instance is inaccessible. If the source code of a component can be changed by yourself, the component is not managed.",
@@ -1673,40 +1350,19 @@ export const cna_modeling_profile: TOSCA_File = {
             ]
           }
         }
-      }
-    },
-    "cna-modeling.entities.Infrastructure": {
-      "description": "Node Type to model Infrastructure entities",
-      "attributes": {
-        "state": {
-          "type": "string"
-        }
-      },
-      "capabilities": {
-        "feature": {
-          "type": "Node"
-        },
-        "host": {
-          "type": "Compute"
-        },
-        "address_resolution": {
-          "type": "cna-modeling.capabilities.AdressResolution",
-          "valid_source_node_types": [
-            "cna-modeling.entities.Component",
-            "cna-modeling.entities.Service",
-            "cna-modeling.entities.BackingService",
-            "cna-modeling.entities.StorageBackingService",
-            "cna-modeling.entities.ProxyBackingService",
-            "cna-modeling.entities.BrokerBackingService"
-          ]
-        }
       },
       "requirements": [
         {
-          "dependency": {
-            "capability": "Node",
-            "node": "Root",
-            "relationship": "DependsOn",
+          "host": {
+            "capability": "cna-modeling.capabilities.Host",
+            "node": "cna-modeling.entities.Infrastructure",
+            "relationship": "cna-modeling.entities.HostedOn.DeploymentMapping"
+          }
+        },
+        {
+          "provides_endpoint": {
+            "capability": "cna-modeling.capabilities.Endpoint",
+            "relationship": "cna-modeling.relationships.Provides.Endpoint",
             "count_range": [
               0,
               "UNBOUNDED"
@@ -1714,10 +1370,31 @@ export const cna_modeling_profile: TOSCA_File = {
           }
         },
         {
-          "host": {
-            "capability": "Compute",
-            "node": "cna-modeling.entities.Infrastructure",
-            "relationship": "cna-modeling.entities.HostedOn.DeploymentMapping",
+          "provides_external_endpoint": {
+            "capability": "cna-modeling.capabilities.Endpoint",
+            "relationship": "cna-modeling.relationships.Provides.Endpoint",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
+        },
+        {
+          "endpoint_link": {
+            "capability": "cna-modeling.capabilities.Endpoint",
+            "node": "cna-modeling.entities.Endpoint",
+            "relationship": "cna-modeling.relationships.ConnectsTo.Link",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
+        },
+        {
+          "uses_data": {
+            "capability": "cna-modeling.capabilities.DataUsage",
+            "node": "cna-modeling.entities.DataAggregate",
+            "relationship": "cna-modeling.relationships.AttachesTo.DataAggregate",
             "count_range": [
               0,
               "UNBOUNDED"
@@ -1726,12 +1403,45 @@ export const cna_modeling_profile: TOSCA_File = {
         },
         {
           "uses_backing_data": {
-            "capability": "Attachment",
+            "capability": "cna-modeling.capabilities.DataUsage",
             "node": "cna-modeling.entities.BackingData",
             "relationship": "cna-modeling.relationships.AttachesTo.BackingData",
             "count_range": [
               0,
               "UNBOUNDED"
+            ]
+          }
+        },
+        {
+          "external_ingress_proxied_by": {
+            "capability": "cna-modeling.capabilities.Proxy",
+            "node": "cna-modeling.entities.ProxyBackingService",
+            "relationship": "cna-modeling.relationships.ProxiedBy.ProxyBackingService",
+            "count_range": [
+              0,
+              1
+            ]
+          }
+        },
+        {
+          "ingress_proxied_by": {
+            "capability": "cna-modeling.capabilities.Proxy",
+            "node": "cna-modeling.entities.ProxyBackingService",
+            "relationship": "cna-modeling.relationships.ProxiedBy.ProxyBackingService",
+            "count_range": [
+              0,
+              1
+            ]
+          }
+        },
+        {
+          "egress_proxied_by": {
+            "capability": "cna-modeling.capabilities.Proxy",
+            "node": "cna-modeling.entities.ProxyBackingService",
+            "relationship": "cna-modeling.relationships.ProxiedBy.ProxyBackingService",
+            "count_range": [
+              0,
+              1
             ]
           }
         },
@@ -1745,14 +1455,22 @@ export const cna_modeling_profile: TOSCA_File = {
               "UNBOUNDED"
             ]
           }
+        },
+        {
+          "address_resolution_by": {
+            "capability": "cna-modeling.capabilities.AdressResolution",
+            "relationship": "cna-modeling.relationships.UseAddressResolution",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
         }
       ],
-      "interfaces": {
-        "Standard": {
-          "type": "Lifecycle.Standard"
-        }
-      },
-      "derived_from": "Abstract.Compute",
+      "derived_from": "cna-modeling.entities.Component"
+    },
+    "cna-modeling.entities.Infrastructure": {
+      "description": "Node Type to model Infrastructure entities",
       "properties": {
         "kind": {
           "type": "string",
@@ -1891,7 +1609,67 @@ export const cna_modeling_profile: TOSCA_File = {
           "default": "default-account",
           "required": true
         }
-      }
+      },
+      "capabilities": {
+        "host": {
+          "type": "cna-modeling.capabilities.Host",
+          "valid_source_node_types": [
+            "cna-modeling.entities.Component",
+            "cna-modeling.entities.Service",
+            "cna-modeling.entities.BackingService",
+            "cna-modeling.entities.StorageBackingService",
+            "cna-modeling.entities.ProxyBackingService",
+            "cna-modeling.entities.BrokerBackingService",
+            "cna-modeling.entities.Infrastructure"
+          ]
+        },
+        "address_resolution": {
+          "type": "cna-modeling.capabilities.AdressResolution",
+          "valid_source_node_types": [
+            "cna-modeling.entities.Component",
+            "cna-modeling.entities.Service",
+            "cna-modeling.entities.BackingService",
+            "cna-modeling.entities.StorageBackingService",
+            "cna-modeling.entities.ProxyBackingService",
+            "cna-modeling.entities.BrokerBackingService"
+          ]
+        }
+      },
+      "requirements": [
+        {
+          "host": {
+            "capability": "cna-modeling.capabilities.Host",
+            "node": "cna-modeling.entities.Infrastructure",
+            "relationship": "cna-modeling.entities.HostedOn.DeploymentMapping",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
+        },
+        {
+          "uses_backing_data": {
+            "capability": "cna-modeling.capabilities.DataUsage",
+            "node": "cna-modeling.entities.BackingData",
+            "relationship": "cna-modeling.relationships.AttachesTo.BackingData",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
+        },
+        {
+          "assigned_to_network": {
+            "capability": "cna-modeling.capabilities.Linkable",
+            "node": "cna-modeling.entities.Network",
+            "relationship": "cna-modeling.relationships.LinksTo",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
+        }
+      ]
     },
     "cna-modeling.entities.Endpoint": {
       "description": "Endpoint type to explicitly model endpoints as entities",
@@ -1945,13 +1723,17 @@ export const cna_modeling_profile: TOSCA_File = {
       },
       "capabilities": {
         "endpoint": {
-          "type": "Endpoint"
+          "type": "cna-modeling.capabilities.Endpoint",
+          "count_range": [
+            1,
+            1
+          ]
         }
       },
       "requirements": [
         {
           "uses_data": {
-            "capability": "Attachment",
+            "capability": "cna-modeling.capabilities.DataUsage",
             "node": "cna-modeling.entities.DataAggregate",
             "relationship": "cna-modeling.relationships.AttachesTo.DataAggregate",
             "count_range": [
@@ -2014,16 +1796,24 @@ export const cna_modeling_profile: TOSCA_File = {
       },
       "capabilities": {
         "endpoint": {
-          "type": "Endpoint"
+          "type": "cna-modeling.capabilities.Endpoint",
+          "count_range": [
+            1,
+            1
+          ]
         },
         "external_endpoint": {
-          "type": "Endpoint.Public"
+          "type": "cna-modeling.capabilities.Endpoint",
+          "count_range": [
+            1,
+            1
+          ]
         }
       },
       "requirements": [
         {
           "uses_data": {
-            "capability": "Attachment",
+            "capability": "cna-modeling.capabilities.DataUsage",
             "node": "cna-modeling.entities.DataAggregate",
             "relationship": "cna-modeling.relationships.AttachesTo.DataAggregate",
             "count_range": [
@@ -2070,12 +1860,14 @@ export const cna_modeling_profile: TOSCA_File = {
       },
       "capabilities": {
         "provides_data": {
-          "type": "Attachment",
+          "type": "cna-modeling.capabilities.DataUsage",
           "valid_source_node_types": [
             "cna-modeling.entities.Component",
             "cna-modeling.entities.Service",
             "cna-modeling.entities.BackingService",
             "cna-modeling.entities.StorageBackingService",
+            "cna-modeling.entities.ProxyBackingService",
+            "cna-modeling.entities.BrokerBackingService",
             "cna-modeling.entities.Infrastructure"
           ]
         }
@@ -2085,12 +1877,13 @@ export const cna_modeling_profile: TOSCA_File = {
       "description": "Node Type to model Data Aggregate entities",
       "capabilities": {
         "provides_data": {
-          "type": "Attachment",
+          "type": "cna-modeling.capabilities.DataUsage",
           "valid_source_node_types": [
             "cna-modeling.entities.Component",
             "cna-modeling.entities.Service",
             "cna-modeling.entities.BackingService",
             "cna-modeling.entities.StorageBackingService",
+            "cna-modeling.entities.BrokerBackingService",
             "cna-modeling.entities.Endpoint"
           ]
         }
@@ -2119,8 +1912,8 @@ export const cna_modeling_profile: TOSCA_File = {
       "requirements": [
         {
           "external_endpoint": {
-            "capability": "Endpoint.Public",
-            "relationship": "ConnectsTo",
+            "capability": "cna-modeling.capabilities.Endpoint",
+            "relationship": "cna-modeling.relationships.PartOf",
             "count_range": [
               1,
               1
@@ -2128,6 +1921,74 @@ export const cna_modeling_profile: TOSCA_File = {
           }
         }
       ]
+    },
+    "cna-modeling.entities.Network": {
+      "description": "Node Type to model a (virtual) network (e.g. a subnet)\n",
+      "attributes": {
+        "state": {
+          "type": "string"
+        }
+      },
+      "capabilities": {
+        "feature": {
+          "type": "Node"
+        },
+        "link": {
+          "type": "cna-modeling.capabilities.Linkable"
+        }
+      },
+      "requirements": [
+        {
+          "dependency": {
+            "capability": "Node",
+            "node": "Root",
+            "relationship": "DependsOn",
+            "count_range": [
+              0,
+              "UNBOUNDED"
+            ]
+          }
+        }
+      ],
+      "interfaces": {
+        "Standard": {
+          "type": "Lifecycle.Standard"
+        }
+      },
+      "derived_from": "Root",
+      "properties": {
+        "ip_version": {
+          "description": "The IP version of the requested  Valid values are 4 for ipv4 or 6 for ipv6.\n",
+          "type": "integer",
+          "required": false,
+          "default": 4
+        },
+        "cidr": {
+          "description": "The cidr block of the requested\n",
+          "type": "string",
+          "required": false
+        },
+        "start_ip": {
+          "description": "The IP address to be used as the start of a pool of addresses within the full IP range derived from the cidr block.\n",
+          "type": "string",
+          "required": false
+        },
+        "end_ip": {
+          "description": "The IP address to be used as the end of a pool of addresses within the full IP range derived from the cidr block.\n",
+          "type": "string",
+          "required": false
+        },
+        "gateway_ip": {
+          "description": "The gateway IP address.\n",
+          "type": "string",
+          "required": false
+        },
+        "network_type": {
+          "description": "Specifies the nature of the network in the underlying cloud infrastructure.\n",
+          "type": "string",
+          "required": false
+        }
+      }
     }
   },
   "group_types": {},

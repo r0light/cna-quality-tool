@@ -3,7 +3,7 @@ tosca_definitions_version: tosca_2_0
 metadata:
   template_name: node_types.yaml
   template_author: Distributed Systems Group
-  template_version: 0.4
+  template_version: 0.5
 
 description: >-
   This TOSCA definitions document contains the CNA Modeling node types.
@@ -15,7 +15,6 @@ imports:
 relationship_types:
 
   cna-modeling.relationships.ConnectsTo.Link:
-    derived_from: ConnectsTo
     description: Relationship Type to model Link entities
     properties:
       relation_type:
@@ -36,11 +35,10 @@ relationship_types:
         type: string
         description: Whether or not this invocation is protected by a circuit breaker
         default: none
-    valid_capability_types: [ Endpoint, Endpoint.Public ]
+    valid_capability_types: [ cna-modeling.capabilities.Endpoint ]
     valid_target_node_types: [ cna-modeling.entities.Endpoint, cna-modeling.entities.Endpoint.External ]
 
   cna-modeling.relationships.HostedOn.DeploymentMapping:
-    derived_from: HostedOn
     description: Relationship Type to model DeploymentMapping entities
     properties:
       deployment:
@@ -86,17 +84,11 @@ relationship_types:
 
   cna-modeling.relationships.Provides.Endpoint:
     description: Relationship Type to connect Endpoints to the Components which provide them
-    valid_capability_types: [ Endpoint, Endpoint.Public]
+    valid_capability_types: [ cna-modeling.capabilities.Endpoint ]
     valid_target_node_types: [ cna-modeling.entities.Endpoint, cna-modeling.entities.Endpoint.External ]
 
   cna-modeling.relationships.AttachesTo.DataAggregate:
-    derived_from: AttachesTo
     properties:
-      location:
-        # Override parent AttachesTo definition to make this property non-required
-        # required: false
-        # CL: This is not allowed
-        required: true
       usage_relation:
         type: string
         required: true
@@ -108,36 +100,43 @@ relationship_types:
         required: true
         default: 0
         description: Only applicable if data is persisted by a component; If a component persists data, the sharding level describes the number of shards used; 0 acts as a placeholder if data is not persisted; 1 is the default meaning that no sharding is used; >1 is the number of shards
+    valid_capability_types: [cna-modeling.capabilities.DataUsage]
+    valid_target_node_types: [ cna-modeling.entities.DataAggregate ]
 
   cna-modeling.relationships.AttachesTo.BackingData:
-    derived_from: AttachesTo
     properties:
-      location:
-        # Override parent AttachesTo definition to make this property non-required
-        # required: false
-        # CL: This is not allowed
-        required: true
       usage_relation:
         type: string
         required: true
         description: Describes how a component uses attached data, that means whether it just uses (reads) it for its functionality or if it also updates and persists (writes) it; possible values are usage, cached usage, and persistence
         validation: { $valid_values: [ $value, ["usage", "cached-usage", "persistence"]]}
         default: "usage"
-    valid_capability_types: [Attachment]
-    valid_target_node_types: [ cna-modeling.entities.BackingData ]
+    valid_capability_types: [cna-modeling.capabilities.DataUsage]
+    valid_target_node_types: [cna-modeling.entities.BackingData]
         
   cna-modeling.relationships.ProxiedBy.ProxyBackingService:
     description: Relationship Type to connect Components to Backing Services which act as a proxy for them
+    valid_capability_types: [cna-modeling.capabilities.Proxy]
     valid_target_node_types: [cna-modeling.entities.ProxyBackingService]
+
+  cna-modeling.relationships.LinksTo:
+    description: >-
+      The LinksTo type represents an association relationship between a component/infrastructure and a network
+    valid_capability_types: [cna-modeling.capabilities.Linkable]
+    valid_target_node_types: [cna-modeling.entities.Network]
     
   cna-modeling.relationships.UseAddressResolution:
     description: Relationship Type to connect Components to entities which provide address resolution
+    valid_capability_types: [cna-modeling.capabilities.AdressResolution]
     valid_target_node_types: [cna-modeling.entities.BackingService, cna-modeling.entities.ProxyBackingService, cna-modeling.entities.Infrastructure, Network ]
 
+  cna-modeling.relationships.PartOf:
+    description: Relationship Type to model an endpoint as part of a request trace
+    valid_capability_types: [ cna-modeling.capabilities.Endpoint ]
+    valid_target_node_types: [ cna-modeling.entities.Endpoint.External ]
 
 node_types:
   cna-modeling.entities.Component:
-    derived_from: SoftwareComponent
     description: Node Type to model Component entities
     properties:
       managed:
@@ -167,34 +166,34 @@ node_types:
         required: true
     requirements:
       - host:
-          capability: Compute
+          capability: cna-modeling.capabilities.Host
           node: cna-modeling.entities.Infrastructure
           relationship: cna-modeling.entities.HostedOn.DeploymentMapping
       # Allow the definition of endpoints provided by this Component
       - provides_endpoint:
-          capability: Endpoint
+          capability: cna-modeling.capabilities.Endpoint
           relationship: cna-modeling.relationships.Provides.Endpoint
           count_range: [0, UNBOUNDED]
       # Allow the definition of endpoints provided by this Component
       - provides_external_endpoint:
-          capability: Endpoint.Public
+          capability: cna-modeling.capabilities.Endpoint
           relationship: cna-modeling.relationships.Provides.Endpoint
           count_range: [0, UNBOUNDED]
       # Allow the definition of Links between Components
       - endpoint_link:
-          capability: Endpoint
+          capability: cna-modeling.capabilities.Endpoint
           node: cna-modeling.entities.Endpoint
           relationship: cna-modeling.relationships.ConnectsTo.Link
           count_range: [0, UNBOUNDED]
       # Allow the definition of Data Aggregate usage
       - uses_data:
-          capability: Attachment
+          capability: cna-modeling.capabilities.DataUsage
           node: cna-modeling.entities.DataAggregate
           relationship: cna-modeling.relationships.AttachesTo.DataAggregate
           count_range: [0, UNBOUNDED]
       # Allow the definition of Backing Data usage
       - uses_backing_data:
-          capability: Attachment
+          capability: cna-modeling.capabilities.DataUsage
           node: cna-modeling.entities.BackingData
           relationship: cna-modeling.relationships.AttachesTo.BackingData
           count_range: [0, UNBOUNDED]
@@ -235,7 +234,7 @@ node_types:
         type: string
         description: "The functionality provided by this backing service"
         required: true
-        validation: { $valid_values: [ $value, [ "naming/addressing", "configuration", "authentication/authorization", "logging", "metrics", "tracing", "vault" "other" ]]}
+        validation: { $valid_values: [ $value, [ "naming/addressing", "configuration", "authentication/authorization", "logging", "metrics", "tracing", "vault", "other" ]]}
         default: other
       replication_strategy:
         type: string
@@ -243,7 +242,6 @@ node_types:
         required: true
         default: none
         validation: { $valid_values: [ $value, [ "none", "read-only-replication", "active-active-replication" ]]}
-
     capabilities:
       address_resolution:
         type: cna-modeling.capabilities.AdressResolution
@@ -321,7 +319,6 @@ node_types:
         validation: { $valid_values: [ $value, [ "none", "read-only-replication", "active-active-replication" ]]}
 
   cna-modeling.entities.Infrastructure:
-    derived_from: Abstract.Compute
     description: Node Type to model Infrastructure entities
     properties:
       kind:
@@ -390,6 +387,17 @@ node_types:
         default: default-account
         required: true
     capabilities:
+      host:
+        type: cna-modeling.capabilities.Host
+        #valid_source_types: []
+        valid_source_node_types:
+          - cna-modeling.entities.Component
+          - cna-modeling.entities.Service
+          - cna-modeling.entities.BackingService
+          - cna-modeling.entities.StorageBackingService
+          - cna-modeling.entities.ProxyBackingService
+          - cna-modeling.entities.BrokerBackingService
+          - cna-modeling.entities.Infrastructure
       address_resolution:
         type: cna-modeling.capabilities.AdressResolution
         valid_source_node_types:
@@ -402,22 +410,21 @@ node_types:
     requirements:
       # Allow the deployment on another Infrastructure entity
       - host:
-          capability: Compute
+          capability: cna-modeling.capabilities.Host
           node: cna-modeling.entities.Infrastructure
           relationship: cna-modeling.entities.HostedOn.DeploymentMapping
           count_range: [0, UNBOUNDED]
       # Allow the definition of Backing Data usage
       - uses_backing_data:
-          capability: Attachment
+          capability: cna-modeling.capabilities.DataUsage
           node: cna-modeling.entities.BackingData
           relationship: cna-modeling.relationships.AttachesTo.BackingData
           count_range: [0, UNBOUNDED]
       - assigned_to_network:
-          capability: Linkable
-          node: Network
-          relationship: LinksTo
+          capability: cna-modeling.capabilities.Linkable
+          node: cna-modeling.entities.Network
+          relationship: cna-modeling.relationships.LinksTo
           count_range: [0, UNBOUNDED]
-      
 
   cna-modeling.entities.Endpoint:
     description: Endpoint type to explicitly model endpoints as entities
@@ -455,12 +462,12 @@ node_types:
     capabilities:
       # Allow assigning exactly one Endpoint Capability
       endpoint:
-        type: Endpoint
-        #count_range: [1, 1]
+        type: cna-modeling.capabilities.Endpoint
+        count_range: [1, 1]
     requirements:
       # Allow the definition of Data Aggregate usage
       - uses_data:
-          capability: Attachment
+          capability: cna-modeling.capabilities.DataUsage
           node: cna-modeling.entities.DataAggregate
           relationship: cna-modeling.relationships.AttachesTo.DataAggregate
           count_range: [0, UNBOUNDED]
@@ -471,12 +478,12 @@ node_types:
     capabilities:
       # Allow assigning exactly one External Endpoint Capability
       external_endpoint:
-        type: Endpoint.Public
-        #count_range: [1, 1]
+        type: cna-modeling.capabilities.Endpoint
+        count_range: [1, 1]
     requirements:
       # Allow the definition of Data Aggregate usage
       - uses_data:
-          capability: Attachment
+          capability: cna-modeling.capabilities.DataUsage
           node: cna-modeling.entities.DataAggregate
           relationship: cna-modeling.relationships.AttachesTo.DataAggregate
           count_range: [0, UNBOUNDED]
@@ -501,12 +508,14 @@ node_types:
           description: The value of the individual Backing Data element
     capabilities:
       provides_data:
-        type: Attachment
+        type: cna-modeling.capabilities.DataUsage
         valid_source_node_types:
           - cna-modeling.entities.Component
           - cna-modeling.entities.Service
-          - cna-modeling.entities.BackingService
+          - cna-modeling.entities.BackingService          
           - cna-modeling.entities.StorageBackingService
+          - cna-modeling.entities.ProxyBackingService
+          - cna-modeling.entities.BrokerBackingService
           - cna-modeling.entities.Infrastructure
         #count_range: [1, UNBOUNDED]
 
@@ -515,12 +524,13 @@ node_types:
     capabilities:
       # Allows Data Aggregate to be used by other entities
       provides_data:
-        type: Attachment
+        type: cna-modeling.capabilities.DataUsage
         valid_source_node_types:
           - cna-modeling.entities.Component
           - cna-modeling.entities.Service
           - cna-modeling.entities.BackingService
           - cna-modeling.entities.StorageBackingService
+          - cna-modeling.entities.BrokerBackingService
           - cna-modeling.entities.Endpoint
         #count_range: [1, UNBOUNDED]
 
@@ -542,6 +552,50 @@ node_types:
     requirements:
       # Reference to External Endpoint for which the Request Trace is defined
       - external_endpoint:
-          capability: Endpoint.Public
-          relationship: ConnectsTo
+          capability: cna-modeling.capabilities.Endpoint
+          relationship: cna-modeling.relationships.PartOf
           count_range: [1, 1]
+
+  cna-modeling.entities.Network:
+    description: >
+      Node Type to model a (virtual) network (e.g. a subnet)
+    derived_from: Root
+    properties:
+      ip_version:
+        description: >
+          The IP version of the requested  Valid values are 4 for ipv4
+          or 6 for ipv6.
+        type: integer
+        required: false
+        default: 4
+      cidr:
+        description: >
+          The cidr block of the requested
+        type: string
+        required: false
+      start_ip:
+        description: >
+          The IP address to be used as the start of a pool of addresses within
+          the full IP range derived from the cidr block.
+        type: string
+        required: false
+      end_ip:
+        description: >
+          The IP address to be used as the end of a pool of addresses within
+          the full IP range derived from the cidr block.
+        type: string
+        required: false
+      gateway_ip:
+        description: >
+          The gateway IP address.
+        type: string
+        required: false
+      network_type:
+        description: >
+          Specifies the nature of the network in the underlying
+          cloud infrastructure.
+        type: string
+        required: false
+    capabilities:
+      link:
+        type: cna-modeling.capabilities.Linkable

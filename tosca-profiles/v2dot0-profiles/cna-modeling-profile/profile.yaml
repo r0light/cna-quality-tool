@@ -5,7 +5,7 @@ profile: org.dsg.cna-modeling:0.4
 metadata:
   template_name: profile.yaml
   template_author: Distributed Systems Group
-  template_version: 0.4
+  template_version: 0.5
 
 description: >-
   This TOSCA definitions document contains the CNA Modeling TOSCA profile
