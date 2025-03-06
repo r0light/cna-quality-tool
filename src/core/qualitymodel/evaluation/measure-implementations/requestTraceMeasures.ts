@@ -577,6 +577,45 @@ export const ratioOfUniqueAccountUsage: Calculation = (parameters: CalculationPa
     return accounts.size / componentsAndInfrastructure;
 }
 
+export const accessRestrictedToCallers: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+
+    let includedComponents = getIncludedComponents(parameters.entity, parameters.system);
+
+    if (includedComponents.length == 0) {
+        return "n/a";
+    }
+
+    let accessRestrictedToCallersPerComponent = includedComponents.map((component) => componentMeasureImplementations["accessRestrictedToCallers"]({ entity: component, system: parameters.system }));
+
+    let validValues = accessRestrictedToCallersPerComponent.filter(value => value !== "n/a"); 
+
+    if (validValues.length === 0) {
+        return "n/a"
+    } else {
+        return average(validValues as number[]);
+    }
+}
+
+export const ratioOfDelegatedAuthentication: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+
+    let allComponents = getIncludedComponents(parameters.entity, parameters.system).filter(component => {
+        return component.constructor.name !== BackingService.name || component.getProperty("providedFunctionality").value !== "authentication/authorization" 
+    })
+
+
+    if (allComponents.length === 0) {
+        return "n/a";
+    }
+
+    return average(allComponents.map(component => {
+        if (component.getAuthenticationBy) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }));
+
+}
 
 export const requestTraceMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
@@ -610,6 +649,8 @@ export const requestTraceMeasureImplementations: { [measureKey: string]: Calcula
     "configurationExternalization": configurationExternalization,
     "secretsExternalization": secretsExternalization,
     "suitablyReplicatedStatefulService": suitablyReplicatedStatefulService,
-    "ratioOfUniqueAccountUsage": ratioOfUniqueAccountUsage
+    "ratioOfUniqueAccountUsage": ratioOfUniqueAccountUsage,
+    "accessRestrictedToCallers": accessRestrictedToCallers,
+    "ratioOfDelegatedAuthentication": ratioOfDelegatedAuthentication
 }
 

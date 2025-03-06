@@ -245,7 +245,7 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.ENDPOINT],
         "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM],
         "sources": [{ "key": "Scholl2019", "section": "6 Grant Least-Privileged Access" }, { "key": "Arundel2019", "section": "11 Access Control and Permissions" }],
-        "measures": []
+        "measures": ["accessRestrictedToCallers"]
     },
     "accessControlManagementConsistency": {
         "name": "Access control management consistency",
@@ -272,7 +272,7 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.BACKING_SERVICE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Scholl2019", "section": "6 Use Federated Identity Management" }, { "key": "Goniwada2021", "section": "9 Decentralized Identity" }],
-        "measures": []
+        "measures": ["ratioOfDelegatedAuthentication"]
     },
     "serviceOrientation": {
         "name": "Service-orientation",
@@ -1883,6 +1883,18 @@ const measures = {
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT]
     },
+    "accessRestrictedToCallers": {
+        "name": "Access restricted to callers",
+        "calculation": "Average-of(Accounts allowed to access Endpoint / Accounts accessing Endpoint) over all Endpoints",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE]
+    },
+    "ratioOfDelegatedAuthentication": {
+        "name": "Ratio of delegated authentication",
+        "calculation": "Component delegating authentication / All components (excluding authentication backing services)",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE]
+    }
 } satisfies { [measureKey: string]: MeasureSpec }
 
 const measureKeys = Object.freeze(measures);

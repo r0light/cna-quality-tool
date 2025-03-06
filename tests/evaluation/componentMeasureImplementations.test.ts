@@ -6,6 +6,7 @@ import { componentMeasureImplementations } from "@/core/qualitymodel/evaluation/
 import { getQualityModel } from "@/core/qualitymodel/QualityModelInstance";
 import { ENTITIES } from "@/core/qualitymodel/specifications/entities";
 import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_CONFIG_KIND, BACKING_DATA_SECRET_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, SERVICE_MESH_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "@/core/qualitymodel/specifications/featureModel";
+import { linkTools } from "@joint/core";
 import { expect, test } from "vitest";
 
 
@@ -1080,7 +1081,7 @@ test("ratioOfExternalEndpointsSupportingTls", () => {
 
 
 test ("numberOfLinksWithRetryLogic", () => {
-    let system = new System("sys1", "testSystem");;
+    let system = new System("sys1", "testSystem");
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
     let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
@@ -1118,7 +1119,7 @@ test ("numberOfLinksWithRetryLogic", () => {
 })
 
 test ("numberOfLinksWithComplexFailover", () => {
-    let system = new System("sys1", "testSystem");;
+    let system = new System("sys1", "testSystem");
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
     let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
@@ -1156,7 +1157,7 @@ test ("numberOfLinksWithComplexFailover", () => {
 
 
 test("serviceReplicationLevel", () => {
-    let system = new System("sys1", "testSystem");;
+    let system = new System("sys1", "testSystem");
     let infrastructureA = new Infrastructure("i1", "Infrastructure 1", getEmptyMetaData());
     let infrastructureB = new Infrastructure("i2", "Infrastruture B", getEmptyMetaData());
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
@@ -1176,7 +1177,7 @@ test("serviceReplicationLevel", () => {
 })
 
 test("amountOfRedundancy", () => {
-    let system = new System("sys1", "testSystem");;
+    let system = new System("sys1", "testSystem");
     let infrastructureA = new Infrastructure("i1", "Infrastructure 1", getEmptyMetaData());
     let infrastructureB = new Infrastructure("i2", "Infrastruture B", getEmptyMetaData());
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
@@ -1196,7 +1197,7 @@ test("amountOfRedundancy", () => {
 })
 
 test("storageReplicationLevel", () => {
-    let system = new System("sys1", "testSystem");;
+    let system = new System("sys1", "testSystem");
     let infrastructureA = new Infrastructure("i1", "Infrastructure 1", getEmptyMetaData());
     let infrastructureB = new Infrastructure("i2", "Infrastruture B", getEmptyMetaData());
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
@@ -1217,7 +1218,7 @@ test("storageReplicationLevel", () => {
 
 test("storageReplicationLevel", () => {
 
-    let system = new System("sys1", "testSystem");;
+    let system = new System("sys1", "testSystem");
     let infrastructureA = new Infrastructure("i1", "Infrastructure 1", getEmptyMetaData());
     let infrastructureB = new Infrastructure("i2", "Infrastruture B", getEmptyMetaData());
     let sbs = new StorageBackingService("s1", "testService", getEmptyMetaData());
@@ -1254,7 +1255,7 @@ test("serviceMeshUsage", () => {
 })
 
 test("secretsExternalization", () => {
-    let system = new System("sys1", "testSystem");;
+    let system = new System("sys1", "testSystem");
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
 
@@ -1296,7 +1297,7 @@ test("secretsExternalization", () => {
 })
 
 test("configurationExternalization", () => {
-    let system = new System("sys1", "testSystem");;
+    let system = new System("sys1", "testSystem");
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
 
@@ -1340,7 +1341,7 @@ test("configurationExternalization", () => {
 })
 
 test("suitablyReplicatedStatefulService - for service", () => {
-    let system = new System("sys1", "testSystem");;
+    let system = new System("sys1", "testSystem");
     let infrastructureA = new Infrastructure("i1", "Infrastructure 1", getEmptyMetaData());
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
     serviceA.setPropertyValue("stateless", false);
@@ -1357,7 +1358,7 @@ test("suitablyReplicatedStatefulService - for service", () => {
 })
 
 test("suitablyReplicatedStatefulService - for storageBackingService", () => {
-    let system = new System("sys1", "testSystem");;
+    let system = new System("sys1", "testSystem");
     let infrastructureA = new Infrastructure("i1", "Infrastructure 1", getEmptyMetaData());
     let infrastructureB = new Infrastructure("i2", "Infrastruture B", getEmptyMetaData());
     let storageBackingService = new StorageBackingService("sbs1", "Storage Backing Service", getEmptyMetaData());
@@ -1377,7 +1378,7 @@ test("suitablyReplicatedStatefulService - for storageBackingService", () => {
 })
 
 test("ratioOfNonCustomBackingServices - non-custom", () => {
-    let system = new System("sys1", "testSystem");;
+    let system = new System("sys1", "testSystem");
     let backingServiceA = new BackingService("s1", "backingService", getEmptyMetaData());
     backingServiceA.setPropertyValue("software_type", "open-source");
     system.addEntity(backingServiceA);
@@ -1387,7 +1388,7 @@ test("ratioOfNonCustomBackingServices - non-custom", () => {
 })
 
 test("ratioOfNonCustomBackingServices - custom", () => {
-    let system = new System("sys1", "testSystem");;
+    let system = new System("sys1", "testSystem");
     let backingServiceA = new BackingService("s1", "backingService", getEmptyMetaData());
     backingServiceA.setPropertyValue("software_type", "custom");
     system.addEntity(backingServiceA);
@@ -1398,7 +1399,7 @@ test("ratioOfNonCustomBackingServices - custom", () => {
 
 
 test("secretsStoredInVault", () => {
-    let system = new System("sys1", "testSystem");;
+    let system = new System("sys1", "testSystem");
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
 
@@ -1428,7 +1429,7 @@ test("secretsStoredInVault", () => {
 })
 
 test("secretsStoredInVault", () => {
-    let system = new System("sys1", "testSystem");;
+    let system = new System("sys1", "testSystem");
 
     let secretA = new BackingData("b1", "secret A", getEmptyMetaData());
     secretA.setPropertyValue("kind", BACKING_DATA_SECRET_KIND);
@@ -1443,5 +1444,77 @@ test("secretsStoredInVault", () => {
     system.addEntities([backingService]);
 
     let measureValue = componentMeasureImplementations["secretsStoredInVault"]({ entity: backingService, system: system });
+    expect(measureValue).toEqual(1);
+})
+
+
+
+test("accessRestrictedToCallers", () => {
+    let system = new System("sys1", "testSystem");
+
+    let serviceA = new Service("s1", "service A", getEmptyMetaData())
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    endpointA.setPropertyValue("allow_access_to", ["a1", "a2"]);
+    serviceA.addEndpoint(endpointA);
+
+    let serviceB = new Service("s2", "service B", getEmptyMetaData())
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    endpointB.setPropertyValue("allow_access_to", ["a1"]);
+    serviceB.addEndpoint(endpointB);
+
+    let serviceC = new Service("s3", "service C", getEmptyMetaData())
+    serviceC.setPropertyValue("account", "a1");
+
+    let linkCA = new Link("l1", serviceC, endpointA);
+    let linkCB = new Link("l2", serviceC, endpointB);
+
+    system.addEntities([serviceA, serviceB, serviceC]);
+    system.addEntities([linkCA, linkCB]);
+
+    let measureValue = componentMeasureImplementations["accessRestrictedToCallers"]({ entity: serviceA, system: system });
+    expect(measureValue).toEqual(0.5);
+})
+
+test("accessRestrictedToCallers - allow all", () => {
+    let system = new System("sys1", "testSystem");
+
+    let serviceA = new Service("s1", "service A", getEmptyMetaData())
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    endpointA.setPropertyValue("allow_access_to", []);
+    serviceA.addEndpoint(endpointA);
+
+    system.addEntities([serviceA]);
+
+    let measureValue = componentMeasureImplementations["accessRestrictedToCallers"]({ entity: serviceA, system: system });
+    expect(measureValue).toEqual(0);
+})
+
+test("accessRestrictedToCallers - external endpoint", () => {
+    let system = new System("sys1", "testSystem");
+
+    let serviceA = new Service("s1", "service A", getEmptyMetaData())
+    let endpointA = new ExternalEndpoint("e1", "endpoint 1", getEmptyMetaData());
+    endpointA.setPropertyValue("allow_access_to", ["external account"]);
+    serviceA.addEndpoint(endpointA);
+
+    system.addEntities([serviceA]);
+
+    let measureValue = componentMeasureImplementations["accessRestrictedToCallers"]({ entity: serviceA, system: system });
+    expect(measureValue).toEqual(1);
+})
+
+test("ratioOfDelegatedAuthentication", () => {
+    let system = new System("sys1", "testSystem");
+
+    let serviceA = new Service("s1", "service A", getEmptyMetaData())
+
+    let backingService = new BackingService("bs1", "auth service", getEmptyMetaData());
+    backingService.setPropertyValue("providedFunctionality", "authentication/authorization");
+
+    serviceA.setAuthenticationBy = backingService;
+
+    system.addEntities([serviceA, backingService]);
+
+    let measureValue = componentMeasureImplementations["ratioOfDelegatedAuthentication"]({ entity: serviceA, system: system });
     expect(measureValue).toEqual(1);
 })

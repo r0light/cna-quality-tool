@@ -1683,3 +1683,71 @@ test("ratioOfUniqueAccountUsage", () => {
     expect(measureValue).toEqual(0.6);
 })
 
+test("accessRestrictedToCallers", () => {
+    let system = new System("sys1", "testSystem");
+
+    let serviceA = new Service("s1", "service A", getEmptyMetaData())
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    endpointA.setPropertyValue("allow_access_to", ["a1", "a2"]);
+    serviceA.addEndpoint(endpointA);
+
+    let serviceB = new Service("s2", "service B", getEmptyMetaData())
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    endpointB.setPropertyValue("allow_access_to", ["a1"]);
+    serviceB.addEndpoint(endpointB);
+
+    let serviceC = new Service("s3", "service C", getEmptyMetaData())
+    serviceC.setPropertyValue("account", "a1");
+
+    let serviceD = new Service("s4", "service D", getEmptyMetaData())
+    let endpointD = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    endpointD.setPropertyValue("allow_access_to", []);
+    serviceD.addEndpoint(endpointD);
+
+    let linkCA = new Link("l1", serviceC, endpointA);
+    let linkCB = new Link("l2", serviceC, endpointB);
+    let linkAD = new Link("l3", serviceA, endpointD);
+
+    let requestTrace = new RequestTrace("rt1", "request trace", getEmptyMetaData());
+    requestTrace.setLinks = [[linkCA], [linkAD]];
+
+    system.addEntities([serviceA, serviceB, serviceC, serviceD]);
+    system.addEntities([linkCA, linkCB, linkAD]);
+    system.addEntities([requestTrace])
+
+    let measureValue = requestTraceMeasureImplementations["accessRestrictedToCallers"]({ entity: requestTrace, system: system });
+    expect(measureValue).toEqual(0.25);
+})
+
+
+
+test("ratioOfDelegatedAuthentication", () => {
+    let system = new System("sys1", "testSystem");
+
+    let authService = new BackingService("auth1", "auth service", getEmptyMetaData());
+    authService.setPropertyValue("providedFunctionality", "authentication/authorization");
+
+    let serviceA = new Service("s1", "service A", getEmptyMetaData())
+    serviceA.setAuthenticationBy = authService;
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA);
+
+    let serviceB = new Service("s2", "service B", getEmptyMetaData())
+    serviceB.setAuthenticationBy = authService;
+
+    let serviceC = new Service("s3", "service C", getEmptyMetaData())
+    let endpointC = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+
+    let linkAC = new Link("l1", serviceA, endpointC);
+
+    let requestTrace = new RequestTrace("rt1", "request trace", getEmptyMetaData());
+    requestTrace.setLinks = [[linkAC]];
+
+    system.addEntities([authService, serviceA, serviceB, serviceC]);
+    system.addEntities([linkAC]);
+    system.addEntity(requestTrace);
+
+    let measureValue = requestTraceMeasureImplementations["ratioOfDelegatedAuthentication"]({ entity: requestTrace, system: system });
+    expect(measureValue).toEqual(0.5);
+})

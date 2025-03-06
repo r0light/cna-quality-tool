@@ -2,7 +2,7 @@ import { BackingService, BrokerBackingService, Component, DeploymentMapping, Inf
 import { Calculation, CalculationParameters } from "../../quamoco/Measure";
 import { average, median, lowest, partition } from "./general-functions";
 import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, CUSTOM_SOFTWARE_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, EVENT_SOURCING_KIND, getEndpointKindWeight, getUsageRelationWeight, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MESSAGE_BROKER_KIND, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SEND_EVENT_ENDPOINT_KIND, SERVICE_MESH_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND, VAULT_KIND } from "../../specifications/featureModel";
-import { calculateRatioOfEndpointsSupportingSsl, calculateRatioOfExternalEndpointsSupportingTls, numberOfAsynchronousEndpointsOfferedByAService, numberOfComponentsAComponentIsLinkedTo, numberOfSynchronousEndpointsOfferedByAService, providesHealthAndReadinessEndpoints, serviceCouplingBasedOnEndpointEntropy } from "./componentMeasures";
+import { calculateRatioOfEndpointsSupportingSsl, calculateRatioOfExternalEndpointsSupportingTls, componentMeasureImplementations, numberOfAsynchronousEndpointsOfferedByAService, numberOfComponentsAComponentIsLinkedTo, numberOfSynchronousEndpointsOfferedByAService, providesHealthAndReadinessEndpoints, serviceCouplingBasedOnEndpointEntropy } from "./componentMeasures";
 import { numberOfCyclesInRequestTraces, requestTraceComplexity } from "./requestTraceMeasures";
 import { supportsMonitoring as infrastructureSupportsMonitoring } from "./infrastructureMeasures";
 import { supportsMonitoring as componentSupportsMonitoring } from "./componentMeasures";
@@ -1782,6 +1782,46 @@ export const secretsStoredInVault: Calculation = (parameters: CalculationParamet
     return onlyStoredInVault.size / allSecrets.length;
 }
 
+export const accessRestrictedToCallers: Calculation = (parameters: CalculationParameters<System>) => {
+
+    let allComponents = [...parameters.entity.getComponentEntities.entries()];
+
+    if (allComponents.length == 0) {
+        return "n/a";
+    }
+
+    let accessRestrictedToCallersPerComponent = allComponents.map(([componentId, component]) => componentMeasureImplementations["accessRestrictedToCallers"]({ entity: component, system: parameters.system }));
+
+    let validValues = accessRestrictedToCallersPerComponent.filter(value => value !== "n/a"); 
+
+    if (validValues.length === 0) {
+        return "n/a"
+    } else {
+        return average(validValues as number[]);
+    }
+}
+
+
+export const ratioOfDelegatedAuthentication: Calculation = (parameters: CalculationParameters<System>) => {
+
+    let allComponents = [...parameters.entity.getComponentEntities.entries()].filter(([componentId, component]) => {
+        return component.constructor.name !== BackingService.name || component.getProperty("providedFunctionality").value !== "authentication/authorization" 
+    })
+
+    if (allComponents.length === 0) {
+        return "n/a";
+    }
+
+    return average(allComponents.map(([componentId, component]) => {
+        if (component.getAuthenticationBy) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }));
+
+}
+
 export const systemMeasureImplementations: { [measureKey: string]: Calculation } = {
     "serviceReplicationLevel": serviceReplicationLevel,
     "medianServiceReplication": medianServiceReplication,
@@ -1861,5 +1901,7 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation }
     "suitablyReplicatedStatefulService": suitablyReplicatedStatefulService,
     "ratioOfUniqueAccountUsage": ratioOfUniqueAccountUsage,
     "ratioOfNonCustomBackingServices": ratioOfNonCustomBackingServices,
-    "secretsStoredInVault": secretsStoredInVault
+    "secretsStoredInVault": secretsStoredInVault,
+    "accessRestrictedToCallers": accessRestrictedToCallers,
+    "ratioOfDelegatedAuthentication": ratioOfDelegatedAuthentication
 }

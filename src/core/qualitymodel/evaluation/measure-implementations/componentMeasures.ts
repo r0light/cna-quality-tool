@@ -1,6 +1,6 @@
 
 import { ref } from "vue";
-import { BackingService, BrokerBackingService, Component, Endpoint, ProxyBackingService, Service, StorageBackingService, System } from "../../../entities.js";
+import { BackingService, BrokerBackingService, Component, Endpoint, ExternalEndpoint, ProxyBackingService, Service, StorageBackingService, System } from "../../../entities.js";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure.js";
 import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, CUSTOM_SOFTWARE_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, PROTOCOLS_SUPPORTING_TLS, SERVICE_MESH_KIND, SYNCHRONOUS_ENDPOINT_KIND, VAULT_KIND } from "../../specifications/featureModel.js";
 import { average } from "./general-functions.js";
@@ -703,6 +703,58 @@ export const secretsStoredInVault: Calculation = (parameters: CalculationParamet
     return (secretsInVault.size / referencedSecrets.length);
 }
 
+export const accessRestrictedToCallers: Calculation = (parameters: CalculationParameters<Component>) => {
+
+    let endpoints = parameters.entity.getEndpointEntities.concat(parameters.entity.getExternalEndpointEntities);
+
+    if (endpoints.length === 0) {
+        return "n/a";
+    }
+
+    let calledByAccount: Map<string, Set<string>> = new Map();
+    endpoints.forEach(endpoint => {
+        calledByAccount.set(endpoint.getId, new Set())
+        if (endpoint.constructor.name === ExternalEndpoint.name) {
+            calledByAccount.get(endpoint.getId).add("external account");
+        }
+    });
+    for (const link of parameters.system.getIncomingLinksOfComponent(parameters.entity.getId)) {
+        if (link.getSourceEntity.getProperty("account")) {
+            calledByAccount.get(link.getTargetEndpoint.getId).add(link.getSourceEntity.getProperty("account").value);
+        }
+    }
+
+    let restrictiveness = [];
+
+    for (const endpoint of endpoints) {
+        let allowed = endpoint.getProperty("allow_access_to");
+        if (allowed && allowed.value) {
+            if (allowed.value.length === 0) {
+                restrictiveness.push(0);
+            } else {
+                let allowedSet = new Set(allowed.value);
+                let endpointRestrictiveness = 1 - ((allowedSet.difference(calledByAccount.get(endpoint.getId)).size) / allowedSet.size);
+                restrictiveness.push(endpointRestrictiveness);
+            }
+        }
+    }
+
+    return average(restrictiveness);
+}
+
+export const ratioOfDelegatedAuthentication: Calculation = (parameters: CalculationParameters<Component>) => {
+
+    if (parameters.entity.constructor.name === BackingService.name && parameters.entity.getProperty("providedFunctionality").value === "authentication/authorization" ) {
+        return "n/a";
+    }
+
+    if (parameters.entity.getAuthenticationBy) {
+        return 1;
+    } else {
+        return 0;
+    }
+
+}
 
 export const componentMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
@@ -750,6 +802,8 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "configurationExternalization": configurationExternalization,
     "suitablyReplicatedStatefulService": suitablyReplicatedStatefulService,
     "ratioOfNonCustomBackingServices": ratioOfNonCustomBackingServices,
-    "secretsStoredInVault": secretsStoredInVault
+    "secretsStoredInVault": secretsStoredInVault,
+    "accessRestrictedToCallers": accessRestrictedToCallers,
+    "ratioOfDelegatedAuthentication": ratioOfDelegatedAuthentication
 }
 
