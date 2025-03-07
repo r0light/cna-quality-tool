@@ -3,9 +3,8 @@
 import * as fs from 'fs';
 import { getQualityModel } from './QualityModelInstance.js';
 import { ImpactType } from './quamoco/Impact.js';
-import { BackingData, BackingService, BrokerBackingService, Component, DataAggregate, DeploymentMapping, Endpoint, ExternalEndpoint, getBackingDataProperties, getBackingServiceProperties, getBrokerBackingServiceProperties, getComponentProperties, getDataAggregateProperties, getDeploymentMappingProperties, getEndpointProperties, getExternalEndpointProperties, getInfrastructureProperties, getLinkProperties, getNetworkProperties, getProxyBackingServiceProperties, getRequestTraceProperties, getServiceProperties, getStorageBackingServiceProperties, Infrastructure, Link, Network, ProxyBackingService, RequestTrace, Service, StorageBackingService } from '../entities.js';
-import { EntityProperty } from '../common/entityProperty.js';
-import { prop } from 'vue-class-component';
+import { getBackingDataProperties, getBackingServiceProperties, getBrokerBackingServiceProperties, getComponentProperties, getDataAggregateProperties, getDeploymentMappingProperties, getEndpointProperties, getExternalEndpointProperties, getInfrastructureProperties, getLinkProperties, getNetworkProperties, getProxyBackingServiceProperties, getRequestTraceProperties, getServiceProperties, getStorageBackingServiceProperties, Infrastructure, Link, Network, ProxyBackingService, RequestTrace, Service, StorageBackingService } from '../entities.js';
+import { EntityProperty, SelectEntityProperty } from '../common/entityProperty.js';
 
 const qualityModel = getQualityModel();
 
@@ -33,6 +32,8 @@ const outerDir = "latex-generated-qualitymodel";
 const innerDir = "factors";
 
 fs.mkdirSync(`./${outerDir}/${innerDir}`, { recursive: true });
+
+// Product Factors
 
 for (const factor of qualityModel.productFactors) {
 
@@ -77,6 +78,7 @@ fs.writeFile(`./${outerDir}/factors-frame.tex`, `${frameOutput}`, (err) => {
     }
 })
 
+// Quality Aspects
 
 let qaOutput = "";
 
@@ -104,33 +106,12 @@ fs.writeFile(`./${outerDir}/qualityAspects.tex`, `${qaOutput}`, (err) => {
     }
 })
 
+// Entitites
+
 let entitiesTableOutput = "";
-let entitiesListingOutput = "";
 
 for (const entity of qualityModel.entities) {
     entitiesTableOutput += `        ${entity.getName} & ${entity.getDescription} & ${entity.getRelation.type} ${entity.getRelation.target}\\\\\ \\hline \n`;
-
-    let formalSpecification = entity.getFormalSpecification
-        .replaceAll("∪", "\\cup ")
-        .replaceAll("⊆", "\\subseteq")
-        .replaceAll("→", "\\rightarrow")
-        .replaceAll("ℕ", "\\mathbb{N}")
-        .replaceAll("∈", "\\in")
-        .replaceAll("⨯", "\\times ")
-        .replaceAll("\t", "")
-        .replaceAll("\n", "$\n$");
-
-    let latexSpec = "";
-    let parts = formalSpecification.split("\n");
-
-    if (parts.length > 1) {
-        parts[0] = `${parts[0]} #${entity.getName}`;
-        latexSpec = `$${parts.join("\n")}$\n`
-    } else {
-        latexSpec = `$${formalSpecification}$ #${entity.getName}\n`;
-    }
-
-    entitiesListingOutput += latexSpec;
 }
 
 entitiesTableOutput = `
@@ -145,18 +126,107 @@ entitiesTableOutput = `
 \\end{table}
 `;
 
-entitiesListingOutput = `
-\\begin{lstlisting}[caption={Formal specifiation of entities},label=lst:results:qualitymodel:entities,mathescape=true]
-${entitiesListingOutput}
+function prepareForTex(formalSpec: string) {
+    return formalSpec.replaceAll("_", "\\_")
+                     .replaceAll("{", "\\{")
+                     .replaceAll("}", "\\}")
+                     .replaceAll("∪", "\\cup ")
+                     .replaceAll("⊆", "\\subseteq")
+                     .replaceAll("→", "\\rightarrow")
+                     .replaceAll("ℕ", "\\mathbb{N}")
+                     .replaceAll("∈", "\\in")
+                     .replaceAll("∉", "\\notin")
+                     .replaceAll("⨯", "\\times ")
+                     .replaceAll("≠", "\\neq")
+                     .replaceAll("\t", "")
+                     .replaceAll("\n", "$\n$")
+                     .replaceAll("<sub>", "_{")
+                     .replaceAll("</sub>", "}");
+}
+
+let entitiesListing1Output = "";
+
+for (const entity of qualityModel.entities.filter(entity => ["system","dataAggregate","backingData","network"].includes(entity.getKey))) {
+
+    let formalSpecification = prepareForTex(entity.getFormalSpecification);
+ 
+    let latexSpec = "";
+    let parts = formalSpecification.split("\n");
+
+    if (parts.length > 1) {
+        latexSpec = `#${entity.getName}\n`;
+        latexSpec += `$${parts.join("\n")}$\n\n`
+    } else {
+        latexSpec = `#${entity.getName}\n$${formalSpecification}$ \n`;
+    }
+
+    entitiesListing1Output += latexSpec;
+}
+
+entitiesListing1Output = `
+\\begin{lstlisting}[float=h,caption={Formal specifiation of entities - I},label=lst:results:qualitymodel:entities1,mathescape=true]
+${entitiesListing1Output}
+\\end{lstlisting}
+`;
+
+let entitiesListing2Output = "";
+
+for (const entity of qualityModel.entities.filter(entity => ["component","service","backingService","storageBackingService","proxyBackingService","brokerBackingService","endpoint","externalEndpoint"].includes(entity.getKey))) {
+
+    let formalSpecification = prepareForTex(entity.getFormalSpecification);
+ 
+    let latexSpec = "";
+    let parts = formalSpecification.split("\n");
+
+    if (parts.length > 1) {
+        latexSpec = `#${entity.getName}\n`;
+        latexSpec += `$${parts.join("\n")}$\n\n`
+    } else {
+        latexSpec = `#${entity.getName}\n$${formalSpecification}$ \n`;
+    }
+
+    entitiesListing2Output += latexSpec;
+}
+
+entitiesListing2Output = `
+\\begin{lstlisting}[float=h,caption={Formal specifiation of entities - II},label=lst:results:qualitymodel:entities2,mathescape=true]
+${entitiesListing2Output}
+\\end{lstlisting}
+`;
+
+let entitiesListing3Output = "";
+
+for (const entity of qualityModel.entities.filter(entity => ["link","requestTrace","infrastructure","deploymentMapping"].includes(entity.getKey))) {
+
+    let formalSpecification = prepareForTex(entity.getFormalSpecification);
+ 
+    let latexSpec = "";
+    let parts = formalSpecification.split("\n");
+
+    if (parts.length > 1) {
+        latexSpec = `#${entity.getName}\n`;
+        latexSpec += `$${parts.join("\n")}$\n\n`
+    } else {
+        latexSpec = `#${entity.getName}\n$${formalSpecification}$ \n`;
+    }
+
+    entitiesListing3Output += latexSpec;
+}
+
+entitiesListing3Output = `
+\\begin{lstlisting}[float=h,caption={Formal specifiation of entities - III},label=lst:results:qualitymodel:entities3,mathescape=true]
+${entitiesListing3Output}
 \\end{lstlisting}
 `;
 
 
-fs.writeFile(`./${outerDir}/entities.tex`, `${entitiesTableOutput}\n${entitiesListingOutput}`, (err) => {
+fs.writeFile(`./${outerDir}/entities.tex`, `${entitiesTableOutput}\n${entitiesListing1Output}\n${entitiesListing2Output}\n${entitiesListing3Output}`, (err) => {
     if (err) {
         console.error(`Could not export entities to LaTeX`)
     }
 })
+
+// Entity properties
 
 let componentPropertyKeys = getComponentProperties().map(property => property.getKey);
 let endpointPropertyKeys = getEndpointProperties().map(property => property.getKey);
@@ -224,6 +294,8 @@ let entityProperties: { name: string, properties: EntityProperty[] }[] = [
 ];
 
 
+//TODO per entity?
+
 let entityPropertiesOutput = "";
 
 for (const properties of entityProperties) {
@@ -232,8 +304,12 @@ for (const properties of entityProperties) {
         entityPropertiesOutput += `\\multirow[b]{${noOfProperties}}{*}{${properties.name}}`;
     
         for (const [i,property] of properties.properties.entries()) {
-            let lineType = i === noOfProperties-1 ? "\\hline" : "\\cline{2-5}";
-            entityPropertiesOutput += `& ${property.getKey} & ${property.getName} &  ${property.getDescription} & ${property.getDataType}  \\\\\ ${lineType}\n`;
+            let lineType = i === noOfProperties-1 ? "\\hline" : "\\cline{2-4}";
+
+            let dataTypeDesc = property.getDataType === "select" ? (property as SelectEntityProperty).getOptions.map(option => option.text).join(", ") : property.getDataType;
+
+
+            entityPropertiesOutput += `& ${property.getKey}  &  ${property.getDescription} & ${dataTypeDesc}  \\\\\ ${lineType}\n`;
         }
     }
 }
@@ -243,8 +319,8 @@ let entityPropertiesTableOutput = `
 	\\caption{Entities properties}
 	\\label{tab:results:qualitymodel:entity-properties}
 	\\fontsize{8}{10}\\selectfont
-	\\begin{tabularx}{\\linewidth}{lllXl}
-		\\textbf{Entity} & \\textbf{Property key}         & \\textbf{Property name}  & \\textbf{Description} & \\textbf{Value}   \\\\\ \\hline
+	\\begin{tabularx}{\\linewidth}{llXl}
+		\\textbf{Entity} & \\textbf{Property key}         & \\textbf{Description} & \\textbf{Value}   \\\\\ \\hline
         ${entityPropertiesOutput.replaceAll("_", "\\_")}
 	\\end{tabularx}%
 \\end{table}

@@ -57,7 +57,7 @@ export const entities: {[key in ENTITIES]: EntitySpec}  = {
         },
     "service": {
         "name": "Service",
-        "description": "A component that implements a business functionality",
+        "description": "A component that implements a business functionality.",
         "relation": {"type": "is-a", "target": ENTITIES.COMPONENT},
         "symbol": "S",
         "formal": `\tS ⊆ C
@@ -65,7 +65,7 @@ export const entities: {[key in ENTITIES]: EntitySpec}  = {
     },
     "backingService": {
         "name": "Backing Service",
-        "description": "A component providing general functionalities needed by services, for example, messaging, logging",
+        "description": "A component providing general functionalities needed by services, for example, messaging, logging.",
         "relation": {"type": "is-a", "target": ENTITIES.COMPONENT},
         "symbol": "BS",
         "formal": `\tBS ⊆ C
@@ -73,7 +73,7 @@ export const entities: {[key in ENTITIES]: EntitySpec}  = {
     },
     "storageBackingService": {
         "name": "Storage Backing Service",
-        "description": "An explicitly stateful component used to store business data, e.g., a database",
+        "description": "An explicitly stateful component used to store business data, e.g., a database.",
         "relation": {"type": "is-a", "target": ENTITIES.COMPONENT},
         "symbol": "SBS",
         "formal": `\tSBS ⊆ C
@@ -81,7 +81,7 @@ export const entities: {[key in ENTITIES]: EntitySpec}  = {
     },
     "proxyBackingService": {
         "name": "Proxy Backing Service",
-        "description": "A component which can act as a proxy for all kinds of communication (links) between other components",
+        "description": "A component which can act as a proxy for all kinds of communication (links) between other components.",
         "relation": {"type": "is-a", "target": ENTITIES.COMPONENT},
         "symbol": "PBS",
         "formal": `\tPBS ⊆ C
@@ -89,7 +89,7 @@ export const entities: {[key in ENTITIES]: EntitySpec}  = {
     },
     "brokerBackingService": {
         "name": "Broker Backing Service",
-        "description": "A component which acts as a communication broker, for example a message broker or an event store",
+        "description": "A component which acts as a communication broker, for example a message broker or an event store.",
         "relation": {"type": "is-a", "target": ENTITIES.COMPONENT},
         "symbol": "BBS",
         "formal": `\tBBS ⊆ C
@@ -97,7 +97,7 @@ export const entities: {[key in ENTITIES]: EntitySpec}  = {
     },
     "endpoint": {
         "name": "Endpoint",
-        "description": "A communication endpoint, for example a REST endpoint, message producer/listener",
+        "description": "A communication endpoint, for example a REST endpoint, message producer/listener.",
         "relation": {"type": "part-of", "target": ENTITIES.COMPONENT},
         "symbol": "E",
         "formal": `\tE := (id,name,props,RDA)
@@ -106,7 +106,7 @@ export const entities: {[key in ENTITIES]: EntitySpec}  = {
     },
     "externalEndpoint": {
         "name": "External Endpoint",
-        "description": "An endpoint which is explicitly publicly available",
+        "description": "An endpoint which is explicitly publicly available.",
         "relation": {"type": "is-a", "target": ENTITIES.ENDPOINT},
         "symbol": "EE",
         "formal": "\tEE ⊆ E"
@@ -124,7 +124,7 @@ export const entities: {[key in ENTITIES]: EntitySpec}  = {
     },
     "infrastructure": {
         "name": "Infrastructure",
-        "description": "The technical foundation where components are deployed, e.g., a container orchestration system",
+        "description": "The technical foundation where components are deployed, e.g., a container orchestration system.",
         "relation": {"type": "part-of", "target": ENTITIES.SYSTEM},
         "symbol": "I",
         "formal": `\tI := (id,name,props,RBD,RN)
@@ -145,7 +145,7 @@ export const entities: {[key in ENTITIES]: EntitySpec}  = {
     },
     "requestTrace": {
         "name": "Request Trace",
-        "description": "The whole resulting trace of a service invocation from the outside that means when an external endpoint is invoked. A request trace includes a collection of components and links",
+        "description": "The whole resulting trace of a service invocation from the outside that means when an external endpoint is invoked. A request trace includes a collection of components and links.",
         "relation": {"type": "part-of", "target": ENTITIES.SYSTEM},
         "symbol": "RT",
         "formal": `\tRT := (id,name,props,involvedLinks,referencedEndpoint)
@@ -155,7 +155,7 @@ export const entities: {[key in ENTITIES]: EntitySpec}  = {
     },
     "dataAggregate": {
         "name": "Data Aggregate",
-        "description": "An aggregate which needs to be persisted and is used by services, e.g., Business objects",
+        "description": "An aggregate which needs to be persisted and is used by services, e.g., business objects.",
         "relation": {"type": "part-of", "target": ENTITIES.SYSTEM},
         "symbol": "DA",
         "formal": `\tDA := (id, name, props)
