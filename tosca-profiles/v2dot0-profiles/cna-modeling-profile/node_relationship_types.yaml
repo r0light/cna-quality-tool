@@ -510,7 +510,7 @@ node_types:
       # Allow assigning exactly one Endpoint Capability
       endpoint:
         type: cna-modeling.capabilities.Endpoint
-        count_range: [1, 1]
+        #count_range: [1, 1]
     requirements:
       # Allow the definition of Data Aggregate usage
       - uses_data:
@@ -526,7 +526,7 @@ node_types:
       # Allow assigning exactly one External Endpoint Capability
       external_endpoint:
         type: cna-modeling.capabilities.Endpoint
-        count_range: [1, 1]
+        #count_range: [1, 1]
     requirements:
       # Allow the definition of Data Aggregate usage
       - uses_data:

@@ -24,6 +24,7 @@ import { BROKER_BACKING_SERVICE_TOSCA_KEY } from '../entities/brokerBackingServi
 import { NETWORK_TOSCA_KEY } from '../entities/network';
 import { valHooks } from 'jquery';
 import { EntityPropertyKey } from '@/totypa/parsedProfiles/v2dot0-profiles/propertyKeys';
+import { parseProperties } from '../common/entityProperty';
 
 const MATCH_UNDERSCORE = new RegExp(/_/g);
 const MATCH_FIRST_CHARACTER = new RegExp(/^./g);
@@ -209,7 +210,8 @@ class ToscaToEntitesConverter {
                             value.deploy_path ? value.deploy_path : "",
                             value.artifact_version ? value.artifact_version : "",
                             value.checksum ? value.checksum : "",
-                            value.checksum_algorithm ? value.checksum_algorithm : ""
+                            value.checksum_algorithm ? value.checksum_algorithm : "",
+                            value.properties ? parseProperties(value.properties) : [] //TODO
                         ))
                     }
                 }
@@ -368,7 +370,8 @@ class ToscaToEntitesConverter {
                             value.deploy_path ? value.deploy_path : "",
                             value.artifact_version ? value.artifact_version : "",
                             value.checksum ? value.checksum : "",
-                            value.checksum_algorithm ? value.checksum_algorithm : ""
+                            value.checksum_algorithm ? value.checksum_algorithm : "",
+                            value.properties ? parseProperties(value.properties) : [] //TODO
                         ))
                     }
                 }

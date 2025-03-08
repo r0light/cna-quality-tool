@@ -436,6 +436,7 @@ class SystemEntityManager {
                 artifactData.artifact_version,
                 artifactData.checksum,
                 artifactData.checksum_algorithm,
+                artifactData.properties
             )
             entity.setArtifact(artifactData.key, artifact);
         }
@@ -584,6 +585,7 @@ class SystemEntityManager {
                 artifactData.artifact_version,
                 artifactData.checksum,
                 artifactData.checksum_algorithm,
+                artifactData.properties
             )
             infrastructureEntity.setArtifact(artifactData.key, artifact);
         }

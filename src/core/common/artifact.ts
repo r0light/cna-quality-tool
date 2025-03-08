@@ -3,6 +3,8 @@
 // TODO parse artifact types from TOSCA profiles
 
 import { all_profiles } from "@/totypa/parsedProfiles/v2dot0-profiles/all_profiles";
+import { EntityProperty } from "./entityProperty";
+import { EntityPropertyKey } from "@/totypa/parsedProfiles/v2dot0-profiles/propertyKeys";
 
 function getAvailableArtifactTypes() {
 
@@ -11,6 +13,10 @@ function getAvailableArtifactTypes() {
             return typeKey;
         })
     })
+}
+
+function getArtifactProperties() {
+    return [];
 }
 
 
@@ -24,6 +30,7 @@ class Artifact {
     #artifactVersion: string;
     #checksum: string;
     #checksumAlgorithm: string;
+    #properties: EntityProperty[];
 
     constructor(
         type: string,
@@ -34,6 +41,7 @@ class Artifact {
         artifactVersion: string,
         checksum: string,
         checksumAlgorithm: string,
+        properties: EntityProperty[]
     ) {
         this.#type = type;
         this.#file = file;
@@ -43,6 +51,7 @@ class Artifact {
         this.#artifactVersion = artifactVersion;
         this.#checksum = checksum;
         this.#checksumAlgorithm = checksumAlgorithm;
+        this.#properties = properties;
     }
 
     getType(): string {
@@ -137,6 +146,24 @@ class Artifact {
 
 
     }
+
+    setPropertyValue(propertyKey: EntityPropertyKey, propertyValue: any) {
+        let propertyToSet = (this.#properties.find(property => property.getKey === propertyKey))
+        if (propertyToSet) {
+            propertyToSet.value = propertyValue
+        } else {
+            throw new Error(`Property with key ${propertyKey} not found in ${this.constructor}`)
+        }
+    }
+
+    getProperty(propertyKey: EntityPropertyKey) {
+        return this.#properties.find(property => property.getKey === propertyKey);
+    }
+
+    getProperties() {
+        return this.#properties;
+    }
+
 
 }
 

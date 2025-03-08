@@ -21,7 +21,15 @@ export const cna_modeling_profile: TOSCA_File = {
       "file_ext": [
         "yaml",
         "yml"
-      ]
+      ],
+      "properties": {
+        "provider_specific": {
+          "type": "boolean",
+          "description": "Whether this artifact is (cloud) provider-specific or not.",
+          "required": true,
+          "default": false
+        }
+      }
     },
     "Implementation.Java": {
       "description": "Artifact type for a Java archive which might be executable\n",
@@ -1813,11 +1821,7 @@ export const cna_modeling_profile: TOSCA_File = {
       },
       "capabilities": {
         "endpoint": {
-          "type": "cna-modeling.capabilities.Endpoint",
-          "count_range": [
-            1,
-            1
-          ]
+          "type": "cna-modeling.capabilities.Endpoint"
         }
       },
       "requirements": [
@@ -1916,18 +1920,10 @@ export const cna_modeling_profile: TOSCA_File = {
       },
       "capabilities": {
         "endpoint": {
-          "type": "cna-modeling.capabilities.Endpoint",
-          "count_range": [
-            1,
-            1
-          ]
+          "type": "cna-modeling.capabilities.Endpoint"
         },
         "external_endpoint": {
-          "type": "cna-modeling.capabilities.Endpoint",
-          "count_range": [
-            1,
-            1
-          ]
+          "type": "cna-modeling.capabilities.Endpoint"
         }
       },
       "requirements": [

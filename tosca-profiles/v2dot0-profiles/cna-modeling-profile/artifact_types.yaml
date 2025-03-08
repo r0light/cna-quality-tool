@@ -14,6 +14,12 @@ artifact_types:
     description: >
       A Kubernetes resource (like Deployment, Service, etc) which is described in a file
     file_ext: [ yaml, yml ]
+    properties:
+      provider_specific:
+        type: boolean
+        description: "Whether this artifact is (cloud) provider-specific or not."
+        required: true
+        default: false
 
   Implementation.Java:
     description: >

@@ -45,7 +45,7 @@ export const entities: {[key in ENTITIES]: EntitySpec}  = {
         "relation": {"type": "part-of", "target": ENTITIES.SYSTEM},
         "symbol": "C",
         "formal": `\tC := (id,name,props,providedEndpoints,RDA,RBD,RN,externalIngressProxiedBy,ingressProxiedBy,egressProxiedBy,addressResolutionBy)
-        props<sub>C</sub> = {${getComponentProperties().map(property => property.getKey).join(",")}}
+        props<sub>C</sub> := {${getComponentProperties().map(property => property.getKey).join(",")}}
         providedEndpoints ⊆ E
         RDA ⊆ C ⨯ DA
         RBD ⊆ C ⨯ BD

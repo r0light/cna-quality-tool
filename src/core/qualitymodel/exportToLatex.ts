@@ -319,7 +319,7 @@ let entityPropertiesTableOutput = `
 	\\caption{Entities properties}
 	\\label{tab:results:qualitymodel:entity-properties}
 	\\fontsize{8}{10}\\selectfont
-	\\begin{tabularx}{\\linewidth}{llXl}
+	\\begin{tabularx}{\\linewidth}{llXX}
 		\\textbf{Entity} & \\textbf{Property key}         & \\textbf{Description} & \\textbf{Value}   \\\\\ \\hline
         ${entityPropertiesOutput.replaceAll("_", "\\_")}
 	\\end{tabularx}%
