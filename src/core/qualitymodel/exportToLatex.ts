@@ -171,7 +171,7 @@ ${entitiesListing1Output}
 
 let entitiesListing2Output = "";
 
-for (const entity of qualityModel.entities.filter(entity => ["component","service","backingService","storageBackingService","proxyBackingService","brokerBackingService","endpoint","externalEndpoint"].includes(entity.getKey))) {
+for (const entity of qualityModel.entities.filter(entity => ["component","service","backingService","storageBackingService","proxyBackingService","brokerBackingService","endpoint","externalEndpoint","artifact"].includes(entity.getKey))) {
 
     let formalSpecification = prepareForTex(entity.getFormalSpecification);
  
@@ -290,7 +290,7 @@ let entityProperties: { name: string, properties: EntityProperty[] }[] = [
     {
         name: "Network",
         properties: getNetworkProperties()
-    }
+    },
 ];
 
 

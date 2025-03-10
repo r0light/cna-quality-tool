@@ -20,7 +20,8 @@ export enum ENTITIES {
     REQUEST_TRACE = "requestTrace",
     DATA_AGGREGATE = "dataAggregate",
     BACKING_DATA = "backingData",
-    NETWORK = "network"
+    NETWORK = "network",
+    ARTIFACT = "artifact"
 };
 
 type EntitySpec =  {
@@ -44,9 +45,10 @@ export const entities: {[key in ENTITIES]: EntitySpec}  = {
         "description": "An abstract entity for representing distinguishable executable parts of the system that provide certain functionalities. It can for example be a service or a certain cloud resource. Regarding its granularity, it should, generally speaking, correspond to something that can be run as an OS process.",
         "relation": {"type": "part-of", "target": ENTITIES.SYSTEM},
         "symbol": "C",
-        "formal": `\tC := (id,name,props,providedEndpoints,RDA,RBD,RN,externalIngressProxiedBy,ingressProxiedBy,egressProxiedBy,addressResolutionBy)
+        "formal": `\tC := (id,name,props,providedEndpoints,artifacts,RDA,RBD,RN,externalIngressProxiedBy,ingressProxiedBy,egressProxiedBy,addressResolutionBy)
         props<sub>C</sub> := {${getComponentProperties().map(property => property.getKey).join(",")}}
         providedEndpoints ⊆ E
+        artifacts ⊆ A
         RDA ⊆ C ⨯ DA
         RBD ⊆ C ⨯ BD
         RN ⊆ C ⨯ N
@@ -127,8 +129,9 @@ export const entities: {[key in ENTITIES]: EntitySpec}  = {
         "description": "The technical foundation where components are deployed, e.g., a container orchestration system.",
         "relation": {"type": "part-of", "target": ENTITIES.SYSTEM},
         "symbol": "I",
-        "formal": `\tI := (id,name,props,RBD,RN)
+        "formal": `\tI := (id,name,props,artifacts,RBD,RN)
         props<sub>I</sub> := {${getInfrastructureProperties().map(property => property.getKey).join(",")}}
+        artifacts ⊆ A
         RBD ⊆ I ⨯ BD
         RN ⊆ I ⨯ N`
     },
@@ -176,6 +179,13 @@ export const entities: {[key in ENTITIES]: EntitySpec}  = {
         "symbol": "N",
         "formal": `\tN := (id, name, props)
         props<sub>N</sub> := {${getNetworkProperties().map(property => property.getKey).join(",")}}`
+    },
+    "artifact": {
+        "name": "Artifact",
+        "description": "An artifact associcated with a component or an infrastructure entity that enables the actual deployment or execution of that entity. For example, a Jar-File or a Container Image",
+        "relation": {"type": "part-of", "target": ENTITIES.COMPONENT},
+        "symbol": "A",
+        "formal": `\tA := (id, type, props)`
     }
 };
 
