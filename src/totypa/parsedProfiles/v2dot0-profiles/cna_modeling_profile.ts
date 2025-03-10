@@ -29,6 +29,17 @@ export const cna_modeling_profile: TOSCA_File = {
           "type": "text",
           "description": "If the artifact is based on a standard, specify it here.",
           "required": true,
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "none",
+                "OCI",
+                "OpenAPI",
+                "other"
+              ]
+            ]
+          },
           "default": "none"
         },
         "self-contained": {
@@ -52,6 +63,17 @@ export const cna_modeling_profile: TOSCA_File = {
           "type": "text",
           "description": "If the artifact is based on a standard, specify it here.",
           "required": true,
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "none",
+                "OCI",
+                "OpenAPI",
+                "other"
+              ]
+            ]
+          },
           "default": "none"
         },
         "self-contained": {
@@ -67,6 +89,197 @@ export const cna_modeling_profile: TOSCA_File = {
         "yml"
       ]
     },
+    "Kubernetes.Resource.Service": {
+      "description": "A Kubernetes Service Resource\n",
+      "properties": {
+        "provider_specific": {
+          "type": "boolean",
+          "description": "Whether this artifact is (cloud) provider-specific or not.",
+          "required": true,
+          "default": false
+        },
+        "based_on_standard": {
+          "type": "text",
+          "description": "If the artifact is based on a standard, specify it here.",
+          "required": true,
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "none",
+                "OCI",
+                "OpenAPI",
+                "other"
+              ]
+            ]
+          },
+          "default": "none"
+        },
+        "self-contained": {
+          "type": "boolean",
+          "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
+          "required": true,
+          "default": false
+        }
+      },
+      "derived_from": "Kubernetes.Resource",
+      "file_ext": [
+        "yaml",
+        "yml"
+      ]
+    },
+    "Kubernetes.Resource.Deployment": {
+      "description": "A Kubernetes Deployment Resource\n",
+      "properties": {
+        "provider_specific": {
+          "type": "boolean",
+          "description": "Whether this artifact is (cloud) provider-specific or not.",
+          "required": true,
+          "default": false
+        },
+        "based_on_standard": {
+          "type": "text",
+          "description": "If the artifact is based on a standard, specify it here.",
+          "required": true,
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "none",
+                "OCI",
+                "OpenAPI",
+                "other"
+              ]
+            ]
+          },
+          "default": "none"
+        },
+        "self-contained": {
+          "type": "boolean",
+          "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
+          "required": true,
+          "default": false
+        }
+      },
+      "derived_from": "Kubernetes.Resource",
+      "file_ext": [
+        "yaml",
+        "yml"
+      ]
+    },
+    "Implementation": {
+      "description": "A generic implementation artifact\n",
+      "properties": {
+        "provider_specific": {
+          "type": "boolean",
+          "description": "Whether this artifact is (cloud) provider-specific or not.",
+          "required": true,
+          "default": false
+        },
+        "based_on_standard": {
+          "type": "text",
+          "description": "If the artifact is based on a standard, specify it here.",
+          "required": true,
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "none",
+                "OCI",
+                "OpenAPI",
+                "other"
+              ]
+            ]
+          },
+          "default": "none"
+        },
+        "self-contained": {
+          "type": "boolean",
+          "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
+          "required": true,
+          "default": false
+        }
+      },
+      "derived_from": "CNA-Artifact"
+    },
+    "Implementation.Bash": {
+      "description": "Script artifact for the Unix Bash shell.\n",
+      "properties": {
+        "provider_specific": {
+          "type": "boolean",
+          "description": "Whether this artifact is (cloud) provider-specific or not.",
+          "required": true,
+          "default": false
+        },
+        "based_on_standard": {
+          "type": "text",
+          "description": "If the artifact is based on a standard, specify it here.",
+          "required": true,
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "none",
+                "OCI",
+                "OpenAPI",
+                "other"
+              ]
+            ]
+          },
+          "default": "none"
+        },
+        "self-contained": {
+          "type": "boolean",
+          "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
+          "required": true,
+          "default": false
+        }
+      },
+      "derived_from": "Implementation",
+      "mime_type": "application/x-sh",
+      "file_ext": [
+        "sh"
+      ]
+    },
+    "Implementation.Python": {
+      "description": "Artifact for the interpreted Python language.\n",
+      "properties": {
+        "provider_specific": {
+          "type": "boolean",
+          "description": "Whether this artifact is (cloud) provider-specific or not.",
+          "required": true,
+          "default": false
+        },
+        "based_on_standard": {
+          "type": "text",
+          "description": "If the artifact is based on a standard, specify it here.",
+          "required": true,
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "none",
+                "OCI",
+                "OpenAPI",
+                "other"
+              ]
+            ]
+          },
+          "default": "none"
+        },
+        "self-contained": {
+          "type": "boolean",
+          "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
+          "required": true,
+          "default": false
+        }
+      },
+      "derived_from": "Implementation",
+      "mime_type": "application/x-python",
+      "file_ext": [
+        "py"
+      ]
+    },
     "Implementation.Java": {
       "description": "Artifact type for a Java archive which might be executable\n",
       "properties": {
@@ -80,6 +293,17 @@ export const cna_modeling_profile: TOSCA_File = {
           "type": "text",
           "description": "If the artifact is based on a standard, specify it here.",
           "required": true,
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "none",
+                "OCI",
+                "OpenAPI",
+                "other"
+              ]
+            ]
+          },
           "default": "none"
         },
         "self-contained": {
@@ -89,10 +313,99 @@ export const cna_modeling_profile: TOSCA_File = {
           "default": false
         }
       },
-      "derived_from": "CNA-Artifact",
+      "derived_from": "Implementation",
       "file_ext": [
         "jar"
       ]
+    },
+    "Image.Container": {
+      "description": "Artifact type for a Container Image\n",
+      "properties": {
+        "provider_specific": {
+          "type": "boolean",
+          "description": "Whether this artifact is (cloud) provider-specific or not.",
+          "required": true,
+          "default": false
+        },
+        "based_on_standard": {
+          "type": "text",
+          "description": "If the artifact is based on a standard, specify it here.",
+          "required": true,
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "none",
+                "OCI",
+                "OpenAPI",
+                "other"
+              ]
+            ]
+          },
+          "default": "none"
+        },
+        "self-contained": {
+          "type": "boolean",
+          "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
+          "required": true,
+          "default": false
+        }
+      },
+      "derived_from": "CNA-Artifact"
+    },
+    "Image.Container.OCI": {
+      "description": "Artifact type for a OCI (Open Container Initiative)-compliant Container Image \n",
+      "properties": {
+        "provider_specific": {
+          "type": "boolean",
+          "description": "Whether this artifact is (cloud) provider-specific or not.",
+          "required": true,
+          "default": false
+        },
+        "based_on_standard": "OCI",
+        "self-contained": {
+          "type": "boolean",
+          "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
+          "required": true,
+          "default": false
+        }
+      },
+      "derived_from": "CNA-Artifact"
+    },
+    "Image.VM": {
+      "description": "Artifact type for a Virtual Machine (VM) Image\n",
+      "properties": {
+        "provider_specific": {
+          "type": "boolean",
+          "description": "Whether this artifact is (cloud) provider-specific or not.",
+          "required": true,
+          "default": false
+        },
+        "based_on_standard": {
+          "type": "text",
+          "description": "If the artifact is based on a standard, specify it here.",
+          "required": true,
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "none",
+                "OCI",
+                "OpenAPI",
+                "other"
+              ]
+            ]
+          },
+          "default": "none"
+        },
+        "self-contained": {
+          "type": "boolean",
+          "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
+          "required": true,
+          "default": false
+        }
+      },
+      "derived_from": "CNA-Artifact"
     },
     "Terraform.Script": {
       "description": "A configuration file which can be used by Terraform to set up components or infrastructure.",
@@ -107,6 +420,17 @@ export const cna_modeling_profile: TOSCA_File = {
           "type": "text",
           "description": "If the artifact is based on a standard, specify it here.",
           "required": true,
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "none",
+                "OCI",
+                "OpenAPI",
+                "other"
+              ]
+            ]
+          },
           "default": "none"
         },
         "self-contained": {
@@ -135,6 +459,17 @@ export const cna_modeling_profile: TOSCA_File = {
           "type": "text",
           "description": "If the artifact is based on a standard, specify it here.",
           "required": true,
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "none",
+                "OCI",
+                "OpenAPI",
+                "other"
+              ]
+            ]
+          },
           "default": "none"
         },
         "self-contained": {
@@ -154,16 +489,22 @@ export const cna_modeling_profile: TOSCA_File = {
     "AWS.Resource": {
       "description": "An abstract type for resources created in the AWS cloud.",
       "properties": {
-        "provider_specific": {
-          "type": "boolean",
-          "description": "Whether this artifact is (cloud) provider-specific or not.",
-          "required": true,
-          "default": false
-        },
+        "provider_specific": true,
         "based_on_standard": {
           "type": "text",
           "description": "If the artifact is based on a standard, specify it here.",
           "required": true,
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "none",
+                "OCI",
+                "OpenAPI",
+                "other"
+              ]
+            ]
+          },
           "default": "none"
         },
         "self-contained": {
@@ -178,16 +519,22 @@ export const cna_modeling_profile: TOSCA_File = {
     "AWS.EKS.Cluster": {
       "description": "An AWS EKS Cluster",
       "properties": {
-        "provider_specific": {
-          "type": "boolean",
-          "description": "Whether this artifact is (cloud) provider-specific or not.",
-          "required": true,
-          "default": false
-        },
+        "provider_specific": true,
         "based_on_standard": {
           "type": "text",
           "description": "If the artifact is based on a standard, specify it here.",
           "required": true,
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "none",
+                "OCI",
+                "OpenAPI",
+                "other"
+              ]
+            ]
+          },
           "default": "none"
         },
         "self-contained": {
@@ -202,16 +549,22 @@ export const cna_modeling_profile: TOSCA_File = {
     "AWS.EC2.Instance": {
       "description": "An AWS EC2 Instance",
       "properties": {
-        "provider_specific": {
-          "type": "boolean",
-          "description": "Whether this artifact is (cloud) provider-specific or not.",
-          "required": true,
-          "default": false
-        },
+        "provider_specific": true,
         "based_on_standard": {
           "type": "text",
           "description": "If the artifact is based on a standard, specify it here.",
           "required": true,
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "none",
+                "OCI",
+                "OpenAPI",
+                "other"
+              ]
+            ]
+          },
           "default": "none"
         },
         "self-contained": {
@@ -226,16 +579,22 @@ export const cna_modeling_profile: TOSCA_File = {
     "AWS.Beanstalk.Application": {
       "description": "An AWS Beanstalk application",
       "properties": {
-        "provider_specific": {
-          "type": "boolean",
-          "description": "Whether this artifact is (cloud) provider-specific or not.",
-          "required": true,
-          "default": false
-        },
+        "provider_specific": true,
         "based_on_standard": {
           "type": "text",
           "description": "If the artifact is based on a standard, specify it here.",
           "required": true,
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "none",
+                "OCI",
+                "OpenAPI",
+                "other"
+              ]
+            ]
+          },
           "default": "none"
         },
         "self-contained": {
@@ -250,16 +609,22 @@ export const cna_modeling_profile: TOSCA_File = {
     "AWS.RDS.Instance": {
       "description": "An AWS RDS instance",
       "properties": {
-        "provider_specific": {
-          "type": "boolean",
-          "description": "Whether this artifact is (cloud) provider-specific or not.",
-          "required": true,
-          "default": false
-        },
+        "provider_specific": true,
         "based_on_standard": {
           "type": "text",
           "description": "If the artifact is based on a standard, specify it here.",
           "required": true,
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "none",
+                "OCI",
+                "OpenAPI",
+                "other"
+              ]
+            ]
+          },
           "default": "none"
         },
         "self-contained": {
@@ -270,6 +635,95 @@ export const cna_modeling_profile: TOSCA_File = {
         }
       },
       "derived_from": "AWS.Resource"
+    },
+    "Azure.Resource": {
+      "description": "An abstract type for resources created in the Microsoft Azure Cloud.",
+      "properties": {
+        "provider_specific": {
+          "type": "boolean",
+          "description": "Whether this artifact is (cloud) provider-specific or not.",
+          "required": true,
+          "default": false
+        },
+        "based_on_standard": {
+          "type": "text",
+          "description": "If the artifact is based on a standard, specify it here.",
+          "required": true,
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "none",
+                "OCI",
+                "OpenAPI",
+                "other"
+              ]
+            ]
+          },
+          "default": "none"
+        },
+        "self-contained": {
+          "type": "boolean",
+          "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
+          "required": true,
+          "default": false
+        }
+      },
+      "derived_from": "CNA-Artifact"
+    },
+    "GCP.Resource": {
+      "description": "An abstract type for resources created in the Google Cloud Platform.",
+      "properties": {
+        "provider_specific": {
+          "type": "boolean",
+          "description": "Whether this artifact is (cloud) provider-specific or not.",
+          "required": true,
+          "default": false
+        },
+        "based_on_standard": {
+          "type": "text",
+          "description": "If the artifact is based on a standard, specify it here.",
+          "required": true,
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "none",
+                "OCI",
+                "OpenAPI",
+                "other"
+              ]
+            ]
+          },
+          "default": "none"
+        },
+        "self-contained": {
+          "type": "boolean",
+          "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
+          "required": true,
+          "default": false
+        }
+      },
+      "derived_from": "CNA-Artifact"
+    },
+    "OpenAPI": {
+      "description": "Artifact type for OpenAPI-based service interface description documents",
+      "properties": {
+        "provider_specific": {
+          "type": "boolean",
+          "description": "Whether this artifact is (cloud) provider-specific or not.",
+          "required": true,
+          "default": false
+        },
+        "based_on_standard": "OpenAPI",
+        "self-contained": {
+          "type": "boolean",
+          "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
+          "required": true,
+          "default": false
+        }
+      },
+      "derived_from": "CNA-Artifact"
     }
   },
   "data_types": {},

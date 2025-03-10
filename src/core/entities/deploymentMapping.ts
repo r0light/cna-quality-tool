@@ -3,6 +3,7 @@ import { Infrastructure } from './infrastructure.js'
 import { EntityProperty, SelectEntityProperty, parseProperties } from '../common/entityProperty.js';
 import { cna_modeling_profile } from '../../totypa/parsedProfiles/v2dot0-profiles/cna_modeling_profile.js'
 import { EntityPropertyKey } from '@/totypa/parsedProfiles/v2dot0-profiles/propertyKeys.js';
+import { getAvailableArtifactTypes } from '../common/artifact.js';
 
 /**
  * The module for aspects related to a Deployment Mapping quality model entity.
@@ -19,6 +20,15 @@ function getDeploymentMappingProperties(): EntityProperty[] {
             case "deployment":
                 prop.setName = "Deployment process"
                 return prop;
+            case "deployment_unit":
+                return new SelectEntityProperty(prop.getKey,
+                    prop.getName,
+                    prop.getDescription,
+                    prop.getExample,
+                    prop.getRequired,
+                    ["custom"].concat(getAvailableArtifactTypes()).map(option => { return { value: option, text: option } }),
+                    prop.getDefaultValue,
+                    prop.value)
             default:
                 return prop;
         }

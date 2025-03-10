@@ -15,47 +15,7 @@ export const tosca_simple_2_0: TOSCA_File = {
   "description": "TOSCA Simple Profile type definitions",
   "dsl_definitions": "",
   "repositories": {},
-  "artifact_types": {
-    "Root": {
-      "description": "The TOSCA base artifact type from which all other normative TOSCA artifact types derive.\n"
-    },
-    "File": {
-      "description": "The File artifact type is used when an artifact definition needs to have its associated file simply treated as a file without any special handling.",
-      "derived_from": "Root"
-    },
-    "Deployment": {
-      "description": "The Deployment artifact type represents a binary packaging of an application or service that is used to install/create or deploy it as part of a node’s lifecycle.",
-      "derived_from": "Root"
-    },
-    "Deployment.Image": {
-      "description": "The Deployment.Image artifact type represents any “image” that is an opaque packaging of a TOSCA Node whose contents are already installed and pre-configured (i.e., “stateful”) and prepared to be run on a known target container.",
-      "derived_from": "Deployment"
-    },
-    "Deployment.Image.VM": {
-      "description": "The VM artifact type represents all Virtual Machine (VM) image and container formatted deployment artifacts.",
-      "derived_from": "Deployment.Image"
-    },
-    "Implementation": {
-      "description": "The Implementation artifact type represents artifacts that are used to implement operations of TOSCA interfaces either directly (e.g., scripts) or indirectly (e.g., config. files).",
-      "derived_from": "Root"
-    },
-    "Implementation.Bash": {
-      "description": "Script artifact for the Unix Bash shell.\n",
-      "derived_from": "Implementation",
-      "mime_type": "application/x-sh",
-      "file_ext": [
-        "sh"
-      ]
-    },
-    "Implementation.Python": {
-      "description": "Artifact for the interpreted Python language.\n",
-      "derived_from": "Implementation",
-      "mime_type": "application/x-python",
-      "file_ext": [
-        "py"
-      ]
-    }
-  },
+  "artifact_types": {},
   "data_types": {
     "json": {
       "description": "The json type defines strings that contain data in the JavaScript Object Notation (JSON) format.",

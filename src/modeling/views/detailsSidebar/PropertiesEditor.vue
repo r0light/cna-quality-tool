@@ -528,4 +528,12 @@ function onChangeFromDropdown(propertyOption: EditPropertySection, elementField:
 .cell-highlighted {
     background-color: #cadde7;
 }
+
+.dialogCheckBox {
+    width: 20px !important;
+    font-size: 3pt;
+    margin-left: 5px !important;
+    flex-grow: 0 !important;
+    align-self: center;
+}
 </style>

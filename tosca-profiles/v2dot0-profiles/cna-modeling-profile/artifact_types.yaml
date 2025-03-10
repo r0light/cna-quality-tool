@@ -22,6 +22,7 @@ artifact_types:
         type: text
         description: If the artifact is based on a standard, specify it here.
         required: true
+        validation: { $valid_values: [ $value, ["none", "OCI", "OpenAPI", "other"]]}
         default: "none"
       self-contained:
         type: boolean
@@ -35,11 +36,59 @@ artifact_types:
       A Kubernetes resource (like Deployment, Service, etc) which is described in a file
     file_ext: [ yaml, yml ]
 
-  Implementation.Java:
+  Kubernetes.Resource.Service:
+    derived_from: Kubernetes.Resource
+    description: >
+      A Kubernetes Service Resource
+    file_ext: [ yaml, yml ]
+
+  Kubernetes.Resource.Deployment:
+    derived_from: Kubernetes.Resource
+    description: >
+      A Kubernetes Deployment Resource
+    file_ext: [ yaml, yml ]
+
+  Implementation:
+    description: >
+      A generic implementation artifact
     derived_from: CNA-Artifact
+
+  Implementation.Bash:
+    description: >
+      Script artifact for the Unix Bash shell.
+    derived_from: Implementation
+    mime_type: application/x-sh
+    file_ext: [ sh ]
+
+  Implementation.Python:
+    description: >
+      Artifact for the interpreted Python language.
+    derived_from: Implementation
+    mime_type: application/x-python
+    file_ext: [ py ]
+
+  Implementation.Java:
+    derived_from: Implementation
     description: >
       Artifact type for a Java archive which might be executable
     file_ext: [ jar ]
+
+  Image.Container:
+    derived_from: CNA-Artifact
+    description: >
+      Artifact type for a Container Image
+
+  Image.Container.OCI:
+    derived_from: CNA-Artifact
+    description: >
+      Artifact type for a OCI (Open Container Initiative)-compliant Container Image 
+    properties:
+      based_on_standard: "OCI"
+
+  Image.VM:
+    derived_from: CNA-Artifact
+    description: >
+      Artifact type for a Virtual Machine (VM) Image
     
   Terraform.Script:
     derived_from: CNA-Artifact
@@ -54,6 +103,8 @@ artifact_types:
   AWS.Resource:
     derived_from: CNA-Artifact
     description: An abstract type for resources created in the AWS cloud.
+    properties:
+      provider_specific: true
 
   AWS.EKS.Cluster:
     derived_from: AWS.Resource
@@ -70,4 +121,18 @@ artifact_types:
   AWS.RDS.Instance:
     derived_from: AWS.Resource
     description: An AWS RDS instance
+
+  Azure.Resource:
+    derived_from: CNA-Artifact
+    description: An abstract type for resources created in the Microsoft Azure Cloud.
+
+  GCP.Resource:
+    derived_from: CNA-Artifact
+    description: An abstract type for resources created in the Google Cloud Platform.
+
+  OpenAPI:
+    derived_from: CNA-Artifact
+    description: Artifact type for OpenAPI-based service interface description documents
+    properties:
+        based_on_standard: "OpenAPI"
 
