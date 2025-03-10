@@ -47,7 +47,8 @@
                                 information, which is especially relevant for a TOSCA transformation.
                             </p>
                             <PropertiesEditor :groupId="propertyGroup.groupId" :cardBodyId="propertyGroup.cardBodyId"
-                                :propertyOptions="propertyGroup.options" @on:EnterProperty="onEnterProperty">
+                                :propertyOptions="propertyGroup.options" @on:EnterProperty="onEnterProperty"
+                                @on:ChangeFromDropdown="onChangeFromDropdown">
                             </PropertiesEditor>
                         </div>
                     </div>
@@ -59,17 +60,18 @@
 
 
 <script lang="ts" setup>
-import { PropertyContent, DetailsSidebarConfig, EntityDetailsConfig, PropertyConfig, EditArtifactsConfig, EntityRelationsConfig, } from '../../config/detailsSidebarConfig';
+import { PropertyContent, DetailsSidebarConfig, EntityDetailsConfig, PropertyConfig, EditArtifactsConfig, EntityRelationsConfig, ListElementDropdownField, DynamicListPropertyConfig, } from '../../config/detailsSidebarConfig';
 import { dia } from '@joint/core';
 import { ref, computed, onUpdated, onMounted } from 'vue';
 import EntityTypes from '@/modeling/config/entityTypes';
 import PropertiesEditor from './PropertiesEditor.vue';
 import type { EditPropertySection } from './PropertiesEditor.vue';
 import { toPropertySections } from './PropertiesEditor.vue';
-import { getAvailableArtifactTypes } from '@/core/common/artifact';
+import { getArtifactTypeProperties, getAvailableArtifactTypes } from '@/core/common/artifact';
 import { getValidPropertyValues } from '@/core/common/helpers';
 import { DEPLOYMENT_MAPPING_TOSCA_KEY } from '@/core/entities/deploymentMapping';
 import { ENTITIES } from '@/core/qualitymodel/specifications/entities';
+import { SelectEntityProperty } from '@/core/common/entityProperty';
 
 const toArray = (o: object, keyName: string, valueName: string) => {
     let asArray = [];
@@ -1194,6 +1196,37 @@ function isPropertyValueValid(option): boolean {
 
     return true;
 }
+
+function onChangeFromDropdown(propertyOption: EditPropertySection, elementField: ListElementDropdownField, value: string) {
+
+    // currently only used for artifact type update to properties
+    if (propertyOption.providedFeature === "artifacts" && elementField.key === "type") {
+        let artifactOption = findInSectionsByFeature(selectedEntityPropertyGroups.value, "artifacts");
+
+        let noOfStandardElements = (DetailsSidebarConfig.GeneralProperties.artifacts.options[0] as DynamicListPropertyConfig).attributes.listElementFields.length;
+        let removed = artifactOption.attributes.listElementFields.splice(noOfStandardElements, artifactOption.attributes.listElementFields.length);
+        removed.forEach(removedElement => {
+            delete artifactOption.newElementData[removedElement.getKey];
+        })
+
+        let properties = getArtifactTypeProperties(value);
+        properties.forEach(property => {
+            artifactOption.newElementData[property.getKey] = property.value
+            artifactOption.attributes.listElementFields.push({
+                fieldType: property.getDataType,
+                key: property.getKey,
+                label: property.getName,
+                helpText: property.getDescription,
+                labelIcon: "fa-solid fa-sliders",
+                placeholder: property.getExample,
+                value: property.value
+            },)
+
+        })
+    }
+
+}
+
 
 </script>
 

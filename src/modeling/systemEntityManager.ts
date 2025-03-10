@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import EntityTypes from './config/entityTypes';
 import * as Entities from '../core/entities';
 import ErrorMessage, { ErrorType } from './errorMessage'
-import { DetailsSidebarConfig, EntityDetailsConfig, EntityRelationsConfig, PropertyConfig } from './config/detailsSidebarConfig';
+import { DetailsSidebarConfig, DynamicListPropertyConfig, EntityDetailsConfig, EntityRelationsConfig, PropertyConfig } from './config/detailsSidebarConfig';
 import { MetaData, getEmptyMetaData } from "../core/common/entityDataTypes";
 import { convertToServiceTemplate, importFromServiceTemplate } from "../core/tosca-adapter/ToscaAdapter";
 import {
@@ -18,7 +18,7 @@ import { DataAggregate, Link } from "../core/entities";
 import { FormContentConfig } from "./config/actionDialogConfig";
 import { RelationToDataAggregate } from "../core/entities/relationToDataAggregate";
 import { RelationToBackingData } from "../core/entities/relationToBackingData";
-import { Artifact } from '@/core/common/artifact';
+import { Artifact, getArtifactTypeProperties } from '@/core/common/artifact';
 import { Entity } from '@/core/qualitymodel/quamoco/Entity';
 import { networkInterfaces } from 'os';
 import { Network } from '@/core/entities/network';
@@ -428,6 +428,11 @@ class SystemEntityManager {
         // set artifact(s)
         let artifactsData = graphElement.prop("entity/artifacts");
         for (const artifactData of artifactsData) {
+            let additionalProperties = getArtifactTypeProperties(artifactData.type);
+            for (let property of additionalProperties) {
+                property.value = artifactData[property.getKey];
+            }
+
             let artifact = new Artifact(artifactData.type,
                 artifactData.file,
                 artifactData.repository,
@@ -436,7 +441,7 @@ class SystemEntityManager {
                 artifactData.artifact_version,
                 artifactData.checksum,
                 artifactData.checksum_algorithm,
-                artifactData.properties
+                additionalProperties
             )
             entity.setArtifact(artifactData.key, artifact);
         }
@@ -574,21 +579,28 @@ class SystemEntityManager {
             property.value = infrastructureElement.prop("entity/properties/" + property.getKey)
         }
 
-        // set artifact(s)
-        let artifactsData = infrastructureElement.prop("entity/artifacts");
-        for (const artifactData of artifactsData) {
-            let artifact = new Artifact(artifactData.type,
-                artifactData.file,
-                artifactData.repository,
-                artifactData.description,
-                artifactData.deploy_path,
-                artifactData.artifact_version,
-                artifactData.checksum,
-                artifactData.checksum_algorithm,
-                artifactData.properties
-            )
-            infrastructureEntity.setArtifact(artifactData.key, artifact);
-        }
+
+          // set artifact(s)
+          let artifactsData = infrastructureElement.prop("entity/artifacts");
+          for (const artifactData of artifactsData) {
+              let additionalProperties = getArtifactTypeProperties(artifactData.type);
+              for (let property of additionalProperties) {
+                  property.value = artifactData[property.getKey];
+              }
+  
+              let artifact = new Artifact(artifactData.type,
+                  artifactData.file,
+                  artifactData.repository,
+                  artifactData.description,
+                  artifactData.deploy_path,
+                  artifactData.artifact_version,
+                  artifactData.checksum,
+                  artifactData.checksum_algorithm,
+                  additionalProperties
+              )
+              infrastructureEntity.setArtifact(artifactData.key, artifact);
+            }
+
 
         const backingDataEntities = infrastructureElement.getEmbeddedCells();
 
@@ -1183,8 +1195,9 @@ class SystemEntityManager {
 
         let artifacts = [];
         for (const [artifactKey, artifact] of infrastructure.getArtifacts.entries()) {
-            artifacts.push(artifact.getAsSimpleObject(artifactKey));
+            artifacts.push(artifact.getAsFlatObject(artifactKey));
         }
+
         infrastructureElement.prop(DetailsSidebarConfig.GeneralProperties.artifacts.options[0].jointJsConfig.modelPath, artifacts)
 
     }
@@ -1374,8 +1387,9 @@ class SystemEntityManager {
 
         let artifacts = [];
         for (const [artifactKey, artifact] of component.getArtifacts.entries()) {
-            artifacts.push(artifact.getAsSimpleObject(artifactKey));
+            artifacts.push(artifact.getAsFlatObject(artifactKey));
         }
+        console.log(artifacts);
         componentElement.prop(DetailsSidebarConfig.GeneralProperties.artifacts.options[0].jointJsConfig.modelPath, artifacts)
 
         return componentElement;

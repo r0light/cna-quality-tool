@@ -164,7 +164,7 @@
                                                     <span v-for="elementField of option.attributes.listElementFields.slice(3)"> {{ elementField.label }}</span>
                                                 
                                                 </th>
-                                                <th>Delete</th>
+                                                <th>Edit/Delete</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -177,16 +177,20 @@
                                                     <span v-if="typeof columnValue === 'string'"> {{ columnValue
                                                         }}</span>
                                                 </td>
+                                                <td v-else>
+                                                    <!-- list with literals -->
+                                                    <span>{{ row }}</span>
+                                                </td>
                                                 <td v-if="typeof row === 'object' && Object.entries(row).length > 3" class="overloaded">
                                                     <!-- list with objects -->
                                                     <span v-for="[columnKey, columnValue] of Object.entries(row).slice(3)"> {{ columnValue
                                                         }}</span>
                                                 </td>
-                                                <td v-else>
-                                                    <!-- list with literals -->
-                                                    <span>{{ row }}</span>
-                                                </td>
                                                 <td>
+                                                    <button type="button" class="btn btn-outline-dark"
+                                                        @click="onEditInDynamicList(option, index)">
+                                                        <i class="fa-solid fa-pen"></i>
+                                                    </button>
                                                     <button type="button" class="btn btn-outline-dark"
                                                         @click="onRemoveFromDynamicList(option, index)">
                                                         <i class="fa-solid fa-trash-can"></i>
@@ -210,9 +214,14 @@
                                             v-model="option.newElementData[elementField.key]">
                                         <select v-if="elementField.fieldType === 'dropdown'" :id="elementField.key"
                                             class="form-control"
-                                            v-model="option.newElementData[elementField.key]">
+                                            v-model="option.newElementData[elementField.key]" @change="onChangeFromDropdown(option, elementField)">
                                         <option v-for="dropdownOption of elementField.dropdownOptions" :value="dropdownOption"> {{ dropdownOption }}</option>
+
                                     </select>
+                                    <input v-if="elementField.fieldType === 'boolean'" :id="elementField.key"
+                                            class="dialogCheckBox form-check-input form-control" type="checkbox"
+                                            :checked="option.newElementData[elementField.key]"
+                                            v-model="option.newElementData[elementField.key]">
                                     </div>
                                 </div>
                                 <button type="button" class="btn btn-outline-dark" @click="onAddToDynamicList(option)">
@@ -251,7 +260,7 @@
 <script lang="ts">
 import type { ComputedRef, } from 'vue';
 import type { dia } from '@joint/core';
-import { PropertyContent, CheckboxPropertyConfig, DropdownPropertyConfig, InputProperties, JointJsConfig, NumberPropertyConfig, NumberRangePropertyConfig, PropertyConfig, TextAreaPropertyConfig, TextPropertyConfig, TogglePropertyConfig, DynamicListPropertyConfig, PropertyContentType, MultiSelectPropertyConfig } from '../../config/detailsSidebarConfig';
+import { PropertyContent, CheckboxPropertyConfig, DropdownPropertyConfig, InputProperties, JointJsConfig, NumberPropertyConfig, NumberRangePropertyConfig, PropertyConfig, TextAreaPropertyConfig, TextPropertyConfig, TogglePropertyConfig, DynamicListPropertyConfig, PropertyContentType, MultiSelectPropertyConfig, ListElementDropdownField } from '../../config/detailsSidebarConfig';
 import ModalWrapper from '../components/ModalWrapper.vue';
 
 export type EditPropertySection = {
@@ -404,7 +413,7 @@ export function toPropertySections(propertyConfigs: PropertyConfig[]): EditPrope
                 let dynamicListOption = option as DynamicListPropertyConfig;
                 options.push({
                     ...preparedProperty, ...{
-                        attributes: dynamicListOption.attributes,
+                        attributes: JSON.parse(JSON.stringify(dynamicListOption.attributes)), // deep copy the attributes element, otherwise the original object will be used
                         newElementData: (() => {
                             let dataHolder = {};
                             if (Array.isArray(dynamicListOption.attributes.listElementFields)) {
@@ -439,6 +448,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
     (e: "on:EnterProperty", properties: EditPropertySection[]): void;
+    (e: "on:ChangeFromDropdown", propepropertyOption: EditPropertySection, elementField: ListElementDropdownField, value: string): void;
 }>()
 
 
@@ -474,6 +484,25 @@ function onAddToDynamicList(propertyOption: EditPropertySection) {
 
 function onRemoveFromDynamicList(propertyOption: EditPropertySection, listIndex: number) {
     (propertyOption.value as any[]).splice(listIndex, 1);
+}
+
+function onEditInDynamicList(propertyOption: EditPropertySection, listIndex: number) {
+    let elementToEdit = (propertyOption.value as any[]).splice(listIndex, 1);
+
+    if (propertyOption.providedFeature === "artifacts") {
+        // special case artifacts: refresh editable fields 
+        emit("on:ChangeFromDropdown", propertyOption, propertyOption.attributes.listElementFields.find(field => {
+            return field.key === "type";
+        } ), elementToEdit[0]["type"]);
+    }
+
+    for (const [key, value] of Object.entries(propertyOption.newElementData)) {
+        propertyOption.newElementData[key] = elementToEdit[0][key];
+    }
+}
+
+function onChangeFromDropdown(propertyOption: EditPropertySection, elementField: ListElementDropdownField) {
+    emit("on:ChangeFromDropdown", propertyOption, elementField, propertyOption.newElementData[elementField.key]);
 }
 
 </script>

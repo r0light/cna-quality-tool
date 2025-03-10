@@ -10,46 +10,64 @@ metadata:
 
 artifact_types:
 
-  Kubernetes.Resource:
-    description: >
-      A Kubernetes resource (like Deployment, Service, etc) which is described in a file
-    file_ext: [ yaml, yml ]
+  CNA-Artifact:
+    description: The root artifact type for artifacts used in the cna modeling application
     properties:
       provider_specific:
         type: boolean
         description: "Whether this artifact is (cloud) provider-specific or not."
         required: true
         default: false
+      based_on_standard:
+        type: text
+        description: If the artifact is based on a standard, specify it here.
+        required: true
+        default: "none"
+      self-contained:
+        type: boolean
+        description: "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used."
+        required: true
+        default: false
+
+  Kubernetes.Resource:
+    derived_from: CNA-Artifact
+    description: >
+      A Kubernetes resource (like Deployment, Service, etc) which is described in a file
+    file_ext: [ yaml, yml ]
 
   Implementation.Java:
+    derived_from: CNA-Artifact
     description: >
       Artifact type for a Java archive which might be executable
-    derived_from: Implementation
     file_ext: [ jar ]
     
   Terraform.Script:
+    derived_from: CNA-Artifact
     description: A configuration file which can be used by Terraform to set up components or infrastructure.
     file_ext: [ tf, tf.json ] 
 
   CloudFormation.Script:
+    derived_from: CNA-Artifact
     description: A configuration file which can be used by AWS tools to set up components or infrastructure.
     file_ext: [ yaml, yml, json ]
 
   AWS.Resource:
+    derived_from: CNA-Artifact
     description: An abstract type for resources created in the AWS cloud.
 
   AWS.EKS.Cluster:
-    description: An AWS EKS Cluster
     derived_from: AWS.Resource
+    description: An AWS EKS Cluster
 
   AWS.EC2.Instance:
-    description: An AWS EC2 Instance
     derived_from: AWS.Resource
+    description: An AWS EC2 Instance
 
   AWS.Beanstalk.Application:
-    description: An AWS Beanstalk application
     derived_from: AWS.Resource
+    description: An AWS Beanstalk application
 
   AWS.RDS.Instance:
-    description: An AWS RDS instance
     derived_from: AWS.Resource
+    description: An AWS RDS instance
+

@@ -611,7 +611,9 @@ class EntitiesToToscaConverter {
             template.artifacts = {};
             for (const [key, artifact] of component.getArtifacts.entries()) {
                 //TODO include only keys with a value
+                console.log(artifact);
                 template.artifacts[key] = artifact.getAsSimpleObject("");
+                console.log(template.artifacts[key]);
             }
         }
 

@@ -16,30 +16,107 @@ export const cna_modeling_profile: TOSCA_File = {
   "dsl_definitions": "",
   "repositories": {},
   "artifact_types": {
-    "Kubernetes.Resource": {
-      "description": "A Kubernetes resource (like Deployment, Service, etc) which is described in a file\n",
-      "file_ext": [
-        "yaml",
-        "yml"
-      ],
+    "CNA-Artifact": {
+      "description": "The root artifact type for artifacts used in the cna modeling application",
       "properties": {
         "provider_specific": {
           "type": "boolean",
           "description": "Whether this artifact is (cloud) provider-specific or not.",
           "required": true,
           "default": false
+        },
+        "based_on_standard": {
+          "type": "text",
+          "description": "If the artifact is based on a standard, specify it here.",
+          "required": true,
+          "default": "none"
+        },
+        "self-contained": {
+          "type": "boolean",
+          "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
+          "required": true,
+          "default": false
         }
       }
     },
+    "Kubernetes.Resource": {
+      "description": "A Kubernetes resource (like Deployment, Service, etc) which is described in a file\n",
+      "properties": {
+        "provider_specific": {
+          "type": "boolean",
+          "description": "Whether this artifact is (cloud) provider-specific or not.",
+          "required": true,
+          "default": false
+        },
+        "based_on_standard": {
+          "type": "text",
+          "description": "If the artifact is based on a standard, specify it here.",
+          "required": true,
+          "default": "none"
+        },
+        "self-contained": {
+          "type": "boolean",
+          "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
+          "required": true,
+          "default": false
+        }
+      },
+      "derived_from": "CNA-Artifact",
+      "file_ext": [
+        "yaml",
+        "yml"
+      ]
+    },
     "Implementation.Java": {
       "description": "Artifact type for a Java archive which might be executable\n",
-      "derived_from": "Implementation",
+      "properties": {
+        "provider_specific": {
+          "type": "boolean",
+          "description": "Whether this artifact is (cloud) provider-specific or not.",
+          "required": true,
+          "default": false
+        },
+        "based_on_standard": {
+          "type": "text",
+          "description": "If the artifact is based on a standard, specify it here.",
+          "required": true,
+          "default": "none"
+        },
+        "self-contained": {
+          "type": "boolean",
+          "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
+          "required": true,
+          "default": false
+        }
+      },
+      "derived_from": "CNA-Artifact",
       "file_ext": [
         "jar"
       ]
     },
     "Terraform.Script": {
       "description": "A configuration file which can be used by Terraform to set up components or infrastructure.",
+      "properties": {
+        "provider_specific": {
+          "type": "boolean",
+          "description": "Whether this artifact is (cloud) provider-specific or not.",
+          "required": true,
+          "default": false
+        },
+        "based_on_standard": {
+          "type": "text",
+          "description": "If the artifact is based on a standard, specify it here.",
+          "required": true,
+          "default": "none"
+        },
+        "self-contained": {
+          "type": "boolean",
+          "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
+          "required": true,
+          "default": false
+        }
+      },
+      "derived_from": "CNA-Artifact",
       "file_ext": [
         "tf",
         "tf.json"
@@ -47,6 +124,27 @@ export const cna_modeling_profile: TOSCA_File = {
     },
     "CloudFormation.Script": {
       "description": "A configuration file which can be used by AWS tools to set up components or infrastructure.",
+      "properties": {
+        "provider_specific": {
+          "type": "boolean",
+          "description": "Whether this artifact is (cloud) provider-specific or not.",
+          "required": true,
+          "default": false
+        },
+        "based_on_standard": {
+          "type": "text",
+          "description": "If the artifact is based on a standard, specify it here.",
+          "required": true,
+          "default": "none"
+        },
+        "self-contained": {
+          "type": "boolean",
+          "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
+          "required": true,
+          "default": false
+        }
+      },
+      "derived_from": "CNA-Artifact",
       "file_ext": [
         "yaml",
         "yml",
@@ -54,22 +152,123 @@ export const cna_modeling_profile: TOSCA_File = {
       ]
     },
     "AWS.Resource": {
-      "description": "An abstract type for resources created in the AWS cloud."
+      "description": "An abstract type for resources created in the AWS cloud.",
+      "properties": {
+        "provider_specific": {
+          "type": "boolean",
+          "description": "Whether this artifact is (cloud) provider-specific or not.",
+          "required": true,
+          "default": false
+        },
+        "based_on_standard": {
+          "type": "text",
+          "description": "If the artifact is based on a standard, specify it here.",
+          "required": true,
+          "default": "none"
+        },
+        "self-contained": {
+          "type": "boolean",
+          "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
+          "required": true,
+          "default": false
+        }
+      },
+      "derived_from": "CNA-Artifact"
     },
     "AWS.EKS.Cluster": {
       "description": "An AWS EKS Cluster",
+      "properties": {
+        "provider_specific": {
+          "type": "boolean",
+          "description": "Whether this artifact is (cloud) provider-specific or not.",
+          "required": true,
+          "default": false
+        },
+        "based_on_standard": {
+          "type": "text",
+          "description": "If the artifact is based on a standard, specify it here.",
+          "required": true,
+          "default": "none"
+        },
+        "self-contained": {
+          "type": "boolean",
+          "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
+          "required": true,
+          "default": false
+        }
+      },
       "derived_from": "AWS.Resource"
     },
     "AWS.EC2.Instance": {
       "description": "An AWS EC2 Instance",
+      "properties": {
+        "provider_specific": {
+          "type": "boolean",
+          "description": "Whether this artifact is (cloud) provider-specific or not.",
+          "required": true,
+          "default": false
+        },
+        "based_on_standard": {
+          "type": "text",
+          "description": "If the artifact is based on a standard, specify it here.",
+          "required": true,
+          "default": "none"
+        },
+        "self-contained": {
+          "type": "boolean",
+          "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
+          "required": true,
+          "default": false
+        }
+      },
       "derived_from": "AWS.Resource"
     },
     "AWS.Beanstalk.Application": {
       "description": "An AWS Beanstalk application",
+      "properties": {
+        "provider_specific": {
+          "type": "boolean",
+          "description": "Whether this artifact is (cloud) provider-specific or not.",
+          "required": true,
+          "default": false
+        },
+        "based_on_standard": {
+          "type": "text",
+          "description": "If the artifact is based on a standard, specify it here.",
+          "required": true,
+          "default": "none"
+        },
+        "self-contained": {
+          "type": "boolean",
+          "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
+          "required": true,
+          "default": false
+        }
+      },
       "derived_from": "AWS.Resource"
     },
     "AWS.RDS.Instance": {
       "description": "An AWS RDS instance",
+      "properties": {
+        "provider_specific": {
+          "type": "boolean",
+          "description": "Whether this artifact is (cloud) provider-specific or not.",
+          "required": true,
+          "default": false
+        },
+        "based_on_standard": {
+          "type": "text",
+          "description": "If the artifact is based on a standard, specify it here.",
+          "required": true,
+          "default": "none"
+        },
+        "self-contained": {
+          "type": "boolean",
+          "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
+          "required": true,
+          "default": false
+        }
+      },
       "derived_from": "AWS.Resource"
     }
   },

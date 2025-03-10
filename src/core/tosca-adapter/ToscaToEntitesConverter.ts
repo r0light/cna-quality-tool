@@ -18,7 +18,7 @@ import { RelationToDataAggregate } from '../entities/relationToDataAggregate';
 import { RelationToBackingData } from '../entities/relationToBackingData';
 import { TOSCA_File } from '@/totypa/tosca-types/v2dot0-types/definition-types';
 import { TOSCA_Node_Template, TOSCA_Service_Template } from '@/totypa/tosca-types/v2dot0-types/template-types';
-import { Artifact } from '../common/artifact';
+import { Artifact, getArtifactTypeProperties } from '../common/artifact';
 import { PROXY_BACKING_SERVICE_TOSCA_KEY } from '../entities/proxyBackingService';
 import { BROKER_BACKING_SERVICE_TOSCA_KEY } from '../entities/brokerBackingService';
 import { NETWORK_TOSCA_KEY } from '../entities/network';
@@ -202,6 +202,18 @@ class ToscaToEntitesConverter {
 
                 if (node.artifacts) {
                     for (const [key, value] of Object.entries(node.artifacts)) {
+                        let artifactTypeProperties = value.type ? getArtifactTypeProperties(value.type) : [];
+                        if (value.properties && Array.isArray(value.properties)) {
+                            value.properties.forEach(propObject => {
+                                Object.entries(propObject).forEach(([propKey, propValue]) => {
+                                    // assumption is that there is only one property on this object which is the property key with a value
+                                    let entityProp = artifactTypeProperties.find(entityProp => entityProp.getKey === propKey);
+                                    if (entityProp) {
+                                        entityProp.value = propValue;
+                                    }
+                                })
+                            })
+                        }
                         infrastructure.setArtifact(key, new Artifact(
                             value.type ? value.type : "",
                             value.file ? value.file : "",
@@ -211,7 +223,7 @@ class ToscaToEntitesConverter {
                             value.artifact_version ? value.artifact_version : "",
                             value.checksum ? value.checksum : "",
                             value.checksum_algorithm ? value.checksum_algorithm : "",
-                            value.properties ? parseProperties(value.properties) : [] //TODO
+                            artifactTypeProperties
                         ))
                     }
                 }
@@ -362,6 +374,18 @@ class ToscaToEntitesConverter {
 
                 if (node.artifacts) {
                     for (const [key, value] of Object.entries(node.artifacts)) {
+                        let artifactTypeProperties = value.type ? getArtifactTypeProperties(value.type) : [];
+                        if (value.properties && Array.isArray(value.properties)) {
+                            value.properties.forEach(propObject => {
+                                Object.entries(propObject).forEach(([propKey, propValue]) => {
+                                    // assumption is that there is only one property on this object which is the property key with a value
+                                    let entityProp = artifactTypeProperties.find(entityProp => entityProp.getKey === propKey);
+                                    if (entityProp) {
+                                        entityProp.value = propValue;
+                                    }
+                                })
+                            })
+                        }
                         component.setArtifact(key, new Artifact(
                             value.type ? value.type : "",
                             value.file ? value.file : "",
@@ -371,7 +395,7 @@ class ToscaToEntitesConverter {
                             value.artifact_version ? value.artifact_version : "",
                             value.checksum ? value.checksum : "",
                             value.checksum_algorithm ? value.checksum_algorithm : "",
-                            value.properties ? parseProperties(value.properties) : [] //TODO
+                            artifactTypeProperties
                         ))
                     }
                 }

@@ -3,7 +3,7 @@
 // TODO parse artifact types from TOSCA profiles
 
 import { all_profiles } from "@/totypa/parsedProfiles/v2dot0-profiles/all_profiles";
-import { EntityProperty } from "./entityProperty";
+import { EntityProperty, parseProperties } from "./entityProperty";
 import { EntityPropertyKey } from "@/totypa/parsedProfiles/v2dot0-profiles/propertyKeys";
 
 function getAvailableArtifactTypes() {
@@ -15,8 +15,17 @@ function getAvailableArtifactTypes() {
     })
 }
 
-function getArtifactProperties() {
-    return [];
+function getArtifactTypeProperties(artifactTypeToFind: string): EntityProperty[]  {
+    for (const profile of all_profiles) {
+        let artifactType;
+        if (profile.artifact_types) {
+            artifactType = Object.entries(profile.artifact_types).find(([artifactTypeKey, artifactType]) => artifactTypeKey === artifactTypeToFind);
+        }
+        if (artifactType && artifactType[1]) {
+            return artifactType[1].properties ? parseProperties(artifactType[1].properties) : [];
+        }
+    }
+    throw new Error("No artifact type " + artifactTypeToFind + " found in any profile.");
 }
 
 
@@ -129,7 +138,12 @@ class Artifact {
                 deploy_path: this.#deployPath,
                 artifact_version: this.#artifactVersion,
                 checksum: this.#checksum,
-                checksum_algorithm: this.#checksumAlgorithm
+                checksum_algorithm: this.#checksumAlgorithm,
+                properties: this.#properties.map(property => {
+                    let prop = {};
+                    prop[property.getKey] = property.value
+                    return prop;
+                })
             }
         } else {
             return {
@@ -140,12 +154,51 @@ class Artifact {
                 deploy_path: this.#deployPath,
                 artifact_version: this.#artifactVersion,
                 checksum: this.#checksum,
-                checksum_algorithm: this.#checksumAlgorithm
+                checksum_algorithm: this.#checksumAlgorithm,
+                properties: this.#properties.map(property => {
+                    let prop = {};
+                    prop[property.getKey] = property.value
+                    return prop;
+                })
             }
         }
 
-
     }
+
+        getAsFlatObject(keyToAssign: string) {
+            if (keyToAssign) {
+                let flatArtifact = {
+                    key: keyToAssign,
+                    type: this.#type,
+                    file: this.#file,
+                    repository: this.#repository,
+                    description: this.#description,
+                    deploy_path: this.#deployPath,
+                    artifact_version: this.#artifactVersion,
+                    checksum: this.#checksum,
+                    checksum_algorithm: this.#checksumAlgorithm
+                }
+                this.#properties.forEach(prop => {
+                    flatArtifact[prop.getKey] = prop.value;
+                })
+                return flatArtifact;
+            } else {
+                let flatArtifact = {
+                    type: this.#type,
+                    file: this.#file,
+                    repository: this.#repository,
+                    description: this.#description,
+                    deploy_path: this.#deployPath,
+                    artifact_version: this.#artifactVersion,
+                    checksum: this.#checksum,
+                    checksum_algorithm: this.#checksumAlgorithm
+                }
+                this.#properties.forEach(prop => {
+                    flatArtifact[prop.getKey] = prop.value;
+                })
+                return flatArtifact;
+            }
+        }
 
     setPropertyValue(propertyKey: EntityPropertyKey, propertyValue: any) {
         let propertyToSet = (this.#properties.find(property => property.getKey === propertyKey))
@@ -167,4 +220,4 @@ class Artifact {
 
 }
 
-export { Artifact, getAvailableArtifactTypes }
+export { Artifact, getAvailableArtifactTypes, getArtifactTypeProperties }
