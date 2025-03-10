@@ -471,7 +471,7 @@ const productFactors = {
         "relevantEntities": [ENTITIES.INFRASTRUCTURE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE],
         "sources": [{ "key": "Reznik2019", "section": "10 Automated Infrastructure" }, { "key": "Goniwada2021", "section": "5 Automation" }],
-        "measures": []
+        "measures": ["ratioOfAutomaticallyProvisionedInfrastructure"]
     },
     "useInfrastructureAsCode": {
         "name": "Use infrastructure as code",
@@ -1918,6 +1918,12 @@ const measures = {
         "calculation": "Average similarity of infrastructure entities based on a pairwise comparison of infrastructure artifacts.",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM]
+    },
+    "ratioOfAutomaticallyProvisionedInfrastructure": {
+        "name": "Ratio of automatically provisioned infrastructure",
+        "calculation": "Infrastructure entities that are provisioned automatically / All infrastructure entities",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE]
     }
 } satisfies { [measureKey: string]: MeasureSpec }
 

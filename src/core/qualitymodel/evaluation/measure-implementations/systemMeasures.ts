@@ -4,7 +4,7 @@ import { average, median, lowest, partition } from "./general-functions";
 import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, CUSTOM_SOFTWARE_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, EVENT_SOURCING_KIND, getEndpointKindWeight, getUsageRelationWeight, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MESSAGE_BROKER_KIND, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SEND_EVENT_ENDPOINT_KIND, SERVICE_MESH_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND, VAULT_KIND } from "../../specifications/featureModel";
 import { calculateRatioOfEndpointsSupportingSsl, calculateRatioOfExternalEndpointsSupportingTls, componentMeasureImplementations, numberOfAsynchronousEndpointsOfferedByAService, numberOfComponentsAComponentIsLinkedTo, numberOfSynchronousEndpointsOfferedByAService, providesHealthAndReadinessEndpoints, serviceCouplingBasedOnEndpointEntropy } from "./componentMeasures";
 import { numberOfCyclesInRequestTraces, requestTraceComplexity } from "./requestTraceMeasures";
-import { supportsMonitoring as infrastructureSupportsMonitoring } from "./infrastructureMeasures";
+import { supportsMonitoring as infrastructureSupportsMonitoring, ratioOfAutomaticallyProvisionedInfrastructure as infrastructureProvisionedAutomatically } from "./infrastructureMeasures";
 import { supportsMonitoring as componentSupportsMonitoring } from "./componentMeasures";
 import { serviceMeshUsage as componentServiceMeshUsage } from "./componentMeasures";
 import { map } from "jquery";
@@ -1920,6 +1920,12 @@ export const infrastructureArtifactsSimilarity: Calculation = (parameters: Calcu
     return average(comparisons);
 }
 
+export const ratioOfAutomaticallyProvisionedInfrastructure: Calculation = (parameters: CalculationParameters<System>) => {
+    
+    let automatedProvisioning: number[] = parameters.entity.getInfrastructureEntities.values().map(infrastructure => infrastructureProvisionedAutomatically({entity: infrastructure, system: parameters.system}) as number).toArray();
+
+    return average(automatedProvisioning);
+}
 
 export const systemMeasureImplementations: { [measureKey: string]: Calculation } = {
     "serviceReplicationLevel": serviceReplicationLevel,
@@ -2006,5 +2012,6 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation }
     "ratioOfStandardizedArtifacts": ratioOfStandardizedArtifacts,
     "ratioOfEntitiesProvidingStandardizedArtifacts": ratioOfEntitiesProvidingStandardizedArtifacts,
     "componentArtifactsSimilarity": componentArtifactsSimilarity,
-    "infrastructureArtifactsSimilarity": infrastructureArtifactsSimilarity
+    "infrastructureArtifactsSimilarity": infrastructureArtifactsSimilarity,
+    "ratioOfAutomaticallyProvisionedInfrastructure": ratioOfAutomaticallyProvisionedInfrastructure
 }

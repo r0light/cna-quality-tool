@@ -210,3 +210,21 @@ test("ratioOfEntitiesProvidingStandardizedArtifacts", () => {
     let measureValue = infrastructureMeasureImplementations["ratioOfStandardizedArtifacts"]({ entity: infrastructureA, system: system });
     expect(measureValue).toEqual(1);
 })
+
+
+test("ratioOfAutomaticallyProvisionedInfrastructure", () => {
+    let system = new System("sys1", "testSystem");
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure A", getEmptyMetaData());
+    infrastructureA.setPropertyValue("provisioning", "transparent");
+    let infrastructureB = new Infrastructure("i2", "infrastructure B", getEmptyMetaData());
+    let infrastructureC = new Infrastructure("i3", "infrastructure C", getEmptyMetaData());
+
+    let backingService = new BackingService("bs1", "auth service", getEmptyMetaData());
+
+    system.addEntities([infrastructureA, infrastructureB, infrastructureC]);
+    system.addEntities([backingService]);
+
+    let measureValue = infrastructureMeasureImplementations["ratioOfAutomaticallyProvisionedInfrastructure"]({ entity: infrastructureA, system: system });
+    expect(measureValue).toEqual(1);
+})

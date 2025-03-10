@@ -2881,3 +2881,22 @@ test("infrastructureArtifactsSimilarity", () => {
     let measureValue = systemMeasureImplementations["infrastructureArtifactsSimilarity"]({ entity: system, system: system });
     expect(measureValue).toEqual(1);
 })
+
+
+test("ratioOfAutomaticallyProvisionedInfrastructure", () => {
+    let system = new System("sys1", "testSystem");
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure A", getEmptyMetaData());
+    infrastructureA.setPropertyValue("provisioning", "transparent");
+    let infrastructureB = new Infrastructure("i2", "infrastructure B", getEmptyMetaData());
+    infrastructureB.setPropertyValue("provisioning", "transparent");
+    let infrastructureC = new Infrastructure("i3", "infrastructure C", getEmptyMetaData());
+
+    let backingService = new BackingService("bs1", "auth service", getEmptyMetaData());
+
+    system.addEntities([infrastructureA, infrastructureB, infrastructureC]);
+    system.addEntities([backingService]);
+
+    let measureValue = systemMeasureImplementations["ratioOfAutomaticallyProvisionedInfrastructure"]({ entity: system, system: system });
+    expect(measureValue).toEqual(2/3);
+})

@@ -1,6 +1,6 @@
 import { BackingService, Infrastructure } from "@/core/entities";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure";
-import { BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, ROLLING_UPDATE_STRATEGY_OPTIONS } from "../../specifications/featureModel";
+import { AUTOMATED_INFRASTRUCTURE_PROVISIONING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, ROLLING_UPDATE_STRATEGY_OPTIONS } from "../../specifications/featureModel";
 
 
 export const supportsMonitoring: (infrastructure: Infrastructure) => boolean = (infrastructure: Infrastructure) => {
@@ -156,6 +156,9 @@ export const ratioOfEntitiesProvidingStandardizedArtifacts: Calculation = (param
     return standardized.length > 0 ? 1 : 0;
 }
 
+export const ratioOfAutomaticallyProvisionedInfrastructure: Calculation = (parameters: CalculationParameters<Infrastructure>) => {
+    return AUTOMATED_INFRASTRUCTURE_PROVISIONING.includes(parameters.entity.getProperty("provisioning").value) ? 1 : 0;
+}
 
 
 export const infrastructureMeasureImplementations: { [measureKey: string]: Calculation } = {
@@ -165,5 +168,6 @@ export const infrastructureMeasureImplementations: { [measureKey: string]: Calcu
     "secretsExternalization": secretsExternalization,
     "configurationExternalization": configurationExternalization,
     "ratioOfStandardizedArtifacts": ratioOfStandardizedArtifacts,
-    "ratioOfEntitiesProvidingStandardizedArtifacts": ratioOfEntitiesProvidingStandardizedArtifacts
+    "ratioOfEntitiesProvidingStandardizedArtifacts": ratioOfEntitiesProvidingStandardizedArtifacts,
+    "ratioOfAutomaticallyProvisionedInfrastructure": ratioOfAutomaticallyProvisionedInfrastructure
 }

@@ -831,6 +831,6 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "accessRestrictedToCallers": accessRestrictedToCallers,
     "ratioOfDelegatedAuthentication": ratioOfDelegatedAuthentication,
     "ratioOfStandardizedArtifacts": ratioOfStandardizedArtifacts,
-    "ratioOfEntitiesProvidingStandardizedArtifacts": ratioOfEntitiesProvidingStandardizedArtifacts
+    "ratioOfEntitiesProvidingStandardizedArtifacts": ratioOfEntitiesProvidingStandardizedArtifacts,
 }
 
