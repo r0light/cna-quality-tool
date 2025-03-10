@@ -1874,6 +1874,53 @@ export const ratioOfEntitiesProvidingStandardizedArtifacts: Calculation = (param
     return providesStandardizedArtifact.size / (parameters.entity.getComponentEntities.size + parameters.entity.getInfrastructureEntities.size);
 }
 
+export const componentArtifactsSimilarity: Calculation = (parameters: CalculationParameters<System>) => {
+
+    let allComponents = [...parameters.entity.getComponentEntities.values()];
+
+    let comparisons = [];
+
+    for (const [index, componentA] of allComponents.entries()) {
+        if (index < allComponents.length - 1) {
+            for (const componentB of allComponents.slice(index+1)) {
+                let artifactTypesA = new Set(componentA.getArtifacts.entries().map(([artifactKey, artifact]) => artifact.getType()));
+                let artifactTypesB = new Set(componentB.getArtifacts.entries().map(([artifactKey, artifact]) => artifact.getType()));
+                if (artifactTypesA.union(artifactTypesB).size === 0) {
+                    comparisons.push(0);
+                } else {
+                    comparisons.push(artifactTypesA.intersection(artifactTypesB).size / (artifactTypesA.union(artifactTypesB).size));
+                }
+            }
+        }
+    }
+
+    return average(comparisons);
+}
+
+export const infrastructureArtifactsSimilarity: Calculation = (parameters: CalculationParameters<System>) => {
+
+    let allInfrastructure = [...parameters.entity.getInfrastructureEntities.values()];
+
+    let comparisons = [];
+
+    for (const [index, infrastructureA] of allInfrastructure.entries()) {
+        if (index < allInfrastructure.length - 1) {
+            for (const infrastructureB of allInfrastructure.slice(index+1)) {
+                let artifactTypesA = new Set(infrastructureA.getArtifacts.entries().map(([artifactKey, artifact]) => artifact.getType()));
+                let artifactTypesB = new Set(infrastructureB.getArtifacts.entries().map(([artifactKey, artifact]) => artifact.getType()));
+                if (artifactTypesA.union(artifactTypesB).size === 0) {
+                    comparisons.push(0);
+                } else {
+                    comparisons.push(artifactTypesA.intersection(artifactTypesB).size / (artifactTypesA.union(artifactTypesB).size));
+                }
+            }
+        }
+    }
+
+    return average(comparisons);
+}
+
+
 export const systemMeasureImplementations: { [measureKey: string]: Calculation } = {
     "serviceReplicationLevel": serviceReplicationLevel,
     "medianServiceReplication": medianServiceReplication,
@@ -1957,5 +2004,7 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation }
     "accessRestrictedToCallers": accessRestrictedToCallers,
     "ratioOfDelegatedAuthentication": ratioOfDelegatedAuthentication,
     "ratioOfStandardizedArtifacts": ratioOfStandardizedArtifacts,
-    "ratioOfEntitiesProvidingStandardizedArtifacts": ratioOfEntitiesProvidingStandardizedArtifacts
+    "ratioOfEntitiesProvidingStandardizedArtifacts": ratioOfEntitiesProvidingStandardizedArtifacts,
+    "componentArtifactsSimilarity": componentArtifactsSimilarity,
+    "infrastructureArtifactsSimilarity": infrastructureArtifactsSimilarity
 }

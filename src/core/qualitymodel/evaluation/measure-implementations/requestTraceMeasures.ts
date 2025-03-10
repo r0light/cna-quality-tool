@@ -684,6 +684,29 @@ export const ratioOfEntitiesProvidingStandardizedArtifacts: Calculation = (param
     return providesStandardizedArtifact.size / (includedComponentIds.length + supportingInfrastructure.size);
 }
 
+export const componentArtifactsSimilarity: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+
+    let includedComponents = getIncludedComponents(parameters.entity, parameters.system)
+
+    let comparisons = [];
+
+    for (const [index, componentA] of includedComponents.entries()) {
+        if (index < includedComponents.length - 1) {
+            for (const componentB of includedComponents.slice(index+1)) {
+                let artifactTypesA = new Set(componentA.getArtifacts.entries().map(([artifactKey, artifact]) => artifact.getType()));
+                let artifactTypesB = new Set(componentB.getArtifacts.entries().map(([artifactKey, artifact]) => artifact.getType()));
+                if (artifactTypesA.union(artifactTypesB).size === 0) {
+                    comparisons.push(0);
+                } else {
+                    comparisons.push(artifactTypesA.intersection(artifactTypesB).size / (artifactTypesA.union(artifactTypesB).size));
+                }
+            }
+        }
+    }
+
+    return average(comparisons);
+}
+
 export const requestTraceMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
     "ratioOfSecuredLinks": ratioOfSecuredLinks,
@@ -721,5 +744,6 @@ export const requestTraceMeasureImplementations: { [measureKey: string]: Calcula
     "ratioOfDelegatedAuthentication": ratioOfDelegatedAuthentication,
     "ratioOfStandardizedArtifacts": ratioOfStandardizedArtifacts,
     "ratioOfEntitiesProvidingStandardizedArtifacts": ratioOfEntitiesProvidingStandardizedArtifacts,
+    "componentArtifactsSimilarity": componentArtifactsSimilarity
 }
 

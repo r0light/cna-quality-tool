@@ -2806,3 +2806,78 @@ test("ratioOfEntitiesProvidingStandardizedArtifacts", () => {
     let measureValue = systemMeasureImplementations["ratioOfEntitiesProvidingStandardizedArtifacts"]({ entity: system, system: system });
     expect(measureValue).toEqual(1/3);
 })
+
+test("componentArtifactsSimilarity", () => {
+    let system = new System("sys1", "testSystem");
+
+    let serviceA = new Service("s1", "service A", getEmptyMetaData())
+    let propertiesA = getArtifactTypeProperties("Implementation.Java");
+    serviceA.setArtifact("art1", new Artifact(
+        "Implementation.Java",
+        "", "", "", "", "", "", "", propertiesA
+    ));
+
+    let serviceB = new Service("s2", "service B", getEmptyMetaData())
+    let propertiesB = getArtifactTypeProperties("Implementation.Java");
+    serviceB.setArtifact("art2", new Artifact(
+        "Implementation.Java",
+        "", "", "", "", "", "", "", propertiesB
+    ));
+
+    let serviceC = new Service("s3", "service C", getEmptyMetaData())
+    let propertiesC = getArtifactTypeProperties("Implementation.Python");
+    serviceC.setArtifact("art3", new Artifact(
+        "Implementation.Python",
+        "", "", "", "", "", "", "", propertiesC
+    ));
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure A", getEmptyMetaData());
+    let propertiesIB = getArtifactTypeProperties("Implementation.Java");
+    propertiesIB.find(prop => prop.getKey === "based_on_standard").value = "none";
+    infrastructureA.setArtifact("art2", new Artifact(
+        "Implementation.Java",
+        "", "", "", "", "", "", "", propertiesIB
+    ));
+
+    system.addEntities([infrastructureA]);
+    system.addEntities([serviceA, serviceB, serviceC]);
+
+    let measureValue = systemMeasureImplementations["componentArtifactsSimilarity"]({ entity: system, system: system });
+    expect(measureValue).toEqual(1/3);
+})
+
+
+test("infrastructureArtifactsSimilarity", () => {
+    let system = new System("sys1", "testSystem");
+
+    let serviceA = new Service("s1", "service A", getEmptyMetaData())
+    let propertiesA = getArtifactTypeProperties("Implementation.Java");
+    serviceA.setArtifact("art1", new Artifact(
+        "Implementation.Java",
+        "", "", "", "", "", "", "", propertiesA
+    ));
+
+    let infrastructureB = new Infrastructure("i1", "infrastructure A", getEmptyMetaData());
+    let propertiesB = getArtifactTypeProperties("Image.Container.OCI");
+    propertiesB.find(prop => prop.getKey === "based_on_standard").value = "OCI";
+    infrastructureB.setArtifact("art1", new Artifact(
+        "Image.Container.OCI",
+        "", "", "", "", "", "", "", propertiesB
+    ));
+
+    let infrastructureC = new Infrastructure("i2", "infrastructure B", getEmptyMetaData());
+    let propertiesC = getArtifactTypeProperties("Image.Container.OCI");
+    propertiesC.find(prop => prop.getKey === "based_on_standard").value = "OCI";
+    infrastructureC.setArtifact("art1", new Artifact(
+        "Image.Container.OCI",
+        "", "", "", "", "", "", "", propertiesC
+    ));
+
+    let backingService = new BackingService("bs1", "auth service", getEmptyMetaData());
+
+    system.addEntities([infrastructureB, infrastructureC]);
+    system.addEntities([serviceA, backingService]);
+
+    let measureValue = systemMeasureImplementations["infrastructureArtifactsSimilarity"]({ entity: system, system: system });
+    expect(measureValue).toEqual(1);
+})

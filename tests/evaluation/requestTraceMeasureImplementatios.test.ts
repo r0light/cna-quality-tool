@@ -1857,3 +1857,59 @@ test("ratioOfEntitiesProvidingStandardizedArtifacts", () => {
     let measureValue = requestTraceMeasureImplementations["ratioOfEntitiesProvidingStandardizedArtifacts"]({ entity: requestTrace, system: system });
     expect(measureValue).toEqual(2/5);
 })
+
+test("componentArtifactsSimilarity", () => {
+    let system = new System("sys1", "testSystem");;
+    let infrastructureA = new Infrastructure("i1", "Infrastructure 1", getEmptyMetaData());
+    let propertiesA = getArtifactTypeProperties("Image.Container.OCI");
+    propertiesA.find(prop => prop.getKey === "based_on_standard").value = "OCI";
+    infrastructureA.setArtifact("art1", new Artifact(
+        "Image.Container.OCI",
+        "", "", "", "", "", "", "", propertiesA
+    ));
+    let infrastructureB = new Infrastructure("i2", "Infrastruture B", getEmptyMetaData());
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA);
+    serviceA.addEndpoint(externalEndpointA);
+    let propertiesB = getArtifactTypeProperties("Implementation.Java");
+    serviceA.setArtifact("art1", new Artifact(
+        "Implementation.Java",
+        "", "", "", "", "", "", "", propertiesB
+    ));
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+    let propertiesC = getArtifactTypeProperties("Implementation.Java");
+    serviceC.setArtifact("art2", new Artifact(
+        "Implementation.Java",
+        "", "", "", "", "", "", "", propertiesC
+    ));
+
+    let deploymentMappingAA = new DeploymentMapping("dm1", serviceA, infrastructureA);
+    let deploymentMappingBB = new DeploymentMapping("dm2", serviceB, infrastructureB);
+    let deploymentMappingCA = new DeploymentMapping("dm6", serviceC, infrastructureA);
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+    let linkBC = new Link("l2", serviceB, endpointC);
+
+    let requestTrace = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
+    requestTrace.setLinks = [[linkAB], [linkBC]];
+    requestTrace.setExternalEndpoint = externalEndpointA;
+
+    system.addEntities([infrastructureA, infrastructureB]);
+    system.addEntities([serviceA, serviceB, serviceC]);
+    system.addEntities([deploymentMappingAA, deploymentMappingBB, deploymentMappingCA]);
+    system.addEntities([linkAB, linkBC]);
+    system.addEntity(requestTrace);
+
+    let measureValue = requestTraceMeasureImplementations["componentArtifactsSimilarity"]({ entity: requestTrace, system: system });
+    expect(measureValue).toEqual(1/3);
+})

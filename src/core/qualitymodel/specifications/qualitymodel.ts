@@ -417,7 +417,7 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE, ENTITIES.INFRASTRUCTURE],
         "sources": [{ "key": "Reznik2019", "section": "9 Reference Architecture" }],
-        "measures": []
+        "measures": ["componentArtifactsSimilarity", "infrastructureArtifactsSimilarity"]
     },
     "automatedMonitoring": {
         "name": "Automated Monitoring",
@@ -1906,6 +1906,18 @@ const measures = {
         "calculation": "Components and infrastructure entities having a standardized artifact / All components and infrastructure entities",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE]
+    },
+    "componentArtifactsSimilarity": {
+        "name": "Component Artifacts Similarity",
+        "calculation": "Average similarity of components based on a pairwise comparison of component artifacts.",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE]
+    },
+    "infrastructureArtifactsSimilarity": {
+        "name": "Infrastructure Artifacts Similarity",
+        "calculation": "Average similarity of infrastructure entities based on a pairwise comparison of infrastructure artifacts.",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM]
     }
 } satisfies { [measureKey: string]: MeasureSpec }
 
