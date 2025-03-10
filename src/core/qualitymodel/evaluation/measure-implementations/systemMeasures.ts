@@ -8,6 +8,7 @@ import { supportsMonitoring as infrastructureSupportsMonitoring } from "./infras
 import { supportsMonitoring as componentSupportsMonitoring } from "./componentMeasures";
 import { serviceMeshUsage as componentServiceMeshUsage } from "./componentMeasures";
 import { map } from "jquery";
+import { Artifact } from "@/core/common/artifact";
 
 
 export const countComponentsConnectedToCertainEndpoints: (components: Component[], endpointIds: Set<string>, system: System) => number = (components, endpointIds, system) => {
@@ -1822,6 +1823,57 @@ export const ratioOfDelegatedAuthentication: Calculation = (parameters: Calculat
 
 }
 
+export const ratioOfStandardizedArtifacts: Calculation = (parameters: CalculationParameters<System>) => {
+
+    let allArtifacts = new Map<string, Artifact>();
+
+    parameters.entity.getComponentEntities.entries().forEach(([componentKey, component]) => {
+        component.getArtifacts.entries().forEach(([artifactKey, artifact]) => {
+            allArtifacts.set(`${componentKey}-${artifactKey}`, artifact);
+        })
+    })
+
+    parameters.entity.getInfrastructureEntities.entries().forEach(([infrastructureKey, infrastructure]) => {
+        infrastructure.getArtifacts.entries().forEach(([artifactKey, artifact]) => {
+            allArtifacts.set(`${infrastructureKey}-${artifactKey}`, artifact);
+        })
+    })
+
+    if (allArtifacts.size === 0) {
+        return "n/a";
+    }
+
+    let standardized = allArtifacts.entries().filter(([key, artifact]) => artifact.getProperty("based_on_standard") && artifact.getProperty("based_on_standard").value !== "none").toArray();
+
+    return standardized.length / allArtifacts.size;
+}
+
+export const ratioOfEntitiesProvidingStandardizedArtifacts: Calculation = (parameters: CalculationParameters<System>) => {
+
+
+    let providesStandardizedArtifact = new Set<string>();
+
+    if (parameters.entity.getComponentEntities.size + parameters.entity.getInfrastructureEntities.size === 0) {
+        return "n/a";
+    }
+
+    parameters.entity.getComponentEntities.entries().forEach(([componentKey, component]) => {
+        let standardizedArtifacts = component.getArtifacts.entries().filter(([key, artifact]) => artifact.getProperty("based_on_standard") && artifact.getProperty("based_on_standard").value !== "none").toArray();
+        if (standardizedArtifacts.length > 0) {
+            providesStandardizedArtifact.add(componentKey);
+        }
+    })
+
+    parameters.entity.getInfrastructureEntities.entries().forEach(([infrastructureKey, infrastructure]) => {
+        let standardizedArtifacts = infrastructure.getArtifacts.entries().filter(([key, artifact]) => artifact.getProperty("based_on_standard") && artifact.getProperty("based_on_standard").value !== "none").toArray();
+        if (standardizedArtifacts.length > 0) {
+            providesStandardizedArtifact.add(infrastructureKey);
+        }
+    })
+
+    return providesStandardizedArtifact.size / (parameters.entity.getComponentEntities.size + parameters.entity.getInfrastructureEntities.size);
+}
+
 export const systemMeasureImplementations: { [measureKey: string]: Calculation } = {
     "serviceReplicationLevel": serviceReplicationLevel,
     "medianServiceReplication": medianServiceReplication,
@@ -1903,5 +1955,7 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation }
     "ratioOfNonCustomBackingServices": ratioOfNonCustomBackingServices,
     "secretsStoredInVault": secretsStoredInVault,
     "accessRestrictedToCallers": accessRestrictedToCallers,
-    "ratioOfDelegatedAuthentication": ratioOfDelegatedAuthentication
+    "ratioOfDelegatedAuthentication": ratioOfDelegatedAuthentication,
+    "ratioOfStandardizedArtifacts": ratioOfStandardizedArtifacts,
+    "ratioOfEntitiesProvidingStandardizedArtifacts": ratioOfEntitiesProvidingStandardizedArtifacts
 }

@@ -7,6 +7,7 @@ import { BACKING_DATA_CONFIG_KIND, BACKING_DATA_SECRET_KIND, DATA_USAGE_RELATION
 import { supportsMonitoring as infrastructureSupportsMonitoring } from "./infrastructureMeasures";
 import { supportsMonitoring as componentSupportsMonitoring } from "./componentMeasures";
 import { serviceMeshUsage as componentServiceMeshUsage } from "./componentMeasures";
+import { Artifact } from "@/core/common/artifact";
 
 export const getIncludedComponents: (requestTrace: RequestTrace, system: System) => Component[] = (requestTrace, system) => {
     let includedUniqueComponents = new Set(requestTrace.getLinks
@@ -617,6 +618,72 @@ export const ratioOfDelegatedAuthentication: Calculation = (parameters: Calculat
 
 }
 
+export const ratioOfStandardizedArtifacts: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+
+    let allArtifacts = new Map<string, Artifact>();
+
+    let includedComponentIds = getIncludedComponents(parameters.entity, parameters.system).map(component => component.getId);
+    let supportingInfrastructure = new Set<Infrastructure>();
+    for (const [deploymentMappingId, deploymentMapping] of parameters.system.getDeploymentMappingEntities.entries()) {
+        if (includedComponentIds.includes(deploymentMapping.getDeployedEntity.getId)) {
+            supportingInfrastructure.add(deploymentMapping.getUnderlyingInfrastructure);
+        }
+    }
+
+    getIncludedComponents(parameters.entity, parameters.system).forEach((component) => {
+        component.getArtifacts.entries().forEach(([artifactKey, artifact]) => {
+            allArtifacts.set(`${component.getId}-${artifactKey}`, artifact);
+        })
+    })
+
+    supportingInfrastructure.forEach(infrastructure => {
+        infrastructure.getArtifacts.entries().forEach(([artifactKey, artifact]) => {
+            allArtifacts.set(`${infrastructure.getId}-${artifactKey}`, artifact);
+        })
+    })
+
+    if (allArtifacts.size === 0) {
+        return "n/a";
+    }
+
+    let standardized = allArtifacts.entries().filter(([key, artifact]) => artifact.getProperty("based_on_standard") && artifact.getProperty("based_on_standard").value !== "none").toArray();
+
+    return standardized.length / allArtifacts.size;
+}
+
+export const ratioOfEntitiesProvidingStandardizedArtifacts: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+
+    let includedComponentIds = getIncludedComponents(parameters.entity, parameters.system).map(component => component.getId);
+    let supportingInfrastructure = new Set<Infrastructure>();
+    for (const [deploymentMappingId, deploymentMapping] of parameters.system.getDeploymentMappingEntities.entries()) {
+        if (includedComponentIds.includes(deploymentMapping.getDeployedEntity.getId)) {
+            supportingInfrastructure.add(deploymentMapping.getUnderlyingInfrastructure);
+        }
+    }
+
+    let providesStandardizedArtifact = new Set<string>();
+
+    if (getIncludedComponents(parameters.entity, parameters.system).length + supportingInfrastructure.size === 0) {
+        return "n/a";
+    }
+
+    getIncludedComponents(parameters.entity, parameters.system).forEach(component => {
+        let standardizedArtifacts = component.getArtifacts.entries().filter(([key, artifact]) => artifact.getProperty("based_on_standard") && artifact.getProperty("based_on_standard").value !== "none").toArray();
+        if (standardizedArtifacts.length > 0) {
+            providesStandardizedArtifact.add(component.getId);
+        }
+    })
+
+    supportingInfrastructure.forEach(infrastructure => {
+        let standardizedArtifacts = infrastructure.getArtifacts.entries().filter(([key, artifact]) => artifact.getProperty("based_on_standard") && artifact.getProperty("based_on_standard").value !== "none").toArray();
+        if (standardizedArtifacts.length > 0) {
+            providesStandardizedArtifact.add(infrastructure.getId);
+        }
+    })
+
+    return providesStandardizedArtifact.size / (includedComponentIds.length + supportingInfrastructure.size);
+}
+
 export const requestTraceMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
     "ratioOfSecuredLinks": ratioOfSecuredLinks,
@@ -651,6 +718,8 @@ export const requestTraceMeasureImplementations: { [measureKey: string]: Calcula
     "suitablyReplicatedStatefulService": suitablyReplicatedStatefulService,
     "ratioOfUniqueAccountUsage": ratioOfUniqueAccountUsage,
     "accessRestrictedToCallers": accessRestrictedToCallers,
-    "ratioOfDelegatedAuthentication": ratioOfDelegatedAuthentication
+    "ratioOfDelegatedAuthentication": ratioOfDelegatedAuthentication,
+    "ratioOfStandardizedArtifacts": ratioOfStandardizedArtifacts,
+    "ratioOfEntitiesProvidingStandardizedArtifacts": ratioOfEntitiesProvidingStandardizedArtifacts,
 }
 

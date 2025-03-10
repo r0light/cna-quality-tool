@@ -1,3 +1,4 @@
+import { Artifact, getArtifactTypeProperties } from "@/core/common/artifact";
 import { getEmptyMetaData } from "@/core/common/entityDataTypes";
 import { BackingData, BackingService, BrokerBackingService, Component, DataAggregate, DeploymentMapping, Endpoint, ExternalEndpoint, Infrastructure, Link, ProxyBackingService, RequestTrace, Service, StorageBackingService, System } from "@/core/entities";
 import { RelationToBackingData } from "@/core/entities/relationToBackingData";
@@ -2741,4 +2742,67 @@ test("ratioOfDelegatedAuthentication", () => {
 
     let measureValue = systemMeasureImplementations["ratioOfDelegatedAuthentication"]({ entity: system, system: system });
     expect(measureValue).toEqual(2/3);
+})
+
+
+test("ratioOfStandardizedArtifacts", () => {
+    let system = new System("sys1", "testSystem");
+
+    let serviceA = new Service("s1", "service A", getEmptyMetaData())
+    let propertiesA = getArtifactTypeProperties("Image.Container.OCI");
+    propertiesA.find(prop => prop.getKey === "based_on_standard").value = "OCI";
+    serviceA.setArtifact("art1", new Artifact(
+        "Image.Container.OCI",
+        "", "", "", "", "", "", "", propertiesA
+    ));
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure A", getEmptyMetaData())
+    let propertiesIA = getArtifactTypeProperties("Image.Container.OCI");
+    propertiesIA.find(prop => prop.getKey === "based_on_standard").value = "OCI";
+    infrastructureA.setArtifact("art1", new Artifact(
+        "Image.Container.OCI",
+        "", "", "", "", "", "", "", propertiesIA
+    ));
+    let propertiesIB = getArtifactTypeProperties("Implementation.Java");
+    propertiesIB.find(prop => prop.getKey === "based_on_standard").value = "none";
+    infrastructureA.setArtifact("art2", new Artifact(
+        "Implementation.Java",
+        "", "", "", "", "", "", "", propertiesIB
+    ));
+
+    let backingService = new BackingService("bs1", "auth service", getEmptyMetaData());
+
+    system.addEntities([infrastructureA]);
+    system.addEntities([serviceA, backingService]);
+
+    let measureValue = systemMeasureImplementations["ratioOfStandardizedArtifacts"]({ entity: system, system: system });
+    expect(measureValue).toEqual(2/3);
+})
+
+test("ratioOfEntitiesProvidingStandardizedArtifacts", () => {
+    let system = new System("sys1", "testSystem");
+
+    let serviceA = new Service("s1", "service A", getEmptyMetaData())
+    let propertiesA = getArtifactTypeProperties("Image.Container.OCI");
+    propertiesA.find(prop => prop.getKey === "based_on_standard").value = "OCI";
+    serviceA.setArtifact("art1", new Artifact(
+        "Image.Container.OCI",
+        "", "", "", "", "", "", "", propertiesA
+    ));
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure A", getEmptyMetaData());
+    let propertiesIB = getArtifactTypeProperties("Implementation.Java");
+    propertiesIB.find(prop => prop.getKey === "based_on_standard").value = "none";
+    infrastructureA.setArtifact("art2", new Artifact(
+        "Implementation.Java",
+        "", "", "", "", "", "", "", propertiesIB
+    ));
+
+    let backingService = new BackingService("bs1", "auth service", getEmptyMetaData());
+
+    system.addEntities([infrastructureA]);
+    system.addEntities([serviceA, backingService]);
+
+    let measureValue = systemMeasureImplementations["ratioOfEntitiesProvidingStandardizedArtifacts"]({ entity: system, system: system });
+    expect(measureValue).toEqual(1/3);
 })

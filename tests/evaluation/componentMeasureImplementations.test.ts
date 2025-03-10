@@ -1,4 +1,6 @@
+import { Artifact, getArtifactTypeProperties } from "@/core/common/artifact";
 import { getEmptyMetaData } from "@/core/common/entityDataTypes";
+import { EntityProperty } from "@/core/common/entityProperty";
 import { BackingData, BackingService, DataAggregate, DeploymentMapping, Endpoint, ExternalEndpoint, Infrastructure, Link, ProxyBackingService, Service, StorageBackingService, System } from "@/core/entities";
 import { RelationToBackingData } from "@/core/entities/relationToBackingData";
 import { RelationToDataAggregate } from "@/core/entities/relationToDataAggregate";
@@ -1516,5 +1518,43 @@ test("ratioOfDelegatedAuthentication", () => {
     system.addEntities([serviceA, backingService]);
 
     let measureValue = componentMeasureImplementations["ratioOfDelegatedAuthentication"]({ entity: serviceA, system: system });
+    expect(measureValue).toEqual(1);
+})
+
+test("ratioOfStandardizedArtifacts", () => {
+    let system = new System("sys1", "testSystem");
+
+    let serviceA = new Service("s1", "service A", getEmptyMetaData())
+    let propertiesA = getArtifactTypeProperties("Image.Container.OCI");
+    propertiesA.find(prop => prop.getKey === "based_on_standard").value = "OCI";
+    serviceA.setArtifact("art1", new Artifact(
+        "Image.Container.OCI",
+        "", "", "", "", "", "", "", propertiesA
+    ));
+
+    let backingService = new BackingService("bs1", "auth service", getEmptyMetaData());
+
+    system.addEntities([serviceA, backingService]);
+
+    let measureValue = componentMeasureImplementations["ratioOfStandardizedArtifacts"]({ entity: serviceA, system: system });
+    expect(measureValue).toEqual(1);
+})
+
+test("ratioOfEntitiesProvidingStandardizedArtifacts", () => {
+    let system = new System("sys1", "testSystem");
+
+    let serviceA = new Service("s1", "service A", getEmptyMetaData())
+    let propertiesA = getArtifactTypeProperties("Image.Container.OCI");
+    propertiesA.find(prop => prop.getKey === "based_on_standard").value = "OCI";
+    serviceA.setArtifact("art1", new Artifact(
+        "Image.Container.OCI",
+        "", "", "", "", "", "", "", propertiesA
+    ));
+
+    let backingService = new BackingService("bs1", "auth service", getEmptyMetaData());
+
+    system.addEntities([serviceA, backingService]);
+
+    let measureValue = componentMeasureImplementations["ratioOfStandardizedArtifacts"]({ entity: serviceA, system: system });
     expect(measureValue).toEqual(1);
 })

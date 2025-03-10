@@ -408,7 +408,7 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.ENDPOINT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
         "sources": [],
-        "measures": []
+        "measures": ["ratioOfStandardizedArtifacts", "ratioOfEntitiesProvidingStandardizedArtifacts"]
     },
     "componentSimilarity": {
         "name": "Component similarity",
@@ -1894,6 +1894,18 @@ const measures = {
         "calculation": "Component delegating authentication / All components (excluding authentication backing services)",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE]
+    },
+    "ratioOfStandardizedArtifacts": {
+        "name": "Ratio of standardized artifacts",
+        "calculation": "Artifacts complying to a standard / All artifacts",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE]
+    },
+    "ratioOfEntitiesProvidingStandardizedArtifacts": {
+        "name": "Ratio of entities providing standardized artifacts",
+        "calculation": "Components and infrastructure entities having a standardized artifact / All components and infrastructure entities",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE]
     }
 } satisfies { [measureKey: string]: MeasureSpec }
 

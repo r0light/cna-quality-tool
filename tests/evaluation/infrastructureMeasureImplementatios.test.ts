@@ -1,3 +1,4 @@
+import { Artifact, getArtifactTypeProperties } from "@/core/common/artifact";
 import { getEmptyMetaData } from "@/core/common/entityDataTypes";
 import { BackingData, BackingService, DeploymentMapping, Infrastructure, Service, System } from "@/core/entities";
 import { RelationToBackingData } from "@/core/entities/relationToBackingData";
@@ -168,4 +169,44 @@ test("configurationExternalization", () => {
     expect(measureValue).toEqual(2 / 3);
 
 
+})
+
+test("ratioOfStandardizedArtifacts", () => {
+    let system = new System("sys1", "testSystem");
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure A", getEmptyMetaData())
+    let propertiesA = getArtifactTypeProperties("Image.Container.OCI");
+    propertiesA.find(prop => prop.getKey === "based_on_standard").value = "OCI";
+    infrastructureA.setArtifact("art1", new Artifact(
+        "Image.Container.OCI",
+        "", "", "", "", "", "", "", propertiesA
+    ));
+
+    let backingService = new BackingService("bs1", "auth service", getEmptyMetaData());
+
+    system.addEntities([infrastructureA]);
+    system.addEntities([backingService]);
+
+    let measureValue = infrastructureMeasureImplementations["ratioOfStandardizedArtifacts"]({ entity: infrastructureA, system: system });
+    expect(measureValue).toEqual(1);
+})
+
+test("ratioOfEntitiesProvidingStandardizedArtifacts", () => {
+    let system = new System("sys1", "testSystem");
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure A", getEmptyMetaData())
+    let propertiesA = getArtifactTypeProperties("Image.Container.OCI");
+    propertiesA.find(prop => prop.getKey === "based_on_standard").value = "OCI";
+    infrastructureA.setArtifact("art1", new Artifact(
+        "Image.Container.OCI",
+        "", "", "", "", "", "", "", propertiesA
+    ));
+
+    let backingService = new BackingService("bs1", "auth service", getEmptyMetaData());
+
+    system.addEntities([infrastructureA]);
+    system.addEntities([backingService]);
+
+    let measureValue = infrastructureMeasureImplementations["ratioOfStandardizedArtifacts"]({ entity: infrastructureA, system: system });
+    expect(measureValue).toEqual(1);
 })

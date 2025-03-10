@@ -131,11 +131,39 @@ export const configurationExternalization: Calculation = (parameters: Calculatio
 
 }
 
+export const ratioOfStandardizedArtifacts: Calculation = (parameters: CalculationParameters<Infrastructure>) => {
+    let artifacts = parameters.entity.getArtifacts;
+
+    if (artifacts.size === 0) {
+        return "n/a";
+    }
+
+    let standardized = artifacts.entries().filter(([key, artifact]) => artifact.getProperty("based_on_standard") && artifact.getProperty("based_on_standard").value !== "none").toArray();
+
+    return standardized.length / artifacts.size;
+}
+
+export const ratioOfEntitiesProvidingStandardizedArtifacts: Calculation = (parameters: CalculationParameters<Infrastructure>) => {
+
+    let artifacts = parameters.entity.getArtifacts;
+
+    if (artifacts.size === 0) {
+        return "n/a";
+    }
+
+    let standardized = artifacts.entries().filter(([key, artifact]) => artifact.getProperty("based_on_standard") && artifact.getProperty("based_on_standard").value !== "none").toArray();
+
+    return standardized.length > 0 ? 1 : 0;
+}
+
+
 
 export const infrastructureMeasureImplementations: { [measureKey: string]: Calculation } = {
     "numberOfServiceHostedOnOneInfrastructure": numberOfServiceHostedOnOneInfrastructure,
     "numberOfAvailabilityZonesUsed": numberOfAvailabilityZonesUsed,
     "rollingUpdateOption": rollingUpdateOption,
     "secretsExternalization": secretsExternalization,
-    "configurationExternalization": configurationExternalization
+    "configurationExternalization": configurationExternalization,
+    "ratioOfStandardizedArtifacts": ratioOfStandardizedArtifacts,
+    "ratioOfEntitiesProvidingStandardizedArtifacts": ratioOfEntitiesProvidingStandardizedArtifacts
 }

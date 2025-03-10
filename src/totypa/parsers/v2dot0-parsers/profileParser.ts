@@ -145,6 +145,11 @@ export async function startParsing() {
             }).forEach((propertyKey) => {
                 allPropertyKeys.add(propertyKey)
             });
+            Object.entries(mergedProfiles.artifact_types).flatMap(([artifactKey, artifact]) => {
+                return artifact.properties ? Object.keys(artifact.properties) : [] 
+            }).forEach((propertyKey) => {
+                allPropertyKeys.add(propertyKey)
+            });
 
             let propertyKeysOutput = `export type EntityPropertyKey = ${allPropertyKeys.entries().map(([v1,v2]) => `"${v1}"`).toArray().join(" | ")};`;
 

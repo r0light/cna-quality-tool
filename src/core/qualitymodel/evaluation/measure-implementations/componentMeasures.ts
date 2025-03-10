@@ -753,7 +753,32 @@ export const ratioOfDelegatedAuthentication: Calculation = (parameters: Calculat
     } else {
         return 0;
     }
+}
 
+export const ratioOfStandardizedArtifacts: Calculation = (parameters: CalculationParameters<Component>) => {
+
+    let artifacts = parameters.entity.getArtifacts;
+
+    if (artifacts.size === 0) {
+        return "n/a";
+    }
+
+    let standardized = artifacts.entries().filter(([key, artifact]) => artifact.getProperty("based_on_standard") && artifact.getProperty("based_on_standard").value !== "none").toArray();
+
+    return standardized.length / artifacts.size;
+}
+
+export const ratioOfEntitiesProvidingStandardizedArtifacts: Calculation = (parameters: CalculationParameters<Component>) => {
+
+    let artifacts = parameters.entity.getArtifacts;
+
+    if (artifacts.size === 0) {
+        return "n/a";
+    }
+
+    let standardized = artifacts.entries().filter(([key, artifact]) => artifact.getProperty("based_on_standard") && artifact.getProperty("based_on_standard").value !== "none").toArray();
+
+    return standardized.length > 0 ? 1 : 0;
 }
 
 export const componentMeasureImplementations: { [measureKey: string]: Calculation } = {
@@ -804,6 +829,8 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "ratioOfNonCustomBackingServices": ratioOfNonCustomBackingServices,
     "secretsStoredInVault": secretsStoredInVault,
     "accessRestrictedToCallers": accessRestrictedToCallers,
-    "ratioOfDelegatedAuthentication": ratioOfDelegatedAuthentication
+    "ratioOfDelegatedAuthentication": ratioOfDelegatedAuthentication,
+    "ratioOfStandardizedArtifacts": ratioOfStandardizedArtifacts,
+    "ratioOfEntitiesProvidingStandardizedArtifacts": ratioOfEntitiesProvidingStandardizedArtifacts
 }
 
