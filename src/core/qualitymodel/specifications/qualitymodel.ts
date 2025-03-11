@@ -534,7 +534,7 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.LINK, ENTITIES.REQUEST_TRACE, ENTITIES.NETWORK],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Scholl2019", "section": "6 Use Namespaces to Organize Services in Kubernetes" }, { "key": "Arundel2019", "section": "5 Using Namespaces" }, { "key": "Indrasiri2021", "section": "1 Why container orchestration?; Componentization and isolation" }],
-        "measures": []
+        "measures": ["namespaceSeparation"]
     },
     "backingServiceDecentralization": {
         "name": "Backing service decentralization",
@@ -1936,6 +1936,12 @@ const measures = {
         "calculation": "Infrastructure entities with an IaC artifact / All infrastructure entities",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE]
+    },
+    "namespaceSeparation": {
+        "name": "Namespace Separation",
+        "calculation": "1 - (Average sharing of namespaces)",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT]
     }
 } satisfies { [measureKey: string]: MeasureSpec }
 

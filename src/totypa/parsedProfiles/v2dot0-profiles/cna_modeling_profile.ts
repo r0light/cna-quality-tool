@@ -1231,6 +1231,12 @@ export const cna_modeling_profile: TOSCA_File = {
           "description": "The identifier of the account with which this component is executed.",
           "default": "default-account",
           "required": true
+        },
+        "namespace": {
+          "type": "string",
+          "description": "If the underlying infrastructure enables the usage of namespaces, this can be specified here to logically group components. If not, everything is in the same default namespace",
+          "default": "default",
+          "required": false
         }
       },
       "requirements": [
@@ -1401,6 +1407,12 @@ export const cna_modeling_profile: TOSCA_File = {
           "description": "The identifier of the account with which this component is executed.",
           "default": "default-account",
           "required": true
+        },
+        "namespace": {
+          "type": "string",
+          "description": "If the underlying infrastructure enables the usage of namespaces, this can be specified here to logically group components. If not, everything is in the same default namespace",
+          "default": "default",
+          "required": false
         }
       },
       "requirements": [
@@ -1572,6 +1584,12 @@ export const cna_modeling_profile: TOSCA_File = {
           "description": "The identifier of the account with which this component is executed.",
           "default": "default-account",
           "required": true
+        },
+        "namespace": {
+          "type": "string",
+          "description": "If the underlying infrastructure enables the usage of namespaces, this can be specified here to logically group components. If not, everything is in the same default namespace",
+          "default": "default",
+          "required": false
         },
         "providedFunctionality": {
           "type": "string",
@@ -1805,6 +1823,12 @@ export const cna_modeling_profile: TOSCA_File = {
           "default": "default-account",
           "required": true
         },
+        "namespace": {
+          "type": "string",
+          "description": "If the underlying infrastructure enables the usage of namespaces, this can be specified here to logically group components. If not, everything is in the same default namespace",
+          "default": "default",
+          "required": false
+        },
         "kind": {
           "type": "string",
           "description": "The kind of proxy this is.",
@@ -2005,6 +2029,12 @@ export const cna_modeling_profile: TOSCA_File = {
           "description": "The identifier of the account with which this component is executed.",
           "default": "default-account",
           "required": true
+        },
+        "namespace": {
+          "type": "string",
+          "description": "If the underlying infrastructure enables the usage of namespaces, this can be specified here to logically group components. If not, everything is in the same default namespace",
+          "default": "default",
+          "required": false
         },
         "kind": {
           "type": "string",
@@ -2208,6 +2238,12 @@ export const cna_modeling_profile: TOSCA_File = {
           "description": "The identifier of the account with which this component is executed.",
           "default": "default-account",
           "required": true
+        },
+        "namespace": {
+          "type": "string",
+          "description": "If the underlying infrastructure enables the usage of namespaces, this can be specified here to logically group components. If not, everything is in the same default namespace",
+          "default": "default",
+          "required": false
         },
         "name": {
           "type": "string",

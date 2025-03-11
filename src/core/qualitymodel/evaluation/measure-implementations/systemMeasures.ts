@@ -6,7 +6,7 @@ import { calculateRatioOfEndpointsSupportingSsl, calculateRatioOfExternalEndpoin
 import { numberOfCyclesInRequestTraces, requestTraceComplexity } from "./requestTraceMeasures";
 import { supportsMonitoring as infrastructureSupportsMonitoring, ratioOfAutomaticallyProvisionedInfrastructure as infrastructureProvisionedAutomatically } from "./infrastructureMeasures";
 import { supportsMonitoring as componentSupportsMonitoring } from "./componentMeasures";
-import { serviceMeshUsage as componentServiceMeshUsage } from "./componentMeasures";
+import { serviceMeshUsage as componentServiceMeshUsage, namespaceSeparation as componentNamespaceSeparation } from "./componentMeasures";
 import { map } from "jquery";
 import { Artifact } from "@/core/common/artifact";
 
@@ -1965,6 +1965,17 @@ export const ratioOfInfrastructureWithIaCArtifact: Calculation = (parameters: Ca
     return hasIaCArtifact.length / infrastructureEntities.length; 
 }
 
+export const namespaceSeparation: Calculation = (parameters: CalculationParameters<System>) => {
+
+    if (parameters.entity.getComponentEntities.entries().toArray().length === 0) {
+        return "n/a";
+    }
+
+    let componentNamespaceSeparations = parameters.entity.getComponentEntities.entries().map(([componentKey, component]) => componentNamespaceSeparation({entity: component, system: parameters.system})).toArray() as number[];
+
+    return average(componentNamespaceSeparations);
+}
+
 export const systemMeasureImplementations: { [measureKey: string]: Calculation } = {
     "serviceReplicationLevel": serviceReplicationLevel,
     "medianServiceReplication": medianServiceReplication,
@@ -2053,5 +2064,6 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation }
     "infrastructureArtifactsSimilarity": infrastructureArtifactsSimilarity,
     "ratioOfAutomaticallyProvisionedInfrastructure": ratioOfAutomaticallyProvisionedInfrastructure,
     "ratioOfDeploymentsOnDynamicInfrastructure": ratioOfDeploymentsOnDynamicInfrastructure,
-    "ratioOfInfrastructureWithIaCArtifact": ratioOfInfrastructureWithIaCArtifact
+    "ratioOfInfrastructureWithIaCArtifact": ratioOfInfrastructureWithIaCArtifact,
+    "namespaceSeparation": namespaceSeparation
 }

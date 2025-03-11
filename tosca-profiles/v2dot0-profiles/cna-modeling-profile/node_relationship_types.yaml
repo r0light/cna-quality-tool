@@ -169,6 +169,11 @@ node_types:
         description: The identifier of the account with which this component is executed.
         default: default-account
         required: true
+      namespace:
+        type: string
+        description: If the underlying infrastructure enables the usage of namespaces, this can be specified here to logically group components. If not, everything is in the same default namespace
+        default: default
+        required: false
     requirements:
       - host:
           capability: cna-modeling.capabilities.Host

@@ -800,6 +800,30 @@ export const ratioOfDeploymentsOnDynamicInfrastructure: Calculation = (parameter
     return dynamicDeployment.length / deployedOnInfrastructure.length;
 }
 
+export const namespaceSeparation: Calculation = (parameters: CalculationParameters<Component>) => {
+
+    let allOtherComponents = parameters.system.getComponentEntities.entries().filter(([componentKey, component]) => {
+        return componentKey !== parameters.entity.getId
+    }).toArray(); 
+
+    if (allOtherComponents.length === 0) {
+        return "n/a";
+    }
+
+    let sharedNamespace = []
+
+    for (const [componentKey, component] of allOtherComponents) {
+        if (parameters.entity.getProperty("namespace").value === component.getProperty("namespace").value) {
+            sharedNamespace.push(1);
+        } else {
+            sharedNamespace.push(0);
+        }
+
+    }
+
+    return 1 - average(sharedNamespace);
+}
+
 export const componentMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
     "ratioOfExternalEndpointsSupportingTls": ratioOfExternalEndpointsSupportingTls,
@@ -851,6 +875,7 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "ratioOfDelegatedAuthentication": ratioOfDelegatedAuthentication,
     "ratioOfStandardizedArtifacts": ratioOfStandardizedArtifacts,
     "ratioOfEntitiesProvidingStandardizedArtifacts": ratioOfEntitiesProvidingStandardizedArtifacts,
-    "ratioOfDeploymentsOnDynamicInfrastructure": ratioOfDeploymentsOnDynamicInfrastructure
+    "ratioOfDeploymentsOnDynamicInfrastructure": ratioOfDeploymentsOnDynamicInfrastructure,
+    "namespaceSeparation": namespaceSeparation
 }
 

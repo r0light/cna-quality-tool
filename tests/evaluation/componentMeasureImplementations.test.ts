@@ -1581,3 +1581,66 @@ test("ratioOfDeploymentsOnDynamicInfrastructure", () => {
     let measureValue = componentMeasureImplementations["ratioOfDeploymentsOnDynamicInfrastructure"]({ entity: serviceA, system: system });
     expect(measureValue).toEqual(0.5);
 })
+
+test("namespaceSeparation - full", () => {
+    let system = new System("sys1", "testSystem");
+
+    let serviceA = new Service("s1", "service A", getEmptyMetaData())
+    serviceA.setPropertyValue("namespace", "first");
+
+    let serviceB = new Service("s2", "service B", getEmptyMetaData())
+    serviceB.setPropertyValue("namespace", "second");
+
+    let serviceC = new Service("s3", "service C", getEmptyMetaData())
+    serviceC.setPropertyValue("namespace", "third");
+
+    let serviceD = new Service("s4", "service D", getEmptyMetaData())
+    serviceD.setPropertyValue("namespace", "fourth");
+
+    system.addEntities([serviceA, serviceB, serviceC, serviceD]);
+
+    let measureValue = componentMeasureImplementations["namespaceSeparation"]({ entity: serviceA, system: system });
+    expect(measureValue).toEqual(1);
+})
+
+test("namespaceSeparation - mixed", () => {
+    let system = new System("sys1", "testSystem");
+
+    let serviceA = new Service("s1", "service A", getEmptyMetaData())
+    serviceA.setPropertyValue("namespace", "first");
+
+    let serviceB = new Service("s2", "service B", getEmptyMetaData())
+    serviceB.setPropertyValue("namespace", "first");
+
+    let serviceC = new Service("s3", "service C", getEmptyMetaData())
+    serviceC.setPropertyValue("namespace", "second");
+
+    let serviceD = new Service("s4", "service D", getEmptyMetaData())
+    serviceD.setPropertyValue("namespace", "second");
+
+    system.addEntities([serviceA, serviceB, serviceC, serviceD]);
+
+    let measureValue = componentMeasureImplementations["namespaceSeparation"]({ entity: serviceA, system: system });
+    expect(measureValue).toBeCloseTo(2/3, 5);
+})
+
+test("namespaceSeparation - none", () => {
+    let system = new System("sys1", "testSystem");
+
+    let serviceA = new Service("s1", "service A", getEmptyMetaData())
+    serviceA.setPropertyValue("namespace", "first");
+
+    let serviceB = new Service("s2", "service B", getEmptyMetaData())
+    serviceB.setPropertyValue("namespace", "first");
+
+    let serviceC = new Service("s3", "service C", getEmptyMetaData())
+    serviceC.setPropertyValue("namespace", "first");
+
+    let serviceD = new Service("s4", "service D", getEmptyMetaData())
+    serviceD.setPropertyValue("namespace", "first");
+
+    system.addEntities([serviceA, serviceB, serviceC, serviceD]);
+
+    let measureValue = componentMeasureImplementations["namespaceSeparation"]({ entity: serviceA, system: system });
+    expect(measureValue).toEqual(0);
+})
