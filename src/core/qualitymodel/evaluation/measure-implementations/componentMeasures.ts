@@ -2,7 +2,7 @@
 import { ref } from "vue";
 import { BackingService, BrokerBackingService, Component, Endpoint, ExternalEndpoint, ProxyBackingService, Service, StorageBackingService, System } from "../../../entities.js";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure.js";
-import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, CUSTOM_SOFTWARE_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, PROTOCOLS_SUPPORTING_TLS, SERVICE_MESH_KIND, SYNCHRONOUS_ENDPOINT_KIND, VAULT_KIND } from "../../specifications/featureModel.js";
+import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, CUSTOM_SOFTWARE_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, PROTOCOLS_SUPPORTING_TLS, SERVICE_MESH_KIND, SYNCHRONOUS_ENDPOINT_KIND, VAULT_KIND } from "../../specifications/featureModel.js";
 import { average } from "./general-functions.js";
 
 
@@ -781,6 +781,25 @@ export const ratioOfEntitiesProvidingStandardizedArtifacts: Calculation = (param
     return standardized.length > 0 ? 1 : 0;
 }
 
+export const ratioOfDeploymentsOnDynamicInfrastructure: Calculation = (parameters: CalculationParameters<Component>) => {
+
+    let deployedOnInfrastructure = parameters.system.getDeploymentMappingEntities.entries().filter(([deploymentMappingKey, deployment]) => {
+        return deployment.getDeployedEntity.getId === parameters.entity.getId;
+    }).map(([deploymentMappingKey, deployment]) => {
+        return deployment.getUnderlyingInfrastructure
+    }).toArray();
+
+    if (deployedOnInfrastructure.length === 0) {
+        return "n/a";
+    }
+
+    let dynamicDeployment = deployedOnInfrastructure.filter(infrastructure => {
+        return DYNAMIC_INFRASTRUCTURE.includes(infrastructure.getProperty("kind").value);
+    })
+
+    return dynamicDeployment.length / deployedOnInfrastructure.length;
+}
+
 export const componentMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
     "ratioOfExternalEndpointsSupportingTls": ratioOfExternalEndpointsSupportingTls,
@@ -832,5 +851,6 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "ratioOfDelegatedAuthentication": ratioOfDelegatedAuthentication,
     "ratioOfStandardizedArtifacts": ratioOfStandardizedArtifacts,
     "ratioOfEntitiesProvidingStandardizedArtifacts": ratioOfEntitiesProvidingStandardizedArtifacts,
+    "ratioOfDeploymentsOnDynamicInfrastructure": ratioOfDeploymentsOnDynamicInfrastructure
 }
 

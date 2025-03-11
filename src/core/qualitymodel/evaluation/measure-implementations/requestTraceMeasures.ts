@@ -3,7 +3,7 @@ import { Calculation, CalculationParameters } from "../../quamoco/Measure";
 import { average, lowest, median } from "./general-functions";
 import { calculateRatioOfEndpointsSupportingSsl, componentMeasureImplementations, providesHealthAndReadinessEndpoints } from "./componentMeasures";
 import { calculateNumberOfLinksWithServiceDiscovery, calculateRatioOfLinksToAsynchronousEndpoints, calculateRatioOfSecuredLinks, calculateRatioOfStatefulComponents, calculateRatioOfStatelessComponents, calculateReplicasPerService, countComponentsConnectedToCertainEndpoints, getServiceInteractions } from "./systemMeasures";
-import { BACKING_DATA_CONFIG_KIND, BACKING_DATA_SECRET_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, EVENT_SOURCING_KIND, SERVICE_MESH_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "../../specifications/featureModel";
+import { BACKING_DATA_CONFIG_KIND, BACKING_DATA_SECRET_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, EVENT_SOURCING_KIND, SERVICE_MESH_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "../../specifications/featureModel";
 import { supportsMonitoring as infrastructureSupportsMonitoring } from "./infrastructureMeasures";
 import { supportsMonitoring as componentSupportsMonitoring } from "./componentMeasures";
 import { serviceMeshUsage as componentServiceMeshUsage } from "./componentMeasures";
@@ -707,6 +707,26 @@ export const componentArtifactsSimilarity: Calculation = (parameters: Calculatio
     return average(comparisons);
 }
 
+export const ratioOfDeploymentsOnDynamicInfrastructure: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+
+    let includedComponentIds = getIncludedComponents(parameters.entity, parameters.system).map(component => component.getId);
+
+    let infrastructureOfDeploymentMappingsForComponents = parameters.system.getDeploymentMappingEntities.entries().filter(([deploymentMappingKey, deploymentMapping]) => {
+        return includedComponentIds.includes(deploymentMapping.getDeployedEntity.getId);
+    }).map(([deploymentMappingKey, deploymentMapping]) => deploymentMapping.getUnderlyingInfrastructure).toArray();
+
+    if (infrastructureOfDeploymentMappingsForComponents.length === 0) {
+        return "n/a";
+    }
+
+    let dynamicDeployment = infrastructureOfDeploymentMappingsForComponents.filter(infrastructure => {
+        return DYNAMIC_INFRASTRUCTURE.includes(infrastructure.getProperty("kind").value);
+    })
+
+    return dynamicDeployment.length / infrastructureOfDeploymentMappingsForComponents.length;
+
+}
+
 export const requestTraceMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
     "ratioOfSecuredLinks": ratioOfSecuredLinks,
@@ -744,6 +764,7 @@ export const requestTraceMeasureImplementations: { [measureKey: string]: Calcula
     "ratioOfDelegatedAuthentication": ratioOfDelegatedAuthentication,
     "ratioOfStandardizedArtifacts": ratioOfStandardizedArtifacts,
     "ratioOfEntitiesProvidingStandardizedArtifacts": ratioOfEntitiesProvidingStandardizedArtifacts,
-    "componentArtifactsSimilarity": componentArtifactsSimilarity
+    "componentArtifactsSimilarity": componentArtifactsSimilarity,
+    "ratioOfDeploymentsOnDynamicInfrastructure": ratioOfDeploymentsOnDynamicInfrastructure
 }
 

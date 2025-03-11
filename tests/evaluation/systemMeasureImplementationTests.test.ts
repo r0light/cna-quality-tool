@@ -6,7 +6,7 @@ import { RelationToDataAggregate } from "@/core/entities/relationToDataAggregate
 import { systemMeasureImplementations } from "@/core/qualitymodel/evaluation/measure-implementations/systemMeasures";
 import { getQualityModel } from "@/core/qualitymodel/QualityModelInstance";
 import { ENTITIES } from "@/core/qualitymodel/specifications/entities";
-import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_SECRET_KIND, COMMAND_ENDPOINT_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, QUERY_ENDPOINT_KIND, SEND_EVENT_ENDPOINT_KIND, SERVICE_MESH_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "@/core/qualitymodel/specifications/featureModel";
+import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_SECRET_KIND, COMMAND_ENDPOINT_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, QUERY_ENDPOINT_KIND, SEND_EVENT_ENDPOINT_KIND, SERVICE_MESH_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "@/core/qualitymodel/specifications/featureModel";
 import { backingDataSvgRepresentation } from "@/modeling/config/detailsSidebarConfig";
 import { beforeAll, expect, test } from "vitest"
 
@@ -2898,5 +2898,26 @@ test("ratioOfAutomaticallyProvisionedInfrastructure", () => {
     system.addEntities([backingService]);
 
     let measureValue = systemMeasureImplementations["ratioOfAutomaticallyProvisionedInfrastructure"]({ entity: system, system: system });
+    expect(measureValue).toEqual(2/3);
+})
+
+test("ratioOfDeploymentsOnDynamicInfrastructure", () => {
+    let system = new System("sys1", "testSystem");
+    let infrastructureA = new Infrastructure("i1", "Infrastructure A", getEmptyMetaData());
+    infrastructureA.setPropertyValue("kind", DYNAMIC_INFRASTRUCTURE[0]);
+    let infrastructureB = new Infrastructure("i2", "Infrastruture B", getEmptyMetaData());
+    infrastructureB.setPropertyValue("kind", "virtual-hardware");
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+
+    let serviceB = new Service("s2", "testService 2", getEmptyMetaData());
+
+    let deploymentMappingA = new DeploymentMapping("dm1", serviceA, infrastructureA);
+    let deploymentMappingB = new DeploymentMapping("dm2", serviceA, infrastructureB);
+    let deploymentMappingC = new DeploymentMapping("dm3", serviceB, infrastructureA);
+
+    system.addEntities([serviceA, serviceB]);
+    system.addEntities([infrastructureA, infrastructureB]);
+    system.addEntities([deploymentMappingA, deploymentMappingB, deploymentMappingC]);
+    let measureValue = systemMeasureImplementations["ratioOfDeploymentsOnDynamicInfrastructure"]({ entity: system, system: system });
     expect(measureValue).toEqual(2/3);
 })

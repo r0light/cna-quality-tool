@@ -489,7 +489,7 @@ const productFactors = {
         "relevantEntities": [ENTITIES.INFRASTRUCTURE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE],
         "sources": [{ "key": "Reznik2019", "section": "10 Dynamic Scheduling" }, { "key": "Garrison2017", "section": "7 Resource Allocation and Scheduling" }, { "key": "Ibryam2020", "section": "6 Automated Placement" }, { "key": "Indrasiri2021", "section": "1 Why container orchestration?; Resource Management" }, { "key": "Indrasiri2021", "section": "1 Why container orchestration?; Automatic provisioning" }, { "key": "Goniwada2021", "section": "16 Automated Placement" }],
-        "measures": []
+        "measures": ["ratioOfDeploymentsOnDynamicInfrastructure"]
     },
     "serviceIndependence": {
         "name": "Service independence",
@@ -1924,6 +1924,12 @@ const measures = {
         "calculation": "Infrastructure entities that are provisioned automatically / All infrastructure entities",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE]
+    },
+    "ratioOfDeploymentsOnDynamicInfrastructure": {
+        "name": "Ratio of components deployed dynamically",
+        "calculation": "DeploymentMappings of components on a software platform or cloud service / All deployment mappings of components",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE]
     }
 } satisfies { [measureKey: string]: MeasureSpec }
 
