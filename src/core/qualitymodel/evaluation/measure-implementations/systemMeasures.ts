@@ -1,7 +1,7 @@
 import { BackingService, BrokerBackingService, Component, DeploymentMapping, Infrastructure, Link, ProxyBackingService, Service, StorageBackingService, System } from "@/core/entities";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure";
 import { average, median, lowest, partition } from "./general-functions";
-import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, CUSTOM_SOFTWARE_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, EVENT_SOURCING_KIND, getEndpointKindWeight, getUsageRelationWeight, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MESSAGE_BROKER_KIND, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SEND_EVENT_ENDPOINT_KIND, SERVICE_MESH_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND, VAULT_KIND } from "../../specifications/featureModel";
+import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, CUSTOM_SOFTWARE_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, EVENT_SOURCING_KIND, getEndpointKindWeight, getUsageRelationWeight, IAC_ARTIFACT_TYPE, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MESSAGE_BROKER_KIND, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SEND_EVENT_ENDPOINT_KIND, SERVICE_MESH_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND, VAULT_KIND } from "../../specifications/featureModel";
 import { calculateRatioOfEndpointsSupportingSsl, calculateRatioOfExternalEndpointsSupportingTls, componentMeasureImplementations, numberOfAsynchronousEndpointsOfferedByAService, numberOfComponentsAComponentIsLinkedTo, numberOfSynchronousEndpointsOfferedByAService, providesHealthAndReadinessEndpoints, serviceCouplingBasedOnEndpointEntropy } from "./componentMeasures";
 import { numberOfCyclesInRequestTraces, requestTraceComplexity } from "./requestTraceMeasures";
 import { supportsMonitoring as infrastructureSupportsMonitoring, ratioOfAutomaticallyProvisionedInfrastructure as infrastructureProvisionedAutomatically } from "./infrastructureMeasures";
@@ -1945,6 +1945,26 @@ export const ratioOfDeploymentsOnDynamicInfrastructure: Calculation = (parameter
 
 }
 
+export const ratioOfInfrastructureWithIaCArtifact: Calculation = (parameters: CalculationParameters<System>) => {
+
+    let infrastructureEntities = parameters.entity.getInfrastructureEntities.entries().toArray();
+
+    if (infrastructureEntities.length === 0) {
+        return "n/a";
+    }
+
+    let hasIaCArtifact = [];
+    infrastructureEntities.forEach(([infrastructureKey, infrastructure]) => {
+        let artifacts = infrastructure.getArtifacts;  
+        let iacArtifact = infrastructure.getArtifacts.entries().find(([artifactKey, artifact]) => IAC_ARTIFACT_TYPE.includes(artifact.getType())); 
+        if (iacArtifact) {
+            hasIaCArtifact.push(infrastructureKey);
+        }
+    })
+    
+    return hasIaCArtifact.length / infrastructureEntities.length; 
+}
+
 export const systemMeasureImplementations: { [measureKey: string]: Calculation } = {
     "serviceReplicationLevel": serviceReplicationLevel,
     "medianServiceReplication": medianServiceReplication,
@@ -2032,5 +2052,6 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation }
     "componentArtifactsSimilarity": componentArtifactsSimilarity,
     "infrastructureArtifactsSimilarity": infrastructureArtifactsSimilarity,
     "ratioOfAutomaticallyProvisionedInfrastructure": ratioOfAutomaticallyProvisionedInfrastructure,
-    "ratioOfDeploymentsOnDynamicInfrastructure": ratioOfDeploymentsOnDynamicInfrastructure
+    "ratioOfDeploymentsOnDynamicInfrastructure": ratioOfDeploymentsOnDynamicInfrastructure,
+    "ratioOfInfrastructureWithIaCArtifact": ratioOfInfrastructureWithIaCArtifact
 }

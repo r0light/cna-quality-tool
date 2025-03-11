@@ -95,6 +95,22 @@ artifact_types:
     description: A configuration file which can be used by Terraform to set up components or infrastructure.
     file_ext: [ tf, tf.json ] 
 
+  Pulumi.Script:
+    derived_from: CNA-Artifact
+    description: A configuration file which can be used by Pulumi to set up components or infrastructure.
+
+  Ansible.Script:
+    derived_from: CNA-Artifact
+    description: A configuration file which can be used by Ansible to set up components or infrastructure.
+
+  Chef.Script:
+    derived_from: CNA-Artifact
+    description: A configuration file which can be used by Chef to set up components or infrastructure.
+
+  Puppet.Script:
+    derived_from: CNA-Artifact
+    description: A configuration file which can be used by Puppet to set up components or infrastructure.
+
   CloudFormation.Script:
     derived_from: CNA-Artifact
     description: A configuration file which can be used by AWS tools to set up components or infrastructure.
@@ -125,6 +141,10 @@ artifact_types:
   Azure.Resource:
     derived_from: CNA-Artifact
     description: An abstract type for resources created in the Microsoft Azure Cloud.
+
+  Azure.ResourceManagerTemplate:
+    derived_from: CNA-Artifact
+    description: An artifact type for Azure Resource Manager (ARM) templates
 
   GCP.Resource:
     derived_from: CNA-Artifact

@@ -446,6 +446,146 @@ export const cna_modeling_profile: TOSCA_File = {
         "tf.json"
       ]
     },
+    "Pulumi.Script": {
+      "description": "A configuration file which can be used by Pulumi to set up components or infrastructure.",
+      "properties": {
+        "provider_specific": {
+          "type": "boolean",
+          "description": "Whether this artifact is (cloud) provider-specific or not.",
+          "required": true,
+          "default": false
+        },
+        "based_on_standard": {
+          "type": "text",
+          "description": "If the artifact is based on a standard, specify it here.",
+          "required": true,
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "none",
+                "OCI",
+                "OpenAPI",
+                "other"
+              ]
+            ]
+          },
+          "default": "none"
+        },
+        "self-contained": {
+          "type": "boolean",
+          "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
+          "required": true,
+          "default": false
+        }
+      },
+      "derived_from": "CNA-Artifact"
+    },
+    "Ansible.Script": {
+      "description": "A configuration file which can be used by Ansible to set up components or infrastructure.",
+      "properties": {
+        "provider_specific": {
+          "type": "boolean",
+          "description": "Whether this artifact is (cloud) provider-specific or not.",
+          "required": true,
+          "default": false
+        },
+        "based_on_standard": {
+          "type": "text",
+          "description": "If the artifact is based on a standard, specify it here.",
+          "required": true,
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "none",
+                "OCI",
+                "OpenAPI",
+                "other"
+              ]
+            ]
+          },
+          "default": "none"
+        },
+        "self-contained": {
+          "type": "boolean",
+          "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
+          "required": true,
+          "default": false
+        }
+      },
+      "derived_from": "CNA-Artifact"
+    },
+    "Chef.Script": {
+      "description": "A configuration file which can be used by Chef to set up components or infrastructure.",
+      "properties": {
+        "provider_specific": {
+          "type": "boolean",
+          "description": "Whether this artifact is (cloud) provider-specific or not.",
+          "required": true,
+          "default": false
+        },
+        "based_on_standard": {
+          "type": "text",
+          "description": "If the artifact is based on a standard, specify it here.",
+          "required": true,
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "none",
+                "OCI",
+                "OpenAPI",
+                "other"
+              ]
+            ]
+          },
+          "default": "none"
+        },
+        "self-contained": {
+          "type": "boolean",
+          "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
+          "required": true,
+          "default": false
+        }
+      },
+      "derived_from": "CNA-Artifact"
+    },
+    "Puppet.Script": {
+      "description": "A configuration file which can be used by Puppet to set up components or infrastructure.",
+      "properties": {
+        "provider_specific": {
+          "type": "boolean",
+          "description": "Whether this artifact is (cloud) provider-specific or not.",
+          "required": true,
+          "default": false
+        },
+        "based_on_standard": {
+          "type": "text",
+          "description": "If the artifact is based on a standard, specify it here.",
+          "required": true,
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "none",
+                "OCI",
+                "OpenAPI",
+                "other"
+              ]
+            ]
+          },
+          "default": "none"
+        },
+        "self-contained": {
+          "type": "boolean",
+          "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
+          "required": true,
+          "default": false
+        }
+      },
+      "derived_from": "CNA-Artifact"
+    },
     "CloudFormation.Script": {
       "description": "A configuration file which can be used by AWS tools to set up components or infrastructure.",
       "properties": {
@@ -638,6 +778,41 @@ export const cna_modeling_profile: TOSCA_File = {
     },
     "Azure.Resource": {
       "description": "An abstract type for resources created in the Microsoft Azure Cloud.",
+      "properties": {
+        "provider_specific": {
+          "type": "boolean",
+          "description": "Whether this artifact is (cloud) provider-specific or not.",
+          "required": true,
+          "default": false
+        },
+        "based_on_standard": {
+          "type": "text",
+          "description": "If the artifact is based on a standard, specify it here.",
+          "required": true,
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "none",
+                "OCI",
+                "OpenAPI",
+                "other"
+              ]
+            ]
+          },
+          "default": "none"
+        },
+        "self-contained": {
+          "type": "boolean",
+          "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
+          "required": true,
+          "default": false
+        }
+      },
+      "derived_from": "CNA-Artifact"
+    },
+    "Azure.ResourceManagerTemplate": {
+      "description": "An artifact type for Azure Resource Manager (ARM) templates",
       "properties": {
         "provider_specific": {
           "type": "boolean",

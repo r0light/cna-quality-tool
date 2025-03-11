@@ -2921,3 +2921,41 @@ test("ratioOfDeploymentsOnDynamicInfrastructure", () => {
     let measureValue = systemMeasureImplementations["ratioOfDeploymentsOnDynamicInfrastructure"]({ entity: system, system: system });
     expect(measureValue).toEqual(2/3);
 })
+
+test("ratioOfInfrastructureWithIaCArtifact", () => {
+    let system = new System("sys1", "testSystem");
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure A", getEmptyMetaData())
+    let propertiesA = getArtifactTypeProperties("Terraform.Script");
+    infrastructureA.setArtifact("art1", new Artifact(
+        "Terraform.Script",
+        "", "", "", "", "", "", "", propertiesA
+    ));
+    let propertiesAA = getArtifactTypeProperties("Azure.Resource");
+    infrastructureA.setArtifact("art2", new Artifact(
+       "Azure.Resource",
+        "", "", "", "", "", "", "", propertiesAA
+    ));
+
+    let infrastructureB = new Infrastructure("i2", "infrastructure B", getEmptyMetaData())
+    let propertiesB = getArtifactTypeProperties("Pulumi.Script");
+    infrastructureB.setArtifact("art3", new Artifact(
+        "Pulumi.Script",
+        "", "", "", "", "", "", "", propertiesB
+    ));
+
+    let infrastructureC = new Infrastructure("i3", "infrastructure C", getEmptyMetaData())
+    let propertiesC = getArtifactTypeProperties("Azure.Resource");
+    infrastructureC.setArtifact("art4", new Artifact(
+       "Azure.Resource",
+        "", "", "", "", "", "", "", propertiesC
+    ));
+
+    let backingService = new BackingService("bs1", "auth service", getEmptyMetaData());
+
+    system.addEntities([infrastructureA, infrastructureB, infrastructureC]);
+    system.addEntities([backingService]);
+
+    let measureValue = systemMeasureImplementations["ratioOfInfrastructureWithIaCArtifact"]({ entity: system, system: system });
+    expect(measureValue).toEqual(2/3);
+})

@@ -480,7 +480,7 @@ const productFactors = {
         "relevantEntities": [ENTITIES.INFRASTRUCTURE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE],
         "sources": [{ "key": "Scholl2019", "section": "6 Describe Infrastructure Using Code" }, { "key": "Goniwada2021", "section": "16 Declarative Deployment, 17 What Is Infrastructure as Code?" }],
-        "measures": ["linesOfCodeForDeploymentConfiguration"]
+        "measures": ["linesOfCodeForDeploymentConfiguration", "ratioOfInfrastructureWithIaCArtifact"]
     },
     "dynamicScheduling": {
         "name": "Dynamic scheduling",
@@ -1930,6 +1930,12 @@ const measures = {
         "calculation": "DeploymentMappings of components on a software platform or cloud service / All deployment mappings of components",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE]
+    },
+    "ratioOfInfrastructureWithIaCArtifact": {
+        "name": "Ratio of infrastructure with IaC artifact",
+        "calculation": "Infrastructure entities with an IaC artifact / All infrastructure entities",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE]
     }
 } satisfies { [measureKey: string]: MeasureSpec }
 
