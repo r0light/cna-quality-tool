@@ -12,7 +12,7 @@ const EXTERNAL_ENDPOINT_TOSCA_KEY = "cna-modeling.entities.Endpoint.External";
 const EXTERNAL_ENDPOINT_TOSCA_EQUIVALENT = cna_modeling_profile.node_types[EXTERNAL_ENDPOINT_TOSCA_KEY];
 
 function getExternalEndpointProperties(): EntityProperty[] {
-    let parsed = parseProperties(EXTERNAL_ENDPOINT_TOSCA_EQUIVALENT.properties).concat(mergeAllCapabilitiesProperties(parseCapabilitiesProperties(EXTERNAL_ENDPOINT_TOSCA_EQUIVALENT.capabilities)));
+    let parsed = parseProperties(EXTERNAL_ENDPOINT_TOSCA_EQUIVALENT.properties).concat(mergeAllCapabilitiesProperties(parseCapabilitiesProperties(EXTERNAL_ENDPOINT_TOSCA_EQUIVALENT.capabilities))).filter(property => property.getKey !== "documented_by");
 
     for (const prop of parsed) {
         switch (prop.getKey) {

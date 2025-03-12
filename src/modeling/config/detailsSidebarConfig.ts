@@ -482,7 +482,7 @@ const DetailsSidebarConfig: {
                     provideEnterButton: false,
                     show: true,
                     jointJsConfig: {
-                        propertyType: "property",
+                        propertyType: "customProperty",
                         modelPath: "entity/artifacts",
                         defaultPropPath: "",
                         minPath: "",
@@ -1724,7 +1724,36 @@ const EntityRelationsConfig: {
                     minPath: "",
                     min: ""
                 }
-            }
+            },
+            {
+                providedFeature: "documentedBy",
+                contentType: PropertyContent.DROPDOWN,
+                label: "Documented by:",
+                inputProperties: {
+                    disabled: false,
+                    required: false,
+                    checked: false,
+                    selected: false,
+                    readonly: false,
+                },
+                helpText: "The artifact documenting this endpoint.",
+                show: true,
+                attributes: {
+                    placeholder: "Choose Artifact...",
+                    svgRepresentation: "",
+                    defaultValue: "",
+
+                },
+                provideEnterButton: false,
+                jointJsConfig: {
+                    propertyType: "relation",
+                    modelPath: "entity/relations/documented_by",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
+                dropdownOptions: []
+            },
         ]
     },
     ExternalEndpoint: {
@@ -1786,7 +1815,36 @@ const EntityRelationsConfig: {
                     minPath: "",
                     min: ""
                 }
-            }
+            },
+            {
+                providedFeature: "documentedBy",
+                contentType: PropertyContent.DROPDOWN,
+                label: "Documented by:",
+                inputProperties: {
+                    disabled: false,
+                    required: false,
+                    checked: false,
+                    selected: false,
+                    readonly: false,
+                },
+                helpText: "The artifact documenting this endpoint.",
+                show: true,
+                attributes: {
+                    placeholder: "Choose Artifact...",
+                    svgRepresentation: "",
+                    defaultValue: "",
+
+                },
+                provideEnterButton: false,
+                jointJsConfig: {
+                    propertyType: "relation",
+                    modelPath: "entity/relations/documented_by",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
+                dropdownOptions: []
+            },
         ]
     },
     Link: {

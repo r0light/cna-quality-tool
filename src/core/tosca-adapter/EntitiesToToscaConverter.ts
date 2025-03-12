@@ -1,6 +1,6 @@
 import * as Entities from '../entities'
 import { TwoWayKeyIdMap } from "./TwoWayKeyIdMap";
-import { UniqueKeyManager } from "./UniqueKeyManager";
+import { UniqueKeyManager } from "../common/UniqueKeyManager";
 import { flatMetaData } from '../common/entityDataTypes';
 import { ENDPOINT_TOSCA_EQUIVALENT, ENDPOINT_TOSCA_KEY } from '../entities/endpoint';
 import { REQUEST_TRACE_TOSCA_KEY } from '../entities/requestTrace';
@@ -637,6 +637,8 @@ class EntitiesToToscaConverter {
             }
         })
 
+        template.properties.documented_by = endpoint.getDocumentedBy ? endpoint.getDocumentedBy : ""; 
+
         return template;
     }
 
@@ -655,6 +657,8 @@ class EntitiesToToscaConverter {
                 properties: this.#parsePropertiesForYaml(endpoint.getProperties().filter(property => propertyKeys.includes(property.getKey)))
             }
         })
+
+        template.properties.documented_by = endpoint.getDocumentedBy ? endpoint.getDocumentedBy : ""; 
 
         return template;
     }

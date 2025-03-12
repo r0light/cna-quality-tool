@@ -2681,6 +2681,11 @@ export const cna_modeling_profile: TOSCA_File = {
           "required": true,
           "description": "Flag to specify whether this endpoint is used as a health check",
           "default": false
+        },
+        "documented_by": {
+          "type": "string",
+          "required": false,
+          "description": "If this endpoint is documented by an artifact (for example an OpenAPI specification), the artifact id can be specified here"
         }
       },
       "capabilities": {
@@ -2780,6 +2785,11 @@ export const cna_modeling_profile: TOSCA_File = {
           "required": true,
           "description": "Flag to specify whether this endpoint is used as a health check",
           "default": false
+        },
+        "documented_by": {
+          "type": "string",
+          "required": false,
+          "description": "If this endpoint is documented by an artifact (for example an OpenAPI specification), the artifact id can be specified here"
         }
       },
       "capabilities": {

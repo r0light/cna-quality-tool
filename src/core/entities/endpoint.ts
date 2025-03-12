@@ -4,6 +4,7 @@ import { cna_modeling_profile } from '../../totypa/parsedProfiles/v2dot0-profile
 import { DataAggregate } from "./dataAggregate.js";
 import { RelationToDataAggregate } from "./relationToDataAggregate.js";
 import { EntityPropertyKey } from "@/totypa/parsedProfiles/v2dot0-profiles/propertyKeys.js";
+import { Artifact } from "../common/artifact.js";
 
 const ENDPOINT_TOSCA_KEY = "cna-modeling.entities.Endpoint";
 const ENDPOINT_TOSCA_EQUIVALENT = cna_modeling_profile.node_types[ENDPOINT_TOSCA_KEY];
@@ -14,7 +15,7 @@ const ENDPOINT_TOSCA_EQUIVALENT = cna_modeling_profile.node_types[ENDPOINT_TOSCA
  */
 
 function getEndpointProperties(): EntityProperty[] {
-    let parsed = parseProperties(ENDPOINT_TOSCA_EQUIVALENT.properties).concat(mergeAllCapabilitiesProperties(parseCapabilitiesProperties(ENDPOINT_TOSCA_EQUIVALENT.capabilities)));
+    let parsed = parseProperties(ENDPOINT_TOSCA_EQUIVALENT.properties).concat(mergeAllCapabilitiesProperties(parseCapabilitiesProperties(ENDPOINT_TOSCA_EQUIVALENT.capabilities))).filter(property => property.getKey !== "documented_by");
 
     for (const prop of parsed) {
         switch (prop.getKey) {
@@ -66,6 +67,8 @@ class Endpoint {
     #metaData: MetaData;
 
     #dataAggregateEntities = new Array<{ data: DataAggregate, relation: RelationToDataAggregate }>();
+
+    #documented_by: string; // artifact key
 
     #properties: EntityProperty[];
 
@@ -121,6 +124,14 @@ class Endpoint {
 
     addDataAggregateEntity(dataEntityToAdd: DataAggregate, relation: RelationToDataAggregate) {
         this.#dataAggregateEntities.push({ data: dataEntityToAdd, relation });
+    }
+
+    get getDocumentedBy() {
+        return this.#documented_by;
+    }
+
+    set setDocumentedBy(artifactKey: string) {
+        this.#documented_by = artifactKey;
     }
 
     /**

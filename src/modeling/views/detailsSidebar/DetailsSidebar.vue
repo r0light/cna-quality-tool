@@ -72,6 +72,7 @@ import { getValidPropertyValues } from '@/core/common/helpers';
 import { DEPLOYMENT_MAPPING_TOSCA_KEY } from '@/core/entities/deploymentMapping';
 import { ENTITIES } from '@/core/qualitymodel/specifications/entities';
 import { SelectEntityProperty } from '@/core/common/entityProperty';
+import { UniqueKeyManager } from '@/core/common/UniqueKeyManager';
 
 const toArray = (o: object, keyName: string, valueName: string) => {
     let asArray = [];
@@ -313,7 +314,7 @@ onUpdated(() => {
             let valueToSet: any = "";
             if (option.jointJsConfig.propertyType === "attribute") {
                 valueToSet = selectedEntity.model.attr(option.jointJsConfig.modelPath);
-            } else if (option.jointJsConfig.propertyType === "property" || option.jointJsConfig.propertyType === "providedMethod") {
+            } else if (option.jointJsConfig.propertyType === "property" || option.jointJsConfig.propertyType === "customProperty" ||option.jointJsConfig.propertyType === "providedMethod") {
                 valueToSet = selectedEntity.model.prop(option.jointJsConfig.modelPath);
 
                 if (option.providedFeature === "entity-aspect-ratio" && valueToSet) {
@@ -515,7 +516,6 @@ onUpdated(() => {
             let infrastructureArtifactOption = findInSectionsByFeature(selectedEntityPropertyGroups.value, "artifacts");
             infrastructureArtifactOption.includeFormCheck = false;
             infrastructureArtifactOption.attributes.listElementFields.find(field => field.key === "type")["dropdownOptions"] = getAvailableArtifactTypes();
-
             break;
         case EntityTypes.DATA_AGGREGATE:
 
@@ -823,6 +823,25 @@ onUpdated(() => {
                 });
             })
 
+            if (parentComponent) {
+                const artifacts = parentComponent.prop("entity/artifacts");
+
+                const documentationDropdownOptions = artifacts.map((artifact) => {
+                    return {
+                        optionValue: artifact.key,
+                        optionText: `${artifact.key} (${artifact.type})`,
+                        optionTitle: `${artifact.key} (${artifact.type})`,
+                        optionRepresentationClass: "validOption",
+                        disabled: false,
+                    };
+                })
+
+                let documentedByOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "documentedBy");
+                documentedByOption.includeFormCheck = false;
+                const selectedDocumentedBy = selectedEntity.model.prop(documentedByOption.jointJsConfig.modelPath);
+                documentedByOption.dropdownOptions = [EMPTY_DROPDOWN_VALUE, ...documentationDropdownOptions];
+                documentedByOption.value = selectedDocumentedBy;
+            }
             break;
         default:
         // do nothing
@@ -1018,6 +1037,19 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                             }
                         })
                         selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, supportedStrategies, { rewrite: true });
+                    } else if (propertyOption.providedFeature === "artifacts") {
+                        let keyManager = new UniqueKeyManager();
+                        let artifacts = propertyOption.value as object[];
+                        for (const artifact of artifacts) {
+                            if (artifact["key"]) {
+                                let uniqueKey = keyManager.ensureUniqueness(artifact["key"]);
+                                artifact["key"] = uniqueKey;
+                            } else {
+                                let newUniqueKey = keyManager.ensureUniqueness("artifact");
+                                artifact["key"] = newUniqueKey;
+                            }
+                        }
+                        selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, artifacts, { rewrite: true });
                     }
                     break;
                 case EntityTypes.DATA_AGGREGATE:
@@ -1079,6 +1111,27 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                         selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, allowedAccounts, { rewrite: true });
                     }
                     break;
+                case EntityTypes.COMPONENT:
+                case EntityTypes.SERVICE:
+                case EntityTypes.BACKING_SERVICE:
+                case EntityTypes.STORAGE_BACKING_SERVICE:
+                case EntityTypes.PROXY_BACKING_SERVICE:
+                case EntityTypes.BROKER_BACKING_SERVICE:
+                    if (propertyOption.providedFeature === "artifacts") {
+                        let keyManager = new UniqueKeyManager();
+                        let artifacts = propertyOption.value as object[];
+                        for (const artifact of artifacts) {
+                            if (artifact["key"]) {
+                                let uniqueKey = keyManager.ensureUniqueness(artifact["key"]);
+                                artifact["key"] = uniqueKey;
+                            } else {
+                                let newUniqueKey = keyManager.ensureUniqueness("artifact");
+                                artifact["key"] = newUniqueKey;
+                            }
+                        }
+                        selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, artifacts, { rewrite: true });
+                    }
+                    break;
                 default:
                     console.error("no custom handling for this property defined: " + propertyOption.providedFeature);
             }
@@ -1129,6 +1182,8 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                             .map(row => row.columns["included"]["id"]);
                         selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, selectedDataAggregateIDs, { rewrite: true });
                         continue;
+                    } else if (propertyOption.providedFeature === "documentedBy") {
+                        selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, propertyOption.value, { rewrite: true });
                     }
                     break;
                 case EntityTypes.REQUEST_TRACE:

@@ -580,26 +580,26 @@ class SystemEntityManager {
         }
 
 
-          // set artifact(s)
-          let artifactsData = infrastructureElement.prop("entity/artifacts");
-          for (const artifactData of artifactsData) {
-              let additionalProperties = getArtifactTypeProperties(artifactData.type);
-              for (let property of additionalProperties) {
-                  property.value = artifactData[property.getKey];
-              }
-  
-              let artifact = new Artifact(artifactData.type,
-                  artifactData.file,
-                  artifactData.repository,
-                  artifactData.description,
-                  artifactData.deploy_path,
-                  artifactData.artifact_version,
-                  artifactData.checksum,
-                  artifactData.checksum_algorithm,
-                  additionalProperties
-              )
-              infrastructureEntity.setArtifact(artifactData.key, artifact);
+        // set artifact(s)
+        let artifactsData = infrastructureElement.prop("entity/artifacts");
+        for (const artifactData of artifactsData) {
+            let additionalProperties = getArtifactTypeProperties(artifactData.type);
+            for (let property of additionalProperties) {
+                property.value = artifactData[property.getKey];
             }
+
+            let artifact = new Artifact(artifactData.type,
+                artifactData.file,
+                artifactData.repository,
+                artifactData.description,
+                artifactData.deploy_path,
+                artifactData.artifact_version,
+                artifactData.checksum,
+                artifactData.checksum_algorithm,
+                additionalProperties
+            )
+            infrastructureEntity.setArtifact(artifactData.key, artifact);
+        }
 
 
         const backingDataEntities = infrastructureElement.getEmbeddedCells();
@@ -792,6 +792,9 @@ class SystemEntityManager {
                 }
 
             }
+        }
+        if (graphElement.prop("entity/relations/documented_by")) {
+            endpointEntity.setDocumentedBy = graphElement.prop("entity/relations/documented_by");
         }
 
         return endpointEntity;
@@ -1342,7 +1345,7 @@ class SystemEntityManager {
         return newComponent;
     }
 
-    #configureComponentCell(component: Entities.Component, componentElement: dia.Element, entityConfig: {type: string, specificProperties: PropertyConfig[]}, relationsConfig: {type: string,relations: PropertyConfig[]}) {
+    #configureComponentCell(component: Entities.Component, componentElement: dia.Element, entityConfig: { type: string, specificProperties: PropertyConfig[] }, relationsConfig: { type: string, relations: PropertyConfig[] }) {
 
         for (const property of entityConfig.specificProperties) {
             if (property.jointJsConfig.modelPath) {
@@ -1389,7 +1392,6 @@ class SystemEntityManager {
         for (const [artifactKey, artifact] of component.getArtifacts.entries()) {
             artifacts.push(artifact.getAsFlatObject(artifactKey));
         }
-        console.log(artifacts);
         componentElement.prop(DetailsSidebarConfig.GeneralProperties.artifacts.options[0].jointJsConfig.modelPath, artifacts)
 
         return componentElement;
@@ -1540,6 +1542,10 @@ class SystemEntityManager {
             newEndpoint.prop("entity/relations/uses_data", endpoint.getDataAggregateEntities.map(usedData => {
                 return parent.getEmbeddedCells().find(cell => cell.prop("entity/assignedFamily") === usedData.data.getName).id;
             }));
+        }
+
+        if (endpoint.getDocumentedBy) {
+           newEndpoint.prop("entity/relations/documented_by", endpoint.getDocumentedBy)
         }
 
         return newEndpoint;

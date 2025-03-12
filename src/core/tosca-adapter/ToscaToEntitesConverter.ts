@@ -260,9 +260,16 @@ class ToscaToEntitesConverter {
                 let endpoint = endpoints.get(this.#keyIdMap.getId(key));
                 if (node.properties) {
                     for (const [key, value] of Object.entries(node.properties)) {
-                        endpoint.setPropertyValue(key as EntityPropertyKey, value);
+                        switch (key) {
+                            case "documented_by":
+                                // ignore, because it is set customly
+                                break;
+                            default:
+                            endpoint.setPropertyValue(key as EntityPropertyKey, value);
+                        }
                     }
                 }
+
                 if (node.capabilities) {
                     for (const [capabilityKey, capability] of Object.entries(node.capabilities)) {
                         if (capability.properties) {
@@ -299,11 +306,21 @@ class ToscaToEntitesConverter {
                     }
                 }
 
+                if (node.properties && node.properties.documented_by) {
+                    endpoint.setDocumentedBy = node.properties.documented_by;
+                }
+
             } else if (node.type === EXTERNAL_ENDPOINT_TOSCA_KEY) {
                 let externalEndpoint = endpoints.get(this.#keyIdMap.getId(key));
                 if (node.properties) {
                     for (const [key, value] of Object.entries(node.properties)) {
-                        externalEndpoint.setPropertyValue(key as EntityPropertyKey, value);
+                        switch (key) {
+                            case "documented_by":
+                                // ignore, because it is set customly
+                                break;
+                            default:
+                                externalEndpoint.setPropertyValue(key as EntityPropertyKey, value);
+                        }
                     }
                 }
                 if (node.capabilities) {
@@ -340,6 +357,10 @@ class ToscaToEntitesConverter {
                             }
                         }
                     }
+                }
+
+                if (node.properties && node.properties.documented_by) {
+                    externalEndpoint.setDocumentedBy = node.properties.documented_by;
                 }
             }
         }
