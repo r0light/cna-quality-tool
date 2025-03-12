@@ -5,7 +5,7 @@ import { RelationToBackingData } from "@/core/entities/relationToBackingData";
 import { infrastructureMeasureImplementations } from "@/core/qualitymodel/evaluation/measure-implementations/infrastructureMeasures";
 import { getQualityModel } from "@/core/qualitymodel/QualityModelInstance";
 import { ENTITIES } from "@/core/qualitymodel/specifications/entities";
-import { BACKING_DATA_CONFIG_KIND, BACKING_DATA_SECRET_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MANAGED_INFRASTRUCTURE_MAINTENANCE } from "@/core/qualitymodel/specifications/featureModel";
+import { AUTOMATED_SCALING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_SECRET_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MANAGED_INFRASTRUCTURE_MAINTENANCE } from "@/core/qualitymodel/specifications/featureModel";
 import { expect, test } from "vitest";
 
 
@@ -273,7 +273,6 @@ test("ratioOfInfrastructureEnforcingResourceBoundaries", () => {
     expect(measureValue).toEqual(1);
 })
 
-
 test("ratioOfDeploymentMappingsWithStatedResourceRequirements", () => {
     let system = new System("sys1", "testSystem");;
 
@@ -297,4 +296,70 @@ test("ratioOfDeploymentMappingsWithStatedResourceRequirements", () => {
 
     let measureValue = infrastructureMeasureImplementations["ratioOfDeploymentMappingsWithStatedResourceRequirements"]({ entity: infrastructureA, system: system });
     expect(measureValue).toEqual(0.5);
+})
+
+test("deployedEntitiesAutoscaling", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    infrastructureA.setPropertyValue("deployed_entities_scaling", AUTOMATED_SCALING[0]);
+    let infrastructureB = new Infrastructure("i2", "infrastructure 2", getEmptyMetaData());
+    infrastructureB.setPropertyValue("deployed_entities_scaling", "none");
+
+    let deploymentMappingA = new DeploymentMapping("dm1", serviceA, infrastructureA);
+    let deploymentMappingB = new DeploymentMapping("dm2", serviceB, infrastructureA);
+    let deploymentMappingC = new DeploymentMapping("dm3", serviceA, infrastructureB);
+
+    system.addEntities([serviceA, serviceB]);
+    system.addEntities([infrastructureA, infrastructureB]);
+    system.addEntities([deploymentMappingA, deploymentMappingB, deploymentMappingC]);
+
+    let measureValue = infrastructureMeasureImplementations["deployedEntitiesAutoscaling"]({ entity: infrastructureA, system: system });
+    expect(measureValue).toEqual(1);
+})
+
+test("infrastructureAutoscaling", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    infrastructureA.setPropertyValue("self_scaling", AUTOMATED_SCALING[0]);
+
+    let deploymentMappingA = new DeploymentMapping("dm1", serviceA, infrastructureA);
+    let deploymentMappingB = new DeploymentMapping("dm2", serviceB, infrastructureA);
+
+    system.addEntities([serviceA, serviceB]);
+    system.addEntities([infrastructureA]);
+    system.addEntities([deploymentMappingA, deploymentMappingB]);
+
+    let measureValue = infrastructureMeasureImplementations["infrastructureAutoscaling"]({ entity: infrastructureA, system: system });
+    expect(measureValue).toEqual(1);
+})
+
+test("ratioOfAbstractedHardware", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    infrastructureA.setPropertyValue("kind", DYNAMIC_INFRASTRUCTURE[0]);
+    let infrastructureB = new Infrastructure("i2", "infrastructure 2", getEmptyMetaData());
+    infrastructureB.setPropertyValue("kind", "virtual-hardware");
+
+    let deploymentMappingA = new DeploymentMapping("dm1", serviceA, infrastructureA);
+    let deploymentMappingB = new DeploymentMapping("dm2", serviceB, infrastructureA);
+    let deploymentMappingC = new DeploymentMapping("dm3", serviceA, infrastructureB);
+
+    system.addEntities([serviceA, serviceB]);
+    system.addEntities([infrastructureA, infrastructureB]);
+    system.addEntities([deploymentMappingA, deploymentMappingB, deploymentMappingC]);
+
+    let measureValue = infrastructureMeasureImplementations["ratioOfAbstractedHardware"]({ entity: infrastructureA, system: system });
+    expect(measureValue).toEqual(1);
 })

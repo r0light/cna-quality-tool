@@ -2,7 +2,7 @@
 import { ref } from "vue";
 import { BackingService, BrokerBackingService, Component, Endpoint, ExternalEndpoint, ProxyBackingService, Service, StorageBackingService, System } from "../../../entities.js";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure.js";
-import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, CUSTOM_SOFTWARE_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, PROTOCOLS_SUPPORTING_TLS, SERVICE_MESH_KIND, SYNCHRONOUS_ENDPOINT_KIND, VAULT_KIND } from "../../specifications/featureModel.js";
+import { ASYNCHRONOUS_ENDPOINT_KIND, AUTOMATED_SCALING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, CUSTOM_SOFTWARE_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, PROTOCOLS_SUPPORTING_TLS, SERVICE_MESH_KIND, SYNCHRONOUS_ENDPOINT_KIND, VAULT_KIND } from "../../specifications/featureModel.js";
 import { average } from "./general-functions.js";
 
 
@@ -847,6 +847,24 @@ export const ratioOfDeploymentMappingsWithStatedResourceRequirements: Calculatio
 
 }
 
+export const deployedEntitiesAutoscaling: Calculation = (parameters: CalculationParameters<Component>) => {
+
+    let relevantDeploymentMappings = parameters.system.getDeploymentMappingEntities.entries().filter(([deploymentMappingKey, deploymentMapping]) => {
+        return deploymentMapping.getDeployedEntity.getId === parameters.entity.getId;
+    }).toArray();
+
+    if (relevantDeploymentMappings.length === 0) {
+        return "n/a";
+    }
+
+    let underlyingInfrastructure = relevantDeploymentMappings.map(([deploymentMappingKey, deploymentMapping]) => deploymentMapping.getUnderlyingInfrastructure);
+
+    let infrastructureProvidesScaling = underlyingInfrastructure.filter(infrastructure => AUTOMATED_SCALING.includes(infrastructure.getProperty("deployed_entities_scaling").value))
+
+    return infrastructureProvidesScaling.length / underlyingInfrastructure.length;
+}
+
+
 export const componentMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
     "ratioOfExternalEndpointsSupportingTls": ratioOfExternalEndpointsSupportingTls,
@@ -901,6 +919,7 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "ratioOfDeploymentsOnDynamicInfrastructure": ratioOfDeploymentsOnDynamicInfrastructure,
     "namespaceSeparation": namespaceSeparation,
     "ratioOfManagedBackingServices": ratioOfManagedBackingServices,
-    "ratioOfDeploymentMappingsWithStatedResourceRequirements": ratioOfDeploymentMappingsWithStatedResourceRequirements
+    "ratioOfDeploymentMappingsWithStatedResourceRequirements": ratioOfDeploymentMappingsWithStatedResourceRequirements,
+    "deployedEntitiesAutoscaling": deployedEntitiesAutoscaling
 }
 

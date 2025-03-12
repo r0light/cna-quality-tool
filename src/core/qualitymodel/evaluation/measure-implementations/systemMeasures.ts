@@ -1,7 +1,7 @@
 import { BackingService, BrokerBackingService, Component, DeploymentMapping, Infrastructure, Link, ProxyBackingService, Service, StorageBackingService, System } from "@/core/entities";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure";
 import { average, median, lowest, partition } from "./general-functions";
-import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, CUSTOM_SOFTWARE_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, EVENT_SOURCING_KIND, getEndpointKindWeight, getUsageRelationWeight, IAC_ARTIFACT_TYPE, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MESSAGE_BROKER_KIND, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SEND_EVENT_ENDPOINT_KIND, SERVICE_MESH_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND, VAULT_KIND } from "../../specifications/featureModel";
+import { ASYNCHRONOUS_ENDPOINT_KIND, AUTOMATED_SCALING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, CUSTOM_SOFTWARE_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, EVENT_SOURCING_KIND, getEndpointKindWeight, getUsageRelationWeight, IAC_ARTIFACT_TYPE, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MESSAGE_BROKER_KIND, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SEND_EVENT_ENDPOINT_KIND, SERVICE_MESH_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND, VAULT_KIND } from "../../specifications/featureModel";
 import { calculateRatioOfEndpointsSupportingSsl, calculateRatioOfExternalEndpointsSupportingTls, componentMeasureImplementations, numberOfAsynchronousEndpointsOfferedByAService, numberOfComponentsAComponentIsLinkedTo, numberOfSynchronousEndpointsOfferedByAService, providesHealthAndReadinessEndpoints, serviceCouplingBasedOnEndpointEntropy } from "./componentMeasures";
 import { numberOfCyclesInRequestTraces, requestTraceComplexity } from "./requestTraceMeasures";
 import { supportsMonitoring as infrastructureSupportsMonitoring, ratioOfAutomaticallyProvisionedInfrastructure as infrastructureProvisionedAutomatically, ratioOfFullyManagedInfrastructure as infrastructureIsFullyManaged } from "./infrastructureMeasures";
@@ -2027,8 +2027,53 @@ export const ratioOfDeploymentMappingsWithStatedResourceRequirements: Calculatio
     let statingResourceRequirements = allDeploymentMappings.filter(([deplyomentMappingKey, deploymentMapping]) => deploymentMapping.getProperty("resource_requirements").value !== "unstated");
 
     return statingResourceRequirements.length / allDeploymentMappings.length;
-
 }
+
+export const deployedEntitiesAutoscaling: Calculation = (parameters: CalculationParameters<System>) => {
+
+    let allComponentIds = parameters.entity.getComponentEntities.entries().map(([componentKey, component]) => componentKey).toArray();
+
+    let relevantDeploymentMappings = parameters.system.getDeploymentMappingEntities.entries().filter(([deploymentMappingKey, deploymentMapping]) => {
+        return allComponentIds.includes(deploymentMapping.getDeployedEntity.getId);
+    }).toArray();
+
+    if (relevantDeploymentMappings.length === 0) {
+        return "n/a";
+    }
+
+    let underlyingInfrastructure = relevantDeploymentMappings.map(([deploymentMappingKey, deploymentMapping]) => deploymentMapping.getUnderlyingInfrastructure);
+
+    let infrastructureProvidesScaling = underlyingInfrastructure.filter(infrastructure => AUTOMATED_SCALING.includes(infrastructure.getProperty("deployed_entities_scaling").value))
+
+    return infrastructureProvidesScaling.length / underlyingInfrastructure.length;
+}
+
+export const infrastructureAutoscaling: Calculation = (parameters: CalculationParameters<Infrastructure>) => {
+
+    let allInfrastructure = parameters.system.getInfrastructureEntities.entries().toArray();
+
+    if (allInfrastructure.length === 0) {
+        return "n/a";
+    }
+
+    let autoscalingInfrastructure = allInfrastructure.filter(([infrastructureKey, infrastructure]) => AUTOMATED_SCALING.includes(infrastructure.getProperty("self_scaling").value));
+
+    return autoscalingInfrastructure.length / allInfrastructure.length
+}
+
+export const ratioOfAbstractedHardware: Calculation = (parameters: CalculationParameters<Infrastructure>) => {
+
+    let allInfrastructure = parameters.system.getInfrastructureEntities.entries().toArray();
+
+    if (allInfrastructure.length === 0) {
+        return "n/a";
+    }
+
+    let abstractedHardwareInfrastructure = allInfrastructure.filter(([infrastructureKey, infrastructure]) => DYNAMIC_INFRASTRUCTURE.includes(infrastructure.getProperty("kind").value));
+
+    return abstractedHardwareInfrastructure.length / allInfrastructure.length
+}
+
 
 export const systemMeasureImplementations: { [measureKey: string]: Calculation } = {
     "serviceReplicationLevel": serviceReplicationLevel,
@@ -2123,5 +2168,8 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation }
     "ratioOfFullyManagedInfrastructure": ratioOfFullyManagedInfrastructure,
     "ratioOfManagedBackingServices": ratioOfManagedBackingServices,
     "ratioOfInfrastructureEnforcingResourceBoundaries": ratioOfInfrastructureEnforcingResourceBoundaries,
-    "ratioOfDeploymentMappingsWithStatedResourceRequirements": ratioOfDeploymentMappingsWithStatedResourceRequirements
+    "ratioOfDeploymentMappingsWithStatedResourceRequirements": ratioOfDeploymentMappingsWithStatedResourceRequirements,
+    "deployedEntitiesAutoscaling": deployedEntitiesAutoscaling,
+    "infrastructureAutoscaling": infrastructureAutoscaling,
+    "ratioOfAbstractedHardware": ratioOfAbstractedHardware
 }

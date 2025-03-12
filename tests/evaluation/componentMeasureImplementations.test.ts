@@ -7,7 +7,7 @@ import { RelationToDataAggregate } from "@/core/entities/relationToDataAggregate
 import { componentMeasureImplementations } from "@/core/qualitymodel/evaluation/measure-implementations/componentMeasures";
 import { getQualityModel } from "@/core/qualitymodel/QualityModelInstance";
 import { ENTITIES } from "@/core/qualitymodel/specifications/entities";
-import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_CONFIG_KIND, BACKING_DATA_SECRET_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, SERVICE_MESH_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "@/core/qualitymodel/specifications/featureModel";
+import { ASYNCHRONOUS_ENDPOINT_KIND, AUTOMATED_SCALING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_SECRET_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, SERVICE_MESH_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "@/core/qualitymodel/specifications/featureModel";
 import { linkTools } from "@joint/core";
 import { expect, test } from "vitest";
 
@@ -1678,5 +1678,29 @@ test("ratioOfDeploymentMappingsWithStatedResourceRequirements", () => {
     system.addEntities([deploymentMappingA, deploymentMappingB, deploymentMappingC]);
 
     let measureValue = componentMeasureImplementations["ratioOfDeploymentMappingsWithStatedResourceRequirements"]({ entity: serviceA, system: system });
+    expect(measureValue).toEqual(0.5);
+})
+
+
+test("deployedEntitiesAutoscaling", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    infrastructureA.setPropertyValue("deployed_entities_scaling", AUTOMATED_SCALING[0]);
+    let infrastructureB = new Infrastructure("i2", "infrastructure 2", getEmptyMetaData());
+    infrastructureB.setPropertyValue("deployed_entities_scaling", "none");
+
+    let deploymentMappingA = new DeploymentMapping("dm1", serviceA, infrastructureA);
+    let deploymentMappingB = new DeploymentMapping("dm2", serviceB, infrastructureA);
+    let deploymentMappingC = new DeploymentMapping("dm3", serviceA, infrastructureB);
+
+    system.addEntities([serviceA, serviceB]);
+    system.addEntities([infrastructureA, infrastructureB]);
+    system.addEntities([deploymentMappingA, deploymentMappingB, deploymentMappingC]);
+
+    let measureValue = componentMeasureImplementations["deployedEntitiesAutoscaling"]({ entity: serviceA, system: system });
     expect(measureValue).toEqual(0.5);
 })

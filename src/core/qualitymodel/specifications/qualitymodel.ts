@@ -651,7 +651,7 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.DEPLOYMENT_MAPPING],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Scholl2019", "section": "6 Use Platform Autoscaling Features" }, { "key": "Ibryam2020", "section": "24 Elastic Scale" }, { "key": "Bastani2017", "section": "13 Autoscaling" }, { "key": "Indrasiri2021", "section": "1 Why container orchestration?; Scaling" }, { "key": "Goniwada2021", "section": "5 Elasticity in Microservices" }],
-        "measures": []
+        "measures": ["deployedEntitiesAutoscaling", "infrastructureAutoscaling"]
     },
     "infrastructureAbstraction": {
         "name": "Infrastructure abstraction",
@@ -660,7 +660,7 @@ const productFactors = {
         "relevantEntities": [ENTITIES.INFRASTRUCTURE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE],
         "sources": [{ "key": "Bastani2017", "section": "14 Service Brokers (make use of service brokers as an additional level of abstraction to automatically add or remove backing services)" }, { "key": "Goniwada2021", "section": "3 Location-Independent Principle" }],
-        "measures": []
+        "measures": ["ratioOfAbstractedHardware"]
     },
     "cloudVendorAbstraction": {
         "name": "Cloud vendor abstraction",
@@ -1967,6 +1967,24 @@ const measures = {
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE]
     },
+    "deployedEntitiesAutoscaling": {
+        "name": "Deployed Entities Autoscaling",
+        "calculation": "Infrastructure that hosts Components and automatically scales them via the infrastructure they are deployed on / All infrastructure",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE]
+    },
+    "infrastructureAutoscaling": {
+        "name": "Infrastructure Autoscaling",
+        "calculation": "Infrastructure entities that scale themselves automatically / All infrastructure entities",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE]
+    },
+    "ratioOfAbstractedHardware": {
+        "name": "Ratio of abstracted hardware",
+        "calculation": "Infrastructure entities that are software-platform or cloud-service/ All infrastructure entities",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE]
+    }
 } satisfies { [measureKey: string]: MeasureSpec }
 
 const measureKeys = Object.freeze(measures);

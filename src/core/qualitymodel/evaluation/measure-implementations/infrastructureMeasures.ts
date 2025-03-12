@@ -1,6 +1,6 @@
 import { BackingService, DeploymentMapping, Infrastructure } from "@/core/entities";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure";
-import { AUTOMATED_INFRASTRUCTURE_PROVISIONING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, IAC_ARTIFACT_TYPE, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MANAGED_INFRASTRUCTURE_MAINTENANCE, ROLLING_UPDATE_STRATEGY_OPTIONS } from "../../specifications/featureModel";
+import { AUTOMATED_INFRASTRUCTURE_PROVISIONING, AUTOMATED_SCALING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, IAC_ARTIFACT_TYPE, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MANAGED_INFRASTRUCTURE_MAINTENANCE, ROLLING_UPDATE_STRATEGY_OPTIONS } from "../../specifications/featureModel";
 
 
 export const supportsMonitoring: (infrastructure: Infrastructure) => boolean = (infrastructure: Infrastructure) => {
@@ -198,6 +198,31 @@ export const ratioOfDeploymentMappingsWithStatedResourceRequirements: Calculatio
 
 }
 
+export const deployedEntitiesAutoscaling: Calculation = (parameters: CalculationParameters<Infrastructure>) => {
+
+    let relevantDeploymentMappings = parameters.system.getDeploymentMappingEntities.entries().filter(([deploymentMappingKey, deploymentMapping]) => {
+        return deploymentMapping.getUnderlyingInfrastructure.getId === parameters.entity.getId;
+    }).toArray();
+
+    if (relevantDeploymentMappings.length === 0) {
+        return "n/a";
+    }
+
+    let underlyingInfrastructure = relevantDeploymentMappings.map(([deploymentMappingKey, deploymentMapping]) => deploymentMapping.getUnderlyingInfrastructure);
+
+    let infrastructureProvidesScaling = underlyingInfrastructure.filter(infrastructure => AUTOMATED_SCALING.includes(infrastructure.getProperty("deployed_entities_scaling").value))
+
+    return AUTOMATED_SCALING.includes(parameters.entity.getProperty("deployed_entities_scaling").value) ? 1 : 0;
+}
+
+export const infrastructureAutoscaling: Calculation = (parameters: CalculationParameters<Infrastructure>) => {
+    return AUTOMATED_SCALING.includes(parameters.entity.getProperty("self_scaling").value) ? 1 : 0;
+}
+
+export const ratioOfAbstractedHardware: Calculation = (parameters: CalculationParameters<Infrastructure>) => {
+    return DYNAMIC_INFRASTRUCTURE.includes(parameters.entity.getProperty("kind").value) ? 1 : 0;
+}
+
 export const infrastructureMeasureImplementations: { [measureKey: string]: Calculation } = {
     "numberOfServiceHostedOnOneInfrastructure": numberOfServiceHostedOnOneInfrastructure,
     "numberOfAvailabilityZonesUsed": numberOfAvailabilityZonesUsed,
@@ -210,5 +235,8 @@ export const infrastructureMeasureImplementations: { [measureKey: string]: Calcu
     "ratioOfInfrastructureWithIaCArtifact": ratioOfInfrastructureWithIaCArtifact,
     "ratioOfFullyManagedInfrastructure": ratioOfFullyManagedInfrastructure,
     "ratioOfInfrastructureEnforcingResourceBoundaries": ratioOfInfrastructureEnforcingResourceBoundaries,
-    "ratioOfDeploymentMappingsWithStatedResourceRequirements": ratioOfDeploymentMappingsWithStatedResourceRequirements
+    "ratioOfDeploymentMappingsWithStatedResourceRequirements": ratioOfDeploymentMappingsWithStatedResourceRequirements,
+    "deployedEntitiesAutoscaling": deployedEntitiesAutoscaling,
+    "infrastructureAutoscaling": infrastructureAutoscaling,
+    "ratioOfAbstractedHardware": ratioOfAbstractedHardware
 }

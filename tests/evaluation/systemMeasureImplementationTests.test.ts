@@ -3123,3 +3123,84 @@ test("ratioOfDeploymentMappingsWithStatedResourceRequirements", () => {
     let measureValue = systemMeasureImplementations["ratioOfDeploymentMappingsWithStatedResourceRequirements"]({ entity: system, system: system });
     expect(measureValue).toEqual(2/3);
 })
+
+test("deployedEntitiesAutoscaling", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    infrastructureA.setPropertyValue("deployed_entities_scaling", "automated-built-in");
+    let infrastructureB = new Infrastructure("i2", "infrastructure 2", getEmptyMetaData());
+    infrastructureB.setPropertyValue("deployed_entities_scaling", "automated-separate");
+    let infrastructureC = new Infrastructure("i3", "infrastructure 3", getEmptyMetaData());
+    infrastructureC.setPropertyValue("deployed_entities_scaling", "none");
+
+    let deploymentMappingA = new DeploymentMapping("dm1", serviceA, infrastructureA);
+    let deploymentMappingB = new DeploymentMapping("dm2", serviceB, infrastructureB);
+    let deploymentMappingC = new DeploymentMapping("dm3", serviceC, infrastructureC);
+
+    system.addEntities([serviceA, serviceB, serviceC]);
+    system.addEntities([infrastructureA, infrastructureB, infrastructureC]);
+    system.addEntities([deploymentMappingA, deploymentMappingB, deploymentMappingC]);
+
+    let measureValue = systemMeasureImplementations["deployedEntitiesAutoscaling"]({ entity: system, system: system });
+    expect(measureValue).toEqual(2/3);
+})
+
+
+test("infrastructureAutoscaling", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    infrastructureA.setPropertyValue("self_scaling", "automated-built-in");
+    let infrastructureB = new Infrastructure("i2", "infrastructure 2", getEmptyMetaData());
+    infrastructureB.setPropertyValue("self_scaling", "manual");
+    let infrastructureC = new Infrastructure("i3", "infrastructure 3", getEmptyMetaData());
+    infrastructureC.setPropertyValue("self_scaling", "none");
+
+    let deploymentMappingA = new DeploymentMapping("dm1", serviceA, infrastructureA);
+    let deploymentMappingB = new DeploymentMapping("dm2", serviceB, infrastructureB);
+    let deploymentMappingC = new DeploymentMapping("dm3", serviceC, infrastructureC);
+
+    system.addEntities([serviceA, serviceB, serviceC]);
+    system.addEntities([infrastructureA, infrastructureB, infrastructureC]);
+    system.addEntities([deploymentMappingA, deploymentMappingB, deploymentMappingC]);
+
+    let measureValue = systemMeasureImplementations["infrastructureAutoscaling"]({ entity: system, system: system });
+    expect(measureValue).toEqual(1/3);
+})
+
+
+
+test("ratioOfAbstractedHardware", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    infrastructureA.setPropertyValue("kind", DYNAMIC_INFRASTRUCTURE[0]);
+    let infrastructureB = new Infrastructure("i2", "infrastructure 2", getEmptyMetaData());
+    infrastructureB.setPropertyValue("kind", "virtual-hardware");
+    let infrastructureC = new Infrastructure("i3", "infrastructure 3", getEmptyMetaData());
+    infrastructureC.setPropertyValue("kind", DYNAMIC_INFRASTRUCTURE[0]);
+
+    let deploymentMappingA = new DeploymentMapping("dm1", serviceA, infrastructureA);
+    let deploymentMappingB = new DeploymentMapping("dm2", serviceB, infrastructureB);
+    let deploymentMappingC = new DeploymentMapping("dm3", serviceC, infrastructureC);
+
+    system.addEntities([serviceA, serviceB, serviceC]);
+    system.addEntities([infrastructureA, infrastructureB, infrastructureC]);
+    system.addEntities([deploymentMappingA, deploymentMappingB, deploymentMappingC]);
+
+    let measureValue = systemMeasureImplementations["ratioOfAbstractedHardware"]({ entity: system, system: system });
+    expect(measureValue).toEqual(2/3);
+})
