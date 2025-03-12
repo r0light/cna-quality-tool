@@ -1704,3 +1704,24 @@ test("deployedEntitiesAutoscaling", () => {
     let measureValue = componentMeasureImplementations["deployedEntitiesAutoscaling"]({ entity: serviceA, system: system });
     expect(measureValue).toEqual(0.5);
 })
+
+
+test("nonProviderSpecificComponentArtifacts", () => {
+    let system = new System("sys1", "testSystem");
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let propertiesA = getArtifactTypeProperties("Kubernetes.Resource");
+    propertiesA.find(prop => prop.getKey === "provider_specific").value = false;
+    serviceA.setArtifact("art1", new Artifact(
+        "Kubernetes.Resource",
+        "", "", "", "", "", "", "", propertiesA
+    ));
+
+    let backingService = new BackingService("bs1", "auth service", getEmptyMetaData());
+
+    system.addEntities([serviceA]);
+    system.addEntities([backingService]);
+
+    let measureValue = componentMeasureImplementations["nonProviderSpecificComponentArtifacts"]({ entity: serviceA, system: system });
+    expect(measureValue).toEqual(1);
+})

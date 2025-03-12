@@ -669,7 +669,7 @@ const productFactors = {
         "relevantEntities": [ENTITIES.INFRASTRUCTURE, ENTITIES.COMPONENT],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE],
         "sources": [ { "key": "Indrasiri2021", "section": "1 Dynamic Management; Multicloud support" }],
-        "measures": ["servicePortability"]
+        "measures": ["servicePortability", "nonProviderSpecificInfrastructureArtifacts", "nonProviderSpecificComponentArtifacts"]
     },
     "configurationManagement": {
         "name": "Configuration management",
@@ -1984,6 +1984,18 @@ const measures = {
         "calculation": "Infrastructure entities that are software-platform or cloud-service/ All infrastructure entities",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE]
+    },
+    "nonProviderSpecificInfrastructureArtifacts": {
+        "name": "Non-provider-specific infrastructure artifacts",
+        "calculation": "Infrastructure entities with all artifacts being non-provider-specific / All infrastructure entities",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE]
+    }, 
+    "nonProviderSpecificComponentArtifacts": {
+        "name": "Non-provider-specific component artifacts",
+        "calculation": "Component entities with all artifacts being non-provider-specific / All components",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT]
     }
 } satisfies { [measureKey: string]: MeasureSpec }
 

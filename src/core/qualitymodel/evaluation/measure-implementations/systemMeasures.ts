@@ -4,8 +4,8 @@ import { average, median, lowest, partition } from "./general-functions";
 import { ASYNCHRONOUS_ENDPOINT_KIND, AUTOMATED_SCALING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, CUSTOM_SOFTWARE_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, EVENT_SOURCING_KIND, getEndpointKindWeight, getUsageRelationWeight, IAC_ARTIFACT_TYPE, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MESSAGE_BROKER_KIND, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SEND_EVENT_ENDPOINT_KIND, SERVICE_MESH_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND, VAULT_KIND } from "../../specifications/featureModel";
 import { calculateRatioOfEndpointsSupportingSsl, calculateRatioOfExternalEndpointsSupportingTls, componentMeasureImplementations, numberOfAsynchronousEndpointsOfferedByAService, numberOfComponentsAComponentIsLinkedTo, numberOfSynchronousEndpointsOfferedByAService, providesHealthAndReadinessEndpoints, serviceCouplingBasedOnEndpointEntropy } from "./componentMeasures";
 import { numberOfCyclesInRequestTraces, requestTraceComplexity } from "./requestTraceMeasures";
-import { supportsMonitoring as infrastructureSupportsMonitoring, ratioOfAutomaticallyProvisionedInfrastructure as infrastructureProvisionedAutomatically, ratioOfFullyManagedInfrastructure as infrastructureIsFullyManaged } from "./infrastructureMeasures";
-import { supportsMonitoring as componentSupportsMonitoring } from "./componentMeasures";
+import { supportsMonitoring as infrastructureSupportsMonitoring, ratioOfAutomaticallyProvisionedInfrastructure as infrastructureProvisionedAutomatically, ratioOfFullyManagedInfrastructure as infrastructureIsFullyManaged, nonProviderSpecificInfrastructureArtifacts as infrastructureHasOnlyNonProviderSpecificArtifacts } from "./infrastructureMeasures";
+import { supportsMonitoring as componentSupportsMonitoring, nonProviderSpecificComponentArtifacts as componentHasOnlyNonProviderSpecificArtifacts } from "./componentMeasures";
 import { serviceMeshUsage as componentServiceMeshUsage, namespaceSeparation as componentNamespaceSeparation } from "./componentMeasures";
 import { map } from "jquery";
 import { Artifact } from "@/core/common/artifact";
@@ -2048,9 +2048,9 @@ export const deployedEntitiesAutoscaling: Calculation = (parameters: Calculation
     return infrastructureProvidesScaling.length / underlyingInfrastructure.length;
 }
 
-export const infrastructureAutoscaling: Calculation = (parameters: CalculationParameters<Infrastructure>) => {
+export const infrastructureAutoscaling: Calculation = (parameters: CalculationParameters<System>) => {
 
-    let allInfrastructure = parameters.system.getInfrastructureEntities.entries().toArray();
+    let allInfrastructure = parameters.entity.getInfrastructureEntities.entries().toArray();
 
     if (allInfrastructure.length === 0) {
         return "n/a";
@@ -2061,9 +2061,9 @@ export const infrastructureAutoscaling: Calculation = (parameters: CalculationPa
     return autoscalingInfrastructure.length / allInfrastructure.length
 }
 
-export const ratioOfAbstractedHardware: Calculation = (parameters: CalculationParameters<Infrastructure>) => {
+export const ratioOfAbstractedHardware: Calculation = (parameters: CalculationParameters<System>) => {
 
-    let allInfrastructure = parameters.system.getInfrastructureEntities.entries().toArray();
+    let allInfrastructure = parameters.entity.getInfrastructureEntities.entries().toArray();
 
     if (allInfrastructure.length === 0) {
         return "n/a";
@@ -2072,6 +2072,37 @@ export const ratioOfAbstractedHardware: Calculation = (parameters: CalculationPa
     let abstractedHardwareInfrastructure = allInfrastructure.filter(([infrastructureKey, infrastructure]) => DYNAMIC_INFRASTRUCTURE.includes(infrastructure.getProperty("kind").value));
 
     return abstractedHardwareInfrastructure.length / allInfrastructure.length
+}
+
+
+export const nonProviderSpecificInfrastructureArtifacts: Calculation = (parameters: CalculationParameters<System>) => {
+
+    let allInfrastructure = parameters.entity.getInfrastructureEntities;
+
+    if (allInfrastructure.size === 0) {
+        return "n/a";
+    }
+
+    let nonProviderSpecificArtifacts = allInfrastructure.entries().filter(([infrastructureKey, infrastructure]) => {
+        return infrastructureHasOnlyNonProviderSpecificArtifacts({entity: infrastructure, system: parameters.system}) === 1
+    }).toArray();
+
+    return nonProviderSpecificArtifacts.length / allInfrastructure.size;
+}
+
+export const nonProviderSpecificComponentArtifacts: Calculation = (parameters: CalculationParameters<System>) => {
+
+    let allComponents = parameters.entity.getComponentEntities;
+
+    if (allComponents.size === 0) {
+        return "n/a";
+    }
+
+    let nonProviderSpecificArtifacts = allComponents.entries().filter(([componentKey, component]) => {
+        return componentHasOnlyNonProviderSpecificArtifacts({entity: component, system: parameters.system}) === 1
+    }).toArray();
+
+    return nonProviderSpecificArtifacts.length / allComponents.size;
 }
 
 
@@ -2171,5 +2202,7 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation }
     "ratioOfDeploymentMappingsWithStatedResourceRequirements": ratioOfDeploymentMappingsWithStatedResourceRequirements,
     "deployedEntitiesAutoscaling": deployedEntitiesAutoscaling,
     "infrastructureAutoscaling": infrastructureAutoscaling,
-    "ratioOfAbstractedHardware": ratioOfAbstractedHardware
+    "ratioOfAbstractedHardware": ratioOfAbstractedHardware,
+    "nonProviderSpecificInfrastructureArtifacts": nonProviderSpecificInfrastructureArtifacts,
+    "nonProviderSpecificComponentArtifacts": nonProviderSpecificComponentArtifacts
 }

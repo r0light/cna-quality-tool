@@ -865,6 +865,21 @@ export const deployedEntitiesAutoscaling: Calculation = (parameters: Calculation
 }
 
 
+export const nonProviderSpecificComponentArtifacts: Calculation = (parameters: CalculationParameters<Component>) => {
+
+    let allArtifacts = parameters.entity.getArtifacts;
+
+    if (allArtifacts.size === 0) {
+        return "n/a";
+    }
+
+    let nonProviderSpecificArtifacts = allArtifacts.entries().filter(([artifactKey, artifact]) => {
+        return artifact.getProperty("provider_specific") && !artifact.getProperty("provider_specific").value;
+    }).toArray();
+
+    return nonProviderSpecificArtifacts.length / allArtifacts.size;
+}
+
 export const componentMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
     "ratioOfExternalEndpointsSupportingTls": ratioOfExternalEndpointsSupportingTls,
@@ -920,6 +935,7 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "namespaceSeparation": namespaceSeparation,
     "ratioOfManagedBackingServices": ratioOfManagedBackingServices,
     "ratioOfDeploymentMappingsWithStatedResourceRequirements": ratioOfDeploymentMappingsWithStatedResourceRequirements,
-    "deployedEntitiesAutoscaling": deployedEntitiesAutoscaling
+    "deployedEntitiesAutoscaling": deployedEntitiesAutoscaling,
+    "nonProviderSpecificComponentArtifacts": nonProviderSpecificComponentArtifacts
 }
 

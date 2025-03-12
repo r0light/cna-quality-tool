@@ -3204,3 +3204,60 @@ test("ratioOfAbstractedHardware", () => {
     let measureValue = systemMeasureImplementations["ratioOfAbstractedHardware"]({ entity: system, system: system });
     expect(measureValue).toEqual(2/3);
 })
+
+
+test("nonProviderSpecificInfrastructureArtifacts", () => {
+    let system = new System("sys1", "testSystem");
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure A", getEmptyMetaData())
+    let propertiesA = getArtifactTypeProperties("Kubernetes.Resource");
+    propertiesA.find(prop => prop.getKey === "provider_specific").value = false;
+    infrastructureA.setArtifact("art1", new Artifact(
+        "Kubernetes.Resource",
+        "", "", "", "", "", "", "", propertiesA
+    ));
+    let infrastructureB = new Infrastructure("i2", "infrastructure B", getEmptyMetaData())
+    let propertiesB = getArtifactTypeProperties("AWS.Resource");
+    propertiesB.find(prop => prop.getKey === "provider_specific").value = true;
+    infrastructureB.setArtifact("art2", new Artifact(
+        "AWS.Resource",
+        "", "", "", "", "", "", "", propertiesB
+    ));
+
+
+    let backingService = new BackingService("bs1", "auth service", getEmptyMetaData());
+
+    system.addEntities([infrastructureA, infrastructureB]);
+    system.addEntities([backingService]);
+
+    let measureValue = systemMeasureImplementations["nonProviderSpecificInfrastructureArtifacts"]({ entity: system, system: system });
+    expect(measureValue).toEqual(0.5);
+})
+
+test("nonProviderSpecificComponentArtifacts", () => {
+    let system = new System("sys1", "testSystem");
+
+    let serviceA = new Service("s1", "service A", getEmptyMetaData())
+    let propertiesA = getArtifactTypeProperties("Kubernetes.Resource");
+    propertiesA.find(prop => prop.getKey === "provider_specific").value = false;
+    serviceA.setArtifact("art1", new Artifact(
+        "Kubernetes.Resource",
+        "", "", "", "", "", "", "", propertiesA
+    ));
+    let serviceB = new Service("s2", "service B", getEmptyMetaData())
+    let propertiesB = getArtifactTypeProperties("AWS.Resource");
+    propertiesB.find(prop => prop.getKey === "provider_specific").value = true;
+    serviceB.setArtifact("art2", new Artifact(
+        "AWS.Resource",
+        "", "", "", "", "", "", "", propertiesB
+    ));
+
+
+    let backingService = new BackingService("bs1", "auth service", getEmptyMetaData());
+
+    system.addEntities([serviceA, serviceB]);
+    system.addEntities([backingService]);
+
+    let measureValue = systemMeasureImplementations["nonProviderSpecificComponentArtifacts"]({ entity: system, system: system });
+    expect(measureValue).toEqual(1/3);
+})

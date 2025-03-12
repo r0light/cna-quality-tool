@@ -363,3 +363,23 @@ test("ratioOfAbstractedHardware", () => {
     let measureValue = infrastructureMeasureImplementations["ratioOfAbstractedHardware"]({ entity: infrastructureA, system: system });
     expect(measureValue).toEqual(1);
 })
+
+test("nonProviderSpecificInfrastructureArtifacts", () => {
+    let system = new System("sys1", "testSystem");
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure A", getEmptyMetaData())
+    let propertiesA = getArtifactTypeProperties("Kubernetes.Resource");
+    propertiesA.find(prop => prop.getKey === "provider_specific").value = false;
+    infrastructureA.setArtifact("art1", new Artifact(
+        "Kubernetes.Resource",
+        "", "", "", "", "", "", "", propertiesA
+    ));
+
+    let backingService = new BackingService("bs1", "auth service", getEmptyMetaData());
+
+    system.addEntities([infrastructureA]);
+    system.addEntities([backingService]);
+
+    let measureValue = infrastructureMeasureImplementations["nonProviderSpecificInfrastructureArtifacts"]({ entity: infrastructureA, system: system });
+    expect(measureValue).toEqual(1);
+})

@@ -223,6 +223,21 @@ export const ratioOfAbstractedHardware: Calculation = (parameters: CalculationPa
     return DYNAMIC_INFRASTRUCTURE.includes(parameters.entity.getProperty("kind").value) ? 1 : 0;
 }
 
+export const nonProviderSpecificInfrastructureArtifacts: Calculation = (parameters: CalculationParameters<Infrastructure>) => {
+
+    let allArtifacts = parameters.entity.getArtifacts;
+
+    if (allArtifacts.size === 0) {
+        return "n/a";
+    }
+
+    let nonProviderSpecificArtifacts = allArtifacts.entries().filter(([artifactKey, artifact]) => {
+        return artifact.getProperty("provider_specific") && !artifact.getProperty("provider_specific").value;
+    }).toArray();
+
+    return nonProviderSpecificArtifacts.length / allArtifacts.size;
+}
+
 export const infrastructureMeasureImplementations: { [measureKey: string]: Calculation } = {
     "numberOfServiceHostedOnOneInfrastructure": numberOfServiceHostedOnOneInfrastructure,
     "numberOfAvailabilityZonesUsed": numberOfAvailabilityZonesUsed,
@@ -238,5 +253,6 @@ export const infrastructureMeasureImplementations: { [measureKey: string]: Calcu
     "ratioOfDeploymentMappingsWithStatedResourceRequirements": ratioOfDeploymentMappingsWithStatedResourceRequirements,
     "deployedEntitiesAutoscaling": deployedEntitiesAutoscaling,
     "infrastructureAutoscaling": infrastructureAutoscaling,
-    "ratioOfAbstractedHardware": ratioOfAbstractedHardware
+    "ratioOfAbstractedHardware": ratioOfAbstractedHardware,
+    "nonProviderSpecificInfrastructureArtifacts": nonProviderSpecificInfrastructureArtifacts
 }
