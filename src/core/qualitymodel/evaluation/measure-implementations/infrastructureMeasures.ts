@@ -1,6 +1,6 @@
 import { BackingService, Infrastructure } from "@/core/entities";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure";
-import { AUTOMATED_INFRASTRUCTURE_PROVISIONING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, IAC_ARTIFACT_TYPE, ROLLING_UPDATE_STRATEGY_OPTIONS } from "../../specifications/featureModel";
+import { AUTOMATED_INFRASTRUCTURE_PROVISIONING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, IAC_ARTIFACT_TYPE, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MANAGED_INFRASTRUCTURE_MAINTENANCE, ROLLING_UPDATE_STRATEGY_OPTIONS } from "../../specifications/featureModel";
 
 
 export const supportsMonitoring: (infrastructure: Infrastructure) => boolean = (infrastructure: Infrastructure) => {
@@ -173,6 +173,11 @@ export const ratioOfInfrastructureWithIaCArtifact: Calculation = (parameters: Ca
     return iacArtifact ? 1 : 0;
 }
 
+export const ratioOfFullyManagedInfrastructure: Calculation = (parameters: CalculationParameters<Infrastructure>) => {
+
+    return MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS.includes(parameters.entity.getProperty("environment_access").value) &&
+            MANAGED_INFRASTRUCTURE_MAINTENANCE.includes(parameters.entity.getProperty("maintenance").value) ? 1 : 0;
+}
 
 export const infrastructureMeasureImplementations: { [measureKey: string]: Calculation } = {
     "numberOfServiceHostedOnOneInfrastructure": numberOfServiceHostedOnOneInfrastructure,
@@ -183,5 +188,6 @@ export const infrastructureMeasureImplementations: { [measureKey: string]: Calcu
     "ratioOfStandardizedArtifacts": ratioOfStandardizedArtifacts,
     "ratioOfEntitiesProvidingStandardizedArtifacts": ratioOfEntitiesProvidingStandardizedArtifacts,
     "ratioOfAutomaticallyProvisionedInfrastructure": ratioOfAutomaticallyProvisionedInfrastructure,
-    "ratioOfInfrastructureWithIaCArtifact": ratioOfInfrastructureWithIaCArtifact
+    "ratioOfInfrastructureWithIaCArtifact": ratioOfInfrastructureWithIaCArtifact,
+    "ratioOfFullyManagedInfrastructure": ratioOfFullyManagedInfrastructure
 }

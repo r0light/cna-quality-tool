@@ -4,7 +4,7 @@ import { average, median, lowest, partition } from "./general-functions";
 import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, CUSTOM_SOFTWARE_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, EVENT_SOURCING_KIND, getEndpointKindWeight, getUsageRelationWeight, IAC_ARTIFACT_TYPE, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MESSAGE_BROKER_KIND, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SEND_EVENT_ENDPOINT_KIND, SERVICE_MESH_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND, VAULT_KIND } from "../../specifications/featureModel";
 import { calculateRatioOfEndpointsSupportingSsl, calculateRatioOfExternalEndpointsSupportingTls, componentMeasureImplementations, numberOfAsynchronousEndpointsOfferedByAService, numberOfComponentsAComponentIsLinkedTo, numberOfSynchronousEndpointsOfferedByAService, providesHealthAndReadinessEndpoints, serviceCouplingBasedOnEndpointEntropy } from "./componentMeasures";
 import { numberOfCyclesInRequestTraces, requestTraceComplexity } from "./requestTraceMeasures";
-import { supportsMonitoring as infrastructureSupportsMonitoring, ratioOfAutomaticallyProvisionedInfrastructure as infrastructureProvisionedAutomatically } from "./infrastructureMeasures";
+import { supportsMonitoring as infrastructureSupportsMonitoring, ratioOfAutomaticallyProvisionedInfrastructure as infrastructureProvisionedAutomatically, ratioOfFullyManagedInfrastructure as infrastructureIsFullyManaged } from "./infrastructureMeasures";
 import { supportsMonitoring as componentSupportsMonitoring } from "./componentMeasures";
 import { serviceMeshUsage as componentServiceMeshUsage, namespaceSeparation as componentNamespaceSeparation } from "./componentMeasures";
 import { map } from "jquery";
@@ -1976,6 +1976,19 @@ export const namespaceSeparation: Calculation = (parameters: CalculationParamete
     return average(componentNamespaceSeparations);
 }
 
+export const ratioOfFullyManagedInfrastructure: Calculation = (parameters: CalculationParameters<System>) => {
+
+    let allInfrastructureInstances = parameters.entity.getInfrastructureEntities.entries().toArray();
+
+    if (allInfrastructureInstances.length === 0) {
+        return "n/a";
+    }
+
+    let fullyManaged = allInfrastructureInstances.map(([infrastructureKey, infrastructure]) =>  infrastructureIsFullyManaged({entity: infrastructure, system: parameters.system})) as number[];
+
+    return average(fullyManaged);
+}
+
 export const systemMeasureImplementations: { [measureKey: string]: Calculation } = {
     "serviceReplicationLevel": serviceReplicationLevel,
     "medianServiceReplication": medianServiceReplication,
@@ -2065,5 +2078,6 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation }
     "ratioOfAutomaticallyProvisionedInfrastructure": ratioOfAutomaticallyProvisionedInfrastructure,
     "ratioOfDeploymentsOnDynamicInfrastructure": ratioOfDeploymentsOnDynamicInfrastructure,
     "ratioOfInfrastructureWithIaCArtifact": ratioOfInfrastructureWithIaCArtifact,
-    "namespaceSeparation": namespaceSeparation
+    "namespaceSeparation": namespaceSeparation,
+    "ratioOfFullyManagedInfrastructure": ratioOfFullyManagedInfrastructure
 }

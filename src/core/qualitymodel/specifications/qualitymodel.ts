@@ -579,7 +579,7 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.DEPLOYMENT_MAPPING],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
         "sources": [],
-        "measures": []
+        "measures": ["ratioOfFullyManagedInfrastructure"]
     },
     "managedBackingServices": {
         "name": "Managed backing services",
@@ -1942,6 +1942,12 @@ const measures = {
         "calculation": "1 - (Average sharing of namespaces)",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT]
+    },
+    "ratioOfFullyManagedInfrastructure": {
+        "name": "Ratio of fully managed infrastructure",
+        "calculation": "Infrastructure entities with no environment access and transparent maintenance / All infrastructure entities",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE]
     }
 } satisfies { [measureKey: string]: MeasureSpec }
 

@@ -6,7 +6,7 @@ import { RelationToDataAggregate } from "@/core/entities/relationToDataAggregate
 import { systemMeasureImplementations } from "@/core/qualitymodel/evaluation/measure-implementations/systemMeasures";
 import { getQualityModel } from "@/core/qualitymodel/QualityModelInstance";
 import { ENTITIES } from "@/core/qualitymodel/specifications/entities";
-import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_SECRET_KIND, COMMAND_ENDPOINT_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, QUERY_ENDPOINT_KIND, SEND_EVENT_ENDPOINT_KIND, SERVICE_MESH_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "@/core/qualitymodel/specifications/featureModel";
+import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_SECRET_KIND, COMMAND_ENDPOINT_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MANAGED_INFRASTRUCTURE_MAINTENANCE, QUERY_ENDPOINT_KIND, SEND_EVENT_ENDPOINT_KIND, SERVICE_MESH_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "@/core/qualitymodel/specifications/featureModel";
 import { backingDataSvgRepresentation } from "@/modeling/config/detailsSidebarConfig";
 import { beforeAll, expect, test } from "vitest"
 
@@ -3022,4 +3022,32 @@ test("namespaceSeparation - none", () => {
 
     let measureValue = systemMeasureImplementations["namespaceSeparation"]({ entity: system, system: system });
     expect(measureValue).toEqual(0);
+})
+
+test("ratioOfFullyManagedInfrastructure", () => {
+    let system = new System("sys1", "testSystem");
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure A", getEmptyMetaData())
+    infrastructureA.setPropertyValue("environment_access", MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS[0]);
+    infrastructureA.setPropertyValue("maintenance", MANAGED_INFRASTRUCTURE_MAINTENANCE[0]);
+
+
+    let infrastructureB = new Infrastructure("i2", "infrastructure B", getEmptyMetaData())
+    infrastructureB.setPropertyValue("environment_access", MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS[0]);
+    infrastructureB.setPropertyValue("maintenance", "manual");
+
+
+    let infrastructureC = new Infrastructure("i3", "infrastructure C", getEmptyMetaData())
+    infrastructureC.setPropertyValue("environment_access", "full");
+    infrastructureC.setPropertyValue("maintenance", MANAGED_INFRASTRUCTURE_MAINTENANCE[0]);
+
+
+    let infrastructureD = new Infrastructure("i4", "infrastructure D", getEmptyMetaData())
+    infrastructureD.setPropertyValue("environment_access", "full");
+    infrastructureD.setPropertyValue("maintenance", "manual");
+
+    system.addEntities([infrastructureA, infrastructureB, infrastructureC, infrastructureD]);
+
+    let measureValue = systemMeasureImplementations["ratioOfFullyManagedInfrastructure"]({ entity: system, system: system });
+    expect(measureValue).toEqual(1/4);
 })

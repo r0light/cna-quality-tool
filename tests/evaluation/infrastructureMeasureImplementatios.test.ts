@@ -5,7 +5,7 @@ import { RelationToBackingData } from "@/core/entities/relationToBackingData";
 import { infrastructureMeasureImplementations } from "@/core/qualitymodel/evaluation/measure-implementations/infrastructureMeasures";
 import { getQualityModel } from "@/core/qualitymodel/QualityModelInstance";
 import { ENTITIES } from "@/core/qualitymodel/specifications/entities";
-import { BACKING_DATA_CONFIG_KIND, BACKING_DATA_SECRET_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE } from "@/core/qualitymodel/specifications/featureModel";
+import { BACKING_DATA_CONFIG_KIND, BACKING_DATA_SECRET_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MANAGED_INFRASTRUCTURE_MAINTENANCE } from "@/core/qualitymodel/specifications/featureModel";
 import { expect, test } from "vitest";
 
 
@@ -245,5 +245,18 @@ test("ratioOfInfrastructureWithIaCArtifact", () => {
     system.addEntities([backingService]);
 
     let measureValue = infrastructureMeasureImplementations["ratioOfInfrastructureWithIaCArtifact"]({ entity: infrastructureA, system: system });
+    expect(measureValue).toEqual(1);
+})
+
+test("ratioOfFullyManagedInfrastructure", () => {
+    let system = new System("sys1", "testSystem");
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure A", getEmptyMetaData())
+    infrastructureA.setPropertyValue("environment_access", MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS[0]);
+    infrastructureA.setPropertyValue("maintenance", MANAGED_INFRASTRUCTURE_MAINTENANCE[0]);
+
+    system.addEntities([infrastructureA]);
+
+    let measureValue = infrastructureMeasureImplementations["ratioOfFullyManagedInfrastructure"]({ entity: infrastructureA, system: system });
     expect(measureValue).toEqual(1);
 })
