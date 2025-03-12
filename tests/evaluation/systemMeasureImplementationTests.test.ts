@@ -3051,3 +3051,28 @@ test("ratioOfFullyManagedInfrastructure", () => {
     let measureValue = systemMeasureImplementations["ratioOfFullyManagedInfrastructure"]({ entity: system, system: system });
     expect(measureValue).toEqual(1/4);
 })
+
+test("ratioOfManagedBackingServices", () => {
+    let system = new System("sys1", "testSystem");
+
+    let backingServiceA = new BackingService("bs1", "backing service A", getEmptyMetaData())
+    backingServiceA.setPropertyValue("managed", true);
+
+    let backingServiceB = new StorageBackingService("bs2", "storage backing service B", getEmptyMetaData())
+    backingServiceB.setPropertyValue("managed", false);
+
+    let backingServiceC = new ProxyBackingService("bs3", "proxy backing service C", getEmptyMetaData())
+    backingServiceC.setPropertyValue("managed", false);
+
+    let backingServiceD = new BrokerBackingService("bs4", "broker backing service D", getEmptyMetaData())
+    backingServiceD.setPropertyValue("managed", true);
+
+    let serviceD = new Service("s1", "service A", getEmptyMetaData())
+    serviceD.setPropertyValue("managed", true);
+
+    system.addEntities([backingServiceA, backingServiceB, backingServiceC, backingServiceD]);
+    system.addEntities([serviceD]);
+
+    let measureValue = systemMeasureImplementations["ratioOfManagedBackingServices"]({ entity: system, system: system });
+    expect(measureValue).toEqual(0.5);
+})

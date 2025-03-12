@@ -1644,3 +1644,15 @@ test("namespaceSeparation - none", () => {
     let measureValue = componentMeasureImplementations["namespaceSeparation"]({ entity: serviceA, system: system });
     expect(measureValue).toEqual(0);
 })
+
+test("ratioOfManagedBackingServices", () => {
+    let system = new System("sys1", "testSystem");
+
+    let backingServiceA = new BackingService("bs1", "service A", getEmptyMetaData())
+    backingServiceA.setPropertyValue("managed", true);
+
+    system.addEntities([backingServiceA]);
+
+    let measureValue = componentMeasureImplementations["ratioOfManagedBackingServices"]({ entity: backingServiceA, system: system });
+    expect(measureValue).toEqual(1);
+})

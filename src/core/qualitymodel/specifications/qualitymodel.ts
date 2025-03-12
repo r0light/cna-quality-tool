@@ -588,7 +588,7 @@ const productFactors = {
         "relevantEntities": [ENTITIES.BACKING_SERVICE, ENTITIES.BROKER_BACKING_SERVICE, ENTITIES.PROXY_BACKING_SERVICE, ENTITIES.STORAGE_BACKING_SERVICE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Scholl2019", "section": "6 Use Managed Databases and Analytics Services" }, { "key": "Arundel2019", "section": "15 Don't build your own monitoring infrastructure (Use an external monitoring service)" }, { "key": "Bastani2017", "section": "10 managed and automated messaging system (operating your own messaging system increases operational overhead, better use a system managed by a platform)" }],
-        "measures": []
+        "measures": ["ratioOfManagedBackingServices"]
     },
     "replication": {
         "name": "Replication",
@@ -1948,6 +1948,12 @@ const measures = {
         "calculation": "Infrastructure entities with no environment access and transparent maintenance / All infrastructure entities",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE]
+    },
+    "ratioOfManagedBackingServices": {
+        "name": "Ratio of managed backing services",
+        "calculation": "Managed Backing Services, Storage Backing Services, Proxy Backing Services and Broker Backing Services / All Backing Services, Storage Backing Services, Proxy Backing Services and Broker Backing Services",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT]
     }
 } satisfies { [measureKey: string]: MeasureSpec }
 

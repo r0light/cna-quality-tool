@@ -1989,6 +1989,22 @@ export const ratioOfFullyManagedInfrastructure: Calculation = (parameters: Calcu
     return average(fullyManaged);
 }
 
+export const ratioOfManagedBackingServices: Calculation = (parameters: CalculationParameters<System>) => {
+
+    let allBackingServices = parameters.entity.getComponentEntities.entries().filter(([componentKey, component]) => {
+        return [BackingService.name, StorageBackingService.name, ProxyBackingService.name, BrokerBackingService.name].includes(component.constructor.name);
+    }).toArray();
+
+    if (allBackingServices.length === 0) {
+        return "n/a";
+    }
+
+    let managedBackingServices = allBackingServices.filter(([backingServiceKey, backingService]) => backingService.getProperty("managed").value);
+
+    return managedBackingServices.length / allBackingServices.length;
+}
+
+
 export const systemMeasureImplementations: { [measureKey: string]: Calculation } = {
     "serviceReplicationLevel": serviceReplicationLevel,
     "medianServiceReplication": medianServiceReplication,
@@ -2079,5 +2095,6 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation }
     "ratioOfDeploymentsOnDynamicInfrastructure": ratioOfDeploymentsOnDynamicInfrastructure,
     "ratioOfInfrastructureWithIaCArtifact": ratioOfInfrastructureWithIaCArtifact,
     "namespaceSeparation": namespaceSeparation,
-    "ratioOfFullyManagedInfrastructure": ratioOfFullyManagedInfrastructure
+    "ratioOfFullyManagedInfrastructure": ratioOfFullyManagedInfrastructure,
+    "ratioOfManagedBackingServices": ratioOfManagedBackingServices
 }

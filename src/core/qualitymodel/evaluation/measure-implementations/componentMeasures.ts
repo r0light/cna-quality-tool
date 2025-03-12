@@ -824,6 +824,14 @@ export const namespaceSeparation: Calculation = (parameters: CalculationParamete
     return 1 - average(sharedNamespace);
 }
 
+export const ratioOfManagedBackingServices: Calculation = (parameters: CalculationParameters<Component>) => {
+    if (![BackingService.name, StorageBackingService.name, ProxyBackingService.name, BrokerBackingService.name].includes(parameters.entity.constructor.name)) {
+        return "n/a";
+    } else {
+        return parameters.entity.getProperty("managed").value ? 1 : 0;
+    }
+}
+
 export const componentMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
     "ratioOfExternalEndpointsSupportingTls": ratioOfExternalEndpointsSupportingTls,
@@ -876,6 +884,7 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "ratioOfStandardizedArtifacts": ratioOfStandardizedArtifacts,
     "ratioOfEntitiesProvidingStandardizedArtifacts": ratioOfEntitiesProvidingStandardizedArtifacts,
     "ratioOfDeploymentsOnDynamicInfrastructure": ratioOfDeploymentsOnDynamicInfrastructure,
-    "namespaceSeparation": namespaceSeparation
+    "namespaceSeparation": namespaceSeparation,
+    "ratioOfManagedBackingServices": ratioOfManagedBackingServices
 }
 
