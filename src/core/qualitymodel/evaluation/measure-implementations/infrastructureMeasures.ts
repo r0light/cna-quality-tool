@@ -1,4 +1,4 @@
-import { BackingService, Infrastructure } from "@/core/entities";
+import { BackingService, DeploymentMapping, Infrastructure } from "@/core/entities";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure";
 import { AUTOMATED_INFRASTRUCTURE_PROVISIONING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, IAC_ARTIFACT_TYPE, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MANAGED_INFRASTRUCTURE_MAINTENANCE, ROLLING_UPDATE_STRATEGY_OPTIONS } from "../../specifications/featureModel";
 
@@ -179,6 +179,25 @@ export const ratioOfFullyManagedInfrastructure: Calculation = (parameters: Calcu
             MANAGED_INFRASTRUCTURE_MAINTENANCE.includes(parameters.entity.getProperty("maintenance").value) ? 1 : 0;
 }
 
+export const ratioOfInfrastructureEnforcingResourceBoundaries: Calculation = (parameters: CalculationParameters<Infrastructure>) => {
+    return parameters.entity.getProperty("enforced_resource_bounds").value ? 1 : 0;
+}
+
+export const ratioOfDeploymentMappingsWithStatedResourceRequirements: Calculation = (parameters: CalculationParameters<Infrastructure>) => {
+    let relevantDeploymentMappings = parameters.system.getDeploymentMappingEntities.entries().filter(([deploymentMappingKey, deploymentMapping]) => {
+        return deploymentMapping.getUnderlyingInfrastructure.getId === parameters.entity.getId;
+    }).toArray();
+
+    if (relevantDeploymentMappings.length === 0) {
+        return "n/a";
+    }
+
+    let statingResourceRequirements = relevantDeploymentMappings.filter(([deplyomentMappingKey, deploymentMapping]) => deploymentMapping.getProperty("resource_requirements").value !== "unstated");
+
+    return statingResourceRequirements.length / relevantDeploymentMappings.length;
+
+}
+
 export const infrastructureMeasureImplementations: { [measureKey: string]: Calculation } = {
     "numberOfServiceHostedOnOneInfrastructure": numberOfServiceHostedOnOneInfrastructure,
     "numberOfAvailabilityZonesUsed": numberOfAvailabilityZonesUsed,
@@ -189,5 +208,7 @@ export const infrastructureMeasureImplementations: { [measureKey: string]: Calcu
     "ratioOfEntitiesProvidingStandardizedArtifacts": ratioOfEntitiesProvidingStandardizedArtifacts,
     "ratioOfAutomaticallyProvisionedInfrastructure": ratioOfAutomaticallyProvisionedInfrastructure,
     "ratioOfInfrastructureWithIaCArtifact": ratioOfInfrastructureWithIaCArtifact,
-    "ratioOfFullyManagedInfrastructure": ratioOfFullyManagedInfrastructure
+    "ratioOfFullyManagedInfrastructure": ratioOfFullyManagedInfrastructure,
+    "ratioOfInfrastructureEnforcingResourceBoundaries": ratioOfInfrastructureEnforcingResourceBoundaries,
+    "ratioOfDeploymentMappingsWithStatedResourceRequirements": ratioOfDeploymentMappingsWithStatedResourceRequirements
 }

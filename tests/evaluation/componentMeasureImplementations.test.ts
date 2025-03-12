@@ -1656,3 +1656,27 @@ test("ratioOfManagedBackingServices", () => {
     let measureValue = componentMeasureImplementations["ratioOfManagedBackingServices"]({ entity: backingServiceA, system: system });
     expect(measureValue).toEqual(1);
 })
+
+test("ratioOfDeploymentMappingsWithStatedResourceRequirements", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    let infrastructureB = new Infrastructure("i2", "infrastructure 2", getEmptyMetaData());
+
+    let deploymentMappingA = new DeploymentMapping("dm1", serviceA, infrastructureA);
+    deploymentMappingA.setPropertyValue("resource_requirements", "cpu:200m, memory:1GB");
+    let deploymentMappingB = new DeploymentMapping("dm2", serviceB, infrastructureA);
+    deploymentMappingB.setPropertyValue("resource_requirements", "cpu:200m, memory:1GB");
+    let deploymentMappingC = new DeploymentMapping("dm3", serviceA, infrastructureB);
+
+
+    system.addEntities([serviceA, serviceB]);
+    system.addEntities([infrastructureA, infrastructureB]);
+    system.addEntities([deploymentMappingA, deploymentMappingB, deploymentMappingC]);
+
+    let measureValue = componentMeasureImplementations["ratioOfDeploymentMappingsWithStatedResourceRequirements"]({ entity: serviceA, system: system });
+    expect(measureValue).toEqual(0.5);
+})

@@ -2004,6 +2004,31 @@ export const ratioOfManagedBackingServices: Calculation = (parameters: Calculati
     return managedBackingServices.length / allBackingServices.length;
 }
 
+export const ratioOfInfrastructureEnforcingResourceBoundaries: Calculation = (parameters: CalculationParameters<System>) => {
+
+    let allInfrastructure = parameters.system.getInfrastructureEntities.entries().toArray();
+
+    if (allInfrastructure.length === 0) {
+        return "n/a";
+    }
+
+    let enforcingInfrastructure = allInfrastructure.filter(([infrastructureKey, infrastructure]) => infrastructure.getProperty("enforced_resource_bounds").value);
+
+    return enforcingInfrastructure.length / allInfrastructure.length;
+}
+
+export const ratioOfDeploymentMappingsWithStatedResourceRequirements: Calculation = (parameters: CalculationParameters<System>) => {
+    let allDeploymentMappings = parameters.system.getDeploymentMappingEntities.entries().toArray();
+
+    if (allDeploymentMappings.length === 0) {
+        return "n/a";
+    }
+
+    let statingResourceRequirements = allDeploymentMappings.filter(([deplyomentMappingKey, deploymentMapping]) => deploymentMapping.getProperty("resource_requirements").value !== "unstated");
+
+    return statingResourceRequirements.length / allDeploymentMappings.length;
+
+}
 
 export const systemMeasureImplementations: { [measureKey: string]: Calculation } = {
     "serviceReplicationLevel": serviceReplicationLevel,
@@ -2096,5 +2121,7 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation }
     "ratioOfInfrastructureWithIaCArtifact": ratioOfInfrastructureWithIaCArtifact,
     "namespaceSeparation": namespaceSeparation,
     "ratioOfFullyManagedInfrastructure": ratioOfFullyManagedInfrastructure,
-    "ratioOfManagedBackingServices": ratioOfManagedBackingServices
+    "ratioOfManagedBackingServices": ratioOfManagedBackingServices,
+    "ratioOfInfrastructureEnforcingResourceBoundaries": ratioOfInfrastructureEnforcingResourceBoundaries,
+    "ratioOfDeploymentMappingsWithStatedResourceRequirements": ratioOfDeploymentMappingsWithStatedResourceRequirements
 }

@@ -642,7 +642,7 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.DEPLOYMENT_MAPPING],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Scholl2019", "section": "6 Define CPU and Memory Limits for Your Containers" }, { "key": "Arundel2019", "section": "5 Resource Limits" }, { "key": "Ibryam2020", "section": "2 Defined Resource requirements" }, { "key": "Arundel2019", "section": "5 Resource Quotas (limit maximum resources for a namespace)" }, { "key": "Goniwada2021", "section": "3 Runtime Confinement Principle, 6 Predictable Demands" }],
-        "measures": []
+        "measures": ["ratioOfInfrastructureEnforcingResourceBoundaries", "ratioOfDeploymentMappingsWithStatedResourceRequirements"]
     },
     "built-InAutoscaling": {
         "name": "Built-in autoscaling",
@@ -1954,7 +1954,19 @@ const measures = {
         "calculation": "Managed Backing Services, Storage Backing Services, Proxy Backing Services and Broker Backing Services / All Backing Services, Storage Backing Services, Proxy Backing Services and Broker Backing Services",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT]
-    }
+    },
+    "ratioOfInfrastructureEnforcingResourceBoundaries": {
+        "name": "Ratio infrastructure enforcing resource boundaries",
+        "calculation": "Infrastructure entities enforcing resource boundaries / All infrastructure entities",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE]
+    },
+    "ratioOfDeploymentMappingsWithStatedResourceRequirements": {
+        "name": "Ratio of Deployment Mappings with stated resource requirements",
+        "calculation": "Deployment Mappings with stated resource requirements / All Deployment Mappings",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE]
+    },
 } satisfies { [measureKey: string]: MeasureSpec }
 
 const measureKeys = Object.freeze(measures);

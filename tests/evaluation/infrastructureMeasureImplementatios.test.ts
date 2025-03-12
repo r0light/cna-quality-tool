@@ -260,3 +260,41 @@ test("ratioOfFullyManagedInfrastructure", () => {
     let measureValue = infrastructureMeasureImplementations["ratioOfFullyManagedInfrastructure"]({ entity: infrastructureA, system: system });
     expect(measureValue).toEqual(1);
 })
+
+test("ratioOfInfrastructureEnforcingResourceBoundaries", () => {
+    let system = new System("sys1", "testSystem");
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure A", getEmptyMetaData())
+    infrastructureA.setPropertyValue("enforced_resource_bounds", true);
+
+    system.addEntities([infrastructureA]);
+
+    let measureValue = infrastructureMeasureImplementations["ratioOfInfrastructureEnforcingResourceBoundaries"]({ entity: infrastructureA, system: system });
+    expect(measureValue).toEqual(1);
+})
+
+
+test("ratioOfDeploymentMappingsWithStatedResourceRequirements", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    let infrastructureB = new Infrastructure("i2", "infrastructure 2", getEmptyMetaData());
+    let infrastructureC = new Infrastructure("i3", "infrastructure 3", getEmptyMetaData());
+
+    let deploymentMappingA = new DeploymentMapping("dm1", serviceA, infrastructureA);
+    deploymentMappingA.setPropertyValue("resource_requirements", "cpu:200m, memory:1GB");
+    let deploymentMappingB = new DeploymentMapping("dm2", serviceB, infrastructureA);
+    let deploymentMappingC = new DeploymentMapping("dm3", serviceC, infrastructureB);
+    deploymentMappingC.setPropertyValue("resource_requirements", "cpu:200m, memory:1GB");
+
+    system.addEntities([serviceA, serviceB, serviceC]);
+    system.addEntities([infrastructureA, infrastructureB, infrastructureC]);
+    system.addEntities([deploymentMappingA, deploymentMappingB, deploymentMappingC]);
+
+    let measureValue = infrastructureMeasureImplementations["ratioOfDeploymentMappingsWithStatedResourceRequirements"]({ entity: infrastructureA, system: system });
+    expect(measureValue).toEqual(0.5);
+})
