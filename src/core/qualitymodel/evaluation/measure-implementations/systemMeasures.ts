@@ -1,7 +1,7 @@
 import { BackingService, BrokerBackingService, Component, DeploymentMapping, Infrastructure, Link, ProxyBackingService, Service, StorageBackingService, System } from "@/core/entities";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure";
 import { average, median, lowest, partition } from "./general-functions";
-import { ASYNCHRONOUS_ENDPOINT_KIND, AUTOMATED_SCALING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, CUSTOM_SOFTWARE_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, EVENT_SOURCING_KIND, getEndpointKindWeight, getUsageRelationWeight, IAC_ARTIFACT_TYPE, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MESSAGE_BROKER_KIND, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SEND_EVENT_ENDPOINT_KIND, SERVICE_MESH_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND, VAULT_KIND } from "../../specifications/featureModel";
+import { ASYNCHRONOUS_ENDPOINT_KIND, AUTOMATED_SCALING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, CONFIG_SERVICE_KIND, CUSTOM_SOFTWARE_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, EVENT_SOURCING_KIND, getEndpointKindWeight, getUsageRelationWeight, IAC_ARTIFACT_TYPE, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MESSAGE_BROKER_KIND, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SEND_EVENT_ENDPOINT_KIND, SERVICE_MESH_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND, VAULT_KIND } from "../../specifications/featureModel";
 import { calculateRatioOfEndpointsSupportingSsl, calculateRatioOfExternalEndpointsSupportingTls, componentMeasureImplementations, numberOfAsynchronousEndpointsOfferedByAService, numberOfComponentsAComponentIsLinkedTo, numberOfSynchronousEndpointsOfferedByAService, providesHealthAndReadinessEndpoints, serviceCouplingBasedOnEndpointEntropy } from "./componentMeasures";
 import { numberOfCyclesInRequestTraces, requestTraceComplexity } from "./requestTraceMeasures";
 import { supportsMonitoring as infrastructureSupportsMonitoring, ratioOfAutomaticallyProvisionedInfrastructure as infrastructureProvisionedAutomatically, ratioOfFullyManagedInfrastructure as infrastructureIsFullyManaged, nonProviderSpecificInfrastructureArtifacts as infrastructureHasOnlyNonProviderSpecificArtifacts } from "./infrastructureMeasures";
@@ -2105,6 +2105,36 @@ export const nonProviderSpecificComponentArtifacts: Calculation = (parameters: C
     return nonProviderSpecificArtifacts.length / allComponents.size;
 }
 
+export const configurationStoredInConfigService: Calculation = (parameters: CalculationParameters<System>) => {
+
+    let allConfigs = [...parameters.entity.getBackingDataEntities.entries()].filter(([backingDataId, backingData]) => backingData.getProperty("kind").value === BACKING_DATA_CONFIG_KIND);
+
+    if (allConfigs.length === 0) {
+        return "n/a";
+    }
+
+    let allComponents = [...parameters.entity.getComponentEntities.entries()];
+
+    let configsStoredInConfigService: Set<string> = new Set();
+    let configsStoredElsewhere: Set<string> = new Set();
+
+    for (const [componentId, component] of allComponents ) {
+        let configsStoredInComponent = component.getBackingDataEntities
+            .filter((backingData) => backingData.backingData.getProperty("kind").value === BACKING_DATA_CONFIG_KIND && DATA_USAGE_RELATION_PERSISTENCE.includes(backingData.relation.getProperty("usage_relation").value))
+            .map(backingData => backingData.backingData.getId);
+
+        if ( component.constructor.name === BackingService.name && CONFIG_SERVICE_KIND.includes(component.getProperty("providedFunctionality").value)) {
+            configsStoredInComponent.forEach(secretId => configsStoredInConfigService.add(secretId));
+        } else {
+            configsStoredInComponent.forEach(secretId => configsStoredElsewhere.add(secretId)); 
+        }
+
+    }
+    let onlyStoredInConfigService = configsStoredInConfigService.difference(configsStoredElsewhere);
+
+    return onlyStoredInConfigService.size / allConfigs.length;
+}
+
 
 export const systemMeasureImplementations: { [measureKey: string]: Calculation } = {
     "serviceReplicationLevel": serviceReplicationLevel,
@@ -2204,5 +2234,6 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation }
     "infrastructureAutoscaling": infrastructureAutoscaling,
     "ratioOfAbstractedHardware": ratioOfAbstractedHardware,
     "nonProviderSpecificInfrastructureArtifacts": nonProviderSpecificInfrastructureArtifacts,
-    "nonProviderSpecificComponentArtifacts": nonProviderSpecificComponentArtifacts
+    "nonProviderSpecificComponentArtifacts": nonProviderSpecificComponentArtifacts,
+    "configurationStoredInConfigService": configurationStoredInConfigService
 }

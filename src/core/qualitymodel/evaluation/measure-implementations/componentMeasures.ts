@@ -2,7 +2,7 @@
 import { ref } from "vue";
 import { BackingService, BrokerBackingService, Component, Endpoint, ExternalEndpoint, ProxyBackingService, Service, StorageBackingService, System } from "../../../entities.js";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure.js";
-import { ASYNCHRONOUS_ENDPOINT_KIND, AUTOMATED_SCALING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, CUSTOM_SOFTWARE_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, PROTOCOLS_SUPPORTING_TLS, SERVICE_MESH_KIND, SYNCHRONOUS_ENDPOINT_KIND, VAULT_KIND } from "../../specifications/featureModel.js";
+import { ASYNCHRONOUS_ENDPOINT_KIND, AUTOMATED_SCALING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, CONFIG_SERVICE_KIND, CUSTOM_SOFTWARE_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, PROTOCOLS_SUPPORTING_TLS, SERVICE_MESH_KIND, SYNCHRONOUS_ENDPOINT_KIND, VAULT_KIND } from "../../specifications/featureModel.js";
 import { average } from "./general-functions.js";
 
 
@@ -880,6 +880,41 @@ export const nonProviderSpecificComponentArtifacts: Calculation = (parameters: C
     return nonProviderSpecificArtifacts.length / allArtifacts.size;
 }
 
+export const configurationStoredInConfigService: Calculation = (parameters: CalculationParameters<Component>) => {
+
+    let referencedConfigs = parameters.entity.getBackingDataEntities.filter(backingData => backingData.backingData.getProperty("kind").value === BACKING_DATA_CONFIG_KIND);
+
+    if (referencedConfigs.length === 0) {
+        return "n/a";
+    }
+
+    let usedConfigs = referencedConfigs.filter(backingData => DATA_USAGE_RELATION_USAGE.includes(backingData.relation.getProperty("usage_relation").value));
+    let usedConfigIds = usedConfigs.map(backingData => backingData.backingData.getId);
+    let persistedConfigs = referencedConfigs.filter(backingData => DATA_USAGE_RELATION_PERSISTENCE.includes(backingData.relation.getProperty("usage_relation").value));
+
+    let configsInConfigService: Set<string> = new Set();
+
+    let allConfigServices = [...parameters.system.getComponentEntities.entries()].filter(([componentId, component]) => {
+        return component.constructor.name === BackingService.name && CONFIG_SERVICE_KIND.includes(component.getProperty("providedFunctionality").value);
+    })
+
+    for (const [configServiceId, configService] of allConfigServices) {
+        let configs = configService.getBackingDataEntities.filter(backingData => { return backingData.backingData.getProperty("kind").value === BACKING_DATA_CONFIG_KIND });
+        configs.forEach(config => {
+            if (usedConfigIds.includes(config.backingData.getId) && DATA_USAGE_RELATION_PERSISTENCE.includes(config.relation.getProperty("usage_relation").value) ) {
+                configsInConfigService.add(config.backingData.getId);
+            }
+        })
+    }
+
+    if (parameters.entity.constructor.name === BackingService.name && CONFIG_SERVICE_KIND.includes(parameters.entity.getProperty("providedFunctionality").value)) {
+        persistedConfigs.map(backingData => backingData.backingData.getId).forEach(configId => configsInConfigService.add(configId));
+    }
+
+    return (configsInConfigService.size / referencedConfigs.length);
+}
+
+
 export const componentMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
     "ratioOfExternalEndpointsSupportingTls": ratioOfExternalEndpointsSupportingTls,
@@ -936,6 +971,7 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "ratioOfManagedBackingServices": ratioOfManagedBackingServices,
     "ratioOfDeploymentMappingsWithStatedResourceRequirements": ratioOfDeploymentMappingsWithStatedResourceRequirements,
     "deployedEntitiesAutoscaling": deployedEntitiesAutoscaling,
-    "nonProviderSpecificComponentArtifacts": nonProviderSpecificComponentArtifacts
+    "nonProviderSpecificComponentArtifacts": nonProviderSpecificComponentArtifacts,
+    "configurationStoredInConfigService": configurationStoredInConfigService
 }
 

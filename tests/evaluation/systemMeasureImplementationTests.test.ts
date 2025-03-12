@@ -6,7 +6,7 @@ import { RelationToDataAggregate } from "@/core/entities/relationToDataAggregate
 import { systemMeasureImplementations } from "@/core/qualitymodel/evaluation/measure-implementations/systemMeasures";
 import { getQualityModel } from "@/core/qualitymodel/QualityModelInstance";
 import { ENTITIES } from "@/core/qualitymodel/specifications/entities";
-import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_SECRET_KIND, COMMAND_ENDPOINT_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MANAGED_INFRASTRUCTURE_MAINTENANCE, QUERY_ENDPOINT_KIND, SEND_EVENT_ENDPOINT_KIND, SERVICE_MESH_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "@/core/qualitymodel/specifications/featureModel";
+import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_CONFIG_KIND, BACKING_DATA_SECRET_KIND, COMMAND_ENDPOINT_KIND, CONFIG_SERVICE_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MANAGED_INFRASTRUCTURE_MAINTENANCE, QUERY_ENDPOINT_KIND, SEND_EVENT_ENDPOINT_KIND, SERVICE_MESH_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "@/core/qualitymodel/specifications/featureModel";
 import { backingDataSvgRepresentation } from "@/modeling/config/detailsSidebarConfig";
 import { beforeAll, expect, test } from "vitest"
 
@@ -2669,7 +2669,7 @@ test("secretsStoredInVault", () => {
     serviceA.addBackingDataEntity(secretB, relationAtoB);
 
     let backingService = new BackingService("bs1", "backing service 1", getEmptyMetaData());
-    backingService.setPropertyValue("providedFunctionality", "config");
+    backingService.setPropertyValue("providedFunctionality", "configuration");
     let relationBStoA = new RelationToBackingData("r4", getEmptyMetaData());
     relationBStoA.setPropertyValue("usage_relation", DATA_USAGE_RELATION_PERSISTENCE[0]);
     backingService.addBackingDataEntity(secretA, relationBStoA);
@@ -3224,7 +3224,6 @@ test("nonProviderSpecificInfrastructureArtifacts", () => {
         "", "", "", "", "", "", "", propertiesB
     ));
 
-
     let backingService = new BackingService("bs1", "auth service", getEmptyMetaData());
 
     system.addEntities([infrastructureA, infrastructureB]);
@@ -3252,7 +3251,6 @@ test("nonProviderSpecificComponentArtifacts", () => {
         "", "", "", "", "", "", "", propertiesB
     ));
 
-
     let backingService = new BackingService("bs1", "auth service", getEmptyMetaData());
 
     system.addEntities([serviceA, serviceB]);
@@ -3260,4 +3258,44 @@ test("nonProviderSpecificComponentArtifacts", () => {
 
     let measureValue = systemMeasureImplementations["nonProviderSpecificComponentArtifacts"]({ entity: system, system: system });
     expect(measureValue).toEqual(1/3);
+})
+
+test("configurationStoredInConfigService", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+
+    let configA = new BackingData("b1", "config A", getEmptyMetaData());
+    configA.setPropertyValue("kind", BACKING_DATA_CONFIG_KIND);
+    let relationAtoA = new RelationToBackingData("r1", getEmptyMetaData());
+    relationAtoA.setPropertyValue("usage_relation", DATA_USAGE_RELATION_USAGE[0]);
+    serviceA.addBackingDataEntity(configA, relationAtoA);
+
+    let configB = new BackingData("b2", "config B", getEmptyMetaData());
+    configB.setPropertyValue("kind", BACKING_DATA_CONFIG_KIND);
+    let relationAtoB = new RelationToBackingData("r2", getEmptyMetaData());
+    relationAtoB.setPropertyValue("usage_relation", DATA_USAGE_RELATION_USAGE[0]);
+    serviceA.addBackingDataEntity(configB, relationAtoB);
+
+    let backingService = new BackingService("bs1", "backing service 1", getEmptyMetaData());
+    backingService.setPropertyValue("providedFunctionality", "other");
+    let relationBStoA = new RelationToBackingData("r4", getEmptyMetaData());
+    relationBStoA.setPropertyValue("usage_relation", DATA_USAGE_RELATION_PERSISTENCE[0]);
+    backingService.addBackingDataEntity(configA, relationBStoA);
+
+    let configService = new BackingService("vs1", "backing service 1", getEmptyMetaData());
+    configService.setPropertyValue("providedFunctionality", CONFIG_SERVICE_KIND[0]);
+    let relationCStoA = new RelationToBackingData("r5", getEmptyMetaData());
+    relationCStoA.setPropertyValue("usage_relation", DATA_USAGE_RELATION_PERSISTENCE[0]);
+    configService.addBackingDataEntity(configA, relationCStoA);
+    let relationCStoB = new RelationToBackingData("r6", getEmptyMetaData());
+    relationCStoB.setPropertyValue("usage_relation", DATA_USAGE_RELATION_PERSISTENCE[0]);
+    configService.addBackingDataEntity(configB, relationCStoB);
+
+
+    system.addEntities([configA, configB]);
+    system.addEntities([serviceA, backingService, configService]);
+
+    let measureValue = systemMeasureImplementations["configurationStoredInConfigService"]({ entity: system, system: system });
+    expect(measureValue).toEqual(0.5);
 })

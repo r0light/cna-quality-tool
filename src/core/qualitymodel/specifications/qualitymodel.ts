@@ -696,7 +696,7 @@ const productFactors = {
         "relevantEntities": [ENTITIES.BACKING_DATA, ENTITIES.INFRASTRUCTURE, ENTITIES.COMPONENT, ENTITIES.BACKING_SERVICE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.SERVICE, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Ibryam2020", "section": "19 Configuration Resource" }, { "key": "Richardson2019", "section": "11.2 “Designing configurable services" }, { "key": "Arundel2019", "section": "10 ConfigMaps" }, { "key": "Bastani2017", "section": "2 Centralized, Journaled Configuration" }, { "key": "Bastani2017", "section": "2 Refreshable Configuration" }],
-        "measures": []
+        "measures": ["configurationStoredInConfigService"]
     },
     "contract-BasedLinks": {
         "name": "Contract-based links",
@@ -1994,6 +1994,12 @@ const measures = {
     "nonProviderSpecificComponentArtifacts": {
         "name": "Non-provider-specific component artifacts",
         "calculation": "Component entities with all artifacts being non-provider-specific / All components",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT]
+    },
+    "configurationStoredInConfigService": {
+        "name": "Configuration stored in config service",
+        "calculation": "Backing Data of type config stored in config service / All backing data of type config",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT]
     }

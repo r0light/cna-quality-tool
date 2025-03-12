@@ -7,7 +7,7 @@ import { RelationToDataAggregate } from "@/core/entities/relationToDataAggregate
 import { componentMeasureImplementations } from "@/core/qualitymodel/evaluation/measure-implementations/componentMeasures";
 import { getQualityModel } from "@/core/qualitymodel/QualityModelInstance";
 import { ENTITIES } from "@/core/qualitymodel/specifications/entities";
-import { ASYNCHRONOUS_ENDPOINT_KIND, AUTOMATED_SCALING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_SECRET_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, SERVICE_MESH_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "@/core/qualitymodel/specifications/featureModel";
+import { ASYNCHRONOUS_ENDPOINT_KIND, AUTOMATED_SCALING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_SECRET_KIND, CONFIG_SERVICE_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, SERVICE_MESH_KIND, SYNCHRONOUS_ENDPOINT_KIND, VAULT_KIND } from "@/core/qualitymodel/specifications/featureModel";
 import { linkTools } from "@joint/core";
 import { expect, test } from "vitest";
 
@@ -1418,7 +1418,7 @@ test("secretsStoredInVault", () => {
     serviceA.addBackingDataEntity(secretB, relationAtoB);
 
     let backingService = new BackingService("bs1", "backing service 1", getEmptyMetaData());
-    backingService.setPropertyValue("providedFunctionality", "vault");
+    backingService.setPropertyValue("providedFunctionality", VAULT_KIND[0]);
     let relationBStoA = new RelationToBackingData("r4", getEmptyMetaData());
     relationBStoA.setPropertyValue("usage_relation", DATA_USAGE_RELATION_PERSISTENCE[0]);
     backingService.addBackingDataEntity(secretA, relationBStoA);
@@ -1725,3 +1725,33 @@ test("nonProviderSpecificComponentArtifacts", () => {
     let measureValue = componentMeasureImplementations["nonProviderSpecificComponentArtifacts"]({ entity: serviceA, system: system });
     expect(measureValue).toEqual(1);
 })
+
+test("configurationStoredInConfigService", () => {
+    let system = new System("sys1", "testSystem");
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+
+    let configA = new BackingData("b1", "config A", getEmptyMetaData());
+    configA.setPropertyValue("kind", BACKING_DATA_CONFIG_KIND);
+    let relationAtoA = new RelationToBackingData("r1", getEmptyMetaData());
+    relationAtoA.setPropertyValue("usage_relation", DATA_USAGE_RELATION_USAGE[0]);
+    serviceA.addBackingDataEntity(configA, relationAtoA);
+
+    let configB = new BackingData("b2", "config B", getEmptyMetaData());
+    configB.setPropertyValue("kind", BACKING_DATA_CONFIG_KIND);
+    let relationAtoB = new RelationToBackingData("r2", getEmptyMetaData());
+    relationAtoB.setPropertyValue("usage_relation", DATA_USAGE_RELATION_PERSISTENCE[0]);
+    serviceA.addBackingDataEntity(configB, relationAtoB);
+
+    let backingService = new BackingService("bs1", "backing service 1", getEmptyMetaData());
+    backingService.setPropertyValue("providedFunctionality", CONFIG_SERVICE_KIND[0]);
+    let relationBStoA = new RelationToBackingData("r4", getEmptyMetaData());
+    relationBStoA.setPropertyValue("usage_relation", DATA_USAGE_RELATION_PERSISTENCE[0]);
+    backingService.addBackingDataEntity(configA, relationBStoA);
+
+    system.addEntities([configA, configB]);
+    system.addEntities([serviceA, backingService]);
+
+    let measureValue = componentMeasureImplementations["configurationStoredInConfigService"]({ entity: serviceA, system: system });
+    expect(measureValue).toEqual(0.5);
+}) 
