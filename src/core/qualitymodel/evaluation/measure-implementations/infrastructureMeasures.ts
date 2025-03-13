@@ -1,6 +1,6 @@
 import { BackingService, DeploymentMapping, Infrastructure } from "@/core/entities";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure";
-import { AUTOMATED_INFRASTRUCTURE_PROVISIONING, AUTOMATED_SCALING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, IAC_ARTIFACT_TYPE, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MANAGED_INFRASTRUCTURE_MAINTENANCE, ROLLING_UPDATE_STRATEGY_OPTIONS } from "../../specifications/featureModel";
+import { AUTOMATED_INFRASTRUCTURE_MAINTENANCE, AUTOMATED_INFRASTRUCTURE_PROVISIONING, AUTOMATED_SCALING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, IAC_ARTIFACT_TYPE, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MANAGED_INFRASTRUCTURE_MAINTENANCE, ROLLING_UPDATE_STRATEGY_OPTIONS } from "../../specifications/featureModel";
 
 
 export const supportsMonitoring: (infrastructure: Infrastructure) => boolean = (infrastructure: Infrastructure) => {
@@ -238,6 +238,31 @@ export const nonProviderSpecificInfrastructureArtifacts: Calculation = (paramete
     return nonProviderSpecificArtifacts.length / allArtifacts.size;
 }
 
+export const replacingDeployments: Calculation = (parameters: CalculationParameters<Infrastructure>) => {
+    let relevantDeploymentMappings = parameters.system.getDeploymentMappingEntities.entries().filter(([deploymentMappingKey, deploymentMapping]) => {
+        return deploymentMapping.getDeployedEntity.getId === parameters.entity.getId;
+    }).toArray();
+
+    if (relevantDeploymentMappings.length === 0) {
+        return "n/a";
+    }
+
+    let replacing = [];
+
+    relevantDeploymentMappings.forEach(([deploymentMappingId, deploymentMapping]) => {
+        if (deploymentMapping.getProperty("update_strategy").value !== "in-place") {
+            replacing.push(deploymentMappingId);
+        }
+    })
+
+    return replacing.length / relevantDeploymentMappings.length;
+}
+
+export const ratioOfAutomaticallyMaintainedInfrastructure: Calculation = (parameters: CalculationParameters<Infrastructure>) => {
+    return AUTOMATED_INFRASTRUCTURE_MAINTENANCE.includes(parameters.entity.getProperty("maintenance").value) ? 1 : 0;
+}
+
+
 export const infrastructureMeasureImplementations: { [measureKey: string]: Calculation } = {
     "numberOfServiceHostedOnOneInfrastructure": numberOfServiceHostedOnOneInfrastructure,
     "numberOfAvailabilityZonesUsed": numberOfAvailabilityZonesUsed,
@@ -254,5 +279,7 @@ export const infrastructureMeasureImplementations: { [measureKey: string]: Calcu
     "deployedEntitiesAutoscaling": deployedEntitiesAutoscaling,
     "infrastructureAutoscaling": infrastructureAutoscaling,
     "ratioOfAbstractedHardware": ratioOfAbstractedHardware,
-    "nonProviderSpecificInfrastructureArtifacts": nonProviderSpecificInfrastructureArtifacts
+    "nonProviderSpecificInfrastructureArtifacts": nonProviderSpecificInfrastructureArtifacts,
+    "replacingDeployments": replacingDeployments,
+    "ratioOfAutomaticallyMaintainedInfrastructure": ratioOfAutomaticallyMaintainedInfrastructure
 }

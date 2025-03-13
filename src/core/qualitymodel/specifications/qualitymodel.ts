@@ -723,7 +723,7 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.DEPLOYMENT_MAPPING, ENTITIES.INFRASTRUCTURE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Scholl2019", "section": "6 Don't Modify Deployed Infrastructure" }, { "key": "Indrasiri2021", "section": "1 Containerization" }, { "key": "Goniwada2021", "section": "3 Process Disposability Principle, Image Immutability Principle" }],
-        "measures": ["numberOfDeploymentTargetEnvironments"]
+        "measures": ["numberOfDeploymentTargetEnvironments", "replacingDeployments"]
     },
     "guardedIngress": {
         "name": "Guarded ingress",
@@ -786,7 +786,7 @@ const productFactors = {
         "relevantEntities": [ENTITIES.INFRASTRUCTURE, ENTITIES.DEPLOYMENT_MAPPING],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Reznik2019", "section": "10 Automated Infrastructure" }, { "key": "Goniwada2021", "section": "5 Automation" }],
-        "measures": []
+        "measures": ["ratioOfAutomaticallyMaintainedInfrastructure"]
     },
     "autonomousFaultHandling": {
         "name": "Autonomous fault handling",
@@ -2020,6 +2020,18 @@ const measures = {
         "calculation": "DeploymentMappings of components with a self-contained deployment unit / All deployment mappings of components",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE]
+    },
+    "replacingDeployments": {
+        "name": "Replacing Deployments",
+        "calculation": "DeploymentMappings that disallow in-place updates / All deployment mappings",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE]
+    },
+    "ratioOfAutomaticallyMaintainedInfrastructure": {
+        "name": "Ratio of automatically maintained infrastructure",
+        "calculation": "Infrastructure maintained in a non-manual way / All infrastructure entities",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE]
     }
 } satisfies { [measureKey: string]: MeasureSpec }
 

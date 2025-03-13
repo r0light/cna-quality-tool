@@ -6,7 +6,7 @@ import { RelationToDataAggregate } from "@/core/entities/relationToDataAggregate
 import { systemMeasureImplementations } from "@/core/qualitymodel/evaluation/measure-implementations/systemMeasures";
 import { getQualityModel } from "@/core/qualitymodel/QualityModelInstance";
 import { ENTITIES } from "@/core/qualitymodel/specifications/entities";
-import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_CONFIG_KIND, BACKING_DATA_SECRET_KIND, COMMAND_ENDPOINT_KIND, CONFIG_SERVICE_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MANAGED_INFRASTRUCTURE_MAINTENANCE, QUERY_ENDPOINT_KIND, SEND_EVENT_ENDPOINT_KIND, SERVICE_MESH_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "@/core/qualitymodel/specifications/featureModel";
+import { ASYNCHRONOUS_ENDPOINT_KIND, AUTOMATED_INFRASTRUCTURE_MAINTENANCE, BACKING_DATA_CONFIG_KIND, BACKING_DATA_SECRET_KIND, COMMAND_ENDPOINT_KIND, CONFIG_SERVICE_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MANAGED_INFRASTRUCTURE_MAINTENANCE, QUERY_ENDPOINT_KIND, SEND_EVENT_ENDPOINT_KIND, SERVICE_MESH_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "@/core/qualitymodel/specifications/featureModel";
 import { backingDataSvgRepresentation } from "@/modeling/config/detailsSidebarConfig";
 import { beforeAll, expect, test } from "vitest"
 
@@ -3410,4 +3410,49 @@ test("selfContainedDeployments", () => {
 
     let measureValue = systemMeasureImplementations["selfContainedDeployments"]({ entity: system, system: system });
     expect(measureValue).toEqual(2/3);
+})
+
+test("replacingDeployments", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    let infrastructureB = new Infrastructure("i2", "infrastructure 2", getEmptyMetaData());
+
+    let deploymentMappingA = new DeploymentMapping("dm1", serviceA, infrastructureA);
+    deploymentMappingA.setPropertyValue("update_strategy", "in-place");
+    let deploymentMappingB = new DeploymentMapping("dm2", serviceB, infrastructureA);
+    deploymentMappingB.setPropertyValue("update_strategy", "replace");
+    let deploymentMappingC = new DeploymentMapping("dm3", serviceA, infrastructureB);
+    deploymentMappingC.setPropertyValue("update_strategy", "replace");
+
+
+    system.addEntities([serviceA, serviceB]);
+    system.addEntities([infrastructureA, infrastructureB]);
+    system.addEntities([deploymentMappingA, deploymentMappingB, deploymentMappingC]);
+
+    let measureValue = systemMeasureImplementations["replacingDeployments"]({ entity: system, system: system });
+    expect(measureValue).toEqual(2/3);
+})
+
+test("ratioOfAutomaticallyMaintainedInfrastructure", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    infrastructureA.setPropertyValue("maintenance", AUTOMATED_INFRASTRUCTURE_MAINTENANCE[0]);
+    let infrastructureB = new Infrastructure("i2", "infrastructure 2", getEmptyMetaData());
+
+    let deploymentMappingA = new DeploymentMapping("dm1", serviceA, infrastructureA);
+    let deploymentMappingB = new DeploymentMapping("dm2", infrastructureA, infrastructureB);
+
+    system.addEntities([serviceA]);
+    system.addEntities([infrastructureA, infrastructureB]);
+    system.addEntities([deploymentMappingA, deploymentMappingB]);
+
+    let measureValue = systemMeasureImplementations["ratioOfAutomaticallyMaintainedInfrastructure"]({ entity: system, system: system });
+    expect(measureValue).toEqual(0.5);
 })

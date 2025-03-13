@@ -997,6 +997,26 @@ export const selfContainedDeployments: Calculation = (parameters: CalculationPar
     return selfContainedDeploymentUnit.length / relevantDeploymentMappings.length;
 }
 
+export const replacingDeployments: Calculation = (parameters: CalculationParameters<Component>) => {
+    let relevantDeploymentMappings = parameters.system.getDeploymentMappingEntities.entries().filter(([deploymentMappingKey, deploymentMapping]) => {
+        return deploymentMapping.getDeployedEntity.getId === parameters.entity.getId;
+    }).toArray();
+
+    if (relevantDeploymentMappings.length === 0) {
+        return "n/a";
+    }
+
+    let replacing = [];
+
+    relevantDeploymentMappings.forEach(([deploymentMappingId, deploymentMapping]) => {
+        if (deploymentMapping.getProperty("update_strategy").value !== "in-place") {
+            replacing.push(deploymentMappingId);
+        }
+    })
+
+    return replacing.length / relevantDeploymentMappings.length;
+}
+
 export const componentMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
     "ratioOfExternalEndpointsSupportingTls": ratioOfExternalEndpointsSupportingTls,
@@ -1057,6 +1077,7 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "configurationStoredInConfigService": configurationStoredInConfigService,
     "ratioOfEndpointsCoveredByContract": ratioOfEndpointsCoveredByContract,
     "standardizedDeployments": standardizedDeployments,
-    "selfContainedDeployments": selfContainedDeployments
+    "selfContainedDeployments": selfContainedDeployments,
+    "replacingDeployments": replacingDeployments
 }
 

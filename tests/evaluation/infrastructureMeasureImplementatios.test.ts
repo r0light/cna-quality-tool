@@ -5,7 +5,7 @@ import { RelationToBackingData } from "@/core/entities/relationToBackingData";
 import { infrastructureMeasureImplementations } from "@/core/qualitymodel/evaluation/measure-implementations/infrastructureMeasures";
 import { getQualityModel } from "@/core/qualitymodel/QualityModelInstance";
 import { ENTITIES } from "@/core/qualitymodel/specifications/entities";
-import { AUTOMATED_SCALING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_SECRET_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MANAGED_INFRASTRUCTURE_MAINTENANCE } from "@/core/qualitymodel/specifications/featureModel";
+import { AUTOMATED_INFRASTRUCTURE_MAINTENANCE, AUTOMATED_SCALING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_SECRET_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MANAGED_INFRASTRUCTURE_MAINTENANCE } from "@/core/qualitymodel/specifications/featureModel";
 import { expect, test } from "vitest";
 
 
@@ -381,5 +381,47 @@ test("nonProviderSpecificInfrastructureArtifacts", () => {
     system.addEntities([backingService]);
 
     let measureValue = infrastructureMeasureImplementations["nonProviderSpecificInfrastructureArtifacts"]({ entity: infrastructureA, system: system });
+    expect(measureValue).toEqual(1);
+})
+
+test("replacingDeployments", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    let infrastructureB = new Infrastructure("i2", "infrastructure 2", getEmptyMetaData());
+
+    let deploymentMappingA = new DeploymentMapping("dm1", serviceA, infrastructureA);
+    deploymentMappingA.setPropertyValue("update_strategy", "in-place");
+    let deploymentMappingB = new DeploymentMapping("dm2", infrastructureA, infrastructureB);
+    deploymentMappingB.setPropertyValue("update_strategy", "replace");
+
+
+    system.addEntities([serviceA]);
+    system.addEntities([infrastructureA, infrastructureB]);
+    system.addEntities([deploymentMappingA, deploymentMappingB]);
+
+    let measureValue = infrastructureMeasureImplementations["replacingDeployments"]({ entity: infrastructureA, system: system });
+    expect(measureValue).toEqual(1);
+})
+
+test("ratioOfAutomaticallyMaintainedInfrastructure", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    infrastructureA.setPropertyValue("maintenance", AUTOMATED_INFRASTRUCTURE_MAINTENANCE[0]);
+    let infrastructureB = new Infrastructure("i2", "infrastructure 2", getEmptyMetaData());
+
+    let deploymentMappingA = new DeploymentMapping("dm1", serviceA, infrastructureA);
+    let deploymentMappingB = new DeploymentMapping("dm2", infrastructureA, infrastructureB);
+
+    system.addEntities([serviceA]);
+    system.addEntities([infrastructureA, infrastructureB]);
+    system.addEntities([deploymentMappingA, deploymentMappingB]);
+
+    let measureValue = infrastructureMeasureImplementations["ratioOfAutomaticallyMaintainedInfrastructure"]({ entity: infrastructureA, system: system });
     expect(measureValue).toEqual(1);
 })

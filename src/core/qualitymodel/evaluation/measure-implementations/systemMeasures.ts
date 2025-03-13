@@ -1,7 +1,7 @@
 import { BackingService, BrokerBackingService, Component, DeploymentMapping, Infrastructure, Link, ProxyBackingService, Service, StorageBackingService, System } from "@/core/entities";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure";
 import { average, median, lowest, partition } from "./general-functions";
-import { ASYNCHRONOUS_ENDPOINT_KIND, AUTOMATED_SCALING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, CONFIG_SERVICE_KIND, CONTRACT_ARTIFACT_TYPE, CUSTOM_SOFTWARE_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, EVENT_SOURCING_KIND, getEndpointKindWeight, getUsageRelationWeight, IAC_ARTIFACT_TYPE, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MESSAGE_BROKER_KIND, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SEND_EVENT_ENDPOINT_KIND, SERVICE_MESH_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND, VAULT_KIND } from "../../specifications/featureModel";
+import { ASYNCHRONOUS_ENDPOINT_KIND, AUTOMATED_INFRASTRUCTURE_MAINTENANCE, AUTOMATED_SCALING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, CONFIG_SERVICE_KIND, CONTRACT_ARTIFACT_TYPE, CUSTOM_SOFTWARE_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, EVENT_SOURCING_KIND, getEndpointKindWeight, getUsageRelationWeight, IAC_ARTIFACT_TYPE, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MESSAGE_BROKER_KIND, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SEND_EVENT_ENDPOINT_KIND, SERVICE_MESH_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND, VAULT_KIND } from "../../specifications/featureModel";
 import { calculateRatioOfEndpointsSupportingSsl, calculateRatioOfExternalEndpointsSupportingTls, componentMeasureImplementations, numberOfAsynchronousEndpointsOfferedByAService, numberOfComponentsAComponentIsLinkedTo, numberOfSynchronousEndpointsOfferedByAService, providesHealthAndReadinessEndpoints, serviceCouplingBasedOnEndpointEntropy } from "./componentMeasures";
 import { numberOfCyclesInRequestTraces, requestTraceComplexity } from "./requestTraceMeasures";
 import { supportsMonitoring as infrastructureSupportsMonitoring, ratioOfAutomaticallyProvisionedInfrastructure as infrastructureProvisionedAutomatically, ratioOfFullyManagedInfrastructure as infrastructureIsFullyManaged, nonProviderSpecificInfrastructureArtifacts as infrastructureHasOnlyNonProviderSpecificArtifacts } from "./infrastructureMeasures";
@@ -2218,6 +2218,42 @@ export const selfContainedDeployments: Calculation = (parameters: CalculationPar
     return selfContainedDeploymentUnit.length / relevantDeploymentMappings.length;
 }
 
+export const replacingDeployments: Calculation = (parameters: CalculationParameters<System>) => {
+    let allDeploymentMappings = parameters.entity.getDeploymentMappingEntities;
+
+    if (allDeploymentMappings.size === 0) {
+        return 0;
+    }
+
+    let replacing = [];
+
+    allDeploymentMappings.entries().forEach(([deploymentMappingId, deploymentMapping]) => {
+        if (deploymentMapping.getProperty("update_strategy").value !== "in-place") {
+            replacing.push(deploymentMappingId);
+        }
+    })
+
+    return replacing.length / allDeploymentMappings.size;
+}
+
+export const ratioOfAutomaticallyMaintainedInfrastructure: Calculation = (parameters: CalculationParameters<System>) => {
+    let allInfrastructureInstances = parameters.entity.getInfrastructureEntities;
+
+    if (allInfrastructureInstances.size === 0) {
+        return "n/a";
+    }
+
+    let automaticallyMaintained = [];
+
+    allInfrastructureInstances.entries().forEach(([infrastructureId, infrastructure]) => {
+        if (AUTOMATED_INFRASTRUCTURE_MAINTENANCE.includes(infrastructure.getProperty("maintenance").value)) {
+            automaticallyMaintained.push(infrastructureId);
+        }
+    })
+
+    return  automaticallyMaintained.length / allInfrastructureInstances.size;
+}
+
 export const systemMeasureImplementations: { [measureKey: string]: Calculation } = {
     "serviceReplicationLevel": serviceReplicationLevel,
     "medianServiceReplication": medianServiceReplication,
@@ -2320,5 +2356,7 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation }
     "configurationStoredInConfigService": configurationStoredInConfigService,
     "ratioOfEndpointsCoveredByContract": ratioOfEndpointsCoveredByContract,
     "standardizedDeployments": standardizedDeployments,
-    "selfContainedDeployments": selfContainedDeployments
+    "selfContainedDeployments": selfContainedDeployments,
+    "replacingDeployments": replacingDeployments,
+    "ratioOfAutomaticallyMaintainedInfrastructure": ratioOfAutomaticallyMaintainedInfrastructure
 }

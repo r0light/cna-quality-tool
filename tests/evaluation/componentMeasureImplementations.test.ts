@@ -1839,3 +1839,28 @@ test("selfContainedDeployments", () => {
     let measureValue = componentMeasureImplementations["selfContainedDeployments"]({ entity: serviceA, system: system });
     expect(measureValue).toEqual(0.5);
 })
+
+test("replacingDeployments", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    let infrastructureB = new Infrastructure("i2", "infrastructure 2", getEmptyMetaData());
+
+    let deploymentMappingA = new DeploymentMapping("dm1", serviceA, infrastructureA);
+    deploymentMappingA.setPropertyValue("update_strategy", "in-place");
+    let deploymentMappingB = new DeploymentMapping("dm2", serviceB, infrastructureA);
+    deploymentMappingB.setPropertyValue("update_strategy", "replace");
+    let deploymentMappingC = new DeploymentMapping("dm3", serviceA, infrastructureB);
+    deploymentMappingC.setPropertyValue("update_strategy", "replace");
+
+
+    system.addEntities([serviceA, serviceB]);
+    system.addEntities([infrastructureA, infrastructureB]);
+    system.addEntities([deploymentMappingA, deploymentMappingB, deploymentMappingC]);
+
+    let measureValue = componentMeasureImplementations["replacingDeployments"]({ entity: serviceA, system: system });
+    expect(measureValue).toEqual(0.5);
+})
