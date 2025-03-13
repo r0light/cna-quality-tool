@@ -714,7 +714,7 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.DEPLOYMENT_MAPPING],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Reznik2019", "section": "10 Containerized Apps" }, { "key": "Adkins2020", "section": "7 Use Containers (smaller deployments, separated operating system, portable);" }, { "key": "Indrasiri2021", "section": "1 Use Containerization and Container Orchestration" }, { "key": "Garrison2017", "section": "7 Application Runtime and Isolation" }, { "key": "Goniwada2021", "section": "3 Deploy Independently Principle (deploy services in independent containers), Self-Containment Principle, 5 Containerization" }],
-        "measures": []
+        "measures": ["standardizedDeployments", "selfContainedDeployments"]
     },
     "immutableArtifacts": {
         "name": "Immutable artifacts",
@@ -2006,6 +2006,18 @@ const measures = {
     "ratioOfEndpointsCoveredByContract": {
         "name": "Ratio of endpoints covered by contract",
         "calculation": "Endpoints documented by contract / All endpoints",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE]
+    },
+    "standardizedDeployments": {
+        "name": "Standardized Deployments",
+        "calculation": "DeploymentMappings of components with a standardized deployment unit / All deployment mappings of components",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE]
+    },
+    "selfContainedDeployments": {
+        "name": "Self-contained Deployments",
+        "calculation": "DeploymentMappings of components with a self-contained deployment unit / All deployment mappings of components",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE]
     }

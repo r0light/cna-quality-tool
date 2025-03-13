@@ -1999,3 +1999,102 @@ test("ratioOfEndpointsCoveredByContract", () => {
     let measureValue = requestTraceMeasureImplementations["ratioOfEndpointsCoveredByContract"]({ entity: requestTrace, system: system });
     expect(measureValue).toEqual(2/3);
 })
+
+
+test("standardizedDeployments", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let propertiesA = getArtifactTypeProperties("Image.Container.OCI");
+    propertiesA.find(prop => prop.getKey === "based_on_standard").value = "OCI";
+    serviceA.setArtifact("art1", new Artifact(
+        "Image.Container.OCI",
+        "", "", "", "", "", "", "", propertiesA
+    ));
+    let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
+    externalEndpointA.setDocumentedBy = ["art1"];
+    serviceA.addEndpoint(externalEndpointA);
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let propertiesB = getArtifactTypeProperties("Image.Container.OCI");
+    propertiesB.find(prop => prop.getKey === "based_on_standard").value = "OCI";
+    serviceB.setArtifact("art1", new Artifact(
+        "Image.Container.OCI",
+        "", "", "", "", "", "", "", propertiesB
+    ));
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    let infrastructureB = new Infrastructure("i2", "infrastructure 2", getEmptyMetaData());
+
+    let deploymentMappingA = new DeploymentMapping("dm1", serviceA, infrastructureA);
+    deploymentMappingA.setPropertyValue("deployment_unit", "Image.Container.OCI");
+    let deploymentMappingB = new DeploymentMapping("dm2", serviceB, infrastructureA);
+    deploymentMappingB.setPropertyValue("deployment_unit", "Image.Container.OCI");
+    let deploymentMappingC = new DeploymentMapping("dm3", serviceA, infrastructureB);
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+
+    let requestTrace = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
+    requestTrace.setLinks = [[linkAB]];
+    requestTrace.setExternalEndpoint = externalEndpointA;
+
+    system.addEntities([serviceA, serviceB]);
+    system.addEntities([infrastructureA, infrastructureB]);
+    system.addEntities([deploymentMappingA, deploymentMappingB, deploymentMappingC]);
+    system.addEntities([linkAB]);
+    system.addEntity(requestTrace);
+
+    let measureValue = requestTraceMeasureImplementations["standardizedDeployments"]({ entity: requestTrace, system: system });
+    expect(measureValue).toEqual(2/3);
+})
+
+test("selfContainedDeployments", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let propertiesA = getArtifactTypeProperties("Image.Container.OCI");
+    propertiesA.find(prop => prop.getKey === "self_contained").value = true;
+    serviceA.setArtifact("art1", new Artifact(
+        "Image.Container.OCI",
+        "", "", "", "", "", "", "", propertiesA
+    ));
+    let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
+    externalEndpointA.setDocumentedBy = ["art1"];
+    serviceA.addEndpoint(externalEndpointA);
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let propertiesB = getArtifactTypeProperties("Image.Container.OCI");
+    propertiesB.find(prop => prop.getKey === "self_contained").value = true;
+    serviceB.setArtifact("art1", new Artifact(
+        "Image.Container.OCI",
+        "", "", "", "", "", "", "", propertiesB
+    ));
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    let infrastructureB = new Infrastructure("i2", "infrastructure 2", getEmptyMetaData());
+
+    let deploymentMappingA = new DeploymentMapping("dm1", serviceA, infrastructureA);
+    deploymentMappingA.setPropertyValue("deployment_unit", "Image.Container.OCI");
+    let deploymentMappingB = new DeploymentMapping("dm2", serviceB, infrastructureA);
+    deploymentMappingB.setPropertyValue("deployment_unit", "Image.Container.OCI");
+    let deploymentMappingC = new DeploymentMapping("dm3", serviceA, infrastructureB);
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+
+    let requestTrace = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
+    requestTrace.setLinks = [[linkAB]];
+    requestTrace.setExternalEndpoint = externalEndpointA;
+
+    system.addEntities([serviceA, serviceB]);
+    system.addEntities([infrastructureA, infrastructureB]);
+    system.addEntities([deploymentMappingA, deploymentMappingB, deploymentMappingC]);
+    system.addEntities([linkAB]);
+    system.addEntity(requestTrace);
+
+    let measureValue = requestTraceMeasureImplementations["selfContainedDeployments"]({ entity: requestTrace, system: system });
+    expect(measureValue).toEqual(2/3);
+})

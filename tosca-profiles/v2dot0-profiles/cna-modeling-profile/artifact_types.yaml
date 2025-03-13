@@ -24,7 +24,7 @@ artifact_types:
         required: true
         validation: { $valid_values: [ $value, ["none", "OCI", "OpenAPI", "other"]]}
         default: "none"
-      self-contained:
+      self_contained:
         type: boolean
         description: "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used."
         required: true

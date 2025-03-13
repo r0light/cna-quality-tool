@@ -3339,3 +3339,75 @@ test("ratioOfEndpointsCoveredByContract", () => {
     expect(measureValue).toEqual(0.5);
 })
 
+
+test("standardizedDeployments", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let propertiesA = getArtifactTypeProperties("Image.Container.OCI");
+    propertiesA.find(prop => prop.getKey === "based_on_standard").value = "OCI";
+    serviceA.setArtifact("art1", new Artifact(
+        "Image.Container.OCI",
+        "", "", "", "", "", "", "", propertiesA
+    ));
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let propertiesB = getArtifactTypeProperties("Image.Container.OCI");
+    propertiesB.find(prop => prop.getKey === "based_on_standard").value = "OCI";
+    serviceB.setArtifact("art1", new Artifact(
+        "Image.Container.OCI",
+        "", "", "", "", "", "", "", propertiesB
+    ));
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    let infrastructureB = new Infrastructure("i2", "infrastructure 2", getEmptyMetaData());
+
+    let deploymentMappingA = new DeploymentMapping("dm1", serviceA, infrastructureA);
+    deploymentMappingA.setPropertyValue("deployment_unit", "Image.Container.OCI");
+    let deploymentMappingB = new DeploymentMapping("dm2", serviceB, infrastructureA);
+    deploymentMappingB.setPropertyValue("deployment_unit", "Image.Container.OCI");
+    let deploymentMappingC = new DeploymentMapping("dm3", serviceA, infrastructureB);
+
+
+    system.addEntities([serviceA, serviceB]);
+    system.addEntities([infrastructureA, infrastructureB]);
+    system.addEntities([deploymentMappingA, deploymentMappingB, deploymentMappingC]);
+
+    let measureValue = systemMeasureImplementations["standardizedDeployments"]({ entity: system, system: system });
+    expect(measureValue).toEqual(2/3);
+})
+
+test("selfContainedDeployments", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let propertiesA = getArtifactTypeProperties("Image.Container.OCI");
+    propertiesA.find(prop => prop.getKey === "self_contained").value = true;
+    serviceA.setArtifact("art1", new Artifact(
+        "Image.Container.OCI",
+        "", "", "", "", "", "", "", propertiesA
+    ));
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let propertiesB = getArtifactTypeProperties("Image.Container.OCI");
+    propertiesB.find(prop => prop.getKey === "self_contained").value = true;
+    serviceB.setArtifact("art1", new Artifact(
+        "Image.Container.OCI",
+        "", "", "", "", "", "", "", propertiesB
+    ));
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    let infrastructureB = new Infrastructure("i2", "infrastructure 2", getEmptyMetaData());
+
+    let deploymentMappingA = new DeploymentMapping("dm1", serviceA, infrastructureA);
+    deploymentMappingA.setPropertyValue("deployment_unit", "Image.Container.OCI");
+    let deploymentMappingB = new DeploymentMapping("dm2", serviceB, infrastructureA);
+    deploymentMappingB.setPropertyValue("deployment_unit", "Image.Container.OCI");
+    let deploymentMappingC = new DeploymentMapping("dm3", serviceA, infrastructureB);
+
+
+    system.addEntities([serviceA, serviceB]);
+    system.addEntities([infrastructureA, infrastructureB]);
+    system.addEntities([deploymentMappingA, deploymentMappingB, deploymentMappingC]);
+
+    let measureValue = systemMeasureImplementations["selfContainedDeployments"]({ entity: system, system: system });
+    expect(measureValue).toEqual(2/3);
+})

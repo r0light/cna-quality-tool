@@ -2166,6 +2166,57 @@ export const ratioOfEndpointsCoveredByContract: Calculation = (parameters: Calcu
     return coveredByContractIds.length / allEndpointIds.length;
 }
 
+export const standardizedDeployments: Calculation = (parameters: CalculationParameters<System>) => {
+    let allComponentIds = parameters.entity.getComponentEntities.entries().map(([componentKey, component]) => componentKey).toArray();
+
+    let relevantDeploymentMappings = parameters.system.getDeploymentMappingEntities.entries().filter(([deploymentMappingKey, deploymentMapping]) => {
+        return allComponentIds.includes(deploymentMapping.getDeployedEntity.getId);
+    }).toArray();
+
+    if (relevantDeploymentMappings.length === 0) {
+        return "n/a";
+    }
+
+    let standardizedDeploymentUnit = relevantDeploymentMappings.filter(([deplyomentMappingKey, deploymentMapping]) => {
+        let artifacts = deploymentMapping.getDeployedEntity.getArtifacts;
+        let deploymentUnit = deploymentMapping.getProperty("deployment_unit").value;
+        console.log(deploymentUnit);
+        if (deploymentUnit) {
+            return artifacts.entries().find(([artifactKey, artifact]) => {
+                return artifact.getType() === deploymentUnit && artifact.getProperty("based_on_standard") && artifact.getProperty("based_on_standard").value !== "none";
+            });
+        }
+        return false;
+        }
+    );
+    return standardizedDeploymentUnit.length / relevantDeploymentMappings.length;
+}
+
+export const selfContainedDeployments: Calculation = (parameters: CalculationParameters<System>) => {
+    let allComponentIds = parameters.entity.getComponentEntities.entries().map(([componentKey, component]) => componentKey).toArray();
+
+    let relevantDeploymentMappings = parameters.system.getDeploymentMappingEntities.entries().filter(([deploymentMappingKey, deploymentMapping]) => {
+        return allComponentIds.includes(deploymentMapping.getDeployedEntity.getId);
+    }).toArray();
+
+    if (relevantDeploymentMappings.length === 0) {
+        return "n/a";
+    }
+
+    let selfContainedDeploymentUnit = relevantDeploymentMappings.filter(([deplyomentMappingKey, deploymentMapping]) => {
+        let artifacts = deploymentMapping.getDeployedEntity.getArtifacts;
+        let deploymentUnit = deploymentMapping.getProperty("deployment_unit").value;
+        console.log(deploymentUnit);
+        if (deploymentUnit) {
+            return artifacts.entries().find(([artifactKey, artifact]) => {
+                return artifact.getType() === deploymentUnit && artifact.getProperty("self_contained") && artifact.getProperty("self_contained").value;
+            });
+        }
+        return false;
+        }
+    );
+    return selfContainedDeploymentUnit.length / relevantDeploymentMappings.length;
+}
 
 export const systemMeasureImplementations: { [measureKey: string]: Calculation } = {
     "serviceReplicationLevel": serviceReplicationLevel,
@@ -2267,5 +2318,7 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation }
     "nonProviderSpecificInfrastructureArtifacts": nonProviderSpecificInfrastructureArtifacts,
     "nonProviderSpecificComponentArtifacts": nonProviderSpecificComponentArtifacts,
     "configurationStoredInConfigService": configurationStoredInConfigService,
-    "ratioOfEndpointsCoveredByContract": ratioOfEndpointsCoveredByContract
+    "ratioOfEndpointsCoveredByContract": ratioOfEndpointsCoveredByContract,
+    "standardizedDeployments": standardizedDeployments,
+    "selfContainedDeployments": selfContainedDeployments
 }

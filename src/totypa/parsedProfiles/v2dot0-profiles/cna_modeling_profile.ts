@@ -42,7 +42,7 @@ export const cna_modeling_profile: TOSCA_File = {
           },
           "default": "none"
         },
-        "self-contained": {
+        "self_contained": {
           "type": "boolean",
           "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
           "required": true,
@@ -76,7 +76,7 @@ export const cna_modeling_profile: TOSCA_File = {
           },
           "default": "none"
         },
-        "self-contained": {
+        "self_contained": {
           "type": "boolean",
           "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
           "required": true,
@@ -115,7 +115,7 @@ export const cna_modeling_profile: TOSCA_File = {
           },
           "default": "none"
         },
-        "self-contained": {
+        "self_contained": {
           "type": "boolean",
           "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
           "required": true,
@@ -154,7 +154,7 @@ export const cna_modeling_profile: TOSCA_File = {
           },
           "default": "none"
         },
-        "self-contained": {
+        "self_contained": {
           "type": "boolean",
           "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
           "required": true,
@@ -193,7 +193,7 @@ export const cna_modeling_profile: TOSCA_File = {
           },
           "default": "none"
         },
-        "self-contained": {
+        "self_contained": {
           "type": "boolean",
           "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
           "required": true,
@@ -228,7 +228,7 @@ export const cna_modeling_profile: TOSCA_File = {
           },
           "default": "none"
         },
-        "self-contained": {
+        "self_contained": {
           "type": "boolean",
           "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
           "required": true,
@@ -267,7 +267,7 @@ export const cna_modeling_profile: TOSCA_File = {
           },
           "default": "none"
         },
-        "self-contained": {
+        "self_contained": {
           "type": "boolean",
           "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
           "required": true,
@@ -306,7 +306,7 @@ export const cna_modeling_profile: TOSCA_File = {
           },
           "default": "none"
         },
-        "self-contained": {
+        "self_contained": {
           "type": "boolean",
           "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
           "required": true,
@@ -344,7 +344,7 @@ export const cna_modeling_profile: TOSCA_File = {
           },
           "default": "none"
         },
-        "self-contained": {
+        "self_contained": {
           "type": "boolean",
           "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
           "required": true,
@@ -363,7 +363,7 @@ export const cna_modeling_profile: TOSCA_File = {
           "default": false
         },
         "based_on_standard": "OCI",
-        "self-contained": {
+        "self_contained": {
           "type": "boolean",
           "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
           "required": true,
@@ -398,7 +398,7 @@ export const cna_modeling_profile: TOSCA_File = {
           },
           "default": "none"
         },
-        "self-contained": {
+        "self_contained": {
           "type": "boolean",
           "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
           "required": true,
@@ -433,7 +433,7 @@ export const cna_modeling_profile: TOSCA_File = {
           },
           "default": "none"
         },
-        "self-contained": {
+        "self_contained": {
           "type": "boolean",
           "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
           "required": true,
@@ -472,7 +472,7 @@ export const cna_modeling_profile: TOSCA_File = {
           },
           "default": "none"
         },
-        "self-contained": {
+        "self_contained": {
           "type": "boolean",
           "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
           "required": true,
@@ -507,7 +507,7 @@ export const cna_modeling_profile: TOSCA_File = {
           },
           "default": "none"
         },
-        "self-contained": {
+        "self_contained": {
           "type": "boolean",
           "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
           "required": true,
@@ -542,7 +542,7 @@ export const cna_modeling_profile: TOSCA_File = {
           },
           "default": "none"
         },
-        "self-contained": {
+        "self_contained": {
           "type": "boolean",
           "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
           "required": true,
@@ -577,7 +577,7 @@ export const cna_modeling_profile: TOSCA_File = {
           },
           "default": "none"
         },
-        "self-contained": {
+        "self_contained": {
           "type": "boolean",
           "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
           "required": true,
@@ -612,7 +612,7 @@ export const cna_modeling_profile: TOSCA_File = {
           },
           "default": "none"
         },
-        "self-contained": {
+        "self_contained": {
           "type": "boolean",
           "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
           "required": true,
@@ -647,7 +647,7 @@ export const cna_modeling_profile: TOSCA_File = {
           },
           "default": "none"
         },
-        "self-contained": {
+        "self_contained": {
           "type": "boolean",
           "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
           "required": true,
@@ -677,7 +677,7 @@ export const cna_modeling_profile: TOSCA_File = {
           },
           "default": "none"
         },
-        "self-contained": {
+        "self_contained": {
           "type": "boolean",
           "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
           "required": true,
@@ -707,7 +707,7 @@ export const cna_modeling_profile: TOSCA_File = {
           },
           "default": "none"
         },
-        "self-contained": {
+        "self_contained": {
           "type": "boolean",
           "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
           "required": true,
@@ -737,7 +737,7 @@ export const cna_modeling_profile: TOSCA_File = {
           },
           "default": "none"
         },
-        "self-contained": {
+        "self_contained": {
           "type": "boolean",
           "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
           "required": true,
@@ -767,7 +767,7 @@ export const cna_modeling_profile: TOSCA_File = {
           },
           "default": "none"
         },
-        "self-contained": {
+        "self_contained": {
           "type": "boolean",
           "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
           "required": true,
@@ -802,7 +802,7 @@ export const cna_modeling_profile: TOSCA_File = {
           },
           "default": "none"
         },
-        "self-contained": {
+        "self_contained": {
           "type": "boolean",
           "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
           "required": true,
@@ -837,7 +837,7 @@ export const cna_modeling_profile: TOSCA_File = {
           },
           "default": "none"
         },
-        "self-contained": {
+        "self_contained": {
           "type": "boolean",
           "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
           "required": true,
@@ -872,7 +872,7 @@ export const cna_modeling_profile: TOSCA_File = {
           },
           "default": "none"
         },
-        "self-contained": {
+        "self_contained": {
           "type": "boolean",
           "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
           "required": true,
@@ -891,7 +891,7 @@ export const cna_modeling_profile: TOSCA_File = {
           "default": false
         },
         "based_on_standard": "OpenAPI",
-        "self-contained": {
+        "self_contained": {
           "type": "boolean",
           "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
           "required": true,
@@ -926,7 +926,7 @@ export const cna_modeling_profile: TOSCA_File = {
           },
           "default": "none"
         },
-        "self-contained": {
+        "self_contained": {
           "type": "boolean",
           "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
           "required": true,
@@ -961,7 +961,7 @@ export const cna_modeling_profile: TOSCA_File = {
           },
           "default": "none"
         },
-        "self-contained": {
+        "self_contained": {
           "type": "boolean",
           "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
           "required": true,

@@ -759,6 +759,59 @@ export const ratioOfEndpointsCoveredByContract: Calculation = (parameters: Calcu
 }
 
 
+export const standardizedDeployments: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+    let includedComponentIds = getIncludedComponents(parameters.entity, parameters.system).map(component => component.getId);
+
+    let relevantDeploymentMappings = parameters.system.getDeploymentMappingEntities.entries().filter(([deploymentMappingKey, deploymentMapping]) => {
+        return includedComponentIds.includes(deploymentMapping.getDeployedEntity.getId);
+    }).toArray();
+
+    if (relevantDeploymentMappings.length === 0) {
+        return "n/a";
+    }
+
+    let standardizedDeploymentUnit = relevantDeploymentMappings.filter(([deplyomentMappingKey, deploymentMapping]) => {
+        let artifacts = deploymentMapping.getDeployedEntity.getArtifacts;
+        let deploymentUnit = deploymentMapping.getProperty("deployment_unit").value;
+        console.log(deploymentUnit);
+        if (deploymentUnit) {
+            return artifacts.entries().find(([artifactKey, artifact]) => {
+                return artifact.getType() === deploymentUnit && artifact.getProperty("based_on_standard") && artifact.getProperty("based_on_standard").value !== "none";
+            });
+        }
+        return false;
+        }
+    );
+    return standardizedDeploymentUnit.length / relevantDeploymentMappings.length;
+}
+
+export const selfContainedDeployments: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+    let includedComponentIds = getIncludedComponents(parameters.entity, parameters.system).map(component => component.getId);
+
+    let relevantDeploymentMappings = parameters.system.getDeploymentMappingEntities.entries().filter(([deploymentMappingKey, deploymentMapping]) => {
+        return includedComponentIds.includes(deploymentMapping.getDeployedEntity.getId);
+    }).toArray();
+
+    if (relevantDeploymentMappings.length === 0) {
+        return "n/a";
+    }
+
+    let selfContainedDeploymentUnit = relevantDeploymentMappings.filter(([deplyomentMappingKey, deploymentMapping]) => {
+        let artifacts = deploymentMapping.getDeployedEntity.getArtifacts;
+        let deploymentUnit = deploymentMapping.getProperty("deployment_unit").value;
+        console.log(deploymentUnit);
+        if (deploymentUnit) {
+            return artifacts.entries().find(([artifactKey, artifact]) => {
+                return artifact.getType() === deploymentUnit && artifact.getProperty("self_contained") && artifact.getProperty("self_contained").value;
+            });
+        }
+        return false;
+        }
+    );
+    return selfContainedDeploymentUnit.length / relevantDeploymentMappings.length;
+}
+
+
 export const requestTraceMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
     "ratioOfSecuredLinks": ratioOfSecuredLinks,
@@ -798,6 +851,8 @@ export const requestTraceMeasureImplementations: { [measureKey: string]: Calcula
     "ratioOfEntitiesProvidingStandardizedArtifacts": ratioOfEntitiesProvidingStandardizedArtifacts,
     "componentArtifactsSimilarity": componentArtifactsSimilarity,
     "ratioOfDeploymentsOnDynamicInfrastructure": ratioOfDeploymentsOnDynamicInfrastructure,
-    "ratioOfEndpointsCoveredByContract": ratioOfEndpointsCoveredByContract
+    "ratioOfEndpointsCoveredByContract": ratioOfEndpointsCoveredByContract,
+    "standardizedDeployments": standardizedDeployments,
+    "selfContainedDeployments": selfContainedDeployments
 }
 

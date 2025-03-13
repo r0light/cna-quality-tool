@@ -4,6 +4,7 @@ import { BackingService, BrokerBackingService, Component, Endpoint, ExternalEndp
 import { Calculation, CalculationParameters } from "../../quamoco/Measure.js";
 import { ASYNCHRONOUS_ENDPOINT_KIND, AUTOMATED_SCALING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, CONFIG_SERVICE_KIND, CONTRACT_ARTIFACT_TYPE, CUSTOM_SOFTWARE_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, PROTOCOLS_SUPPORTING_TLS, SERVICE_MESH_KIND, SYNCHRONOUS_ENDPOINT_KIND, VAULT_KIND } from "../../specifications/featureModel.js";
 import { average } from "./general-functions.js";
+import { Artifact, getArtifactTypeProperties, getAvailableArtifactTypes } from "@/core/common/artifact.js";
 
 
 export const supportsMonitoring: (component: Component) => boolean = (component) => {
@@ -938,6 +939,63 @@ export const ratioOfEndpointsCoveredByContract: Calculation = (parameters: Calcu
     return coveredByContract.length / allComponentEndpoints.length;
 }
 
+export const standardizedDeployments: Calculation = (parameters: CalculationParameters<Component>) => {
+    let relevantDeploymentMappings = parameters.system.getDeploymentMappingEntities.entries().filter(([deploymentMappingKey, deploymentMapping]) => {
+        return deploymentMapping.getDeployedEntity.getId === parameters.entity.getId;
+    }).toArray();
+
+    if (relevantDeploymentMappings.length === 0) {
+        return "n/a";
+    }
+
+    let artifacts = parameters.entity.getArtifacts;
+
+    if (artifacts.size === 0) {
+        return "n/a";
+    }
+
+    let standardizedDeploymentUnit = relevantDeploymentMappings.filter(([deplyomentMappingKey, deploymentMapping]) => {
+        let deploymentUnit = deploymentMapping.getProperty("deployment_unit").value;
+        console.log(deploymentUnit);
+        if (deploymentUnit) {
+            return artifacts.entries().find(([artifactKey, artifact]) => {
+                return artifact.getType() === deploymentUnit && artifact.getProperty("based_on_standard") && artifact.getProperty("based_on_standard").value !== "none";
+            });
+        }
+        return false;
+        }
+    );
+    return standardizedDeploymentUnit.length / relevantDeploymentMappings.length;
+}
+
+export const selfContainedDeployments: Calculation = (parameters: CalculationParameters<Component>) => {
+    let relevantDeploymentMappings = parameters.system.getDeploymentMappingEntities.entries().filter(([deploymentMappingKey, deploymentMapping]) => {
+        return deploymentMapping.getDeployedEntity.getId === parameters.entity.getId;
+    }).toArray();
+
+    if (relevantDeploymentMappings.length === 0) {
+        return "n/a";
+    }
+
+    let artifacts = parameters.entity.getArtifacts;
+
+    if (artifacts.size === 0) {
+        return "n/a";
+    }
+
+    let selfContainedDeploymentUnit = relevantDeploymentMappings.filter(([deplyomentMappingKey, deploymentMapping]) => {
+        let deploymentUnit = deploymentMapping.getProperty("deployment_unit").value;
+        console.log(deploymentUnit);
+        if (deploymentUnit) {
+            return artifacts.entries().find(([artifactKey, artifact]) => {
+                return artifact.getType() === deploymentUnit && artifact.getProperty("self_contained") && artifact.getProperty("self_contained").value;
+            });
+        }
+        return false;
+        }
+    );
+    return selfContainedDeploymentUnit.length / relevantDeploymentMappings.length;
+}
 
 export const componentMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
@@ -997,6 +1055,8 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "deployedEntitiesAutoscaling": deployedEntitiesAutoscaling,
     "nonProviderSpecificComponentArtifacts": nonProviderSpecificComponentArtifacts,
     "configurationStoredInConfigService": configurationStoredInConfigService,
-    "ratioOfEndpointsCoveredByContract": ratioOfEndpointsCoveredByContract
+    "ratioOfEndpointsCoveredByContract": ratioOfEndpointsCoveredByContract,
+    "standardizedDeployments": standardizedDeployments,
+    "selfContainedDeployments": selfContainedDeployments
 }
 
