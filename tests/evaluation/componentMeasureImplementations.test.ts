@@ -1456,12 +1456,12 @@ test("accessRestrictedToCallers", () => {
 
     let serviceA = new Service("s1", "service A", getEmptyMetaData())
     let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
-    endpointA.setPropertyValue("allow_access_to", ["a1", "a2"]);
+    endpointA.setAllowedAccounts = ["a1", "a2"];
     serviceA.addEndpoint(endpointA);
 
     let serviceB = new Service("s2", "service B", getEmptyMetaData())
     let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
-    endpointB.setPropertyValue("allow_access_to", ["a1"]);
+    endpointB.setAllowedAccounts = ["a1"];
     serviceB.addEndpoint(endpointB);
 
     let serviceC = new Service("s3", "service C", getEmptyMetaData())
@@ -1482,7 +1482,7 @@ test("accessRestrictedToCallers - allow all", () => {
 
     let serviceA = new Service("s1", "service A", getEmptyMetaData())
     let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
-    endpointA.setPropertyValue("allow_access_to", []);
+    endpointA.setAllowedAccounts = [];
     serviceA.addEndpoint(endpointA);
 
     system.addEntities([serviceA]);
@@ -1496,7 +1496,7 @@ test("accessRestrictedToCallers - external endpoint", () => {
 
     let serviceA = new Service("s1", "service A", getEmptyMetaData())
     let endpointA = new ExternalEndpoint("e1", "endpoint 1", getEmptyMetaData());
-    endpointA.setPropertyValue("allow_access_to", ["external account"]);
+    endpointA.setAllowedAccounts = ["external account"];
     serviceA.addEndpoint(endpointA);
 
     system.addEntities([serviceA]);
@@ -1755,3 +1755,26 @@ test("configurationStoredInConfigService", () => {
     let measureValue = componentMeasureImplementations["configurationStoredInConfigService"]({ entity: serviceA, system: system });
     expect(measureValue).toEqual(0.5);
 }) 
+
+test("ratioOfEndpointsCoveredByContract", () => {
+    let system = new System("sys1", "testSystem");
+
+    let serviceA = new Service("s1", "service A", getEmptyMetaData())
+    let propertiesA = getArtifactTypeProperties("Spring.CloudContract");
+    serviceA.setArtifact("art1", new Artifact(
+        "Spring.CloudContract",
+        "", "", "", "", "", "", "", propertiesA
+    ));
+
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    endpointA.setDocumentedBy = ["art1"];
+    serviceA.addEndpoint(endpointA);
+
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceA.addEndpoint(endpointB);
+
+    system.addEntities([serviceA]);
+
+    let measureValue = componentMeasureImplementations["ratioOfEndpointsCoveredByContract"]({ entity: serviceA, system: system });
+    expect(measureValue).toEqual(0.5);
+})

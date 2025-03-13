@@ -2007,7 +2007,7 @@ const measures = {
         "name": "Ratio of endpoints covered by contract",
         "calculation": "Endpoints documented by contract / All endpoints",
         "sources": ["new"],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT]
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE]
     }
 } satisfies { [measureKey: string]: MeasureSpec }
 

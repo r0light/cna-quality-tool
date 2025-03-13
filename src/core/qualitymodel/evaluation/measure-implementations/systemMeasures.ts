@@ -1,7 +1,7 @@
 import { BackingService, BrokerBackingService, Component, DeploymentMapping, Infrastructure, Link, ProxyBackingService, Service, StorageBackingService, System } from "@/core/entities";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure";
 import { average, median, lowest, partition } from "./general-functions";
-import { ASYNCHRONOUS_ENDPOINT_KIND, AUTOMATED_SCALING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, CONFIG_SERVICE_KIND, CUSTOM_SOFTWARE_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, EVENT_SOURCING_KIND, getEndpointKindWeight, getUsageRelationWeight, IAC_ARTIFACT_TYPE, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MESSAGE_BROKER_KIND, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SEND_EVENT_ENDPOINT_KIND, SERVICE_MESH_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND, VAULT_KIND } from "../../specifications/featureModel";
+import { ASYNCHRONOUS_ENDPOINT_KIND, AUTOMATED_SCALING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, CONFIG_SERVICE_KIND, CONTRACT_ARTIFACT_TYPE, CUSTOM_SOFTWARE_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, EVENT_SOURCING_KIND, getEndpointKindWeight, getUsageRelationWeight, IAC_ARTIFACT_TYPE, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MESSAGE_BROKER_KIND, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SEND_EVENT_ENDPOINT_KIND, SERVICE_MESH_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND, VAULT_KIND } from "../../specifications/featureModel";
 import { calculateRatioOfEndpointsSupportingSsl, calculateRatioOfExternalEndpointsSupportingTls, componentMeasureImplementations, numberOfAsynchronousEndpointsOfferedByAService, numberOfComponentsAComponentIsLinkedTo, numberOfSynchronousEndpointsOfferedByAService, providesHealthAndReadinessEndpoints, serviceCouplingBasedOnEndpointEntropy } from "./componentMeasures";
 import { numberOfCyclesInRequestTraces, requestTraceComplexity } from "./requestTraceMeasures";
 import { supportsMonitoring as infrastructureSupportsMonitoring, ratioOfAutomaticallyProvisionedInfrastructure as infrastructureProvisionedAutomatically, ratioOfFullyManagedInfrastructure as infrastructureIsFullyManaged, nonProviderSpecificInfrastructureArtifacts as infrastructureHasOnlyNonProviderSpecificArtifacts } from "./infrastructureMeasures";
@@ -2135,6 +2135,37 @@ export const configurationStoredInConfigService: Calculation = (parameters: Calc
     return onlyStoredInConfigService.size / allConfigs.length;
 }
 
+export const ratioOfEndpointsCoveredByContract: Calculation = (parameters: CalculationParameters<System>) => {
+
+    let allComponents = parameters.entity.getComponentEntities.entries();
+
+    let allEndpointIds = [];
+    let coveredByContractIds = [];
+
+    for(const [componentKey, component] of allComponents) {
+
+        let allComponentEndpoints = component.getEndpointEntities.concat(component.getExternalEndpointEntities);
+        let componentArtifacts = component.getArtifacts;
+    
+        for(const endpoint of allComponentEndpoints) {
+            allEndpointIds.push(endpoint.getId);
+
+            let contractArtifact = endpoint.getDocumentedBy.map(artifactKey => componentArtifacts.get(artifactKey)).find(artifact => {
+                return CONTRACT_ARTIFACT_TYPE.includes(artifact.getType());
+            })
+            if (contractArtifact) {
+                coveredByContractIds.push(endpoint.getId);
+            }
+        }
+    }
+
+    if (allEndpointIds.length === 0) {
+        return "n/a";
+    }
+
+    return coveredByContractIds.length / allEndpointIds.length;
+}
+
 
 export const systemMeasureImplementations: { [measureKey: string]: Calculation } = {
     "serviceReplicationLevel": serviceReplicationLevel,
@@ -2235,5 +2266,6 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation }
     "ratioOfAbstractedHardware": ratioOfAbstractedHardware,
     "nonProviderSpecificInfrastructureArtifacts": nonProviderSpecificInfrastructureArtifacts,
     "nonProviderSpecificComponentArtifacts": nonProviderSpecificComponentArtifacts,
-    "configurationStoredInConfigService": configurationStoredInConfigService
+    "configurationStoredInConfigService": configurationStoredInConfigService,
+    "ratioOfEndpointsCoveredByContract": ratioOfEndpointsCoveredByContract
 }

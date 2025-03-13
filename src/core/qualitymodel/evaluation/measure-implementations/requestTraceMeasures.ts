@@ -3,7 +3,7 @@ import { Calculation, CalculationParameters } from "../../quamoco/Measure";
 import { average, lowest, median } from "./general-functions";
 import { calculateRatioOfEndpointsSupportingSsl, componentMeasureImplementations, providesHealthAndReadinessEndpoints } from "./componentMeasures";
 import { calculateNumberOfLinksWithServiceDiscovery, calculateRatioOfLinksToAsynchronousEndpoints, calculateRatioOfSecuredLinks, calculateRatioOfStatefulComponents, calculateRatioOfStatelessComponents, calculateReplicasPerService, countComponentsConnectedToCertainEndpoints, getServiceInteractions } from "./systemMeasures";
-import { BACKING_DATA_CONFIG_KIND, BACKING_DATA_SECRET_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, EVENT_SOURCING_KIND, SERVICE_MESH_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "../../specifications/featureModel";
+import { BACKING_DATA_CONFIG_KIND, BACKING_DATA_SECRET_KIND, CONTRACT_ARTIFACT_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, EVENT_SOURCING_KIND, SERVICE_MESH_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "../../specifications/featureModel";
 import { supportsMonitoring as infrastructureSupportsMonitoring } from "./infrastructureMeasures";
 import { supportsMonitoring as componentSupportsMonitoring } from "./componentMeasures";
 import { serviceMeshUsage as componentServiceMeshUsage } from "./componentMeasures";
@@ -727,6 +727,38 @@ export const ratioOfDeploymentsOnDynamicInfrastructure: Calculation = (parameter
 
 }
 
+export const ratioOfEndpointsCoveredByContract: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+
+    let allEndpoints = parameters.entity.getLinks.flatMap(links => links).map(link => link.getTargetEndpoint);
+    if (parameters.entity.getExternalEndpoint) {
+        allEndpoints.push(parameters.entity.getExternalEndpoint);
+    }
+
+    if (allEndpoints.length === 0) {
+        return "n/a";
+    }
+
+    let coveredByContractIds = [];
+
+    for (const endpoint of allEndpoints) {
+        let parentComponent = parameters.system.searchComponentOfEndpoint(endpoint.getId);
+        if (parentComponent) {
+
+            let componentArtifacts = parentComponent.getArtifacts;
+
+            let contractArtifact = endpoint.getDocumentedBy.map(artifactKey => componentArtifacts.get(artifactKey)).find(artifact => {
+                return CONTRACT_ARTIFACT_TYPE.includes(artifact.getType());
+            })
+            if (contractArtifact) {
+                coveredByContractIds.push(endpoint.getId);
+            }
+        }
+    }
+
+    return coveredByContractIds.length / allEndpoints.length;
+}
+
+
 export const requestTraceMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
     "ratioOfSecuredLinks": ratioOfSecuredLinks,
@@ -765,6 +797,7 @@ export const requestTraceMeasureImplementations: { [measureKey: string]: Calcula
     "ratioOfStandardizedArtifacts": ratioOfStandardizedArtifacts,
     "ratioOfEntitiesProvidingStandardizedArtifacts": ratioOfEntitiesProvidingStandardizedArtifacts,
     "componentArtifactsSimilarity": componentArtifactsSimilarity,
-    "ratioOfDeploymentsOnDynamicInfrastructure": ratioOfDeploymentsOnDynamicInfrastructure
+    "ratioOfDeploymentsOnDynamicInfrastructure": ratioOfDeploymentsOnDynamicInfrastructure,
+    "ratioOfEndpointsCoveredByContract": ratioOfEndpointsCoveredByContract
 }
 

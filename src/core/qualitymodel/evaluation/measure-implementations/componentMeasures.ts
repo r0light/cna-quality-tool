@@ -2,7 +2,7 @@
 import { ref } from "vue";
 import { BackingService, BrokerBackingService, Component, Endpoint, ExternalEndpoint, ProxyBackingService, Service, StorageBackingService, System } from "../../../entities.js";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure.js";
-import { ASYNCHRONOUS_ENDPOINT_KIND, AUTOMATED_SCALING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, CONFIG_SERVICE_KIND, CUSTOM_SOFTWARE_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, PROTOCOLS_SUPPORTING_TLS, SERVICE_MESH_KIND, SYNCHRONOUS_ENDPOINT_KIND, VAULT_KIND } from "../../specifications/featureModel.js";
+import { ASYNCHRONOUS_ENDPOINT_KIND, AUTOMATED_SCALING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, CONFIG_SERVICE_KIND, CONTRACT_ARTIFACT_TYPE, CUSTOM_SOFTWARE_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, PROTOCOLS_SUPPORTING_TLS, SERVICE_MESH_KIND, SYNCHRONOUS_ENDPOINT_KIND, VAULT_KIND } from "../../specifications/featureModel.js";
 import { average } from "./general-functions.js";
 
 
@@ -727,12 +727,12 @@ export const accessRestrictedToCallers: Calculation = (parameters: CalculationPa
     let restrictiveness = [];
 
     for (const endpoint of endpoints) {
-        let allowed = endpoint.getProperty("allow_access_to");
-        if (allowed && allowed.value) {
-            if (allowed.value.length === 0) {
+        let allowed = endpoint.getAllowedAccounts;
+        if (allowed) {
+            if (allowed.length === 0) {
                 restrictiveness.push(0);
             } else {
-                let allowedSet = new Set(allowed.value);
+                let allowedSet = new Set(allowed);
                 let endpointRestrictiveness = 1 - ((allowedSet.difference(calledByAccount.get(endpoint.getId)).size) / allowedSet.size);
                 restrictiveness.push(endpointRestrictiveness);
             }
@@ -914,6 +914,30 @@ export const configurationStoredInConfigService: Calculation = (parameters: Calc
     return (configsInConfigService.size / referencedConfigs.length);
 }
 
+export const ratioOfEndpointsCoveredByContract: Calculation = (parameters: CalculationParameters<Component>) => {
+
+    let allComponentEndpoints = parameters.entity.getEndpointEntities.concat(parameters.entity.getExternalEndpointEntities);
+
+    if (allComponentEndpoints.length === 0) {
+        return "n/a";
+    }
+
+    let componentArtifacts = parameters.entity.getArtifacts;
+
+    let coveredByContract = [];
+
+    for(const endpoint of allComponentEndpoints) {
+        let contractArtifact = endpoint.getDocumentedBy.map(artifactKey => componentArtifacts.get(artifactKey)).find(artifact => {
+            return CONTRACT_ARTIFACT_TYPE.includes(artifact.getType());
+        })
+        if (contractArtifact) {
+            coveredByContract.push(endpoint);
+        }
+    }
+
+    return coveredByContract.length / allComponentEndpoints.length;
+}
+
 
 export const componentMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
@@ -972,6 +996,7 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "ratioOfDeploymentMappingsWithStatedResourceRequirements": ratioOfDeploymentMappingsWithStatedResourceRequirements,
     "deployedEntitiesAutoscaling": deployedEntitiesAutoscaling,
     "nonProviderSpecificComponentArtifacts": nonProviderSpecificComponentArtifacts,
-    "configurationStoredInConfigService": configurationStoredInConfigService
+    "configurationStoredInConfigService": configurationStoredInConfigService,
+    "ratioOfEndpointsCoveredByContract": ratioOfEndpointsCoveredByContract
 }
 
