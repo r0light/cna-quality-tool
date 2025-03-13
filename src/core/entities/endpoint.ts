@@ -68,7 +68,7 @@ class Endpoint {
 
     #dataAggregateEntities = new Array<{ data: DataAggregate, relation: RelationToDataAggregate }>();
 
-    #documented_by: string; // artifact key
+    #documented_by = new Array<string>(); // artifact keys
 
     #properties: EntityProperty[];
 
@@ -130,9 +130,21 @@ class Endpoint {
         return this.#documented_by;
     }
 
-    set setDocumentedBy(artifactKey: string) {
-        this.#documented_by = artifactKey;
+    set setDocumentedBy(artifactKeys: string[]) {
+        this.#documented_by = artifactKeys;
     }
+
+    addDocumentedBy(artifactKey: string) {
+        this.#documented_by.push(artifactKey);
+    }
+
+    removeDocumentedBy(artifactKey: string) {
+        let index = this.#documented_by.indexOf(artifactKey);
+        if (index !== -1) {
+            this.#documented_by.splice(index, 1);
+        }
+    }
+
 
     /**
      * Adds additional properties to this entity, only intended for subtypes to add additional properties

@@ -828,7 +828,7 @@ const EntityDetailsConfig: {
                     dialogMetaData: {
                         dialogSize: DialogSize.LARGE,
                         header: {
-                            iconClass: "fa-solid fa-arrow-up-from-bracket",
+                            iconClass: "fa-regular fa-id-card",
                             svgRepresentation: "",
                             text: "Allowed accounts: "
                         },
@@ -1727,7 +1727,7 @@ const EntityRelationsConfig: {
             },
             {
                 providedFeature: "documentedBy",
-                contentType: PropertyContent.DROPDOWN,
+                contentType: PropertyContent.MULTI_SELECT,
                 label: "Documented by:",
                 inputProperties: {
                     disabled: false,
@@ -1739,10 +1739,34 @@ const EntityRelationsConfig: {
                 helpText: "The artifact documenting this endpoint.",
                 show: true,
                 attributes: {
-                    placeholder: "Choose Artifact...",
                     svgRepresentation: "",
-                    defaultValue: "",
-
+                    buttonText: "Edit documentating artifacts",
+                    buttonIconClass: "fa-solid fa-pencil",
+                    dialogMetaData: {
+                        dialogSize: DialogSize.LARGE,
+                        header: {
+                            iconClass: "fa-regular fa-file-lines",
+                            svgRepresentation: "",
+                            text: "Documenting artifacts: "
+                        },
+                        footer: {
+                            showCancelButton: true,
+                            cancelButtonText: "Cancel",
+                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
+                        }
+                    },
+                    dialogInfo: `Check all artifacts that provide documentation for this endpoint. Your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your selection, all your changes will be lost.`,
+                    tableColumnHeaders: [
+                        {
+                            text: "Artifact"
+                        },
+                        {
+                            text: "Type"
+                        },
+                        {
+                            text: "documenting"
+                        },
+                    ]
                 },
                 provideEnterButton: false,
                 jointJsConfig: {
@@ -1751,8 +1775,7 @@ const EntityRelationsConfig: {
                     defaultPropPath: "",
                     minPath: "",
                     min: ""
-                },
-                dropdownOptions: []
+                }
             },
         ]
     },
@@ -1818,7 +1841,7 @@ const EntityRelationsConfig: {
             },
             {
                 providedFeature: "documentedBy",
-                contentType: PropertyContent.DROPDOWN,
+                contentType: PropertyContent.MULTI_SELECT,
                 label: "Documented by:",
                 inputProperties: {
                     disabled: false,
@@ -1830,10 +1853,34 @@ const EntityRelationsConfig: {
                 helpText: "The artifact documenting this endpoint.",
                 show: true,
                 attributes: {
-                    placeholder: "Choose Artifact...",
                     svgRepresentation: "",
-                    defaultValue: "",
-
+                    buttonText: "Edit documentating artifacts",
+                    buttonIconClass: "fa-solid fa-pencil",
+                    dialogMetaData: {
+                        dialogSize: DialogSize.LARGE,
+                        header: {
+                            iconClass: "fa-regular fa-file-lines",
+                            svgRepresentation: "",
+                            text: "Documenting artifacts: "
+                        },
+                        footer: {
+                            showCancelButton: true,
+                            cancelButtonText: "Cancel",
+                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
+                        }
+                    },
+                    dialogInfo: `Check all artifacts that provide documentation for this endpoint. Your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your selection, all your changes will be lost.`,
+                    tableColumnHeaders: [
+                        {
+                            text: "Artifact"
+                        },
+                        {
+                            text: "Type"
+                        },
+                        {
+                            text: "documenting"
+                        },
+                    ]
                 },
                 provideEnterButton: false,
                 jointJsConfig: {
@@ -1842,8 +1889,7 @@ const EntityRelationsConfig: {
                     defaultPropPath: "",
                     minPath: "",
                     min: ""
-                },
-                dropdownOptions: []
+                }
             },
         ]
     },

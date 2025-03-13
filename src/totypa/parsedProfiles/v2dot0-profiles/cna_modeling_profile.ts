@@ -16,7 +16,7 @@ export const cna_modeling_profile: TOSCA_File = {
   "dsl_definitions": "",
   "repositories": {},
   "artifact_types": {
-    "CNA-Artifact": {
+    "CNA.Artifact": {
       "description": "The root artifact type for artifacts used in the cna modeling application",
       "properties": {
         "provider_specific": {
@@ -83,7 +83,7 @@ export const cna_modeling_profile: TOSCA_File = {
           "default": false
         }
       },
-      "derived_from": "CNA-Artifact",
+      "derived_from": "CNA.Artifact",
       "file_ext": [
         "yaml",
         "yml"
@@ -200,7 +200,7 @@ export const cna_modeling_profile: TOSCA_File = {
           "default": false
         }
       },
-      "derived_from": "CNA-Artifact"
+      "derived_from": "CNA.Artifact"
     },
     "Implementation.Bash": {
       "description": "Script artifact for the Unix Bash shell.\n",
@@ -351,7 +351,7 @@ export const cna_modeling_profile: TOSCA_File = {
           "default": false
         }
       },
-      "derived_from": "CNA-Artifact"
+      "derived_from": "CNA.Artifact"
     },
     "Image.Container.OCI": {
       "description": "Artifact type for a OCI (Open Container Initiative)-compliant Container Image \n",
@@ -370,7 +370,7 @@ export const cna_modeling_profile: TOSCA_File = {
           "default": false
         }
       },
-      "derived_from": "CNA-Artifact"
+      "derived_from": "CNA.Artifact"
     },
     "Image.VM": {
       "description": "Artifact type for a Virtual Machine (VM) Image\n",
@@ -405,7 +405,7 @@ export const cna_modeling_profile: TOSCA_File = {
           "default": false
         }
       },
-      "derived_from": "CNA-Artifact"
+      "derived_from": "CNA.Artifact"
     },
     "Terraform.Script": {
       "description": "A configuration file which can be used by Terraform to set up components or infrastructure.",
@@ -440,7 +440,7 @@ export const cna_modeling_profile: TOSCA_File = {
           "default": false
         }
       },
-      "derived_from": "CNA-Artifact",
+      "derived_from": "CNA.Artifact",
       "file_ext": [
         "tf",
         "tf.json"
@@ -479,7 +479,7 @@ export const cna_modeling_profile: TOSCA_File = {
           "default": false
         }
       },
-      "derived_from": "CNA-Artifact"
+      "derived_from": "CNA.Artifact"
     },
     "Ansible.Script": {
       "description": "A configuration file which can be used by Ansible to set up components or infrastructure.",
@@ -514,7 +514,7 @@ export const cna_modeling_profile: TOSCA_File = {
           "default": false
         }
       },
-      "derived_from": "CNA-Artifact"
+      "derived_from": "CNA.Artifact"
     },
     "Chef.Script": {
       "description": "A configuration file which can be used by Chef to set up components or infrastructure.",
@@ -549,7 +549,7 @@ export const cna_modeling_profile: TOSCA_File = {
           "default": false
         }
       },
-      "derived_from": "CNA-Artifact"
+      "derived_from": "CNA.Artifact"
     },
     "Puppet.Script": {
       "description": "A configuration file which can be used by Puppet to set up components or infrastructure.",
@@ -584,7 +584,7 @@ export const cna_modeling_profile: TOSCA_File = {
           "default": false
         }
       },
-      "derived_from": "CNA-Artifact"
+      "derived_from": "CNA.Artifact"
     },
     "CloudFormation.Script": {
       "description": "A configuration file which can be used by AWS tools to set up components or infrastructure.",
@@ -619,7 +619,7 @@ export const cna_modeling_profile: TOSCA_File = {
           "default": false
         }
       },
-      "derived_from": "CNA-Artifact",
+      "derived_from": "CNA.Artifact",
       "file_ext": [
         "yaml",
         "yml",
@@ -654,7 +654,7 @@ export const cna_modeling_profile: TOSCA_File = {
           "default": false
         }
       },
-      "derived_from": "CNA-Artifact"
+      "derived_from": "CNA.Artifact"
     },
     "AWS.EKS.Cluster": {
       "description": "An AWS EKS Cluster",
@@ -809,7 +809,7 @@ export const cna_modeling_profile: TOSCA_File = {
           "default": false
         }
       },
-      "derived_from": "CNA-Artifact"
+      "derived_from": "CNA.Artifact"
     },
     "Azure.ResourceManagerTemplate": {
       "description": "An artifact type for Azure Resource Manager (ARM) templates",
@@ -844,7 +844,7 @@ export const cna_modeling_profile: TOSCA_File = {
           "default": false
         }
       },
-      "derived_from": "CNA-Artifact"
+      "derived_from": "CNA.Artifact"
     },
     "GCP.Resource": {
       "description": "An abstract type for resources created in the Google Cloud Platform.",
@@ -879,7 +879,7 @@ export const cna_modeling_profile: TOSCA_File = {
           "default": false
         }
       },
-      "derived_from": "CNA-Artifact"
+      "derived_from": "CNA.Artifact"
     },
     "OpenAPI": {
       "description": "Artifact type for OpenAPI-based service interface description documents",
@@ -898,7 +898,77 @@ export const cna_modeling_profile: TOSCA_File = {
           "default": false
         }
       },
-      "derived_from": "CNA-Artifact"
+      "derived_from": "CNA.Artifact"
+    },
+    "Spring.CloudContract": {
+      "description": "Artifact type for Spring Cloud contracts for consumer-driven contract testing of APIs",
+      "properties": {
+        "provider_specific": {
+          "type": "boolean",
+          "description": "Whether this artifact is (cloud) provider-specific or not.",
+          "required": true,
+          "default": false
+        },
+        "based_on_standard": {
+          "type": "text",
+          "description": "If the artifact is based on a standard, specify it here.",
+          "required": true,
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "none",
+                "OCI",
+                "OpenAPI",
+                "other"
+              ]
+            ]
+          },
+          "default": "none"
+        },
+        "self-contained": {
+          "type": "boolean",
+          "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
+          "required": true,
+          "default": false
+        }
+      },
+      "derived_from": "CNA.Artifact"
+    },
+    "Pact.Contract": {
+      "description": "Artifact type for Pact contracts for consumer-driven contract testing of APIs",
+      "properties": {
+        "provider_specific": {
+          "type": "boolean",
+          "description": "Whether this artifact is (cloud) provider-specific or not.",
+          "required": true,
+          "default": false
+        },
+        "based_on_standard": {
+          "type": "text",
+          "description": "If the artifact is based on a standard, specify it here.",
+          "required": true,
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "none",
+                "OCI",
+                "OpenAPI",
+                "other"
+              ]
+            ]
+          },
+          "default": "none"
+        },
+        "self-contained": {
+          "type": "boolean",
+          "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
+          "required": true,
+          "default": false
+        }
+      },
+      "derived_from": "CNA.Artifact"
     }
   },
   "data_types": {},

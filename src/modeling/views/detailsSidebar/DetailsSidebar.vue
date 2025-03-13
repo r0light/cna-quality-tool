@@ -314,7 +314,7 @@ onUpdated(() => {
             let valueToSet: any = "";
             if (option.jointJsConfig.propertyType === "attribute") {
                 valueToSet = selectedEntity.model.attr(option.jointJsConfig.modelPath);
-            } else if (option.jointJsConfig.propertyType === "property" || option.jointJsConfig.propertyType === "customProperty" ||option.jointJsConfig.propertyType === "providedMethod") {
+            } else if (option.jointJsConfig.propertyType === "property" || option.jointJsConfig.propertyType === "customProperty" || option.jointJsConfig.propertyType === "providedMethod") {
                 valueToSet = selectedEntity.model.prop(option.jointJsConfig.modelPath);
 
                 if (option.providedFeature === "entity-aspect-ratio" && valueToSet) {
@@ -824,23 +824,34 @@ onUpdated(() => {
             })
 
             if (parentComponent) {
-                const artifacts = parentComponent.prop("entity/artifacts");
-
-                const documentationDropdownOptions = artifacts.map((artifact) => {
-                    return {
-                        optionValue: artifact.key,
-                        optionText: `${artifact.key} (${artifact.type})`,
-                        optionTitle: `${artifact.key} (${artifact.type})`,
-                        optionRepresentationClass: "validOption",
-                        disabled: false,
-                    };
-                })
 
                 let documentedByOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "documentedBy");
                 documentedByOption.includeFormCheck = false;
-                const selectedDocumentedBy = selectedEntity.model.prop(documentedByOption.jointJsConfig.modelPath);
-                documentedByOption.dropdownOptions = [EMPTY_DROPDOWN_VALUE, ...documentationDropdownOptions];
-                documentedByOption.value = selectedDocumentedBy;
+
+                const artifacts = parentComponent.prop("entity/artifacts");
+                const selectedDocumentedBy = selectedEntity.model.prop(documentedByOption.jointJsConfig.modelPath) ? selectedEntity.model.prop(documentedByOption.jointJsConfig.modelPath) : [];;
+
+                // clear table rows
+                documentedByOption.tableRows.length = 0;
+                artifacts.forEach((artifact) => {
+
+                    documentedByOption.tableRows.push({
+                        columns: {
+                            Artifact: artifact.key,
+                            Type: artifact.type,
+                            documenting: {
+                                contentType: PropertyContent.CHECKBOX_WITHOUT_LABEL,
+                                disabled: false,
+                                checked: selectedDocumentedBy.includes(artifact.key),
+                                id: artifact.key
+                            }
+                        },
+                        attributes: {
+                            representationClass: "validOption",
+                            disabled: false
+                        }
+                    });
+                })
             }
             break;
         default:
@@ -1183,7 +1194,13 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                         selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, selectedDataAggregateIDs, { rewrite: true });
                         continue;
                     } else if (propertyOption.providedFeature === "documentedBy") {
-                        selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, propertyOption.value, { rewrite: true });
+                        let documentingArtifactIds = [];
+                        propertyOption.tableRows.forEach(artifact => {
+                            if (artifact.columns["documenting"]["checked"]) {
+                                documentingArtifactIds.push(artifact.columns["documenting"]["id"]);
+                            }
+                        })
+                        selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, documentingArtifactIds, { rewrite: true });
                     }
                     break;
                 case EntityTypes.REQUEST_TRACE:

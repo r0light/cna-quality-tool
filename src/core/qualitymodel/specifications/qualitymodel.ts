@@ -705,7 +705,7 @@ const productFactors = {
         "relevantEntities": [ENTITIES.LINK, ENTITIES.ENDPOINT, ENTITIES.COMPONENT],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Bastani2017", "section": "4 Consumer-Driven Contract Testing (Use contracts for APIs to test against)" }],
-        "measures": []
+        "measures": ["ratioOfEndpointsCoveredByContract"]
     },
     "standardizedSelf-containedDeploymentUnit": {
         "name": "Standardized self-contained deployment unit",
@@ -2000,6 +2000,12 @@ const measures = {
     "configurationStoredInConfigService": {
         "name": "Configuration stored in config service",
         "calculation": "Backing Data of type config stored in config service / All backing data of type config",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT]
+    },
+    "ratioOfEndpointsCoveredByContract": {
+        "name": "Ratio of endpoints covered by contract",
+        "calculation": "Endpoints documented by contract / All endpoints",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT]
     }
