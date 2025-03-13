@@ -3456,3 +3456,100 @@ test("ratioOfAutomaticallyMaintainedInfrastructure", () => {
     let measureValue = systemMeasureImplementations["ratioOfAutomaticallyMaintainedInfrastructure"]({ entity: system, system: system });
     expect(measureValue).toEqual(0.5);
 })
+
+test("linksWithTimeout", () => {
+    let system = new System("sys1", "testSystem");
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA);
+    serviceA.addEndpoint(externalEndpointA);
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    endpointB.setPropertyValue("kind", SYNCHRONOUS_ENDPOINT_KIND[0]);
+    serviceB.addEndpoint(endpointB);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    endpointC.setPropertyValue("kind", ASYNCHRONOUS_ENDPOINT_KIND[0]);
+    serviceC.addEndpoint(endpointC);
+
+    let serviceD = new Service("s4", "testService", getEmptyMetaData());
+    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    endpointD.setPropertyValue("kind", SYNCHRONOUS_ENDPOINT_KIND[0]);
+    serviceD.addEndpoint(endpointD);
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+    linkAB.setPropertyValue("timeout", "2000");
+    let linkAC = new Link("l2", serviceA, endpointC);
+    let linkAD = new Link("l3", serviceA, endpointD);
+
+    system.addEntities([serviceA, serviceB, serviceC, serviceD]);
+    system.addEntities([linkAB, linkAC, linkAD]);
+
+    let measureValue = systemMeasureImplementations["linksWithTimeout"]({ entity: system, system: system });
+    expect(measureValue).toEqual(1/3);
+})
+
+test("deploymentsWithRestart", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    let infrastructureB = new Infrastructure("i2", "infrastructure 2", getEmptyMetaData());
+
+    let deploymentMappingA = new DeploymentMapping("dm1", serviceA, infrastructureA);
+    deploymentMappingA.setPropertyValue("automated_restart_policy", "never");
+    let deploymentMappingB = new DeploymentMapping("dm2", serviceB, infrastructureA);
+    deploymentMappingB.setPropertyValue("automated_restart_policy", "onProcessFailure");
+    let deploymentMappingC = new DeploymentMapping("dm3", serviceA, infrastructureB);
+    deploymentMappingC.setPropertyValue("automated_restart_policy", "onProcessFailure");
+
+    system.addEntities([serviceA, serviceB]);
+    system.addEntities([infrastructureA, infrastructureB]);
+    system.addEntities([deploymentMappingA, deploymentMappingB, deploymentMappingC]);
+
+    let measureValue = systemMeasureImplementations["deploymentsWithRestart"]({ entity: system, system: system });
+    expect(measureValue).toEqual(2/3);
+})
+
+test("ratioOfDocumentedEndpoints", () => {
+    let system = new System("sys1", "testSystem");
+
+    let serviceA = new Service("s1", "service A", getEmptyMetaData())
+    let propertiesA = getArtifactTypeProperties("OpenAPI");
+    serviceA.setArtifact("art1", new Artifact(
+        "OpenAPI",
+        "", "", "", "", "", "", "", propertiesA
+    ));
+
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    endpointA.setDocumentedBy = ["art1"];
+    serviceA.addEndpoint(endpointA);
+
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceA.addEndpoint(endpointB);
+
+    let serviceB = new Service("s2", "service B", getEmptyMetaData())
+    let propertiesB = getArtifactTypeProperties("OpenAPI");
+    serviceB.setArtifact("art1", new Artifact(
+        "OpenAPI",
+        "", "", "", "", "", "", "", propertiesB
+    ));
+
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    endpointC.setDocumentedBy = ["art1"];
+    serviceB.addEndpoint(endpointC);
+
+    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    serviceB.addEndpoint(endpointD);
+
+    system.addEntities([serviceA, serviceB]);
+
+    let measureValue = systemMeasureImplementations["ratioOfDocumentedEndpoints"]({ entity: system, system: system });
+    expect(measureValue).toEqual(0.5);
+})

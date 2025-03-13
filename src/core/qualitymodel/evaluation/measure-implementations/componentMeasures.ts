@@ -2,9 +2,10 @@
 import { ref } from "vue";
 import { BackingService, BrokerBackingService, Component, Endpoint, ExternalEndpoint, ProxyBackingService, Service, StorageBackingService, System } from "../../../entities.js";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure.js";
-import { ASYNCHRONOUS_ENDPOINT_KIND, AUTOMATED_SCALING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, CONFIG_SERVICE_KIND, CONTRACT_ARTIFACT_TYPE, CUSTOM_SOFTWARE_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, PROTOCOLS_SUPPORTING_TLS, SERVICE_MESH_KIND, SYNCHRONOUS_ENDPOINT_KIND, VAULT_KIND } from "../../specifications/featureModel.js";
+import { ASYNCHRONOUS_ENDPOINT_KIND, AUTOMATED_RESTART_POLICIES, AUTOMATED_SCALING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, CONFIG_SERVICE_KIND, CONTRACT_ARTIFACT_TYPE, CUSTOM_SOFTWARE_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, PROTOCOLS_SUPPORTING_TLS, SERVICE_MESH_KIND, SYNCHRONOUS_ENDPOINT_KIND, VAULT_KIND } from "../../specifications/featureModel.js";
 import { average } from "./general-functions.js";
 import { Artifact, getArtifactTypeProperties, getAvailableArtifactTypes } from "@/core/common/artifact.js";
+import { link } from "fs";
 
 
 export const supportsMonitoring: (component: Component) => boolean = (component) => {
@@ -517,11 +518,11 @@ export const countReplicasOfThisComponent: (component: Component, system: System
         }
     }
     return replicas;
-} 
+}
 
 export const serviceReplicationLevel: Calculation = (parameters: CalculationParameters<Component>) => {
 
-   return countReplicasOfThisComponent(parameters.entity, parameters.system);
+    return countReplicasOfThisComponent(parameters.entity, parameters.system);
 }
 
 export const amountOfRedundancy: Calculation = (parameters: CalculationParameters<Component>) => {
@@ -536,12 +537,12 @@ export const storageReplicationLevel: Calculation = (parameters: CalculationPara
     if (parameters.entity.constructor.name !== StorageBackingService.name) {
         return "n/a";
     }
-    
+
     return countReplicasOfThisComponent(parameters.entity, parameters.system);
 }
 
 export const serviceMeshUsage: Calculation = (parameters: CalculationParameters<Component>) => {
-    
+
     let usage = 0;
 
     let outgoingProxy = parameters.entity.getEgressProxiedBy;
@@ -559,7 +560,7 @@ export const serviceMeshUsage: Calculation = (parameters: CalculationParameters<
 
 export const secretsExternalization: Calculation = (parameters: CalculationParameters<Component>) => {
 
-    let secrets= parameters.entity.getBackingDataEntities.filter(backingData => backingData.backingData.getProperty("kind").value === BACKING_DATA_SECRET_KIND);
+    let secrets = parameters.entity.getBackingDataEntities.filter(backingData => backingData.backingData.getProperty("kind").value === BACKING_DATA_SECRET_KIND);
 
     if (secrets.length === 0) {
         return 0;
@@ -579,7 +580,7 @@ export const secretsExternalization: Calculation = (parameters: CalculationParam
     for (const [configServiceId, configService] of allConfigServices) {
         let secrets = configService.getBackingDataEntities.filter(backingData => { return backingData.backingData.getProperty("kind").value === BACKING_DATA_SECRET_KIND });
         secrets.forEach(secret => {
-            if (notStoredSecretIds.includes(secret.backingData.getId) && DATA_USAGE_RELATION_PERSISTENCE.includes(secret.relation.getProperty("usage_relation").value) ) {
+            if (notStoredSecretIds.includes(secret.backingData.getId) && DATA_USAGE_RELATION_PERSISTENCE.includes(secret.relation.getProperty("usage_relation").value)) {
                 secretsStoredOutsideComponent.add(secret.backingData.getId);
             }
         })
@@ -599,7 +600,7 @@ export const secretsExternalization: Calculation = (parameters: CalculationParam
 
 export const configurationExternalization: Calculation = (parameters: CalculationParameters<Component>) => {
 
-    let configurations= parameters.entity.getBackingDataEntities.filter(backingData => backingData.backingData.getProperty("kind").value === BACKING_DATA_CONFIG_KIND);
+    let configurations = parameters.entity.getBackingDataEntities.filter(backingData => backingData.backingData.getProperty("kind").value === BACKING_DATA_CONFIG_KIND);
 
     if (configurations.length === 0) {
         return 0;
@@ -619,7 +620,7 @@ export const configurationExternalization: Calculation = (parameters: Calculatio
     for (const [configServiceId, configService] of allConfigServices) {
         let secrets = configService.getBackingDataEntities.filter(backingData => { return backingData.backingData.getProperty("kind").value === BACKING_DATA_CONFIG_KIND });
         secrets.forEach(config => {
-            if (notStoredConfigIds.includes(config.backingData.getId) && DATA_USAGE_RELATION_PERSISTENCE.includes(config.relation.getProperty("usage_relation").value) ) {
+            if (notStoredConfigIds.includes(config.backingData.getId) && DATA_USAGE_RELATION_PERSISTENCE.includes(config.relation.getProperty("usage_relation").value)) {
                 configsStoredOutsideComponent.add(config.backingData.getId);
             }
         })
@@ -641,12 +642,12 @@ export const configurationExternalization: Calculation = (parameters: Calculatio
 
 export const suitablyReplicatedStatefulService: Calculation = (parameters: CalculationParameters<Component>) => {
 
-    if (![StorageBackingService.name, BackingService.name, BrokerBackingService.name].includes(parameters.entity.constructor.name) 
+    if (![StorageBackingService.name, BackingService.name, BrokerBackingService.name].includes(parameters.entity.constructor.name)
         || parameters.entity.getProperty("stateless").value) {
-            return "n/a";
+        return "n/a";
     }
-    
-    let deploymentMappings = [...parameters.system.getDeploymentMappingEntities.entries()].filter(([mappingId ,mapping]) => {
+
+    let deploymentMappings = [...parameters.system.getDeploymentMappingEntities.entries()].filter(([mappingId, mapping]) => {
         return mapping.getDeployedEntity.getId === parameters.entity.getId;
     })
 
@@ -664,7 +665,7 @@ export const suitablyReplicatedStatefulService: Calculation = (parameters: Calcu
 export const ratioOfNonCustomBackingServices: Calculation = (parameters: CalculationParameters<Component>) => {
 
     if (![StorageBackingService.constructor.name, BackingService.name, BrokerBackingService.name, ProxyBackingService.name].includes(parameters.entity.constructor.name)) {
-            return "n/a";
+        return "n/a";
     }
 
     return parameters.entity.getProperty("software_type").value === CUSTOM_SOFTWARE_TYPE ? 0 : 1;
@@ -691,7 +692,7 @@ export const secretsStoredInVault: Calculation = (parameters: CalculationParamet
     for (const [valutServiceId, vaultService] of allVaultServices) {
         let secrets = vaultService.getBackingDataEntities.filter(backingData => { return backingData.backingData.getProperty("kind").value === BACKING_DATA_SECRET_KIND });
         secrets.forEach(secret => {
-            if (usedSecretIds.includes(secret.backingData.getId) && DATA_USAGE_RELATION_PERSISTENCE.includes(secret.relation.getProperty("usage_relation").value) ) {
+            if (usedSecretIds.includes(secret.backingData.getId) && DATA_USAGE_RELATION_PERSISTENCE.includes(secret.relation.getProperty("usage_relation").value)) {
                 secretsInVault.add(secret.backingData.getId);
             }
         })
@@ -745,7 +746,7 @@ export const accessRestrictedToCallers: Calculation = (parameters: CalculationPa
 
 export const ratioOfDelegatedAuthentication: Calculation = (parameters: CalculationParameters<Component>) => {
 
-    if (parameters.entity.constructor.name === BackingService.name && parameters.entity.getProperty("providedFunctionality").value === "authentication/authorization" ) {
+    if (parameters.entity.constructor.name === BackingService.name && parameters.entity.getProperty("providedFunctionality").value === "authentication/authorization") {
         return "n/a";
     }
 
@@ -805,7 +806,7 @@ export const namespaceSeparation: Calculation = (parameters: CalculationParamete
 
     let allOtherComponents = parameters.system.getComponentEntities.entries().filter(([componentKey, component]) => {
         return componentKey !== parameters.entity.getId
-    }).toArray(); 
+    }).toArray();
 
     if (allOtherComponents.length === 0) {
         return "n/a";
@@ -902,7 +903,7 @@ export const configurationStoredInConfigService: Calculation = (parameters: Calc
     for (const [configServiceId, configService] of allConfigServices) {
         let configs = configService.getBackingDataEntities.filter(backingData => { return backingData.backingData.getProperty("kind").value === BACKING_DATA_CONFIG_KIND });
         configs.forEach(config => {
-            if (usedConfigIds.includes(config.backingData.getId) && DATA_USAGE_RELATION_PERSISTENCE.includes(config.relation.getProperty("usage_relation").value) ) {
+            if (usedConfigIds.includes(config.backingData.getId) && DATA_USAGE_RELATION_PERSISTENCE.includes(config.relation.getProperty("usage_relation").value)) {
                 configsInConfigService.add(config.backingData.getId);
             }
         })
@@ -927,7 +928,7 @@ export const ratioOfEndpointsCoveredByContract: Calculation = (parameters: Calcu
 
     let coveredByContract = [];
 
-    for(const endpoint of allComponentEndpoints) {
+    for (const endpoint of allComponentEndpoints) {
         let contractArtifact = endpoint.getDocumentedBy.map(artifactKey => componentArtifacts.get(artifactKey)).find(artifact => {
             return CONTRACT_ARTIFACT_TYPE.includes(artifact.getType());
         })
@@ -963,7 +964,7 @@ export const standardizedDeployments: Calculation = (parameters: CalculationPara
             });
         }
         return false;
-        }
+    }
     );
     return standardizedDeploymentUnit.length / relevantDeploymentMappings.length;
 }
@@ -992,7 +993,7 @@ export const selfContainedDeployments: Calculation = (parameters: CalculationPar
             });
         }
         return false;
-        }
+    }
     );
     return selfContainedDeploymentUnit.length / relevantDeploymentMappings.length;
 }
@@ -1015,6 +1016,45 @@ export const replacingDeployments: Calculation = (parameters: CalculationParamet
     })
 
     return replacing.length / relevantDeploymentMappings.length;
+}
+
+export const linksWithTimeout: Calculation = (parameters: CalculationParameters<Component>) => {
+
+    let outgoingLinks = parameters.system.getOutgoingLinksOfComponent(parameters.entity.getId);
+
+    if (outgoingLinks.length === 0) {
+        return "n/a";
+    }
+
+    let linksWithTimeout = outgoingLinks.filter(link => link.getProperty("timeout").value > 0);
+
+    return linksWithTimeout.length / outgoingLinks.length;
+}
+
+export const deploymentsWithRestart: Calculation = (parameters: CalculationParameters<Component>) => {
+    let relevantDeploymentMappings = parameters.system.getDeploymentMappingEntities.entries().filter(([deploymentMappingKey, deploymentMapping]) => {
+        return deploymentMapping.getDeployedEntity.getId === parameters.entity.getId;
+    }).toArray();
+
+    if (relevantDeploymentMappings.length === 0) {
+        return "n/a";
+    }
+
+    let automatedRestart = relevantDeploymentMappings.filter(([deploymentMappingId, deploymentMapping]) =>         AUTOMATED_RESTART_POLICIES.includes(deploymentMapping.getProperty("automated_restart_policy").value));
+
+    return automatedRestart.length / relevantDeploymentMappings.length;
+}
+
+export const ratioOfDocumentedEndpoints: Calculation = (parameters: CalculationParameters<Component>) => {
+    let allComponentEndpoints = parameters.entity.getEndpointEntities.concat(parameters.entity.getExternalEndpointEntities);
+
+    if (allComponentEndpoints.length === 0) {
+        return "n/a";
+    }
+
+    let documented = allComponentEndpoints.filter(endpoint => endpoint.getDocumentedBy.length > 0);
+
+    return documented.length / allComponentEndpoints.length;
 }
 
 export const componentMeasureImplementations: { [measureKey: string]: Calculation } = {
@@ -1078,6 +1118,9 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "ratioOfEndpointsCoveredByContract": ratioOfEndpointsCoveredByContract,
     "standardizedDeployments": standardizedDeployments,
     "selfContainedDeployments": selfContainedDeployments,
-    "replacingDeployments": replacingDeployments
+    "replacingDeployments": replacingDeployments,
+    "linksWithTimeout": linksWithTimeout,
+    "deploymentsWithRestart": deploymentsWithRestart,
+    "ratioOfDocumentedEndpoints": ratioOfDocumentedEndpoints
 }
 

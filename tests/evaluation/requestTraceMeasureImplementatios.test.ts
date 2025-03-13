@@ -2098,3 +2098,48 @@ test("selfContainedDeployments", () => {
     let measureValue = requestTraceMeasureImplementations["selfContainedDeployments"]({ entity: requestTrace, system: system });
     expect(measureValue).toEqual(2/3);
 })
+
+
+test("ratioOfDocumentedEndpoints", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let propertiesB = getArtifactTypeProperties("OpenAPI");
+    serviceA.setArtifact("art1", new Artifact(
+        "OpenAPI",
+        "", "", "", "", "", "", "", propertiesB
+    ));
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA);
+    let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
+    externalEndpointA.setDocumentedBy = ["art1"];
+    serviceA.addEndpoint(externalEndpointA);
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let propertiesC = getArtifactTypeProperties("OpenAPI");
+    serviceC.setArtifact("art2", new Artifact(
+        "OpenAPI",
+        "", "", "", "", "", "", "", propertiesC
+    ));
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    endpointC.setDocumentedBy = ["art2"];
+    serviceC.addEndpoint(endpointC);
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+    let linkBC = new Link("l2", serviceB, endpointC);
+
+    let requestTrace = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
+    requestTrace.setLinks = [[linkAB], [linkBC]];
+    requestTrace.setExternalEndpoint = externalEndpointA;
+
+    system.addEntities([serviceA, serviceB, serviceC]);
+    system.addEntities([linkAB, linkBC]);
+    system.addEntity(requestTrace);
+
+    let measureValue = requestTraceMeasureImplementations["ratioOfDocumentedEndpoints"]({ entity: requestTrace, system: system });
+    expect(measureValue).toEqual(2/3);
+})

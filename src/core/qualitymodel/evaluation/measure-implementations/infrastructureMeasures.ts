@@ -1,6 +1,6 @@
 import { BackingService, DeploymentMapping, Infrastructure } from "@/core/entities";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure";
-import { AUTOMATED_INFRASTRUCTURE_MAINTENANCE, AUTOMATED_INFRASTRUCTURE_PROVISIONING, AUTOMATED_SCALING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, IAC_ARTIFACT_TYPE, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MANAGED_INFRASTRUCTURE_MAINTENANCE, ROLLING_UPDATE_STRATEGY_OPTIONS } from "../../specifications/featureModel";
+import { AUTOMATED_INFRASTRUCTURE_MAINTENANCE, AUTOMATED_INFRASTRUCTURE_PROVISIONING, AUTOMATED_RESTART_POLICIES, AUTOMATED_SCALING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, IAC_ARTIFACT_TYPE, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MANAGED_INFRASTRUCTURE_MAINTENANCE, ROLLING_UPDATE_STRATEGY_OPTIONS } from "../../specifications/featureModel";
 
 
 export const supportsMonitoring: (infrastructure: Infrastructure) => boolean = (infrastructure: Infrastructure) => {
@@ -262,6 +262,20 @@ export const ratioOfAutomaticallyMaintainedInfrastructure: Calculation = (parame
     return AUTOMATED_INFRASTRUCTURE_MAINTENANCE.includes(parameters.entity.getProperty("maintenance").value) ? 1 : 0;
 }
 
+export const deploymentsWithRestart: Calculation = (parameters: CalculationParameters<Infrastructure>) => {
+    let relevantDeploymentMappings = parameters.system.getDeploymentMappingEntities.entries().filter(([deploymentMappingKey, deploymentMapping]) => {
+        return deploymentMapping.getDeployedEntity.getId === parameters.entity.getId;
+    }).toArray();
+
+    if (relevantDeploymentMappings.length === 0) {
+        return "n/a";
+    }
+
+    let automatedRestart = relevantDeploymentMappings.filter(([deploymentMappingId, deploymentMapping]) =>         AUTOMATED_RESTART_POLICIES.includes(deploymentMapping.getProperty("automated_restart_policy").value));
+
+    return automatedRestart.length / relevantDeploymentMappings.length;
+}
+
 
 export const infrastructureMeasureImplementations: { [measureKey: string]: Calculation } = {
     "numberOfServiceHostedOnOneInfrastructure": numberOfServiceHostedOnOneInfrastructure,
@@ -281,5 +295,6 @@ export const infrastructureMeasureImplementations: { [measureKey: string]: Calcu
     "ratioOfAbstractedHardware": ratioOfAbstractedHardware,
     "nonProviderSpecificInfrastructureArtifacts": nonProviderSpecificInfrastructureArtifacts,
     "replacingDeployments": replacingDeployments,
-    "ratioOfAutomaticallyMaintainedInfrastructure": ratioOfAutomaticallyMaintainedInfrastructure
+    "ratioOfAutomaticallyMaintainedInfrastructure": ratioOfAutomaticallyMaintainedInfrastructure,
+    "deploymentsWithRestart": deploymentsWithRestart
 }

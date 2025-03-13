@@ -811,6 +811,27 @@ export const selfContainedDeployments: Calculation = (parameters: CalculationPar
     return selfContainedDeploymentUnit.length / relevantDeploymentMappings.length;
 }
 
+export const ratioOfDocumentedEndpoints: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+    let allEndpoints = parameters.entity.getLinks.flatMap(links => links).map(link => link.getTargetEndpoint);
+    if (parameters.entity.getExternalEndpoint) {
+        allEndpoints.push(parameters.entity.getExternalEndpoint);
+    }
+
+    if (allEndpoints.length === 0) {
+        return "n/a";
+    }
+
+    let documented = [];
+
+    for (const endpoint of allEndpoints) {
+        if (endpoint.getDocumentedBy.length > 0) {
+            documented.push(endpoint.getId);
+        }
+    }
+
+    return documented.length / allEndpoints.length;
+}
+
 
 export const requestTraceMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
@@ -853,6 +874,7 @@ export const requestTraceMeasureImplementations: { [measureKey: string]: Calcula
     "ratioOfDeploymentsOnDynamicInfrastructure": ratioOfDeploymentsOnDynamicInfrastructure,
     "ratioOfEndpointsCoveredByContract": ratioOfEndpointsCoveredByContract,
     "standardizedDeployments": standardizedDeployments,
-    "selfContainedDeployments": selfContainedDeployments
+    "selfContainedDeployments": selfContainedDeployments,
+    "ratioOfDocumentedEndpoints": ratioOfDocumentedEndpoints
 }
 

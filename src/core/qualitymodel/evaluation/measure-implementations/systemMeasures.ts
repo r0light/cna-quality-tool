@@ -1,7 +1,7 @@
 import { BackingService, BrokerBackingService, Component, DeploymentMapping, Infrastructure, Link, ProxyBackingService, Service, StorageBackingService, System } from "@/core/entities";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure";
 import { average, median, lowest, partition } from "./general-functions";
-import { ASYNCHRONOUS_ENDPOINT_KIND, AUTOMATED_INFRASTRUCTURE_MAINTENANCE, AUTOMATED_SCALING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, CONFIG_SERVICE_KIND, CONTRACT_ARTIFACT_TYPE, CUSTOM_SOFTWARE_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, EVENT_SOURCING_KIND, getEndpointKindWeight, getUsageRelationWeight, IAC_ARTIFACT_TYPE, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MESSAGE_BROKER_KIND, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SEND_EVENT_ENDPOINT_KIND, SERVICE_MESH_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND, VAULT_KIND } from "../../specifications/featureModel";
+import { ASYNCHRONOUS_ENDPOINT_KIND, AUTOMATED_INFRASTRUCTURE_MAINTENANCE, AUTOMATED_RESTART_POLICIES, AUTOMATED_SCALING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, CONFIG_SERVICE_KIND, CONTRACT_ARTIFACT_TYPE, CUSTOM_SOFTWARE_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, EVENT_SOURCING_KIND, getEndpointKindWeight, getUsageRelationWeight, IAC_ARTIFACT_TYPE, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MESSAGE_BROKER_KIND, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SEND_EVENT_ENDPOINT_KIND, SERVICE_MESH_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND, VAULT_KIND } from "../../specifications/featureModel";
 import { calculateRatioOfEndpointsSupportingSsl, calculateRatioOfExternalEndpointsSupportingTls, componentMeasureImplementations, numberOfAsynchronousEndpointsOfferedByAService, numberOfComponentsAComponentIsLinkedTo, numberOfSynchronousEndpointsOfferedByAService, providesHealthAndReadinessEndpoints, serviceCouplingBasedOnEndpointEntropy } from "./componentMeasures";
 import { numberOfCyclesInRequestTraces, requestTraceComplexity } from "./requestTraceMeasures";
 import { supportsMonitoring as infrastructureSupportsMonitoring, ratioOfAutomaticallyProvisionedInfrastructure as infrastructureProvisionedAutomatically, ratioOfFullyManagedInfrastructure as infrastructureIsFullyManaged, nonProviderSpecificInfrastructureArtifacts as infrastructureHasOnlyNonProviderSpecificArtifacts } from "./infrastructureMeasures";
@@ -2254,6 +2254,57 @@ export const ratioOfAutomaticallyMaintainedInfrastructure: Calculation = (parame
     return  automaticallyMaintained.length / allInfrastructureInstances.size;
 }
 
+export const linksWithTimeout: Calculation = (parameters: CalculationParameters<System>) => {
+
+    let allLinks = parameters.entity.getLinkEntities;
+
+    if (allLinks.size === 0) {
+        return "n/a";
+    }
+
+    let linksWithTimeout = allLinks.entries().filter(([linkId, link]) => link.getProperty("timeout").value > 0).toArray();
+
+    return linksWithTimeout.length / allLinks.size;
+}
+
+export const deploymentsWithRestart: Calculation = (parameters: CalculationParameters<System>) => {
+    let allDeploymentMappings = parameters.entity.getDeploymentMappingEntities;
+
+    if (allDeploymentMappings.size === 0) {
+        return 0;
+    }
+
+    let automatedRestart = allDeploymentMappings.entries().filter(([deploymentMappingId, deploymentMapping]) =>         AUTOMATED_RESTART_POLICIES.includes(deploymentMapping.getProperty("automated_restart_policy").value)).toArray();
+
+    return automatedRestart.length / allDeploymentMappings.size;
+}
+
+export const ratioOfDocumentedEndpoints: Calculation = (parameters: CalculationParameters<System>) => {
+    let allComponents = parameters.entity.getComponentEntities.entries();
+
+    let allEndpointIds = [];
+    let documented = [];
+
+    for(const [componentKey, component] of allComponents) {
+
+        let allComponentEndpoints = component.getEndpointEntities.concat(component.getExternalEndpointEntities);
+    
+        for(const endpoint of allComponentEndpoints) {
+            allEndpointIds.push(endpoint.getId);
+            if (endpoint.getDocumentedBy.length > 0) {
+                documented.push(endpoint.getId);
+            }
+        }
+    }
+
+    if (allEndpointIds.length === 0) {
+        return "n/a";
+    }
+
+    return documented.length / allEndpointIds.length;
+}
+
+
 export const systemMeasureImplementations: { [measureKey: string]: Calculation } = {
     "serviceReplicationLevel": serviceReplicationLevel,
     "medianServiceReplication": medianServiceReplication,
@@ -2358,5 +2409,8 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation }
     "standardizedDeployments": standardizedDeployments,
     "selfContainedDeployments": selfContainedDeployments,
     "replacingDeployments": replacingDeployments,
-    "ratioOfAutomaticallyMaintainedInfrastructure": ratioOfAutomaticallyMaintainedInfrastructure
+    "ratioOfAutomaticallyMaintainedInfrastructure": ratioOfAutomaticallyMaintainedInfrastructure,
+    "linksWithTimeout": linksWithTimeout,
+    "deploymentsWithRestart": deploymentsWithRestart,
+    "ratioOfDocumentedEndpoints": ratioOfDocumentedEndpoints
 }

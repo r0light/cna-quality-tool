@@ -425,3 +425,27 @@ test("ratioOfAutomaticallyMaintainedInfrastructure", () => {
     let measureValue = infrastructureMeasureImplementations["ratioOfAutomaticallyMaintainedInfrastructure"]({ entity: infrastructureA, system: system });
     expect(measureValue).toEqual(1);
 })
+
+
+
+test("deploymentsWithRestart", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    let infrastructureB = new Infrastructure("i2", "infrastructure 2", getEmptyMetaData());
+
+    let deploymentMappingA = new DeploymentMapping("dm1", serviceA, infrastructureA);
+    deploymentMappingA.setPropertyValue("automated_restart_policy", "never");
+    let deploymentMappingB = new DeploymentMapping("dm2", infrastructureA, infrastructureB);
+    deploymentMappingB.setPropertyValue("automated_restart_policy", "onProcessFailure");
+
+
+    system.addEntities([serviceA]);
+    system.addEntities([infrastructureA, infrastructureB]);
+    system.addEntities([deploymentMappingA, deploymentMappingB]);
+
+    let measureValue = infrastructureMeasureImplementations["deploymentsWithRestart"]({ entity: infrastructureA, system: system });
+    expect(measureValue).toEqual(1);
+})

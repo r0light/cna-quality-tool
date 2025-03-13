@@ -804,7 +804,7 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.LINK, ENTITIES.ENDPOINT],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.SERVICE, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Indrasiri2021", "section": "3 Resilient Connectivity Pattern: Time-out" }, { "key": "Richardson2019", "section": "3.2.3 Handling partial failures using the Circuit Breaker pattern" }, { "key": "Goniwada2021", "section": "5 Timeout" }],
-        "measures": []
+        "measures": ["linksWithTimeout"]
     },
     "retriesForSafeInvocations": {
         "name": "Retries for safe invocations",
@@ -831,7 +831,7 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.DEPLOYMENT_MAPPING],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE],
         "sources": [ { "key": "Bastani2017", "section": "13 automatic remediation" }, { "key": "Indrasiri2021", "section": "1 Why container orchestration?; High availability" }, { "key": "Goniwada2021", "section": "5 Self-Healing" }],
-        "measures": []
+        "measures": ["deploymentsWithRestart"]
     },
     "api-BasedCommunication": {
         "name": "API-based communication",
@@ -840,7 +840,7 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.ENDPOINT, ENTITIES.LINK],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.SERVICE, ENTITIES.ENDPOINT, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Reznik2019", "section": "9 Communicate Through APIs" }, { "key": "Adkins2020", "section": "6 Understandable Interface Specifications (Use Interface specifications for understandability" }, { "key": "Bastani2017", "section": "6 Everything is an API (Services are integrated via APIs)" }, { "key": "Indrasiri2021", "section": "2 Service Definitions in Synchronous Communication (Use a service definition for each service);" }, { "key": "Indrasiri2021", "section": "2 Service Definition in Asynchronous Communication (Use schemas to define message formats);" }, { "key": "Goniwada2021", "section": "3 API First Principle" }],
-        "measures": []
+        "measures": ["ratioOfDocumentedEndpoints"]
     },
     "consistentlyMediatedCommunication": {
         "name": "Consistently mediated communication",
@@ -2032,6 +2032,24 @@ const measures = {
         "calculation": "Infrastructure maintained in a non-manual way / All infrastructure entities",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE]
+    },
+    "linksWithTimeout": {
+        "name": "Links with timeout",
+        "calculation": "Links with a specified timeout / All links",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT]
+    },
+    "deploymentsWithRestart": {
+        "name": "Deployments with restart",
+        "calculation": "DeploymentMappings with configured restart / All deployment mappings",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE]
+    },
+    "ratioOfDocumentedEndpoints": {
+        "name": "Ratio of documented endpoints",
+        "calculation": "Endpoints documented / All endpoints",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE]
     }
 } satisfies { [measureKey: string]: MeasureSpec }
 
