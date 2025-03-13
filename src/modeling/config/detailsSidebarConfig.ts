@@ -808,55 +808,6 @@ const EntityDetailsConfig: {
                     minPath: "",
                     min: ""
                 }
-            },
-            {
-                providedFeature: "allow_access_to",
-                contentType: PropertyContent.MULTI_SELECT,
-                label: "Accounts allowed to call this endpoint:",
-                helpText: "",
-                inputProperties: {
-                    disabled: false,
-                    required: false,
-                    checked: false,
-                    selected: false,
-                    readonly: false
-                },
-                attributes: {
-                    svgRepresentation: "",
-                    buttonText: "Edit allowed accounts",
-                    buttonIconClass: "fa-solid fa-pencil",
-                    dialogMetaData: {
-                        dialogSize: DialogSize.LARGE,
-                        header: {
-                            iconClass: "fa-regular fa-id-card",
-                            svgRepresentation: "",
-                            text: "Allowed accounts: "
-                        },
-                        footer: {
-                            showCancelButton: true,
-                            cancelButtonText: "Cancel",
-                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
-                        }
-                    },
-                    dialogInfo: `Check all accounts that are allowed to call this endpoint. If no account is selected, anybody is allowed to call this endpoint. Your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your selection, all your changes will be lost.`,
-                    tableColumnHeaders: [
-                        {
-                            text: "Account"
-                        },
-                        {
-                            text: "allowed"
-                        },
-                    ]
-                },
-                provideEnterButton: false,
-                show: true,
-                jointJsConfig: {
-                    propertyType: "customProperty",
-                    modelPath: "entity/properties/allow_access_to",
-                    defaultPropPath: "",
-                    minPath: "",
-                    min: ""
-                },
             }
         ])
     },
@@ -1726,6 +1677,55 @@ const EntityRelationsConfig: {
                 }
             },
             {
+                providedFeature: "allow_access_to",
+                contentType: PropertyContent.MULTI_SELECT,
+                label: "Accounts allowed to call this endpoint:",
+                helpText: "",
+                inputProperties: {
+                    disabled: false,
+                    required: false,
+                    checked: false,
+                    selected: false,
+                    readonly: false
+                },
+                attributes: {
+                    svgRepresentation: "",
+                    buttonText: "Edit allowed accounts",
+                    buttonIconClass: "fa-solid fa-pencil",
+                    dialogMetaData: {
+                        dialogSize: DialogSize.LARGE,
+                        header: {
+                            iconClass: "fa-regular fa-id-card",
+                            svgRepresentation: "",
+                            text: "Allowed accounts: "
+                        },
+                        footer: {
+                            showCancelButton: true,
+                            cancelButtonText: "Cancel",
+                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
+                        }
+                    },
+                    dialogInfo: `Check all accounts that are allowed to call this endpoint. If no account is selected, anybody is allowed to call this endpoint. Your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your selection, all your changes will be lost.`,
+                    tableColumnHeaders: [
+                        {
+                            text: "Account"
+                        },
+                        {
+                            text: "allowed"
+                        },
+                    ]
+                },
+                provideEnterButton: false,
+                show: true,
+                jointJsConfig: {
+                    propertyType: "relation",
+                    modelPath: "entity/relations/allow_access_to",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
+            },
+            {
                 providedFeature: "documentedBy",
                 contentType: PropertyContent.MULTI_SELECT,
                 label: "Documented by:",
@@ -1838,6 +1838,55 @@ const EntityRelationsConfig: {
                     minPath: "",
                     min: ""
                 }
+            },
+            {
+                providedFeature: "allow_access_to",
+                contentType: PropertyContent.MULTI_SELECT,
+                label: "Accounts allowed to call this endpoint:",
+                helpText: "",
+                inputProperties: {
+                    disabled: false,
+                    required: false,
+                    checked: false,
+                    selected: false,
+                    readonly: false
+                },
+                attributes: {
+                    svgRepresentation: "",
+                    buttonText: "Edit allowed accounts",
+                    buttonIconClass: "fa-solid fa-pencil",
+                    dialogMetaData: {
+                        dialogSize: DialogSize.LARGE,
+                        header: {
+                            iconClass: "fa-regular fa-id-card",
+                            svgRepresentation: "",
+                            text: "Allowed accounts: "
+                        },
+                        footer: {
+                            showCancelButton: true,
+                            cancelButtonText: "Cancel",
+                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
+                        }
+                    },
+                    dialogInfo: `Check all accounts that are allowed to call this endpoint. If no account is selected, anybody is allowed to call this endpoint. Your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your selection, all your changes will be lost.`,
+                    tableColumnHeaders: [
+                        {
+                            text: "Account"
+                        },
+                        {
+                            text: "allowed"
+                        },
+                    ]
+                },
+                provideEnterButton: false,
+                show: true,
+                jointJsConfig: {
+                    propertyType: "relation",
+                    modelPath: "entity/relations/allow_access_to",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
             },
             {
                 providedFeature: "documentedBy",

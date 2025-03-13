@@ -15,7 +15,7 @@ const ENDPOINT_TOSCA_EQUIVALENT = cna_modeling_profile.node_types[ENDPOINT_TOSCA
  */
 
 function getEndpointProperties(): EntityProperty[] {
-    let parsed = parseProperties(ENDPOINT_TOSCA_EQUIVALENT.properties).concat(mergeAllCapabilitiesProperties(parseCapabilitiesProperties(ENDPOINT_TOSCA_EQUIVALENT.capabilities))).filter(property => property.getKey !== "documented_by");
+    let parsed = parseProperties(ENDPOINT_TOSCA_EQUIVALENT.properties).concat(mergeAllCapabilitiesProperties(parseCapabilitiesProperties(ENDPOINT_TOSCA_EQUIVALENT.capabilities))).filter(property => !["allow_access_to", "documented_by"].includes(property.getKey));
 
     for (const prop of parsed) {
         switch (prop.getKey) {
@@ -67,6 +67,8 @@ class Endpoint {
     #metaData: MetaData;
 
     #dataAggregateEntities = new Array<{ data: DataAggregate, relation: RelationToDataAggregate }>();
+
+    #allowedAccounts = new Array<string>(); // account ids
 
     #documented_by = new Array<string>(); // artifact keys
 
@@ -124,6 +126,25 @@ class Endpoint {
 
     addDataAggregateEntity(dataEntityToAdd: DataAggregate, relation: RelationToDataAggregate) {
         this.#dataAggregateEntities.push({ data: dataEntityToAdd, relation });
+    }
+
+    get getAllowedAccounts() {
+        return this.#allowedAccounts;
+    }
+
+    set setAllowedAccounts(accountIds: string[]) {
+        this.#allowedAccounts = accountIds;
+    }
+
+    addAllowedAccount(accountId: string) {
+        this.#allowedAccounts.push(accountId);
+    }
+
+    removeAllowedAccount(accountId: string) {
+        let index = this.#allowedAccounts.indexOf(accountId);
+        if (index !== -1) {
+            this.#allowedAccounts.splice(index, 1);
+        }
     }
 
     get getDocumentedBy() {

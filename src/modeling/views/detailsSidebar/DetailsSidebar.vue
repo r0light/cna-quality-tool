@@ -1110,18 +1110,6 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                         selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, toObject(propertyOption.value as any[]), { rewrite: true });
                     }
                     break;
-                case EntityTypes.ENDPOINT:
-                case EntityTypes.EXTERNAL_ENDPOINT:
-                    if (propertyOption.providedFeature === "allow_access_to") {
-                        let allowedAccounts = [];
-                        propertyOption.tableRows.forEach(account => {
-                            if (account.columns["allowed"]["checked"]) {
-                                allowedAccounts.push(account.columns["allowed"]["id"]);
-                            }
-                        })
-                        selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, allowedAccounts, { rewrite: true });
-                    }
-                    break;
                 case EntityTypes.COMPONENT:
                 case EntityTypes.SERVICE:
                 case EntityTypes.BACKING_SERVICE:
@@ -1193,6 +1181,14 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                             .map(row => row.columns["included"]["id"]);
                         selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, selectedDataAggregateIDs, { rewrite: true });
                         continue;
+                    } else if (propertyOption.providedFeature === "allow_access_to") {
+                        let allowedAccounts = [];
+                        propertyOption.tableRows.forEach(account => {
+                            if (account.columns["allowed"]["checked"]) {
+                                allowedAccounts.push(account.columns["allowed"]["id"]);
+                            }
+                        })
+                        selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, allowedAccounts, { rewrite: true });
                     } else if (propertyOption.providedFeature === "documentedBy") {
                         let documentingArtifactIds = [];
                         propertyOption.tableRows.forEach(artifact => {

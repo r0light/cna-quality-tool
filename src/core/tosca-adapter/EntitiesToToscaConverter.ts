@@ -612,7 +612,6 @@ class EntitiesToToscaConverter {
             for (const [key, artifact] of component.getArtifacts.entries()) {
                 //TODO include only keys with a value
                 template.artifacts[key] = artifact.getAsSimpleObject("");
-                console.log(template.artifacts[key]);
             }
         }
 
@@ -636,6 +635,7 @@ class EntitiesToToscaConverter {
             }
         })
 
+        template.properties.allow_access_to = endpoint.getAllowedAccounts; 
         template.properties.documented_by = endpoint.getDocumentedBy; 
 
         return template;

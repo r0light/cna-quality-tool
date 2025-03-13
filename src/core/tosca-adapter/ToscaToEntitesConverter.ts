@@ -261,6 +261,9 @@ class ToscaToEntitesConverter {
                 if (node.properties) {
                     for (const [key, value] of Object.entries(node.properties)) {
                         switch (key) {
+                            case "allow_access_to":
+                                // ignore, because it is set customly
+                                break;
                             case "documented_by":
                                 // ignore, because it is set customly
                                 break;
@@ -306,6 +309,10 @@ class ToscaToEntitesConverter {
                     }
                 }
 
+                if (node.properties && node.properties.allow_access_to) {
+                    endpoint.setAllowedAccounts = node.properties.allow_access_to;
+                }
+
                 if (node.properties && node.properties.documented_by) {
                     endpoint.setDocumentedBy = node.properties.documented_by;
                 }
@@ -315,6 +322,9 @@ class ToscaToEntitesConverter {
                 if (node.properties) {
                     for (const [key, value] of Object.entries(node.properties)) {
                         switch (key) {
+                            case "allow_access_to":
+                                // ignore, because it is set customly
+                                break;
                             case "documented_by":
                                 // ignore, because it is set customly
                                 break;
@@ -357,6 +367,10 @@ class ToscaToEntitesConverter {
                             }
                         }
                     }
+                }
+
+                if (node.properties && node.properties.allow_access_to) {
+                    externalEndpoint.setAllowedAccounts = node.properties.allow_access_to;
                 }
 
                 if (node.properties && node.properties.documented_by) {

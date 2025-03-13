@@ -793,6 +793,9 @@ class SystemEntityManager {
 
             }
         }
+        if (graphElement.prop("entity/relations/allow_access_to")) {
+            endpointEntity.setAllowedAccounts = graphElement.prop("entity/relations/allow_access_to");
+        }
         if (graphElement.prop("entity/relations/documented_by")) {
             endpointEntity.setDocumentedBy = graphElement.prop("entity/relations/documented_by");
         }
@@ -1543,9 +1546,12 @@ class SystemEntityManager {
                 return parent.getEmbeddedCells().find(cell => cell.prop("entity/assignedFamily") === usedData.data.getName).id;
             }));
         }
+        if (endpoint.getAllowedAccounts) {
+            newEndpoint.prop("entity/relations/allow_access_to", endpoint.getAllowedAccounts);
+         }
 
         if (endpoint.getDocumentedBy) {
-           newEndpoint.prop("entity/relations/documented_by", endpoint.getDocumentedBy)
+           newEndpoint.prop("entity/relations/documented_by", endpoint.getDocumentedBy);
         }
 
         return newEndpoint;
