@@ -45,7 +45,7 @@ export const entities: {[key in ENTITIES]: EntitySpec}  = {
         "description": "An abstract entity for representing distinguishable executable parts of the system that provide certain functionalities. It can for example be a service or a certain cloud resource. Regarding its granularity, it should, generally speaking, correspond to something that can be run as an OS process.",
         "relation": {"type": "part-of", "target": ENTITIES.SYSTEM},
         "symbol": "C",
-        "formal": `\tC := (id,name,props,providedEndpoints,artifacts,RDA,RBD,RN,externalIngressProxiedBy,ingressProxiedBy,egressProxiedBy,addressResolutionBy)
+        "formal": `\tC := (id,name,props,providedEndpoints,artifacts,RDA,RBD,RN,externalIngressProxiedBy,ingressProxiedBy,egressProxiedBy,addressResolutionBy,authenticationBy)
         props<sub>C</sub> := {${getComponentProperties().map(property => property.getKey).join(",")}}
         providedEndpoints ⊆ E
         artifacts ⊆ A
@@ -55,7 +55,8 @@ export const entities: {[key in ENTITIES]: EntitySpec}  = {
         externalIngressProxiedBy ∈ PBS
         ingressProxiedBy ∈ PBS
         egressProxiedBy ∈ PBS
-        addressResolutionBy ∈ BS ∪ PBS ∪ I ∪ N`
+        addressResolutionBy ∈ BS ∪ PBS ∪ I ∪ N
+        authenticationBy ∈ BS`
         },
     "service": {
         "name": "Service",
@@ -102,9 +103,10 @@ export const entities: {[key in ENTITIES]: EntitySpec}  = {
         "description": "A communication endpoint, for example a REST endpoint, message producer/listener.",
         "relation": {"type": "part-of", "target": ENTITIES.COMPONENT},
         "symbol": "E",
-        "formal": `\tE := (id,name,props,RDA)
+        "formal": `\tE := (id,name,props,RDA,documentedBy)
         props<sub>E</sub> := {${getEndpointProperties().map(property => property.getKey).join(",")}}
-        RDA ⊆ E ⨯ DA`
+        RDA ⊆ E ⨯ DA
+        documentedBy ⊆ A`
     },
     "externalEndpoint": {
         "name": "External Endpoint",
