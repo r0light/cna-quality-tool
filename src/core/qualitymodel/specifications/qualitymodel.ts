@@ -2123,6 +2123,12 @@ const productFactorEvaluations = [
         "evaluation": "addressingAbstraction",
         "reasoning": "The more communication uses abstract addresses for communication partners, the higher is the adressing abstraction. Usage of abstract addresses can be measured by the usage of service discovery mechanisms."
     }
+    ,{
+        "targetFactor": "dataEncryptionInTransit",
+        "targetEntities": [ENTITIES.LINK, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+        "evaluation": "dataEncryptionInTransit",
+        "reasoning": "The more communication is encrypted, the better confidential data is protected. It can be measured by links targeting secure endpoints."
+    }
 ] satisfies ProductFactorEvaluationSpec[]
 
 type QualityAspectEvaluationSpec = {
@@ -2153,6 +2159,13 @@ const qualityAspectEvaluations = [
         "targetAspect": "analyzability",
         "evaluation": "aggregateImpacts",
         "reasoning": "The analyzability of an application can be influenced in different ways and depends on the specific goal for which a software is analyzed (debugging, refactoring, extension...). The impacts on this aspect are therefore difficult to aggregate. While this evaluation aims to provide an overview, individual impacts nevertheless need to be reviewed separately.",
+        "precondition": "at-least-one",
+        "impactsInterpretation": "median"
+    },
+    {
+        "targetAspect": "confidentiality",
+        "evaluation": "aggregateImpacts",
+        "reasoning": "The confidentiality of an application depends on the confidentatiality of data both at rest (stored in an environemnt or a database) and it transit (when requests and responses are send via the network.) ",
         "precondition": "at-least-one",
         "impactsInterpretation": "median"
     }

@@ -3,7 +3,7 @@ import { Endpoint, Service, System } from "@/core/entities"
 import { expect, test } from "vitest";
 
 test("searchComponentOfEndpointShouldReturnCorrectEntity", () => {
-    let systemToTest = new System("testSystem");
+    let systemToTest = new System("sys1", "testSystem");
 
     let serviceA = new Service("s1", "service a", getEmptyMetaData());
 

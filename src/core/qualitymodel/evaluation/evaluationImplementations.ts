@@ -1,6 +1,7 @@
-import { AspectEvaluationFunction, FactorEvaluationFunction, FactorEvaluationParameters, ImpactWeight, impactWeightNumericMapping, interpretNumericalResultAsFactorEvaluation, interpretNumericValueAsOutcome, linearNumericalMapping } from "./Evaluation";
+import { AspectEvaluationFunction, exponentialNumericalMapping, FactorEvaluationFunction, FactorEvaluationParameters, ImpactWeight, impactWeightNumericMapping, interpretNumericalResultAsFactorEvaluation, interpretNumericValueAsOutcome, linearNumericalMapping } from "./Evaluation";
 import { ProductFactorKey } from "../specifications/qualitymodel";
 import { param } from "jquery";
+import { average } from "./measure-implementations/general-functions";
 
 const mean: (list: number[]) => number = list => {
     return list.reduce((e1, e2) => e1 + e2, 0) / list.length
@@ -171,6 +172,21 @@ const productFactorEvaluationImplementation: {
             return linearNumericalMapping(serviceDiscoveryUsage);
         } else {
             throw new Error(`dataReplicationAlongRequestTrace is of type ${typeof serviceDiscoveryUsage}, but should be of type number`);
+        }
+    },
+    "dataEncryptionInTransit": (parameters) => {
+        let securedExternalEndpoints = parameters.calculatedMeasures.get("ratioOfExternalEndpointsSupportingTls").value;
+
+        let securedLinks = parameters.calculatedMeasures.get("ratioOfSecuredLinks").value;
+
+        if (securedLinks === "n/a") {
+            return "n/a";
+        }
+
+        if (securedExternalEndpoints === "n/a") {
+            return linearNumericalMapping(securedLinks as number);
+        } else {
+            return linearNumericalMapping(average([securedExternalEndpoints as number,securedLinks as number]));
         }
     }
 };

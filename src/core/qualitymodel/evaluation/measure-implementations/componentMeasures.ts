@@ -957,7 +957,6 @@ export const standardizedDeployments: Calculation = (parameters: CalculationPara
 
     let standardizedDeploymentUnit = relevantDeploymentMappings.filter(([deplyomentMappingKey, deploymentMapping]) => {
         let deploymentUnit = deploymentMapping.getProperty("deployment_unit").value;
-        console.log(deploymentUnit);
         if (deploymentUnit) {
             return artifacts.entries().find(([artifactKey, artifact]) => {
                 return artifact.getType() === deploymentUnit && artifact.getProperty("based_on_standard") && artifact.getProperty("based_on_standard").value !== "none";
@@ -986,7 +985,6 @@ export const selfContainedDeployments: Calculation = (parameters: CalculationPar
 
     let selfContainedDeploymentUnit = relevantDeploymentMappings.filter(([deplyomentMappingKey, deploymentMapping]) => {
         let deploymentUnit = deploymentMapping.getProperty("deployment_unit").value;
-        console.log(deploymentUnit);
         if (deploymentUnit) {
             return artifacts.entries().find(([artifactKey, artifact]) => {
                 return artifact.getType() === deploymentUnit && artifact.getProperty("self_contained") && artifact.getProperty("self_contained").value;

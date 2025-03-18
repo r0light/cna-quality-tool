@@ -1,4 +1,4 @@
-const PROTOCOLS_SUPPORTING_TLS = ["https", "sftp"];
+const PROTOCOLS_SUPPORTING_TLS = ["HTTPS", "https", "SFTP", "sftp"];
 
 const QUERY_ENDPOINT_KIND = "query";
 const COMMAND_ENDPOINT_KIND = "command";
