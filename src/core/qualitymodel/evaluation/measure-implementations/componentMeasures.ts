@@ -569,15 +569,15 @@ export const secretsExternalization: Calculation = (parameters: CalculationParam
     let notStoredSecrets = secrets.filter(secret => DATA_USAGE_RELATION_USAGE.includes(secret.relation.getProperty("usage_relation").value));
     let notStoredSecretIds = notStoredSecrets.map(secret => secret.backingData.getId);
 
-    let allConfigServices = [...parameters.system.getComponentEntities.entries()].filter(([componentId, component]) => {
-        return component.constructor.name === BackingService.name && component.getProperty("providedFunctionality").value === "config";
+    let allVaultServices = [...parameters.system.getComponentEntities.entries()].filter(([componentId, component]) => {
+        return component.constructor.name === BackingService.name && component.getProperty("providedFunctionality").value === "vault";
     })
 
     let allInfrastructure = [...parameters.system.getInfrastructureEntities.entries()];
 
     let secretsStoredOutsideComponent = new Set();
 
-    for (const [configServiceId, configService] of allConfigServices) {
+    for (const [configServiceId, configService] of allVaultServices) {
         let secrets = configService.getBackingDataEntities.filter(backingData => { return backingData.backingData.getProperty("kind").value === BACKING_DATA_SECRET_KIND });
         secrets.forEach(secret => {
             if (notStoredSecretIds.includes(secret.backingData.getId) && DATA_USAGE_RELATION_PERSISTENCE.includes(secret.relation.getProperty("usage_relation").value)) {

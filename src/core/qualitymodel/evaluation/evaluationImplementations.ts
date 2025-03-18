@@ -191,6 +191,14 @@ const productFactorEvaluationImplementation: {
         }
         return linearNumericalMapping(securedLinks as number);
     },
+    "isolatedSecrets": (parameters) => {
+        let externalizedSecrets = parameters.calculatedMeasures.get("secretsExternalization").value;
+
+        if (externalizedSecrets === "n/a") {
+            return "n/a";
+        }
+        return linearNumericalMapping(externalizedSecrets as number);
+    },
 };
 
 

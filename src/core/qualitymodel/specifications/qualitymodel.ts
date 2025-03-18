@@ -2134,6 +2134,12 @@ const productFactorEvaluations = [
         "targetEntities": [ENTITIES.LINK],
         "evaluation": "linkDataEncryptionInTransit",
         "reasoning": "The more communication is encrypted, the better confidential data is protected. It can be measured by links targeting secure endpoints."
+    },
+    {
+        "targetFactor": "isolatedSecrets",
+        "targetEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+        "evaluation": "isolatedSecrets",
+        "reasoning": "The more secrets are stored outside of the components which use them, the more secrets are isolated."
     }
 ] satisfies ProductFactorEvaluationSpec[]
 
