@@ -2122,11 +2122,17 @@ const productFactorEvaluations = [
         "targetEntities": [ENTITIES.LINK, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
         "evaluation": "addressingAbstraction",
         "reasoning": "The more communication uses abstract addresses for communication partners, the higher is the adressing abstraction. Usage of abstract addresses can be measured by the usage of service discovery mechanisms."
-    }
-    ,{
+    },
+    {
         "targetFactor": "dataEncryptionInTransit",
-        "targetEntities": [ENTITIES.LINK, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+        "targetEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
         "evaluation": "dataEncryptionInTransit",
+        "reasoning": "The more communication is encrypted, the better confidential data is protected. It can be measured by links targeting secure endpoints."
+    },
+    {
+        "targetFactor": "dataEncryptionInTransit",
+        "targetEntities": [ENTITIES.LINK],
+        "evaluation": "linkDataEncryptionInTransit",
         "reasoning": "The more communication is encrypted, the better confidential data is protected. It can be measured by links targeting secure endpoints."
     }
 ] satisfies ProductFactorEvaluationSpec[]

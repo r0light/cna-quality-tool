@@ -176,19 +176,21 @@ const productFactorEvaluationImplementation: {
     },
     "dataEncryptionInTransit": (parameters) => {
         let securedExternalEndpoints = parameters.calculatedMeasures.get("ratioOfExternalEndpointsSupportingTls").value;
+        let securedLinks = parameters.calculatedMeasures.get("ratioOfSecuredLinks").value;
 
+        if (securedLinks === "n/a" || securedExternalEndpoints === "n/a") {
+            return "n/a";
+        }
+        return linearNumericalMapping(average([securedExternalEndpoints as number, securedLinks as number]));
+    },
+    "linkDataEncryptionInTransit": (parameters) => {
         let securedLinks = parameters.calculatedMeasures.get("ratioOfSecuredLinks").value;
 
         if (securedLinks === "n/a") {
             return "n/a";
         }
-
-        if (securedExternalEndpoints === "n/a") {
-            return linearNumericalMapping(securedLinks as number);
-        } else {
-            return linearNumericalMapping(average([securedExternalEndpoints as number,securedLinks as number]));
-        }
-    }
+        return linearNumericalMapping(securedLinks as number);
+    },
 };
 
 
