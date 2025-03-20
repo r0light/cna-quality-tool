@@ -1532,7 +1532,7 @@ test("secretsExternalization", () => {
     storageServiceA.addEndpoint(endpointSA);
 
     let backingService = new BackingService("b1", "backing service", getEmptyMetaData());
-    backingService.setPropertyValue("providedFunctionality", "config");
+    backingService.setPropertyValue("providedFunctionality", "vault");
 
     let usageBSA = new RelationToBackingData("r1", getEmptyMetaData());
     usageBSA.setPropertyValue("usage_relation", "persistence");

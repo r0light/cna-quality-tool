@@ -1280,7 +1280,7 @@ test("secretsExternalization", () => {
     serviceA.addBackingDataEntity(secretC, relationAtoC);
 
     let backingService = new BackingService("bs1", "backing service 1", getEmptyMetaData());
-    backingService.setPropertyValue("providedFunctionality", "config");
+    backingService.setPropertyValue("providedFunctionality", "vault");
     let relationBStoA = new RelationToBackingData("r4", getEmptyMetaData());
     relationBStoA.setPropertyValue("usage_relation", DATA_USAGE_RELATION_PERSISTENCE[0]);
     backingService.addBackingDataEntity(secretA, relationBStoA);

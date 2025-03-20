@@ -563,22 +563,19 @@ export const secretsExternalization: Calculation = (parameters: CalculationParam
     let secrets = parameters.entity.getBackingDataEntities.filter(backingData => backingData.backingData.getProperty("kind").value === BACKING_DATA_SECRET_KIND);
 
     if (secrets.length === 0) {
-        return 0;
+        return "n/a";
     }
 
     let notStoredSecrets = secrets.filter(secret => DATA_USAGE_RELATION_USAGE.includes(secret.relation.getProperty("usage_relation").value));
     let notStoredSecretIds = notStoredSecrets.map(secret => secret.backingData.getId);
 
-    let allVaultServices = [...parameters.system.getComponentEntities.entries()].filter(([componentId, component]) => {
-        return component.constructor.name === BackingService.name && component.getProperty("providedFunctionality").value === "vault";
-    })
-
+    let allOtherComponents = parameters.system.getComponentEntities.entries();
     let allInfrastructure = [...parameters.system.getInfrastructureEntities.entries()];
 
     let secretsStoredOutsideComponent = new Set();
 
-    for (const [configServiceId, configService] of allVaultServices) {
-        let secrets = configService.getBackingDataEntities.filter(backingData => { return backingData.backingData.getProperty("kind").value === BACKING_DATA_SECRET_KIND });
+    for (const [otherServiceId, otherService] of allOtherComponents) {
+        let secrets = otherService.getBackingDataEntities.filter(backingData => { return backingData.backingData.getProperty("kind").value === BACKING_DATA_SECRET_KIND });
         secrets.forEach(secret => {
             if (notStoredSecretIds.includes(secret.backingData.getId) && DATA_USAGE_RELATION_PERSISTENCE.includes(secret.relation.getProperty("usage_relation").value)) {
                 secretsStoredOutsideComponent.add(secret.backingData.getId);
@@ -599,27 +596,23 @@ export const secretsExternalization: Calculation = (parameters: CalculationParam
 }
 
 export const configurationExternalization: Calculation = (parameters: CalculationParameters<Component>) => {
-
     let configurations = parameters.entity.getBackingDataEntities.filter(backingData => backingData.backingData.getProperty("kind").value === BACKING_DATA_CONFIG_KIND);
 
     if (configurations.length === 0) {
-        return 0;
+        return "n/a";
     }
 
     let notStoredConfigs = configurations.filter(config => DATA_USAGE_RELATION_USAGE.includes(config.relation.getProperty("usage_relation").value));
     let notStoredConfigIds = notStoredConfigs.map(config => config.backingData.getId);
 
-    let allConfigServices = [...parameters.system.getComponentEntities.entries()].filter(([componentId, component]) => {
-        return component.constructor.name === BackingService.name && component.getProperty("providedFunctionality").value === "config";
-    })
-
+    let allOtherComponents = parameters.system.getComponentEntities.entries();
     let allInfrastructure = [...parameters.system.getInfrastructureEntities.entries()];
 
     let configsStoredOutsideComponent = new Set();
 
-    for (const [configServiceId, configService] of allConfigServices) {
-        let secrets = configService.getBackingDataEntities.filter(backingData => { return backingData.backingData.getProperty("kind").value === BACKING_DATA_CONFIG_KIND });
-        secrets.forEach(config => {
+    for (const [otherServiceId, otherService] of allOtherComponents) {
+        let configs = otherService.getBackingDataEntities.filter(backingData => { return backingData.backingData.getProperty("kind").value === BACKING_DATA_CONFIG_KIND });
+        configs.forEach(config => {
             if (notStoredConfigIds.includes(config.backingData.getId) && DATA_USAGE_RELATION_PERSISTENCE.includes(config.relation.getProperty("usage_relation").value)) {
                 configsStoredOutsideComponent.add(config.backingData.getId);
             }
@@ -627,8 +620,8 @@ export const configurationExternalization: Calculation = (parameters: Calculatio
     }
 
     for (const [infrastructureId, infrastructure] of allInfrastructure) {
-        let secrets = infrastructure.getBackingDataEntities.filter(backingData => { return backingData.backingData.getProperty("kind").value === BACKING_DATA_CONFIG_KIND });
-        secrets.forEach(config => {
+        let configs = infrastructure.getBackingDataEntities.filter(backingData => { return backingData.backingData.getProperty("kind").value === BACKING_DATA_CONFIG_KIND });
+        configs.forEach(config => {
             if (notStoredConfigIds.includes(config.backingData.getId) && DATA_USAGE_RELATION_PERSISTENCE.includes(config.relation.getProperty("usage_relation").value)) {
                 configsStoredOutsideComponent.add(config.backingData.getId);
             }

@@ -1115,15 +1115,7 @@ export const eventSourcingUtilizationMetric: Calculation = (parameters: Calculat
 }
 
 export const configurationExternalization: Calculation = (parameters: CalculationParameters<System>) => {
-
-    let allNonConfigServices = [...parameters.entity.getComponentEntities.entries()].filter(([componentId, component]) => {
-        return component.constructor.name !== BackingService.name || component.getProperty("providedFunctionality").value !== "config";
-    })
-
-    let allConfigServices = [...parameters.entity.getComponentEntities.entries()].filter(([componentId, component]) => {
-        return component.constructor.name === BackingService.name && component.getProperty("providedFunctionality").value === "config";
-    })
-
+    let allComponents = [...parameters.entity.getComponentEntities.entries()];
     let allInfrastructure = [...parameters.entity.getInfrastructureEntities.entries()];
 
     let configurationRelations: Map<string, {
@@ -1135,32 +1127,21 @@ export const configurationExternalization: Calculation = (parameters: Calculatio
         .filter(([backingDataId, backingData]) => { return backingData.getProperty("kind").value === BACKING_DATA_CONFIG_KIND })
         .forEach(([configId, config]) => { configurationRelations.set(configId, { "usedBy": [], "persistedBy": [] }) });
 
-    for (const [componentId, component] of allNonConfigServices) {
-        let configurations = component.getBackingDataEntities.filter(backingData => { return backingData.backingData.getProperty("kind").value === BACKING_DATA_CONFIG_KIND });
-        configurations.forEach(config => {
-            // set usedBy in any case
-            configurationRelations.get(config.backingData.getId).usedBy.push(componentId);
+    for (const [componentId, component] of allComponents) {
+        let configs = component.getBackingDataEntities.filter(backingData => { return backingData.backingData.getProperty("kind").value === BACKING_DATA_CONFIG_KIND });
+        configs.forEach(config => {
+            if (DATA_USAGE_RELATION_USAGE.includes(config.relation.getProperty("usage_relation").value)) {
+                configurationRelations.get(config.backingData.getId).usedBy.push(componentId);
+            }
             if (DATA_USAGE_RELATION_PERSISTENCE.includes(config.relation.getProperty("usage_relation").value)) {
                 configurationRelations.get(config.backingData.getId).persistedBy.push(componentId);
             }
         })
     }
 
-    for (const [configServiceId, configService] of allConfigServices) {
-        let configurations = configService.getBackingDataEntities.filter(backingData => { return backingData.backingData.getProperty("kind").value === BACKING_DATA_CONFIG_KIND });
-        configurations.forEach(config => {
-            if (DATA_USAGE_RELATION_USAGE.includes(config.relation.getProperty("usage_relation").value)) {
-                configurationRelations.get(config.backingData.getId).usedBy.push(configServiceId);
-            }
-            if (DATA_USAGE_RELATION_PERSISTENCE.includes(config.relation.getProperty("usage_relation").value)) {
-                configurationRelations.get(config.backingData.getId).persistedBy.push(configServiceId);
-            }
-        })
-    }
-
     for (const [infrastructureId, infrastructure] of allInfrastructure) {
-        let configurations = infrastructure.getBackingDataEntities.filter(backingData => { return backingData.backingData.getProperty("kind").value === BACKING_DATA_CONFIG_KIND });
-        configurations.forEach(config => {
+        let configs = infrastructure.getBackingDataEntities.filter(backingData => { return backingData.backingData.getProperty("kind").value === BACKING_DATA_CONFIG_KIND });
+        configs.forEach(config => {
             if (DATA_USAGE_RELATION_USAGE.includes(config.relation.getProperty("usage_relation").value)) {
                 configurationRelations.get(config.backingData.getId).usedBy.push(infrastructureId);
             }
@@ -1173,19 +1154,23 @@ export const configurationExternalization: Calculation = (parameters: Calculatio
     let nonExternalizedConfigurations = 0;
     let externalizedConfigurations = 0;
     [...configurationRelations.entries()].forEach(([configId, relations]) => {
-        for (const usingComponent of relations.usedBy) {
-            if (!relations.persistedBy.includes(usingComponent) && relations.persistedBy.length > 0) {
-                externalizedConfigurations++;
+
+        if (relations.persistedBy.length > 0) {
+            if (relations.usedBy.length === 0) {
+                nonExternalizedConfigurations++; 
             } else {
-                nonExternalizedConfigurations++;
+                externalizedConfigurations += relations.usedBy.length;
             }
+            nonExternalizedConfigurations += relations.persistedBy.length - 1;
         }
+
     })
 
     if (nonExternalizedConfigurations + externalizedConfigurations === 0) {
         return 0;
     }
     return externalizedConfigurations / (nonExternalizedConfigurations + externalizedConfigurations);
+
 }
 
 export const ratioOfRequestTracesThroughGateway: Calculation = (parameters: CalculationParameters<System>) => {
@@ -1566,14 +1551,7 @@ export const serviceMeshUsage: Calculation = (parameters: CalculationParameters<
 }
 
 export const secretsExternalization: Calculation = (parameters: CalculationParameters<System>) => {
-    let allNonConfigServices = [...parameters.entity.getComponentEntities.entries()].filter(([componentId, component]) => {
-        return component.constructor.name !== BackingService.name || component.getProperty("providedFunctionality").value !== "vault";
-    })
-
-    let allVaultServices = [...parameters.entity.getComponentEntities.entries()].filter(([componentId, component]) => {
-        return component.constructor.name === BackingService.name && component.getProperty("providedFunctionality").value === "vault";
-    })
-
+    let allComponents = [...parameters.entity.getComponentEntities.entries()];
     let allInfrastructure = [...parameters.entity.getInfrastructureEntities.entries()];
 
     let secretRelations: Map<string, {
@@ -1585,25 +1563,14 @@ export const secretsExternalization: Calculation = (parameters: CalculationParam
         .filter(([backingDataId, backingData]) => { return backingData.getProperty("kind").value === BACKING_DATA_SECRET_KIND })
         .forEach(([secretId, secret]) => { secretRelations.set(secretId, { "usedBy": [], "persistedBy": [] }) });
 
-    for (const [componentId, component] of allNonConfigServices) {
+    for (const [componentId, component] of allComponents) {
         let secrets = component.getBackingDataEntities.filter(backingData => { return backingData.backingData.getProperty("kind").value === BACKING_DATA_SECRET_KIND });
         secrets.forEach(secret => {
-            // set usedBy in any case
-            secretRelations.get(secret.backingData.getId).usedBy.push(componentId);
+            if (DATA_USAGE_RELATION_USAGE.includes(secret.relation.getProperty("usage_relation").value)) {
+                secretRelations.get(secret.backingData.getId).usedBy.push(componentId);
+            }
             if (DATA_USAGE_RELATION_PERSISTENCE.includes(secret.relation.getProperty("usage_relation").value)) {
                 secretRelations.get(secret.backingData.getId).persistedBy.push(componentId);
-            }
-        })
-    }
-
-    for (const [configServiceId, configService] of allVaultServices) {
-        let secrets = configService.getBackingDataEntities.filter(backingData => { return backingData.backingData.getProperty("kind").value === BACKING_DATA_SECRET_KIND });
-        secrets.forEach(secret => {
-            if (DATA_USAGE_RELATION_USAGE.includes(secret.relation.getProperty("usage_relation").value)) {
-                secretRelations.get(secret.backingData.getId).usedBy.push(configServiceId);
-            }
-            if (DATA_USAGE_RELATION_PERSISTENCE.includes(secret.relation.getProperty("usage_relation").value)) {
-                secretRelations.get(secret.backingData.getId).persistedBy.push(configServiceId);
             }
         })
     }
@@ -1623,13 +1590,16 @@ export const secretsExternalization: Calculation = (parameters: CalculationParam
     let nonExternalizedSecrets = 0;
     let externalizedSecrets = 0;
     [...secretRelations.entries()].forEach(([secretId, relations]) => {
-        for (const usingComponent of relations.usedBy) {
-            if (!relations.persistedBy.includes(usingComponent) && relations.persistedBy.length > 0) {
-                externalizedSecrets++;
+
+        if (relations.persistedBy.length > 0) {
+            if (relations.usedBy.length === 0) {
+                nonExternalizedSecrets++; 
             } else {
-                nonExternalizedSecrets++;
+                externalizedSecrets += relations.usedBy.length;
             }
+            nonExternalizedSecrets += relations.persistedBy.length - 1;
         }
+
     })
 
     if (nonExternalizedSecrets + externalizedSecrets === 0) {
@@ -1688,7 +1658,7 @@ export const suitablyReplicatedStatefulService: Calculation = (parameters: Calcu
             let replicatedService = allStatefulBackingServices.find(([id, service]) => {
                 return id == serviceId
             });
-            if (replicatedService[1].getProperty("replication_strategy").value !== "none" ) {
+            if (replicatedService[1].getProperty("replication_strategy").value !== "none") {
                 suitablyReplicated.add(serviceId);
             }
         }
@@ -1708,7 +1678,7 @@ export const ratioOfUniqueAccountUsage: Calculation = (parameters: CalculationPa
 
     let allComponents = parameters.entity.getComponentEntities;
 
-    for(const [componentId, component] of allComponents) {
+    for (const [componentId, component] of allComponents) {
 
         let account = component.getProperty("account").value;
         if (!account) {
@@ -1720,7 +1690,7 @@ export const ratioOfUniqueAccountUsage: Calculation = (parameters: CalculationPa
 
     let allInfrastructureInstances = parameters.entity.getInfrastructureEntities;
 
-    for(const [infrastructureId, infrastructure] of allInfrastructureInstances) {
+    for (const [infrastructureId, infrastructure] of allInfrastructureInstances) {
 
         let account = infrastructure.getProperty("account").value;
         if (!account) {
@@ -1766,15 +1736,15 @@ export const secretsStoredInVault: Calculation = (parameters: CalculationParamet
     let secretsStoredInVault: Set<string> = new Set();
     let secretsStoredElsewhere: Set<string> = new Set();
 
-    for (const [componentId, component] of allComponents ) {
+    for (const [componentId, component] of allComponents) {
         let secretsStoredInComponent = component.getBackingDataEntities
             .filter((backingData) => backingData.backingData.getProperty("kind").value === BACKING_DATA_SECRET_KIND && DATA_USAGE_RELATION_PERSISTENCE.includes(backingData.relation.getProperty("usage_relation").value))
             .map(backingData => backingData.backingData.getId);
 
-        if ( component.constructor.name === BackingService.name && VAULT_KIND.includes(component.getProperty("providedFunctionality").value)) {
+        if (component.constructor.name === BackingService.name && VAULT_KIND.includes(component.getProperty("providedFunctionality").value)) {
             secretsStoredInComponent.forEach(secretId => secretsStoredInVault.add(secretId));
         } else {
-            secretsStoredInComponent.forEach(secretId => secretsStoredElsewhere.add(secretId)); 
+            secretsStoredInComponent.forEach(secretId => secretsStoredElsewhere.add(secretId));
         }
 
     }
@@ -1793,7 +1763,7 @@ export const accessRestrictedToCallers: Calculation = (parameters: CalculationPa
 
     let accessRestrictedToCallersPerComponent = allComponents.map(([componentId, component]) => componentMeasureImplementations["accessRestrictedToCallers"]({ entity: component, system: parameters.system }));
 
-    let validValues = accessRestrictedToCallersPerComponent.filter(value => value !== "n/a"); 
+    let validValues = accessRestrictedToCallersPerComponent.filter(value => value !== "n/a");
 
     if (validValues.length === 0) {
         return "n/a"
@@ -1806,7 +1776,7 @@ export const accessRestrictedToCallers: Calculation = (parameters: CalculationPa
 export const ratioOfDelegatedAuthentication: Calculation = (parameters: CalculationParameters<System>) => {
 
     let allComponents = [...parameters.entity.getComponentEntities.entries()].filter(([componentId, component]) => {
-        return component.constructor.name !== BackingService.name || component.getProperty("providedFunctionality").value !== "authentication/authorization" 
+        return component.constructor.name !== BackingService.name || component.getProperty("providedFunctionality").value !== "authentication/authorization"
     })
 
     if (allComponents.length === 0) {
@@ -1882,7 +1852,7 @@ export const componentArtifactsSimilarity: Calculation = (parameters: Calculatio
 
     for (const [index, componentA] of allComponents.entries()) {
         if (index < allComponents.length - 1) {
-            for (const componentB of allComponents.slice(index+1)) {
+            for (const componentB of allComponents.slice(index + 1)) {
                 let artifactTypesA = new Set(componentA.getArtifacts.entries().map(([artifactKey, artifact]) => artifact.getType()));
                 let artifactTypesB = new Set(componentB.getArtifacts.entries().map(([artifactKey, artifact]) => artifact.getType()));
                 if (artifactTypesA.union(artifactTypesB).size === 0) {
@@ -1905,7 +1875,7 @@ export const infrastructureArtifactsSimilarity: Calculation = (parameters: Calcu
 
     for (const [index, infrastructureA] of allInfrastructure.entries()) {
         if (index < allInfrastructure.length - 1) {
-            for (const infrastructureB of allInfrastructure.slice(index+1)) {
+            for (const infrastructureB of allInfrastructure.slice(index + 1)) {
                 let artifactTypesA = new Set(infrastructureA.getArtifacts.entries().map(([artifactKey, artifact]) => artifact.getType()));
                 let artifactTypesB = new Set(infrastructureB.getArtifacts.entries().map(([artifactKey, artifact]) => artifact.getType()));
                 if (artifactTypesA.union(artifactTypesB).size === 0) {
@@ -1921,8 +1891,8 @@ export const infrastructureArtifactsSimilarity: Calculation = (parameters: Calcu
 }
 
 export const ratioOfAutomaticallyProvisionedInfrastructure: Calculation = (parameters: CalculationParameters<System>) => {
-    
-    let automatedProvisioning: number[] = parameters.entity.getInfrastructureEntities.values().map(infrastructure => infrastructureProvisionedAutomatically({entity: infrastructure, system: parameters.system}) as number).toArray();
+
+    let automatedProvisioning: number[] = parameters.entity.getInfrastructureEntities.values().map(infrastructure => infrastructureProvisionedAutomatically({ entity: infrastructure, system: parameters.system }) as number).toArray();
 
     return average(automatedProvisioning);
 }
@@ -1955,14 +1925,14 @@ export const ratioOfInfrastructureWithIaCArtifact: Calculation = (parameters: Ca
 
     let hasIaCArtifact = [];
     infrastructureEntities.forEach(([infrastructureKey, infrastructure]) => {
-        let artifacts = infrastructure.getArtifacts;  
-        let iacArtifact = infrastructure.getArtifacts.entries().find(([artifactKey, artifact]) => IAC_ARTIFACT_TYPE.includes(artifact.getType())); 
+        let artifacts = infrastructure.getArtifacts;
+        let iacArtifact = infrastructure.getArtifacts.entries().find(([artifactKey, artifact]) => IAC_ARTIFACT_TYPE.includes(artifact.getType()));
         if (iacArtifact) {
             hasIaCArtifact.push(infrastructureKey);
         }
     })
-    
-    return hasIaCArtifact.length / infrastructureEntities.length; 
+
+    return hasIaCArtifact.length / infrastructureEntities.length;
 }
 
 export const namespaceSeparation: Calculation = (parameters: CalculationParameters<System>) => {
@@ -1971,7 +1941,7 @@ export const namespaceSeparation: Calculation = (parameters: CalculationParamete
         return "n/a";
     }
 
-    let componentNamespaceSeparations = parameters.entity.getComponentEntities.entries().map(([componentKey, component]) => componentNamespaceSeparation({entity: component, system: parameters.system})).toArray() as number[];
+    let componentNamespaceSeparations = parameters.entity.getComponentEntities.entries().map(([componentKey, component]) => componentNamespaceSeparation({ entity: component, system: parameters.system })).toArray() as number[];
 
     return average(componentNamespaceSeparations);
 }
@@ -1984,7 +1954,7 @@ export const ratioOfFullyManagedInfrastructure: Calculation = (parameters: Calcu
         return "n/a";
     }
 
-    let fullyManaged = allInfrastructureInstances.map(([infrastructureKey, infrastructure]) =>  infrastructureIsFullyManaged({entity: infrastructure, system: parameters.system})) as number[];
+    let fullyManaged = allInfrastructureInstances.map(([infrastructureKey, infrastructure]) => infrastructureIsFullyManaged({ entity: infrastructure, system: parameters.system })) as number[];
 
     return average(fullyManaged);
 }
@@ -2084,7 +2054,7 @@ export const nonProviderSpecificInfrastructureArtifacts: Calculation = (paramete
     }
 
     let nonProviderSpecificArtifacts = allInfrastructure.entries().filter(([infrastructureKey, infrastructure]) => {
-        return infrastructureHasOnlyNonProviderSpecificArtifacts({entity: infrastructure, system: parameters.system}) === 1
+        return infrastructureHasOnlyNonProviderSpecificArtifacts({ entity: infrastructure, system: parameters.system }) === 1
     }).toArray();
 
     return nonProviderSpecificArtifacts.length / allInfrastructure.size;
@@ -2099,7 +2069,7 @@ export const nonProviderSpecificComponentArtifacts: Calculation = (parameters: C
     }
 
     let nonProviderSpecificArtifacts = allComponents.entries().filter(([componentKey, component]) => {
-        return componentHasOnlyNonProviderSpecificArtifacts({entity: component, system: parameters.system}) === 1
+        return componentHasOnlyNonProviderSpecificArtifacts({ entity: component, system: parameters.system }) === 1
     }).toArray();
 
     return nonProviderSpecificArtifacts.length / allComponents.size;
@@ -2118,15 +2088,15 @@ export const configurationStoredInConfigService: Calculation = (parameters: Calc
     let configsStoredInConfigService: Set<string> = new Set();
     let configsStoredElsewhere: Set<string> = new Set();
 
-    for (const [componentId, component] of allComponents ) {
+    for (const [componentId, component] of allComponents) {
         let configsStoredInComponent = component.getBackingDataEntities
             .filter((backingData) => backingData.backingData.getProperty("kind").value === BACKING_DATA_CONFIG_KIND && DATA_USAGE_RELATION_PERSISTENCE.includes(backingData.relation.getProperty("usage_relation").value))
             .map(backingData => backingData.backingData.getId);
 
-        if ( component.constructor.name === BackingService.name && CONFIG_SERVICE_KIND.includes(component.getProperty("providedFunctionality").value)) {
+        if (component.constructor.name === BackingService.name && CONFIG_SERVICE_KIND.includes(component.getProperty("providedFunctionality").value)) {
             configsStoredInComponent.forEach(secretId => configsStoredInConfigService.add(secretId));
         } else {
-            configsStoredInComponent.forEach(secretId => configsStoredElsewhere.add(secretId)); 
+            configsStoredInComponent.forEach(secretId => configsStoredElsewhere.add(secretId));
         }
 
     }
@@ -2142,12 +2112,12 @@ export const ratioOfEndpointsCoveredByContract: Calculation = (parameters: Calcu
     let allEndpointIds = [];
     let coveredByContractIds = [];
 
-    for(const [componentKey, component] of allComponents) {
+    for (const [componentKey, component] of allComponents) {
 
         let allComponentEndpoints = component.getEndpointEntities.concat(component.getExternalEndpointEntities);
         let componentArtifacts = component.getArtifacts;
-    
-        for(const endpoint of allComponentEndpoints) {
+
+        for (const endpoint of allComponentEndpoints) {
             allEndpointIds.push(endpoint.getId);
 
             let contractArtifact = endpoint.getDocumentedBy.map(artifactKey => componentArtifacts.get(artifactKey)).find(artifact => {
@@ -2186,7 +2156,7 @@ export const standardizedDeployments: Calculation = (parameters: CalculationPara
             });
         }
         return false;
-        }
+    }
     );
     return standardizedDeploymentUnit.length / relevantDeploymentMappings.length;
 }
@@ -2211,7 +2181,7 @@ export const selfContainedDeployments: Calculation = (parameters: CalculationPar
             });
         }
         return false;
-        }
+    }
     );
     return selfContainedDeploymentUnit.length / relevantDeploymentMappings.length;
 }
@@ -2249,7 +2219,7 @@ export const ratioOfAutomaticallyMaintainedInfrastructure: Calculation = (parame
         }
     })
 
-    return  automaticallyMaintained.length / allInfrastructureInstances.size;
+    return automaticallyMaintained.length / allInfrastructureInstances.size;
 }
 
 export const linksWithTimeout: Calculation = (parameters: CalculationParameters<System>) => {
@@ -2272,7 +2242,7 @@ export const deploymentsWithRestart: Calculation = (parameters: CalculationParam
         return 0;
     }
 
-    let automatedRestart = allDeploymentMappings.entries().filter(([deploymentMappingId, deploymentMapping]) =>         AUTOMATED_RESTART_POLICIES.includes(deploymentMapping.getProperty("automated_restart_policy").value)).toArray();
+    let automatedRestart = allDeploymentMappings.entries().filter(([deploymentMappingId, deploymentMapping]) => AUTOMATED_RESTART_POLICIES.includes(deploymentMapping.getProperty("automated_restart_policy").value)).toArray();
 
     return automatedRestart.length / allDeploymentMappings.size;
 }
@@ -2283,11 +2253,11 @@ export const ratioOfDocumentedEndpoints: Calculation = (parameters: CalculationP
     let allEndpointIds = [];
     let documented = [];
 
-    for(const [componentKey, component] of allComponents) {
+    for (const [componentKey, component] of allComponents) {
 
         let allComponentEndpoints = component.getEndpointEntities.concat(component.getExternalEndpointEntities);
-    
-        for(const endpoint of allComponentEndpoints) {
+
+        for (const endpoint of allComponentEndpoints) {
             allEndpointIds.push(endpoint.getId);
             if (endpoint.getDocumentedBy.length > 0) {
                 documented.push(endpoint.getId);

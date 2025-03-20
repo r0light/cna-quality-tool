@@ -2525,7 +2525,7 @@ test("secretsExternalization", () => {
     serviceC.addBackingDataEntity(secretC, relationCtoC);
 
     let backingService = new BackingService("bs1", "backing service 1", getEmptyMetaData());
-    backingService.setPropertyValue("providedFunctionality", "config");
+    backingService.setPropertyValue("providedFunctionality", "vault");
     let relationBStoA = new RelationToBackingData("r4", getEmptyMetaData());
     relationBStoA.setPropertyValue("usage_relation", DATA_USAGE_RELATION_PERSISTENCE[0]);
     backingService.addBackingDataEntity(secretA, relationBStoA);
@@ -2545,9 +2545,7 @@ test("secretsExternalization", () => {
     system.addEntities([infrastructureA]);
 
     let measureValue = systemMeasureImplementations["secretsExternalization"]({ entity: system, system: system });
-    expect(measureValue).toEqual(3 / 4);
-
-
+    expect(measureValue).toEqual(0.75);
 })
 
 test("ratioOfSpecializedStatefulServices", () => {
