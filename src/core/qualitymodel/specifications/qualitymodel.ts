@@ -2154,6 +2154,12 @@ const productFactorEvaluations = [
         "reasoning": "Secrets management is concered with where and how secrets are stored and how they are made accessible to components which need them.",
         "precondition": "at-least-one",
         "impactsInterpretation": "mean"
+    },
+    {
+        "targetFactor": "leastPrivilegedAccess",
+        "targetEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM],
+        "evaluation": "leastPrivilegedAccess",
+        "reasoning": "Access to endpoints is minimal if access is allowed only to those who actually need. it",
     }
 ] satisfies ProductFactorEvaluationSpec[]
 

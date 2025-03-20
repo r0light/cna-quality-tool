@@ -207,6 +207,15 @@ const productFactorEvaluationImplementation: {
         }
         return linearNumericalMapping(secretsInVaults as number);
     },
+    "leastPrivilegedAccess": (parameters) => {
+        let accessRestrictedToCallers = parameters.calculatedMeasures.get("accessRestrictedToCallers").value;
+
+        if (accessRestrictedToCallers === "n/a") {
+            return "n/a";
+        }
+
+        return linearNumericalMapping(accessRestrictedToCallers as number);
+    }
 };
 
 
