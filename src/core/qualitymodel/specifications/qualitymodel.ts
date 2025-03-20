@@ -2146,6 +2146,14 @@ const productFactorEvaluations = [
         "targetEntities": [ENTITIES.COMPONENT,  ENTITIES.INFRASTRUCTURE, ENTITIES.SYSTEM],
         "evaluation": "secretsStoredInSpecializedServices",
         "reasoning": "The more secrets are stored in vaults, the more they are stored in specialized services which encrypt them and offer management features."
+    },
+    {
+        "targetFactor": "secretsManagement",
+        "targetEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+        "evaluation": "aggregateImpacts",
+        "reasoning": "Secrets management is concered with where and how secrets are stored and how they are made accessible to components which need them.",
+        "precondition": "at-least-one",
+        "impactsInterpretation": "mean"
     }
 ] satisfies ProductFactorEvaluationSpec[]
 
