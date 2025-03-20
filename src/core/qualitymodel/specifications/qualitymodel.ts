@@ -144,14 +144,14 @@ const qualityAspects = {
 const highLevelAspectKeys = Object.freeze(qualityAspects);
 export type HighLevelAspectKey = keyof typeof highLevelAspectKeys;
 
-const qualityAspectKeys = Object.freeze({...qualityAspects.compatibility.aspects, ...qualityAspects.maintainability.aspects, ...qualityAspects.performanceEfficiency.aspects, ...qualityAspects.portability.aspects, ...qualityAspects.reliability.aspects, ...qualityAspects.security.aspects});
+const qualityAspectKeys = Object.freeze({ ...qualityAspects.compatibility.aspects, ...qualityAspects.maintainability.aspects, ...qualityAspects.performanceEfficiency.aspects, ...qualityAspects.portability.aspects, ...qualityAspects.reliability.aspects, ...qualityAspects.security.aspects });
 export type QualityAspectKey = keyof typeof qualityAspectKeys;
 
 export type CategorySpec = {
     name: string
 }
 
-const factorCategories =  {
+const factorCategories = {
     "cloudInfrastructure": {
         "name": "Cloud Infrastructure"
     },
@@ -167,7 +167,7 @@ const factorCategories =  {
     "businessDomain": {
         "name": "Business Domain"
     }
-} satisfies {[categoryKey: string]: CategorySpec}
+} satisfies { [categoryKey: string]: CategorySpec }
 
 const factorCategoryKeys = Object.freeze(factorCategories);
 export type FactorCategoryKey = keyof typeof factorCategoryKeys;
@@ -613,7 +613,7 @@ const productFactors = {
         "description": "Data is replicated horizontally, that means duplicated across several instances of a storage backing service so that a higher load can be handled and replicas closer to the service where data is needed can be used to reduce latency.",
         "categories": ["applicationAdministration", "dataManagement"],
         "relevantEntities": [ENTITIES.STORAGE_BACKING_SERVICE, ENTITIES.DATA_AGGREGATE],
-        "applicableEntities":  [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE, ENTITIES.STORAGE_BACKING_SERVICE ],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE, ENTITIES.STORAGE_BACKING_SERVICE],
         "sources": [{ "key": "Scholl2019", "section": "6 Use Data Partitioning and Replication for Scale" }, { "key": "Goniwada2021", "section": "4 Data Replication" }],
         "measures": ["storageReplicationLevel"]
     },
@@ -622,7 +622,7 @@ const productFactors = {
         "description": "Data is replicated vertically, that means across a request trace so that it is available closer to where a request initially comes in. Typically caching is used for vertical data replication.",
         "categories": ["applicationAdministration", "dataManagement"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.DATA_AGGREGATE, ENTITIES.REQUEST_TRACE],
-        "applicableEntities":  [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE, ENTITIES.STORAGE_BACKING_SERVICE ],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE, ENTITIES.STORAGE_BACKING_SERVICE],
         "sources": [{ "key": "Scholl2019", "section": "6 Use Caching" }, { "key": "Bastani2017", "section": "9 Caching (Use an In-Memory cache for queries to relieve datastore from traffic; replication into faster data storage)" }, { "key": "Indrasiri2021", "section": "4 Caching Pattern" }],
         "measures": ["ratioOfCachedDataAggregates", "dataReplicationAlongRequestTrace"]
     },
@@ -631,7 +631,7 @@ const productFactors = {
         "description": "Data storage is sharded, that means data is split into several storage backing service instances by a certain strategy so that requests can be distributed across shards to increase performance. One example strategy could be to shard data geographically, that means user data from one location is stored in one shard while user data from another location is stored in a different shard. One storage backing service instance is then less likely to be overloaded with requests, because the number of potential requests is limited by the amount of data in that instance.",
         "categories": ["applicationAdministration", "dataManagement"],
         "relevantEntities": [ENTITIES.STORAGE_BACKING_SERVICE, ENTITIES.DATA_AGGREGATE],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE, ENTITIES.STORAGE_BACKING_SERVICE ],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE, ENTITIES.STORAGE_BACKING_SERVICE],
         "sources": [{ "key": "Indrasiri2021", "section": "4 Data Sharding Pattern" }, { "key": "Goniwada2021", "section": "4 Data Partitioning Pattern" }],
         "measures": ["dataShardingLevel"]
     },
@@ -668,7 +668,7 @@ const productFactors = {
         "categories": ["applicationAdministration", "cloudInfrastructure"],
         "relevantEntities": [ENTITIES.INFRASTRUCTURE, ENTITIES.COMPONENT],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE],
-        "sources": [ { "key": "Indrasiri2021", "section": "1 Dynamic Management; Multicloud support" }],
+        "sources": [{ "key": "Indrasiri2021", "section": "1 Dynamic Management; Multicloud support" }],
         "measures": ["servicePortability", "nonProviderSpecificInfrastructureArtifacts", "nonProviderSpecificComponentArtifacts"]
     },
     "configurationManagement": {
@@ -757,7 +757,7 @@ const productFactors = {
         "description": "Components are distributed through replication across physical locations (e.g. availability zones of a cloud vendor) so that even in the case of a failure of one physical location, another physical location is still useable.",
         "categories": ["cloudInfrastructure"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.DEPLOYMENT_MAPPING],
-        "applicableEntities": [ENTITIES.SYSTEM,  ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
         "sources": [],
         "measures": ["numberOfAvailabilityZonesUsed"]
     },
@@ -793,7 +793,7 @@ const productFactors = {
         "description": "Services expect faults at different levels and either handle them or minimize their impact by relying on the capabilities of cloud environments.",
         "categories": ["networkCommunication", "cloudInfrastructure"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.LINK, ENTITIES.ENDPOINT, ENTITIES.INFRASTRUCTURE, ENTITIES.DEPLOYMENT_MAPPING],
-        "applicableEntities": [ENTITIES.SYSTEM,ENTITIES.SERVICE, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.SERVICE, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
         "sources": [],
         "measures": []
     },
@@ -811,7 +811,7 @@ const productFactors = {
         "description": "Links that are safe to invoke multiple times without leading to unintended state changes, are automatically retried in case of errors to transparently handle transient faults in communication. That way faults can be prevented from being propagated higher up in a request trace.",
         "categories": ["networkCommunication"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.LINK, ENTITIES.ENDPOINT],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT,  ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Davis2019", "section": "9.1" }, { "key": "Scholl2019", "section": "6 Handle Transient Failures with Retries" }, { "key": "Scholl2019", "section": "6 Use a Finite Number of Retries" }, { "key": "Bastani2017", "section": "12 Isolating Failures and Graceful Degradation: Use retries" }, { "key": "Indrasiri2021", "section": "3 Resilient Connectivity Pattern: Retry" }, { "key": "Ruecker2021", "section": "9 Synchronous Request/Response (Use retries in synchronous communications)" }, { "key": "Ruecker2021", "section": "9 The Importance of Idempotency (Communication which is retried needs idempotency)" }, { "key": "Goniwada2021", "section": "Idempotent Service Operation, Retry, 5 Retry " }],
         "measures": ["numberOfLinksWithRetryLogic"]
     },
@@ -830,7 +830,7 @@ const productFactors = {
         "categories": ["cloudInfrastructure", "applicationAdministration"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.DEPLOYMENT_MAPPING],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE],
-        "sources": [ { "key": "Bastani2017", "section": "13 automatic remediation" }, { "key": "Indrasiri2021", "section": "1 Why container orchestration?; High availability" }, { "key": "Goniwada2021", "section": "5 Self-Healing" }],
+        "sources": [{ "key": "Bastani2017", "section": "13 automatic remediation" }, { "key": "Indrasiri2021", "section": "1 Why container orchestration?; High availability" }, { "key": "Goniwada2021", "section": "5 Self-Healing" }],
         "measures": ["deploymentsWithRestart"]
     },
     "api-BasedCommunication": {
@@ -1863,13 +1863,13 @@ const measures = {
         "name": "Ratio of suitably replicated stateful services",
         "calculation": "Stateful Backing Services, Storage Backing Services, or Broker Backing Services that are replicated with a strategy other than \"none\" / All Stateful Backing Services, Storage Backing Services, or Broker Backing Services",
         "sources": ["new"],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE ]
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE]
     },
     "ratioOfUniqueAccountUsage": {
         "name": "Ratio of unique account usage",
         "calculation": "Number of unique accounts used by components and infrastructure / Number of components and infrastructure",
         "sources": ["new"],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE ]
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE]
     },
     "ratioOfNonCustomBackingServices": {
         "name": "Ratio of non-custom backing services",
@@ -1990,7 +1990,7 @@ const measures = {
         "calculation": "Infrastructure entities with all artifacts being non-provider-specific / All infrastructure entities",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE]
-    }, 
+    },
     "nonProviderSpecificComponentArtifacts": {
         "name": "Non-provider-specific component artifacts",
         "calculation": "Component entities with all artifacts being non-provider-specific / All components",
@@ -2140,6 +2140,12 @@ const productFactorEvaluations = [
         "targetEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
         "evaluation": "isolatedSecrets",
         "reasoning": "The more secrets are stored outside of the components which use them, the more secrets are isolated."
+    },
+    {
+        "targetFactor": "secretsStoredInSpecializedServices",
+        "targetEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM],
+        "evaluation": "secretsStoredInSpecializedServices",
+        "reasoning": "The more secrets are stored in vaults, the more they are stored in specialized services which encrypt them and offer management features."
     }
 ] satisfies ProductFactorEvaluationSpec[]
 
@@ -2201,5 +2207,5 @@ export const qualityModel = {
     "impacts": impacts,
     "measures": measures,
     "productFactorEvaluations": productFactorEvaluations,
-    "qualityAspectEvaluations": qualityAspectEvaluations 
+    "qualityAspectEvaluations": qualityAspectEvaluations
 } satisfies QualityModelSpec;
