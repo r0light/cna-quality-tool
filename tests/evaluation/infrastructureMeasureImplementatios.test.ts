@@ -5,7 +5,7 @@ import { RelationToBackingData } from "@/core/entities/relationToBackingData";
 import { infrastructureMeasureImplementations } from "@/core/qualitymodel/evaluation/measure-implementations/infrastructureMeasures";
 import { getQualityModel } from "@/core/qualitymodel/QualityModelInstance";
 import { ENTITIES } from "@/core/qualitymodel/specifications/entities";
-import { AUTOMATED_INFRASTRUCTURE_MAINTENANCE, AUTOMATED_SCALING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_SECRET_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MANAGED_INFRASTRUCTURE_MAINTENANCE } from "@/core/qualitymodel/specifications/featureModel";
+import { AUTOMATED_INFRASTRUCTURE_MAINTENANCE, AUTOMATED_SCALING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_SECRET_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MANAGED_INFRASTRUCTURE_MAINTENANCE, VAULT_KIND } from "@/core/qualitymodel/specifications/featureModel";
 import { expect, test } from "vitest";
 
 
@@ -448,4 +448,35 @@ test("deploymentsWithRestart", () => {
 
     let measureValue = infrastructureMeasureImplementations["deploymentsWithRestart"]({ entity: infrastructureA, system: system });
     expect(measureValue).toEqual(1);
+})
+
+test("secretsStoredInVault", () => {
+    let system = new System("sys1", "testSystem");
+
+    let infrastructureA = new Infrastructure("i1", "testInfra", getEmptyMetaData());
+
+    let secretA = new BackingData("b1", "secret A", getEmptyMetaData());
+    secretA.setPropertyValue("kind", BACKING_DATA_SECRET_KIND);
+    let relationAtoA = new RelationToBackingData("r1", getEmptyMetaData());
+    relationAtoA.setPropertyValue("usage_relation", DATA_USAGE_RELATION_USAGE[0]);
+    infrastructureA.addBackingDataEntity(secretA, relationAtoA);
+
+    let secretB = new BackingData("b2", "secret B", getEmptyMetaData());
+    secretB.setPropertyValue("kind", BACKING_DATA_SECRET_KIND);
+    let relationAtoB = new RelationToBackingData("r2", getEmptyMetaData());
+    relationAtoB.setPropertyValue("usage_relation", DATA_USAGE_RELATION_PERSISTENCE[0]);
+    infrastructureA.addBackingDataEntity(secretB, relationAtoB);
+
+    let backingService = new BackingService("bs1", "backing service 1", getEmptyMetaData());
+    backingService.setPropertyValue("providedFunctionality", VAULT_KIND[0]);
+    let relationBStoA = new RelationToBackingData("r4", getEmptyMetaData());
+    relationBStoA.setPropertyValue("usage_relation", DATA_USAGE_RELATION_PERSISTENCE[0]);
+    backingService.addBackingDataEntity(secretA, relationBStoA);
+
+    system.addEntities([secretA, secretB]);
+    system.addEntities([infrastructureA]);
+    system.addEntities([backingService]);
+
+    let measureValue = infrastructureMeasureImplementations["secretsStoredInVault"]({ entity: infrastructureA, system: system });
+    expect(measureValue).toEqual(0.5);
 })

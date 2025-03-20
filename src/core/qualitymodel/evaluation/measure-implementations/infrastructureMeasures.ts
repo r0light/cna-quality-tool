@@ -1,6 +1,6 @@
 import { BackingService, DeploymentMapping, Infrastructure } from "@/core/entities";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure";
-import { AUTOMATED_INFRASTRUCTURE_MAINTENANCE, AUTOMATED_INFRASTRUCTURE_PROVISIONING, AUTOMATED_RESTART_POLICIES, AUTOMATED_SCALING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, IAC_ARTIFACT_TYPE, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MANAGED_INFRASTRUCTURE_MAINTENANCE, ROLLING_UPDATE_STRATEGY_OPTIONS } from "../../specifications/featureModel";
+import { AUTOMATED_INFRASTRUCTURE_MAINTENANCE, AUTOMATED_INFRASTRUCTURE_PROVISIONING, AUTOMATED_RESTART_POLICIES, AUTOMATED_SCALING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, IAC_ARTIFACT_TYPE, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MANAGED_INFRASTRUCTURE_MAINTENANCE, ROLLING_UPDATE_STRATEGY_OPTIONS, VAULT_KIND } from "../../specifications/featureModel";
 
 
 export const supportsMonitoring: (infrastructure: Infrastructure) => boolean = (infrastructure: Infrastructure) => {
@@ -271,6 +271,39 @@ export const deploymentsWithRestart: Calculation = (parameters: CalculationParam
 }
 
 
+export const secretsStoredInVault: Calculation = (parameters: CalculationParameters<Infrastructure>) => {
+    let referencedSecrets = parameters.entity.getBackingDataEntities.filter(backingData => backingData.backingData.getProperty("kind").value === BACKING_DATA_SECRET_KIND);
+
+    if (referencedSecrets.length === 0) {
+        return "n/a";
+    }
+
+    let usedSecrets = referencedSecrets.filter(backingData => DATA_USAGE_RELATION_USAGE.includes(backingData.relation.getProperty("usage_relation").value));
+    let usedSecretIds = usedSecrets.map(backingData => backingData.backingData.getId);
+    let persistedSecrets = referencedSecrets.filter(backingData => DATA_USAGE_RELATION_PERSISTENCE.includes(backingData.relation.getProperty("usage_relation").value));
+
+    let secretsInVault: Set<string> = new Set();
+
+    let allVaultServices = [...parameters.system.getComponentEntities.entries()].filter(([componentId, component]) => {
+        return component.constructor.name === BackingService.name && VAULT_KIND.includes(component.getProperty("providedFunctionality").value);
+    })
+
+    for (const [valutServiceId, vaultService] of allVaultServices) {
+        let secrets = vaultService.getBackingDataEntities.filter(backingData => { return backingData.backingData.getProperty("kind").value === BACKING_DATA_SECRET_KIND });
+        secrets.forEach(secret => {
+            if (usedSecretIds.includes(secret.backingData.getId) && DATA_USAGE_RELATION_PERSISTENCE.includes(secret.relation.getProperty("usage_relation").value)) {
+                secretsInVault.add(secret.backingData.getId);
+            }
+        })
+    }
+
+    if (parameters.entity.constructor.name === BackingService.name && VAULT_KIND.includes(parameters.entity.getProperty("providedFunctionality").value)) {
+        persistedSecrets.map(backingData => backingData.backingData.getId).forEach(secretId => secretsInVault.add(secretId));
+    }
+
+    return (secretsInVault.size / referencedSecrets.length);
+}
+
 export const infrastructureMeasureImplementations: { [measureKey: string]: Calculation } = {
     "numberOfServiceHostedOnOneInfrastructure": numberOfServiceHostedOnOneInfrastructure,
     "numberOfAvailabilityZonesUsed": numberOfAvailabilityZonesUsed,
@@ -290,5 +323,6 @@ export const infrastructureMeasureImplementations: { [measureKey: string]: Calcu
     "nonProviderSpecificInfrastructureArtifacts": nonProviderSpecificInfrastructureArtifacts,
     "replacingDeployments": replacingDeployments,
     "ratioOfAutomaticallyMaintainedInfrastructure": ratioOfAutomaticallyMaintainedInfrastructure,
-    "deploymentsWithRestart": deploymentsWithRestart
+    "deploymentsWithRestart": deploymentsWithRestart,
+    "secretsStoredInVault": secretsStoredInVault
 }

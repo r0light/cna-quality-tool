@@ -223,7 +223,7 @@ const productFactors = {
         "description": "A dedicated backing service to host secrets (e.g. passwords, access tokens, encryption keys) exists. All secrets required by a system are hosted in this backing service where they can also be managed (for example they can be revoked or replaced with updated secrets). Components fetch secrets from this backing services in a controlled way when they need them.",
         "categories": ["cloudInfrastructure", "dataManagement"],
         "relevantEntities": [ENTITIES.BACKING_SERVICE, ENTITIES.BACKING_DATA, ENTITIES.COMPONENT],
-        "applicableEntities": [ENTITIES.SERVICE, ENTITIES.INFRASTRUCTURE, ENTITIES.BACKING_SERVICE, ENTITIES.BACKING_DATA],
+        "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.SYSTEM],
         "sources": [{ "key": "Scholl2019", "section": "6 Securely Store All Secrets" },
         { "key": "Arundel2019", "section": "10 Kubernetes Secrets" }
         ],
@@ -1881,7 +1881,7 @@ const measures = {
         "name": "Secrets stored in vault",
         "calculation": "Backing Data of type secret stored in vault / All backing data of type secret",
         "sources": ["new"],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT]
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE]
     },
     "accessRestrictedToCallers": {
         "name": "Access restricted to callers",
@@ -2143,7 +2143,7 @@ const productFactorEvaluations = [
     },
     {
         "targetFactor": "secretsStoredInSpecializedServices",
-        "targetEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM],
+        "targetEntities": [ENTITIES.COMPONENT,  ENTITIES.INFRASTRUCTURE, ENTITIES.SYSTEM],
         "evaluation": "secretsStoredInSpecializedServices",
         "reasoning": "The more secrets are stored in vaults, the more they are stored in specialized services which encrypt them and offer management features."
     }
