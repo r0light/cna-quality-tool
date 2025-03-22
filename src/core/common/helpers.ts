@@ -1,6 +1,8 @@
 import { TOSCA_Node_Definition, TOSCA_Property_Definition, TOSCA_Property_Refinement, TOSCA_Relationship_Definition } from '@/totypa/tosca-types/v2dot0-types/definition-types';
 import { all_profiles } from '../../totypa/parsedProfiles/v2dot0-profiles/all_profiles.js'
 import { TOSCA_Property_Name } from '@/totypa/tosca-types/v2dot0-types/alias-types';
+import { COMPONENT_TOSCA_KEY } from '../entities/component.js';
+import { cna_modeling_profile } from '@/totypa/parsedProfiles/v2dot0-profiles/cna_modeling_profile.js';
 
 
 function getValidPropertyValues(toscaType: "node" | "relationship", definitionKey: string, propertyKey: string): string[] {
@@ -113,5 +115,20 @@ const refineValue = (thingToRefine: any, thingWithRefinements: any) => {
 }
 
 
+function getIdentityTypes(): {value: string, text: string}[] {
+    const COMPONENT_TOSCA_EQUIVALENT = cna_modeling_profile.node_types[COMPONENT_TOSCA_KEY];
 
-export { getValidPropertyValues, getCapabilityTypeDefinition, refineValue }
+    if (COMPONENT_TOSCA_EQUIVALENT.properties 
+        && COMPONENT_TOSCA_EQUIVALENT.properties.identities 
+        && COMPONENT_TOSCA_EQUIVALENT.properties.identities["entry_schema"]
+        && COMPONENT_TOSCA_EQUIVALENT.properties.identities["entry_schema"].validation
+        && COMPONENT_TOSCA_EQUIVALENT.properties.identities["entry_schema"].validation["$valid_values"]) {
+        let validValues = COMPONENT_TOSCA_EQUIVALENT.properties.identities["entry_schema"].validation["$valid_values"];
+        let validOptions = validValues[1];
+        return validOptions;
+    }
+    return [];
+}
+
+
+export { getValidPropertyValues, getCapabilityTypeDefinition, refineValue, getIdentityTypes }

@@ -68,11 +68,12 @@ import PropertiesEditor from './PropertiesEditor.vue';
 import type { EditPropertySection } from './PropertiesEditor.vue';
 import { toPropertySections } from './PropertiesEditor.vue';
 import { getArtifactTypeProperties, getAvailableArtifactTypes } from '@/core/common/artifact';
-import { getValidPropertyValues } from '@/core/common/helpers';
+import { getIdentityTypes, getValidPropertyValues } from '@/core/common/helpers';
 import { DEPLOYMENT_MAPPING_TOSCA_KEY } from '@/core/entities/deploymentMapping';
 import { ENTITIES } from '@/core/qualitymodel/specifications/entities';
 import { SelectEntityProperty } from '@/core/common/entityProperty';
 import { UniqueKeyManager } from '@/core/common/UniqueKeyManager';
+import { identity } from 'lodash';
 
 const toArray = (o: object, keyName: string, valueName: string) => {
     let asArray = [];
@@ -334,6 +335,11 @@ onUpdated(() => {
         case EntityTypes.STORAGE_BACKING_SERVICE:
         case EntityTypes.PROXY_BACKING_SERVICE:
         case EntityTypes.BROKER_BACKING_SERVICE:
+            let assignedIdentitiesOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "identities");
+            assignedIdentitiesOption.includeFormCheck = false;
+            assignedIdentitiesOption.value = toArray(selectedEntity.model.prop("entity/properties/identities"), assignedIdentitiesOption.attributes.listElementFields[0].key, assignedIdentitiesOption.attributes.listElementFields[1].key);
+            assignedIdentitiesOption.attributes.listElementFields.find(field => field.key === "identityType")["dropdownOptions"] = getIdentityTypes();
+
             let componentAssignedNetworksOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "assigned_to_networks");
             componentAssignedNetworksOption.includeFormCheck = false;
 
@@ -611,16 +617,7 @@ onUpdated(() => {
                 }
             });
 
-            const toArray = (o: object, keyName: string, valueName: string) => {
-                let asArray = [];
-                for (const [attributeKey, attributeValue] of Object.entries(o)) {
-                    let element = {};
-                    element[keyName] = attributeKey;
-                    element[valueName] = attributeValue;
-                    asArray.push(element);
-                };
-                return asArray;
-            }
+
 
             includedDataOption.value = toArray(selectedEntity.model.prop("entity/properties/included_data"), includedDataOption.attributes.listElementFields[0].key, includedDataOption.attributes.listElementFields[1].key);
 
@@ -804,7 +801,7 @@ onUpdated(() => {
             let currentlyAllowedAccounts = selectedEntity.model.prop(allowedAccountsOption.jointJsConfig.modelPath) ? selectedEntity.model.prop(allowedAccountsOption.jointJsConfig.modelPath) : [];
             // clear table rows
             allowedAccountsOption.tableRows.length = 0;
-            getAllAccounts(props.graph).forEach((account) => {
+            getAllIdentities(props.graph).forEach((account) => {
 
                 allowedAccountsOption.tableRows.push({
                     columns: {
@@ -928,6 +925,14 @@ function getParentRelationLabel(parentId: string) {
 function onEnterProperty(propertyOptions: EditPropertySection[]) {
 
     for (const propertyOption of propertyOptions) {
+
+        const toObject = (a: object[]) => {
+                            let asObject = {};
+                            for (const element of a) {
+                                asObject[element[propertyOption.attributes.listElementFields[0].key]] = element[propertyOption.attributes.listElementFields[1].key];
+                            }
+                            return asObject;
+                        }
 
         if (propertyOption.includeFormCheck && !isPropertyValueValid(propertyOption)) {
             propertyOption.validationState = "is-invalid";
@@ -1099,14 +1104,6 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                         }
                         continue;
                     } else if (propertyOption.providedFeature === "backingData-includedData") {
-                        const toObject = (a: object[]) => {
-                            let asObject = {};
-                            for (const element of a) {
-                                asObject[element[propertyOption.attributes.listElementFields[0].key]] = element[propertyOption.attributes.listElementFields[1].key];
-                            }
-                            return asObject;
-                        }
-
                         selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, toObject(propertyOption.value as any[]), { rewrite: true });
                     }
                     break;
@@ -1129,6 +1126,8 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                             }
                         }
                         selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, artifacts, { rewrite: true });
+                    } else if (propertyOption.providedFeature === "identities") {
+                        selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, toObject(propertyOption.value as any[]), { rewrite: true });
                     }
                     break;
                 default:
@@ -1228,14 +1227,17 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
     }
 }
 
-function getAllAccounts(graph: dia.Graph) {
+function getAllIdentities(graph: dia.Graph) {
     let accounts: Set<string> = new Set();
     accounts.add("external account");
 
     graph.getElements().forEach(element => {
-        let availableAccount = element.prop("entity/properties/account");
-        if (availableAccount) {
-            accounts.add(availableAccount);
+        let availableAccount = element.prop("entity/properties/identities");
+        // TODO only include type account?
+        if (availableAccount && Object.keys(availableAccount) && Object.keys(availableAccount).length > 0) {
+            (Object.keys(availableAccount).forEach(identity => {
+                accounts.add(identity);
+            }))
         }
     })
 

@@ -15,7 +15,7 @@ type propertyDatatype = "text" | "select" | "textarea" | "number" | "boolean" | 
  */
 class EntityProperty {
 
-    #key: string; //string
+    #key: string; //string 
 
     #name: string; //string
 

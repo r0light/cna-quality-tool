@@ -2160,7 +2160,13 @@ const productFactorEvaluations = [
         "targetEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM],
         "evaluation": "leastPrivilegedAccess",
         "reasoning": "Access to endpoints is minimal if access is allowed only to those who actually need. it",
-    }
+    },
+    /*{
+        "targetFactor": "accessControlManagementConsistency",
+        "targetEntities": [ENTITIES.SYSTEM],
+        "evaluation": "accessControlManagementConsistency",
+        "reasoning": "Accesss control mangement is consistent, if the same approach is used for most endpoints."
+    }*/
 ] satisfies ProductFactorEvaluationSpec[]
 
 type QualityAspectEvaluationSpec = {

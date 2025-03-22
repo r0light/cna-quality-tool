@@ -1296,11 +1296,28 @@ export const cna_modeling_profile: TOSCA_File = {
           "required": true,
           "default": false
         },
-        "account": {
-          "type": "string",
-          "description": "The identifier of the account with which this component is executed.",
-          "default": "default-account",
-          "required": true
+        "identities": {
+          "type": "map",
+          "description": "The identities of this component, such as account names, users or roles.",
+          "required": true,
+          "key_schema": {
+            "type": "string",
+            "description": "The identifier for this identity."
+          },
+          "entry_schema": {
+            "type": "string",
+            "description": "The type of the identity which can be an account, a user name, or a role",
+            "validation": {
+              "$valid_values": [
+                "$value",
+                [
+                  "account",
+                  "usernane",
+                  "role"
+                ]
+              ]
+            }
+          }
         },
         "namespace": {
           "type": "string",
@@ -1472,11 +1489,28 @@ export const cna_modeling_profile: TOSCA_File = {
           "required": true,
           "default": false
         },
-        "account": {
-          "type": "string",
-          "description": "The identifier of the account with which this component is executed.",
-          "default": "default-account",
-          "required": true
+        "identities": {
+          "type": "map",
+          "description": "The identities of this component, such as account names, users or roles.",
+          "required": true,
+          "key_schema": {
+            "type": "string",
+            "description": "The identifier for this identity."
+          },
+          "entry_schema": {
+            "type": "string",
+            "description": "The type of the identity which can be an account, a user name, or a role",
+            "validation": {
+              "$valid_values": [
+                "$value",
+                [
+                  "account",
+                  "usernane",
+                  "role"
+                ]
+              ]
+            }
+          }
         },
         "namespace": {
           "type": "string",
@@ -1649,11 +1683,28 @@ export const cna_modeling_profile: TOSCA_File = {
           "required": true,
           "default": false
         },
-        "account": {
-          "type": "string",
-          "description": "The identifier of the account with which this component is executed.",
-          "default": "default-account",
-          "required": true
+        "identities": {
+          "type": "map",
+          "description": "The identities of this component, such as account names, users or roles.",
+          "required": true,
+          "key_schema": {
+            "type": "string",
+            "description": "The identifier for this identity."
+          },
+          "entry_schema": {
+            "type": "string",
+            "description": "The type of the identity which can be an account, a user name, or a role",
+            "validation": {
+              "$valid_values": [
+                "$value",
+                [
+                  "account",
+                  "usernane",
+                  "role"
+                ]
+              ]
+            }
+          }
         },
         "namespace": {
           "type": "string",
@@ -1887,11 +1938,28 @@ export const cna_modeling_profile: TOSCA_File = {
           "required": true,
           "default": false
         },
-        "account": {
-          "type": "string",
-          "description": "The identifier of the account with which this component is executed.",
-          "default": "default-account",
-          "required": true
+        "identities": {
+          "type": "map",
+          "description": "The identities of this component, such as account names, users or roles.",
+          "required": true,
+          "key_schema": {
+            "type": "string",
+            "description": "The identifier for this identity."
+          },
+          "entry_schema": {
+            "type": "string",
+            "description": "The type of the identity which can be an account, a user name, or a role",
+            "validation": {
+              "$valid_values": [
+                "$value",
+                [
+                  "account",
+                  "usernane",
+                  "role"
+                ]
+              ]
+            }
+          }
         },
         "namespace": {
           "type": "string",
@@ -2094,11 +2162,28 @@ export const cna_modeling_profile: TOSCA_File = {
           "required": true,
           "default": false
         },
-        "account": {
-          "type": "string",
-          "description": "The identifier of the account with which this component is executed.",
-          "default": "default-account",
-          "required": true
+        "identities": {
+          "type": "map",
+          "description": "The identities of this component, such as account names, users or roles.",
+          "required": true,
+          "key_schema": {
+            "type": "string",
+            "description": "The identifier for this identity."
+          },
+          "entry_schema": {
+            "type": "string",
+            "description": "The type of the identity which can be an account, a user name, or a role",
+            "validation": {
+              "$valid_values": [
+                "$value",
+                [
+                  "account",
+                  "usernane",
+                  "role"
+                ]
+              ]
+            }
+          }
         },
         "namespace": {
           "type": "string",
@@ -2303,11 +2388,28 @@ export const cna_modeling_profile: TOSCA_File = {
           "required": true,
           "default": false
         },
-        "account": {
-          "type": "string",
-          "description": "The identifier of the account with which this component is executed.",
-          "default": "default-account",
-          "required": true
+        "identities": {
+          "type": "map",
+          "description": "The identities of this component, such as account names, users or roles.",
+          "required": true,
+          "key_schema": {
+            "type": "string",
+            "description": "The identifier for this identity."
+          },
+          "entry_schema": {
+            "type": "string",
+            "description": "The type of the identity which can be an account, a user name, or a role",
+            "validation": {
+              "$valid_values": [
+                "$value",
+                [
+                  "account",
+                  "usernane",
+                  "role"
+                ]
+              ]
+            }
+          }
         },
         "namespace": {
           "type": "string",

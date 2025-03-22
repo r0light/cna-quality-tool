@@ -11,6 +11,7 @@ description: >-
 imports:
   - profile: org.oasis-open.simple:2.0
   - url: capability_types.yaml
+  - url: data_types.yaml
 
 relationship_types:
 
@@ -164,11 +165,17 @@ node_types:
         description: Whether or not this component applies load shedding. That means whether the component rejects incoming load based on certain thresholds (resource usage, concurrent requests).
         required: true
         default: false
-      account:
-        type: string
-        description: The identifier of the account with which this component is executed.
-        default: default-account
+      identities:
+        type: map
+        description: The identities of this component, such as account names, users or roles.
         required: true
+        key_schema:
+          type: string
+          description: The identifier for this identity.
+        entry_schema:
+          type: string
+          description: The type of the identity which can be an account, a user name, or a role
+          validation: { $valid_values: [ $value, [ "account", "usernane", "role"]]}
       namespace:
         type: string
         description: If the underlying infrastructure enables the usage of namespaces, this can be specified here to logically group components. If not, everything is in the same default namespace

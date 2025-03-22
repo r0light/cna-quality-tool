@@ -746,6 +746,72 @@ const linkSvgRepresentation = () => {
     return marker + pathElement;
 }
 
+const getIdentitiesConfig: () => PropertyConfig = () => {
+    return {
+        providedFeature: "identities",
+        contentType: PropertyContent.DYNAMIC_LIST,
+        label: "Assigned identities:",
+        helpText: "",
+        inputProperties: {
+            disabled: false,
+            required: false,
+            checked: false,
+            selected: false,
+            readonly: false
+        },
+        attributes: {
+            svgRepresentation: "",
+            buttonText: "Edit Identities",
+            buttonIconClass: "fa-solid fa-pencil",
+            dialogMetaData: {
+                dialogSize: DialogSize.LARGE,
+                header: {
+                    iconClass: "fa-regular fa-id-card",
+                    svgRepresentation: "",
+                    text: "Identities: "
+                },
+                footer: {
+                    showCancelButton: true,
+                    cancelButtonText: "Cancel",
+                    actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
+                }
+            },
+            dialogInfo: `The following table shows all identities assigned to this component. In case you want to add a new entry, the following section provides one text element box and one dropdown field you can use to provide the information and then add it using the plus button. However, your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your entity selection, all your changes will be lost. While you keep the selection of this Backing Data entity, your changes will be remembered.`,
+            listElementFields: [
+                {
+                    fieldType: "text",
+                    key: "identifier",
+                    label: "Identifier",
+                    helpText: "A unique identifying name",
+                    labelIcon: "fa-regular fa-id-card",
+                    placeholder: "e.g. account1"
+                },
+                {
+                    fieldType: "dropdown",
+                    key: "identityType",
+                    dropdownOptions: [],
+                    label: "Type",
+                    helpText: "The type of this identity",
+                    labelIcon: "fa-solid fa-passport",
+                }
+            ],
+            addElementButton: {
+                label: "Submit",
+                labelIcon: "fa-solid fa-plus"
+            }
+        },
+        provideEnterButton: false,
+        show: true,
+        jointJsConfig: {
+            propertyType: "customProperty",
+            modelPath: "entity/properties/identities",
+            defaultPropPath: "",
+            minPath: "",
+            min: ""
+        }
+    };
+}
+
 const EntityDetailsConfig: {
     [key: string]: {
         type: string,
@@ -754,27 +820,39 @@ const EntityDetailsConfig: {
 } = {
     Component: {
         type: EntityTypes.COMPONENT,
-        specificProperties: parseProperties(getComponentProperties(), "entity")
+        specificProperties: customizePropertyConfigs(parseProperties(getComponentProperties(), "entity"), [
+            getIdentitiesConfig()
+        ])
     },
     Service: {
         type: EntityTypes.SERVICE,
-        specificProperties: concatInOrder(parseProperties(getServiceProperties(), "entity"), parseProperties(getComponentProperties(), "entity"))
+        specificProperties: customizePropertyConfigs(concatInOrder(parseProperties(getServiceProperties(), "entity"), parseProperties(getComponentProperties(), "entity")), [
+            getIdentitiesConfig()
+        ])
     },
     BackingService: {
         type: EntityTypes.BACKING_SERVICE,
-        specificProperties: concatInOrder(parseProperties(getBackingServiceProperties(), "entity"), parseProperties(getComponentProperties(), "entity"))
+        specificProperties: customizePropertyConfigs(concatInOrder(parseProperties(getBackingServiceProperties(), "entity"), parseProperties(getComponentProperties(), "entity")), [
+            getIdentitiesConfig()
+        ])
     },
     StorageBackingService: {
         type: EntityTypes.STORAGE_BACKING_SERVICE,
-        specificProperties: concatInOrder(parseProperties(getStorageBackingServiceProperties(), "entity"), parseProperties(getComponentProperties(), "entity"))
+        specificProperties: customizePropertyConfigs(concatInOrder(parseProperties(getStorageBackingServiceProperties(), "entity"), parseProperties(getComponentProperties(), "entity")), [
+            getIdentitiesConfig()
+        ])
     },
     BrokerBackingService: {
         type: EntityTypes.BROKER_BACKING_SERVICE,
-        specificProperties: concatInOrder(parseProperties(getBrokerBackingServiceProperties(), "entity"), parseProperties(getComponentProperties(), "entity"))
+        specificProperties: customizePropertyConfigs(concatInOrder(parseProperties(getBrokerBackingServiceProperties(), "entity"), parseProperties(getComponentProperties(), "entity")), [
+            getIdentitiesConfig()
+        ])
     },
     ProxyBackingService: {
         type: EntityTypes.PROXY_BACKING_SERVICE,
-        specificProperties: concatInOrder(parseProperties(getProxyBackingServiceProperties(), "entity"), parseProperties(getComponentProperties(), "entity"))
+        specificProperties: customizePropertyConfigs(concatInOrder(parseProperties(getProxyBackingServiceProperties(), "entity"), parseProperties(getComponentProperties(), "entity")), [
+            getIdentitiesConfig()
+        ])
     },
     Endpoint: {
         type: EntityTypes.ENDPOINT,
@@ -1330,6 +1408,9 @@ const EntityDetailsConfig: {
         specificProperties: parseProperties(getNetworkProperties(), "entity")
     }
 };
+
+
+
 
 
 const getAssignedNetworksRelationConfig: ()=>PropertyConfig = () => {
