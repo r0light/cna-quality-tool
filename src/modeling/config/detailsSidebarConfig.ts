@@ -931,6 +931,7 @@ const EntityDetailsConfig: {
     Infrastructure: {
         type: EntityTypes.INFRASTRUCTURE,
         specificProperties: customizePropertyConfigs(parseProperties(getInfrastructureProperties(), "entity"), [
+            getIdentitiesConfig(),
             {
                 providedFeature: "supported_artifacts",
                 contentType: PropertyContent.MULTI_SELECT,

@@ -441,6 +441,11 @@ onUpdated(() => {
             break;
         case EntityTypes.INFRASTRUCTURE:
 
+            let assignedInfrastructureIdentitiesOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "identities");
+            assignedInfrastructureIdentitiesOption.includeFormCheck = false;
+            assignedInfrastructureIdentitiesOption.value = toArray(selectedEntity.model.prop("entity/properties/identities"), assignedInfrastructureIdentitiesOption.attributes.listElementFields[0].key, assignedInfrastructureIdentitiesOption.attributes.listElementFields[1].key);
+            assignedInfrastructureIdentitiesOption.attributes.listElementFields.find(field => field.key === "identityType")["dropdownOptions"] = getIdentityTypes();
+
             let supportedArtifactsOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "supported_artifacts");
             supportedArtifactsOption.includeFormCheck = false;
             let currentlySupportedArtifacts = selectedEntity.model.prop(supportedArtifactsOption.jointJsConfig.modelPath) ? selectedEntity.model.prop(supportedArtifactsOption.jointJsConfig.modelPath) : [];
@@ -1066,6 +1071,8 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                             }
                         }
                         selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, artifacts, { rewrite: true });
+                    } else if (propertyOption.providedFeature === "identities") {
+                        selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, toObject(propertyOption.value as any[]), { rewrite: true });
                     }
                     break;
                 case EntityTypes.DATA_AGGREGATE:

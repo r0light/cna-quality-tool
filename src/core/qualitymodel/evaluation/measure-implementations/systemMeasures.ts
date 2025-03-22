@@ -1678,13 +1678,13 @@ export const ratioOfUniqueAccountUsage: Calculation = (parameters: CalculationPa
 
     let allComponents = parameters.entity.getComponentEntities;
 
-    for (const [componentId, component] of allComponents) {
+    for(const [componentId, component] of allComponents) {
 
-        let account = component.getProperty("account").value;
-        if (!account) {
+        let componentAccounts = new Set(Object.entries(component.getProperty("identities").value).filter(([identifier, identityType])=> identityType === "account").map(([identifier, identityType])=> identifier));
+        if (componentAccounts.size === 0) {
             accounts.add("default-account");
         } else {
-            accounts.add(account);
+            componentAccounts.forEach(account => accounts.add(account));
         }
     }
 
@@ -1692,13 +1692,15 @@ export const ratioOfUniqueAccountUsage: Calculation = (parameters: CalculationPa
 
     for (const [infrastructureId, infrastructure] of allInfrastructureInstances) {
 
-        let account = infrastructure.getProperty("account").value;
-        if (!account) {
+        let infrastructureAccounts = new Set(Object.entries(infrastructure.getProperty("identities").value).filter(([identifier, identityType])=> identityType === "account").map(([identifier, identityType])=> identifier));
+        if (infrastructureAccounts.size === 0) {
             accounts.add("default-account");
         } else {
-            accounts.add(account);
+            infrastructureAccounts.forEach(account => accounts.add(account));
         }
     }
+
+    console.log(accounts)
 
     let componentsAndInfrastructure = allComponents.size + allInfrastructureInstances.size;
     if (componentsAndInfrastructure === 0) {

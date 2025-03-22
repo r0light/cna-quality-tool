@@ -714,8 +714,10 @@ export const accessRestrictedToCallers: Calculation = (parameters: CalculationPa
         }
     });
     for (const link of parameters.system.getIncomingLinksOfComponent(parameters.entity.getId)) {
-        if (link.getSourceEntity.getProperty("account")) {
-            calledByAccount.get(link.getTargetEndpoint.getId).add(link.getSourceEntity.getProperty("account").value);
+        let identities = link.getSourceEntity.getProperty("identities");
+        if (identities) {
+            let accounts = Object.entries(identities.value).filter(([identifier, identityType]) => identityType === "account").map(([identifier, identityType]) => identifier);
+            accounts.forEach(account => calledByAccount.get(link.getTargetEndpoint.getId).add(account));
         }
     }
 

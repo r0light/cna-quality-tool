@@ -1465,7 +1465,7 @@ test("accessRestrictedToCallers", () => {
     serviceB.addEndpoint(endpointB);
 
     let serviceC = new Service("s3", "service C", getEmptyMetaData())
-    serviceC.setPropertyValue("account", "a1");
+    serviceC.setPropertyValue("identities", {"a1": "account"});
 
     let linkCA = new Link("l1", serviceC, endpointA);
     let linkCB = new Link("l2", serviceC, endpointB);

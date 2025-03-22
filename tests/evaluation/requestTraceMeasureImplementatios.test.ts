@@ -1642,24 +1642,24 @@ test("suitablyReplicatedStatefulService", () => {
 test("ratioOfUniqueAccountUsage", () => {
     let system = new System("sys1", "testSystem");;
     let infrastructureA = new Infrastructure("i1", "Infrastructure 1", getEmptyMetaData());
-    infrastructureA.setPropertyValue("account", "infraAccount");
+    infrastructureA.setPropertyValue("identities", {"infraAccount": "account"});
     let infrastructureB = new Infrastructure("i2", "Infrastruture B", getEmptyMetaData());
-    infrastructureB.setPropertyValue("account", "default-account");
+    infrastructureB.setPropertyValue("identities", {"default-account": "account"});
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
-    serviceA.setPropertyValue("account", "serviceAccount");
+    serviceA.setPropertyValue("identities", {"serviceAccount": "account"});
     let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
     let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
     serviceA.addEndpoint(endpointA);
     serviceA.addEndpoint(externalEndpointA);
 
     let serviceB = new Service("s2", "testService", getEmptyMetaData());
-    serviceB.setPropertyValue("account", "default-account");
+    serviceB.setPropertyValue("identities", {"default-account": "account"});
     let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
     serviceB.addEndpoint(endpointB);
 
     let serviceC = new Service("s3", "testService", getEmptyMetaData());
-    serviceC.setPropertyValue("account", "default-account");
+    serviceC.setPropertyValue("identities", {"default-account": "account"});
     let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
     serviceC.addEndpoint(endpointC);
 
@@ -1698,7 +1698,7 @@ test("accessRestrictedToCallers", () => {
     serviceB.addEndpoint(endpointB);
 
     let serviceC = new Service("s3", "service C", getEmptyMetaData())
-    serviceC.setPropertyValue("account", "a1");
+    serviceC.setPropertyValue("identities", {"a1": "account"});
 
     let serviceD = new Service("s4", "service D", getEmptyMetaData())
     let endpointD = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
