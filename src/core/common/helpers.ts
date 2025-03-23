@@ -3,6 +3,7 @@ import { all_profiles } from '../../totypa/parsedProfiles/v2dot0-profiles/all_pr
 import { TOSCA_Property_Name } from '@/totypa/tosca-types/v2dot0-types/alias-types';
 import { COMPONENT_TOSCA_KEY } from '../entities/component.js';
 import { cna_modeling_profile } from '@/totypa/parsedProfiles/v2dot0-profiles/cna_modeling_profile.js';
+import { ENDPOINT_TOSCA_EQUIVALENT, ENDPOINT_TOSCA_KEY } from '../entities/endpoint.js';
 
 
 function getValidPropertyValues(toscaType: "node" | "relationship", definitionKey: string, propertyKey: string): string[] {
@@ -130,5 +131,20 @@ function getIdentityTypes(): {value: string, text: string}[] {
     return [];
 }
 
+function getAuthenticationMethods(): string[] {
+    const ENDPOINT_TOSCA_EQUIVALENT = cna_modeling_profile.node_types[ENDPOINT_TOSCA_KEY];
 
-export { getValidPropertyValues, getCapabilityTypeDefinition, refineValue, getIdentityTypes }
+    if (ENDPOINT_TOSCA_EQUIVALENT.properties 
+        && ENDPOINT_TOSCA_EQUIVALENT.properties.supported_authentication_methods 
+        && ENDPOINT_TOSCA_EQUIVALENT.properties.supported_authentication_methods["entry_schema"]
+        && ENDPOINT_TOSCA_EQUIVALENT.properties.supported_authentication_methods["entry_schema"].validation
+        && ENDPOINT_TOSCA_EQUIVALENT.properties.supported_authentication_methods["entry_schema"].validation["$valid_values"]) {
+        let validValues = ENDPOINT_TOSCA_EQUIVALENT.properties.supported_authentication_methods["entry_schema"].validation["$valid_values"];
+        let validOptions = validValues[1];
+        return validOptions;
+    }
+    return [];
+}
+
+
+export { getValidPropertyValues, getCapabilityTypeDefinition, refineValue, getIdentityTypes, getAuthenticationMethods}

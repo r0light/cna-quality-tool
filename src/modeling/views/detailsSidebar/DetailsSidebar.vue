@@ -68,7 +68,7 @@ import PropertiesEditor from './PropertiesEditor.vue';
 import type { EditPropertySection } from './PropertiesEditor.vue';
 import { toPropertySections } from './PropertiesEditor.vue';
 import { getArtifactTypeProperties, getAvailableArtifactTypes } from '@/core/common/artifact';
-import { getIdentityTypes, getValidPropertyValues } from '@/core/common/helpers';
+import { getAuthenticationMethods, getIdentityTypes, getValidPropertyValues } from '@/core/common/helpers';
 import { DEPLOYMENT_MAPPING_TOSCA_KEY } from '@/core/entities/deploymentMapping';
 import { ENTITIES } from '@/core/qualitymodel/specifications/entities';
 import { SelectEntityProperty } from '@/core/common/entityProperty';
@@ -825,6 +825,30 @@ onUpdated(() => {
                 });
             })
 
+            let supportedAuthMethodsOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "supported_authentication_methods");
+            supportedAuthMethodsOption.includeFormCheck = false;
+            let currentlySupportedMethods = selectedEntity.model.prop(supportedAuthMethodsOption.jointJsConfig.modelPath) ? selectedEntity.model.prop(supportedAuthMethodsOption.jointJsConfig.modelPath) : [];
+            // clear table rows
+            supportedAuthMethodsOption.tableRows.length = 0;
+            getAuthenticationMethods().forEach((method) => {
+
+                supportedAuthMethodsOption.tableRows.push({
+                    columns: {
+                        name: method,
+                        supported: {
+                            contentType: PropertyContent.CHECKBOX_WITHOUT_LABEL,
+                            disabled: false,
+                            checked: currentlySupportedMethods.includes(method),
+                            id: method
+                        }
+                    },
+                    attributes: {
+                        representationClass: "validOption",
+                        disabled: false
+                    }
+                });
+            })
+
             if (parentComponent) {
 
                 let documentedByOption: EditPropertySection = findInSectionsByFeature(selectedEntityPropertyGroups.value, "documentedBy");
@@ -932,12 +956,12 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
     for (const propertyOption of propertyOptions) {
 
         const toObject = (a: object[]) => {
-                            let asObject = {};
-                            for (const element of a) {
-                                asObject[element[propertyOption.attributes.listElementFields[0].key]] = element[propertyOption.attributes.listElementFields[1].key];
-                            }
-                            return asObject;
-                        }
+            let asObject = {};
+            for (const element of a) {
+                asObject[element[propertyOption.attributes.listElementFields[0].key]] = element[propertyOption.attributes.listElementFields[1].key];
+            }
+            return asObject;
+        }
 
         if (propertyOption.includeFormCheck && !isPropertyValueValid(propertyOption)) {
             propertyOption.validationState = "is-invalid";
@@ -1135,6 +1159,18 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                         selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, artifacts, { rewrite: true });
                     } else if (propertyOption.providedFeature === "identities") {
                         selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, toObject(propertyOption.value as any[]), { rewrite: true });
+                    }
+                    break;
+                case EntityTypes.ENDPOINT:
+                case EntityTypes.EXTERNAL_ENDPOINT:
+                    if (propertyOption.providedFeature === "supported_authentication_methods") {
+                        let supportedMethods = [];
+                        propertyOption.tableRows.forEach(method => {
+                            if (method.columns["supported"]["checked"]) {
+                                supportedMethods.push(method.columns["supported"]["id"]);
+                            }
+                        })
+                        selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, supportedMethods, { rewrite: true });
                     }
                     break;
                 default:

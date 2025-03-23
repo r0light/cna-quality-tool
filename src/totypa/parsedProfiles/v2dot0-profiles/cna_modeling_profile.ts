@@ -2827,19 +2827,33 @@ export const cna_modeling_profile: TOSCA_File = {
           "type": "string",
           "required": false
         },
-        "secure": {
-          "description": "If set, the endpoint accepts only secure connections.",
-          "type": "boolean",
-          "required": false,
-          "default": false
-        },
         "allow_access_to": {
-          "description": "A list of entities/accounts who are allowed to access this endpoint. If the list is empty anybody can access the endpoint ",
+          "description": "A list of entities/accounts who are allowed to access this endpoint. If the list is empty anybody can access the endpoint.",
           "type": "list",
           "required": true,
           "entry_schema": {
             "description": "The id of an account that can access this endpoint.",
             "type": "string"
+          }
+        },
+        "supported_authentication_methods": {
+          "description": "A list of authentication methods, that this endpoint supports. If the list is empty, the endpoint does not require authentication.",
+          "type": "list",
+          "required": true,
+          "entry_schema": {
+            "description": "An authentication method that is supported by this endpoint.",
+            "type": "string",
+            "validation": {
+              "$valid_values": [
+                "$value",
+                [
+                  "basic_authentication",
+                  "JWT",
+                  "Token",
+                  "OAuth2"
+                ]
+              ]
+            }
           }
         },
         "url_path": {
@@ -2931,19 +2945,33 @@ export const cna_modeling_profile: TOSCA_File = {
           "type": "string",
           "required": false
         },
-        "secure": {
-          "description": "If set, the endpoint accepts only secure connections.",
-          "type": "boolean",
-          "required": false,
-          "default": false
-        },
         "allow_access_to": {
-          "description": "A list of entities/accounts who are allowed to access this endpoint. If the list is empty anybody can access the endpoint ",
+          "description": "A list of entities/accounts who are allowed to access this endpoint. If the list is empty anybody can access the endpoint.",
           "type": "list",
           "required": true,
           "entry_schema": {
             "description": "The id of an account that can access this endpoint.",
             "type": "string"
+          }
+        },
+        "supported_authentication_methods": {
+          "description": "A list of authentication methods, that this endpoint supports. If the list is empty, the endpoint does not require authentication.",
+          "type": "list",
+          "required": true,
+          "entry_schema": {
+            "description": "An authentication method that is supported by this endpoint.",
+            "type": "string",
+            "validation": {
+              "$valid_values": [
+                "$value",
+                [
+                  "basic_authentication",
+                  "JWT",
+                  "Token",
+                  "OAuth2"
+                ]
+              ]
+            }
           }
         },
         "url_path": {

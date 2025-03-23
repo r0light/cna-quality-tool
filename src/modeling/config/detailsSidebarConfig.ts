@@ -886,6 +886,55 @@ const EntityDetailsConfig: {
                     minPath: "",
                     min: ""
                 }
+            },
+            {
+                providedFeature: "supported_authentication_methods",
+                contentType: PropertyContent.MULTI_SELECT,
+                label: "Authentication methods supported by this endpoint:",
+                helpText: "",
+                inputProperties: {
+                    disabled: false,
+                    required: false,
+                    checked: false,
+                    selected: false,
+                    readonly: false
+                },
+                attributes: {
+                    svgRepresentation: "",
+                    buttonText: "Edit supported methods",
+                    buttonIconClass: "fa-solid fa-pencil",
+                    dialogMetaData: {
+                        dialogSize: DialogSize.LARGE,
+                        header: {
+                            iconClass: "fa-regular fa-id-card",
+                            svgRepresentation: "",
+                            text: "Supported methods "
+                        },
+                        footer: {
+                            showCancelButton: true,
+                            cancelButtonText: "Cancel",
+                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
+                        }
+                    },
+                    dialogInfo: `Check all authentication methods that are supported by this endpoint. If no method is selected, no authentication is needed for this endpoint. Your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your selection, all your changes will be lost.`,
+                    tableColumnHeaders: [
+                        {
+                            text: "Method"
+                        },
+                        {
+                            text: "supported"
+                        },
+                    ]
+                },
+                provideEnterButton: false,
+                show: true,
+                jointJsConfig: {
+                    propertyType: "customProperty",
+                    modelPath: "entity/relations/supported_authentication_methods",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
             }
         ])
     },
@@ -921,6 +970,55 @@ const EntityDetailsConfig: {
                     minPath: "",
                     min: ""
                 }
+            },
+            {
+                providedFeature: "supported_authentication_methods",
+                contentType: PropertyContent.MULTI_SELECT,
+                label: "Authentication methods supported by this endpoint:",
+                helpText: "",
+                inputProperties: {
+                    disabled: false,
+                    required: false,
+                    checked: false,
+                    selected: false,
+                    readonly: false
+                },
+                attributes: {
+                    svgRepresentation: "",
+                    buttonText: "Edit supported methods",
+                    buttonIconClass: "fa-solid fa-pencil",
+                    dialogMetaData: {
+                        dialogSize: DialogSize.LARGE,
+                        header: {
+                            iconClass: "fa-regular fa-id-card",
+                            svgRepresentation: "",
+                            text: "Supported methods "
+                        },
+                        footer: {
+                            showCancelButton: true,
+                            cancelButtonText: "Cancel",
+                            actionButtons: [{ buttonIconClass: "fa-regular fa-floppy-disk", buttonText: "Save" }]
+                        }
+                    },
+                    dialogInfo: `Check all authentication methods that are supported by this endpoint. If no method is selected, no authentication is needed for this endpoint. Your changes won't be saved or adopted until you clicked "Save". In case you cancel and change your selection, all your changes will be lost.`,
+                    tableColumnHeaders: [
+                        {
+                            text: "Method"
+                        },
+                        {
+                            text: "supported"
+                        },
+                    ]
+                },
+                provideEnterButton: false,
+                show: true,
+                jointJsConfig: {
+                    propertyType: "customProperty",
+                    modelPath: "entity/relations/supported_authentication_methods",
+                    defaultPropPath: "",
+                    minPath: "",
+                    min: ""
+                },
             }
         ])
     },
