@@ -333,10 +333,16 @@ const productFactors = {
         "description": "Components are separated by assigning them different accounts. Ideally each component has an individual account. Through this, it is possible to trace which component performed which actions and it is possible to restrict access to other components on a fine-grained level, so that for example in the case of an attack, compromised components can be isolated based on their account.",
         "categories": ["applicationAdministration", "businessDomain"],
         "relevantEntities": [ENTITIES.COMPONENT],
-        "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Scholl2019", "section": "6 Use Separate Accounts/Subscriptions/Tenants”" }, { "key": "Adkins2020", "section": "8 Role separation”(let different services run with different roles to restrict access)" }, { "key": "Adkins2020", "section": "8 “Location separation (use different roles for a service in different locations to limit attack impacts)" }],
         "measures": ["ratioOfUniqueAccountUsage"],
-        "evaluations": []
+        "evaluations": [
+            {
+                "targetEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+                "evaluation": "accountSeparation",
+                "reasoning": "The higher the ratio of unique account usage, the more this product factor is present."
+            }
+        ]
     },
     "authenticationDelegation": {
         "name": "Authentication delegation",
@@ -346,7 +352,13 @@ const productFactors = {
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Scholl2019", "section": "6 Use Federated Identity Management" }, { "key": "Goniwada2021", "section": "9 Decentralized Identity" }],
         "measures": ["ratioOfDelegatedAuthentication"],
-        "evaluations": []
+        "evaluations": [
+            {
+                "targetEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+                "evaluation": "authenticationDelegation",
+                "reasoning": "The higher the ratio of delegated authentication, the more this product factor is present."
+            }
+        ]
     },
     "serviceOrientation": {
         "name": "Service-orientation",
@@ -2297,6 +2309,20 @@ const qualityAspectEvaluations = [
         "targetAspect": "integrity",
         "evaluation": "aggregateImpacts",
         "reasoning": "The integrity depends on how access is restricted.",
+        "precondition": "at-least-one",
+        "impactsInterpretation": "median"
+    },
+    {
+        "targetAspect": "accountability",
+        "evaluation": "aggregateImpacts",
+        "reasoning": "The accountability depends on how parts of application can be assigned to different accounts and how well actions can be traced to certain accounts.",
+        "precondition": "at-least-one",
+        "impactsInterpretation": "median"
+    },
+    {
+        "targetAspect": "authenticity",
+        "evaluation": "aggregateImpacts",
+        "reasoning": "The authenticity depends on how well authentication is implemented and managed in a system",
         "precondition": "at-least-one",
         "impactsInterpretation": "median"
     }

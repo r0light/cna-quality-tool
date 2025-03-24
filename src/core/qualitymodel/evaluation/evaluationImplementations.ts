@@ -1,4 +1,4 @@
-import { AspectEvaluationFunction, exponentialNumericalMapping, FactorEvaluationFunction, FactorEvaluationParameters, ImpactWeight, impactWeightNumericMapping, interpretNumericalResultAsFactorEvaluation, interpretNumericValueAsOutcome, linearNumericalMapping } from "./Evaluation";
+import { AspectEvaluationFunction, exponentialNumericalMapping, FactorEvaluationFunction, FactorEvaluationParameters, ImpactWeight, impactWeightNumericMapping, interpretNumericalResultAsFactorEvaluation, interpretNumericValueAsOutcome, linearNumericalMapping, squareRootedNumericalMapping } from "./Evaluation";
 import { ProductFactorKey } from "../specifications/qualitymodel";
 import { param } from "jquery";
 import { average } from "./measure-implementations/general-functions";
@@ -230,6 +230,24 @@ const productFactorEvaluationImplementation: {
         } else {
             return linearNumericalMapping(average([endpointAccessConsistency,externalEndpointAccessConsistency] as number[]) as number);
         }
+    },
+    "accountSeparation": (parameters) => {
+        let ratioOfUniqueAccountUsage = parameters.calculatedMeasures.get("ratioOfUniqueAccountUsage").value;
+
+        if (ratioOfUniqueAccountUsage === "n/a") {
+            return "n/a";
+        }
+
+        return squareRootedNumericalMapping(ratioOfUniqueAccountUsage as number);
+    },
+    "authenticationDelegation": (parameters) => {
+        let ratioOfDelegatedAuthentication = parameters.calculatedMeasures.get("ratioOfDelegatedAuthentication").value;
+
+        if (ratioOfDelegatedAuthentication === "n/a") {
+            return "n/a";
+        }
+
+        return squareRootedNumericalMapping(ratioOfDelegatedAuthentication as number);
     },
 };
 
