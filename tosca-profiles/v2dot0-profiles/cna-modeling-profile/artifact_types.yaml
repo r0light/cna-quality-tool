@@ -6,7 +6,7 @@ imports:
 metadata:
   template_name: artifact_types.yaml
   template_author: Distributed Systems Group
-  template_version: 0.5
+  template_version: 0.6
 
 artifact_types:
 
