@@ -1056,7 +1056,7 @@ test("ratioOfEndpointsSupportingSsl", () => {
     system.addEntity(service);
 
     let measureValue = componentMeasureImplementations["ratioOfEndpointsSupportingSsl"]({ entity: service, system: system });
-    expect(measureValue).toEqual(2);
+    expect(measureValue).toEqual(2/3);
 
 })
 

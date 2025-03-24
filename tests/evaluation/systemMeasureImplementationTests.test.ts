@@ -90,7 +90,7 @@ test("all implemented measure must provide information on the calculation", () =
 test("ratioOfEndpointsSupportingSsl", () => {
     let measureValue = systemMeasureImplementations["ratioOfEndpointsSupportingSsl"]({ entity: systemToEvaluateA, system: systemToEvaluateA });
 
-    expect(measureValue).toEqual(0.5);
+    expect(measureValue).toEqual(1/3);
 })
 
 test("ratioOfExternalEndpointsSupportingTls", () => {

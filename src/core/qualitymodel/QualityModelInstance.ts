@@ -112,6 +112,35 @@ function getQualityModel(): QualityModelInstance {
                 throw Error("No measure with key " + measureKey + " could be found, please check the quality model definition.")
             }
         }
+
+        // add all product factor evaluations
+        for (const productFactorEvaluation of productFactor.evaluations) {
+            let evaluationDetails = new EvaluationDetails(productFactorEvaluation.evaluation,
+                productFactorEvaluation.reasoning,
+                productFactorEvaluation.precondition ? productFactorEvaluation.precondition : DEFAULT_PRECONDITION,
+                productFactorEvaluation.impactsInterpretation ? productFactorEvaluation.impactsInterpretation : DEFAULT_IMPACTS_INTERPRETATION,
+                productFactorEvaluation.customImpactInterpretation ? productFactorEvaluation.customImpactInterpretation : (impacts: number[]) => 0
+            )
+            let newEvaluation = new ProductFactorEvaluation(newProductFactor, evaluationDetails);
+            let availableImplementation = productFactorEvaluationImplementation[newEvaluation.getEvaluationDetails.getEvaluationId]
+            if (availableImplementation) {
+                newEvaluation.addEvaluation(availableImplementation);
+                productFactorEvaluation.targetEntities.forEach(targetEntity => {
+                    newProductFactor.addEvaluation(targetEntity, newEvaluation);
+                })
+            } else {
+                availableImplementation = generalProductFactorEvaluationImplementation[newEvaluation.getEvaluationDetails.getEvaluationId];
+                if (availableImplementation) {
+                    newEvaluation.addEvaluation(availableImplementation);
+                    productFactorEvaluation.targetEntities.forEach(targetEntity => {
+                        newProductFactor.addEvaluation(targetEntity, newEvaluation);
+                    })
+                } else {
+                    throw new Error(`No evaluation implementation found with id ${newEvaluation.getEvaluationDetails.getEvaluationId}`);
+                }
+            }
+        }
+        
         newQualityModel.productFactors.push(newProductFactor);
     }
 
@@ -145,42 +174,6 @@ function getQualityModel(): QualityModelInstance {
         impacted.addIncomingImpact(newImpact);
         impacter.addOutgoingImpact(newImpact);
         newQualityModel.impacts.push(newImpact);
-    }
-
-    // add all product factor evaluations
-    for (const productFactorEvaluation of specifiedQualityModel.productFactorEvaluations) {
-
-        let evaluatedProductFactor = newQualityModel.findProductFactor(productFactorEvaluation.targetFactor);
-        if (evaluatedProductFactor) {
-
-            let evaluationDetails = new EvaluationDetails(productFactorEvaluation.evaluation, 
-                productFactorEvaluation.reasoning, 
-                productFactorEvaluation.precondition ? productFactorEvaluation.precondition : DEFAULT_PRECONDITION,
-                productFactorEvaluation.impactsInterpretation ? productFactorEvaluation.impactsInterpretation : DEFAULT_IMPACTS_INTERPRETATION,
-                productFactorEvaluation.customImpactInterpretation ? productFactorEvaluation.customImpactInterpretation : (impacts: number[]) => 0
-            )
-            let newEvaluation = new ProductFactorEvaluation(evaluatedProductFactor, evaluationDetails);
-            let availableImplementation = productFactorEvaluationImplementation[newEvaluation.getEvaluationDetails.getEvaluationId]
-            if (availableImplementation) {
-                newEvaluation.addEvaluation(availableImplementation);
-                productFactorEvaluation.targetEntities.forEach(targetEntity => {
-                    evaluatedProductFactor.addEvaluation(targetEntity, newEvaluation);
-                })
-            } else {
-                availableImplementation = generalProductFactorEvaluationImplementation[newEvaluation.getEvaluationDetails.getEvaluationId];
-                if (availableImplementation) {
-                    newEvaluation.addEvaluation(availableImplementation);
-                    productFactorEvaluation.targetEntities.forEach(targetEntity => {
-                        evaluatedProductFactor.addEvaluation(targetEntity, newEvaluation);
-                    })
-                } else {
-                    throw new Error(`No evaluation implementation found with id ${newEvaluation.getEvaluationDetails.getEvaluationId}`);
-                }
-            }
-        } else {
-            throw new Error(`There is no product factor with key ${productFactorEvaluation.targetFactor}`);
-        }
-
     }
 
     // add all quality aspect evaluations

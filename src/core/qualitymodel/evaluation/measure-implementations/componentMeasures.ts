@@ -1,7 +1,7 @@
 
 import { ref } from "vue";
 import { BackingService, BrokerBackingService, Component, Endpoint, ExternalEndpoint, ProxyBackingService, Service, StorageBackingService, System } from "../../../entities.js";
-import { Calculation, CalculationParameters } from "../../quamoco/Measure.js";
+import { Calculation, CalculationParameters, MeasureValue } from "../../quamoco/Measure.js";
 import { ASYNCHRONOUS_ENDPOINT_KIND, AUTOMATED_RESTART_POLICIES, AUTOMATED_SCALING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, CONFIG_SERVICE_KIND, CONTRACT_ARTIFACT_TYPE, CUSTOM_SOFTWARE_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, PROTOCOLS_SUPPORTING_TLS, SERVICE_MESH_KIND, SYNCHRONOUS_ENDPOINT_KIND, VAULT_KIND } from "../../specifications/featureModel.js";
 import { average } from "./general-functions.js";
 import { Artifact, getArtifactTypeProperties, getAvailableArtifactTypes } from "@/core/common/artifact.js";
@@ -34,16 +34,16 @@ export const providesHealthAndReadinessEndpoints: (component: Component) => bool
 
 }
 
-export const calculateRatioOfEndpointsSupportingSsl: (endpoints: Endpoint[]) => number = (allEndpoints) => {
+export const calculateRatioOfEndpointsSupportingSsl: (endpoints: Endpoint[]) => MeasureValue = (allEndpoints) => {
     let numberOfEndpointsSupportingSsl = allEndpoints.map(endpoint => endpoint.getProperties().find(property => property.getKey === "protocol").value)
         .filter(protocol => PROTOCOLS_SUPPORTING_TLS.includes(protocol))
         .length;
 
-    if ((allEndpoints.length - numberOfEndpointsSupportingSsl) === 0) {
-        return 0;
+    if (allEndpoints.length === 0) {
+        return "n/a";
     }
 
-    return numberOfEndpointsSupportingSsl / (allEndpoints.length - numberOfEndpointsSupportingSsl);
+    return numberOfEndpointsSupportingSsl / allEndpoints.length;
 }
 
 
@@ -1093,7 +1093,11 @@ export const ratioOfEndpointsThatAreIncludedInASingleSignOnApproach: Calculation
         return "n/a";
     }
 
+    console.log(allComponentEndpoints);
+
     let endpointsSupportingTokens = allComponentEndpoints.filter(endpoint => endpoint.getProperty("supported_authentication_methods").value.includes("Single Sign-On"));
+
+    console.log(allComponentEndpoints)
 
     return endpointsSupportingTokens.length / allComponentEndpoints.length;
 }

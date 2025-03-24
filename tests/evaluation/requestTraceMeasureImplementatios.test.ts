@@ -287,7 +287,7 @@ test("ratioOfEndpointsSupportingSsl", () => {
     system.addEntity(requestTrace);
 
     let measureValue = requestTraceMeasureImplementations["ratioOfEndpointsSupportingSsl"]({ entity: requestTrace, system: system });
-    expect(measureValue).toEqual(0.5);
+    expect(measureValue).toEqual(1/3);
 
 })
 

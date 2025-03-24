@@ -930,7 +930,7 @@ const EntityDetailsConfig: {
                 show: true,
                 jointJsConfig: {
                     propertyType: "customProperty",
-                    modelPath: "entity/relations/supported_authentication_methods",
+                    modelPath: "entity/properties/supported_authentication_methods",
                     defaultPropPath: "",
                     minPath: "",
                     min: ""
@@ -1014,7 +1014,7 @@ const EntityDetailsConfig: {
                 show: true,
                 jointJsConfig: {
                     propertyType: "customProperty",
-                    modelPath: "entity/relations/supported_authentication_methods",
+                    modelPath: "entity/properties/supported_authentication_methods",
                     defaultPropPath: "",
                     minPath: "",
                     min: ""

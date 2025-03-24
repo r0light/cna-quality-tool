@@ -172,6 +172,25 @@ const factorCategories = {
 const factorCategoryKeys = Object.freeze(factorCategories);
 export type FactorCategoryKey = keyof typeof factorCategoryKeys;
 
+type SourceSpec = {
+    key: LiteratureKey,
+    section: string
+}
+
+export const DEFAULT_PRECONDITION: EvaluationPrecondition = "at-least-one";
+export type EvaluationPrecondition = "at-least-one" | "all" | "majority";
+export const DEFAULT_IMPACTS_INTERPRETATION: IncomingImpactsInterpretation = "mean";
+export type IncomingImpactsInterpretation = "lowest" | "highest" | "mean" | "median" | "custom"
+
+type ProductFactorEvaluationSpec = {
+    targetEntities: `${ENTITIES}`[],
+    evaluation: string,
+    reasoning: string,
+    precondition?: EvaluationPrecondition,
+    impactsInterpretation?: IncomingImpactsInterpretation,
+    customImpactInterpretation?: (list: number[]) => number
+}
+
 export type ProductFactorSpec = {
     name: string,
     description: string,
@@ -179,12 +198,8 @@ export type ProductFactorSpec = {
     relevantEntities: `${ENTITIES}`[],
     applicableEntities: `${ENTITIES}`[],
     sources: SourceSpec[],
-    measures: MeasureKey[]
-}
-
-type SourceSpec = {
-    key: LiteratureKey,
-    section: string
+    measures: MeasureKey[],
+    evaluations: ProductFactorEvaluationSpec[]
 }
 
 const productFactors = {
@@ -198,7 +213,19 @@ const productFactors = {
             { "key": "Scholl2019", "section": "6 Encrypt Data in Transit" },
             { "key": "Indrasiri2021", "section": "2 Security (Use TLS for synchronous communications)" }
         ],
-        "measures": ["ratioOfEndpointsSupportingSsl", "ratioOfExternalEndpointsSupportingTls", "ratioOfSecuredLinks"]
+        "measures": ["ratioOfEndpointsSupportingSsl", "ratioOfExternalEndpointsSupportingTls", "ratioOfSecuredLinks"],
+        "evaluations": [
+            {
+                "targetEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+                "evaluation": "dataEncryptionInTransit",
+                "reasoning": "The more communication is encrypted, the better confidential data is protected. It can be measured by links targeting secure endpoints."
+            },
+            {
+                "targetEntities": [ENTITIES.LINK],
+                "evaluation": "linkDataEncryptionInTransit",
+                "reasoning": "The more communication is encrypted, the better confidential data is protected. It can be measured by links targeting secure endpoints."
+            }
+        ]
     },
     "secretsManagement": {
         "name": "Secrets management",
@@ -207,7 +234,16 @@ const productFactors = {
         "relevantEntities": [ENTITIES.BACKING_SERVICE, ENTITIES.INFRASTRUCTURE, ENTITIES.BACKING_DATA, ENTITIES.COMPONENT],
         "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
         "sources": [],
-        "measures": []
+        "measures": [],
+        "evaluations": [
+            {
+                "targetEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+                "evaluation": "aggregateImpacts",
+                "reasoning": "Secrets management is concered with where and how secrets are stored and how they are made accessible to components which need them.",
+                "precondition": "at-least-one",
+                "impactsInterpretation": "mean"
+            },
+        ]
     },
     "isolatedSecrets": {
         "name": "Isolated secrets",
@@ -216,7 +252,14 @@ const productFactors = {
         "relevantEntities": [ENTITIES.BACKING_SERVICE, ENTITIES.INFRASTRUCTURE, ENTITIES.BACKING_DATA, ENTITIES.COMPONENT],
         "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Scholl2019", "section": "6 Never Store Secrets or Configuration Inside an Image" }, { "key": "Adkins2020", "section": "14 Don't Check In Secrets" }],
-        "measures": ["secretsExternalization"]
+        "measures": ["secretsExternalization"],
+        "evaluations": [
+            {
+                "targetEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+                "evaluation": "isolatedSecrets",
+                "reasoning": "The more secrets are stored outside of the components which use them, the more secrets are isolated."
+            },
+        ]
     },
     "secretsStoredInSpecializedServices": {
         "name": "Secrets stored in specialized services",
@@ -227,16 +270,31 @@ const productFactors = {
         "sources": [{ "key": "Scholl2019", "section": "6 Securely Store All Secrets" },
         { "key": "Arundel2019", "section": "10 Kubernetes Secrets" }
         ],
-        "measures": ["secretsStoredInVault"]
+        "measures": ["secretsStoredInVault"],
+        "evaluations": [
+            {
+                "targetEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.SYSTEM],
+                "evaluation": "secretsStoredInSpecializedServices",
+                "reasoning": "The more secrets are stored in vaults, the more they are stored in specialized services which encrypt them and offer management features."
+            }
+        ]
     },
     "accessRestriction": {
         "name": "Access restriction",
         "description": "Access to components is restricted to those who actually need it. Also, within a system access controls are put in place to have multiple layers of defense. A dedicated component to manage access policies can be used.",
         "categories": ["networkCommunication", "applicationAdministration"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.ENDPOINT, ENTITIES.BACKING_SERVICE],
-        "applicableEntities": [ENTITIES.SYSTEM],
+        "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM],
         "sources": [],
-        "measures": []
+        "measures": [],
+        "evaluations": [{
+            "targetEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM],
+            "evaluation": "aggregateImpacts",
+            "precondition": "at-least-one",
+            "impactsInterpretation": "median",
+            "reasoning": "How well access restriction is supported depends on the impacting factors. Their impacts are simply aggregated to evaluate this factor.",
+        }
+        ]
     },
     "leastPrivilegedAccess": {
         "name": "Least-privileged access",
@@ -245,16 +303,30 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.ENDPOINT],
         "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM],
         "sources": [{ "key": "Scholl2019", "section": "6 Grant Least-Privileged Access" }, { "key": "Arundel2019", "section": "11 Access Control and Permissions" }],
-        "measures": ["accessRestrictedToCallers"]
+        "measures": ["accessRestrictedToCallers"],
+        "evaluations": [
+            {
+                "targetEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM],
+                "evaluation": "leastPrivilegedAccess",
+                "reasoning": "Access to endpoints is minimal if access is allowed only to those who actually need. it",
+            },
+        ]
     },
     "accessControlManagementConsistency": {
         "name": "Access control management consistency",
         "description": "Access control for endpoints is managed in a consistent way, that means for example always the same format is used for access control lists or a single account directory in a dedicated backing service exists for all components. Access control configurations can then be made always in the same known style and only in a dedicated place. Based on such a consistent access control configuration, also verifications can be performed to ensure that access restrictions are implemented correctly.",
         "categories": ["applicationAdministration", "networkCommunication"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.ENDPOINT, ENTITIES.BACKING_SERVICE],
-        "applicableEntities": [ENTITIES.SYSTEM],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT],
         "sources": [{ "key": "Adkins2020", "section": "6 Access Control (Access control managed by framework)" }, { "key": "Goniwada2021", "section": "9 Policy as Code (consistently describe your security policies in form of code)" }],
-        "measures": ["ratioOfEndpointsThatSupportTokenBasedAuthentication", "ratioOfEndpointsThatSupportApiKeys", "ratioOfEndpointsThatSupportPlaintextAuthentication", "ratioOfEndpointsThatAreIncludedInASingleSignOnApproach"]
+        "measures": ["ratioOfEndpointsThatSupportTokenBasedAuthentication", "ratioOfEndpointsThatSupportApiKeys", "ratioOfEndpointsThatSupportPlaintextAuthentication", "ratioOfEndpointsThatAreIncludedInASingleSignOnApproach", "endpointAccessConsistency", "externalEndpointAccessConsistency"],
+        "evaluations": [
+            {
+                "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT],
+                "evaluation": "accessControlManagementConsistency",
+                "reasoning": "Access control consistency is calculated for all endpoints and all external endpoints separately. Both results are averaged and the factor is evaluated as high if this consistency is also high. If there are not endpoints in the system, the evaluation is none."
+            }
+        ]
     },
     "accountSeparation": {
         "name": "Account separation",
@@ -263,7 +335,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT],
         "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Scholl2019", "section": "6 Use Separate Accounts/Subscriptions/Tenants”" }, { "key": "Adkins2020", "section": "8 Role separation”(let different services run with different roles to restrict access)" }, { "key": "Adkins2020", "section": "8 “Location separation (use different roles for a service in different locations to limit attack impacts)" }],
-        "measures": ["ratioOfUniqueAccountUsage"]
+        "measures": ["ratioOfUniqueAccountUsage"],
+        "evaluations": []
     },
     "authenticationDelegation": {
         "name": "Authentication delegation",
@@ -272,7 +345,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.BACKING_SERVICE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Scholl2019", "section": "6 Use Federated Identity Management" }, { "key": "Goniwada2021", "section": "9 Decentralized Identity" }],
-        "measures": ["ratioOfDelegatedAuthentication"]
+        "measures": ["ratioOfDelegatedAuthentication"],
+        "evaluations": []
     },
     "serviceOrientation": {
         "name": "Service-orientation",
@@ -281,7 +355,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.DATA_AGGREGATE, ENTITIES.ENDPOINT, ENTITIES.LINK],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT],
         "sources": [],
-        "measures": []
+        "measures": [],
+        "evaluations": []
     },
     "limitedFunctionalScope": {
         "name": "Limited functional scope",
@@ -290,7 +365,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.ENDPOINT, ENTITIES.LINK],
         "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SERVICE, ENTITIES.ENDPOINT],
         "sources": [{ "key": "Reznik2019", "section": "9 Microservices Architecture" }, { "key": "Adkins2020", "section": "7 Use Microservices" }, { "key": "Goniwada2021", "section": "3 Polylithic Architecture Principle (Build separate services for different business functionalitites) " }],
-        "measures": ["totalServiceInterfaceCohesion", "cohesivenessOfService", "cohesionOfAServiceBasedOnOtherEndpointsCalled", "lackOfCohesion", "averageLackOfCohesion", "serviceSize", "unreachableEndpointCount"]
+        "measures": ["totalServiceInterfaceCohesion", "cohesivenessOfService", "cohesionOfAServiceBasedOnOtherEndpointsCalled", "lackOfCohesion", "averageLackOfCohesion", "serviceSize", "unreachableEndpointCount"],
+        "evaluations": []
     },
     "limitedDataScope": {
         "name": "Limited data scope",
@@ -299,7 +375,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.ENDPOINT, ENTITIES.DATA_AGGREGATE],
         "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SERVICE, ENTITIES.ENDPOINT],
         "sources": [],
-        "measures": ["dataAggregateScope", "serviceInterfaceDataCohesion", "cohesionBetweenEndpointsBasedOnDataAggregateUsage", "resourceCount"]
+        "measures": ["dataAggregateScope", "serviceInterfaceDataCohesion", "cohesionBetweenEndpointsBasedOnDataAggregateUsage", "resourceCount"],
+        "evaluations": []
     },
     "limitedEndpointScope": {
         "name": "Limited endpoint scope",
@@ -308,7 +385,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.ENDPOINT, ENTITIES.LINK],
         "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SERVICE, ENTITIES.ENDPOINT],
         "sources": [],
-        "measures": ["numberOfProvidedSynchronousAndAsynchronousEndpoints", "numberOfSynchronousEndpointsOfferedByAService", "serviceInterfaceUsageCohesion", "distributionOfSynchronousCalls", "cohesionOfEndpointsBasedOnInvocationByOtherServices", "unusedEndpointCount"]
+        "measures": ["numberOfProvidedSynchronousAndAsynchronousEndpoints", "numberOfSynchronousEndpointsOfferedByAService", "serviceInterfaceUsageCohesion", "distributionOfSynchronousCalls", "cohesionOfEndpointsBasedOnInvocationByOtherServices", "unusedEndpointCount"],
+        "evaluations": []
     },
     "commandQueryResponsibilitySegregation": {
         "name": "Command Query Responsibility Segregation",
@@ -317,7 +395,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.ENDPOINT, ENTITIES.LINK],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Davis2019", "section": "4.4" }, { "key": "Richardson2019", "section": "7.2 Using the CQRS pattern" }, { "key": "Bastani2017", "section": "12 CQRS (Command Query Responsibility Segregation)" }, { "key": "Indrasiri2021", "section": "4 Command and Query Responsibility Segregation Pattern" }, { "key": "Goniwada2021", "section": "4 Command and Query Responsibility Segregation Pattern" }],
-        "measures": ["numberOfReadEndpointsProvidedByAService", "numberOfWriteEndpointsProvidedByAService"]
+        "measures": ["numberOfReadEndpointsProvidedByAService", "numberOfWriteEndpointsProvidedByAService"],
+        "evaluations": []
     },
     "separationByGateways": {
         "name": "Separation by gateways",
@@ -327,7 +406,8 @@ const productFactors = {
         "applicableEntities": [ENTITIES.SYSTEM],
         "sources": [{ "key": "Davis2019", "section": "10.2" },
         { "key": "Richardson2019", "section": "8.2" }, { "key": "Bastani2017", "section": "8 Edge Services: Filtering and Proxying with Netflix Zuul" }, { "key": "Indrasiri2021", "section": "7 API Gateway Pattern" }, { "key": "Indrasiri2021", "section": "7 API Microgateway Pattern (Smaller API microgateways to avoid having a monolithic API gateway)" }, { "key": "Goniwada2021", "section": "4 “Mediator” (Use a mediator pattern between clients and servers)" }],
-        "measures": ["externallyAvailableEndpoints", "centralizationOfExternallyAvailableEndpoints", "apiCompositionUtilizationMetric", "ratioOfRequestTracesThroughGateway"]
+        "measures": ["externallyAvailableEndpoints", "centralizationOfExternallyAvailableEndpoints", "apiCompositionUtilizationMetric", "ratioOfRequestTracesThroughGateway"],
+        "evaluations": []
     },
     "isolatedState": {
         "name": "Isolated state",
@@ -336,7 +416,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.DATA_AGGREGATE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.STORAGE_BACKING_SERVICE],
         "sources": [{ "key": "Goniwada2021", "section": "3 Coupling (Services should be as loosely coupled as possible)" }],
-        "measures": []
+        "measures": [],
+        "evaluations": []
     },
     "mostlyStatelessServices": {
         "name": "Mostly stateless services",
@@ -345,7 +426,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.DATA_AGGREGATE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Davis2019", "section": "5.4" }, { "key": "Scholl2019", "section": "6 “Design Stateless Services That Scale Out" }, { "key": "Goniwada2021", "section": "3 Be Smart with State Principle, 5 Stateless Services" }],
-        "measures": ["ratioOfStateDependencyOfEndpoints", "ratioOfStatefulComponents", "ratioOfStatelessComponents", "degreeToWhichComponentsAreLinkedToStatefulComponents"]
+        "measures": ["ratioOfStateDependencyOfEndpoints", "ratioOfStatefulComponents", "ratioOfStatelessComponents", "degreeToWhichComponentsAreLinkedToStatefulComponents"],
+        "evaluations": []
     },
     "specializedStatefulServices": {
         "name": "Specialized stateful services",
@@ -354,7 +436,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.STORAGE_BACKING_SERVICE, ENTITIES.DATA_AGGREGATE],
         "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Davis2019", "section": "5.4" }, { "key": "Ibryam2020", "section": "11 “Stateful Service”" }],
-        "measures": ["ratioOfSpecializedStatefulServices", "suitablyReplicatedStatefulService"]
+        "measures": ["ratioOfSpecializedStatefulServices", "suitablyReplicatedStatefulService"],
+        "evaluations": []
     },
     "looseCoupling": {
         "name": "Loose coupling",
@@ -363,7 +446,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.LINK, ENTITIES.INFRASTRUCTURE, ENTITIES.DEPLOYMENT_MAPPING],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT],
         "sources": [],
-        "measures": []
+        "measures": [],
+        "evaluations": []
     },
     "asynchronousCommunication": {
         "name": "Asynchronous communication",
@@ -372,7 +456,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.LINK, ENTITIES.ENDPOINT, ENTITIES.REQUEST_TRACE, ENTITIES.BROKER_BACKING_SERVICE,],
         "applicableEntities": [ENTITIES.LINK, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Davis2019", "section": "4.2" }, { "key": "Scholl2019", "section": "6 Prefer Asynchronous Communication" }, { "key": "Richardson2019", "section": "3.3.2, 3.4 Using asynchronous messaging to improve availability" }, { "key": "Indrasiri2021", "section": "3 Service Choreography Pattern" }, { "key": "Ruecker2021", "section": "9 Asynchronous Request/Response (Use asynchronous communication to make services more robust)" }, { "key": "Goniwada2021", "section": "4 Asynchronous Nonblocking I/O" }],
-        "measures": ["numberOfAsynchronousEndpointsOfferedByAService", "numberOfSynchronousOutgoingLinks", "numberOfAsynchronousOutgoingLinks", "ratioOfAsynchronousOutgoingLinks", "degreeOfAsynchronousCommunication", "asynchronousCommunicationUtilization"]
+        "measures": ["numberOfAsynchronousEndpointsOfferedByAService", "numberOfSynchronousOutgoingLinks", "numberOfAsynchronousOutgoingLinks", "ratioOfAsynchronousOutgoingLinks", "degreeOfAsynchronousCommunication", "asynchronousCommunicationUtilization"],
+        "evaluations": []
     },
     "communicationPartnerAbstraction": {
         "name": "Communication partner abstraction",
@@ -381,7 +466,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.LINK, ENTITIES.BROKER_BACKING_SERVICE, ENTITIES.ENDPOINT, ENTITIES.REQUEST_TRACE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.LINK, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Richardson2019", "section": "6 Event-driven communication" }, { "key": "Ruecker2021", "section": "8: Event-driven systems “event chains emerge over time and therefore lack visibility." }],
-        "measures": ["eventSourcingUtilizationMetric"]
+        "measures": ["eventSourcingUtilizationMetric"],
+        "evaluations": []
     },
     "persistentCommunication": {
         "name": "Persistent communication",
@@ -390,7 +476,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.LINK, ENTITIES.BROKER_BACKING_SERVICE, ENTITIES.ENDPOINT],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.LINK, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Indrasiri2021", "section": "5 Event Sourcing Pattern: Log-based message brokers" }],
-        "measures": ["serviceInteractionViaBackingService", "eventSourcingUtilizationMetric"]
+        "measures": ["serviceInteractionViaBackingService", "eventSourcingUtilizationMetric"],
+        "evaluations": []
     },
     "usageOfExistingSolutionsForNonCoreCapabilities": {
         "name": "Usage of existing solutions for non-core capabilities",
@@ -399,7 +486,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.BACKING_SERVICE, ENTITIES.STORAGE_BACKING_SERVICE, ENTITIES.BROKER_BACKING_SERVICE, ENTITIES.PROXY_BACKING_SERVICE, ENTITIES.INFRASTRUCTURE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE],
         "sources": [{ "key": "Reznik2019", "section": "9 Avoid Reinventing the Wheel" }, { "key": "Adkins2020", "section": "12 Frameworks to Enforce Security and Reliability" }],
-        "measures": ["ratioOfNonCustomBackingServices"]
+        "measures": ["ratioOfNonCustomBackingServices"],
+        "evaluations": []
     },
     "standardization": {
         "name": "Standardization",
@@ -408,7 +496,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.ENDPOINT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
         "sources": [],
-        "measures": ["ratioOfStandardizedArtifacts", "ratioOfEntitiesProvidingStandardizedArtifacts"]
+        "measures": ["ratioOfStandardizedArtifacts", "ratioOfEntitiesProvidingStandardizedArtifacts"],
+        "evaluations": []
     },
     "componentSimilarity": {
         "name": "Component similarity",
@@ -417,7 +506,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE, ENTITIES.INFRASTRUCTURE],
         "sources": [{ "key": "Reznik2019", "section": "9 Reference Architecture" }],
-        "measures": ["componentArtifactsSimilarity", "infrastructureArtifactsSimilarity"]
+        "measures": ["componentArtifactsSimilarity", "infrastructureArtifactsSimilarity"],
+        "evaluations": []
     },
     "automatedMonitoring": {
         "name": "Automated Monitoring",
@@ -426,7 +516,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.BACKING_SERVICE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.SERVICE, ENTITIES.INFRASTRUCTURE],
         "sources": [{ "key": "Goniwada2021", "section": "3 High Observability Principle" }],
-        "measures": ["ratioOfInfrastructureNodesThatSupportMonitoring", "ratioOfComponentsThatSupportMonitoring"]
+        "measures": ["ratioOfInfrastructureNodesThatSupportMonitoring", "ratioOfComponentsThatSupportMonitoring"],
+        "evaluations": []
     },
     "consistentCentralizedLogging": {
         "name": "Consistent centralized logging",
@@ -435,7 +526,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.BACKING_DATA, ENTITIES.BACKING_SERVICE, ENTITIES.LINK],
         "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Davis2019", "section": "11.1" }, { "key": "Scholl2019", "section": "6 Use a Unified Logging System" }, { "key": "Scholl2019", "section": "6 Common and Structured Logging Format" }, { "key": "Richardson2019", "section": "11.3.2 Applying the Log aggregation pattern" }, { "key": "Reznik2019", "section": "10 Observability" }, { "key": "Garrison2017", "section": "7 Monitoring and Logging" }, { "key": "Adkins2020", "section": "15 Design your logging to be immutable" }, { "key": "Arundel2019", "section": "15 Logging" }, { "key": "Bastani2017", "section": "13 Application Logging" }, { "key": "Bastani2017", "section": "13 Audit Events (capture events for audits, like failed logins etc)" }, { "key": "Ruecker2021", "section": "11 Custom Centralized Monitoring" }, { "key": "Goniwada2021", "section": "19 One Source of Truth" }],
-        "measures": ["ratioOfComponentsOrInfrastructureNodesThatExportLogsToACentralService"]
+        "measures": ["ratioOfComponentsOrInfrastructureNodesThatExportLogsToACentralService"],
+        "evaluations": []
     },
     "consistentCentralizedMetrics": {
         "name": "Consistent centralized metrics",
@@ -444,7 +536,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.BACKING_DATA, ENTITIES.BACKING_SERVICE, ENTITIES.LINK],
         "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Davis2019", "section": "11.2" }, { "key": "Scholl2019", "section": "6 Tag Your Metrics Appropriately" }, { "key": "Richardson2019", "section": "11.3.4 Applying the Applications metrics pattern" }, { "key": "Garrison2017", "section": "7 Monitoring and Logging, Metrics Aggregation" }, { "key": "Reznik2019", "section": "10 Observability" }, { "key": "Arundel2019", "section": "15 Metrics help predict problems" }, { "key": "Arundel2019", "section": "15 Logging" }, { "key": "Bastani2017", "section": "13 Metrics" }, { "key": "Arundel2019", "section": "16 The RED Pattern (common metrics you should have for services" }, { "key": "Arundel2019", "section": "16 The USE Pattern (common metrics for resources" }, { "key": "Goniwada2021", "section": "19 One Source of Truth" }],
-        "measures": ["ratioOfComponentsOrInfrastructureNodesThatExportMetrics", "ratioOfComponentsOrInfrastructureNodesThatEnablePerformanceAnalytics"]
+        "measures": ["ratioOfComponentsOrInfrastructureNodesThatExportMetrics", "ratioOfComponentsOrInfrastructureNodesThatEnablePerformanceAnalytics"],
+        "evaluations": []
     },
     "distributedTracingOfInvocations": {
         "name": "Distributed tracing of invocations",
@@ -453,7 +546,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.BACKING_SERVICE, ENTITIES.REQUEST_TRACE],
         "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Davis2019", "section": "11.3" }, { "key": "Scholl2019", "section": "6 Use Correlation IDs" }, { "key": "Richardson2019", "section": "11.3.3 AUsing the Distributed tracing pattern" }, { "key": "Garrison2017", "section": "7 Debugging and Tracing" }, { "key": "Reznik2019", "section": "10 Observability" }, { "key": "Arundel2019", "section": "15 Tracing" }, { "key": "Bastani2017", "section": "13 Distributed Tracing" }, { "key": "Ruecker2021", "section": "11 Observability and Distributed Tracing Tools (Use Distributed Tracing)" }, { "key": "Goniwada2021", "section": "19 One Source of Truth" }],
-        "measures": ["distributedTracingSupport"]
+        "measures": ["distributedTracingSupport"],
+        "evaluations": []
     },
     "healthAndReadinessChecks": {
         "name": "Health and readiness Checks",
@@ -462,7 +556,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.ENDPOINT],
         "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Scholl2019", "section": "6 Implement Health Checks and Readiness Checks" }, { "key": "Ibryam2020", "section": "4 Health Probe" }, { "key": "Richardson2019", "section": "11.3.1 Using the Health check API pattern" }, { "key": "Garrison2017", "section": "7 State Management" }, { "key": "Arundel2019", "section": "5 Liveness Probes" }, { "key": "Arundel2019", "section": "5 Readiness Probes" }, { "key": "Bastani2017", "section": "13 Health Checks" }, { "key": "Indrasiri2021", "section": "1 Why container orchestration?, Health monitoring" }, { "key": "Goniwada2021", "section": "4 Fail Fast, 16 Health Probe" }],
-        "measures": ["ratioOfServicesThatProvideHealthEndpoints"]
+        "measures": ["ratioOfServicesThatProvideHealthEndpoints"],
+        "evaluations": []
     },
     "automatedInfrastructureProvisioning": {
         "name": "Automated infrastructure provisioning",
@@ -471,7 +566,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.INFRASTRUCTURE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE],
         "sources": [{ "key": "Reznik2019", "section": "10 Automated Infrastructure" }, { "key": "Goniwada2021", "section": "5 Automation" }],
-        "measures": ["ratioOfAutomaticallyProvisionedInfrastructure"]
+        "measures": ["ratioOfAutomaticallyProvisionedInfrastructure"],
+        "evaluations": []
     },
     "useInfrastructureAsCode": {
         "name": "Use infrastructure as code",
@@ -480,7 +576,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.INFRASTRUCTURE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE],
         "sources": [{ "key": "Scholl2019", "section": "6 Describe Infrastructure Using Code" }, { "key": "Goniwada2021", "section": "16 Declarative Deployment, 17 What Is Infrastructure as Code?" }],
-        "measures": ["linesOfCodeForDeploymentConfiguration", "ratioOfInfrastructureWithIaCArtifact"]
+        "measures": ["linesOfCodeForDeploymentConfiguration", "ratioOfInfrastructureWithIaCArtifact"],
+        "evaluations": []
     },
     "dynamicScheduling": {
         "name": "Dynamic scheduling",
@@ -489,7 +586,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.INFRASTRUCTURE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE],
         "sources": [{ "key": "Reznik2019", "section": "10 Dynamic Scheduling" }, { "key": "Garrison2017", "section": "7 Resource Allocation and Scheduling" }, { "key": "Ibryam2020", "section": "6 Automated Placement" }, { "key": "Indrasiri2021", "section": "1 Why container orchestration?; Resource Management" }, { "key": "Indrasiri2021", "section": "1 Why container orchestration?; Automatic provisioning" }, { "key": "Goniwada2021", "section": "16 Automated Placement" }],
-        "measures": ["ratioOfDeploymentsOnDynamicInfrastructure"]
+        "measures": ["ratioOfDeploymentsOnDynamicInfrastructure"],
+        "evaluations": []
     },
     "serviceIndependence": {
         "name": "Service independence",
@@ -498,7 +596,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.LINK, ENTITIES.DEPLOYMENT_MAPPING],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.SERVICE],
         "sources": [{ "key": "Goniwada2021", "section": "3 Decentralize Everything Principle (Decentralize deployment, governance)" }],
-        "measures": []
+        "measures": [],
+        "evaluations": []
     },
     "lowCoupling": {
         "name": "Low coupling",
@@ -507,7 +606,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.LINK, ENTITIES.ENDPOINT, ENTITIES.DATA_AGGREGATE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.SERVICE],
         "sources": [],
-        "measures": ["numberOfLinksPerComponent", "numberOfConsumedEndpoints", "incomingOutgoingRatioOfAComponent", "ratioOfOutgoingLinksOfAService", "couplingDegreeBasedOnPotentialCoupling", "interactionDensityBasedOnComponents", "interactionDensityBasedOnLinks", "serviceCouplingBasedOnEndpointEntropy", "systemCouplingBasedOnEndpointEntropy", "modularityQualityBasedOnCohesionAndCoupling", "combinedMetricForIndirectDependency", "servicesInterdependenceInTheSystem", "indirectInteractionDensity", "averageNumberOfDirectlyConnectedServices", "numberOfComponentsThatAreLinkedToAComponent", "numberOfComponentsAComponentIsLinkedTo", "numberOfLinksBetweenTwoServices", "aggregateSystemMetricToMeasureServiceCoupling", "numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfComponents", "degreeOfCouplingInASystem", "serviceCouplingBasedOnDataExchangeComplexity", "simpleDegreeOfCouplingInASystem", "directServiceSharing", "transitivelySharedServices", "ratioOfSharedNonExternalComponentsToNonExternalComponents", "ratioOfSharedDependenciesOfNonExternalComponentsToPossibleDependencies", "degreeOfDependenceOnOtherComponents", "averageSystemCoupling", "couplingOfServicesBasedOnUsedDataAggregates", "couplingOfServicesBasedServicesWhichCallThem", "couplingOfServicesBasedServicesWhichAreCalledByThem", "couplingOfServicesBasedOnAmountOfRequestTracesThatIncludeASpecificLink", "couplingOfServicesBasedTimesThatTheyOccurInTheSameRequestTrace"]
+        "measures": ["numberOfLinksPerComponent", "numberOfConsumedEndpoints", "incomingOutgoingRatioOfAComponent", "ratioOfOutgoingLinksOfAService", "couplingDegreeBasedOnPotentialCoupling", "interactionDensityBasedOnComponents", "interactionDensityBasedOnLinks", "serviceCouplingBasedOnEndpointEntropy", "systemCouplingBasedOnEndpointEntropy", "modularityQualityBasedOnCohesionAndCoupling", "combinedMetricForIndirectDependency", "servicesInterdependenceInTheSystem", "indirectInteractionDensity", "averageNumberOfDirectlyConnectedServices", "numberOfComponentsThatAreLinkedToAComponent", "numberOfComponentsAComponentIsLinkedTo", "numberOfLinksBetweenTwoServices", "aggregateSystemMetricToMeasureServiceCoupling", "numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfComponents", "degreeOfCouplingInASystem", "serviceCouplingBasedOnDataExchangeComplexity", "simpleDegreeOfCouplingInASystem", "directServiceSharing", "transitivelySharedServices", "ratioOfSharedNonExternalComponentsToNonExternalComponents", "ratioOfSharedDependenciesOfNonExternalComponentsToPossibleDependencies", "degreeOfDependenceOnOtherComponents", "averageSystemCoupling", "couplingOfServicesBasedOnUsedDataAggregates", "couplingOfServicesBasedServicesWhichCallThem", "couplingOfServicesBasedServicesWhichAreCalledByThem", "couplingOfServicesBasedOnAmountOfRequestTracesThatIncludeASpecificLink", "couplingOfServicesBasedTimesThatTheyOccurInTheSameRequestTrace"],
+        "evaluations": []
     },
     "functionalDecentralization": {
         "name": "Functional decentralization",
@@ -516,7 +616,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.LINK, ENTITIES.ENDPOINT, ENTITIES.REQUEST_TRACE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
         "sources": [],
-        "measures": ["conceptualModularityQualityBasedOnDataAggregateCohesionAndCoupling", "cyclicCommunication", "numberOfSynchronousCycles", "relativeImportanceOfTheService", "extentOfAggregationComponents", "systemCentralization", "densityOfAggregation", "aggregatorCentralization", "dataAggregateConvergenceAcrossComponents", "serviceCriticality", "ratioOfCyclicRequestTraces", "numberOfPotentialCyclesInASystem"]
+        "measures": ["conceptualModularityQualityBasedOnDataAggregateCohesionAndCoupling", "cyclicCommunication", "numberOfSynchronousCycles", "relativeImportanceOfTheService", "extentOfAggregationComponents", "systemCentralization", "densityOfAggregation", "aggregatorCentralization", "dataAggregateConvergenceAcrossComponents", "serviceCriticality", "ratioOfCyclicRequestTraces", "numberOfPotentialCyclesInASystem"],
+        "evaluations": []
     },
     "limitedRequestTraceScope": {
         "name": "Limited request trace scope",
@@ -525,7 +626,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.LINK, ENTITIES.ENDPOINT, ENTITIES.REQUEST_TRACE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
         "sources": [],
-        "measures": ["maximumLengthOfServiceLinkChainPerRequestTrace", "maximumNumberOfServicesWithinARequestTrace", "numberOfRequestTraces", "averageComplexityOfRequestTraces", "requestTraceComplexity", "requestTraceLength", "numberOfCyclesInRequestTraces"]
+        "measures": ["maximumLengthOfServiceLinkChainPerRequestTrace", "maximumNumberOfServicesWithinARequestTrace", "numberOfRequestTraces", "averageComplexityOfRequestTraces", "requestTraceComplexity", "requestTraceLength", "numberOfCyclesInRequestTraces"],
+        "evaluations": []
     },
     "logicalGrouping": {
         "name": "Logical grouping",
@@ -534,7 +636,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.LINK, ENTITIES.REQUEST_TRACE, ENTITIES.NETWORK],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Scholl2019", "section": "6 Use Namespaces to Organize Services in Kubernetes" }, { "key": "Arundel2019", "section": "5 Using Namespaces" }, { "key": "Indrasiri2021", "section": "1 Why container orchestration?; Componentization and isolation" }],
-        "measures": ["namespaceSeparation"]
+        "measures": ["namespaceSeparation"],
+        "evaluations": []
     },
     "backingServiceDecentralization": {
         "name": "Backing service decentralization",
@@ -543,7 +646,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.LINK, ENTITIES.BACKING_SERVICE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.SERVICE, ENTITIES.BACKING_SERVICE],
         "sources": [{ "key": "Indrasiri2021", "section": "4 Decentralized Data Management (decentralized data leads to higher service independence while centralized data leads to higher consistency.)" }, { "key": "Indrasiri2021", "section": "4 Data Service Pattern (As having a negative impact because multiple services should not access the same data);" }, { "key": "Ruecker2021", "section": "2 Different Workflow Engines for different services" }, { "key": "Goniwada2021", "section": "5 Distributed State, Decentralized Data" }],
-        "measures": ["degreeOfStorageBackendSharing", "ratioOfStorageBackendSharing", "sharedStorageBackingServiceInteractions", "databaseTypeUtilization", "numberOfServiceConnectedToStorageBackingService"]
+        "measures": ["degreeOfStorageBackendSharing", "ratioOfStorageBackendSharing", "sharedStorageBackingServiceInteractions", "databaseTypeUtilization", "numberOfServiceConnectedToStorageBackingService"],
+        "evaluations": []
     },
     "addressingAbstraction": {
         "name": "Addressing abstraction",
@@ -552,7 +656,14 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.LINK, ENTITIES.BACKING_SERVICE, ENTITIES.INFRASTRUCTURE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.LINK, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Davis2019", "section": "8.3" }, { "key": "Ibryam2020", "section": "12 Service Discovery" }, { "key": "Richardson2019", "section": "Using service discovery" }, { "key": "Garrison2017", "section": "7 Service Discovery" }, { "key": "Indrasiri2021", "section": "3 Service Registry and Discovery Pattern" }, { "key": "Bastani2017", "section": "7 Routing (Use service discovery with support for health checks and respect varying workloads)" }, { "key": "Indrasiri2021", "section": "3 Service Abstraction Pattern (Use an abstraction layer in front of services (for example Kubernetes Service))" }, { "key": "Goniwada2021", "section": "4 Service Discovery" }],
-        "measures": ["serviceDiscoveryUsage"]
+        "measures": ["serviceDiscoveryUsage"],
+        "evaluations": [
+            {
+                "targetEntities": [ENTITIES.LINK, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+                "evaluation": "addressingAbstraction",
+                "reasoning": "The more communication uses abstract addresses for communication partners, the higher is the adressing abstraction. Usage of abstract addresses can be measured by the usage of service discovery mechanisms."
+            },
+        ]
     },
     "sparsity": {
         "name": "Sparsity",
@@ -561,7 +672,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.LINK, ENTITIES.ENDPOINT, ENTITIES.INFRASTRUCTURE],
         "applicableEntities": [ENTITIES.SYSTEM],
         "sources": [],
-        "measures": ["averageNumberOfEndpointsPerService", "numberOfDependencies", "numberOfVersionsPerService", "concurrentlyAvailableVersionsComplexity", "serviceSupportForTransactions", "numberOfComponents"]
+        "measures": ["averageNumberOfEndpointsPerService", "numberOfDependencies", "numberOfVersionsPerService", "concurrentlyAvailableVersionsComplexity", "serviceSupportForTransactions", "numberOfComponents"],
+        "evaluations": []
     },
     "operationOutsourcing": {
         "name": "Operation outsourcing",
@@ -570,7 +682,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.DEPLOYMENT_MAPPING],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE],
         "sources": [],
-        "measures": ["ratioOfProviderManagedComponentsAndInfrastructure"]
+        "measures": ["ratioOfProviderManagedComponentsAndInfrastructure"],
+        "evaluations": []
     },
     "managedInfrastructure": {
         "name": "Managed infrastructure",
@@ -579,7 +692,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.DEPLOYMENT_MAPPING],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
         "sources": [],
-        "measures": ["ratioOfFullyManagedInfrastructure"]
+        "measures": ["ratioOfFullyManagedInfrastructure"],
+        "evaluations": []
     },
     "managedBackingServices": {
         "name": "Managed backing services",
@@ -588,7 +702,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.BACKING_SERVICE, ENTITIES.BROKER_BACKING_SERVICE, ENTITIES.PROXY_BACKING_SERVICE, ENTITIES.STORAGE_BACKING_SERVICE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Scholl2019", "section": "6 Use Managed Databases and Analytics Services" }, { "key": "Arundel2019", "section": "15 Don't build your own monitoring infrastructure (Use an external monitoring service)" }, { "key": "Bastani2017", "section": "10 managed and automated messaging system (operating your own messaging system increases operational overhead, better use a system managed by a platform)" }],
-        "measures": ["ratioOfManagedBackingServices"]
+        "measures": ["ratioOfManagedBackingServices"],
+        "evaluations": []
     },
     "replication": {
         "name": "Replication",
@@ -597,7 +712,16 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.DATA_AGGREGATE, ENTITIES.DEPLOYMENT_MAPPING, ENTITIES.INFRASTRUCTURE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT],
         "sources": [],
-        "measures": []
+        "measures": [],
+        "evaluations": [
+            {
+                "targetEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+                "evaluation": "aggregateImpacts",
+                "reasoning": "Replication can be achieved in different ways, each way already having a positive impact. Therefore if any of the underlying factors is present, replication is increased.",
+                "precondition": "at-least-one",
+                "impactsInterpretation": "mean"
+            },
+        ]
     },
     "serviceReplication": {
         "name": "Service replication",
@@ -606,7 +730,14 @@ const productFactors = {
         "relevantEntities": [ENTITIES.SYSTEM, ENTITIES.SERVICE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.SERVICE, ENTITIES.REQUEST_TRACE],
         "sources": [],
-        "measures": ["amountOfRedundancy", "serviceReplicationLevel", "medianServiceReplication", "smallestReplicationValue"]
+        "measures": ["amountOfRedundancy", "serviceReplicationLevel", "medianServiceReplication", "smallestReplicationValue"],
+        "evaluations": [
+            {
+                "targetEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+                "evaluation": "serviceReplication",
+                "reasoning": "Service replication is measured by the number of replicas for a service and the redudancy introduced by deploying it on multiple infrastructure instances."
+            },
+        ]
     },
     "horizontalDataReplication": {
         "name": "Horizontal data replication",
@@ -615,7 +746,14 @@ const productFactors = {
         "relevantEntities": [ENTITIES.STORAGE_BACKING_SERVICE, ENTITIES.DATA_AGGREGATE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE, ENTITIES.STORAGE_BACKING_SERVICE],
         "sources": [{ "key": "Scholl2019", "section": "6 Use Data Partitioning and Replication for Scale" }, { "key": "Goniwada2021", "section": "4 Data Replication" }],
-        "measures": ["storageReplicationLevel"]
+        "measures": ["storageReplicationLevel"],
+        "evaluations": [
+            {
+                "targetEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+                "evaluation": "horizontalDataReplication",
+                "reasoning": "Horizontal data replication is measured by the number of replicas for storage backing services."
+            },
+        ]
     },
     "verticalDataReplication": {
         "name": "Vertical data replication",
@@ -624,7 +762,19 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.DATA_AGGREGATE, ENTITIES.REQUEST_TRACE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE, ENTITIES.STORAGE_BACKING_SERVICE],
         "sources": [{ "key": "Scholl2019", "section": "6 Use Caching" }, { "key": "Bastani2017", "section": "9 Caching (Use an In-Memory cache for queries to relieve datastore from traffic; replication into faster data storage)" }, { "key": "Indrasiri2021", "section": "4 Caching Pattern" }],
-        "measures": ["ratioOfCachedDataAggregates", "dataReplicationAlongRequestTrace"]
+        "measures": ["ratioOfCachedDataAggregates", "dataReplicationAlongRequestTrace"],
+        "evaluations": [
+            {
+                "targetEntities": [ENTITIES.SYSTEM],
+                "evaluation": "systemVerticalDataReplication",
+                "reasoning": "Data is replicated vertically if data aggregates are cached by those components using them."
+            },
+            {
+                "targetEntities": [ENTITIES.REQUEST_TRACE],
+                "evaluation": "requestTraceVerticalDataReplication",
+                "reasoning": "Data is replicated vertically if data aggregates used throughout a request trace are cached by the involved components."
+            },
+        ]
     },
     "shardedDataStoreReplication": {
         "name": "Sharded data store replication",
@@ -633,7 +783,14 @@ const productFactors = {
         "relevantEntities": [ENTITIES.STORAGE_BACKING_SERVICE, ENTITIES.DATA_AGGREGATE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE, ENTITIES.STORAGE_BACKING_SERVICE],
         "sources": [{ "key": "Indrasiri2021", "section": "4 Data Sharding Pattern" }, { "key": "Goniwada2021", "section": "4 Data Partitioning Pattern" }],
-        "measures": ["dataShardingLevel"]
+        "measures": ["dataShardingLevel"],
+        "evaluations": [
+            {
+                "targetEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+                "evaluation": "shardedDataStoreReplication",
+                "reasoning": "Sharding is a specific form of replication and is measured by the amount of shards used by each storage backing service."
+            },
+        ]
     },
     "enforcementOfAppropriateResourceBoundaries": {
         "name": "Enforcement of appropriate resource boundaries",
@@ -642,7 +799,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.DEPLOYMENT_MAPPING],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Scholl2019", "section": "6 Define CPU and Memory Limits for Your Containers" }, { "key": "Arundel2019", "section": "5 Resource Limits" }, { "key": "Ibryam2020", "section": "2 Defined Resource requirements" }, { "key": "Arundel2019", "section": "5 Resource Quotas (limit maximum resources for a namespace)" }, { "key": "Goniwada2021", "section": "3 Runtime Confinement Principle, 6 Predictable Demands" }],
-        "measures": ["ratioOfInfrastructureEnforcingResourceBoundaries", "ratioOfDeploymentMappingsWithStatedResourceRequirements"]
+        "measures": ["ratioOfInfrastructureEnforcingResourceBoundaries", "ratioOfDeploymentMappingsWithStatedResourceRequirements"],
+        "evaluations": []
     },
     "built-InAutoscaling": {
         "name": "Built-in autoscaling",
@@ -651,7 +809,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.DEPLOYMENT_MAPPING],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Scholl2019", "section": "6 Use Platform Autoscaling Features" }, { "key": "Ibryam2020", "section": "24 Elastic Scale" }, { "key": "Bastani2017", "section": "13 Autoscaling" }, { "key": "Indrasiri2021", "section": "1 Why container orchestration?; Scaling" }, { "key": "Goniwada2021", "section": "5 Elasticity in Microservices" }],
-        "measures": ["deployedEntitiesAutoscaling", "infrastructureAutoscaling"]
+        "measures": ["deployedEntitiesAutoscaling", "infrastructureAutoscaling"],
+        "evaluations": []
     },
     "infrastructureAbstraction": {
         "name": "Infrastructure abstraction",
@@ -660,7 +819,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.INFRASTRUCTURE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE],
         "sources": [{ "key": "Bastani2017", "section": "14 Service Brokers (make use of service brokers as an additional level of abstraction to automatically add or remove backing services)" }, { "key": "Goniwada2021", "section": "3 Location-Independent Principle" }],
-        "measures": ["ratioOfAbstractedHardware"]
+        "measures": ["ratioOfAbstractedHardware"],
+        "evaluations": []
     },
     "cloudVendorAbstraction": {
         "name": "Cloud vendor abstraction",
@@ -669,7 +829,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.INFRASTRUCTURE, ENTITIES.COMPONENT],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE],
         "sources": [{ "key": "Indrasiri2021", "section": "1 Dynamic Management; Multicloud support" }],
-        "measures": ["servicePortability", "nonProviderSpecificInfrastructureArtifacts", "nonProviderSpecificComponentArtifacts"]
+        "measures": ["servicePortability", "nonProviderSpecificInfrastructureArtifacts", "nonProviderSpecificComponentArtifacts"],
+        "evaluations": []
     },
     "configurationManagement": {
         "name": "Configuration management",
@@ -678,7 +839,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.BACKING_DATA, ENTITIES.INFRASTRUCTURE, ENTITIES.COMPONENT],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
         "sources": [],
-        "measures": []
+        "measures": [],
+        "evaluations": []
     },
     "isolatedConfiguration": {
         "name": "Isolated configuration",
@@ -687,7 +849,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.BACKING_DATA, ENTITIES.INFRASTRUCTURE, ENTITIES.COMPONENT],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Davis2019", "section": "6.2 The app's configuration layer" }, { "key": "Ibryam2020", "section": "18" }, { "key": "Scholl2019", "section": "6 Never Store Secrets or Configuration Inside an Image" }, { "key": "Adkins2020", "section": "14 Treat Configuration as Code" }, { "key": "Indrasiri2021", "section": " Decoupled Configurations" }],
-        "measures": ["configurationExternalization"]
+        "measures": ["configurationExternalization"],
+        "evaluations": []
     },
     "configurationStoredInSpecializedServices": {
         "name": "Configuration stored in specialized services",
@@ -696,7 +859,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.BACKING_DATA, ENTITIES.INFRASTRUCTURE, ENTITIES.COMPONENT, ENTITIES.BACKING_SERVICE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.SERVICE, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Ibryam2020", "section": "19 Configuration Resource" }, { "key": "Richardson2019", "section": "11.2 “Designing configurable services" }, { "key": "Arundel2019", "section": "10 ConfigMaps" }, { "key": "Bastani2017", "section": "2 Centralized, Journaled Configuration" }, { "key": "Bastani2017", "section": "2 Refreshable Configuration" }],
-        "measures": ["configurationStoredInConfigService"]
+        "measures": ["configurationStoredInConfigService"],
+        "evaluations": []
     },
     "contract-BasedLinks": {
         "name": "Contract-based links",
@@ -705,7 +869,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.LINK, ENTITIES.ENDPOINT, ENTITIES.COMPONENT],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Bastani2017", "section": "4 Consumer-Driven Contract Testing (Use contracts for APIs to test against)" }],
-        "measures": ["ratioOfEndpointsCoveredByContract"]
+        "measures": ["ratioOfEndpointsCoveredByContract"],
+        "evaluations": []
     },
     "standardizedSelf-containedDeploymentUnit": {
         "name": "Standardized self-contained deployment unit",
@@ -714,7 +879,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.DEPLOYMENT_MAPPING],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Reznik2019", "section": "10 Containerized Apps" }, { "key": "Adkins2020", "section": "7 Use Containers (smaller deployments, separated operating system, portable);" }, { "key": "Indrasiri2021", "section": "1 Use Containerization and Container Orchestration" }, { "key": "Garrison2017", "section": "7 Application Runtime and Isolation" }, { "key": "Goniwada2021", "section": "3 Deploy Independently Principle (deploy services in independent containers), Self-Containment Principle, 5 Containerization" }],
-        "measures": ["standardizedDeployments", "selfContainedDeployments"]
+        "measures": ["standardizedDeployments", "selfContainedDeployments"],
+        "evaluations": []
     },
     "immutableArtifacts": {
         "name": "Immutable artifacts",
@@ -723,7 +889,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.DEPLOYMENT_MAPPING, ENTITIES.INFRASTRUCTURE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Scholl2019", "section": "6 Don't Modify Deployed Infrastructure" }, { "key": "Indrasiri2021", "section": "1 Containerization" }, { "key": "Goniwada2021", "section": "3 Process Disposability Principle, Image Immutability Principle" }],
-        "measures": ["numberOfDeploymentTargetEnvironments", "replacingDeployments"]
+        "measures": ["numberOfDeploymentTargetEnvironments", "replacingDeployments"],
+        "evaluations": []
     },
     "guardedIngress": {
         "name": "Guarded ingress",
@@ -732,7 +899,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.ENDPOINT, ENTITIES.EXTERNAL_ENDPOINT, ENTITIES.COMPONENT, ENTITIES.PROXY_BACKING_SERVICE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Scholl2019", "section": "6 Implement Rate Limiting and Throttling" }, { "key": "Adkins2020", "section": "8 Throttling (Delaying processing or responding to remain functional and decrease traffic from individual clients) (should be automated, part of graceful degradation)" }, { "key": "Adkins2020", "section": "8 Load shedding (In case of traffic spike, deny low priority requests to remain functional) (should be automated, part of graceful degradation)" }, { "key": "Goniwada2021", "section": "5 Throttling " }],
-        "measures": ["ratioOfComponentsWhoseIngressIsProxied"]
+        "measures": ["ratioOfComponentsWhoseIngressIsProxied"],
+        "evaluations": []
     },
     "distribution": {
         "name": "Distribution",
@@ -741,7 +909,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.DEPLOYMENT_MAPPING],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
         "sources": [],
-        "measures": ["componentDensity", "numberOfServiceHostedOnOneInfrastructure"]
+        "measures": ["componentDensity", "numberOfServiceHostedOnOneInfrastructure"],
+        "evaluations": []
     },
     "physicalDataDistribution": {
         "name": "Physical data distribution",
@@ -750,7 +919,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.DEPLOYMENT_MAPPING, ENTITIES.DATA_AGGREGATE, ENTITIES.STORAGE_BACKING_SERVICE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.STORAGE_BACKING_SERVICE, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Scholl2019", "section": "6 Keep Data in Multiple Regions or Zones" }, { "key": "Indrasiri2021", "section": "4 Data Sharding Pattern: Geographically distribute data" }],
-        "measures": ["numberOfAvailabilityZonesUsed"]
+        "measures": ["numberOfAvailabilityZonesUsed"],
+        "evaluations": []
     },
     "physicalServiceDistribution": {
         "name": "Physical service distribution",
@@ -759,7 +929,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.DEPLOYMENT_MAPPING],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
         "sources": [],
-        "measures": ["numberOfAvailabilityZonesUsed"]
+        "measures": ["numberOfAvailabilityZonesUsed"],
+        "evaluations": []
     },
     "seamlessUpgrades": {
         "name": "Seamless upgrades",
@@ -768,7 +939,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.DEPLOYMENT_MAPPING],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
         "sources": [],
-        "measures": []
+        "measures": [],
+        "evaluations": []
     },
     "rollingUpgradesEnabled": {
         "name": "Rolling upgrades enabled",
@@ -777,7 +949,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.DEPLOYMENT_MAPPING],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Davis2019", "section": "7.2" }, { "key": "Scholl2019", "section": "6 Use Zero-Downtime Releases" }, { "key": "Ibryam2020", "section": "3 Declarative Deployment" }, { "key": "Reznik2019", "section": "10 Risk-Reducing Deployment Strategies" }, { "key": "Arundel2019", "section": "13 Rolling Updates" }, { "key": "Indrasiri2021", "section": "1 Why container orchestration?; Rolling upgrades" }],
-        "measures": ["rollingUpdateOption"]
+        "measures": ["rollingUpdateOption"],
+        "evaluations": []
     },
     "automatedInfrastructureMaintenance": {
         "name": "Automated infrastructure maintenance",
@@ -786,7 +959,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.INFRASTRUCTURE, ENTITIES.DEPLOYMENT_MAPPING],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Reznik2019", "section": "10 Automated Infrastructure" }, { "key": "Goniwada2021", "section": "5 Automation" }],
-        "measures": ["ratioOfAutomaticallyMaintainedInfrastructure"]
+        "measures": ["ratioOfAutomaticallyMaintainedInfrastructure"],
+        "evaluations": []
     },
     "autonomousFaultHandling": {
         "name": "Autonomous fault handling",
@@ -795,7 +969,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.LINK, ENTITIES.ENDPOINT, ENTITIES.INFRASTRUCTURE, ENTITIES.DEPLOYMENT_MAPPING],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.SERVICE, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
         "sources": [],
-        "measures": []
+        "measures": [],
+        "evaluations": []
     },
     "invocationTimeouts": {
         "name": "Invocation timeouts",
@@ -804,7 +979,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.LINK, ENTITIES.ENDPOINT],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.SERVICE, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Indrasiri2021", "section": "3 Resilient Connectivity Pattern: Time-out" }, { "key": "Richardson2019", "section": "3.2.3 Handling partial failures using the Circuit Breaker pattern" }, { "key": "Goniwada2021", "section": "5 Timeout" }],
-        "measures": ["linksWithTimeout"]
+        "measures": ["linksWithTimeout"],
+        "evaluations": []
     },
     "retriesForSafeInvocations": {
         "name": "Retries for safe invocations",
@@ -813,7 +989,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.LINK, ENTITIES.ENDPOINT],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Davis2019", "section": "9.1" }, { "key": "Scholl2019", "section": "6 Handle Transient Failures with Retries" }, { "key": "Scholl2019", "section": "6 Use a Finite Number of Retries" }, { "key": "Bastani2017", "section": "12 Isolating Failures and Graceful Degradation: Use retries" }, { "key": "Indrasiri2021", "section": "3 Resilient Connectivity Pattern: Retry" }, { "key": "Ruecker2021", "section": "9 Synchronous Request/Response (Use retries in synchronous communications)" }, { "key": "Ruecker2021", "section": "9 The Importance of Idempotency (Communication which is retried needs idempotency)" }, { "key": "Goniwada2021", "section": "Idempotent Service Operation, Retry, 5 Retry " }],
-        "measures": ["numberOfLinksWithRetryLogic"]
+        "measures": ["numberOfLinksWithRetryLogic"],
+        "evaluations": []
     },
     "circuitBreakedCommunication": {
         "name": "Circuit breaked communication",
@@ -822,7 +999,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.LINK, ENTITIES.ENDPOINT],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Davis2019", "section": "10.1" }, { "key": "Scholl2019", "section": "6 Use Circuit Breakers for Nontransient Failures" }, { "key": "Richardson2019", "section": "3.2.3 Handling partial failures using the Circuit Breaker pattern" }, { "key": "Bastani2017", "section": "12 Isolating Failures and Graceful Degradation: circuit breaker" }, { "key": "Indrasiri2021", "section": "3 Resilient Connectivity Pattern: Circuit breaker" }, { "key": "Goniwada2021", "section": "4 Circuit Breaker" }],
-        "measures": ["numberOfLinksWithComplexFailover"]
+        "measures": ["numberOfLinksWithComplexFailover"],
+        "evaluations": []
     },
     "automatedRestarts": {
         "name": "Automated restarts",
@@ -831,7 +1009,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.DEPLOYMENT_MAPPING],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE],
         "sources": [{ "key": "Bastani2017", "section": "13 automatic remediation" }, { "key": "Indrasiri2021", "section": "1 Why container orchestration?; High availability" }, { "key": "Goniwada2021", "section": "5 Self-Healing" }],
-        "measures": ["deploymentsWithRestart"]
+        "measures": ["deploymentsWithRestart"],
+        "evaluations": []
     },
     "api-BasedCommunication": {
         "name": "API-based communication",
@@ -840,7 +1019,8 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.ENDPOINT, ENTITIES.LINK],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.SERVICE, ENTITIES.ENDPOINT, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Reznik2019", "section": "9 Communicate Through APIs" }, { "key": "Adkins2020", "section": "6 Understandable Interface Specifications (Use Interface specifications for understandability" }, { "key": "Bastani2017", "section": "6 Everything is an API (Services are integrated via APIs)" }, { "key": "Indrasiri2021", "section": "2 Service Definitions in Synchronous Communication (Use a service definition for each service);" }, { "key": "Indrasiri2021", "section": "2 Service Definition in Asynchronous Communication (Use schemas to define message formats);" }, { "key": "Goniwada2021", "section": "3 API First Principle" }],
-        "measures": ["ratioOfDocumentedEndpoints"]
+        "measures": ["ratioOfDocumentedEndpoints"],
+        "evaluations": []
     },
     "consistentlyMediatedCommunication": {
         "name": "Consistently mediated communication",
@@ -849,7 +1029,14 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.ENDPOINT, ENTITIES.LINK, ENTITIES.BACKING_SERVICE, ENTITIES.PROXY_BACKING_SERVICE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Indrasiri2021", "section": "3 Sidecar Pattern, Service Mesh Pattern, Service Abstraction Pattern (Proxy communication with services to include service discovery and load balancing)" }, { "key": "Davis2019", "section": "10.3" }, { "key": "Richardson2019", "section": "11.4.2" }],
-        "measures": ["serviceMeshUsage"]
+        "measures": ["serviceMeshUsage"],
+        "evaluations": [
+            {
+                "targetEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+                "evaluation": "consistentlyMediatedCommunication",
+                "reasoning": "Communication is mediated, if ingress and egress of components is proxied for example by a service mesh"
+            },
+        ]
     }
 } satisfies { [productFactorKey: string]: ProductFactorSpec }
 
@@ -975,7 +1162,7 @@ type MeasureSpec = {
 const measures = {
     "ratioOfEndpointsSupportingSsl": {
         "name": "Ratio of endpoints that support SSL",
-        "calculation": "Endpoints that support SSL / Endpoints that do not support SSL",
+        "calculation": "Endpoints that support SSL / All endpoints",
         "sources": ["Ntentos2022"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
     },
@@ -2068,119 +2255,6 @@ const measures = {
 const measureKeys = Object.freeze(measures);
 export type MeasureKey = keyof typeof measureKeys;
 
-
-export const DEFAULT_PRECONDITION: EvaluationPrecondition = "at-least-one";
-export type EvaluationPrecondition = "at-least-one" | "all" | "majority";
-export const DEFAULT_IMPACTS_INTERPRETATION: IncomingImpactsInterpretation = "mean";
-export type IncomingImpactsInterpretation = "lowest" | "highest" | "mean" | "median" | "custom"
-
-type ProductFactorEvaluationSpec = {
-    targetFactor: ProductFactorKey,
-    targetEntities: `${ENTITIES}`[],
-    evaluation: string,
-    reasoning: string,
-    precondition?: EvaluationPrecondition,
-    impactsInterpretation?: IncomingImpactsInterpretation,
-    customImpactInterpretation?: (list: number[]) => number
-}
-
-const productFactorEvaluations = [
-    {
-        "targetFactor": "serviceReplication",
-        "targetEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
-        "evaluation": "serviceReplication",
-        "reasoning": "Service replication is measured by the number of replicas for a service and the redudancy introduced by deploying it on multiple infrastructure instances."
-    },
-    {
-        "targetFactor": "horizontalDataReplication",
-        "targetEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
-        "evaluation": "horizontalDataReplication",
-        "reasoning": "Horizontal data replication is measured by the number of replicas for storage backing services."
-    },
-    {
-        "targetFactor": "replication",
-        "targetEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
-        "evaluation": "aggregateImpacts",
-        "reasoning": "Replication can be achieved in different ways, each way already having a positive impact. Therefore if any of the underlying factors is present, replication is increased.",
-        "precondition": "at-least-one",
-        "impactsInterpretation": "mean"
-    },
-    {
-        "targetFactor": "shardedDataStoreReplication",
-        "targetEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
-        "evaluation": "shardedDataStoreReplication",
-        "reasoning": "Sharding is a specific form of replication and is measured by the amount of shards used by each storage backing service."
-    },
-    {
-        "targetFactor": "verticalDataReplication",
-        "targetEntities": [ENTITIES.SYSTEM],
-        "evaluation": "systemVerticalDataReplication",
-        "reasoning": "Data is replicated vertically if data aggregates are cached by those components using them."
-    },
-    {
-        "targetFactor": "verticalDataReplication",
-        "targetEntities": [ENTITIES.REQUEST_TRACE],
-        "evaluation": "requestTraceVerticalDataReplication",
-        "reasoning": "Data is replicated vertically if data aggregates used throughout a request trace are cached by the involved components."
-    },
-    {
-        "targetFactor": "consistentlyMediatedCommunication",
-        "targetEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
-        "evaluation": "consistentlyMediatedCommunication",
-        "reasoning": "Communication is mediated, if ingress and egress of components is proxied for example by a service mesh"
-    },
-    {
-        "targetFactor": "addressingAbstraction",
-        "targetEntities": [ENTITIES.LINK, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
-        "evaluation": "addressingAbstraction",
-        "reasoning": "The more communication uses abstract addresses for communication partners, the higher is the adressing abstraction. Usage of abstract addresses can be measured by the usage of service discovery mechanisms."
-    },
-    {
-        "targetFactor": "dataEncryptionInTransit",
-        "targetEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
-        "evaluation": "dataEncryptionInTransit",
-        "reasoning": "The more communication is encrypted, the better confidential data is protected. It can be measured by links targeting secure endpoints."
-    },
-    {
-        "targetFactor": "dataEncryptionInTransit",
-        "targetEntities": [ENTITIES.LINK],
-        "evaluation": "linkDataEncryptionInTransit",
-        "reasoning": "The more communication is encrypted, the better confidential data is protected. It can be measured by links targeting secure endpoints."
-    },
-    {
-        "targetFactor": "isolatedSecrets",
-        "targetEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
-        "evaluation": "isolatedSecrets",
-        "reasoning": "The more secrets are stored outside of the components which use them, the more secrets are isolated."
-    },
-    {
-        "targetFactor": "secretsStoredInSpecializedServices",
-        "targetEntities": [ENTITIES.COMPONENT,  ENTITIES.INFRASTRUCTURE, ENTITIES.SYSTEM],
-        "evaluation": "secretsStoredInSpecializedServices",
-        "reasoning": "The more secrets are stored in vaults, the more they are stored in specialized services which encrypt them and offer management features."
-    },
-    {
-        "targetFactor": "secretsManagement",
-        "targetEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
-        "evaluation": "aggregateImpacts",
-        "reasoning": "Secrets management is concered with where and how secrets are stored and how they are made accessible to components which need them.",
-        "precondition": "at-least-one",
-        "impactsInterpretation": "mean"
-    },
-    {
-        "targetFactor": "leastPrivilegedAccess",
-        "targetEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM],
-        "evaluation": "leastPrivilegedAccess",
-        "reasoning": "Access to endpoints is minimal if access is allowed only to those who actually need. it",
-    },
-    /*{
-        "targetFactor": "accessControlManagementConsistency",
-        "targetEntities": [ENTITIES.SYSTEM],
-        "evaluation": "accessControlManagementConsistency",
-        "reasoning": "Accesss control mangement is consistent, if the same approach is used for most endpoints."
-    }*/
-] satisfies ProductFactorEvaluationSpec[]
-
 type QualityAspectEvaluationSpec = {
     targetAspect: QualityAspectKey
     evaluation: string,
@@ -2218,6 +2292,13 @@ const qualityAspectEvaluations = [
         "reasoning": "The confidentiality of an application depends on the confidentatiality of data both at rest (stored in an environemnt or a database) and it transit (when requests and responses are send via the network.) ",
         "precondition": "at-least-one",
         "impactsInterpretation": "median"
+    },
+    {
+        "targetAspect": "integrity",
+        "evaluation": "aggregateImpacts",
+        "reasoning": "The integrity depends on how access is restricted.",
+        "precondition": "at-least-one",
+        "impactsInterpretation": "median"
     }
 ] satisfies QualityAspectEvaluationSpec[]
 
@@ -2228,7 +2309,6 @@ export type QualityModelSpec = {
     productFactors: { [productFatorKey in ProductFactorKey]: ProductFactorSpec },
     impacts: ImpactSpec[],
     measures: { [measureKey in MeasureKey]: MeasureSpec },
-    productFactorEvaluations: ProductFactorEvaluationSpec[],
     qualityAspectEvaluations: QualityAspectEvaluationSpec[]
 }
 
@@ -2238,6 +2318,5 @@ export const qualityModel = {
     "productFactors": productFactors,
     "impacts": impacts,
     "measures": measures,
-    "productFactorEvaluations": productFactorEvaluations,
     "qualityAspectEvaluations": qualityAspectEvaluations
 } satisfies QualityModelSpec;
