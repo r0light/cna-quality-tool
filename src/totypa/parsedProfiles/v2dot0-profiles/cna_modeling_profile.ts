@@ -10,7 +10,7 @@ export const cna_modeling_profile: TOSCA_File = {
   "metadata": {
     "template_name": "profile.yaml",
     "template_author": "Distributed Systems Group",
-    "template_version": 0.5
+    "template_version": 0.6
   },
   "description": "This TOSCA definitions document contains the CNA Modeling TOSCA profile",
   "dsl_definitions": "",
@@ -2848,9 +2848,9 @@ export const cna_modeling_profile: TOSCA_File = {
                 "$value",
                 [
                   "basic_authentication",
-                  "JWT",
                   "Token",
-                  "OAuth2"
+                  "API-Key",
+                  "Single Sign-On"
                 ]
               ]
             }
@@ -2966,9 +2966,9 @@ export const cna_modeling_profile: TOSCA_File = {
                 "$value",
                 [
                   "basic_authentication",
-                  "JWT",
                   "Token",
-                  "OAuth2"
+                  "API-Key",
+                  "Single Sign-On"
                 ]
               ]
             }

@@ -830,6 +830,117 @@ export const ratioOfDocumentedEndpoints: Calculation = (parameters: CalculationP
     return documented.length / allEndpoints.length;
 }
 
+export const ratioOfEndpointsThatSupportTokenBasedAuthentication: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+    let allEndpoints = parameters.entity.getLinks.flatMap(links => links).map(link => link.getTargetEndpoint);
+    if (parameters.entity.getExternalEndpoint) {
+        allEndpoints.push(parameters.entity.getExternalEndpoint);
+    }
+
+    if (allEndpoints.length === 0) {
+        return "n/a";
+    }
+
+    let supportingToken = [];
+
+    for (const endpoint of allEndpoints) {
+        if (endpoint.getProperty("supported_authentication_methods").value.includes("Token")) {
+            supportingToken.push(endpoint.getId);
+        }
+    }
+
+    return supportingToken.length / allEndpoints.length;
+}
+
+export const ratioOfEndpointsThatSupportApiKeys: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+    let allEndpoints = parameters.entity.getLinks.flatMap(links => links).map(link => link.getTargetEndpoint);
+    if (parameters.entity.getExternalEndpoint) {
+        allEndpoints.push(parameters.entity.getExternalEndpoint);
+    }
+
+    if (allEndpoints.length === 0) {
+        return "n/a";
+    }
+
+    let supportingToken = [];
+
+    for (const endpoint of allEndpoints) {
+        if (endpoint.getProperty("supported_authentication_methods").value.includes("API-Key")) {
+            supportingToken.push(endpoint.getId);
+        }
+    }
+
+    return supportingToken.length / allEndpoints.length;
+}
+
+
+export const ratioOfEndpointsThatSupportPlaintextAuthentication: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+    let allEndpoints = parameters.entity.getLinks.flatMap(links => links).map(link => link.getTargetEndpoint);
+    if (parameters.entity.getExternalEndpoint) {
+        allEndpoints.push(parameters.entity.getExternalEndpoint);
+    }
+
+    if (allEndpoints.length === 0) {
+        return "n/a";
+    }
+
+    let supportingToken = [];
+
+    for (const endpoint of allEndpoints) {
+        if (endpoint.getProperty("supported_authentication_methods").value.includes("basic_authentication")) {
+            supportingToken.push(endpoint.getId);
+        }
+    }
+
+    return supportingToken.length / allEndpoints.length;
+}
+
+
+export const ratioOfEndpointsThatAreIncludedInASingleSignOnApproach: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+    let allEndpoints = parameters.entity.getLinks.flatMap(links => links).map(link => link.getTargetEndpoint);
+    if (parameters.entity.getExternalEndpoint) {
+        allEndpoints.push(parameters.entity.getExternalEndpoint);
+    }
+
+    if (allEndpoints.length === 0) {
+        return "n/a";
+    }
+
+    let supportingToken = [];
+
+    for (const endpoint of allEndpoints) {
+        if (endpoint.getProperty("supported_authentication_methods").value.includes("Single Sign-On")) {
+            supportingToken.push(endpoint.getId);
+        }
+    }
+
+    return supportingToken.length / allEndpoints.length;
+}
+
+export const endpointAccessConsistency: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+    let allEndpoints = parameters.entity.getLinks.flatMap(links => links).map(link => link.getTargetEndpoint);
+
+    if (allEndpoints.length <= 1) {
+        return "n/a";
+    }
+
+    let pairwiseSimilarity = [];
+
+    for ( const [index, endpointA] of allEndpoints.entries()) {
+        for (const endpointB of allEndpoints.slice(index+1)) {
+            let setA = new Set(endpointA.getProperty("supported_authentication_methods").value);
+            let setB = new Set(endpointB.getProperty("supported_authentication_methods").value);
+
+            if (setA.union(setB).size === 0) {
+                pairwiseSimilarity.push(1);
+            } else {
+                let similarity = setA.intersection(setB).size / setA.union(setB).size;
+                pairwiseSimilarity.push(similarity);
+            }
+        }
+    }
+
+    return average(pairwiseSimilarity);
+}
 
 export const requestTraceMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
@@ -873,6 +984,11 @@ export const requestTraceMeasureImplementations: { [measureKey: string]: Calcula
     "ratioOfEndpointsCoveredByContract": ratioOfEndpointsCoveredByContract,
     "standardizedDeployments": standardizedDeployments,
     "selfContainedDeployments": selfContainedDeployments,
-    "ratioOfDocumentedEndpoints": ratioOfDocumentedEndpoints
+    "ratioOfDocumentedEndpoints": ratioOfDocumentedEndpoints,
+    "ratioOfEndpointsThatSupportTokenBasedAuthentication": ratioOfEndpointsThatSupportTokenBasedAuthentication,
+    "ratioOfEndpointsThatSupportApiKeys": ratioOfEndpointsThatSupportApiKeys,
+    "ratioOfEndpointsThatSupportPlaintextAuthentication": ratioOfEndpointsThatSupportPlaintextAuthentication,
+    "ratioOfEndpointsThatAreIncludedInASingleSignOnApproach": ratioOfEndpointsThatAreIncludedInASingleSignOnApproach,
+    "endpointAccessConsistency": endpointAccessConsistency
 }
 

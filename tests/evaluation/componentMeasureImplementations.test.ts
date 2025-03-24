@@ -1948,3 +1948,135 @@ test("ratioOfDocumentedEndpoints", () => {
     let measureValue = componentMeasureImplementations["ratioOfDocumentedEndpoints"]({ entity: serviceA, system: system });
     expect(measureValue).toEqual(0.5);
 })
+
+test("ratioOfEndpointsThatSupportTokenBasedAuthentication", () => {
+    let system = new System("sys1", "testSystem");
+
+    let serviceA = new Service("s1", "service A", getEmptyMetaData())
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    endpointA.setPropertyValue("supported_authentication_methods", ["Token", "basic_authentication"]);
+    serviceA.addEndpoint(endpointA);
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    endpointB.setPropertyValue("supported_authentication_methods", []);
+    serviceA.addEndpoint(endpointB);
+
+    let backingServiceB = new Service("bs1", "backing service 1", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    endpointC.setPropertyValue("supported_authentication_methods", ["Token", "basic_authentication"]);
+    backingServiceB.addEndpoint(endpointC);
+
+    system.addEntities([serviceA, backingServiceB]);
+
+    let measureValue = componentMeasureImplementations["ratioOfEndpointsThatSupportTokenBasedAuthentication"]({ entity: serviceA, system: system });
+    expect(measureValue).toEqual(0.5);
+})
+
+test("ratioOfEndpointsThatSupportApiKeys", () => {
+    let system = new System("sys1", "testSystem");
+
+    let serviceA = new Service("s1", "service A", getEmptyMetaData())
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    endpointA.setPropertyValue("supported_authentication_methods", ["API-Key", "basic_authentication"]);
+    serviceA.addEndpoint(endpointA);
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    endpointB.setPropertyValue("supported_authentication_methods", []);
+    serviceA.addEndpoint(endpointB);
+
+    let backingServiceB = new Service("bs1", "backing service 1", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    endpointC.setPropertyValue("supported_authentication_methods", ["Token", "API-Key"]);
+    backingServiceB.addEndpoint(endpointC);
+
+    system.addEntities([serviceA, backingServiceB]);
+
+    let measureValue = componentMeasureImplementations["ratioOfEndpointsThatSupportApiKeys"]({ entity: serviceA, system: system });
+    expect(measureValue).toEqual(0.5);
+})
+
+test("ratioOfEndpointsThatSupportPlaintextAuthentication", () => {
+    let system = new System("sys1", "testSystem");
+
+    let serviceA = new Service("s1", "service A", getEmptyMetaData())
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    endpointA.setPropertyValue("supported_authentication_methods", ["Token", "basic_authentication"]);
+    serviceA.addEndpoint(endpointA);
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    endpointB.setPropertyValue("supported_authentication_methods", []);
+    serviceA.addEndpoint(endpointB);
+
+    let backingServiceB = new Service("bs1", "backing service 1", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    endpointC.setPropertyValue("supported_authentication_methods", ["Token", "basic_authentication"]);
+    backingServiceB.addEndpoint(endpointC);
+
+    system.addEntities([serviceA, backingServiceB]);
+
+    let measureValue = componentMeasureImplementations["ratioOfEndpointsThatSupportPlaintextAuthentication"]({ entity: serviceA, system: system });
+    expect(measureValue).toEqual(0.5);
+})
+
+test("ratioOfEndpointsThatAreIncludedInASingleSignOnApproach", () => {
+    let system = new System("sys1", "testSystem");
+
+    let serviceA = new Service("s1", "service A", getEmptyMetaData())
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    endpointA.setPropertyValue("supported_authentication_methods", ["Token", "Single Sign-On"]);
+    serviceA.addEndpoint(endpointA);
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    endpointB.setPropertyValue("supported_authentication_methods", []);
+    serviceA.addEndpoint(endpointB);
+
+    let backingServiceB = new Service("bs1", "backing service 1", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    endpointC.setPropertyValue("supported_authentication_methods", ["Single Sign-On"]);
+    backingServiceB.addEndpoint(endpointC);
+
+    system.addEntities([serviceA, backingServiceB]);
+
+    let measureValue = componentMeasureImplementations["ratioOfEndpointsThatAreIncludedInASingleSignOnApproach"]({ entity: serviceA, system: system });
+    expect(measureValue).toEqual(0.5);
+})
+
+test("endpointAccessConsistency", () => {
+    let system = new System("sys1", "testSystem");
+
+    let serviceA = new Service("s1", "service A", getEmptyMetaData())
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    endpointA.setPropertyValue("supported_authentication_methods", ["Token", "Single Sign-On"]);
+    serviceA.addEndpoint(endpointA);
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    endpointB.setPropertyValue("supported_authentication_methods", ["Single Sign-On"]);
+    serviceA.addEndpoint(endpointB);
+
+    let backingServiceB = new Service("bs1", "backing service 1", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    endpointC.setPropertyValue("supported_authentication_methods", ["Single Sign-On"]);
+    backingServiceB.addEndpoint(endpointC);
+
+    system.addEntities([serviceA, backingServiceB]);
+
+    let measureValue = componentMeasureImplementations["endpointAccessConsistency"]({ entity: serviceA, system: system });
+    expect(measureValue).toEqual(0.5);
+})
+
+test("externalEndpointAccessConsistency", () => {
+    let system = new System("sys1", "testSystem");
+
+    let serviceA = new Service("s1", "service A", getEmptyMetaData())
+    let endpointA = new ExternalEndpoint("e1", "endpoint 1", getEmptyMetaData());
+    endpointA.setPropertyValue("supported_authentication_methods", ["Single Sign-On"]);
+    serviceA.addEndpoint(endpointA);
+    let endpointB = new ExternalEndpoint("e2", "endpoint 2", getEmptyMetaData());
+    endpointB.setPropertyValue("supported_authentication_methods", ["Single Sign-On"]);
+    serviceA.addEndpoint(endpointB);
+
+    let backingServiceB = new Service("bs1", "backing service 1", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    endpointC.setPropertyValue("supported_authentication_methods", ["Single Sign-On"]);
+    backingServiceB.addEndpoint(endpointC);
+
+    system.addEntities([serviceA, backingServiceB]);
+
+    let measureValue = componentMeasureImplementations["externalEndpointAccessConsistency"]({ entity: serviceA, system: system });
+    expect(measureValue).toEqual(1);
+})

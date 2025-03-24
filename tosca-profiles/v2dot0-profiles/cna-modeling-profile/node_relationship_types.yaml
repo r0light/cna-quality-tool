@@ -500,7 +500,7 @@ node_types:
         entry_schema:
           description: An authentication method that is supported by this endpoint.
           type: string
-          validation: { $valid_values: [ $value, ["basic_authentication", "JWT", "Token", "OAuth2"]]}
+          validation: { $valid_values: [ $value, ["basic_authentication", "Token", "API-Key", "Single Sign-On"]]}
       url_path:
         description: >-
           The optional URL path of the endpoint's address if applicable for the protocol.

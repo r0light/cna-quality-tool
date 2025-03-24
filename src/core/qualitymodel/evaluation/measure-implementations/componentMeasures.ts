@@ -1050,6 +1050,108 @@ export const ratioOfDocumentedEndpoints: Calculation = (parameters: CalculationP
     return documented.length / allComponentEndpoints.length;
 }
 
+export const ratioOfEndpointsThatSupportTokenBasedAuthentication: Calculation = (parameters: CalculationParameters<Component>) => {
+    let allComponentEndpoints = parameters.entity.getEndpointEntities.concat(parameters.entity.getExternalEndpointEntities);
+
+    if (allComponentEndpoints.length === 0) {
+        return "n/a";
+    }
+
+    let endpointsSupportingTokens = allComponentEndpoints.filter(endpoint => endpoint.getProperty("supported_authentication_methods").value.includes("Token"));
+
+    return endpointsSupportingTokens.length / allComponentEndpoints.length;
+}
+
+export const ratioOfEndpointsThatSupportApiKeys: Calculation = (parameters: CalculationParameters<Component>) => {
+    let allComponentEndpoints = parameters.entity.getEndpointEntities.concat(parameters.entity.getExternalEndpointEntities);
+
+    if (allComponentEndpoints.length === 0) {
+        return "n/a";
+    }
+
+    let endpointsSupportingTokens = allComponentEndpoints.filter(endpoint => endpoint.getProperty("supported_authentication_methods").value.includes("API-Key"));
+
+    return endpointsSupportingTokens.length / allComponentEndpoints.length;
+}
+
+export const ratioOfEndpointsThatSupportPlaintextAuthentication: Calculation = (parameters: CalculationParameters<Component>) => {
+    let allComponentEndpoints = parameters.entity.getEndpointEntities.concat(parameters.entity.getExternalEndpointEntities);
+
+    if (allComponentEndpoints.length === 0) {
+        return "n/a";
+    }
+
+    let endpointsSupportingTokens = allComponentEndpoints.filter(endpoint => endpoint.getProperty("supported_authentication_methods").value.includes("basic_authentication"));
+
+    return endpointsSupportingTokens.length / allComponentEndpoints.length;
+}
+
+export const ratioOfEndpointsThatAreIncludedInASingleSignOnApproach: Calculation = (parameters: CalculationParameters<Component>) => {
+    let allComponentEndpoints = parameters.entity.getEndpointEntities.concat(parameters.entity.getExternalEndpointEntities);
+
+    if (allComponentEndpoints.length === 0) {
+        return "n/a";
+    }
+
+    let endpointsSupportingTokens = allComponentEndpoints.filter(endpoint => endpoint.getProperty("supported_authentication_methods").value.includes("Single Sign-On"));
+
+    return endpointsSupportingTokens.length / allComponentEndpoints.length;
+}
+
+export const endpointAccessConsistency: Calculation = (parameters: CalculationParameters<Component>) => {
+
+    let allComponentEndpoints = parameters.entity.getEndpointEntities;
+
+    if (allComponentEndpoints.length <= 1) {
+        return "n/a";
+    }
+
+    let pairwiseSimilarity = [];
+
+    for ( const [index, endpointA] of allComponentEndpoints.entries()) {
+        for (const endpointB of allComponentEndpoints.slice(index+1)) {
+            let setA = new Set(endpointA.getProperty("supported_authentication_methods").value);
+            let setB = new Set(endpointB.getProperty("supported_authentication_methods").value);
+
+            if (setA.union(setB).size === 0) {
+                pairwiseSimilarity.push(1);
+            } else {
+                let similarity = setA.intersection(setB).size / setA.union(setB).size;
+                pairwiseSimilarity.push(similarity);
+            }
+        }
+    }
+
+    return average(pairwiseSimilarity);
+}
+
+export const externalEndpointAccessConsistency: Calculation = (parameters: CalculationParameters<Component>) => {
+
+    let allComponentEndpoints = parameters.entity.getExternalEndpointEntities;
+
+    if (allComponentEndpoints.length <= 1) {
+        return "n/a";
+    }
+
+    let pairwiseSimilarity = [];
+
+    for ( const [index, endpointA] of allComponentEndpoints.entries()) {
+        for (const endpointB of allComponentEndpoints.slice(index+1)) {
+            let setA = new Set(endpointA.getProperty("supported_authentication_methods").value);
+            let setB = new Set(endpointB.getProperty("supported_authentication_methods").value);
+
+            if (setA.union(setB).size === 0) {
+                pairwiseSimilarity.push(1);
+            } else {
+                let similarity = setA.intersection(setB).size / setA.union(setB).size;
+                pairwiseSimilarity.push(similarity);
+            }
+        }
+    }
+
+    return average(pairwiseSimilarity);
+}
+
 export const componentMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
     "ratioOfExternalEndpointsSupportingTls": ratioOfExternalEndpointsSupportingTls,
@@ -1114,6 +1216,12 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "replacingDeployments": replacingDeployments,
     "linksWithTimeout": linksWithTimeout,
     "deploymentsWithRestart": deploymentsWithRestart,
-    "ratioOfDocumentedEndpoints": ratioOfDocumentedEndpoints
+    "ratioOfDocumentedEndpoints": ratioOfDocumentedEndpoints,
+    "ratioOfEndpointsThatSupportTokenBasedAuthentication": ratioOfEndpointsThatSupportTokenBasedAuthentication,
+    "ratioOfEndpointsThatSupportApiKeys": ratioOfEndpointsThatSupportApiKeys,
+    "ratioOfEndpointsThatSupportPlaintextAuthentication": ratioOfEndpointsThatSupportPlaintextAuthentication,
+    "ratioOfEndpointsThatAreIncludedInASingleSignOnApproach": ratioOfEndpointsThatAreIncludedInASingleSignOnApproach,
+    "endpointAccessConsistency": endpointAccessConsistency,
+    "externalEndpointAccessConsistency": externalEndpointAccessConsistency
 }
 

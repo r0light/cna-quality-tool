@@ -993,25 +993,25 @@ const measures = {
     },
     "ratioOfEndpointsThatSupportTokenBasedAuthentication": {
         "name": "Ratio of endpoints that support token-based authentication ",
-        "calculation": "Endpoints supportin tokens / All endpoints",
+        "calculation": "Endpoints supporting tokens / All endpoints",
         "sources": ["Ntentos2022", "Zdun2023", "Zdun2023a"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
     },
     "ratioOfEndpointsThatSupportApiKeys": {
         "name": "Ratio of endpoints that support API Keys",
-        "calculation": "",
+        "calculation": "Endpoints supporting API keys / All endpoints",
         "sources": ["Ntentos2022", "Ntentos2022"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
     },
     "ratioOfEndpointsThatSupportPlaintextAuthentication": {
         "name": "Ratio of endpoints that support plaintext authentication",
-        "calculation": "",
+        "calculation": "Endpoints supporting basic authentication / All endpoints",
         "sources": ["Ntentos2022", "Zdun2023", "Zdun2023a"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
     },
     "ratioOfEndpointsThatAreIncludedInASingleSignOnApproach": {
         "name": "Ratio of endpoints that are included in an single-sign-on approach",
-        "calculation": "",
+        "calculation": "Endpoints supporting a Single Sign-On approach / All endpoints",
         "sources": ["Ntentos2022"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
     },
@@ -2050,6 +2050,18 @@ const measures = {
         "calculation": "Endpoints documented / All endpoints",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE]
+    },
+    "endpointAccessConsistency": {
+        "name": "Consistency of supported authentication methods of endpoints",
+        "calculation": "Similarity of supported authentication methods / All endpoints",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE]
+    },
+    "externalEndpointAccessConsistency": {
+        "name": "Consistency of supported authentication methods of external endpoints",
+        "calculation": "Similarity of supported authentication methods / All external endpoints",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT]
     }
 } satisfies { [measureKey: string]: MeasureSpec }
 

@@ -2143,3 +2143,182 @@ test("ratioOfDocumentedEndpoints", () => {
     let measureValue = requestTraceMeasureImplementations["ratioOfDocumentedEndpoints"]({ entity: requestTrace, system: system });
     expect(measureValue).toEqual(2/3);
 })
+
+
+test("ratioOfEndpointsThatSupportTokenBasedAuthentication", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    endpointA.setPropertyValue("supported_authentication_methods", ["Token", "basic_authentication"]);
+    serviceA.addEndpoint(endpointA);
+    let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
+    externalEndpointA.setPropertyValue("supported_authentication_methods", ["Token", "basic_authentication"]);
+    serviceA.addEndpoint(externalEndpointA);
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    endpointB.setPropertyValue("supported_authentication_methods", ["Token", "basic_authentication"]);
+    serviceB.addEndpoint(endpointB);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+    let linkBC = new Link("l2", serviceB, endpointC);
+
+    let requestTrace = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
+    requestTrace.setLinks = [[linkAB], [linkBC]];
+    requestTrace.setExternalEndpoint = externalEndpointA;
+
+    system.addEntities([serviceA, serviceB, serviceC]);
+    system.addEntities([linkAB, linkBC]);
+    system.addEntity(requestTrace);
+
+    let measureValue = requestTraceMeasureImplementations["ratioOfEndpointsThatSupportTokenBasedAuthentication"]({ entity: requestTrace, system: system });
+    expect(measureValue).toEqual(2/3);
+})
+
+test("ratioOfEndpointsThatSupportApiKeys", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    endpointA.setPropertyValue("supported_authentication_methods", ["API-Key", "basic_authentication"]);
+    serviceA.addEndpoint(endpointA);
+    let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
+    externalEndpointA.setPropertyValue("supported_authentication_methods", ["API-Key", "basic_authentication"]);
+    serviceA.addEndpoint(externalEndpointA);
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    endpointB.setPropertyValue("supported_authentication_methods", ["Token", "API-Key"]);
+    serviceB.addEndpoint(endpointB);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+    let linkBC = new Link("l2", serviceB, endpointC);
+
+    let requestTrace = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
+    requestTrace.setLinks = [[linkAB], [linkBC]];
+    requestTrace.setExternalEndpoint = externalEndpointA;
+
+    system.addEntities([serviceA, serviceB, serviceC]);
+    system.addEntities([linkAB, linkBC]);
+    system.addEntity(requestTrace);
+
+    let measureValue = requestTraceMeasureImplementations["ratioOfEndpointsThatSupportApiKeys"]({ entity: requestTrace, system: system });
+    expect(measureValue).toEqual(2/3);
+})
+
+
+test("ratioOfEndpointsThatSupportPlaintextAuthentication", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    endpointA.setPropertyValue("supported_authentication_methods", ["Token", "basic_authentication"]);
+    serviceA.addEndpoint(endpointA);
+    let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
+    externalEndpointA.setPropertyValue("supported_authentication_methods", ["Single Sign-On", "basic_authentication"]);
+    serviceA.addEndpoint(externalEndpointA);
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    endpointB.setPropertyValue("supported_authentication_methods", ["Token", "basic_authentication"]);
+    serviceB.addEndpoint(endpointB);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+    let linkBC = new Link("l2", serviceB, endpointC);
+
+    let requestTrace = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
+    requestTrace.setLinks = [[linkAB], [linkBC]];
+    requestTrace.setExternalEndpoint = externalEndpointA;
+
+    system.addEntities([serviceA, serviceB, serviceC]);
+    system.addEntities([linkAB, linkBC]);
+    system.addEntity(requestTrace);
+
+    let measureValue = requestTraceMeasureImplementations["ratioOfEndpointsThatSupportPlaintextAuthentication"]({ entity: requestTrace, system: system });
+    expect(measureValue).toEqual(2/3);
+})
+
+
+test("ratioOfEndpointsThatAreIncludedInASingleSignOnApproach", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    endpointA.setPropertyValue("supported_authentication_methods", ["Token", "Single Sign-On"]);
+    serviceA.addEndpoint(endpointA);
+    let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
+    externalEndpointA.setPropertyValue("supported_authentication_methods", ["Single Sign-On", "basic_authentication"]);
+    serviceA.addEndpoint(externalEndpointA);
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    endpointB.setPropertyValue("supported_authentication_methods", ["Single Sign-On", "basic_authentication"]);
+    serviceB.addEndpoint(endpointB);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+    let linkBC = new Link("l2", serviceB, endpointC);
+
+    let requestTrace = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
+    requestTrace.setLinks = [[linkAB], [linkBC]];
+    requestTrace.setExternalEndpoint = externalEndpointA;
+
+    system.addEntities([serviceA, serviceB, serviceC]);
+    system.addEntities([linkAB, linkBC]);
+    system.addEntity(requestTrace);
+
+    let measureValue = requestTraceMeasureImplementations["ratioOfEndpointsThatAreIncludedInASingleSignOnApproach"]({ entity: requestTrace, system: system });
+    expect(measureValue).toEqual(2/3);
+})
+
+test("endpointAccessConsistency", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    endpointA.setPropertyValue("supported_authentication_methods", ["Token", "Single Sign-On"]);
+    serviceA.addEndpoint(endpointA);
+    let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
+    externalEndpointA.setPropertyValue("supported_authentication_methods", ["Single Sign-On", "basic_authentication"]);
+    serviceA.addEndpoint(externalEndpointA);
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    endpointB.setPropertyValue("supported_authentication_methods", ["API-Key"]);
+    serviceB.addEndpoint(endpointB);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    endpointC.setPropertyValue("supported_authentication_methods", ["API-Key"]);
+    serviceC.addEndpoint(endpointC);
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+    let linkBC = new Link("l2", serviceB, endpointC);
+
+    let requestTrace = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
+    requestTrace.setLinks = [[linkAB], [linkBC]];
+    requestTrace.setExternalEndpoint = externalEndpointA;
+
+    system.addEntities([serviceA, serviceB, serviceC]);
+    system.addEntities([linkAB, linkBC]);
+    system.addEntity(requestTrace);
+
+    let measureValue = requestTraceMeasureImplementations["endpointAccessConsistency"]({ entity: requestTrace, system: system });
+    expect(measureValue).toEqual(1);
+})
