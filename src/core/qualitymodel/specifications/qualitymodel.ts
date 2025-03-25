@@ -457,7 +457,13 @@ const productFactors = {
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT],
         "sources": [{ "key": "Goniwada2021", "section": "3 Coupling (Services should be as loosely coupled as possible)" }],
         "measures": [],
-        "evaluations": []
+        "evaluations": [{
+            "targetEntities": [ENTITIES.SYSTEM],
+            "evaluation": "aggregateImpacts",
+            "reasoning": "Depends on whether state is only stored in specific services (mostlyStatelessServices) and if those services that are stateful are handled properly (specializedStatefulServices)",
+            "precondition": "at-least-one",
+            "impactsInterpretation": "median"
+        }]
     },
     "mostlyStatelessServices": {
         "name": "Mostly stateless services",
@@ -478,10 +484,14 @@ const productFactors = {
         "description": "For stateful components, that means components that do require durable disk space on the infrastructure that they run on, specialized software or frameworks are used that can handle distributed state by replicating it over several components or component instances while still ensuring consistency requirements for that state.",
         "categories": ["dataManagement", "businessDomain"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.STORAGE_BACKING_SERVICE, ENTITIES.DATA_AGGREGATE],
-        "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.SYSTEM],
         "sources": [{ "key": "Davis2019", "section": "5.4" }, { "key": "Ibryam2020", "section": "11 “Stateful Service”" }],
         "measures": ["ratioOfSpecializedStatefulServices", "suitablyReplicatedStatefulService"],
-        "evaluations": []
+        "evaluations": [{
+            "targetEntities": [ENTITIES.SYSTEM],
+            "evaluation": "specializedStatefulServices",
+            "reasoning": "This factor is fulfilled if the ratio of specialized stateful services is rather high. If stateful services are replicated, also suitablyReplicatedStatefulService is included in the evaluation and needs to be rather high."
+        }]
     },
     "looseCoupling": {
         "name": "Loose coupling",

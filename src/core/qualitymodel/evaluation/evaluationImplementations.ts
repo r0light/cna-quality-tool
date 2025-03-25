@@ -287,6 +287,21 @@ const productFactorEvaluationImplementation: {
 
         return exponentialNumericalMapping(average([ratioOfStatelessComponents, degreeToWhichComponentsAreLinkedToStatefulComponents] as number[]));
     },
+    "specializedStatefulServices": (parameters) => {
+        let ratioOfSpecializedStatefulServices = parameters.calculatedMeasures.get("ratioOfSpecializedStatefulServices").value;
+
+        let suitablyReplicatedStatefulService = parameters.calculatedMeasures.get("suitablyReplicatedStatefulService").value;
+
+        if (ratioOfSpecializedStatefulServices === "n/a") {
+            return "n/a";
+        }
+
+        if (suitablyReplicatedStatefulService !== "n/a") {
+            return  linearNumericalMapping(ratioOfSpecializedStatefulServices as number * (suitablyReplicatedStatefulService as number));
+        } else {
+            return linearNumericalMapping(ratioOfSpecializedStatefulServices as number);
+        }
+    },
 };
 
 
