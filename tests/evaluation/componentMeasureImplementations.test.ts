@@ -70,7 +70,6 @@ test("serviceInterfaceDataCohesion", () => {
 
     let measureValue = componentMeasureImplementations["serviceInterfaceDataCohesion"]({ entity: service, system: system });
     expect(measureValue).toEqual(2);
-
 })
 
 

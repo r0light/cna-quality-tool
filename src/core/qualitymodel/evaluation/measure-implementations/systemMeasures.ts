@@ -1700,10 +1700,8 @@ export const ratioOfUniqueAccountUsage: Calculation = (parameters: CalculationPa
         }
     }
 
-    console.log(accounts)
-
     let componentsAndInfrastructure = allComponents.size + allInfrastructureInstances.size;
-    if (componentsAndInfrastructure === 0) {
+    if (componentsAndInfrastructure <= 1) {
         return "n/a";
     }
 
@@ -2382,14 +2380,16 @@ export const endpointAccessConsistency: Calculation = (parameters: CalculationPa
         return component.getEndpointEntities;
     }).toArray();
 
-    if (allEndpoints.length <= 1) {
+    let endpointsWithAccessControl = allEndpoints.filter(endpoint => endpoint.getProperty("supported_authentication_methods").value.length !== 0);
+
+    if (endpointsWithAccessControl.length <= 1) {
         return "n/a";
     }
 
     let pairwiseSimilarity = [];
 
-    for ( const [index, endpointA] of allEndpoints.entries()) {
-        for (const endpointB of allEndpoints.slice(index+1)) {
+    for ( const [index, endpointA] of endpointsWithAccessControl.entries()) {
+        for (const endpointB of endpointsWithAccessControl.slice(index+1)) {
             let setA = new Set(endpointA.getProperty("supported_authentication_methods").value);
             let setB = new Set(endpointB.getProperty("supported_authentication_methods").value);
 
@@ -2411,14 +2411,16 @@ export const externalEndpointAccessConsistency: Calculation = (parameters: Calcu
         return component.getExternalEndpointEntities;
     }).toArray();
 
-    if (allExternalEndpoints.length <= 1) {
+    let endpointsWithAccessControl = allExternalEndpoints.filter(endpoint => endpoint.getProperty("supported_authentication_methods").value.length !== 0);
+
+    if (endpointsWithAccessControl.length <= 1) {
         return "n/a";
     }
 
     let pairwiseSimilarity = [];
 
-    for ( const [index, endpointA] of allExternalEndpoints.entries()) {
-        for (const endpointB of allExternalEndpoints.slice(index+1)) {
+    for ( const [index, endpointA] of endpointsWithAccessControl.entries()) {
+        for (const endpointB of endpointsWithAccessControl.slice(index+1)) {
             let setA = new Set(endpointA.getProperty("supported_authentication_methods").value);
             let setB = new Set(endpointB.getProperty("supported_authentication_methods").value);
 
@@ -2432,6 +2434,30 @@ export const externalEndpointAccessConsistency: Calculation = (parameters: Calcu
     }
 
     return average(pairwiseSimilarity);
+}
+
+export const cohesionBetweenEndpointsBasedOnDataAggregateUsage: Calculation = (parameters: CalculationParameters<System>) => {
+    let allServices = parameters.entity.getComponentEntities.entries().filter(([componentId, component]) => component.constructor.name === Service.name).toArray();
+
+    let cohesionBetweenEndpointsBasedOnDataAggregateUsagePerService = allServices.map(([serviceId, service]) => componentMeasureImplementations["cohesionBetweenEndpointsBasedOnDataAggregateUsage"]({entity: service, system: parameters.system})).filter(measureValue => measureValue !== "n/a");
+
+    if (cohesionBetweenEndpointsBasedOnDataAggregateUsagePerService.length === 0) {
+        return "n/a";
+    }
+
+    return average(cohesionBetweenEndpointsBasedOnDataAggregateUsagePerService as number[]);
+}
+
+export const serviceInterfaceUsageCohesion: Calculation = (parameters: CalculationParameters<System>) => {
+    let allServices = parameters.entity.getComponentEntities.entries().filter(([componentId, component]) => component.constructor.name === Service.name).toArray();
+
+    let serviceInterfaceUsageCohesionPerService = allServices.map(([serviceId, service]) => componentMeasureImplementations["serviceInterfaceUsageCohesion"]({entity: service, system: parameters.system})).filter(measureValue => measureValue !== "n/a");
+
+    if (serviceInterfaceUsageCohesionPerService.length === 0) {
+        return "n/a";
+    }
+
+    return average(serviceInterfaceUsageCohesionPerService as number[]);
 }
 
 
@@ -2548,5 +2574,7 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation }
     "ratioOfEndpointsThatSupportPlaintextAuthentication": ratioOfEndpointsThatSupportPlaintextAuthentication,
     "ratioOfEndpointsThatAreIncludedInASingleSignOnApproach": ratioOfEndpointsThatAreIncludedInASingleSignOnApproach,
     "endpointAccessConsistency": endpointAccessConsistency,
-    "externalEndpointAccessConsistency": externalEndpointAccessConsistency
+    "externalEndpointAccessConsistency": externalEndpointAccessConsistency,
+    "cohesionBetweenEndpointsBasedOnDataAggregateUsage": cohesionBetweenEndpointsBasedOnDataAggregateUsage,
+    "serviceInterfaceUsageCohesion": serviceInterfaceUsageCohesion
 }

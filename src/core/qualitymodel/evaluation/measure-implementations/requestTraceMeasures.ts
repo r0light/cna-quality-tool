@@ -919,14 +919,17 @@ export const ratioOfEndpointsThatAreIncludedInASingleSignOnApproach: Calculation
 export const endpointAccessConsistency: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
     let allEndpoints = parameters.entity.getLinks.flatMap(links => links).map(link => link.getTargetEndpoint);
 
-    if (allEndpoints.length <= 1) {
+    let endpointsWithAccessControl = allEndpoints.filter(endpoint => endpoint.getProperty("supported_authentication_methods").value.length !== 0);
+
+
+    if (endpointsWithAccessControl.length <= 1) {
         return "n/a";
     }
 
     let pairwiseSimilarity = [];
 
-    for ( const [index, endpointA] of allEndpoints.entries()) {
-        for (const endpointB of allEndpoints.slice(index+1)) {
+    for ( const [index, endpointA] of endpointsWithAccessControl.entries()) {
+        for (const endpointB of endpointsWithAccessControl.slice(index+1)) {
             let setA = new Set(endpointA.getProperty("supported_authentication_methods").value);
             let setB = new Set(endpointB.getProperty("supported_authentication_methods").value);
 

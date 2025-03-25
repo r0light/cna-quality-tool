@@ -3683,3 +3683,92 @@ test("externalEndpointAccessConsistency", () => {
     let measureValue = systemMeasureImplementations["externalEndpointAccessConsistency"]({ entity: system, system: system });
     expect(measureValue).toEqual(1/3);
 })
+
+test("cohesionBetweenEndpointsBasedOnDataAggregateUsage", () => {
+    let system = new System("sys1", "testSystem");
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let dataAggregateA = new DataAggregate("d1", "data 1", getEmptyMetaData());
+    serviceA.addDataAggregateEntity(dataAggregateA, new RelationToDataAggregate("r1", getEmptyMetaData()));
+    let dataAggregateB = new DataAggregate("d2", "data 2", getEmptyMetaData());
+    serviceA.addDataAggregateEntity(dataAggregateB, new RelationToDataAggregate("r2", getEmptyMetaData()));
+
+
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA);
+    endpointA.addDataAggregateEntity(dataAggregateA, new RelationToDataAggregate("r3", getEmptyMetaData()));
+
+    let endpointB = new ExternalEndpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceA.addEndpoint(endpointB);
+    endpointB.addDataAggregateEntity(dataAggregateA, new RelationToDataAggregate("r4", getEmptyMetaData()));
+
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceA.addEndpoint(endpointC);
+    endpointC.addDataAggregateEntity(dataAggregateB, new RelationToDataAggregate("r5", getEmptyMetaData()));
+
+    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    serviceA.addEndpoint(endpointD);
+    endpointD.addDataAggregateEntity(dataAggregateB, new RelationToDataAggregate("r6", getEmptyMetaData()));
+
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    serviceB.addDataAggregateEntity(dataAggregateA, new RelationToDataAggregate("r7", getEmptyMetaData()));
+
+    let endpointE = new Endpoint("e5", "endpoint 5", getEmptyMetaData());
+    serviceB.addEndpoint(endpointE);
+    endpointE.addDataAggregateEntity(dataAggregateA, new RelationToDataAggregate("r8", getEmptyMetaData()));
+
+    let endpointF = new ExternalEndpoint("e6", "endpoint 6", getEmptyMetaData());
+    serviceB.addEndpoint(endpointF);
+    endpointF.addDataAggregateEntity(dataAggregateA, new RelationToDataAggregate("r9", getEmptyMetaData()));
+
+    let endpointG = new Endpoint("e7", "endpoint 7", getEmptyMetaData());
+    serviceB.addEndpoint(endpointG);
+    endpointG.addDataAggregateEntity(dataAggregateA, new RelationToDataAggregate("r10", getEmptyMetaData()));
+
+    let endpointH = new Endpoint("e8", "endpoint 8", getEmptyMetaData());
+    serviceB.addEndpoint(endpointH);
+    endpointH.addDataAggregateEntity(dataAggregateA, new RelationToDataAggregate("r11", getEmptyMetaData()));
+
+    system.addEntities([dataAggregateA, dataAggregateB]);
+    system.addEntities([serviceA, serviceB]);
+
+    let measureValue = systemMeasureImplementations["cohesionBetweenEndpointsBasedOnDataAggregateUsage"]({ entity: system, system: system });
+    expect(measureValue).toEqual(2 / 3);
+})
+
+
+test("serviceInterfaceUsageCohesion", () => {
+    let system = new System("sys1", "testSystem");
+
+    let serviceA = new Service("s1", "service A", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA);
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceA.addEndpoint(endpointB);
+
+    let endpointC = new ExternalEndpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceA.addEndpoint(endpointC);
+
+    let serviceB = new Service("s2", "service B", getEmptyMetaData());
+    let linkBA1 = new Link("l1", serviceB, endpointA);
+    let linkBA2 = new Link("l2", serviceB, endpointB);
+
+    let serviceC = new Service("s3", "service C", getEmptyMetaData());
+    let linkCA2 = new Link("l3", serviceC, endpointB);
+
+    let serviceD = new Service("s4", "service D", getEmptyMetaData());
+    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    serviceD.addEndpoint(endpointD);
+    let endpointE = new Endpoint("e5", "endpoint 5", getEmptyMetaData());
+    serviceD.addEndpoint(endpointE);
+
+    let linkBD = new Link("l4", serviceB, endpointD);
+    let linkCD = new Link("l5", serviceC, endpointD);
+
+    system.addEntities([serviceA, serviceB, serviceC, serviceD]);
+    system.addEntities([linkBA1, linkBA2, linkCA2, linkBD, linkCD]);
+
+    let measureValue = systemMeasureImplementations["serviceInterfaceUsageCohesion"]({ entity: system, system: system });
+    expect(measureValue).toEqual(0.625);
+})

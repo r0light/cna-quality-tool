@@ -114,7 +114,7 @@ export const serviceInterfaceUsageCohesion: Calculation = (parameters: Calculati
     }
 
     if (allEndpointsOfThisComponent.length === 0 || clientsOfThisService.size === 0) {
-        return 0;
+        return "n/a";
     }
     return totalSumOfEndpointUsage / (allEndpointsOfThisComponent.length * clientsOfThisService.size);
 }
@@ -129,6 +129,10 @@ export const totalServiceInterfaceCohesion: Calculation = (parameters: Calculati
 
 export const cohesionBetweenEndpointsBasedOnDataAggregateUsage: Calculation = (parameters: CalculationParameters<Component>) => {
     let allEndpoints = parameters.entity.getEndpointEntities.concat(parameters.entity.getExternalEndpointEntities);
+
+    if (allEndpoints.length === 0 || parameters.entity.getDataAggregateEntities.length === 0) {
+        return "n/a";
+    }
 
     let dataAggregateUsage = new Map<string, Set<string>>();
     let sharedUsages: number[] = [];
@@ -149,6 +153,7 @@ export const cohesionBetweenEndpointsBasedOnDataAggregateUsage: Calculation = (p
             }
         }
     }
+
     return average(sharedUsages);
 }
 
@@ -1106,14 +1111,16 @@ export const endpointAccessConsistency: Calculation = (parameters: CalculationPa
 
     let allComponentEndpoints = parameters.entity.getEndpointEntities;
 
-    if (allComponentEndpoints.length <= 1) {
+    let endpointsWithAccessControl = allComponentEndpoints.filter(endpoint => endpoint.getProperty("supported_authentication_methods").value.length !== 0);
+
+    if (endpointsWithAccessControl.length <= 1) {
         return "n/a";
     }
 
     let pairwiseSimilarity = [];
 
-    for ( const [index, endpointA] of allComponentEndpoints.entries()) {
-        for (const endpointB of allComponentEndpoints.slice(index+1)) {
+    for ( const [index, endpointA] of endpointsWithAccessControl.entries()) {
+        for (const endpointB of endpointsWithAccessControl.slice(index+1)) {
             let setA = new Set(endpointA.getProperty("supported_authentication_methods").value);
             let setB = new Set(endpointB.getProperty("supported_authentication_methods").value);
 
@@ -1133,14 +1140,16 @@ export const externalEndpointAccessConsistency: Calculation = (parameters: Calcu
 
     let allComponentEndpoints = parameters.entity.getExternalEndpointEntities;
 
-    if (allComponentEndpoints.length <= 1) {
+    let endpointsWithAccessControl = allComponentEndpoints.filter(endpoint => endpoint.getProperty("supported_authentication_methods").value.length !== 0);
+
+    if (endpointsWithAccessControl.length <= 1) {
         return "n/a";
     }
 
     let pairwiseSimilarity = [];
 
-    for ( const [index, endpointA] of allComponentEndpoints.entries()) {
-        for (const endpointB of allComponentEndpoints.slice(index+1)) {
+    for ( const [index, endpointA] of endpointsWithAccessControl.entries()) {
+        for (const endpointB of endpointsWithAccessControl.slice(index+1)) {
             let setA = new Set(endpointA.getProperty("supported_authentication_methods").value);
             let setB = new Set(endpointB.getProperty("supported_authentication_methods").value);
 

@@ -249,6 +249,24 @@ const productFactorEvaluationImplementation: {
 
         return squareRootedNumericalMapping(ratioOfDelegatedAuthentication as number);
     },
+    "limitedDataScope": (parameters) => {
+        let cohesionBetweenEndpointsBasedOnDataAggregateUsage = parameters.calculatedMeasures.get("cohesionBetweenEndpointsBasedOnDataAggregateUsage").value;
+
+        if (cohesionBetweenEndpointsBasedOnDataAggregateUsage === "n/a") {
+            return "n/a";
+        }
+
+        return squareRootedNumericalMapping(cohesionBetweenEndpointsBasedOnDataAggregateUsage as number);
+    },
+    "limitedEndpointScope": (parameters) => {
+        let serviceInterfaceUsageCohesion = parameters.calculatedMeasures.get("serviceInterfaceUsageCohesion").value;
+
+        if (serviceInterfaceUsageCohesion === "n/a") {
+            return "n/a";
+        }
+
+        return squareRootedNumericalMapping(serviceInterfaceUsageCohesion as number);
+    },
 };
 
 

@@ -196,7 +196,7 @@ export type ProductFactorSpec = {
     description: string,
     categories: FactorCategoryKey[],
     relevantEntities: `${ENTITIES}`[],
-    applicableEntities: `${ENTITIES}`[],
+    applicableEntities: (ENTITIES.SYSTEM | ENTITIES.COMPONENT | ENTITIES.INFRASTRUCTURE | ENTITIES.REQUEST_TRACE)[],
     sources: SourceSpec[],
     measures: MeasureKey[],
     evaluations: ProductFactorEvaluationSpec[]
@@ -208,7 +208,7 @@ const productFactors = {
         "description": "Data which is sent or received through a link from one component to or from an endpoint of another component is encrypted so that even when an attacker has access to the network layer, the data is protected.",
         "categories": ["networkCommunication"],
         "relevantEntities": [ENTITIES.LINK, ENTITIES.ENDPOINT],
-        "applicableEntities": [ENTITIES.LINK, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
         "sources": [
             { "key": "Scholl2019", "section": "6 Encrypt Data in Transit" },
             { "key": "Indrasiri2021", "section": "2 Security (Use TLS for synchronous communications)" }
@@ -375,30 +375,48 @@ const productFactors = {
         "description": "Each service covers only a limited, but cohesive functional scope to keep services manageable.",
         "categories": ["businessDomain", "dataManagement"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.ENDPOINT, ENTITIES.LINK],
-        "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SERVICE, ENTITIES.ENDPOINT],
+        "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM],
         "sources": [{ "key": "Reznik2019", "section": "9 Microservices Architecture" }, { "key": "Adkins2020", "section": "7 Use Microservices" }, { "key": "Goniwada2021", "section": "3 Polylithic Architecture Principle (Build separate services for different business functionalitites) " }],
         "measures": ["totalServiceInterfaceCohesion", "cohesivenessOfService", "cohesionOfAServiceBasedOnOtherEndpointsCalled", "lackOfCohesion", "averageLackOfCohesion", "serviceSize", "unreachableEndpointCount"],
-        "evaluations": []
+        "evaluations": [
+            {
+                "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT],
+                "evaluation": "aggregateImpacts",
+                "reasoning": "The limited functional scope of a component or system is evaluated simply by aggregating the results of limited data scope and limited functional scope.",
+                "precondition": "at-least-one",
+                "impactsInterpretation": "median"
+            }
+        ]
     },
     "limitedDataScope": {
         "name": "Limited data scope",
         "description": "The number of data aggregates that are processed in a service is limited to those which need to be administrated together, for example to fulfill data consistency requirements. The aim is to keep the functional scope of a service cohesive. Data aggregates for which consistency requirements can be relaxed might be distributed over separate services.",
         "categories": ["businessDomain", "dataManagement"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.ENDPOINT, ENTITIES.DATA_AGGREGATE],
-        "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SERVICE, ENTITIES.ENDPOINT],
+        "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM],
         "sources": [],
         "measures": ["dataAggregateScope", "serviceInterfaceDataCohesion", "cohesionBetweenEndpointsBasedOnDataAggregateUsage", "resourceCount"],
-        "evaluations": []
+        "evaluations": [
+            {
+                "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT],
+                "evaluation": "limitedDataScope",
+                "reasoning": "Based on cohesionBetweenEndpointsBasedOnDataAggregateUsage. The higher the cohesion is, the more this factor is present. For the system entity, the measure is aggregated across services."
+            }
+        ]
     },
     "limitedEndpointScope": {
         "name": "Limited endpoint scope",
         "description": "To keep the functional scope of services limited, the number of endpoints of a service is limited to a cohesive set of endpoints that provide related operations.",
         "categories": ["businessDomain"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.ENDPOINT, ENTITIES.LINK],
-        "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SERVICE, ENTITIES.ENDPOINT],
+        "applicableEntities": [ENTITIES.COMPONENT],
         "sources": [],
         "measures": ["numberOfProvidedSynchronousAndAsynchronousEndpoints", "numberOfSynchronousEndpointsOfferedByAService", "serviceInterfaceUsageCohesion", "distributionOfSynchronousCalls", "cohesionOfEndpointsBasedOnInvocationByOtherServices", "unusedEndpointCount"],
-        "evaluations": []
+        "evaluations": [{
+            "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT],
+            "evaluation": "limitedEndpointScope",
+            "reasoning": "Based on serviceInterfaceUsageCohesion. The higher the cohesion is, the more this factor is present. For the system entity, the measure is aggregated across services."
+        }]
     },
     "commandQueryResponsibilitySegregation": {
         "name": "Command Query Responsibility Segregation",
@@ -426,7 +444,7 @@ const productFactors = {
         "description": "Services are structured by clearly separating stateless from stateful services. Stateful services should be reduced to a minimum. That way, state is isolated within these specifically stateful services which can be managed accordingly. The majority of stateless services is easier to deploy and modify.",
         "categories": ["dataManagement", "businessDomain"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.DATA_AGGREGATE],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.STORAGE_BACKING_SERVICE],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT],
         "sources": [{ "key": "Goniwada2021", "section": "3 Coupling (Services should be as loosely coupled as possible)" }],
         "measures": [],
         "evaluations": []
@@ -466,7 +484,7 @@ const productFactors = {
         "description": "Asynchronous links (e.g. based on messaging backing services) are preferred for the communication between components. That way, components are decoupled in time meaning that not all linked components need to be available at the same time for a successful communication. Additionally, callers do not await a response.",
         "categories": ["networkCommunication", "businessDomain"],
         "relevantEntities": [ENTITIES.LINK, ENTITIES.ENDPOINT, ENTITIES.REQUEST_TRACE, ENTITIES.BROKER_BACKING_SERVICE,],
-        "applicableEntities": [ENTITIES.LINK, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Davis2019", "section": "4.2" }, { "key": "Scholl2019", "section": "6 Prefer Asynchronous Communication" }, { "key": "Richardson2019", "section": "3.3.2, 3.4 Using asynchronous messaging to improve availability" }, { "key": "Indrasiri2021", "section": "3 Service Choreography Pattern" }, { "key": "Ruecker2021", "section": "9 Asynchronous Request/Response (Use asynchronous communication to make services more robust)" }, { "key": "Goniwada2021", "section": "4 Asynchronous Nonblocking I/O" }],
         "measures": ["numberOfAsynchronousEndpointsOfferedByAService", "numberOfSynchronousOutgoingLinks", "numberOfAsynchronousOutgoingLinks", "ratioOfAsynchronousOutgoingLinks", "degreeOfAsynchronousCommunication", "asynchronousCommunicationUtilization"],
         "evaluations": []
@@ -476,7 +494,7 @@ const productFactors = {
         "description": "Communication via links is not based on specific communication partners (specific components) but abstracted based on the content of communication. An example is event-driven communication where events are published to channels without the publisher knowing which components receive events and events can therefore also be received by components which are created later in time.",
         "categories": ["networkCommunication"],
         "relevantEntities": [ENTITIES.LINK, ENTITIES.BROKER_BACKING_SERVICE, ENTITIES.ENDPOINT, ENTITIES.REQUEST_TRACE],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.LINK, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Richardson2019", "section": "6 Event-driven communication" }, { "key": "Ruecker2021", "section": "8: Event-driven systems “event chains emerge over time and therefore lack visibility." }],
         "measures": ["eventSourcingUtilizationMetric"],
         "evaluations": []
@@ -486,7 +504,7 @@ const productFactors = {
         "description": "Links persist messages which have been sent (e.g. based on messaging backing services). That way, components are decoupled, because components need not yet exist at the time a message is sent, but can still receive a message. Communication can also be repeated, because persisted messages can be retrieved again.",
         "categories": ["networkCommunication"],
         "relevantEntities": [ENTITIES.LINK, ENTITIES.BROKER_BACKING_SERVICE, ENTITIES.ENDPOINT],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.LINK, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Indrasiri2021", "section": "5 Event Sourcing Pattern: Log-based message brokers" }],
         "measures": ["serviceInteractionViaBackingService", "eventSourcingUtilizationMetric"],
         "evaluations": []
@@ -506,7 +524,7 @@ const productFactors = {
         "description": "By using standardized technologies within components, for interfaces, and especially for the infrastructure, backing services and other non-business concerns, reusability can be increased and the effort to develop additional functionality which integrates with existing components can be reduced.",
         "categories": ["applicationAdministration"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.ENDPOINT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
         "sources": [],
         "measures": ["ratioOfStandardizedArtifacts", "ratioOfEntitiesProvidingStandardizedArtifacts"],
         "evaluations": []
@@ -526,7 +544,7 @@ const productFactors = {
         "description": "Cloud-native applications enable monitoring at various levels (business functionalities in services, backing-service functionalities, infrastructure) in an automated fashion to enable observable and autonomous reactions to changing system conditions.",
         "categories": ["applicationAdministration", "businessDomain", "networkCommunication", "dataManagement"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.BACKING_SERVICE],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.SERVICE, ENTITIES.INFRASTRUCTURE],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE],
         "sources": [{ "key": "Goniwada2021", "section": "3 High Observability Principle" }],
         "measures": ["ratioOfInfrastructureNodesThatSupportMonitoring", "ratioOfComponentsThatSupportMonitoring"],
         "evaluations": []
@@ -606,7 +624,7 @@ const productFactors = {
         "description": "Services are as independent as possible throughout their lifecycle, that means development, operation, and evolution. Changes to one service have a minimum impact on other services.",
         "categories": ["businessDomain", "networkCommunication", "cloudInfrastructure", "applicationAdministration", "dataManagement"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.LINK, ENTITIES.DEPLOYMENT_MAPPING],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.SERVICE],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT],
         "sources": [{ "key": "Goniwada2021", "section": "3 Decentralize Everything Principle (Decentralize deployment, governance)" }],
         "measures": [],
         "evaluations": []
@@ -616,7 +634,7 @@ const productFactors = {
         "description": "The coupling in a system is low in terms of links between components. Each link represents a dependency and therefore decreases service independence.",
         "categories": ["businessDomain"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.LINK, ENTITIES.ENDPOINT, ENTITIES.DATA_AGGREGATE],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.SERVICE],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT],
         "sources": [],
         "measures": ["numberOfLinksPerComponent", "numberOfConsumedEndpoints", "incomingOutgoingRatioOfAComponent", "ratioOfOutgoingLinksOfAService", "couplingDegreeBasedOnPotentialCoupling", "interactionDensityBasedOnComponents", "interactionDensityBasedOnLinks", "serviceCouplingBasedOnEndpointEntropy", "systemCouplingBasedOnEndpointEntropy", "modularityQualityBasedOnCohesionAndCoupling", "combinedMetricForIndirectDependency", "servicesInterdependenceInTheSystem", "indirectInteractionDensity", "averageNumberOfDirectlyConnectedServices", "numberOfComponentsThatAreLinkedToAComponent", "numberOfComponentsAComponentIsLinkedTo", "numberOfLinksBetweenTwoServices", "aggregateSystemMetricToMeasureServiceCoupling", "numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfComponents", "degreeOfCouplingInASystem", "serviceCouplingBasedOnDataExchangeComplexity", "simpleDegreeOfCouplingInASystem", "directServiceSharing", "transitivelySharedServices", "ratioOfSharedNonExternalComponentsToNonExternalComponents", "ratioOfSharedDependenciesOfNonExternalComponentsToPossibleDependencies", "degreeOfDependenceOnOtherComponents", "averageSystemCoupling", "couplingOfServicesBasedOnUsedDataAggregates", "couplingOfServicesBasedServicesWhichCallThem", "couplingOfServicesBasedServicesWhichAreCalledByThem", "couplingOfServicesBasedOnAmountOfRequestTracesThatIncludeASpecificLink", "couplingOfServicesBasedTimesThatTheyOccurInTheSameRequestTrace"],
         "evaluations": []
@@ -656,7 +674,7 @@ const productFactors = {
         "description": "Different backing services are assigned to different components. That way, a decentralization is achieved. For example, instead of one message broker for a whole system, several message brokers can be used, each for a group of components that are interrelated. A problem in one messaging broker has an impact on only those components using it, but not on components having separate message brokers.",
         "categories": ["applicationAdministration", "cloudInfrastructure", "dataManagement"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.LINK, ENTITIES.BACKING_SERVICE],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.SERVICE, ENTITIES.BACKING_SERVICE],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT],
         "sources": [{ "key": "Indrasiri2021", "section": "4 Decentralized Data Management (decentralized data leads to higher service independence while centralized data leads to higher consistency.)" }, { "key": "Indrasiri2021", "section": "4 Data Service Pattern (As having a negative impact because multiple services should not access the same data);" }, { "key": "Ruecker2021", "section": "2 Different Workflow Engines for different services" }, { "key": "Goniwada2021", "section": "5 Distributed State, Decentralized Data" }],
         "measures": ["degreeOfStorageBackendSharing", "ratioOfStorageBackendSharing", "sharedStorageBackingServiceInteractions", "databaseTypeUtilization", "numberOfServiceConnectedToStorageBackingService"],
         "evaluations": []
@@ -666,7 +684,7 @@ const productFactors = {
         "description": "In a link from one component to another the specific addresses for reaching the other component is not used, but instead an abstract address is used. That way, the specific addresses of components can be changed without impacting the link between components. This can be achieved for example through service discovery where components are addressed through abstract service names and specific addresses are resolved through service discovery which can be implemented in the infrastructure or a backing service.",
         "categories": ["networkCommunication"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.LINK, ENTITIES.BACKING_SERVICE, ENTITIES.INFRASTRUCTURE],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.LINK, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Davis2019", "section": "8.3" }, { "key": "Ibryam2020", "section": "12 Service Discovery" }, { "key": "Richardson2019", "section": "Using service discovery" }, { "key": "Garrison2017", "section": "7 Service Discovery" }, { "key": "Indrasiri2021", "section": "3 Service Registry and Discovery Pattern" }, { "key": "Bastani2017", "section": "7 Routing (Use service discovery with support for health checks and respect varying workloads)" }, { "key": "Indrasiri2021", "section": "3 Service Abstraction Pattern (Use an abstraction layer in front of services (for example Kubernetes Service))" }, { "key": "Goniwada2021", "section": "4 Service Discovery" }],
         "measures": ["serviceDiscoveryUsage"],
         "evaluations": [
@@ -740,7 +758,7 @@ const productFactors = {
         "description": "Services and therefore their provided functionalities are replicated across different locations so that the latency for accesses from different locations is minimized and the incoming load can be distributed among replicas.",
         "categories": ["applicationAdministration", "cloudInfrastructure"],
         "relevantEntities": [ENTITIES.SYSTEM, ENTITIES.SERVICE],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.SERVICE, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
         "sources": [],
         "measures": ["amountOfRedundancy", "serviceReplicationLevel", "medianServiceReplication", "smallestReplicationValue"],
         "evaluations": [
@@ -756,7 +774,7 @@ const productFactors = {
         "description": "Data is replicated horizontally, that means duplicated across several instances of a storage backing service so that a higher load can be handled and replicas closer to the service where data is needed can be used to reduce latency.",
         "categories": ["applicationAdministration", "dataManagement"],
         "relevantEntities": [ENTITIES.STORAGE_BACKING_SERVICE, ENTITIES.DATA_AGGREGATE],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE, ENTITIES.STORAGE_BACKING_SERVICE],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE, ENTITIES.COMPONENT],
         "sources": [{ "key": "Scholl2019", "section": "6 Use Data Partitioning and Replication for Scale" }, { "key": "Goniwada2021", "section": "4 Data Replication" }],
         "measures": ["storageReplicationLevel"],
         "evaluations": [
@@ -772,7 +790,7 @@ const productFactors = {
         "description": "Data is replicated vertically, that means across a request trace so that it is available closer to where a request initially comes in. Typically caching is used for vertical data replication.",
         "categories": ["applicationAdministration", "dataManagement"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.DATA_AGGREGATE, ENTITIES.REQUEST_TRACE],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE, ENTITIES.STORAGE_BACKING_SERVICE],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE, ENTITIES.COMPONENT],
         "sources": [{ "key": "Scholl2019", "section": "6 Use Caching" }, { "key": "Bastani2017", "section": "9 Caching (Use an In-Memory cache for queries to relieve datastore from traffic; replication into faster data storage)" }, { "key": "Indrasiri2021", "section": "4 Caching Pattern" }],
         "measures": ["ratioOfCachedDataAggregates", "dataReplicationAlongRequestTrace"],
         "evaluations": [
@@ -793,7 +811,7 @@ const productFactors = {
         "description": "Data storage is sharded, that means data is split into several storage backing service instances by a certain strategy so that requests can be distributed across shards to increase performance. One example strategy could be to shard data geographically, that means user data from one location is stored in one shard while user data from another location is stored in a different shard. One storage backing service instance is then less likely to be overloaded with requests, because the number of potential requests is limited by the amount of data in that instance.",
         "categories": ["applicationAdministration", "dataManagement"],
         "relevantEntities": [ENTITIES.STORAGE_BACKING_SERVICE, ENTITIES.DATA_AGGREGATE],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE, ENTITIES.STORAGE_BACKING_SERVICE],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE, ENTITIES.COMPONENT],
         "sources": [{ "key": "Indrasiri2021", "section": "4 Data Sharding Pattern" }, { "key": "Goniwada2021", "section": "4 Data Partitioning Pattern" }],
         "measures": ["dataShardingLevel"],
         "evaluations": [
@@ -869,7 +887,7 @@ const productFactors = {
         "description": "Configuration values are stored in specialized backing services and not only environment variables for example. That way, changing configurations at runtime is facilitated and can be enabled by connecting components to such specialized backing services and checking for updated configurations at runtime. Additionally, configurations can be stored once, but accessed by different components.",
         "categories": ["applicationAdministration", "dataManagement"],
         "relevantEntities": [ENTITIES.BACKING_DATA, ENTITIES.INFRASTRUCTURE, ENTITIES.COMPONENT, ENTITIES.BACKING_SERVICE],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.SERVICE, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Ibryam2020", "section": "19 Configuration Resource" }, { "key": "Richardson2019", "section": "11.2 “Designing configurable services" }, { "key": "Arundel2019", "section": "10 ConfigMaps" }, { "key": "Bastani2017", "section": "2 Centralized, Journaled Configuration" }, { "key": "Bastani2017", "section": "2 Refreshable Configuration" }],
         "measures": ["configurationStoredInConfigService"],
         "evaluations": []
@@ -929,7 +947,7 @@ const productFactors = {
         "description": "Storage Backing Service instances where Data aggregates are persisted are distributed across physical locations (e.g. availability zones of a cloud vendor) so that even in the case of a failure of one physical location, another physical location is still useable.",
         "categories": ["dataManagement", "cloudInfrastructure"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.DEPLOYMENT_MAPPING, ENTITIES.DATA_AGGREGATE, ENTITIES.STORAGE_BACKING_SERVICE],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.STORAGE_BACKING_SERVICE, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Scholl2019", "section": "6 Keep Data in Multiple Regions or Zones" }, { "key": "Indrasiri2021", "section": "4 Data Sharding Pattern: Geographically distribute data" }],
         "measures": ["numberOfAvailabilityZonesUsed"],
         "evaluations": []
@@ -979,7 +997,7 @@ const productFactors = {
         "description": "Services expect faults at different levels and either handle them or minimize their impact by relying on the capabilities of cloud environments.",
         "categories": ["networkCommunication", "cloudInfrastructure"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.LINK, ENTITIES.ENDPOINT, ENTITIES.INFRASTRUCTURE, ENTITIES.DEPLOYMENT_MAPPING],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.SERVICE, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
         "sources": [],
         "measures": [],
         "evaluations": []
@@ -989,7 +1007,7 @@ const productFactors = {
         "description": "For links between components, timeouts are defined to avoid infinite waiting on a service that is unavailable and a timely handling of problems.",
         "categories": ["networkCommunication"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.LINK, ENTITIES.ENDPOINT],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.SERVICE, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Indrasiri2021", "section": "3 Resilient Connectivity Pattern: Time-out" }, { "key": "Richardson2019", "section": "3.2.3 Handling partial failures using the Circuit Breaker pattern" }, { "key": "Goniwada2021", "section": "5 Timeout" }],
         "measures": ["linksWithTimeout"],
         "evaluations": []
@@ -1029,7 +1047,7 @@ const productFactors = {
         "description": "All endpoints that are offered by a service are part of a well-defined and documented API. That means, the APIs are based on common principles, are declarative instead of imperative, and are documented in a standardized or specified format (such as the OpenAPI specification). Communication only happens via endpoints that are part of such APIs and can be both synchronous or asynchronous.",
         "categories": ["networkCommunication", "businessDomain"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.ENDPOINT, ENTITIES.LINK],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.SERVICE, ENTITIES.ENDPOINT, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Reznik2019", "section": "9 Communicate Through APIs" }, { "key": "Adkins2020", "section": "6 Understandable Interface Specifications (Use Interface specifications for understandability" }, { "key": "Bastani2017", "section": "6 Everything is an API (Services are integrated via APIs)" }, { "key": "Indrasiri2021", "section": "2 Service Definitions in Synchronous Communication (Use a service definition for each service);" }, { "key": "Indrasiri2021", "section": "2 Service Definition in Asynchronous Communication (Use schemas to define message formats);" }, { "key": "Goniwada2021", "section": "3 API First Principle" }],
         "measures": ["ratioOfDocumentedEndpoints"],
         "evaluations": []
@@ -1166,7 +1184,7 @@ type MeasureSpec = {
     name: string,
     calculation: string,
     sources: string[],
-    applicableEntities: `${ENTITIES}`[],
+    applicableEntities: (ENTITIES.SYSTEM | ENTITIES.COMPONENT | ENTITIES.INFRASTRUCTURE | ENTITIES.REQUEST_TRACE)[],
     aggregateOf?: string
 }
 
@@ -1234,9 +1252,9 @@ const measures = {
     },
     "dataAggregateScope": {
         "name": "Data aggregate scope",
-        "calculation": "Total number of Data Aggregates in a System",
+        "calculation": "Total number of Data Aggregates in a Component/System",
         "sources": ["Shim2008", "Zimmermann2015"],
-        "applicableEntities": [ENTITIES.SYSTEM],
+        "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM],
     },
     "serviceInterfaceDataCohesion": {
         "name": "Service Interface Data Cohesion",
@@ -1248,7 +1266,7 @@ const measures = {
         "name": "Cohesion between Endpoints based on data aggregate usage",
         "calculation": "Average-of(Number of Shared Usage of Data Aggregates per endpoint pair) over all endpoints / All Data Aggregates used by endpoints",
         "sources": ["Peng2022"],
-        "applicableEntities": [ENTITIES.COMPONENT],
+        "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM],
     },
     "numberOfProvidedSynchronousAndAsynchronousEndpoints": {
         "name": "Number of provided synchronous and asynchronous endpoints",
@@ -1266,7 +1284,7 @@ const measures = {
         "name": "Service Interface Usage Cohesion",
         "calculation": "Sum-of(Number of endpoints used per client of this service) / (number of clients of this service * number of endpoints of this service)",
         "sources": ["Bogner2017", "Perepletchikov2007", "Kazemi2011"],
-        "applicableEntities": [ENTITIES.COMPONENT],
+        "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM],
     },
     "distributionOfSynchronousCalls": {
         "name": "Distribution of synchronous calls",
@@ -1410,7 +1428,7 @@ const measures = {
         "name": "Lines of code (LOC) for deployment configuration",
         "calculation": "",
         "sources": ["Lehmann2017", "Talwar2005"],
-        "applicableEntities": [ENTITIES.DEPLOYMENT_MAPPING],
+        "applicableEntities": [ENTITIES.COMPONENT],
     },
     "numberOfLinksPerComponent": {
         "name": "Number of Links per Component ",
