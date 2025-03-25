@@ -3772,3 +3772,52 @@ test("serviceInterfaceUsageCohesion", () => {
     let measureValue = systemMeasureImplementations["serviceInterfaceUsageCohesion"]({ entity: system, system: system });
     expect(measureValue).toEqual(0.625);
 })
+
+
+test("readWriteSeparationForDataAggregates", () => {
+    let system = new System("sys1", "testSystem");
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let dataAggregateA = new DataAggregate("d1", "data 1", getEmptyMetaData());
+    serviceA.addDataAggregateEntity(dataAggregateA, new RelationToDataAggregate("r1", getEmptyMetaData()));
+    let dataAggregateB = new DataAggregate("d2", "data 2", getEmptyMetaData());
+    serviceA.addDataAggregateEntity(dataAggregateB, new RelationToDataAggregate("r2", getEmptyMetaData()));
+
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    endpointA.setPropertyValue("kind", "query");
+    serviceA.addEndpoint(endpointA);
+    endpointA.addDataAggregateEntity(dataAggregateA, new RelationToDataAggregate("r3", getEmptyMetaData()));
+
+    let endpointB = new ExternalEndpoint("e2", "endpoint 2", getEmptyMetaData());
+    endpointB.setPropertyValue("kind", "command");
+    serviceA.addEndpoint(endpointB);
+    endpointB.addDataAggregateEntity(dataAggregateB, new RelationToDataAggregate("r4", getEmptyMetaData()));
+
+
+    let serviceB = new Service("s2", "testService 2", getEmptyMetaData());
+    serviceB.addDataAggregateEntity(dataAggregateA, new RelationToDataAggregate("r5", getEmptyMetaData()));
+    serviceB.addDataAggregateEntity(dataAggregateB, new RelationToDataAggregate("r6", getEmptyMetaData()));
+
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    endpointC.setPropertyValue("kind", "query");
+    serviceB.addEndpoint(endpointC);
+    endpointC.addDataAggregateEntity(dataAggregateA, new RelationToDataAggregate("r7", getEmptyMetaData()));
+
+    let endpointD = new ExternalEndpoint("e4", "endpoint 4", getEmptyMetaData());
+    endpointD.setPropertyValue("kind", "command");
+    serviceB.addEndpoint(endpointD);
+    endpointD.addDataAggregateEntity(dataAggregateA, new RelationToDataAggregate("r8", getEmptyMetaData()));
+
+    let endpointE = new ExternalEndpoint("e5", "endpoint 5", getEmptyMetaData());
+    endpointE.setPropertyValue("kind", "command");
+    serviceB.addEndpoint(endpointE);
+    endpointE.addDataAggregateEntity(dataAggregateB, new RelationToDataAggregate("r9", getEmptyMetaData()));
+
+
+
+    system.addEntities([dataAggregateA, dataAggregateB]);
+    system.addEntities([serviceA, serviceB]);
+
+    let measureValue = systemMeasureImplementations["readWriteSeparationForDataAggregates"]({ entity: system, system: system });
+    expect(measureValue).toEqual(0.75);
+})

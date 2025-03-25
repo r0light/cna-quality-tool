@@ -368,7 +368,13 @@ const productFactors = {
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT],
         "sources": [],
         "measures": [],
-        "evaluations": []
+        "evaluations": [{
+            "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT],
+            "evaluation": "aggregateImpacts",
+            "reasoning": "Service-orientation has a number of aspects that need to be considered. Therefore, the evaluation for this factor just aggregates the impacts from other factors impacting this factor.",
+            "precondition": "majority",
+            "impactsInterpretation": "median"
+        }]
     },
     "limitedFunctionalScope": {
         "name": "Limited functional scope",
@@ -423,10 +429,14 @@ const productFactors = {
         "description": "Endpoints for read (query) and write (command) operations on the same data aggregate are separated into different services. Changes to these operations can then be made independently and also different representations for data aggregates can be used. That way operations on data aggregates can be adjusted to differing usage patterns, different format requirements, or if they are changed for different reasons.",
         "categories": ["networkCommunication", "businessDomain"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.ENDPOINT, ENTITIES.LINK],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.SYSTEM],
         "sources": [{ "key": "Davis2019", "section": "4.4" }, { "key": "Richardson2019", "section": "7.2 Using the CQRS pattern" }, { "key": "Bastani2017", "section": "12 CQRS (Command Query Responsibility Segregation)" }, { "key": "Indrasiri2021", "section": "4 Command and Query Responsibility Segregation Pattern" }, { "key": "Goniwada2021", "section": "4 Command and Query Responsibility Segregation Pattern" }],
-        "measures": ["numberOfReadEndpointsProvidedByAService", "numberOfWriteEndpointsProvidedByAService"],
-        "evaluations": []
+        "measures": ["numberOfReadEndpointsProvidedByAService", "numberOfWriteEndpointsProvidedByAService", "readWriteSeparationForDataAggregates"],
+        "evaluations": [{
+            "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT],
+            "evaluation": "commandQueryResponsibilitySegregation",
+            "reasoning": "Based on readWriteSeparationForDataAggregates the factor is evaluated as being present, the higher the separation of read and write operations on the same data aggregate is, across one or more component(s)."
+        }]
     },
     "separationByGateways": {
         "name": "Separation by gateways",
@@ -2277,6 +2287,12 @@ const measures = {
     "externalEndpointAccessConsistency": {
         "name": "Consistency of supported authentication methods of external endpoints",
         "calculation": "Similarity of supported authentication methods / All external endpoints",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT]
+    },
+    "readWriteSeparationForDataAggregates": {
+        "name": "Read Write Separation for Data Aggregates",
+        "calculation": "Average(Exclusive Read or Write Access to Data Aggregate by Endpoint(s)) over all Data Aggregates",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT]
     }

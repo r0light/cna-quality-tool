@@ -267,6 +267,16 @@ const productFactorEvaluationImplementation: {
 
         return squareRootedNumericalMapping(serviceInterfaceUsageCohesion as number);
     },
+    "commandQueryResponsibilitySegregation": (parameters) => {
+        let readWriteSeparationForDataAggregates = parameters.calculatedMeasures.get("readWriteSeparationForDataAggregates").value;
+
+        if (readWriteSeparationForDataAggregates === "n/a") {
+            return "n/a";
+        }
+
+        return exponentialNumericalMapping(readWriteSeparationForDataAggregates as number);
+
+    }
 };
 
 

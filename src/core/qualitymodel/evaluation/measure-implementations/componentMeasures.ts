@@ -1098,11 +1098,7 @@ export const ratioOfEndpointsThatAreIncludedInASingleSignOnApproach: Calculation
         return "n/a";
     }
 
-    console.log(allComponentEndpoints);
-
     let endpointsSupportingTokens = allComponentEndpoints.filter(endpoint => endpoint.getProperty("supported_authentication_methods").value.includes("Single Sign-On"));
-
-    console.log(allComponentEndpoints)
 
     return endpointsSupportingTokens.length / allComponentEndpoints.length;
 }
@@ -1163,6 +1159,48 @@ export const externalEndpointAccessConsistency: Calculation = (parameters: Calcu
     }
 
     return average(pairwiseSimilarity);
+}
+
+export const readWriteSeparationForDataAggregates: Calculation = (parameters: CalculationParameters<Component>) => {
+    // initialize map to track data aggregate usage
+    let dataAggregateUsage = new Map<string, {"read": boolean, "write": boolean}>();
+    parameters.entity.getDataAggregateEntities.forEach(dataAggregate => {
+        dataAggregateUsage.set(dataAggregate.data.getId, {"read": false, "write": false});
+    })
+
+    let allComponentEndpoints = parameters.entity.getEndpointEntities.concat(parameters.entity.getExternalEndpointEntities);
+
+    if (allComponentEndpoints.length === 0 || dataAggregateUsage.size === 0) {
+        return "n/a";
+    }
+
+    for (const endpoint of allComponentEndpoints) {
+        for (const usageRelation of endpoint.getDataAggregateEntities) {
+            if (endpoint.getProperty("kind").value === "query") {
+                dataAggregateUsage.get(usageRelation.data.getId).read = true;
+            } else  if (endpoint.getProperty("kind").value === "command") {
+                dataAggregateUsage.get(usageRelation.data.getId).write = true;
+            }
+        }
+    }
+
+    let readWriteSeparation = [];
+
+    dataAggregateUsage.entries().forEach(([dataAggregateId, usage]) => {
+        if (usage.read && usage.write) {
+            // both read and write
+            readWriteSeparation.push(0);
+        } else if (usage.read != usage.write) {
+            // either read or write => separation
+            readWriteSeparation.push(1)
+        } // else no usage...
+    })
+
+    if (readWriteSeparation.length === 0) {
+        return "n/a";
+    }
+
+    return average(readWriteSeparation);
 }
 
 export const componentMeasureImplementations: { [measureKey: string]: Calculation } = {
@@ -1235,6 +1273,7 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "ratioOfEndpointsThatSupportPlaintextAuthentication": ratioOfEndpointsThatSupportPlaintextAuthentication,
     "ratioOfEndpointsThatAreIncludedInASingleSignOnApproach": ratioOfEndpointsThatAreIncludedInASingleSignOnApproach,
     "endpointAccessConsistency": endpointAccessConsistency,
-    "externalEndpointAccessConsistency": externalEndpointAccessConsistency
+    "externalEndpointAccessConsistency": externalEndpointAccessConsistency,
+    "readWriteSeparationForDataAggregates": readWriteSeparationForDataAggregates
 }
 

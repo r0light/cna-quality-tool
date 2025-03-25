@@ -2079,3 +2079,31 @@ test("externalEndpointAccessConsistency", () => {
     let measureValue = componentMeasureImplementations["externalEndpointAccessConsistency"]({ entity: serviceA, system: system });
     expect(measureValue).toEqual(1);
 })
+
+
+test("readWriteSeparationForDataAggregates", () => {
+    let system = new System("sys1", "testSystem");
+
+    let service = new Service("s1", "testService", getEmptyMetaData());
+    let dataAggregateA = new DataAggregate("d1", "data 1", getEmptyMetaData());
+    service.addDataAggregateEntity(dataAggregateA, new RelationToDataAggregate("r1", getEmptyMetaData()));
+    let dataAggregateB = new DataAggregate("d2", "data 2", getEmptyMetaData());
+    service.addDataAggregateEntity(dataAggregateB, new RelationToDataAggregate("r2", getEmptyMetaData()));
+
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    endpointA.setPropertyValue("kind", "query");
+    service.addEndpoint(endpointA);
+    endpointA.addDataAggregateEntity(dataAggregateA, new RelationToDataAggregate("r3", getEmptyMetaData()));
+
+    let endpointB = new ExternalEndpoint("e2", "endpoint 2", getEmptyMetaData());
+    endpointB.setPropertyValue("kind", "command");
+    service.addEndpoint(endpointB);
+    endpointB.addDataAggregateEntity(dataAggregateB, new RelationToDataAggregate("r4", getEmptyMetaData()));
+
+
+    system.addEntities([dataAggregateA, dataAggregateB]);
+    system.addEntity(service);
+
+    let measureValue = componentMeasureImplementations["readWriteSeparationForDataAggregates"]({ entity: service, system: system });
+    expect(measureValue).toEqual(1);
+})
