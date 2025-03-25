@@ -25,6 +25,7 @@ export type EvaluatedProductFactor = {
     factorType: 'productFactor', //TODO has to be "productFactor"
     productFactor: ProductFactor,
     result: FactorEvaluationResult, 
+    evaluationReasoning: string,
     measures: Map<string, CalculatedMeasure>,
     forwardImpacts: ForwardImpactingPath[],
     backwardImpacts: BackwardImpactingPath[]

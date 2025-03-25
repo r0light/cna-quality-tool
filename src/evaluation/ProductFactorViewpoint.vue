@@ -19,6 +19,9 @@
                                 result</span>: <span> {{ productFactor.result }}</span>
                         </div>
                         <div>
+                            <span class="font-italic"> {{ productFactor.evaluationReasoning }}</span>
+                        </div>
+                        <div>
                             <span v-if="productFactor.measures.size > 0">Relevant measures:</span>
                             <ul>
                                 <li v-for="[key, measure] of productFactor.measures">

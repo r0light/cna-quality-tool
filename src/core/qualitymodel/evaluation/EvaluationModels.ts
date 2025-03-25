@@ -97,6 +97,7 @@ class EvaluatedEntityModel<T extends `${ENTITIES}`, E> implements Evaluation {
                 factorType: 'productFactor' as const,
                 productFactor: currentFactor,
                 result: currentFactor.isEvaluationAvailable(this.#entityKey) ? currentFactor.evaluate(this.#entityKey, this) : "n/a",
+                evaluationReasoning: currentFactor.isEvaluationAvailable(this.#entityKey) ? currentFactor.getEvaluation(this.#entityKey).getEvaluationDetails.getReasoning : "",
                 measures: measuresForThisFactor,
                 forwardImpacts: [],
                 backwardImpacts: []
