@@ -596,15 +596,15 @@ test("combinedMetricForIndirectDependency", () => {
     serviceE.addEndpoint(endpointF);
 
     let linkAD = new Link("l1", serviceA, endpointE);
-    let linkBD = new Link("l3", serviceB, endpointE);
-    let linkAB = new Link("l1", serviceA, endpointA);
-    let linkBC = new Link("l3", serviceB, endpointC);
+    let linkBD = new Link("l2", serviceB, endpointE);
+    let linkAB = new Link("l3", serviceA, endpointA);
+    let linkBC = new Link("l4", serviceB, endpointC);
 
     system.addEntities([serviceA, serviceB, serviceC, storageServiceD, serviceE]);
     system.addEntities([linkAD, linkBD, linkAB, linkBC]);
 
     let measureValue = componentMeasureImplementations["combinedMetricForIndirectDependency"]({ entity: serviceA, system: system });
-    expect(measureValue).toEqual(1 / 6);
+    expect(measureValue).toEqual(0.375);
 })
 
 test("numberOfComponentsThatAreLinkedToAComponent", () => {

@@ -287,7 +287,7 @@ test("ratioOfEndpointsSupportingSsl", () => {
     system.addEntity(requestTrace);
 
     let measureValue = requestTraceMeasureImplementations["ratioOfEndpointsSupportingSsl"]({ entity: requestTrace, system: system });
-    expect(measureValue).toEqual(1/3);
+    expect(measureValue).toEqual(1 / 3);
 
 })
 
@@ -942,7 +942,7 @@ test("serviceDiscoveryUsage", () => {
     system.addEntity(requestTrace);
 
     let measureValue = requestTraceMeasureImplementations["serviceDiscoveryUsage"]({ entity: requestTrace, system: system });
-    expect(measureValue).toEqual(3/4);
+    expect(measureValue).toEqual(3 / 4);
 })
 
 test("serviceReplicationLevel", () => {
@@ -1332,7 +1332,7 @@ test("amountOfRedundancy", () => {
     system.addEntity(requestTrace);
 
     let measureValue = requestTraceMeasureImplementations["amountOfRedundancy"]({ entity: requestTrace, system: system });
-    expect(measureValue).toEqual(6/4);
+    expect(measureValue).toEqual(6 / 4);
 })
 
 test("dataShardingLevel", () => {
@@ -1642,24 +1642,24 @@ test("suitablyReplicatedStatefulService", () => {
 test("ratioOfUniqueAccountUsage", () => {
     let system = new System("sys1", "testSystem");;
     let infrastructureA = new Infrastructure("i1", "Infrastructure 1", getEmptyMetaData());
-    infrastructureA.setPropertyValue("identities", {"infraAccount": "account"});
+    infrastructureA.setPropertyValue("identities", { "infraAccount": "account" });
     let infrastructureB = new Infrastructure("i2", "Infrastruture B", getEmptyMetaData());
-    infrastructureB.setPropertyValue("identities", {"default-account": "account"});
+    infrastructureB.setPropertyValue("identities", { "default-account": "account" });
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
-    serviceA.setPropertyValue("identities", {"serviceAccount": "account"});
+    serviceA.setPropertyValue("identities", { "serviceAccount": "account" });
     let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
     let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
     serviceA.addEndpoint(endpointA);
     serviceA.addEndpoint(externalEndpointA);
 
     let serviceB = new Service("s2", "testService", getEmptyMetaData());
-    serviceB.setPropertyValue("identities", {"default-account": "account"});
+    serviceB.setPropertyValue("identities", { "default-account": "account" });
     let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
     serviceB.addEndpoint(endpointB);
 
     let serviceC = new Service("s3", "testService", getEmptyMetaData());
-    serviceC.setPropertyValue("identities", {"default-account": "account"});
+    serviceC.setPropertyValue("identities", { "default-account": "account" });
     let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
     serviceC.addEndpoint(endpointC);
 
@@ -1698,7 +1698,7 @@ test("accessRestrictedToCallers", () => {
     serviceB.addEndpoint(endpointB);
 
     let serviceC = new Service("s3", "service C", getEmptyMetaData())
-    serviceC.setPropertyValue("identities", {"a1": "account"});
+    serviceC.setPropertyValue("identities", { "a1": "account" });
 
     let serviceD = new Service("s4", "service D", getEmptyMetaData())
     let endpointD = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
@@ -1855,7 +1855,7 @@ test("ratioOfEntitiesProvidingStandardizedArtifacts", () => {
     system.addEntity(requestTrace);
 
     let measureValue = requestTraceMeasureImplementations["ratioOfEntitiesProvidingStandardizedArtifacts"]({ entity: requestTrace, system: system });
-    expect(measureValue).toEqual(2/5);
+    expect(measureValue).toEqual(2 / 5);
 })
 
 test("componentArtifactsSimilarity", () => {
@@ -1911,7 +1911,7 @@ test("componentArtifactsSimilarity", () => {
     system.addEntity(requestTrace);
 
     let measureValue = requestTraceMeasureImplementations["componentArtifactsSimilarity"]({ entity: requestTrace, system: system });
-    expect(measureValue).toEqual(1/3);
+    expect(measureValue).toEqual(1 / 3);
 })
 
 
@@ -1997,7 +1997,7 @@ test("ratioOfEndpointsCoveredByContract", () => {
     system.addEntity(requestTrace);
 
     let measureValue = requestTraceMeasureImplementations["ratioOfEndpointsCoveredByContract"]({ entity: requestTrace, system: system });
-    expect(measureValue).toEqual(2/3);
+    expect(measureValue).toEqual(2 / 3);
 })
 
 
@@ -2047,7 +2047,7 @@ test("standardizedDeployments", () => {
     system.addEntity(requestTrace);
 
     let measureValue = requestTraceMeasureImplementations["standardizedDeployments"]({ entity: requestTrace, system: system });
-    expect(measureValue).toEqual(2/3);
+    expect(measureValue).toEqual(2 / 3);
 })
 
 test("selfContainedDeployments", () => {
@@ -2096,7 +2096,7 @@ test("selfContainedDeployments", () => {
     system.addEntity(requestTrace);
 
     let measureValue = requestTraceMeasureImplementations["selfContainedDeployments"]({ entity: requestTrace, system: system });
-    expect(measureValue).toEqual(2/3);
+    expect(measureValue).toEqual(2 / 3);
 })
 
 
@@ -2141,7 +2141,7 @@ test("ratioOfDocumentedEndpoints", () => {
     system.addEntity(requestTrace);
 
     let measureValue = requestTraceMeasureImplementations["ratioOfDocumentedEndpoints"]({ entity: requestTrace, system: system });
-    expect(measureValue).toEqual(2/3);
+    expect(measureValue).toEqual(2 / 3);
 })
 
 
@@ -2177,7 +2177,7 @@ test("ratioOfEndpointsThatSupportTokenBasedAuthentication", () => {
     system.addEntity(requestTrace);
 
     let measureValue = requestTraceMeasureImplementations["ratioOfEndpointsThatSupportTokenBasedAuthentication"]({ entity: requestTrace, system: system });
-    expect(measureValue).toEqual(2/3);
+    expect(measureValue).toEqual(2 / 3);
 })
 
 test("ratioOfEndpointsThatSupportApiKeys", () => {
@@ -2212,7 +2212,7 @@ test("ratioOfEndpointsThatSupportApiKeys", () => {
     system.addEntity(requestTrace);
 
     let measureValue = requestTraceMeasureImplementations["ratioOfEndpointsThatSupportApiKeys"]({ entity: requestTrace, system: system });
-    expect(measureValue).toEqual(2/3);
+    expect(measureValue).toEqual(2 / 3);
 })
 
 
@@ -2248,7 +2248,7 @@ test("ratioOfEndpointsThatSupportPlaintextAuthentication", () => {
     system.addEntity(requestTrace);
 
     let measureValue = requestTraceMeasureImplementations["ratioOfEndpointsThatSupportPlaintextAuthentication"]({ entity: requestTrace, system: system });
-    expect(measureValue).toEqual(2/3);
+    expect(measureValue).toEqual(2 / 3);
 })
 
 
@@ -2284,7 +2284,7 @@ test("ratioOfEndpointsThatAreIncludedInASingleSignOnApproach", () => {
     system.addEntity(requestTrace);
 
     let measureValue = requestTraceMeasureImplementations["ratioOfEndpointsThatAreIncludedInASingleSignOnApproach"]({ entity: requestTrace, system: system });
-    expect(measureValue).toEqual(2/3);
+    expect(measureValue).toEqual(2 / 3);
 })
 
 test("endpointAccessConsistency", () => {
@@ -2321,4 +2321,47 @@ test("endpointAccessConsistency", () => {
 
     let measureValue = requestTraceMeasureImplementations["endpointAccessConsistency"]({ entity: requestTrace, system: system });
     expect(measureValue).toEqual(1);
+})
+
+
+
+test("degreeToWhichComponentsAreLinkedToStatefulComponents", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA);
+    serviceA.addEndpoint(externalEndpointA);
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    serviceB.setPropertyValue("stateless", true);
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    serviceC.setPropertyValue("stateless", false);
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+
+    let serviceD = new Service("s4", "testService", getEmptyMetaData());
+    serviceD.setPropertyValue("stateless", true);
+    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    serviceD.addEndpoint(endpointD);
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+    let linkBC = new Link("l2", serviceB, endpointC);
+    let linkDB = new Link("l3", serviceD, endpointB);
+    let linkCD = new Link("l5", serviceC, endpointD);
+
+    let requestTrace = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
+    requestTrace.setLinks = [[linkAB], [linkBC], [linkCD], [linkDB]];
+    requestTrace.setExternalEndpoint = externalEndpointA;
+
+    system.addEntities([serviceA, serviceB, serviceC, serviceD]);
+    system.addEntities([linkAB, linkBC, linkDB, linkCD]);
+    system.addEntity(requestTrace);
+
+    let measureValue = requestTraceMeasureImplementations["degreeToWhichComponentsAreLinkedToStatefulComponents"]({ entity: requestTrace, system: system });
+    expect(measureValue).toEqual(0.25);
 })

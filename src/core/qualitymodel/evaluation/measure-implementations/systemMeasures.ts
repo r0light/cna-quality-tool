@@ -1,5 +1,5 @@
 import { BackingService, BrokerBackingService, Component, DeploymentMapping, Infrastructure, Link, ProxyBackingService, Service, StorageBackingService, System } from "@/core/entities";
-import { Calculation, CalculationParameters } from "../../quamoco/Measure";
+import { Calculation, CalculationParameters, MeasureValue } from "../../quamoco/Measure";
 import { average, median, lowest, partition } from "./general-functions";
 import { ASYNCHRONOUS_ENDPOINT_KIND, AUTOMATED_INFRASTRUCTURE_MAINTENANCE, AUTOMATED_RESTART_POLICIES, AUTOMATED_SCALING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, CONFIG_SERVICE_KIND, CONTRACT_ARTIFACT_TYPE, CUSTOM_SOFTWARE_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, EVENT_SOURCING_KIND, getEndpointKindWeight, getUsageRelationWeight, IAC_ARTIFACT_TYPE, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MESSAGE_BROKER_KIND, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SEND_EVENT_ENDPOINT_KIND, SERVICE_MESH_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND, VAULT_KIND } from "../../specifications/featureModel";
 import { calculateRatioOfEndpointsSupportingSsl, calculateRatioOfExternalEndpointsSupportingTls, componentMeasureImplementations, numberOfAsynchronousEndpointsOfferedByAService, numberOfComponentsAComponentIsLinkedTo, numberOfSynchronousEndpointsOfferedByAService, providesHealthAndReadinessEndpoints, serviceCouplingBasedOnEndpointEntropy } from "./componentMeasures";
@@ -133,14 +133,14 @@ export const ratioOfExternalEndpointsSupportingTls: Calculation = (parameters: C
     return calculateRatioOfExternalEndpointsSupportingTls(allExternalEndpoints);
 }
 
-export const calculateRatioOfSecuredLinks: (allLinks: Link[]) => number = (allLinks) => {
+export const calculateRatioOfSecuredLinks: (allLinks: Link[]) => MeasureValue = (allLinks) => {
     let linksConnectedToSecureEndpoints = allLinks.filter(link => {
         let protocol = link.getTargetEndpoint.getProperties().find(property => property.getKey === "protocol").value;
         return PROTOCOLS_SUPPORTING_TLS.includes(protocol);
     }).length
 
     if (allLinks.length === 0) {
-        return 0;
+        return "n/a";
     }
 
     return linksConnectedToSecureEndpoints / allLinks.length;
@@ -155,11 +155,11 @@ export const dataAggregateScope: Calculation = (parameters: CalculationParameter
     return [...parameters.entity.getDataAggregateEntities.keys()].length;
 }
 
-export const calculateRatioOfStatefulComponents: (allComponents: Component[]) => number = (allComponents) => {
+export const calculateRatioOfStatefulComponents: (allComponents: Component[]) => MeasureValue = (allComponents) => {
     let numberOfStatefulComponents = allComponents.filter(entry => !(entry.getProperties().find(property => property.getKey === "stateless").value)).length;
 
     if (allComponents.length === 0) {
-        return 0;
+        return "n/a";
     }
     return numberOfStatefulComponents / allComponents.length;
 
@@ -170,11 +170,11 @@ export const ratioOfStatefulComponents: Calculation = (parameters: CalculationPa
     return calculateRatioOfStatefulComponents(allComponents);
 }
 
-export const calculateRatioOfStatelessComponents: (allComponents: Component[]) => number = (allComponents) => {
+export const calculateRatioOfStatelessComponents: (allComponents: Component[]) => MeasureValue = (allComponents) => {
     let numberOfStatelessComponents = allComponents.filter(entry => (entry.getProperties().find(property => property.getKey === "stateless").value)).length;
 
     if (allComponents.length === 0) {
-        return 0;
+        return "n/a";
     }
     return numberOfStatelessComponents / allComponents.length;
 }
@@ -188,7 +188,7 @@ export const degreeToWhichComponentsAreLinkedToStatefulComponents: Calculation =
     let allComponents = [...parameters.entity.getComponentEntities.entries()];
 
     if (allComponents.length === 0) {
-        return 0;
+        return "n/a";
     }
 
     let totalNumberOfConnectionsToStatefulComponents = 0;
@@ -210,7 +210,7 @@ export const degreeOfAsynchronousCommunication: Calculation = (parameters: Calcu
     let allComponents = [...parameters.entity.getComponentEntities.entries()];
 
     if (allComponents.length === 0) {
-        return 0;
+        return "n/a";
     }
 
     let degreesOfAsynchronousEndpoints: number[] = [];
@@ -227,10 +227,10 @@ export const degreeOfAsynchronousCommunication: Calculation = (parameters: Calcu
     return average(degreesOfAsynchronousEndpoints);
 }
 
-export const calculateRatioOfLinksToAsynchronousEndpoints: (allLinks: Link[]) => number = (allLinks) => {
+export const calculateRatioOfLinksToAsynchronousEndpoints: (allLinks: Link[]) => MeasureValue = (allLinks) => {
 
     if (allLinks.length === 0) {
-        return 0;
+        return "n/a";
     }
 
     let numberOfLinksToAnAsynchronousEndpoint = 0;
@@ -256,7 +256,7 @@ export const ratioOfServicesThatProvideHealthEndpoints: Calculation = (parameter
         .filter(entity => entity.constructor.name === Service.name);
 
     if (allServices.length === 0) {
-        return 0;
+        return "n/a";
     }
 
     let numberOfServicesWithHealthAndReadinessEndpoint = 0;
@@ -276,7 +276,7 @@ export const couplingDegreeBasedOnPotentialCoupling: Calculation = (parameters: 
 
     // the system has to have at least three components for this measure to make sense, because otherwise max-min is 0.
     if (allComponents.length < 3) {
-        return 0;
+        return "n/a";
     }
 
     let shortestPaths = new Map<string, Map<string, number>>();
@@ -311,7 +311,7 @@ export const interactionDensityBasedOnComponents: Calculation = (parameters: Cal
     let numberOfComponents = parameters.entity.getComponentEntities.size;
 
     if (numberOfComponents === 0) {
-        return 0;
+        return "n/a";
     }
 
     return parameters.entity.getLinkEntities.size / numberOfComponents;
@@ -335,7 +335,7 @@ export const systemCouplingBasedOnEndpointEntropy: Calculation = (parameters: Ca
     let cumulativeCoupling = 0;
     for (const [componentId, component] of allComponents) {
         let coupling = serviceCouplingBasedOnEndpointEntropy({ entity: component, system: parameters.system });
-        cumulativeCoupling += coupling as number;
+        cumulativeCoupling += coupling === "n/a" ? 0 : coupling as number;
     }
 
     return cumulativeCoupling;
@@ -477,7 +477,7 @@ export const ratioOfSharedNonExternalComponentsToNonExternalComponents: Calculat
     let allComponents = [...parameters.entity.getComponentEntities.entries()];
 
     if (allComponents.length === 0) {
-        return 0;
+        return "n/a";
     }
 
     let servicesUsedBy = new Map<string, Set<string>>();
@@ -515,7 +515,7 @@ export const ratioOfSharedDependenciesOfNonExternalComponentsToPossibleDependenc
     let allComponents = [...parameters.entity.getComponentEntities.entries()];
 
     if (allComponents.length === 0) {
-        return 0;
+        return "n/a";
     }
 
     let servicesUsedBy = new Map<string, Set<string>>();
@@ -556,7 +556,7 @@ export const ratioOfSharedDependenciesOfNonExternalComponentsToPossibleDependenc
 export const averageSystemCoupling: Calculation = (parameters: CalculationParameters<System>) => {
 
     if (parameters.entity.getComponentEntities.size === 0) {
-        return 0;
+        return "n/a";
     }
 
     let allLinks = [...parameters.entity.getLinkEntities.entries()];
@@ -636,7 +636,7 @@ export const dataAggregateConvergenceAcrossComponents: Calculation = (parameters
     let allComponents = parameters.entity.getComponentEntities;
 
     if (allDataAggregates.size === 0 || allComponents.size === 0) {
-        return 0;
+        return "n/a";
     }
 
     let sumOfDataAggregatesUsed = 0;
@@ -677,6 +677,10 @@ export const numberOfPotentialCyclesInASystem: Calculation = (parameters: Calcul
 
     let allComponents = [...parameters.entity.getComponentEntities.entries()];
 
+    if (allComponents.length === 0) {
+        return "n/a";
+    }
+
     for (let [componentId, component] of allComponents) {
         let pathsToSearch = parameters.entity.getOutgoingLinksOfComponent(componentId)
             .map(link => [link]); // a path is an array of links
@@ -714,13 +718,19 @@ export const numberOfPotentialCyclesInASystem: Calculation = (parameters: Calcul
 export const maximumLengthOfServiceLinkChainPerRequestTrace: Calculation = (parameters: CalculationParameters<System>) => {
     let allRequestTraces = [...parameters.entity.getRequestTraceEntities.entries()].map(requestTrace => requestTrace[1]);
 
-
+    if (allRequestTraces.length === 0) {
+        return "n/a";
+    }
 
     return Math.max(...allRequestTraces.map(requestTrace => requestTrace.getLinks.length));
 }
 
 export const maximumNumberOfServicesWithinARequestTrace: Calculation = (parameters: CalculationParameters<System>) => {
     let allRequestTraces = [...parameters.entity.getRequestTraceEntities.entries()].map(requestTrace => requestTrace[1]);
+
+    if (allRequestTraces.length === 0) {
+        return "n/a";
+    }
 
     return Math.max(...allRequestTraces.map(requestTrace => {
         let nodes = [...requestTrace.getLinks].flatMap(traceIndex => traceIndex.map(link => [link.getSourceEntity, parameters.entity.searchComponentOfEndpoint(link.getTargetEndpoint.getId)]).flatMap(components => components.map(component => component.getId)));
@@ -731,6 +741,10 @@ export const maximumNumberOfServicesWithinARequestTrace: Calculation = (paramete
 export const databaseTypeUtilization: Calculation = (parameters: CalculationParameters<System>) => {
 
     let componentsPerStorage = new Map<string, Set<string>>();
+
+    if (parameters.entity.getLinkEntities.size === 0) {
+        return "n/a";
+    }
 
     for (const [linkId, link] of parameters.entity.getLinkEntities) {
         let targetComponent = parameters.entity.searchComponentOfEndpoint(link.getTargetEndpoint.getId);
@@ -757,7 +771,7 @@ export const averageNumberOfEndpointsPerService: Calculation = (parameters: Calc
     let allComponents = parameters.entity.getComponentEntities;
 
     if (allComponents.size === 0) {
-        return 0;
+        return "n/a";
     }
 
     let allEndpointIds: string[] = [];
@@ -780,7 +794,7 @@ export const ratioOfProviderManagedComponentsAndInfrastructure: Calculation = (p
     let allInfrastructure = parameters.entity.getInfrastructureEntities;
 
     if (allComponents.size === 0 && allInfrastructure.size === 0) {
-        return 0;
+        return "n/a";
     }
 
     let numberOfManagedComponents = [...allComponents.entries()].filter(component => component[1].getProperty("managed").value).reduce((accumulator, current) => accumulator + 1, 0);
@@ -795,7 +809,7 @@ export const componentDensity: Calculation = (parameters: CalculationParameters<
     let allDeploymentMappings = parameters.entity.getDeploymentMappingEntities;
 
     if (allDeploymentMappings.size === 0) {
-        return 0;
+        return "n/a";
     }
 
     let allComponents = parameters.entity.getComponentEntities;
@@ -822,6 +836,10 @@ export const numberOfAvailabilityZonesUsed: Calculation = (parameters: Calculati
 
     let availabilityZones: Set<string> = new Set();
 
+    if (parameters.entity.getInfrastructureEntities.size === 0) {
+        return "n/a";
+    }
+
     [...parameters.entity.getInfrastructureEntities.entries()].forEach(([infrastructureId, infrastructure]) => {
         let usedAvailabilityZones = (infrastructure.getProperty("availability_zone").value as string).split(",");
         usedAvailabilityZones.forEach(zoneId => availabilityZones.add(zoneId));
@@ -841,7 +859,7 @@ export const rollingUpdateOption: Calculation = (parameters: CalculationParamete
     }
 
     if (infrastructureDeployingComponents.size === 0) {
-        return 0;
+        return "n/a";
     }
 
     let infrastructureEnablingRollingUpdates = [...infrastructureDeployingComponents.entries()].filter(infrastructure => infrastructure[1].getProperty("supported_update_strategies").value.some(strategy => ROLLING_UPDATE_STRATEGY_OPTIONS.includes(strategy))).map(infrastructure => infrastructure[1]);
@@ -855,7 +873,7 @@ export const numberOfLinksWithRetryLogic: Calculation = (parameters: Calculation
     let linksToSynchronousEndpoints = [...parameters.entity.getLinkEntities.entries()].filter(([linkId, link]) => SYNCHRONOUS_ENDPOINT_KIND.includes(link.getTargetEndpoint.getProperty("kind").value)).map(([linkId, link]) => link);
 
     if (linksToSynchronousEndpoints.length === 0) {
-        return 0;
+        return "n/a";
     }
 
     let linksWithRetryLogic = linksToSynchronousEndpoints.filter(link => link.getProperty("retries").value > 0);
@@ -869,7 +887,7 @@ export const numberOfLinksWithComplexFailover: Calculation = (parameters: Calcul
     let linksToSynchronousEndpoints = [...parameters.entity.getLinkEntities.entries()].filter(([linkId, link]) => SYNCHRONOUS_ENDPOINT_KIND.includes(link.getTargetEndpoint.getProperty("kind").value)).map(([linkId, link]) => link);
 
     if (linksToSynchronousEndpoints.length === 0) {
-        return 0;
+        return "n/a";
     }
 
     let linksWithCircuitBreaker = linksToSynchronousEndpoints.filter(link => link.getProperty("circuit_breaker").value !== "none");
@@ -965,7 +983,7 @@ export const numberOfRequestTraces: Calculation = (parameters: CalculationParame
 
 export const averageComplexityOfRequestTraces: Calculation = (parameters: CalculationParameters<System>) => {
     if (parameters.entity.getRequestTraceEntities.size === 0) {
-        return 0;
+        return "n/a";
     }
 
     return average([...parameters.entity.getRequestTraceEntities.entries()].map(([requestTraceId, requestTrace]) => requestTraceComplexity({ entity: requestTrace, system: parameters.system }) as number));
@@ -973,7 +991,7 @@ export const averageComplexityOfRequestTraces: Calculation = (parameters: Calcul
 
 export const amountOfRedundancy: Calculation = (parameters: CalculationParameters<System>) => {
     if (parameters.entity.getDeploymentMappingEntities.size === 0) {
-        return 0;
+        return "n/a";
     }
 
     let deploymentMappings: Set<string> = new Set();
@@ -1177,7 +1195,7 @@ export const ratioOfRequestTracesThroughGateway: Calculation = (parameters: Calc
     let allRequestTraces = parameters.entity.getRequestTraceEntities;
 
     if (allRequestTraces.size === 0) {
-        return 0;
+        return "n/a";
     }
 
     let numberOfRequestTracesThroughGateway = 0;
@@ -1210,7 +1228,7 @@ export const ratioOfInfrastructureNodesThatSupportMonitoring: Calculation = (par
     let allInfrastructure = parameters.entity.getInfrastructureEntities;
 
     if (allInfrastructure.size === 0) {
-        return 0;
+        return "n/a";
     }
 
     let numberOfInfrastructureNodesSupportingMonitoring = 0;
@@ -1228,7 +1246,7 @@ export const ratioOfComponentsThatSupportMonitoring: Calculation = (parameters: 
     let allComponents = parameters.entity.getComponentEntities;
 
     if (allComponents.size === 0) {
-        return 0;
+        return "n/a";
     }
 
     let numberOfComponentsSupportingMonitoring = 0;
@@ -1429,7 +1447,7 @@ export const distributedTracingSupport: Calculation = (parameters: CalculationPa
     })
 
     if (allTraceableComponents.length === 0 || tracingServices.length === 0) {
-        return 0;
+        return "n/a";
     }
 
     let tracingEndpoints = new Set(tracingServices.flatMap(([componentId, component]) => {
@@ -1461,7 +1479,7 @@ export const serviceDiscoveryUsage: Calculation = (parameters: CalculationParame
     let allLinks = [...parameters.entity.getLinkEntities.values()];
 
     if (allLinks.length === 0) {
-        return 0;
+        return "n/a";
     }
 
     return calculateNumberOfLinksWithServiceDiscovery(allLinks) as number / allLinks.length;
@@ -1472,7 +1490,7 @@ export const ratioOfComponentsWhoseIngressIsProxied: Calculation = (parameters: 
     const [allNonProxyComponents, proxyComponents] = partition([...parameters.entity.getComponentEntities.entries()], ([componentId, component]) => component.constructor.name !== ProxyBackingService.name);
 
     if (proxyComponents.length === 0 || allNonProxyComponents.length === 0) {
-        return 0;
+        return "n/a";
     }
 
     let numberOfComponentsWithProxiedIngress = 0;
@@ -1491,7 +1509,7 @@ export const ratioOfComponentsWhoseEgressIsProxied: Calculation = (parameters: C
     const [allNonProxyComponents, proxyComponents] = partition([...parameters.entity.getComponentEntities.entries()], ([componentId, component]) => component.constructor.name !== ProxyBackingService.name);
 
     if (proxyComponents.length === 0 || allNonProxyComponents.length === 0) {
-        return 0;
+        return "n/a";
     }
 
     let numberOfComponentsWithProxiedEgress = 0;
@@ -1535,7 +1553,7 @@ export const ratioOfStateDependencyOfEndpoints: Calculation = (parameters: Calcu
     const allEndpoints = [...parameters.entity.getComponentEntities.entries()].flatMap(([componentId, component]) => component.getEndpointEntities.concat(component.getExternalEndpointEntities));
 
     if (allEndpoints.length === 0) {
-        return 0;
+        return "n/a";
     }
 
     let numberOfDependingEndpoints = allEndpoints.filter(endpoint => endpoint.getDataAggregateEntities.length > 0).length;

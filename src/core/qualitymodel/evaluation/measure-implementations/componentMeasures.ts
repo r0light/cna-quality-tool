@@ -53,12 +53,12 @@ export const ratioOfEndpointsSupportingSsl: Calculation = (parameters: Calculati
     return calculateRatioOfEndpointsSupportingSsl(allEndpoints);
 }
 
-export const calculateRatioOfExternalEndpointsSupportingTls: (endpoints: Endpoint[]) => number = (allExternalEndpoints) => {
+export const calculateRatioOfExternalEndpointsSupportingTls: (endpoints: Endpoint[]) => MeasureValue = (allExternalEndpoints) => {
     let numberOfExternalEndpointsSupportingTLS = allExternalEndpoints.map(endpoint => endpoint.getProperties().find(property => property.getKey === "protocol").value)
         .filter(protocol => PROTOCOLS_SUPPORTING_TLS.includes(protocol))
         .length;
     if (allExternalEndpoints.length === 0) {
-        return 0;
+        return "n/a";
     }
 
     return numberOfExternalEndpointsSupportingTLS / allExternalEndpoints.length;
@@ -170,7 +170,7 @@ export const ratioOfStateDependencyOfEndpoints: Calculation = (parameters: Calcu
     let allEndpoints = parameters.entity.getEndpointEntities.concat(parameters.entity.getExternalEndpointEntities);
 
     if (allEndpoints.length === 0) {
-        return 0;
+        return "n/a";
     }
 
     let numberOfDependingEndpoints = allEndpoints.filter(endpoint => endpoint.getDataAggregateEntities.length > 0).length;
@@ -198,7 +198,7 @@ export const ratioOfAsynchronousOutgoingLinks: Calculation = (parameters: Calcul
     let asynchronousOutgoingLinks = outgoingLinks.filter(link => ASYNCHRONOUS_ENDPOINT_KIND.includes(link.getTargetEndpoint.getProperty("kind").value));
 
     if (outgoingLinks.length === 0) {
-        return 0;
+        return "n/a";
     }
 
     return asynchronousOutgoingLinks.length / outgoingLinks.length;
@@ -230,7 +230,7 @@ export const ratioOfOutgoingLinksOfAService: Calculation = (parameters: Calculat
     let numberOfOutgoingLinks: number = numberOfConsumedEndpoints(parameters) as number;
     let incomingLinks = parameters.system.getIncomingLinksOfComponent(parameters.entity.getId);
     if (incomingLinks.length + numberOfOutgoingLinks === 0) {
-        return 0;
+        return "n/a";
     }
 
     return (numberOfOutgoingLinks / (incomingLinks.length + numberOfOutgoingLinks)) * 100
@@ -240,7 +240,7 @@ export const indirectInteractionDensity: Calculation = (parameters: CalculationP
     let allComponents = parameters.system.getComponentEntities;
 
     if (allComponents.size < 3) {
-        return 0;
+        return "n/a";
     }
 
     let directDependencies = parameters.system.getOutgoingLinksOfComponent(parameters.entity.getId).map(link => parameters.system.searchComponentOfEndpoint(link.getTargetEndpoint.getId));
@@ -284,7 +284,7 @@ export const serviceCouplingBasedOnEndpointEntropy: Calculation = (parameters: C
     let endpointIds = parameters.entity.getEndpointEntities.map(endpoint => endpoint.getId);
 
     if (endpointIds.length === 0) {
-        return 0;
+        return "n/a";
     }
 
     let incomingLinks = new Map<string, string[]>();
@@ -312,7 +312,7 @@ export const ratioOfStorageBackendSharing: Calculation = (parameters: Calculatio
         .filter(component => component.constructor.name === StorageBackingService.name);
 
     if (storageServicesUsedByThisComponent.length === 0) {
-        return 0;
+        return "n/a";
     }
 
     let otherServicesUsingStorageServices = new Map<string, Set<string>>();
@@ -386,7 +386,7 @@ export const averageNumberOfDirectlyConnectedServices: Calculation = (parameters
 export const numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfComponents: Calculation = (parameters) => {
 
     if (parameters.system.getComponentEntities.size === 0) {
-        return 0;
+        return "n/a";
     }
 
     let numberOfComponentsAComponentIsLinkedToValue = numberOfComponentsAComponentIsLinkedTo(parameters);
@@ -487,7 +487,7 @@ export const numberOfLinksWithRetryLogic: Calculation = (parameters: Calculation
     let linksToSynchronousEndpoints = outgoingLinks.filter((link) => SYNCHRONOUS_ENDPOINT_KIND.includes(link.getTargetEndpoint.getProperty("kind").value));
 
     if (linksToSynchronousEndpoints.length === 0) {
-        return 0;
+        return "n/a";
     }
 
     let linksWithRetryLogic = linksToSynchronousEndpoints.filter(link => link.getProperty("retries").value > 0);
@@ -503,7 +503,7 @@ export const numberOfLinksWithComplexFailover: Calculation = (parameters: Calcul
     let linksToSynchronousEndpoints = outgoingLinks.filter((link) => SYNCHRONOUS_ENDPOINT_KIND.includes(link.getTargetEndpoint.getProperty("kind").value));
 
     if (linksToSynchronousEndpoints.length === 0) {
-        return 0;
+        return "n/a";
     }
 
     let linksWithCircuitBreaker = linksToSynchronousEndpoints.filter(link => link.getProperty("circuit_breaker").value !== "none");

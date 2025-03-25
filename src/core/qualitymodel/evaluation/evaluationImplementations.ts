@@ -275,8 +275,18 @@ const productFactorEvaluationImplementation: {
         }
 
         return exponentialNumericalMapping(readWriteSeparationForDataAggregates as number);
+    },
+    "mostlyStatelessServices": (parameters) => {
+        let ratioOfStatelessComponents = parameters.calculatedMeasures.get("ratioOfStatelessComponents").value;
 
-    }
+        let degreeToWhichComponentsAreLinkedToStatefulComponents = parameters.calculatedMeasures.get("degreeToWhichComponentsAreLinkedToStatefulComponents").value;
+
+        if (ratioOfStatelessComponents === "n/a" || degreeToWhichComponentsAreLinkedToStatefulComponents === "n/a") {
+            return "n/a";
+        }
+
+        return exponentialNumericalMapping(average([ratioOfStatelessComponents, degreeToWhichComponentsAreLinkedToStatefulComponents] as number[]));
+    },
 };
 
 

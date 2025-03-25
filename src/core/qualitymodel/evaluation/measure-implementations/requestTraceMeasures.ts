@@ -107,7 +107,7 @@ export const ratioOfStateDependencyOfEndpoints: Calculation = (parameters: Calcu
     }
 
     if (allEndpoints.length === 0) {
-        return 0;
+        return "n/a";
     }
 
     let numberOfDependingEndpoints = allEndpoints.filter(endpoint => endpoint.getDataAggregateEntities.length > 0).length;
@@ -175,7 +175,7 @@ export const ratioOfInfrastructureNodesThatSupportMonitoring: Calculation = (par
     }
 
     if (supportingInfrastructure.size === 0) {
-        return 0;
+        return "n/a";
     }
 
     let numberOfInfrastructureNodesSupportingMonitoring = 0;
@@ -194,7 +194,7 @@ export const ratioOfComponentsThatSupportMonitoring: Calculation = (parameters: 
     let components = getIncludedComponents(parameters.entity, parameters.system);
 
     if (components.length === 0) {
-        return 0;
+        return "n/a";
     }
 
     let numberOfComponentsSupportingMonitoring = 0;
@@ -214,7 +214,7 @@ export const ratioOfServicesThatProvideHealthEndpoints: Calculation = (parameter
 
 
     if (allServices.length === 0) {
-        return 0;
+        return "n/a";
     }
 
     let numberOfServicesWithHealthAndReadinessEndpoint = 0;
@@ -241,7 +241,7 @@ export const distributedTracingSupport: Calculation = (parameters: CalculationPa
     })
 
     if (allTraceableComponents.length === 0 || tracingServices.length === 0) {
-        return 0;
+        return "n/a";
     }
 
     let tracingEndpoints = new Set(tracingServices.flatMap(([componentId, component]) => {
@@ -284,7 +284,7 @@ export const serviceDiscoveryUsage: Calculation = (parameters: CalculationParame
     let allLinks = [...parameters.entity.getLinks.flat()];
 
     if (allLinks.length === 0) {
-        return 0;
+        return "n/a";
     }
 
     return calculateNumberOfLinksWithServiceDiscovery(allLinks) as number / allLinks.length;
@@ -397,7 +397,7 @@ export const numberOfLinksWithRetryLogic: Calculation = (parameters: Calculation
     let linksToSynchronousEndpoints = allLinks.filter((link) => SYNCHRONOUS_ENDPOINT_KIND.includes(link.getTargetEndpoint.getProperty("kind").value));
 
     if (linksToSynchronousEndpoints.length === 0) {
-        return 0;
+        return "n/a";
     }
 
     let linksWithRetryLogic = linksToSynchronousEndpoints.filter(link => link.getProperty("retries").value > 0);
@@ -415,7 +415,7 @@ export const numberOfLinksWithComplexFailover: Calculation = (parameters: Calcul
     let linksToSynchronousEndpoints = allLinks.filter((link) => SYNCHRONOUS_ENDPOINT_KIND.includes(link.getTargetEndpoint.getProperty("kind").value));
 
     if (linksToSynchronousEndpoints.length === 0) {
-        return 0;
+        return "n/a";
     }
 
     let linksWithCircuitBreaker = linksToSynchronousEndpoints.filter(link => link.getProperty("circuit_breaker").value !== "none");
@@ -425,7 +425,7 @@ export const numberOfLinksWithComplexFailover: Calculation = (parameters: Calcul
 
 export const amountOfRedundancy: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
     if (parameters.system.getDeploymentMappingEntities.size === 0) {
-        return 0;
+        return "n/a";
     }
 
     let includedComponentIds = getIncludedComponents(parameters.entity, parameters.system).map(component => component.getId);
@@ -945,6 +945,30 @@ export const endpointAccessConsistency: Calculation = (parameters: CalculationPa
     return average(pairwiseSimilarity);
 }
 
+export const degreeToWhichComponentsAreLinkedToStatefulComponents: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+
+    let includedComponents = getIncludedComponents(parameters.entity, parameters.system);
+
+    if (includedComponents.length === 0) {
+        return "n/a";
+    }
+
+    let totalNumberOfConnectionsToStatefulComponents = 0;
+    for (const component of includedComponents) {
+        let connectedToStatefulComponents = new Set<string>();
+
+        for (const link of parameters.system.getOutgoingLinksOfComponent(component.getId).filter(outgoingLink => parameters.entity.getLinks.flatMap(step => step).map(link => link.getId).includes(outgoingLink.getId))) {
+
+            let connectedToComponent = parameters.system.searchComponentOfEndpoint(link.getTargetEndpoint.getId)
+            if (!connectedToComponent.getProperty("stateless").value) {
+                connectedToStatefulComponents.add(connectedToComponent.getId);
+            }
+        }
+        totalNumberOfConnectionsToStatefulComponents = totalNumberOfConnectionsToStatefulComponents + connectedToStatefulComponents.size;
+    }
+    return totalNumberOfConnectionsToStatefulComponents / includedComponents.length;
+}
+
 export const requestTraceMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
     "ratioOfSecuredLinks": ratioOfSecuredLinks,
@@ -992,6 +1016,7 @@ export const requestTraceMeasureImplementations: { [measureKey: string]: Calcula
     "ratioOfEndpointsThatSupportApiKeys": ratioOfEndpointsThatSupportApiKeys,
     "ratioOfEndpointsThatSupportPlaintextAuthentication": ratioOfEndpointsThatSupportPlaintextAuthentication,
     "ratioOfEndpointsThatAreIncludedInASingleSignOnApproach": ratioOfEndpointsThatAreIncludedInASingleSignOnApproach,
-    "endpointAccessConsistency": endpointAccessConsistency
+    "endpointAccessConsistency": endpointAccessConsistency,
+    "degreeToWhichComponentsAreLinkedToStatefulComponents": degreeToWhichComponentsAreLinkedToStatefulComponents
 }
 

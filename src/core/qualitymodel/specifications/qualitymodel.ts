@@ -467,7 +467,11 @@ const productFactors = {
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Davis2019", "section": "5.4" }, { "key": "Scholl2019", "section": "6 “Design Stateless Services That Scale Out" }, { "key": "Goniwada2021", "section": "3 Be Smart with State Principle, 5 Stateless Services" }],
         "measures": ["ratioOfStateDependencyOfEndpoints", "ratioOfStatefulComponents", "ratioOfStatelessComponents", "degreeToWhichComponentsAreLinkedToStatefulComponents"],
-        "evaluations": []
+        "evaluations": [{
+            "targetEntities": [ENTITIES.SYSTEM],
+            "evaluation": "mostlyStatelessServices",
+            "reasoning": "This factor is fulfilled if the ratio of stateless services is rather high and if in addition the degree to which components are linked to stateful components is rather low. These two measures are aggregated."
+        }]
     },
     "specializedStatefulServices": {
         "name": "Specialized stateful services",
@@ -1348,7 +1352,7 @@ const measures = {
         "name": "Degree to which components are linked to stateful components",
         "calculation": "(sum-of(Number of stateful Components a Component is linked to) for all components) / Total Number of Components)",
         "sources": ["Qian2006"],
-        "applicableEntities": [ENTITIES.SYSTEM],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
     },
     "numberOfAsynchronousEndpointsOfferedByAService": {
         "name": "Number of asynchronous endpoints offered by a service",
