@@ -302,6 +302,21 @@ const productFactorEvaluationImplementation: {
             return linearNumericalMapping(ratioOfSpecializedStatefulServices as number);
         }
     },
+    "asynchronousCommunication": (parameters) => {
+        let degreeOfAsynchronousCommunication = parameters.calculatedMeasures.get("degreeOfAsynchronousCommunication").value;
+
+        let asynchronousCommunicationUtilization = parameters.calculatedMeasures.get("asynchronousCommunicationUtilization").value;
+
+        if (degreeOfAsynchronousCommunication === "n/a") {
+            return "n/a";
+        }
+
+        if (asynchronousCommunicationUtilization !== "n/a") {
+            return  linearNumericalMapping(average([degreeOfAsynchronousCommunication, degreeOfAsynchronousCommunication] as number[]));
+        } else {
+            return linearNumericalMapping(degreeOfAsynchronousCommunication as number);
+        }
+    },
 };
 
 

@@ -454,11 +454,11 @@ const productFactors = {
         "description": "Services are structured by clearly separating stateless from stateful services. Stateful services should be reduced to a minimum. That way, state is isolated within these specifically stateful services which can be managed accordingly. The majority of stateless services is easier to deploy and modify.",
         "categories": ["dataManagement", "businessDomain"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.DATA_AGGREGATE],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Goniwada2021", "section": "3 Coupling (Services should be as loosely coupled as possible)" }],
         "measures": [],
         "evaluations": [{
-            "targetEntities": [ENTITIES.SYSTEM],
+            "targetEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
             "evaluation": "aggregateImpacts",
             "reasoning": "Depends on whether state is only stored in specific services (mostlyStatelessServices) and if those services that are stateful are handled properly (specializedStatefulServices)",
             "precondition": "at-least-one",
@@ -474,7 +474,7 @@ const productFactors = {
         "sources": [{ "key": "Davis2019", "section": "5.4" }, { "key": "Scholl2019", "section": "6 “Design Stateless Services That Scale Out" }, { "key": "Goniwada2021", "section": "3 Be Smart with State Principle, 5 Stateless Services" }],
         "measures": ["ratioOfStateDependencyOfEndpoints", "ratioOfStatefulComponents", "ratioOfStatelessComponents", "degreeToWhichComponentsAreLinkedToStatefulComponents"],
         "evaluations": [{
-            "targetEntities": [ENTITIES.SYSTEM],
+            "targetEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
             "evaluation": "mostlyStatelessServices",
             "reasoning": "This factor is fulfilled if the ratio of stateless services is rather high and if in addition the degree to which components are linked to stateful components is rather low. These two measures are aggregated."
         }]
@@ -484,11 +484,11 @@ const productFactors = {
         "description": "For stateful components, that means components that do require durable disk space on the infrastructure that they run on, specialized software or frameworks are used that can handle distributed state by replicating it over several components or component instances while still ensuring consistency requirements for that state.",
         "categories": ["dataManagement", "businessDomain"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.STORAGE_BACKING_SERVICE, ENTITIES.DATA_AGGREGATE],
-        "applicableEntities": [ENTITIES.SYSTEM],
+        "applicableEntities":  [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Davis2019", "section": "5.4" }, { "key": "Ibryam2020", "section": "11 “Stateful Service”" }],
         "measures": ["ratioOfSpecializedStatefulServices", "suitablyReplicatedStatefulService"],
         "evaluations": [{
-            "targetEntities": [ENTITIES.SYSTEM],
+            "targetEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
             "evaluation": "specializedStatefulServices",
             "reasoning": "This factor is fulfilled if the ratio of specialized stateful services is rather high. If stateful services are replicated, also suitablyReplicatedStatefulService is included in the evaluation and needs to be rather high."
         }]
@@ -511,7 +511,11 @@ const productFactors = {
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Davis2019", "section": "4.2" }, { "key": "Scholl2019", "section": "6 Prefer Asynchronous Communication" }, { "key": "Richardson2019", "section": "3.3.2, 3.4 Using asynchronous messaging to improve availability" }, { "key": "Indrasiri2021", "section": "3 Service Choreography Pattern" }, { "key": "Ruecker2021", "section": "9 Asynchronous Request/Response (Use asynchronous communication to make services more robust)" }, { "key": "Goniwada2021", "section": "4 Asynchronous Nonblocking I/O" }],
         "measures": ["numberOfAsynchronousEndpointsOfferedByAService", "numberOfSynchronousOutgoingLinks", "numberOfAsynchronousOutgoingLinks", "ratioOfAsynchronousOutgoingLinks", "degreeOfAsynchronousCommunication", "asynchronousCommunicationUtilization"],
-        "evaluations": []
+        "evaluations": [{
+            "targetEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+            "evaluation": "asynchronousCommunication",
+            "reasoning": "This factor is fulfilled if the degree of asychronous communication and the asynchronousCommunicationUtilization are rather high. Both measures are relevant and therefore aggregated."
+        }]
     },
     "communicationPartnerAbstraction": {
         "name": "Communication partner abstraction",
@@ -2098,7 +2102,7 @@ const measures = {
         "name": "Ratio of specialized stateful services",
         "calculation": "Stateful services that are Backing Services, Storage Backing Services, or Broker Backing Services / All stateful services",
         "sources": ["new"],
-        "applicableEntities": [ENTITIES.SYSTEM]
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE]
     },
     "suitablyReplicatedStatefulService": {
         "name": "Ratio of suitably replicated stateful services",

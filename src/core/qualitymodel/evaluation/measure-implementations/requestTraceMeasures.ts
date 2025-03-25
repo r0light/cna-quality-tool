@@ -969,6 +969,32 @@ export const degreeToWhichComponentsAreLinkedToStatefulComponents: Calculation =
     return totalNumberOfConnectionsToStatefulComponents / includedComponents.length;
 }
 
+export const ratioOfSpecializedStatefulServices: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+
+    let includedComponents = getIncludedComponents(parameters.entity, parameters.system);
+
+    if (includedComponents.length === 0) {
+        return "n/a";
+    }
+
+    let statefulServices = includedComponents.filter(component => !component.getProperty("stateless").value);
+
+    if (statefulServices.length === 0) {
+        return "n/a";
+    }
+
+    let specializedServices: string[] = [];
+
+    for (const statefulService of statefulServices) {
+        if ([StorageBackingService.name, BackingService.name, BrokerBackingService.name].includes(statefulService.constructor.name)) {
+            specializedServices.push(statefulService.getId);
+        }
+    }
+
+    return specializedServices.length / statefulServices.length;
+}
+
+
 export const requestTraceMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
     "ratioOfSecuredLinks": ratioOfSecuredLinks,
@@ -1017,6 +1043,7 @@ export const requestTraceMeasureImplementations: { [measureKey: string]: Calcula
     "ratioOfEndpointsThatSupportPlaintextAuthentication": ratioOfEndpointsThatSupportPlaintextAuthentication,
     "ratioOfEndpointsThatAreIncludedInASingleSignOnApproach": ratioOfEndpointsThatAreIncludedInASingleSignOnApproach,
     "endpointAccessConsistency": endpointAccessConsistency,
-    "degreeToWhichComponentsAreLinkedToStatefulComponents": degreeToWhichComponentsAreLinkedToStatefulComponents
+    "degreeToWhichComponentsAreLinkedToStatefulComponents": degreeToWhichComponentsAreLinkedToStatefulComponents,
+    "ratioOfSpecializedStatefulServices": ratioOfSpecializedStatefulServices
 }
 
