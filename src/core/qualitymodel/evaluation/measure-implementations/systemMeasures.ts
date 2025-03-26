@@ -2533,6 +2533,28 @@ export const readWriteSeparationForDataAggregates: Calculation = (parameters: Ca
     return average(separationPerDataAggregate.values().toArray());
 }
 
+export const degreeOfSeparationByGateways: Calculation = (parameters: CalculationParameters<System>) => {
+    let allServicesWithGateway = parameters.entity.getComponentEntities.entries()
+        .filter(([componentId, component]) => component.constructor.name === Service.name)
+        .filter(([componentId, component]) => component.getExternalIngressProxiedBy && component.getExternalIngressProxiedBy.getProperty("kind").value === "API Gateway")
+        .toArray();
+
+    if (allServicesWithGateway.length === 0) {
+        return "n/a";
+    }
+
+    let gateways = parameters.entity.getComponentEntities.entries()
+        .filter(([componentId, component]) => component.constructor.name === ProxyBackingService.name && component.getProperty("kind").value === "API Gateway").toArray();
+
+    if (gateways.length === 0) {
+        return "n/a";
+    }
+
+    let degreeOfSharing = allServicesWithGateway.length / gateways.length;
+
+    return 1 / degreeOfSharing;
+}
+
 
 export const systemMeasureImplementations: { [measureKey: string]: Calculation } = {
     "serviceReplicationLevel": serviceReplicationLevel,
@@ -2650,5 +2672,6 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation }
     "externalEndpointAccessConsistency": externalEndpointAccessConsistency,
     "cohesionBetweenEndpointsBasedOnDataAggregateUsage": cohesionBetweenEndpointsBasedOnDataAggregateUsage,
     "serviceInterfaceUsageCohesion": serviceInterfaceUsageCohesion,
-    "readWriteSeparationForDataAggregates": readWriteSeparationForDataAggregates
+    "readWriteSeparationForDataAggregates": readWriteSeparationForDataAggregates,
+    "degreeOfSeparationByGateways": degreeOfSeparationByGateways
 }

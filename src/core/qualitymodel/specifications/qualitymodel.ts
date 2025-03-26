@@ -443,11 +443,15 @@ const productFactors = {
         "description": "Individual components or groups of components are separated through gateways. That means communication is proxied and controlled at specific gateway components. It also abstracts one part of a system from another so that it can be reused by different components without needing direct links to components that actually provide the needed functionality. This way, communication can also be redirected when component endpoints change without changing the gateway endpoint. Also incoming communication from outside of a system can be directed at external endpoints of a central component (the gateway).",
         "categories": ["networkCommunication", "businessDomain"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.PROXY_BACKING_SERVICE, ENTITIES.ENDPOINT, ENTITIES.LINK],
-        "applicableEntities": [ENTITIES.SYSTEM],
+        "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Davis2019", "section": "10.2" },
         { "key": "Richardson2019", "section": "8.2" }, { "key": "Bastani2017", "section": "8 Edge Services: Filtering and Proxying with Netflix Zuul" }, { "key": "Indrasiri2021", "section": "7 API Gateway Pattern" }, { "key": "Indrasiri2021", "section": "7 API Microgateway Pattern (Smaller API microgateways to avoid having a monolithic API gateway)" }, { "key": "Goniwada2021", "section": "4 “Mediator” (Use a mediator pattern between clients and servers)" }],
-        "measures": ["externallyAvailableEndpoints", "centralizationOfExternallyAvailableEndpoints", "apiCompositionUtilizationMetric", "ratioOfRequestTracesThroughGateway"],
-        "evaluations": []
+        "measures": ["externallyAvailableEndpoints", "centralizationOfExternallyAvailableEndpoints", "apiCompositionUtilizationMetric", "ratioOfRequestTracesThroughGateway", "degreeOfSeparationByGateways"],
+        "evaluations": [{
+            "targetEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+            "evaluation": "separationByGateways",
+            "reasoning": "Based on degreeOfSeparationByGateways the factor is evaluated as being present, the higher the degree of separation by gateways is."
+        }]
     },
     "isolatedState": {
         "name": "Isolated state",
@@ -615,7 +619,11 @@ const productFactors = {
         "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Scholl2019", "section": "6 Implement Health Checks and Readiness Checks" }, { "key": "Ibryam2020", "section": "4 Health Probe" }, { "key": "Richardson2019", "section": "11.3.1 Using the Health check API pattern" }, { "key": "Garrison2017", "section": "7 State Management" }, { "key": "Arundel2019", "section": "5 Liveness Probes" }, { "key": "Arundel2019", "section": "5 Readiness Probes" }, { "key": "Bastani2017", "section": "13 Health Checks" }, { "key": "Indrasiri2021", "section": "1 Why container orchestration?, Health monitoring" }, { "key": "Goniwada2021", "section": "4 Fail Fast, 16 Health Probe" }],
         "measures": ["ratioOfServicesThatProvideHealthEndpoints"],
-        "evaluations": []
+        "evaluations": [{
+            "targetEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+            "evaluation": "healthAndReadinessChecks",
+            "reasoning": "The higher the number of services providing health and readiness checks, the more this factor is fulfilled."
+        }]
     },
     "automatedInfrastructureProvisioning": {
         "name": "Automated infrastructure provisioning",
@@ -1450,7 +1458,7 @@ const measures = {
         "name": "Ratio of Services that provide Health endpoints",
         "calculation": "Number of Service with at least one health endpoint and at least one readiness endpoint / Number of all Services",
         "sources": ["Ntentos2022"],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
     },
     "linesOfCodeForDeploymentConfiguration": {
         "name": "Lines of code (LOC) for deployment configuration",
@@ -2313,6 +2321,12 @@ const measures = {
         "calculation": "Average(Exclusive Read or Write Access to Data Aggregate by Endpoint(s)) over all Data Aggregates",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT]
+    },
+    "degreeOfSeparationByGateways": {
+        "name": "Degree of separation by gateways",
+        "calculation": "1 / (Number of services proxied by an API gateway / Number of API gateways)",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE]
     }
 } satisfies { [measureKey: string]: MeasureSpec }
 

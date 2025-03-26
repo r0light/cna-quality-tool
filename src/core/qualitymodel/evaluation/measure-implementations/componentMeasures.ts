@@ -434,8 +434,7 @@ export const degreeOfStorageBackendSharing: Calculation = (parameters: Calculati
     if (parameters.entity.constructor.name === StorageBackingService.name) {
         return numberOfComponentsThatAreLinkedToAComponent(parameters);
     } else {
-        // TODO how to react here? throw an error?
-        return 0;
+        return "n/a";
     }
 }
 
@@ -1203,6 +1202,42 @@ export const readWriteSeparationForDataAggregates: Calculation = (parameters: Ca
     return average(readWriteSeparation);
 }
 
+export const ratioOfServicesThatProvideHealthEndpoints: Calculation = (parameters: CalculationParameters<Component>) => {
+
+    if (parameters.entity.constructor.name !== Service.name) {
+        return "n/a";
+    }
+
+    return providesHealthAndReadinessEndpoints(parameters.entity) ? 1 : 0;
+}
+
+export const degreeOfSeparationByGateways: Calculation = (parameters: CalculationParameters<Component>) => {
+
+    if (parameters.entity.constructor.name !== Service.name) {
+        return "n/a";
+    }
+
+    if (!parameters.entity.getExternalIngressProxiedBy) {
+        return "n/a";
+    }
+
+    if (parameters.entity.getExternalIngressProxiedBy.getProperty("kind").value !== "API Gateway") {
+        return "n/a";
+    }
+
+    let commonGateway = parameters.entity.getExternalIngressProxiedBy;
+
+    let otherServices = parameters.system.getComponentEntities.entries()
+        .filter(([componentId, component]) => component.constructor.name === Service.name && componentId !== parameters.entity.getId)
+        .filter(([componentId, component]) => component.getExternalIngressProxiedBy && component.getExternalIngressProxiedBy.getId === commonGateway.getId)
+        .toArray();
+
+    let sharingServices = (1 + otherServices.length)
+    let degreeOfSharing = sharingServices / 1;
+
+    return 1 / degreeOfSharing;
+}
+
 export const componentMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
     "ratioOfExternalEndpointsSupportingTls": ratioOfExternalEndpointsSupportingTls,
@@ -1274,6 +1309,8 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "ratioOfEndpointsThatAreIncludedInASingleSignOnApproach": ratioOfEndpointsThatAreIncludedInASingleSignOnApproach,
     "endpointAccessConsistency": endpointAccessConsistency,
     "externalEndpointAccessConsistency": externalEndpointAccessConsistency,
-    "readWriteSeparationForDataAggregates": readWriteSeparationForDataAggregates
+    "readWriteSeparationForDataAggregates": readWriteSeparationForDataAggregates,
+    "ratioOfServicesThatProvideHealthEndpoints": ratioOfServicesThatProvideHealthEndpoints,
+    "degreeOfSeparationByGateways": degreeOfSeparationByGateways
 }
 

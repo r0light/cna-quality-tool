@@ -2406,3 +2406,52 @@ test("ratioOfSpecializedStatefulServices", () => {
     let measureValue = requestTraceMeasureImplementations["ratioOfSpecializedStatefulServices"]({ entity: requestTrace, system: system });
     expect(measureValue).toEqual(0.5);
 })
+
+test("degreeOfSeparationByGateways", () => {
+
+    let system = new System("sys1", "testSystem");;
+
+    let apiGatewayA = new ProxyBackingService("g1", "gateway 1", getEmptyMetaData());
+    apiGatewayA.setPropertyValue("kind", "API Gateway");
+    let apiGatewayB = new ProxyBackingService("g2", "gateway 2", getEmptyMetaData());
+    apiGatewayB.setPropertyValue("kind", "API Gateway");
+
+    let serviceA = new Service("s1", "testService 1", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA);
+    serviceA.addEndpoint(externalEndpointA);
+    serviceA.setExternalIngressProxiedBy = apiGatewayA;
+
+    let serviceB = new Service("s2", "testService 2", getEmptyMetaData());
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+    serviceB.setExternalIngressProxiedBy = apiGatewayA;
+
+    let serviceC = new Service("s3", "testService 3", getEmptyMetaData());
+    let endpointC = new ExternalEndpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+    serviceC.setExternalIngressProxiedBy = apiGatewayB;
+
+    let serviceD = new Service("s4", "testService 4", getEmptyMetaData());
+    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    serviceD.addEndpoint(endpointD);
+    serviceD.setExternalIngressProxiedBy = apiGatewayB;
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+    let linkBC = new Link("l2", serviceB, endpointC);
+    let linkDB = new Link("l3", serviceD, endpointB);
+    let linkCD = new Link("l5", serviceC, endpointD);
+
+    let requestTrace = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
+    requestTrace.setLinks = [[linkAB], [linkBC], [linkCD], [linkDB]];
+    requestTrace.setExternalEndpoint = externalEndpointA;
+
+    system.addEntities([apiGatewayA, apiGatewayB]);
+    system.addEntities([serviceA, serviceB, serviceC, serviceD]);
+    system.addEntities([linkAB, linkBC, linkDB, linkCD]);
+    system.addEntity(requestTrace);
+
+    let measureValue = requestTraceMeasureImplementations["degreeOfSeparationByGateways"]({ entity: requestTrace, system: system });
+    expect(measureValue).toEqual(0.5);
+})

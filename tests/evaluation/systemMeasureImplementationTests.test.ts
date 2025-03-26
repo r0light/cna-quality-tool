@@ -3821,3 +3821,28 @@ test("readWriteSeparationForDataAggregates", () => {
     let measureValue = systemMeasureImplementations["readWriteSeparationForDataAggregates"]({ entity: system, system: system });
     expect(measureValue).toEqual(0.75);
 })
+
+test("degreeOfSeparationByGateways", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let apiGatewayA = new ProxyBackingService("g1", "gateway 1", getEmptyMetaData());
+    apiGatewayA.setPropertyValue("kind", "API Gateway");
+    let apiGatewayB = new ProxyBackingService("g2", "gateway 2", getEmptyMetaData());
+    apiGatewayB.setPropertyValue("kind", "API Gateway");
+
+    let serviceX = new Service("s1", "service X", getEmptyMetaData());
+    serviceX.setExternalIngressProxiedBy = apiGatewayA;
+    let serviceY = new Service("s2", "service Y", getEmptyMetaData());
+    serviceY.setExternalIngressProxiedBy = apiGatewayA;
+
+    let serviceA = new Service("s3", "service A", getEmptyMetaData());
+    serviceA.setExternalIngressProxiedBy = apiGatewayB;
+    let serviceB = new Service("s4", "service B", getEmptyMetaData());
+    serviceB.setExternalIngressProxiedBy = apiGatewayB;
+
+    system.addEntities([apiGatewayA, apiGatewayB, serviceX, serviceY, serviceA, serviceB]);
+
+    let measureValue = systemMeasureImplementations["degreeOfSeparationByGateways"]({ entity: system, system: system });
+
+    expect(measureValue).toEqual(0.5);
+})

@@ -221,14 +221,14 @@ const productFactorEvaluationImplementation: {
         let externalEndpointAccessConsistency = parameters.calculatedMeasures.get("externalEndpointAccessConsistency").value;
 
         if (endpointAccessConsistency === "n/a") {
-            if ( externalEndpointAccessConsistency === "n/a") {
+            if (externalEndpointAccessConsistency === "n/a") {
                 return "n/a";
             }
             return linearNumericalMapping(externalEndpointAccessConsistency as number);
         } else if (externalEndpointAccessConsistency === "n/a") {
             return linearNumericalMapping(endpointAccessConsistency as number);
         } else {
-            return linearNumericalMapping(average([endpointAccessConsistency,externalEndpointAccessConsistency] as number[]) as number);
+            return linearNumericalMapping(average([endpointAccessConsistency, externalEndpointAccessConsistency] as number[]) as number);
         }
     },
     "accountSeparation": (parameters) => {
@@ -297,7 +297,7 @@ const productFactorEvaluationImplementation: {
         }
 
         if (suitablyReplicatedStatefulService !== "n/a") {
-            return  linearNumericalMapping(ratioOfSpecializedStatefulServices as number * (suitablyReplicatedStatefulService as number));
+            return linearNumericalMapping(ratioOfSpecializedStatefulServices as number * (suitablyReplicatedStatefulService as number));
         } else {
             return linearNumericalMapping(ratioOfSpecializedStatefulServices as number);
         }
@@ -312,10 +312,26 @@ const productFactorEvaluationImplementation: {
         }
 
         if (asynchronousCommunicationUtilization !== "n/a") {
-            return  linearNumericalMapping(average([degreeOfAsynchronousCommunication, degreeOfAsynchronousCommunication] as number[]));
+            return linearNumericalMapping(average([degreeOfAsynchronousCommunication, degreeOfAsynchronousCommunication] as number[]));
         } else {
             return linearNumericalMapping(degreeOfAsynchronousCommunication as number);
         }
+    },
+    "healthAndReadinessChecks": (parameters) => {
+        let ratioOfServicesThatProvideHealthEndpoints = parameters.calculatedMeasures.get("ratioOfServicesThatProvideHealthEndpoints").value;
+
+        if (ratioOfServicesThatProvideHealthEndpoints === "n/a") {
+            return "n/a";
+        }
+        return squareRootedNumericalMapping(ratioOfServicesThatProvideHealthEndpoints as number);
+    },
+    "separationByGateways": (parameters) => {
+        let degreeOfSeparationByGateways = parameters.calculatedMeasures.get("degreeOfSeparationByGateways").value;
+
+        if (degreeOfSeparationByGateways === "n/a") {
+            return "n/a";
+        }
+        return linearNumericalMapping(degreeOfSeparationByGateways as number);
     },
 };
 

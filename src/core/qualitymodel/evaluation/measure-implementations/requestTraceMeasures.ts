@@ -994,6 +994,30 @@ export const ratioOfSpecializedStatefulServices: Calculation = (parameters: Calc
     return specializedServices.length / statefulServices.length;
 }
 
+export const degreeOfSeparationByGateways: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+    let allServicesWithGateway = getIncludedComponents(parameters.entity, parameters.system)
+        .filter(component => component.constructor.name === Service.name)
+        .filter(component => component.getExternalIngressProxiedBy && component.getExternalIngressProxiedBy.getProperty("kind").value === "API Gateway");
+
+    if (allServicesWithGateway.length === 0) {
+        return "n/a";
+    }
+
+    let gateways = new Set<string>();
+    allServicesWithGateway.forEach(service => {
+        gateways.add(service.getExternalIngressProxiedBy.getId);
+    })
+
+    if (gateways.size === 0) {
+        return "n/a";
+    }
+
+    let degreeOfSharing = allServicesWithGateway.length / gateways.size;
+
+    return 1 / degreeOfSharing;
+}
+
+
 
 export const requestTraceMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
@@ -1044,6 +1068,7 @@ export const requestTraceMeasureImplementations: { [measureKey: string]: Calcula
     "ratioOfEndpointsThatAreIncludedInASingleSignOnApproach": ratioOfEndpointsThatAreIncludedInASingleSignOnApproach,
     "endpointAccessConsistency": endpointAccessConsistency,
     "degreeToWhichComponentsAreLinkedToStatefulComponents": degreeToWhichComponentsAreLinkedToStatefulComponents,
-    "ratioOfSpecializedStatefulServices": ratioOfSpecializedStatefulServices
+    "ratioOfSpecializedStatefulServices": ratioOfSpecializedStatefulServices,
+    "degreeOfSeparationByGateways": degreeOfSeparationByGateways
 }
 
