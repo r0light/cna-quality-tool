@@ -640,7 +640,11 @@ const productFactors = {
         "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Davis2019", "section": "11.3" }, { "key": "Scholl2019", "section": "6 Use Correlation IDs" }, { "key": "Richardson2019", "section": "11.3.3 AUsing the Distributed tracing pattern" }, { "key": "Garrison2017", "section": "7 Debugging and Tracing" }, { "key": "Reznik2019", "section": "10 Observability" }, { "key": "Arundel2019", "section": "15 Tracing" }, { "key": "Bastani2017", "section": "13 Distributed Tracing" }, { "key": "Ruecker2021", "section": "11 Observability and Distributed Tracing Tools (Use Distributed Tracing)" }, { "key": "Goniwada2021", "section": "19 One Source of Truth" }],
         "measures": ["distributedTracingSupport"],
-        "evaluations": []
+        "evaluations": [{
+            "targetEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+            "evaluation": "distributedTracingOfInvocations",
+            "reasoning": "The more components are connected to a distributed tracing service, the more this factor is fulfilled."
+        }]
     },
     "healthAndReadinessChecks": {
         "name": "Health and readiness Checks",
@@ -1483,7 +1487,7 @@ const measures = {
         "name": "Distributed Tracing Support",
         "calculation": "Number of Components linked to a tracing service / Total Number of Components which are not tracing services themselves",
         "sources": ["Ntentos2020", "Ntentos2021"],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
     },
     "ratioOfServicesThatProvideHealthEndpoints": {
         "name": "Ratio of Services that provide Health endpoints",

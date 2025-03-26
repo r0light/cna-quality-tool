@@ -1238,6 +1238,19 @@ export const degreeOfSeparationByGateways: Calculation = (parameters: Calculatio
     return 1 / degreeOfSharing;
 }
 
+export const distributedTracingSupport: Calculation = (parameters: CalculationParameters<Component>) => {
+
+    if (parameters.entity.constructor.name === BackingService.name && parameters.entity.getProperty("providedFunctionality").value === "tracing") {
+        return "n/a";
+    }
+
+    let connectedComponents = parameters.system.getOutgoingLinksOfComponent(parameters.entity.getId).map(link => parameters.system.searchComponentOfEndpoint(link.getTargetEndpoint.getId));
+
+    let tracingServiceIncluded = connectedComponents.some(component => component && component.constructor.name === BackingService.name && component.getProperty("providedFunctionality").value === "tracing");
+
+    return tracingServiceIncluded ? 1 : 0;
+}
+
 export const componentMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
     "ratioOfExternalEndpointsSupportingTls": ratioOfExternalEndpointsSupportingTls,
@@ -1311,6 +1324,7 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "externalEndpointAccessConsistency": externalEndpointAccessConsistency,
     "readWriteSeparationForDataAggregates": readWriteSeparationForDataAggregates,
     "ratioOfServicesThatProvideHealthEndpoints": ratioOfServicesThatProvideHealthEndpoints,
-    "degreeOfSeparationByGateways": degreeOfSeparationByGateways
+    "degreeOfSeparationByGateways": degreeOfSeparationByGateways,
+    "distributedTracingSupport": distributedTracingSupport
 }
 

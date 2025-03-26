@@ -2147,3 +2147,22 @@ test("degreeOfSeparationByGateways", () => {
 
     expect(measureValue).toEqual(0.5);
 })
+
+test("distributedTracingSupport", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let tracingService = new BackingService("t1", "tracing service", getEmptyMetaData());
+    tracingService.setPropertyValue("providedFunctionality", "tracing");
+    let tracingEndpoint = new Endpoint("te1", "tracing endpoint", getEmptyMetaData());
+    tracingService.addEndpoint(tracingEndpoint);
+
+    let serviceA = new Service("s1", "testService 1", getEmptyMetaData());
+
+    let linkATS = new Link("link1", serviceA, tracingEndpoint);
+
+    system.addEntities([tracingService, serviceA]);
+    system.addEntities([linkATS]);
+
+    let measureValue = componentMeasureImplementations["distributedTracingSupport"]({ entity: serviceA, system: system });
+    expect(measureValue).toEqual(1);
+})

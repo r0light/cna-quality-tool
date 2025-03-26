@@ -417,6 +417,14 @@ const productFactorEvaluationImplementation: {
             }
         }
     },
+    "distributedTracingOfInvocations": (parameters) => {
+        let distributedTracingSupport = parameters.calculatedMeasures.get("distributedTracingSupport").value;
+
+        if (distributedTracingSupport === "n/a") {
+            return "n/a";
+        }
+        return linearNumericalMapping(distributedTracingSupport as number);
+    },
 };
 
 
