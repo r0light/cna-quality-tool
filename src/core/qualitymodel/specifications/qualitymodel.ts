@@ -502,10 +502,16 @@ const productFactors = {
         "description": "In cloud-native applications communication between components is loosely coupled in time, location, and language to achieve greater independence.",
         "categories": ["businessDomain", "networkCommunication"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.LINK, ENTITIES.INFRASTRUCTURE, ENTITIES.DEPLOYMENT_MAPPING],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
         "sources": [],
         "measures": [],
-        "evaluations": []
+        "evaluations": [{
+            "targetEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+            "evaluation": "aggregateImpacts",
+            "reasoning": "Depends on whether communication is asynchronous and in addition, if event sourcing is used.",
+            "precondition": "at-least-one",
+            "impactsInterpretation": "median"
+        }]
     },
     "asynchronousCommunication": {
         "name": "Asynchronous communication",
@@ -529,7 +535,11 @@ const productFactors = {
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Richardson2019", "section": "6 Event-driven communication" }, { "key": "Ruecker2021", "section": "8: Event-driven systems “event chains emerge over time and therefore lack visibility." }],
         "measures": ["eventSourcingUtilizationMetric"],
-        "evaluations": []
+        "evaluations": [{
+            "targetEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+            "evaluation": "communicationPartnerAbstraction",
+            "reasoning": "This factor is fulfilled if the degree of communication via an event store is rather high."
+        }]
     },
     "persistentCommunication": {
         "name": "Persistent communication",
@@ -539,17 +549,25 @@ const productFactors = {
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Indrasiri2021", "section": "5 Event Sourcing Pattern: Log-based message brokers" }],
         "measures": ["serviceInteractionViaBackingService", "eventSourcingUtilizationMetric"],
-        "evaluations": []
+        "evaluations": [{
+            "targetEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+            "evaluation": "persistentCommunication",
+            "reasoning": "This factor is fulfilled if communication is persistent. It can be partly persistent if communication happens via a message broker which at least temporarily stores messages. But for a higher fullfillment an event store should be utilized."
+        }]
     },
     "usageOfExistingSolutionsForNonCoreCapabilities": {
         "name": "Usage of existing solutions for non-core capabilities",
         "description": "For non-core capabilities readily available solutions are used. This means solutions which are based on a standard or a specification, are widely adopted and ideally open source so that their well-functioning is ensured by a broader community. Non-core capabilities include interface technologies or protocols for endpoints, infrastructure technologies (for example container orchestration engines), and software for backing services. That way capabilities don't need to self-implemented and existing integration options can be used.",
         "categories": ["cloudInfrastructure", "applicationAdministration"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.BACKING_SERVICE, ENTITIES.STORAGE_BACKING_SERVICE, ENTITIES.BROKER_BACKING_SERVICE, ENTITIES.PROXY_BACKING_SERVICE, ENTITIES.INFRASTRUCTURE],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT],
         "sources": [{ "key": "Reznik2019", "section": "9 Avoid Reinventing the Wheel" }, { "key": "Adkins2020", "section": "12 Frameworks to Enforce Security and Reliability" }],
         "measures": ["ratioOfNonCustomBackingServices"],
-        "evaluations": []
+        "evaluations": [{
+            "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT],
+            "evaluation": "usageOfExistingSolutionsForNonCoreCapabilities",
+            "reasoning": "This factor depends on the ratio of non-custom backing services used. The higher this ratio is, the more this factor is fulfilled."
+        }]
     },
     "standardization": {
         "name": "Standardization",
@@ -1947,7 +1965,7 @@ const measures = {
         "name": "Service Interaction via Backing Service",
         "calculation": "Number of service interconnections via a broker backing service / Total number of service interconnections",
         "sources": ["Ntentos2020a", "Ntentos2020", "Ntentos2021"],
-        "applicableEntities": [ENTITIES.SYSTEM],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
     },
     "totalNumberOfComponents": {
         "name": "Total Number of Components",

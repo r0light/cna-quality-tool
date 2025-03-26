@@ -1103,7 +1103,7 @@ export const serviceInteractionViaBackingService: Calculation = (parameters: Cal
         }).reduce((accumulator, currentValue) => { return accumulator + currentValue }, 0);
 
     if ((numberOfAsynchronousConnectionsViaBroker + serviceInteractions.synchronousConnections.size) === 0) {
-        return 0;
+        return "n/a";
     }
 
     return numberOfAsynchronousConnectionsViaBroker / (numberOfAsynchronousConnectionsViaBroker + serviceInteractions.synchronousConnections.size);
@@ -1125,7 +1125,7 @@ export const eventSourcingUtilizationMetric: Calculation = (parameters: Calculat
         }).reduce((accumulator, currentValue) => { return accumulator + currentValue }, 0);
 
     if ((numberOfEventSourcingConnections + serviceInteractions.synchronousConnections.size) === 0) {
-        return 0;
+        return "n/a";
     }
 
     return numberOfEventSourcingConnections / (numberOfEventSourcingConnections + serviceInteractions.synchronousConnections.size);

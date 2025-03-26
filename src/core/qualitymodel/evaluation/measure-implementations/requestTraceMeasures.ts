@@ -3,7 +3,7 @@ import { Calculation, CalculationParameters } from "../../quamoco/Measure";
 import { average, lowest, median } from "./general-functions";
 import { calculateRatioOfEndpointsSupportingSsl, componentMeasureImplementations, providesHealthAndReadinessEndpoints } from "./componentMeasures";
 import { calculateNumberOfLinksWithServiceDiscovery, calculateRatioOfLinksToAsynchronousEndpoints, calculateRatioOfSecuredLinks, calculateRatioOfStatefulComponents, calculateRatioOfStatelessComponents, calculateReplicasPerService, countComponentsConnectedToCertainEndpoints, getServiceInteractions } from "./systemMeasures";
-import { BACKING_DATA_CONFIG_KIND, BACKING_DATA_SECRET_KIND, CONTRACT_ARTIFACT_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, EVENT_SOURCING_KIND, SERVICE_MESH_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "../../specifications/featureModel";
+import { BACKING_DATA_CONFIG_KIND, BACKING_DATA_SECRET_KIND, CONTRACT_ARTIFACT_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, EVENT_SOURCING_KIND, MESSAGE_BROKER_KIND, SERVICE_MESH_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "../../specifications/featureModel";
 import { supportsMonitoring as infrastructureSupportsMonitoring } from "./infrastructureMeasures";
 import { supportsMonitoring as componentSupportsMonitoring } from "./componentMeasures";
 import { serviceMeshUsage as componentServiceMeshUsage } from "./componentMeasures";
@@ -156,7 +156,7 @@ export const eventSourcingUtilizationMetric: Calculation = (parameters: Calculat
         }).reduce((accumulator, currentValue) => { return accumulator + currentValue }, 0);
 
     if ((numberOfEventSourcingConnections + serviceInteractions.synchronousConnections.size) === 0) {
-        return 0;
+        return "n/a";
     }
 
     return numberOfEventSourcingConnections / (numberOfEventSourcingConnections + serviceInteractions.synchronousConnections.size);
@@ -297,10 +297,10 @@ export const serviceReplicationLevel: Calculation = (parameters: CalculationPara
     let replicasPerService = calculateReplicasPerService(parameters.system);
 
     let replicasOfRequestTraceServices = [...replicasPerService.entries()]
-    .filter(([serviceId, replicas]) => {
-        return includedServiceIds.includes(serviceId);
-    })
-    .map(([serviceId, replicas]) => replicas);
+        .filter(([serviceId, replicas]) => {
+            return includedServiceIds.includes(serviceId);
+        })
+        .map(([serviceId, replicas]) => replicas);
 
     if (replicasOfRequestTraceServices.length === 0) {
         return "n/a";
@@ -316,10 +316,10 @@ export const medianServiceReplication: Calculation = (parameters: CalculationPar
     let replicasPerService = calculateReplicasPerService(parameters.system);
 
     let replicasOfRequestTraceServices = [...replicasPerService.entries()]
-    .filter(([serviceId, replicas]) => {
-        return includedServiceIds.includes(serviceId);
-    })
-    .map(([serviceId, replicas]) => replicas);
+        .filter(([serviceId, replicas]) => {
+            return includedServiceIds.includes(serviceId);
+        })
+        .map(([serviceId, replicas]) => replicas);
 
     if (replicasOfRequestTraceServices.length === 0) {
         return "n/a";
@@ -335,10 +335,10 @@ export const smallestReplicationValue: Calculation = (parameters: CalculationPar
     let replicasPerService = calculateReplicasPerService(parameters.system);
 
     let replicasOfRequestTraceServices = [...replicasPerService.entries()]
-    .filter(([serviceId, replicas]) => {
-        return includedServiceIds.includes(serviceId);
-    })
-    .map(([serviceId, replicas]) => replicas);
+        .filter(([serviceId, replicas]) => {
+            return includedServiceIds.includes(serviceId);
+        })
+        .map(([serviceId, replicas]) => replicas);
 
     if (replicasOfRequestTraceServices.length === 0) {
         return "n/a";
@@ -446,7 +446,7 @@ export const amountOfRedundancy: Calculation = (parameters: CalculationParameter
 
 export const dataShardingLevel: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
 
-    let includedStorageBackingServices= getIncludedComponents(parameters.entity, parameters.system).filter(entity => entity.constructor.name === StorageBackingService.name);
+    let includedStorageBackingServices = getIncludedComponents(parameters.entity, parameters.system).filter(entity => entity.constructor.name === StorageBackingService.name);
 
     if (includedStorageBackingServices.length === 0) {
         return "n/a";
@@ -460,42 +460,42 @@ export const dataShardingLevel: Calculation = (parameters: CalculationParameters
 
 export const serviceMeshUsage: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
 
-    let includedComponents =  getIncludedComponents(parameters.entity, parameters.system);
+    let includedComponents = getIncludedComponents(parameters.entity, parameters.system);
 
     const componentsToEvaluate = includedComponents.filter(component => component.constructor.name !== ProxyBackingService.name || component.getProperty("kind").value !== SERVICE_MESH_KIND);
 
-    return average(componentsToEvaluate.map(component => componentServiceMeshUsage({entity: component, system: parameters.system}) as number));
+    return average(componentsToEvaluate.map(component => componentServiceMeshUsage({ entity: component, system: parameters.system }) as number));
 }
 
 export const configurationExternalization: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
 
-    let includedComponents =  getIncludedComponents(parameters.entity, parameters.system);
+    let includedComponents = getIncludedComponents(parameters.entity, parameters.system);
 
     let configurationExternalizationValues = includedComponents
         .filter(component => component.getBackingDataEntities.filter(backingData => backingData.backingData.getProperty("kind").value === BACKING_DATA_CONFIG_KIND).length > 0)
         .map(component => {
-          return componentMeasureImplementations["configurationExternalization"]({entity: component, system: parameters.system}) as number;
-    })
+            return componentMeasureImplementations["configurationExternalization"]({ entity: component, system: parameters.system }) as number;
+        })
 
     return average(configurationExternalizationValues);
 }
 
 export const secretsExternalization: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
 
-    let includedComponents =  getIncludedComponents(parameters.entity, parameters.system);
+    let includedComponents = getIncludedComponents(parameters.entity, parameters.system);
 
     let secretsExternalizationValues = includedComponents
         .filter(component => component.getBackingDataEntities.filter(backingData => backingData.backingData.getProperty("kind").value === BACKING_DATA_SECRET_KIND).length > 0)
         .map(component => {
-        return componentMeasureImplementations["secretsExternalization"]({entity: component, system: parameters.system}) as number;
-    })
+            return componentMeasureImplementations["secretsExternalization"]({ entity: component, system: parameters.system }) as number;
+        })
 
     return average(secretsExternalizationValues);
 }
 
 export const suitablyReplicatedStatefulService: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
 
-    let includedComponents =  getIncludedComponents(parameters.entity, parameters.system);
+    let includedComponents = getIncludedComponents(parameters.entity, parameters.system);
 
     let allStatefulBackingServices = includedComponents
         .filter(component => [StorageBackingService.name, BackingService.name, BrokerBackingService.name].includes(component.constructor.name)
@@ -524,7 +524,7 @@ export const suitablyReplicatedStatefulService: Calculation = (parameters: Calcu
             let replicatedService = allStatefulBackingServices.find(service => {
                 return service.getId == serviceId
             });
-            if (replicatedService.getProperty("replication_strategy").value !== "none" ) {
+            if (replicatedService.getProperty("replication_strategy").value !== "none") {
                 suitablyReplicated.add(serviceId);
             }
         }
@@ -544,9 +544,9 @@ export const ratioOfUniqueAccountUsage: Calculation = (parameters: CalculationPa
 
     let includedComponents = getIncludedComponents(parameters.entity, parameters.system);
 
-    for(const component of includedComponents) {
+    for (const component of includedComponents) {
 
-        let componentAccounts = new Set(Object.entries(component.getProperty("identities").value).filter(([identifier, identityType])=> identityType === "account").map(([identifier, identityType])=> identifier));
+        let componentAccounts = new Set(Object.entries(component.getProperty("identities").value).filter(([identifier, identityType]) => identityType === "account").map(([identifier, identityType]) => identifier));
         if (componentAccounts.size === 0) {
             accounts.add("default-account");
         } else {
@@ -561,7 +561,7 @@ export const ratioOfUniqueAccountUsage: Calculation = (parameters: CalculationPa
     for (const [deploymentMappingId, deploymentMapping] of parameters.system.getDeploymentMappingEntities.entries()) {
         if (includedComponentIds.includes(deploymentMapping.getDeployedEntity.getId)) {
             supportingInfrastructure.add(deploymentMapping.getUnderlyingInfrastructure);
-            let infrastructureAccounts = new Set(Object.entries( deploymentMapping.getUnderlyingInfrastructure.getProperty("identities").value).filter(([identifier, identityType])=> identityType === "account").map(([identifier, identityType])=> identifier));
+            let infrastructureAccounts = new Set(Object.entries(deploymentMapping.getUnderlyingInfrastructure.getProperty("identities").value).filter(([identifier, identityType]) => identityType === "account").map(([identifier, identityType]) => identifier));
             if (infrastructureAccounts.size === 0) {
                 accounts.add("default-account");
             } else {
@@ -588,7 +588,7 @@ export const accessRestrictedToCallers: Calculation = (parameters: CalculationPa
 
     let accessRestrictedToCallersPerComponent = includedComponents.map((component) => componentMeasureImplementations["accessRestrictedToCallers"]({ entity: component, system: parameters.system }));
 
-    let validValues = accessRestrictedToCallersPerComponent.filter(value => value !== "n/a"); 
+    let validValues = accessRestrictedToCallersPerComponent.filter(value => value !== "n/a");
 
     if (validValues.length === 0) {
         return "n/a"
@@ -600,7 +600,7 @@ export const accessRestrictedToCallers: Calculation = (parameters: CalculationPa
 export const ratioOfDelegatedAuthentication: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
 
     let allComponents = getIncludedComponents(parameters.entity, parameters.system).filter(component => {
-        return component.constructor.name !== BackingService.name || component.getProperty("providedFunctionality").value !== "authentication/authorization" 
+        return component.constructor.name !== BackingService.name || component.getProperty("providedFunctionality").value !== "authentication/authorization"
     })
 
 
@@ -692,7 +692,7 @@ export const componentArtifactsSimilarity: Calculation = (parameters: Calculatio
 
     for (const [index, componentA] of includedComponents.entries()) {
         if (index < includedComponents.length - 1) {
-            for (const componentB of includedComponents.slice(index+1)) {
+            for (const componentB of includedComponents.slice(index + 1)) {
                 let artifactTypesA = new Set(componentA.getArtifacts.entries().map(([artifactKey, artifact]) => artifact.getType()));
                 let artifactTypesB = new Set(componentB.getArtifacts.entries().map(([artifactKey, artifact]) => artifact.getType()));
                 if (artifactTypesA.union(artifactTypesB).size === 0) {
@@ -779,7 +779,7 @@ export const standardizedDeployments: Calculation = (parameters: CalculationPara
             });
         }
         return false;
-        }
+    }
     );
     return standardizedDeploymentUnit.length / relevantDeploymentMappings.length;
 }
@@ -804,7 +804,7 @@ export const selfContainedDeployments: Calculation = (parameters: CalculationPar
             });
         }
         return false;
-        }
+    }
     );
     return selfContainedDeploymentUnit.length / relevantDeploymentMappings.length;
 }
@@ -928,8 +928,8 @@ export const endpointAccessConsistency: Calculation = (parameters: CalculationPa
 
     let pairwiseSimilarity = [];
 
-    for ( const [index, endpointA] of endpointsWithAccessControl.entries()) {
-        for (const endpointB of endpointsWithAccessControl.slice(index+1)) {
+    for (const [index, endpointA] of endpointsWithAccessControl.entries()) {
+        for (const endpointB of endpointsWithAccessControl.slice(index + 1)) {
             let setA = new Set(endpointA.getProperty("supported_authentication_methods").value);
             let setB = new Set(endpointB.getProperty("supported_authentication_methods").value);
 
@@ -1017,6 +1017,31 @@ export const degreeOfSeparationByGateways: Calculation = (parameters: Calculatio
     return 1 / degreeOfSharing;
 }
 
+export const serviceInteractionViaBackingService: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+
+    let includedComponents = getIncludedComponents(parameters.entity, parameters.system);
+    let includedLinks = parameters.entity.getLinks.flatMap(step => step);
+
+    let serviceInteractions = getServiceInteractions(includedComponents,
+        includedLinks,
+        parameters.system
+    );
+
+    let numberOfAsynchronousConnectionsViaBroker = [...serviceInteractions.asynchronousConnections.entries()]
+        .filter(([connectionId, connection]) => {
+            return MESSAGE_BROKER_KIND.includes(connection.broker.getProperty("kind").value);
+        })
+        .map(([connectionId, connection]) => {
+            return connection.in.size * connection.out.size;
+        }).reduce((accumulator, currentValue) => { return accumulator + currentValue }, 0);
+
+    if ((numberOfAsynchronousConnectionsViaBroker + serviceInteractions.synchronousConnections.size) === 0) {
+        return "n/a";
+    }
+
+    return numberOfAsynchronousConnectionsViaBroker / (numberOfAsynchronousConnectionsViaBroker + serviceInteractions.synchronousConnections.size);
+
+}
 
 
 export const requestTraceMeasureImplementations: { [measureKey: string]: Calculation } = {
@@ -1069,6 +1094,7 @@ export const requestTraceMeasureImplementations: { [measureKey: string]: Calcula
     "endpointAccessConsistency": endpointAccessConsistency,
     "degreeToWhichComponentsAreLinkedToStatefulComponents": degreeToWhichComponentsAreLinkedToStatefulComponents,
     "ratioOfSpecializedStatefulServices": ratioOfSpecializedStatefulServices,
-    "degreeOfSeparationByGateways": degreeOfSeparationByGateways
+    "degreeOfSeparationByGateways": degreeOfSeparationByGateways,
+    "serviceInteractionViaBackingService": serviceInteractionViaBackingService
 }
 

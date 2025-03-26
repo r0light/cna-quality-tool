@@ -333,6 +333,42 @@ const productFactorEvaluationImplementation: {
         }
         return linearNumericalMapping(degreeOfSeparationByGateways as number);
     },
+    "communicationPartnerAbstraction": (parameters) => {
+        let eventSourcingUtilizationMetric = parameters.calculatedMeasures.get("eventSourcingUtilizationMetric").value;
+
+        if (eventSourcingUtilizationMetric === "n/a") {
+            return "n/a";
+        }
+        return exponentialNumericalMapping(eventSourcingUtilizationMetric as number);
+    },
+    "persistentCommunication": (parameters) => {
+        let serviceInteractionViaBackingService = parameters.calculatedMeasures.get("serviceInteractionViaBackingService").value;
+        let eventSourcingUtilizationMetric = parameters.calculatedMeasures.get("eventSourcingUtilizationMetric").value;
+
+        if (serviceInteractionViaBackingService === "n/a") {
+            if (eventSourcingUtilizationMetric === "n/a") {
+                return "n/a";
+            }
+            return linearNumericalMapping(eventSourcingUtilizationMetric as number);
+        } else {
+            if (eventSourcingUtilizationMetric === "n/a") {
+                return linearNumericalMapping(serviceInteractionViaBackingService as number);
+            } else {
+                return linearNumericalMapping(average([
+                    serviceInteractionViaBackingService as number * 0.4,
+                    eventSourcingUtilizationMetric as number * 0.6]
+                ))
+            }
+        }
+    },
+    "usageOfExistingSolutionsForNonCoreCapabilities": (parameters) => {
+        let ratioOfNonCustomBackingServices = parameters.calculatedMeasures.get("ratioOfNonCustomBackingServices").value;
+
+        if (ratioOfNonCustomBackingServices === "n/a") {
+            return "n/a";
+        }
+        return squareRootedNumericalMapping(ratioOfNonCustomBackingServices as number);
+    },
 };
 
 
