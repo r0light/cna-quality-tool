@@ -577,17 +577,30 @@ const productFactors = {
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
         "sources": [],
         "measures": ["ratioOfStandardizedArtifacts", "ratioOfEntitiesProvidingStandardizedArtifacts"],
-        "evaluations": []
+        "evaluations": [{
+            "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
+            "evaluation": "standardization",
+            "reasoning": "This factor is present, if entities include standardized artifacts. It is evaluated on the one hand based on whether entities include standardized artifacts at all and on the other hand the ratio of standardized artifacts."
+        }]
     },
     "componentSimilarity": {
         "name": "Component similarity",
         "description": "The more similar components are, the easier it is for developers to work on an unfamiliar component. Furthermore, similar components can be more easily integrated and maintained in the same way. Similarity considers mainly the libraries and technologies used for implementing service logic and service endpoints, as well as their deployment.",
         "categories": ["applicationAdministration"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE, ENTITIES.INFRASTRUCTURE],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Reznik2019", "section": "9 Reference Architecture" }],
         "measures": ["componentArtifactsSimilarity", "infrastructureArtifactsSimilarity"],
-        "evaluations": []
+        "evaluations": [{
+            "targetEntities": [ENTITIES.REQUEST_TRACE],
+            "evaluation": "componentSimilarityRequestTrace",
+            "reasoning": "On the level of a request trace, the evaluation of this factor only considers the component similarity of the components involved in the request trace. The similarity is based on the artifacts."
+        },
+        {
+            "targetEntities": [ENTITIES.SYSTEM],
+            "evaluation": "componentSimilaritySystem",
+            "reasoning": "On the level of the whole system, the evaluation of this factor considers the component similarity and infrastructure similarity based on their included artifacts."
+        }]
     },
     "automatedMonitoring": {
         "name": "Automated Monitoring",
@@ -1165,7 +1178,7 @@ const impacts = [
     { "impactedFactor": "faultTolerance", "sourceFactor": "persistentCommunication", "impactType": "positive" },
     { "impactedFactor": "simplicity", "sourceFactor": "usageOfExistingSolutionsForNonCoreCapabilities", "impactType": "positive" },
     { "impactedFactor": "reusability", "sourceFactor": "standardization", "impactType": "positive" },
-    { "impactedFactor": "standardization", "sourceFactor": "componentSimilarity", "impactType": "positive" },
+    { "impactedFactor": "reusability", "sourceFactor": "componentSimilarity", "impactType": "positive" },
     { "impactedFactor": "analyzability", "sourceFactor": "automatedMonitoring", "impactType": "positive" },
     { "impactedFactor": "automatedMonitoring", "sourceFactor": "consistentCentralizedLogging", "impactType": "positive" },
     { "impactedFactor": "accountability", "sourceFactor": "consistentCentralizedLogging", "impactType": "positive" },

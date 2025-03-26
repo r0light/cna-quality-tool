@@ -688,6 +688,10 @@ export const componentArtifactsSimilarity: Calculation = (parameters: Calculatio
 
     let includedComponents = getIncludedComponents(parameters.entity, parameters.system)
 
+    if (includedComponents.length <= 1) {
+        return "n/a";
+    }
+
     let comparisons = [];
 
     for (const [index, componentA] of includedComponents.entries()) {

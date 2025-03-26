@@ -1866,6 +1866,10 @@ export const componentArtifactsSimilarity: Calculation = (parameters: Calculatio
 
     let allComponents = [...parameters.entity.getComponentEntities.values()];
 
+    if (allComponents.length <= 1) {
+        return "n/a";
+    }
+
     let comparisons = [];
 
     for (const [index, componentA] of allComponents.entries()) {
@@ -1888,6 +1892,10 @@ export const componentArtifactsSimilarity: Calculation = (parameters: Calculatio
 export const infrastructureArtifactsSimilarity: Calculation = (parameters: CalculationParameters<System>) => {
 
     let allInfrastructure = [...parameters.entity.getInfrastructureEntities.values()];
+
+    if (allInfrastructure.length <= 1) {
+        return "n/a";
+    } 
 
     let comparisons = [];
 

@@ -354,10 +354,10 @@ const productFactorEvaluationImplementation: {
             if (eventSourcingUtilizationMetric === "n/a") {
                 return linearNumericalMapping(serviceInteractionViaBackingService as number);
             } else {
-                return linearNumericalMapping(average([
-                    serviceInteractionViaBackingService as number * 0.4,
-                    eventSourcingUtilizationMetric as number * 0.6]
-                ))
+                return linearNumericalMapping(
+                    (serviceInteractionViaBackingService as number * 0.4) + 
+                    (eventSourcingUtilizationMetric as number * 0.6)
+                )
             }
         }
     },
@@ -368,6 +368,54 @@ const productFactorEvaluationImplementation: {
             return "n/a";
         }
         return squareRootedNumericalMapping(ratioOfNonCustomBackingServices as number);
+    },
+    "standardization": (parameters) => {
+        let ratioOfStandardizedArtifacts = parameters.calculatedMeasures.get("ratioOfStandardizedArtifacts").value;
+        let ratioOfEntitiesProvidingStandardizedArtifacts = parameters.calculatedMeasures.get("ratioOfEntitiesProvidingStandardizedArtifacts").value;
+
+        if (ratioOfStandardizedArtifacts === "n/a") {
+            if (ratioOfEntitiesProvidingStandardizedArtifacts === "n/a") {
+                return "n/a";
+            }
+            return linearNumericalMapping(ratioOfEntitiesProvidingStandardizedArtifacts as number);
+        } else {
+            if (ratioOfEntitiesProvidingStandardizedArtifacts === "n/a") {
+                return linearNumericalMapping(ratioOfStandardizedArtifacts as number);
+            } else {
+                return linearNumericalMapping(
+                    (ratioOfEntitiesProvidingStandardizedArtifacts as number * 0.7) +
+                    (ratioOfStandardizedArtifacts as number * 0.3)
+                )
+            }
+        }
+    },
+    "componentSimilarityRequestTrace": (parameters) => {
+        let componentArtifactsSimilarity = parameters.calculatedMeasures.get("componentArtifactsSimilarity").value;
+
+        if (componentArtifactsSimilarity === "n/a") {
+            return "n/a";
+        }
+        return linearNumericalMapping(componentArtifactsSimilarity as number);
+    },
+    "componentSimilaritySystem": (parameters) => {
+        let componentArtifactsSimilarity = parameters.calculatedMeasures.get("componentArtifactsSimilarity").value;
+        let infrastructureArtifactsSimilarity = parameters.calculatedMeasures.get("infrastructureArtifactsSimilarity").value;
+
+        if (componentArtifactsSimilarity === "n/a") {
+            if (infrastructureArtifactsSimilarity === "n/a") {
+                return "n/a";
+            }
+            return linearNumericalMapping(infrastructureArtifactsSimilarity as number);
+        } else {
+            if (infrastructureArtifactsSimilarity === "n/a") {
+                return linearNumericalMapping(componentArtifactsSimilarity as number);
+            } else {
+                return linearNumericalMapping(average([
+                    componentArtifactsSimilarity as number,
+                    infrastructureArtifactsSimilarity as number]
+                ))
+            }
+        }
     },
 };
 
