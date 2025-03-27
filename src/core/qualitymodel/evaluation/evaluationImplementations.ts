@@ -642,6 +642,15 @@ const productFactorEvaluationImplementation: {
 
         return linearNumericalMapping(ratioOfDeploymentMappingsWithStatedResourceRequirements as number);
     },
+    "automatedInfrastructureMaintenance": (parameters) => {
+        let ratioOfAutomaticallyMaintainedInfrastructure = parameters.calculatedMeasures.get("ratioOfAutomaticallyMaintainedInfrastructure").value;
+
+        if (ratioOfAutomaticallyMaintainedInfrastructure === "n/a") {
+            return "n/a";
+        }
+
+        return linearNumericalMapping(ratioOfAutomaticallyMaintainedInfrastructure as number);
+    }
 };
 
 

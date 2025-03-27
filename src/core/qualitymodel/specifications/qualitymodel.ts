@@ -1163,10 +1163,14 @@ const productFactors = {
         "description": "The used infrastructure should automate regular maintenance tasks as much as possible in a way that the operation of components is not impacted by these tasks. Such tasks include updates of operating systems, standard libraries, and middleware managed by the infrastructure, but also certificate regeneration.",
         "categories": ["cloudInfrastructure", "applicationAdministration"],
         "relevantEntities": [ENTITIES.INFRASTRUCTURE, ENTITIES.DEPLOYMENT_MAPPING],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE],
         "sources": [{ "key": "Reznik2019", "section": "10 Automated Infrastructure" }, { "key": "Goniwada2021", "section": "5 Automation" }],
         "measures": ["ratioOfAutomaticallyMaintainedInfrastructure"],
-        "evaluations": []
+        "evaluations": [{
+            "targetEntities": [ENTITIES.INFRASTRUCTURE, ENTITIES.SYSTEM],
+            "evaluation": "automatedInfrastructureMaintenance",
+            "reasoning": "The more infrastructure entities are automatically maintained, the more this factor is fulfilled."
+        }]
     },
     "autonomousFaultHandling": {
         "name": "Autonomous fault handling",
