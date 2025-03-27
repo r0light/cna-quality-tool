@@ -588,6 +588,33 @@ const productFactorEvaluationImplementation: {
             }
         }
     },
+    "managedInfrastructure": (parameters) => {
+        let ratioOfFullyManagedInfrastructure = parameters.calculatedMeasures.get("ratioOfFullyManagedInfrastructure").value;
+
+        if (ratioOfFullyManagedInfrastructure === "n/a") {
+            return "n/a";
+        }
+
+        return squareRootedNumericalMapping(ratioOfFullyManagedInfrastructure as number);
+    },
+    "managedBackingServices": (parameters) => {
+        let ratioOfManagedBackingServices = parameters.calculatedMeasures.get("ratioOfManagedBackingServices").value;
+
+        if (ratioOfManagedBackingServices === "n/a") {
+            return "n/a";
+        }
+
+        return squareRootedNumericalMapping(ratioOfManagedBackingServices as number);
+    },
+    "operationOutsourcing": (parameters) => {
+        let ratioOfProviderManagedComponentsAndInfrastructure = parameters.calculatedMeasures.get("ratioOfProviderManagedComponentsAndInfrastructure").value;
+
+        if (ratioOfProviderManagedComponentsAndInfrastructure === "n/a") {
+            return "n/a";
+        }
+
+        return squareRootedNumericalMapping(ratioOfProviderManagedComponentsAndInfrastructure as number);
+    },
 };
 
 

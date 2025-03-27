@@ -852,27 +852,53 @@ const productFactors = {
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE],
         "sources": [],
         "measures": ["ratioOfProviderManagedComponentsAndInfrastructure"],
-        "evaluations": []
+        "evaluations": [{
+            "targetEntities": [ENTITIES.SYSTEM],
+            "evaluation": "operationOutsourcing",
+            "reasoning": "Depends on both the outsourcing (management by provider) of components and infrastructure.",
+        },
+        {
+            "targetEntities": [ENTITIES.COMPONENT],
+            "evaluation": "aggregateImpacts",
+            "reasoning": "Depends on the factor Managed backing services",
+            "precondition": "at-least-one",
+            "impactsInterpretation": "median"
+        },
+        {
+            "targetEntities": [ENTITIES.INFRASTRUCTURE],
+            "evaluation": "aggregateImpacts",
+            "reasoning": "Depends on the factor Managed infrastructure",
+            "precondition": "at-least-one",
+            "impactsInterpretation": "median"
+        }]
     },
     "managedInfrastructure": {
         "name": "Managed infrastructure",
         "description": "Infrastructure such as basic computing, storage or network resources, but potentially also software infrastructure (for example a container orchestration engine) is managed by a cloud provider who is responsible for a stable functioning and up-to-date functionalities. The more infrastructure is managed, the more operational responsibility is transferred. This will also be reflected in the costs which are then calculated more on usage-based pricing schemes.",
         "categories": ["applicationAdministration", "cloudInfrastructure"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.DEPLOYMENT_MAPPING],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE],
         "sources": [],
         "measures": ["ratioOfFullyManagedInfrastructure"],
-        "evaluations": []
+        "evaluations": [{
+            "targetEntities": [ENTITIES.INFRASTRUCTURE, ENTITIES.SYSTEM],
+            "evaluation": "managedInfrastructure",
+            "reasoning": "The more infrastructure entities are managed by a provider, the more this factor is fulfilled."
+        }]
     },
     "managedBackingServices": {
         "name": "Managed backing services",
         "description": "Backing services that provide non-business functionality are operated and managed by vendors who are responsible for a stable functioning and up-to-date functionalities. Operational responsibility is transferred which is also reflected in the costs which are then calculated more on usage-based pricing schemes.",
         "categories": ["applicationAdministration", "cloudInfrastructure"],
         "relevantEntities": [ENTITIES.BACKING_SERVICE, ENTITIES.BROKER_BACKING_SERVICE, ENTITIES.PROXY_BACKING_SERVICE, ENTITIES.STORAGE_BACKING_SERVICE],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT],
         "sources": [{ "key": "Scholl2019", "section": "6 Use Managed Databases and Analytics Services" }, { "key": "Arundel2019", "section": "15 Don't build your own monitoring infrastructure (Use an external monitoring service)" }, { "key": "Bastani2017", "section": "10 managed and automated messaging system (operating your own messaging system increases operational overhead, better use a system managed by a platform)" }],
         "measures": ["ratioOfManagedBackingServices"],
-        "evaluations": []
+        "evaluations": [{
+            "targetEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM],
+            "evaluation": "managedBackingServices",
+            "reasoning": "The more backing services are managed by a provider, the more this factor is fulfilled."
+        }]
     },
     "replication": {
         "name": "Replication",
@@ -1951,7 +1977,7 @@ const measures = {
     },
     "ratioOfProviderManagedComponentsAndInfrastructure": {
         "name": "Ratio of Provider-Managed Components and Infrastructure",
-        "calculation": "Number of Provider-managed components and infrastrcture nodes / All components and infrastructure nodes",
+        "calculation": "Number of Provider-managed components and infrastructure nodes / All components and infrastructure nodes",
         "sources": ["Yussupov2022"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },
@@ -2460,7 +2486,7 @@ const measures = {
         "calculation": "Average(Number of services using a storage service / Number of services) for all storage services",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM],
-    },
+    }
 } satisfies { [measureKey: string]: MeasureSpec }
 
 const measureKeys = Object.freeze(measures);
