@@ -743,7 +743,7 @@ const productFactors = {
         {
             "targetEntities": [ENTITIES.SYSTEM],
             "evaluation": "lowCouplingForSystem",
-            "reasoning": "Evaluation is based on the degree of coupling in the system. The higher this degree is, the less this factor is fulfilled."
+            "reasoning": "Evaluation is based on the simple degree of coupling in the system. The higher this degree is, the less this factor is fulfilled."
         }]
     },
     "functionalDecentralization": {
@@ -768,7 +768,16 @@ const productFactors = {
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
         "sources": [],
         "measures": ["maximumLengthOfServiceLinkChainPerRequestTrace", "maximumNumberOfServicesWithinARequestTrace", "numberOfRequestTraces", "averageComplexityOfRequestTraces", "requestTraceComplexity", "requestTraceLength", "numberOfCyclesInRequestTraces"],
-        "evaluations": []
+        "evaluations": [{
+            "targetEntities": [ENTITIES.SYSTEM],
+            "evaluation": "limitedRequestTraceScopeForSystem",
+            "reasoning": "Evaluation is based on the number of involved links and components of request traces. On the system level, the evaluation is averaged across request traces."
+        },
+        {
+            "targetEntities": [ENTITIES.REQUEST_TRACE],
+            "evaluation": "limitedRequestTraceScopeForRequestTrace",
+            "reasoning": "Evaluation is based on the number of involved links and components of a request traces"
+        }]
     },
     "logicalGrouping": {
         "name": "Logical grouping",

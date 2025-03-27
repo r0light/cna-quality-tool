@@ -351,7 +351,10 @@ function onSelectRequestTrace(element: dia.Element) {
     highlightRequestTrace(element);
 
     // get involved Links
-    const involvedLinks: string[] = element.prop("entity/relations/involved_links").flat();
+    const involvedLinks: string[] = [];
+    if (element.prop("entity/relations/involved_links")) {
+        involvedLinks.push(...element.prop("entity/relations/involved_links").flat());
+    }
 
     let allInvolvedEntities = new Set(involvedLinks);
     // add Request Trace entity itself 

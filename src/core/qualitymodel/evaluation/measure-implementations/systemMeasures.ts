@@ -2599,7 +2599,7 @@ export const dataAggregateSpread: Calculation = (parameters: CalculationParamete
 export const requestTraceSimilarityBasedOnIncludedComponents: Calculation = (parameters: CalculationParameters<System>) => {
     let allRequestTraces = parameters.entity.getRequestTraceEntities;
 
-    if (allRequestTraces.size === 0) {
+    if (allRequestTraces.size <= 1) {
         return "n/a";
     }
 

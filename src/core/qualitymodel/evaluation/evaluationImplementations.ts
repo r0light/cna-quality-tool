@@ -2,6 +2,7 @@ import { AspectEvaluationFunction, exponentialNumericalMapping, FactorEvaluation
 import { ProductFactorKey } from "../specifications/qualitymodel";
 import { param } from "jquery";
 import { average } from "./measure-implementations/general-functions";
+import { max } from "lodash";
 
 const mean: (list: number[]) => number = list => {
     return list.reduce((e1, e2) => e1 + e2, 0) / list.length
@@ -477,13 +478,13 @@ const productFactorEvaluationImplementation: {
         return linearNumericalMapping(inverseCoupling as number);
     },
     "lowCouplingForSystem": (parameters) => {
-        let degreeOfCouplingInASystem = parameters.calculatedMeasures.get("degreeOfCouplingInASystem").value;
+        let simpleDegreeOfCouplingInASystem = parameters.calculatedMeasures.get("simpleDegreeOfCouplingInASystem").value;
 
-        if (degreeOfCouplingInASystem === "n/a") {
+        if (simpleDegreeOfCouplingInASystem === "n/a") {
             return "n/a";
         }
 
-        let inverseCoupling = 1 - (degreeOfCouplingInASystem as number);
+        let inverseCoupling = 1 - (simpleDegreeOfCouplingInASystem as number);
 
         return squareRootedNumericalMapping(inverseCoupling as number);
     },
@@ -495,13 +496,53 @@ const productFactorEvaluationImplementation: {
             if (requestTraceSimilarityBasedOnIncludedComponents === "n/a") {
                 return "n/a";
             }
-            return linearNumericalMapping(1 - (requestTraceSimilarityBasedOnIncludedComponents as number));
+            return squareRootedNumericalMapping(1 - (requestTraceSimilarityBasedOnIncludedComponents as number));
         } else {
             if (requestTraceSimilarityBasedOnIncludedComponents === "n/a") {
-                return linearNumericalMapping(1 - (dataAggregateSpread as number));
+                return squareRootedNumericalMapping(1 - (dataAggregateSpread as number));
             } else {
-                return linearNumericalMapping(average([1 - (dataAggregateSpread as number), 1 - (requestTraceSimilarityBasedOnIncludedComponents as number)]));
+                return squareRootedNumericalMapping(average([1 - (dataAggregateSpread as number), 1 - (requestTraceSimilarityBasedOnIncludedComponents as number)]));
             }
+        }
+    },
+    "limitedRequestTraceScopeForRequestTrace": (parameters) => {
+        let requestTraceComplexity = parameters.calculatedMeasures.get("requestTraceComplexity").value;
+        let maximumNumberOfServicesWithinARequestTrace = parameters.calculatedMeasures.get("maximumNumberOfServicesWithinARequestTrace").value;
+
+        if (requestTraceComplexity === "n/a" || maximumNumberOfServicesWithinARequestTrace === "n/a") {
+            return "n/a";
+        }
+
+        let maximum = Math.max(requestTraceComplexity as number, maximumNumberOfServicesWithinARequestTrace as number);
+
+        if (maximum <= 1) {
+            return "high";
+        } else if (maximum > 1 && maximum <= 3) {
+            return "moderate";
+        } else if (maximum > 3 && maximum <= 6) {
+            return "low";
+        } else {
+            return "none";
+        }
+    },
+    "limitedRequestTraceScopeForSystem": (parameters) => {
+        let averageComplexityOfRequestTraces = parameters.calculatedMeasures.get("averageComplexityOfRequestTraces").value;
+        let maximumNumberOfServicesWithinARequestTrace = parameters.calculatedMeasures.get("maximumNumberOfServicesWithinARequestTrace").value;
+
+        if (averageComplexityOfRequestTraces === "n/a" || maximumNumberOfServicesWithinARequestTrace === "n/a") {
+            return "n/a";
+        }
+
+        let maximum = Math.max(averageComplexityOfRequestTraces as number, maximumNumberOfServicesWithinARequestTrace as number);
+
+        if (maximum <= 1) {
+            return "high";
+        } else if (maximum > 1 && maximum <= 3) {
+            return "moderate";
+        } else if (maximum > 3 && maximum <= 6) {
+            return "low";
+        } else {
+            return "none";
         }
     },
 };
