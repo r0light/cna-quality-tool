@@ -315,9 +315,9 @@ export const ratioOfStorageBackendSharing: Calculation = (parameters: Calculatio
         return "n/a";
     }
 
-    let otherServicesUsingStorageServices = new Map<string, Set<string>>();
+    let allServicesUsingStorageServices = new Map<string, Set<string>>();
     storageServicesUsedByThisComponent.forEach(storageService => {
-        otherServicesUsingStorageServices.set(storageService.getId, new Set<string>());
+        allServicesUsingStorageServices.set(storageService.getId, new Set<string>());
     })
 
     for (const [linkId, link] of parameters.system.getLinkEntities) {
@@ -326,19 +326,20 @@ export const ratioOfStorageBackendSharing: Calculation = (parameters: Calculatio
         }
 
         let targetComponentId = parameters.system.searchComponentOfEndpoint(link.getTargetEndpoint.getId).getId;
-        if (otherServicesUsingStorageServices.has(targetComponentId)) {
-            otherServicesUsingStorageServices.get(targetComponentId).add(link.getSourceEntity.getId);
+        if (allServicesUsingStorageServices.has(targetComponentId) && link.getSourceEntity.constructor.name === Service.name) {
+            allServicesUsingStorageServices.get(targetComponentId).add(link.getSourceEntity.getId);
         }
-
     }
 
     let sum = 0;
-    for (const [storageId, storageService] of otherServicesUsingStorageServices.entries()) {
-        sum += otherServicesUsingStorageServices.get(storageId).size;
+    for (const [storageId, storageService] of allServicesUsingStorageServices.entries()) {
+        sum += allServicesUsingStorageServices.get(storageId).size;
     }
 
-    return sum / (([...parameters.system.getComponentEntities.entries()]).filter(component => component[1].constructor.name === Service.name).length * ([...parameters.system.getComponentEntities.entries()]).filter(component => component[1].constructor.name === StorageBackingService.name).length)
+    let numberOfServices = ([...parameters.system.getComponentEntities.entries()]).filter(component => component[1].constructor.name === Service.name).length;
+    let numberOfStorageBackingServices = ([...parameters.system.getComponentEntities.entries()]).filter(component => component[1].constructor.name === StorageBackingService.name).length;
 
+    return sum / (numberOfServices * numberOfStorageBackingServices);
 }
 
 export const combinedMetricForIndirectDependency: Calculation = (parameters: CalculationParameters<Component>) => {
@@ -1378,6 +1379,42 @@ export const ratioOfComponentsOrInfrastructureNodesThatExportMetrics: Calculatio
     return 0;
 }
 
+export const ratioOfBrokerBackendSharing: Calculation = (parameters: CalculationParameters<Component>) => {
+    let brokerServicesUsedByThisComponent = parameters.system.getOutgoingLinksOfComponent(parameters.entity.getId)
+        .map(link => parameters.system.searchComponentOfEndpoint(link.getTargetEndpoint.getId))
+        .filter(component => component.constructor.name === BrokerBackingService.name);
+
+    if (brokerServicesUsedByThisComponent.length === 0) {
+        return "n/a";
+    }
+
+    let allServicesUsingBrokerServices = new Map<string, Set<string>>();
+    brokerServicesUsedByThisComponent.forEach(brokerService => {
+        allServicesUsingBrokerServices.set(brokerService.getId, new Set<string>());
+    })
+
+    for (const [linkId, link] of parameters.system.getLinkEntities) {
+        if (link.getSourceEntity.getId === parameters.entity.getId) {
+            continue;
+        }
+
+        let targetComponentId = parameters.system.searchComponentOfEndpoint(link.getTargetEndpoint.getId).getId;
+        if (allServicesUsingBrokerServices.has(targetComponentId) && link.getSourceEntity.constructor.name === Service.name) {
+            allServicesUsingBrokerServices.get(targetComponentId).add(link.getSourceEntity.getId);
+        }
+    }
+
+    let sum = 0;
+    for (const [brokerId, brokerService] of allServicesUsingBrokerServices.entries()) {
+        sum += allServicesUsingBrokerServices.get(brokerId).size;
+    }
+
+    let numberOfServices = ([...parameters.system.getComponentEntities.entries()]).filter(component => component[1].constructor.name === Service.name).length;
+    let numberOfBrokerBackingServices = ([...parameters.system.getComponentEntities.entries()]).filter(component => component[1].constructor.name === BrokerBackingService.name).length;
+
+    return sum / (numberOfServices * numberOfBrokerBackingServices);
+}
+
 
 export const componentMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
@@ -1455,6 +1492,7 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "degreeOfSeparationByGateways": degreeOfSeparationByGateways,
     "distributedTracingSupport": distributedTracingSupport,
     "ratioOfComponentsOrInfrastructureNodesThatExportLogsToACentralService": ratioOfComponentsOrInfrastructureNodesThatExportLogsToACentralService,
-    "ratioOfComponentsOrInfrastructureNodesThatExportMetrics": ratioOfComponentsOrInfrastructureNodesThatExportMetrics
+    "ratioOfComponentsOrInfrastructureNodesThatExportMetrics": ratioOfComponentsOrInfrastructureNodesThatExportMetrics,
+    "ratioOfBrokerBackendSharing": ratioOfBrokerBackendSharing
 }
 

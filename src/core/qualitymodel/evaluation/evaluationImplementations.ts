@@ -545,6 +545,49 @@ const productFactorEvaluationImplementation: {
             return "none";
         }
     },
+    "logicalGrouping": (parameters) => {
+        let namespaceSeparation = parameters.calculatedMeasures.get("namespaceSeparation").value;
+
+        if (namespaceSeparation === "n/a") {
+            return "n/a";
+        }
+
+        return squareRootedNumericalMapping(namespaceSeparation as number);
+    },
+    "backingServiceDecentralizationForComponent": (parameters) => {
+        let ratioOfStorageBackendSharing = parameters.calculatedMeasures.get("ratioOfStorageBackendSharing").value;
+        let ratioOfBrokerBackendSharing = parameters.calculatedMeasures.get("ratioOfBrokerBackendSharing").value;
+
+        if (ratioOfStorageBackendSharing === "n/a") {
+            if (ratioOfBrokerBackendSharing === "n/a") {
+                return "n/a";
+            }
+            return linearNumericalMapping(1 - (ratioOfBrokerBackendSharing as number));
+        } else {
+            if (ratioOfBrokerBackendSharing === "n/a") {
+                return linearNumericalMapping(1 - (ratioOfStorageBackendSharing as number));
+            } else {
+                return linearNumericalMapping(average([1 - (ratioOfStorageBackendSharing as number), 1 - (ratioOfBrokerBackendSharing as number)]));
+            }
+        }
+    },
+    "backingServiceDecentralizationForSystem": (parameters) => {
+        let averageStorageBackendSharing = parameters.calculatedMeasures.get("averageStorageBackendSharing").value;
+        let averageBrokerBackendSharing = parameters.calculatedMeasures.get("averageBrokerBackendSharing").value;
+
+        if (averageStorageBackendSharing === "n/a") {
+            if (averageBrokerBackendSharing === "n/a") {
+                return "n/a";
+            }
+            return linearNumericalMapping(1 - (averageBrokerBackendSharing as number));
+        } else {
+            if (averageBrokerBackendSharing === "n/a") {
+                return linearNumericalMapping(1 - (averageStorageBackendSharing as number));
+            } else {
+                return linearNumericalMapping(average([1 - (averageStorageBackendSharing as number), 1 - (averageBrokerBackendSharing as number)]));
+            }
+        }
+    },
 };
 
 

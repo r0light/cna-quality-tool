@@ -724,7 +724,13 @@ const productFactors = {
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT],
         "sources": [{ "key": "Goniwada2021", "section": "3 Decentralize Everything Principle (Decentralize deployment, governance)" }],
         "measures": [],
-        "evaluations": []
+        "evaluations": [{
+            "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT],
+            "evaluation": "aggregateImpacts",
+            "reasoning": "Depends on various aspects of how services depend on each other. Each aspect can have an impact",
+            "precondition": "majority",
+            "impactsInterpretation": "mean"
+        }]
     },
     "lowCoupling": {
         "name": "Low coupling",
@@ -783,11 +789,15 @@ const productFactors = {
         "name": "Logical grouping",
         "description": "Services are logically grouped so that services which are related (for example by having many links or processing the same data aggregates) are in the same group, but services which are more independent are separated in different groups. That way a separation can also be achieved on the network and infrastructure level by separating service groups more strictly, such as having different subnets for such logical groups or not letting different groups run on the same infrastructure. Potential impacts of a compromised or misbehaving service can therefore be reduced to the group to which it belongs but other groups are ideally unaffected.",
         "categories": ["cloudInfrastructure", "applicationAdministration", "businessDomain"],
-        "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.LINK, ENTITIES.REQUEST_TRACE, ENTITIES.NETWORK],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
+        "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.LINK, ENTITIES.NETWORK],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT],
         "sources": [{ "key": "Scholl2019", "section": "6 Use Namespaces to Organize Services in Kubernetes" }, { "key": "Arundel2019", "section": "5 Using Namespaces" }, { "key": "Indrasiri2021", "section": "1 Why container orchestration?; Componentization and isolation" }],
         "measures": ["namespaceSeparation"],
-        "evaluations": []
+        "evaluations": [{
+            "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT],
+            "evaluation": "logicalGrouping",
+            "reasoning": "Evaluation of this factor is based on namespaces. The more components are separated and thus grouped by namespaces, the more the factor is fullfilled"
+        }]
     },
     "backingServiceDecentralization": {
         "name": "Backing service decentralization",
@@ -796,8 +806,17 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.LINK, ENTITIES.BACKING_SERVICE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT],
         "sources": [{ "key": "Indrasiri2021", "section": "4 Decentralized Data Management (decentralized data leads to higher service independence while centralized data leads to higher consistency.)" }, { "key": "Indrasiri2021", "section": "4 Data Service Pattern (As having a negative impact because multiple services should not access the same data);" }, { "key": "Ruecker2021", "section": "2 Different Workflow Engines for different services" }, { "key": "Goniwada2021", "section": "5 Distributed State, Decentralized Data" }],
-        "measures": ["degreeOfStorageBackendSharing", "ratioOfStorageBackendSharing", "sharedStorageBackingServiceInteractions", "databaseTypeUtilization", "numberOfServiceConnectedToStorageBackingService"],
-        "evaluations": []
+        "measures": ["degreeOfStorageBackendSharing", "ratioOfStorageBackendSharing", "sharedStorageBackingServiceInteractions", "databaseTypeUtilization", "numberOfServiceConnectedToStorageBackingService", "ratioOfBrokerBackendSharing", "averageStorageBackendSharing", "averageBrokerBackendSharing"],
+        "evaluations": [{
+            "targetEntities": [ENTITIES.SYSTEM],
+            "evaluation": "backingServiceDecentralizationForSystem",
+            "reasoning": "Evaluation is based on the average sharing of backing services (storage backing services and broker services). The lower the sharing, the higher the decentralization and thus the fulfillment of this factor"
+        },
+        {
+            "targetEntities": [ENTITIES.COMPONENT],
+            "evaluation": "backingServiceDecentralizationForComponent",
+            "reasoning": "Evaluation is based on the ratio of backend sharing (storage backing services and broker services). The lower the sharing, the higher the decentralization and thus the fulfillment of this factor"
+        }]
     },
     "addressingAbstraction": {
         "name": "Addressing abstraction",
@@ -2423,7 +2442,25 @@ const measures = {
         "calculation": "Average(Number of services using a data aggregate / Number of Services) for all data aggregates",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM]
-    }
+    },
+    "ratioOfBrokerBackendSharing": {
+        "name": "Ratio of Broker Backend Sharing",
+        "calculation": "(sum-of(Number of Services sharing the same Broker Backing Service) for all Broker Backing Services) / (Total Number of Services * Total Number of Broker Backing Service)",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.COMPONENT],
+    },
+    "averageBrokerBackendSharing": {
+        "name": "Average Broker Backend Sharing",
+        "calculation": "Average(Number of services using a broker service / Number of services) for all broker services",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM],
+    },
+    "averageStorageBackendSharing": {
+        "name": "Average Storage Backend Sharing",
+        "calculation": "Average(Number of services using a storage service / Number of services) for all storage services",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM],
+    },
 } satisfies { [measureKey: string]: MeasureSpec }
 
 const measureKeys = Object.freeze(measures);

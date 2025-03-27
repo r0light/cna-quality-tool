@@ -1,7 +1,7 @@
 import { Artifact, getArtifactTypeProperties } from "@/core/common/artifact";
 import { getEmptyMetaData } from "@/core/common/entityDataTypes";
 import { EntityProperty } from "@/core/common/entityProperty";
-import { BackingData, BackingService, DataAggregate, DeploymentMapping, Endpoint, ExternalEndpoint, Infrastructure, Link, ProxyBackingService, Service, StorageBackingService, System } from "@/core/entities";
+import { BackingData, BackingService, BrokerBackingService, DataAggregate, DeploymentMapping, Endpoint, ExternalEndpoint, Infrastructure, Link, ProxyBackingService, Service, StorageBackingService, System } from "@/core/entities";
 import { RelationToBackingData } from "@/core/entities/relationToBackingData";
 import { RelationToDataAggregate } from "@/core/entities/relationToDataAggregate";
 import { componentMeasureImplementations } from "@/core/qualitymodel/evaluation/measure-implementations/componentMeasures";
@@ -2227,4 +2227,32 @@ test("ratioOfComponentsOrInfrastructureNodesThatExportMetrics", () => {
 
     let measureValue = componentMeasureImplementations["ratioOfComponentsOrInfrastructureNodesThatExportMetrics"]({ entity: serviceA, system: system });
     expect(measureValue).toEqual(1);
+})
+
+test("ratioOfBrokerBackendSharing", () => {
+
+    let system = new System("sys1", "testSystem");
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    serviceB.addEndpoint(endpointA);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+
+    let brokerServiceD = new BrokerBackingService("s4", "testService", getEmptyMetaData());
+    let endpointE = new Endpoint("e5", "endpoint 5", getEmptyMetaData());
+    brokerServiceD.addEndpoint(endpointE);
+
+    let linkAD = new Link("l1", serviceA, endpointE);
+    let linkBD = new Link("l3", serviceB, endpointE);
+
+    system.addEntities([serviceA, serviceB, serviceC, brokerServiceD]);
+    system.addEntities([linkAD, linkBD]);
+
+    let measureValue = componentMeasureImplementations["ratioOfBrokerBackendSharing"]({ entity: serviceA, system: system });
+    expect(measureValue).toEqual(1 / 3);
 })

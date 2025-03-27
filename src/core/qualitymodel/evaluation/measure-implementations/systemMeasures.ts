@@ -2626,6 +2626,63 @@ export const requestTraceSimilarityBasedOnIncludedComponents: Calculation = (par
     return average(requestTracesSimilarity);
 }
 
+export const averageBrokerBackendSharing: Calculation = (parameters: CalculationParameters<System>) => {
+    let allBrokerServiceIds = parameters.entity.getComponentEntities.entries().filter(([componentId, component]) => component.constructor.name === BrokerBackingService.name).map(([componentId, component]) => componentId).toArray();
+
+    let allServiceIds = parameters.entity.getComponentEntities.entries().filter(([componentId, component]) => component.constructor.name === Service.name).map(([componentId, component]) => componentId).toArray();
+
+    if (allBrokerServiceIds.length === 0 || allServiceIds.length === 0) {
+        return "n/a";
+    }
+
+    let servicesPerBrokerService: Map<string, Set<string>> = new Map();
+    allBrokerServiceIds.forEach(brokerServiceId => servicesPerBrokerService.set(brokerServiceId, new Set()));
+
+    for (const [linkId, link] of parameters.system.getLinkEntities) {
+        let targetComponent = parameters.system.searchComponentOfEndpoint(link.getTargetEndpoint.getId);
+        if (targetComponent && allBrokerServiceIds.includes(targetComponent.getId)) {
+            if (allServiceIds.includes(link.getSourceEntity.getId)) {
+                servicesPerBrokerService.get(targetComponent.getId).add(link.getSourceEntity.getId);
+            }
+        }
+    }
+
+    let brokerSharing = servicesPerBrokerService.entries().map(([brokerId, serviceIds]) => {
+        return serviceIds.size / allServiceIds.length;
+    }).toArray();
+
+    return average(brokerSharing);
+}
+
+export const averageStorageBackendSharing: Calculation = (parameters: CalculationParameters<System>) => {
+    let allStorageServiceIds = parameters.entity.getComponentEntities.entries().filter(([componentId, component]) => component.constructor.name === StorageBackingService.name).map(([componentId, component]) => componentId).toArray();
+
+    let allServiceIds = parameters.entity.getComponentEntities.entries().filter(([componentId, component]) => component.constructor.name === Service.name).map(([componentId, component]) => componentId).toArray();
+
+    if (allStorageServiceIds.length === 0 || allServiceIds.length === 0) {
+        return "n/a";
+    }
+
+    let servicesPerStorageService: Map<string, Set<string>> = new Map();
+    allStorageServiceIds.forEach(brokerServiceId => servicesPerStorageService.set(brokerServiceId, new Set()));
+
+    for (const [linkId, link] of parameters.system.getLinkEntities) {
+        let targetComponent = parameters.system.searchComponentOfEndpoint(link.getTargetEndpoint.getId);
+        if (targetComponent && allStorageServiceIds.includes(targetComponent.getId)) {
+            if (allServiceIds.includes(link.getSourceEntity.getId)) {
+                servicesPerStorageService.get(targetComponent.getId).add(link.getSourceEntity.getId);
+            }
+        }
+    }
+
+    let storageSharing = servicesPerStorageService.entries().map(([brokerId, serviceIds]) => {
+        return serviceIds.size / allServiceIds.length;
+    }).toArray();
+
+    return average(storageSharing);
+}
+
+
 
 export const systemMeasureImplementations: { [measureKey: string]: Calculation } = {
     "serviceReplicationLevel": serviceReplicationLevel,
@@ -2746,5 +2803,7 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation }
     "readWriteSeparationForDataAggregates": readWriteSeparationForDataAggregates,
     "degreeOfSeparationByGateways": degreeOfSeparationByGateways,
     "dataAggregateSpread": dataAggregateSpread,
-    "requestTraceSimilarityBasedOnIncludedComponents": requestTraceSimilarityBasedOnIncludedComponents
+    "requestTraceSimilarityBasedOnIncludedComponents": requestTraceSimilarityBasedOnIncludedComponents,
+    "averageBrokerBackendSharing": averageBrokerBackendSharing,
+    "averageStorageBackendSharing": averageStorageBackendSharing
 }
