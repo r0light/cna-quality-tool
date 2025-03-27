@@ -1545,7 +1545,7 @@ export const ratioOfCachedDataAggregates: Calculation = (parameters: Calculation
     if (allUsages > 0) {
         return cachedUsages / allUsages;
     }
-    return 0;
+    return "n/a";
 }
 
 export const ratioOfStateDependencyOfEndpoints: Calculation = (parameters: CalculationParameters<System>) => {

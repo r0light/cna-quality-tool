@@ -615,6 +615,33 @@ const productFactorEvaluationImplementation: {
 
         return squareRootedNumericalMapping(ratioOfProviderManagedComponentsAndInfrastructure as number);
     },
+    "enforcementOfAppropriateResourceBoundaries": (parameters) => {
+        let ratioOfInfrastructureEnforcingResourceBoundaries = parameters.calculatedMeasures.get("ratioOfInfrastructureEnforcingResourceBoundaries").value;
+
+        let ratioOfDeploymentMappingsWithStatedResourceRequirements = parameters.calculatedMeasures.get("ratioOfDeploymentMappingsWithStatedResourceRequirements").value;
+
+        if (ratioOfInfrastructureEnforcingResourceBoundaries === "n/a") {
+            if (ratioOfDeploymentMappingsWithStatedResourceRequirements === "n/a") {
+                return "n/a";
+            }
+            return linearNumericalMapping(ratioOfDeploymentMappingsWithStatedResourceRequirements as number);
+        } else {
+            if (ratioOfDeploymentMappingsWithStatedResourceRequirements === "n/a") {
+                return linearNumericalMapping(ratioOfInfrastructureEnforcingResourceBoundaries as number);
+            } else {
+                return linearNumericalMapping(average([ratioOfInfrastructureEnforcingResourceBoundaries as number, ratioOfDeploymentMappingsWithStatedResourceRequirements as number]));
+            }
+        }
+    }, 
+    "enforcementOfAppropriateResourceBoundariesForComponents": (parameters) => {
+        let ratioOfDeploymentMappingsWithStatedResourceRequirements = parameters.calculatedMeasures.get("ratioOfDeploymentMappingsWithStatedResourceRequirements").value;
+
+        if (ratioOfDeploymentMappingsWithStatedResourceRequirements === "n/a") {
+            return "n/a";
+        }
+
+        return linearNumericalMapping(ratioOfDeploymentMappingsWithStatedResourceRequirements as number);
+    },
 };
 
 

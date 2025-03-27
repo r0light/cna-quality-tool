@@ -3984,3 +3984,21 @@ test("averageBrokerBackendSharing", () => {
     let measureValue = systemMeasureImplementations["averageBrokerBackendSharing"]({ entity: system, system: system });
     expect(measureValue).toEqual(0.5);
 })
+
+test("dataShardingLevel", () => {
+
+    let system = new System("sys1", "testSystem");;
+
+    let storageBackingServiceA = new StorageBackingService("sbs1", "storage service A", getEmptyMetaData());
+    let endpointSA = new Endpoint("e1", "storage endpoint A", getEmptyMetaData());
+    storageBackingServiceA.addEndpoint(endpointSA);
+    storageBackingServiceA.setPropertyValue("shards", 3);
+
+    let storageBackingServiceB = new StorageBackingService("sbs2", "storage service B", getEmptyMetaData());
+    storageBackingServiceB.setPropertyValue("shards", 4);
+
+    system.addEntities([storageBackingServiceA, storageBackingServiceB]);
+
+    let measureValue = systemMeasureImplementations["dataShardingLevel"]({ entity: system, system: system });
+    expect(measureValue).toEqual(3.5);
+})

@@ -1415,6 +1415,34 @@ export const ratioOfBrokerBackendSharing: Calculation = (parameters: Calculation
     return sum / (numberOfServices * numberOfBrokerBackingServices);
 }
 
+export const ratioOfCachedDataAggregates: Calculation = (parameters: CalculationParameters<Component>) => {
+
+    let cachedUsages = 0;
+    let allUsages = 0;
+
+    parameters.entity.getDataAggregateEntities.forEach(dataAggregateUsage => {
+        if (DATA_USAGE_RELATION_USAGE.includes(dataAggregateUsage.relation.getProperty("usage_relation").value)) {
+            allUsages++;
+            if (dataAggregateUsage.relation.getProperty("usage_relation").value === "cached-usage") {
+                cachedUsages++;
+            }
+        }
+    })
+
+    if (allUsages > 0) {
+        return cachedUsages / allUsages;
+    }
+    return "n/a";
+}
+
+export const dataShardingLevel: Calculation = (parameters: CalculationParameters<Component>) => {
+
+    if (parameters.entity.constructor.name !== StorageBackingService.name) {
+        return "n/a";
+    }
+
+    return parameters.entity.getProperty("shards").value;
+}
 
 export const componentMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
@@ -1493,6 +1521,8 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "distributedTracingSupport": distributedTracingSupport,
     "ratioOfComponentsOrInfrastructureNodesThatExportLogsToACentralService": ratioOfComponentsOrInfrastructureNodesThatExportLogsToACentralService,
     "ratioOfComponentsOrInfrastructureNodesThatExportMetrics": ratioOfComponentsOrInfrastructureNodesThatExportMetrics,
-    "ratioOfBrokerBackendSharing": ratioOfBrokerBackendSharing
+    "ratioOfBrokerBackendSharing": ratioOfBrokerBackendSharing,
+    "ratioOfCachedDataAggregates": ratioOfCachedDataAggregates,
+    "dataShardingLevel": dataShardingLevel
 }
 

@@ -960,7 +960,7 @@ const productFactors = {
         "measures": ["ratioOfCachedDataAggregates", "dataReplicationAlongRequestTrace"],
         "evaluations": [
             {
-                "targetEntities": [ENTITIES.SYSTEM],
+                "targetEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM],
                 "evaluation": "systemVerticalDataReplication",
                 "reasoning": "Data is replicated vertically if data aggregates are cached by those components using them."
             },
@@ -981,7 +981,7 @@ const productFactors = {
         "measures": ["dataShardingLevel"],
         "evaluations": [
             {
-                "targetEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+                "targetEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE, ENTITIES.COMPONENT],
                 "evaluation": "shardedDataStoreReplication",
                 "reasoning": "Sharding is a specific form of replication and is measured by the amount of shards used by each storage backing service."
             },
@@ -992,10 +992,21 @@ const productFactors = {
         "description": "The resources required by a component are predictable as precisely as possible and specified accordingly for each component in terms of lower and upper boundaries. Resources include CPU, memory, GPU, or Network requirements. This information is used by the infrastructure to enforce these resource boundaries. Thereby it is ensured that a component has the resources available that it needs to function properly, that the infrastructure can optimize the amount of allocated resource, and that components are not negatively impacted by defective components which excessively consume resources.",
         "categories": ["applicationAdministration", "cloudInfrastructure"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.DEPLOYMENT_MAPPING],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE],
         "sources": [{ "key": "Scholl2019", "section": "6 Define CPU and Memory Limits for Your Containers" }, { "key": "Arundel2019", "section": "5 Resource Limits" }, { "key": "Ibryam2020", "section": "2 Defined Resource requirements" }, { "key": "Arundel2019", "section": "5 Resource Quotas (limit maximum resources for a namespace)" }, { "key": "Goniwada2021", "section": "3 Runtime Confinement Principle, 6 Predictable Demands" }],
         "measures": ["ratioOfInfrastructureEnforcingResourceBoundaries", "ratioOfDeploymentMappingsWithStatedResourceRequirements"],
-        "evaluations": []
+        "evaluations": [
+            {
+                "targetEntities": [ENTITIES.INFRASTRUCTURE, ENTITIES.SYSTEM],
+                "evaluation": "enforcementOfAppropriateResourceBoundaries",
+                "reasoning": "Enforcement of appropriate resource boundaries is evaluated based on infrastructure entities. The more infrastructure entities support it, the more this factor is fullfilled."
+            },
+            {
+                "targetEntities": [ENTITIES.COMPONENT],
+                "evaluation": "enforcementOfAppropriateResourceBoundariesForComponents",
+                "reasoning": "Enforcement of appropriate resource boundaries is evaluated based on deployment mappings of components that state resource boundaries. Only then it is possible to have suitable resource boundaries."
+            },
+        ]
     },
     "built-InAutoscaling": {
         "name": "Built-in autoscaling",
@@ -2209,13 +2220,13 @@ const measures = {
         "name": "Level of sharding across storage backing services",
         "calculation": "Average number of shards per Storage Backing Service",
         "sources": ["new"],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
     },
     "ratioOfCachedDataAggregates": {
         "name": "Ratio of Cached Data Aggregates",
         "calculation": "Sum-of(Cached usage of a Data Aggregate in a Component) / Sum-of(Cached and uncached usage of a Data Aggregate in a Component",
         "sources": ["new"],
-        "applicableEntities": [ENTITIES.SYSTEM],
+        "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM],
     },
     "dataReplicationAlongRequestTrace": {
         "name": "Data Replication Along Request Trace",

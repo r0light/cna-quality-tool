@@ -2256,3 +2256,40 @@ test("ratioOfBrokerBackendSharing", () => {
     let measureValue = componentMeasureImplementations["ratioOfBrokerBackendSharing"]({ entity: serviceA, system: system });
     expect(measureValue).toEqual(1 / 3);
 })
+
+test("ratioOfCachedDataAggregates", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+
+    let dataAggregateX = new DataAggregate("da1", "data aggregate 1", getEmptyMetaData());
+    let dataAggregateY = new DataAggregate("da2", "data aggregate 2", getEmptyMetaData());
+
+    let usageAX = new RelationToDataAggregate("r1", getEmptyMetaData());
+    usageAX.setPropertyValue("usage_relation", "cached-usage");
+    let usageAY = new RelationToDataAggregate("r2", getEmptyMetaData());
+    usageAY.setPropertyValue("usage_relation", "usage");
+    serviceA.addDataAggregateEntity(dataAggregateX, usageAX);
+    serviceA.addDataAggregateEntity(dataAggregateY, usageAY);
+
+    system.addEntities([serviceA]);
+    system.addEntities([dataAggregateX, dataAggregateY]);
+
+    let measureValue = componentMeasureImplementations["ratioOfCachedDataAggregates"]({ entity: serviceA, system: system });
+    expect(measureValue).toBe(0.5);
+})
+
+test("dataShardingLevel", () => {
+
+    let system = new System("sys1", "testSystem");;
+
+    let storageBackingServiceA = new StorageBackingService("sbs1", "storage service A", getEmptyMetaData());
+    let endpointSA = new Endpoint("e1", "storage endpoint A", getEmptyMetaData());
+    storageBackingServiceA.addEndpoint(endpointSA);
+    storageBackingServiceA.setPropertyValue("shards", 3);
+
+    system.addEntities([storageBackingServiceA]);
+
+    let measureValue = componentMeasureImplementations["dataShardingLevel"]({ entity: storageBackingServiceA, system: system });
+    expect(measureValue).toEqual(3);
+})
