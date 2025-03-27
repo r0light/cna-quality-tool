@@ -425,6 +425,46 @@ const productFactorEvaluationImplementation: {
         }
         return linearNumericalMapping(distributedTracingSupport as number);
     },
+    "consistentCentralizedLogging": (parameters) => {
+        let ratioOfComponentsOrInfrastructureNodesThatExportLogsToACentralService = parameters.calculatedMeasures.get("ratioOfComponentsOrInfrastructureNodesThatExportLogsToACentralService").value;
+
+        if (ratioOfComponentsOrInfrastructureNodesThatExportLogsToACentralService === "n/a") {
+            return "n/a";
+        }
+        return linearNumericalMapping(ratioOfComponentsOrInfrastructureNodesThatExportLogsToACentralService as number);
+    },
+    "consistentCentralizedMetrics": (parameters) => {
+        let ratioOfComponentsOrInfrastructureNodesThatExportMetrics = parameters.calculatedMeasures.get("ratioOfComponentsOrInfrastructureNodesThatExportMetrics").value;
+
+        if (ratioOfComponentsOrInfrastructureNodesThatExportMetrics === "n/a") {
+            return "n/a";
+        }
+        return linearNumericalMapping(ratioOfComponentsOrInfrastructureNodesThatExportMetrics as number);
+    },
+    "automatedInfrastructureProvisioning": (parameters) => {
+        let ratioOfAutomaticallyProvisionedInfrastructure = parameters.calculatedMeasures.get("ratioOfAutomaticallyProvisionedInfrastructure").value;
+
+        if (ratioOfAutomaticallyProvisionedInfrastructure === "n/a") {
+            return "n/a";
+        }
+        return linearNumericalMapping(ratioOfAutomaticallyProvisionedInfrastructure as number);
+    },
+    "useInfrastructureAsCode": (parameters) => {
+        let ratioOfInfrastructureWithIaCArtifact = parameters.calculatedMeasures.get("ratioOfInfrastructureWithIaCArtifact").value;
+
+        if (ratioOfInfrastructureWithIaCArtifact === "n/a") {
+            return "n/a";
+        }
+        return linearNumericalMapping(ratioOfInfrastructureWithIaCArtifact as number);
+    },
+    "dynamicScheduling": (parameters) => {
+        let ratioOfDeploymentsOnDynamicInfrastructure = parameters.calculatedMeasures.get("ratioOfDeploymentsOnDynamicInfrastructure").value;
+
+        if (ratioOfDeploymentsOnDynamicInfrastructure === "n/a") {
+            return "n/a";
+        }
+        return linearNumericalMapping(ratioOfDeploymentsOnDynamicInfrastructure as number);
+    },
 };
 
 

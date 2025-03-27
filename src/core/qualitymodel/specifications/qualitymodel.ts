@@ -607,30 +607,44 @@ const productFactors = {
         "description": "Cloud-native applications enable monitoring at various levels (business functionalities in services, backing-service functionalities, infrastructure) in an automated fashion to enable observable and autonomous reactions to changing system conditions.",
         "categories": ["applicationAdministration", "businessDomain", "networkCommunication", "dataManagement"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.BACKING_SERVICE],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Goniwada2021", "section": "3 High Observability Principle" }],
         "measures": ["ratioOfInfrastructureNodesThatSupportMonitoring", "ratioOfComponentsThatSupportMonitoring"],
-        "evaluations": []
+        "evaluations": [{
+            "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
+            "evaluation": "aggregateImpacts",
+            "reasoning": "Depends on whether components and infrastructure support monitoring through logging, metrics, distributed tracing and health and readiness checks.",
+            "precondition": "at-least-one",
+            "impactsInterpretation": "median"
+        }]
     },
     "consistentCentralizedLogging": {
         "name": "Consistent centralized logging",
         "description": "Logging functionality, specifically the automated collection of logs, is concentrated in a centralized backing service which combines and stores logs from the components of a system. The logs are kept consistent regarding their format and level of granularity. In the backing service also log analysis functionalities are provided, for example by also enabling a correlation of logs from different components.",
         "categories": ["applicationAdministration", "dataManagement"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.BACKING_DATA, ENTITIES.BACKING_SERVICE, ENTITIES.LINK],
-        "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE],
         "sources": [{ "key": "Davis2019", "section": "11.1" }, { "key": "Scholl2019", "section": "6 Use a Unified Logging System" }, { "key": "Scholl2019", "section": "6 Common and Structured Logging Format" }, { "key": "Richardson2019", "section": "11.3.2 Applying the Log aggregation pattern" }, { "key": "Reznik2019", "section": "10 Observability" }, { "key": "Garrison2017", "section": "7 Monitoring and Logging" }, { "key": "Adkins2020", "section": "15 Design your logging to be immutable" }, { "key": "Arundel2019", "section": "15 Logging" }, { "key": "Bastani2017", "section": "13 Application Logging" }, { "key": "Bastani2017", "section": "13 Audit Events (capture events for audits, like failed logins etc)" }, { "key": "Ruecker2021", "section": "11 Custom Centralized Monitoring" }, { "key": "Goniwada2021", "section": "19 One Source of Truth" }],
         "measures": ["ratioOfComponentsOrInfrastructureNodesThatExportLogsToACentralService"],
-        "evaluations": []
+        "evaluations": [{
+            "targetEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.SYSTEM],
+            "evaluation": "consistentCentralizedLogging",
+            "reasoning": "The factor is fullfilled, if services export logs to a logging service. This is checked by the ratio of components or infrastructure that export logs to a central service."
+        }]
     },
     "consistentCentralizedMetrics": {
         "name": "Consistent centralized metrics",
         "description": "Metrics gathering and calculation functionality for monitoring purposes is concentrated in a centralized component which combines, aggregates and stores metrics from the components of a system. The metrics are kept consistent regarding their format and support multiple levels of granularity. In the backing service also metric analysis functionalities are provided, for example by also enabling correlations of metrics.",
         "categories": ["applicationAdministration", "businessDomain"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.BACKING_DATA, ENTITIES.BACKING_SERVICE, ENTITIES.LINK],
-        "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.SYSTEM],
         "sources": [{ "key": "Davis2019", "section": "11.2" }, { "key": "Scholl2019", "section": "6 Tag Your Metrics Appropriately" }, { "key": "Richardson2019", "section": "11.3.4 Applying the Applications metrics pattern" }, { "key": "Garrison2017", "section": "7 Monitoring and Logging, Metrics Aggregation" }, { "key": "Reznik2019", "section": "10 Observability" }, { "key": "Arundel2019", "section": "15 Metrics help predict problems" }, { "key": "Arundel2019", "section": "15 Logging" }, { "key": "Bastani2017", "section": "13 Metrics" }, { "key": "Arundel2019", "section": "16 The RED Pattern (common metrics you should have for services" }, { "key": "Arundel2019", "section": "16 The USE Pattern (common metrics for resources" }, { "key": "Goniwada2021", "section": "19 One Source of Truth" }],
         "measures": ["ratioOfComponentsOrInfrastructureNodesThatExportMetrics", "ratioOfComponentsOrInfrastructureNodesThatEnablePerformanceAnalytics"],
-        "evaluations": []
+        "evaluations": [{
+            "targetEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.SYSTEM],
+            "evaluation": "consistentCentralizedMetrics",
+            "reasoning": "The factor is fullfilled, if services export metrics to a metrics service. This is checked by the ratio of components or infrastructure that export metrics to a central service."
+        }]
     },
     "distributedTracingOfInvocations": {
         "name": "Distributed tracing of invocations",
@@ -668,7 +682,11 @@ const productFactors = {
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE],
         "sources": [{ "key": "Reznik2019", "section": "10 Automated Infrastructure" }, { "key": "Goniwada2021", "section": "5 Automation" }],
         "measures": ["ratioOfAutomaticallyProvisionedInfrastructure"],
-        "evaluations": []
+        "evaluations": [{
+            "targetEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE],
+            "evaluation": "automatedInfrastructureProvisioning",
+            "reasoning": "The higher the number of infrastructure entites that are provisioned automatically, the more this factor is fulfilled."
+        }]
     },
     "useInfrastructureAsCode": {
         "name": "Use infrastructure as code",
@@ -678,17 +696,25 @@ const productFactors = {
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE],
         "sources": [{ "key": "Scholl2019", "section": "6 Describe Infrastructure Using Code" }, { "key": "Goniwada2021", "section": "16 Declarative Deployment, 17 What Is Infrastructure as Code?" }],
         "measures": ["linesOfCodeForDeploymentConfiguration", "ratioOfInfrastructureWithIaCArtifact"],
-        "evaluations": []
+        "evaluations": [{
+            "targetEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE],
+            "evaluation": "useInfrastructureAsCode",
+            "reasoning": "The higher the number of infrastructure entites that include an IaC (Infrastructure as Code) artifact, the more this factor is fulfilled."
+        }]
     },
     "dynamicScheduling": {
         "name": "Dynamic scheduling",
         "description": "Resource provisioning to deployed components is dynamic and automated so that every component is ensured to have the resources it needs and only that many resources are provisioned wich are really needed at the same time. This requires dynamic adjustments to resources to adapt to changing environments. This capability should be part of the used infrastructure.",
         "categories": ["applicationAdministration", "cloudInfrastructure"],
         "relevantEntities": [ENTITIES.INFRASTRUCTURE],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Reznik2019", "section": "10 Dynamic Scheduling" }, { "key": "Garrison2017", "section": "7 Resource Allocation and Scheduling" }, { "key": "Ibryam2020", "section": "6 Automated Placement" }, { "key": "Indrasiri2021", "section": "1 Why container orchestration?; Resource Management" }, { "key": "Indrasiri2021", "section": "1 Why container orchestration?; Automatic provisioning" }, { "key": "Goniwada2021", "section": "16 Automated Placement" }],
         "measures": ["ratioOfDeploymentsOnDynamicInfrastructure"],
-        "evaluations": []
+        "evaluations": [{
+            "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
+            "evaluation": "dynamicScheduling",
+            "reasoning": "The higher the number of deployment mappings on a platform or cloud service, the more this factor is fulfilled."
+        }]
     },
     "serviceIndependence": {
         "name": "Service independence",
@@ -1469,13 +1495,13 @@ const measures = {
         "name": "Ratio of Components or Infrastructure nodes that export logs to a central service",
         "calculation": "Number of Components or Infrastrcture Entities exporting logs to a central service / Total number of Components and Infrastructure entities",
         "sources": ["Ntentos2022"],
-        "applicableEntities": [ENTITIES.SYSTEM],
+        "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.SYSTEM],
     },
     "ratioOfComponentsOrInfrastructureNodesThatExportMetrics": {
         "name": "Ratio of Components or Infrastructure nodes that export metrics",
         "calculation": "Number of Components or Infrastructure Entities exporting metrics to a central service / Total number of Components and Infrastructure entities",
         "sources": ["Ntentos2022"],
-        "applicableEntities": [ENTITIES.SYSTEM],
+        "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.SYSTEM],
     },
     "ratioOfComponentsOrInfrastructureNodesThatEnablePerformanceAnalytics": {
         "name": "Ratio of Components or Infrastructure nodes that enable Performance Analytics",

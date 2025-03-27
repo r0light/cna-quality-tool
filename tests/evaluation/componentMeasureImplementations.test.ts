@@ -2166,3 +2166,65 @@ test("distributedTracingSupport", () => {
     let measureValue = componentMeasureImplementations["distributedTracingSupport"]({ entity: serviceA, system: system });
     expect(measureValue).toEqual(1);
 })
+
+
+test("ratioOfComponentsOrInfrastructureNodesThatExportLogsToACentralService", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let loggingService = new BackingService("bl1", "logging service", getEmptyMetaData());
+    loggingService.setPropertyValue("providedFunctionality", "logging");
+    let loggingEndpoint = new Endpoint("e1", "logging endpoint", getEmptyMetaData());
+    loggingService.addEndpoint(loggingEndpoint);
+
+    let serviceA = new Service("s1", "testService 1", getEmptyMetaData());
+    let metricsA = new BackingData("m1", "metrics 1", getEmptyMetaData());
+    metricsA.setPropertyValue("kind", "metrics");
+    let relationAtoMA = new RelationToBackingData("r1", getEmptyMetaData());
+    relationAtoMA.setPropertyValue("usage_relation", "persistence");
+    serviceA.addBackingDataEntity(metricsA, relationAtoMA);
+    let logsA = new BackingData("l1", "logs 1", getEmptyMetaData());
+    logsA.setPropertyValue("kind", "logs");
+    let relationAtoLA = new RelationToBackingData("r2", getEmptyMetaData());
+    relationAtoLA.setPropertyValue("usage_relation", "usage");
+    serviceA.addBackingDataEntity(logsA, relationAtoLA);
+    let relationLStoLA = new RelationToBackingData("r3", getEmptyMetaData());
+    relationLStoLA.setPropertyValue("usage_relation", "persistence");
+    loggingService.addBackingDataEntity(logsA, relationLStoLA);
+
+
+    let linkALS = new Link("link1", serviceA, loggingEndpoint);
+
+
+    system.addEntities([loggingService, serviceA]);
+    system.addEntities([linkALS]);
+
+    let measureValue = componentMeasureImplementations["ratioOfComponentsOrInfrastructureNodesThatExportLogsToACentralService"]({ entity: serviceA, system: system });
+    expect(measureValue).toEqual(1);
+})
+
+test("ratioOfComponentsOrInfrastructureNodesThatExportMetrics", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let metricsService = new BackingService("bl1", "metrics service", getEmptyMetaData());
+    metricsService.setPropertyValue("providedFunctionality", "metrics");
+    let metricsEndpoint = new Endpoint("e1", "metrics endpoint", getEmptyMetaData());
+    metricsService.addEndpoint(metricsEndpoint);
+
+    let serviceA = new Service("s1", "testService 1", getEmptyMetaData());
+    let metricsA = new BackingData("m1", "metrics 1", getEmptyMetaData());
+    metricsA.setPropertyValue("kind", "metrics");
+    let relationAtoMA = new RelationToBackingData("r1", getEmptyMetaData());
+    relationAtoMA.setPropertyValue("usage_relation", "usage");
+    serviceA.addBackingDataEntity(metricsA, relationAtoMA);
+    let relationMStoMA = new RelationToBackingData("r2", getEmptyMetaData());
+    relationMStoMA.setPropertyValue("usage_relation", "persistence");
+    metricsService.addBackingDataEntity(metricsA, relationMStoMA);
+
+    let linkAMS = new Link("link1", serviceA, metricsEndpoint);
+
+    system.addEntities([metricsService, serviceA]);
+    system.addEntities([linkAMS]);
+
+    let measureValue = componentMeasureImplementations["ratioOfComponentsOrInfrastructureNodesThatExportMetrics"]({ entity: serviceA, system: system });
+    expect(measureValue).toEqual(1);
+})

@@ -1,6 +1,6 @@
 import { Artifact, getArtifactTypeProperties } from "@/core/common/artifact";
 import { getEmptyMetaData } from "@/core/common/entityDataTypes";
-import { BackingData, BackingService, DeploymentMapping, Infrastructure, Service, System } from "@/core/entities";
+import { BackingData, BackingService, DeploymentMapping, Endpoint, Infrastructure, Service, System } from "@/core/entities";
 import { RelationToBackingData } from "@/core/entities/relationToBackingData";
 import { infrastructureMeasureImplementations } from "@/core/qualitymodel/evaluation/measure-implementations/infrastructureMeasures";
 import { getQualityModel } from "@/core/qualitymodel/QualityModelInstance";
@@ -479,4 +479,60 @@ test("secretsStoredInVault", () => {
 
     let measureValue = infrastructureMeasureImplementations["secretsStoredInVault"]({ entity: infrastructureA, system: system });
     expect(measureValue).toEqual(0.5);
+})
+
+test("ratioOfComponentsOrInfrastructureNodesThatExportLogsToACentralService", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let loggingService = new BackingService("bl1", "logging service", getEmptyMetaData());
+    loggingService.setPropertyValue("providedFunctionality", "logging");
+    let loggingEndpoint = new Endpoint("e1", "logging endpoint", getEmptyMetaData());
+    loggingService.addEndpoint(loggingEndpoint);
+
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    let metricsIA = new BackingData("m2", "metrics 2", getEmptyMetaData());
+    metricsIA.setPropertyValue("kind", "metrics");
+    let relationIAtoMIA = new RelationToBackingData("r7", getEmptyMetaData());
+    relationIAtoMIA.setPropertyValue("usage_relation", "persistence");
+    infrastructureA.addBackingDataEntity(metricsIA, relationIAtoMIA);
+    let logsIA = new BackingData("l4", "logs 4", getEmptyMetaData());
+    logsIA.setPropertyValue("kind", "logs");
+    let relationIAtoLIA = new RelationToBackingData("r8", getEmptyMetaData());
+    relationIAtoLIA.setPropertyValue("usage_relation", "usage");
+    infrastructureA.addBackingDataEntity(logsIA, relationIAtoLIA);
+    let relationLStoLIA = new RelationToBackingData("r9", getEmptyMetaData());
+    relationLStoLIA.setPropertyValue("usage_relation", "persistence");
+    loggingService.addBackingDataEntity(logsIA, relationLStoLIA);
+
+    system.addEntities([loggingService]);
+    system.addEntities([infrastructureA]);
+
+    let measureValue = infrastructureMeasureImplementations["ratioOfComponentsOrInfrastructureNodesThatExportLogsToACentralService"]({ entity: infrastructureA, system: system });
+    expect(measureValue).toEqual(1);
+})
+
+test("ratioOfComponentsOrInfrastructureNodesThatExportMetrics", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let metricsService = new BackingService("bl1", "metrics service", getEmptyMetaData());
+    metricsService.setPropertyValue("providedFunctionality", "metrics");
+    let metricsEndpoint = new Endpoint("e1", "metrics endpoint", getEmptyMetaData());
+    metricsService.addEndpoint(metricsEndpoint);
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    let metricsIA = new BackingData("m4", "metrics 4", getEmptyMetaData());
+    metricsIA.setPropertyValue("kind", "metrics");
+    let relationIAtoMIA = new RelationToBackingData("r6", getEmptyMetaData());
+    relationIAtoMIA.setPropertyValue("usage_relation", "usage");
+    infrastructureA.addBackingDataEntity(metricsIA, relationIAtoMIA);
+    let relationMStoMIA = new RelationToBackingData("r7", getEmptyMetaData());
+    relationMStoMIA.setPropertyValue("usage_relation", "persistence");
+    metricsService.addBackingDataEntity(metricsIA, relationMStoMIA);
+
+    system.addEntities([metricsService]);
+    system.addEntities([infrastructureA]);
+
+    let measureValue = infrastructureMeasureImplementations["ratioOfComponentsOrInfrastructureNodesThatExportMetrics"]({ entity: infrastructureA, system: system });
+    expect(measureValue).toEqual(1);
 })

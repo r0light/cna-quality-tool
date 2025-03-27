@@ -1037,7 +1037,7 @@ export const deploymentsWithRestart: Calculation = (parameters: CalculationParam
         return "n/a";
     }
 
-    let automatedRestart = relevantDeploymentMappings.filter(([deploymentMappingId, deploymentMapping]) =>         AUTOMATED_RESTART_POLICIES.includes(deploymentMapping.getProperty("automated_restart_policy").value));
+    let automatedRestart = relevantDeploymentMappings.filter(([deploymentMappingId, deploymentMapping]) => AUTOMATED_RESTART_POLICIES.includes(deploymentMapping.getProperty("automated_restart_policy").value));
 
     return automatedRestart.length / relevantDeploymentMappings.length;
 }
@@ -1114,8 +1114,8 @@ export const endpointAccessConsistency: Calculation = (parameters: CalculationPa
 
     let pairwiseSimilarity = [];
 
-    for ( const [index, endpointA] of endpointsWithAccessControl.entries()) {
-        for (const endpointB of endpointsWithAccessControl.slice(index+1)) {
+    for (const [index, endpointA] of endpointsWithAccessControl.entries()) {
+        for (const endpointB of endpointsWithAccessControl.slice(index + 1)) {
             let setA = new Set(endpointA.getProperty("supported_authentication_methods").value);
             let setB = new Set(endpointB.getProperty("supported_authentication_methods").value);
 
@@ -1143,8 +1143,8 @@ export const externalEndpointAccessConsistency: Calculation = (parameters: Calcu
 
     let pairwiseSimilarity = [];
 
-    for ( const [index, endpointA] of endpointsWithAccessControl.entries()) {
-        for (const endpointB of endpointsWithAccessControl.slice(index+1)) {
+    for (const [index, endpointA] of endpointsWithAccessControl.entries()) {
+        for (const endpointB of endpointsWithAccessControl.slice(index + 1)) {
             let setA = new Set(endpointA.getProperty("supported_authentication_methods").value);
             let setB = new Set(endpointB.getProperty("supported_authentication_methods").value);
 
@@ -1162,9 +1162,9 @@ export const externalEndpointAccessConsistency: Calculation = (parameters: Calcu
 
 export const readWriteSeparationForDataAggregates: Calculation = (parameters: CalculationParameters<Component>) => {
     // initialize map to track data aggregate usage
-    let dataAggregateUsage = new Map<string, {"read": boolean, "write": boolean}>();
+    let dataAggregateUsage = new Map<string, { "read": boolean, "write": boolean }>();
     parameters.entity.getDataAggregateEntities.forEach(dataAggregate => {
-        dataAggregateUsage.set(dataAggregate.data.getId, {"read": false, "write": false});
+        dataAggregateUsage.set(dataAggregate.data.getId, { "read": false, "write": false });
     })
 
     let allComponentEndpoints = parameters.entity.getEndpointEntities.concat(parameters.entity.getExternalEndpointEntities);
@@ -1177,7 +1177,7 @@ export const readWriteSeparationForDataAggregates: Calculation = (parameters: Ca
         for (const usageRelation of endpoint.getDataAggregateEntities) {
             if (endpoint.getProperty("kind").value === "query") {
                 dataAggregateUsage.get(usageRelation.data.getId).read = true;
-            } else  if (endpoint.getProperty("kind").value === "command") {
+            } else if (endpoint.getProperty("kind").value === "command") {
                 dataAggregateUsage.get(usageRelation.data.getId).write = true;
             }
         }
@@ -1250,6 +1250,134 @@ export const distributedTracingSupport: Calculation = (parameters: CalculationPa
 
     return tracingServiceIncluded ? 1 : 0;
 }
+
+export const ratioOfComponentsOrInfrastructureNodesThatExportLogsToACentralService: Calculation = (parameters: CalculationParameters<Component>) => {
+
+    if (parameters.entity.constructor.name === BackingService.name && parameters.entity.getProperty("providedFunctionality").value === "logging") {
+        return "n/a";
+    }
+
+    let loggingComponents = [...parameters.system.getComponentEntities.entries()].filter(([componentId, component]) => {
+        return component.constructor.name === BackingService.name && component.getProperty("providedFunctionality").value === "logging";
+    })
+
+    if (loggingComponents.length === 0) {
+        return 0;
+    }
+
+    let connectionsToLoggingService: {
+        loggingService: string,
+        mode: "push" | "pull"
+    }[] = [];
+    let loggingComponentIds = loggingComponents.map(([componentId, component]) => componentId);
+    for (const link of parameters.system.getOutgoingLinksOfComponent(parameters.entity.getId)) {
+        let targetService = parameters.system.searchComponentOfEndpoint(link.getTargetEndpoint.getId);
+        // case 1: component sends to a logging service
+        if (loggingComponentIds.includes(targetService.getId)) {
+            connectionsToLoggingService.push({
+                loggingService: targetService.getId,
+                mode: "push"
+            })
+        }
+    }
+
+    for (const link of parameters.system.getIncomingLinksOfComponent(parameters.entity.getId)) {
+        // case 2: logging service scrapes logs from component
+        if (loggingComponentIds.includes(link.getSourceEntity.getId)) {
+            connectionsToLoggingService.push({
+                loggingService: link.getSourceEntity.getId,
+                mode: "pull"
+            })
+        }
+    }
+
+    let loggingData: string[] = parameters.entity.getBackingDataEntities.filter(backingData => {
+        return backingData.backingData.getProperty("kind").value === BACKING_DATA_LOGS_KIND && DATA_USAGE_RELATION_USAGE.includes(backingData.relation.getProperty("usage_relation").value)
+    }).map(backingData => backingData.backingData.getId);
+
+    let componentExportsLoggingData = false;
+    logDataLoop: for (const logData of loggingData) {
+        for (const loggingConnection of connectionsToLoggingService) {
+            let loggingService = parameters.system.getComponentEntities.get(loggingConnection.loggingService);
+            let dataStoredByLoggingService = loggingService.getBackingDataEntities.find(backingData => backingData.backingData.getId === logData);
+            if (dataStoredByLoggingService && DATA_USAGE_RELATION_PERSISTENCE.includes(dataStoredByLoggingService.relation.getProperty("usage_relation").value)) {
+                componentExportsLoggingData = true;
+                continue logDataLoop;
+            }
+
+        }
+    }
+    if (componentExportsLoggingData) {
+        return 1;
+    }
+
+    return 0;
+}
+
+
+export const ratioOfComponentsOrInfrastructureNodesThatExportMetrics: Calculation = (parameters: CalculationParameters<Component>) => {
+
+    if (parameters.entity.constructor.name === BackingService.name && parameters.entity.getProperty("providedFunctionality").value === "metrics") {
+        return "n/a";
+    }
+
+    let metricComponents = [...parameters.system.getComponentEntities.entries()].filter(([componentId, component]) => {
+        return component.constructor.name === BackingService.name && component.getProperty("providedFunctionality").value === "metrics";
+    })
+
+    if (metricComponents.length === 0) {
+        return 0;
+    }
+
+    let connectionsToMetricsService: {
+        metricsService: string,
+        mode: "push" | "pull"
+    }[] = [];
+    let metricComponentIds = metricComponents.map(([componentId, component]) => componentId);
+    for (const link of parameters.system.getOutgoingLinksOfComponent(parameters.entity.getId)) {
+        let targetService = parameters.system.searchComponentOfEndpoint(link.getTargetEndpoint.getId);
+        // case 1: component sends to a metrics service
+        if (metricComponentIds.includes(targetService.getId)) {
+            connectionsToMetricsService.push({
+                metricsService: targetService.getId,
+                mode: "push"
+            })
+        }
+    }
+
+    for (const link of parameters.system.getIncomingLinksOfComponent(parameters.entity.getId)) {
+        // case 2: metrics service scrapes logs from component
+        if (metricComponentIds.includes(link.getSourceEntity.getId)) {
+            connectionsToMetricsService.push({
+                metricsService: link.getSourceEntity.getId,
+                mode: "pull"
+            })
+        }
+    }
+
+    let metricData: string[] = parameters.entity.getBackingDataEntities.filter(backingData => {
+        return backingData.backingData.getProperty("kind").value === BACKING_DATA_METRICS_KIND && DATA_USAGE_RELATION_USAGE.includes(backingData.relation.getProperty("usage_relation").value)
+    }).map(backingData => backingData.backingData.getId);
+
+    let componentExportsMetrics = false;
+    metricsDataLoop: for (const metrics of metricData) {
+        for (const metricsConnection of connectionsToMetricsService) {
+            let metricsService = parameters.system.getComponentEntities.get(metricsConnection.metricsService);
+            let dataStoredByMetricsService = metricsService.getBackingDataEntities.find(backingData => backingData.backingData.getId === metrics);
+            if (dataStoredByMetricsService && DATA_USAGE_RELATION_PERSISTENCE.includes(dataStoredByMetricsService.relation.getProperty("usage_relation").value)) {
+                componentExportsMetrics = true;
+                continue metricsDataLoop;
+            }
+
+        }
+    }
+    if (componentExportsMetrics) {
+        return 1;
+    }
+
+    return 0;
+}
+
 
 export const componentMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
@@ -1325,6 +1453,8 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "readWriteSeparationForDataAggregates": readWriteSeparationForDataAggregates,
     "ratioOfServicesThatProvideHealthEndpoints": ratioOfServicesThatProvideHealthEndpoints,
     "degreeOfSeparationByGateways": degreeOfSeparationByGateways,
-    "distributedTracingSupport": distributedTracingSupport
+    "distributedTracingSupport": distributedTracingSupport,
+    "ratioOfComponentsOrInfrastructureNodesThatExportLogsToACentralService": ratioOfComponentsOrInfrastructureNodesThatExportLogsToACentralService,
+    "ratioOfComponentsOrInfrastructureNodesThatExportMetrics": ratioOfComponentsOrInfrastructureNodesThatExportMetrics
 }
 

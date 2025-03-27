@@ -155,7 +155,7 @@ export const ratioOfAutomaticallyProvisionedInfrastructure: Calculation = (param
 }
 
 export const ratioOfInfrastructureWithIaCArtifact: Calculation = (parameters: CalculationParameters<Infrastructure>) => {
-    
+
     let artifacts = parameters.entity.getArtifacts;
 
     if (artifacts.size === 0) {
@@ -170,7 +170,7 @@ export const ratioOfInfrastructureWithIaCArtifact: Calculation = (parameters: Ca
 export const ratioOfFullyManagedInfrastructure: Calculation = (parameters: CalculationParameters<Infrastructure>) => {
 
     return MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS.includes(parameters.entity.getProperty("environment_access").value) &&
-            MANAGED_INFRASTRUCTURE_MAINTENANCE.includes(parameters.entity.getProperty("maintenance").value) ? 1 : 0;
+        MANAGED_INFRASTRUCTURE_MAINTENANCE.includes(parameters.entity.getProperty("maintenance").value) ? 1 : 0;
 }
 
 export const ratioOfInfrastructureEnforcingResourceBoundaries: Calculation = (parameters: CalculationParameters<Infrastructure>) => {
@@ -265,7 +265,7 @@ export const deploymentsWithRestart: Calculation = (parameters: CalculationParam
         return "n/a";
     }
 
-    let automatedRestart = relevantDeploymentMappings.filter(([deploymentMappingId, deploymentMapping]) =>         AUTOMATED_RESTART_POLICIES.includes(deploymentMapping.getProperty("automated_restart_policy").value));
+    let automatedRestart = relevantDeploymentMappings.filter(([deploymentMappingId, deploymentMapping]) => AUTOMATED_RESTART_POLICIES.includes(deploymentMapping.getProperty("automated_restart_policy").value));
 
     return automatedRestart.length / relevantDeploymentMappings.length;
 }
@@ -304,6 +304,65 @@ export const secretsStoredInVault: Calculation = (parameters: CalculationParamet
     return (secretsInVault.size / referencedSecrets.length);
 }
 
+export const ratioOfComponentsOrInfrastructureNodesThatExportLogsToACentralService: Calculation = (parameters: CalculationParameters<Infrastructure>) => {
+    let loggingComponents = [...parameters.system.getComponentEntities.entries()].filter(([componentId, component]) => {
+        return component.constructor.name === BackingService.name && component.getProperty("providedFunctionality").value === "logging";
+    })
+
+    if (loggingComponents.length === 0) {
+        return 0;
+    }
+
+    let loggingData: string[] = parameters.entity.getBackingDataEntities.filter(backingData => {
+        return backingData.backingData.getProperty("kind").value === BACKING_DATA_LOGS_KIND && DATA_USAGE_RELATION_USAGE.includes(backingData.relation.getProperty("usage_relation").value)
+    }).map(backingData => backingData.backingData.getId);
+
+    let infrastructureExportsLoggingData = false;
+    for (const [loggingServiceId, loggingService] of loggingComponents) {
+        let loggingDataAlsoInLoggingService = loggingService.getBackingDataEntities.find(backingData => {
+            return loggingData.includes(backingData.backingData.getId)
+        });
+        if (loggingDataAlsoInLoggingService && DATA_USAGE_RELATION_PERSISTENCE.includes(loggingDataAlsoInLoggingService.relation.getProperty("usage_relation").value)) {
+            infrastructureExportsLoggingData = true;
+        }
+    }
+    if (infrastructureExportsLoggingData) {
+        return 1;
+    }
+
+    return 0;
+}
+
+export const ratioOfComponentsOrInfrastructureNodesThatExportMetrics: Calculation = (parameters: CalculationParameters<Infrastructure>) => {
+    let metricComponents = [...parameters.system.getComponentEntities.entries()].filter(([componentId, component]) => {
+        return component.constructor.name === BackingService.name && component.getProperty("providedFunctionality").value === "metrics";
+    })
+
+    if (metricComponents.length === 0) {
+        return 0;
+    }
+
+    let metricData: string[] = parameters.entity.getBackingDataEntities.filter(backingData => {
+        return backingData.backingData.getProperty("kind").value === BACKING_DATA_METRICS_KIND && DATA_USAGE_RELATION_USAGE.includes(backingData.relation.getProperty("usage_relation").value)
+    }).map(backingData => backingData.backingData.getId);
+
+    let infrastructureExportsMetrics = false;
+    for (const [metricServiceId, metricService] of metricComponents) {
+        let metricsAlsoInMetricsService = metricService.getBackingDataEntities.find(backingData => {
+            return metricData.includes(backingData.backingData.getId)
+        });
+        if (metricsAlsoInMetricsService && DATA_USAGE_RELATION_PERSISTENCE.includes(metricsAlsoInMetricsService.relation.getProperty("usage_relation").value)) {
+            infrastructureExportsMetrics = true;
+        }
+    }
+    if (infrastructureExportsMetrics) {
+        return 1;
+    }
+
+    return 0;
+}
+
+
 export const infrastructureMeasureImplementations: { [measureKey: string]: Calculation } = {
     "numberOfServiceHostedOnOneInfrastructure": numberOfServiceHostedOnOneInfrastructure,
     "numberOfAvailabilityZonesUsed": numberOfAvailabilityZonesUsed,
@@ -324,5 +383,7 @@ export const infrastructureMeasureImplementations: { [measureKey: string]: Calcu
     "replacingDeployments": replacingDeployments,
     "ratioOfAutomaticallyMaintainedInfrastructure": ratioOfAutomaticallyMaintainedInfrastructure,
     "deploymentsWithRestart": deploymentsWithRestart,
-    "secretsStoredInVault": secretsStoredInVault
+    "secretsStoredInVault": secretsStoredInVault,
+    "ratioOfComponentsOrInfrastructureNodesThatExportLogsToACentralService": ratioOfComponentsOrInfrastructureNodesThatExportLogsToACentralService,
+    "ratioOfComponentsOrInfrastructureNodesThatExportMetrics": ratioOfComponentsOrInfrastructureNodesThatExportMetrics
 }
