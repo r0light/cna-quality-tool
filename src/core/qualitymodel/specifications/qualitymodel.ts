@@ -751,10 +751,14 @@ const productFactors = {
         "description": "Business functionality is decentralized over the system as a whole to separate unrelated functionalities from each other and make components more independent.",
         "categories": ["businessDomain"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.LINK, ENTITIES.ENDPOINT, ENTITIES.REQUEST_TRACE],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.SYSTEM],
         "sources": [],
-        "measures": ["conceptualModularityQualityBasedOnDataAggregateCohesionAndCoupling", "cyclicCommunication", "numberOfSynchronousCycles", "relativeImportanceOfTheService", "extentOfAggregationComponents", "systemCentralization", "densityOfAggregation", "aggregatorCentralization", "dataAggregateConvergenceAcrossComponents", "serviceCriticality", "ratioOfCyclicRequestTraces", "numberOfPotentialCyclesInASystem"],
-        "evaluations": []
+        "measures": ["conceptualModularityQualityBasedOnDataAggregateCohesionAndCoupling", "cyclicCommunication", "numberOfSynchronousCycles", "relativeImportanceOfTheService", "extentOfAggregationComponents", "systemCentralization", "densityOfAggregation", "aggregatorCentralization", "dataAggregateConvergenceAcrossComponents", "serviceCriticality", "ratioOfCyclicRequestTraces", "numberOfPotentialCyclesInASystem", "dataAggregateSpread", "requestTraceSimilarityBasedOnIncludedComponents"],
+        "evaluations": [{
+            "targetEntities": [ENTITIES.SYSTEM],
+            "evaluation": "functionalDecentralization",
+            "reasoning": "Evaluation is based on Data Aggregate Spread and Request trace simiarlity. If both measures are available, they equally contribute to the evaluation. If only on measure is available, only this is used."
+        }]
     },
     "limitedRequestTraceScope": {
         "name": "Limited request trace scope",
@@ -2398,6 +2402,18 @@ const measures = {
         "calculation": "1 / (Number of services proxied by an API gateway / Number of API gateways)",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE]
+    },
+    "dataAggregateSpread": {
+        "name": "Data Aggregate Spread",
+        "calculation": "Average(Number of services using a data aggregate / Number of Services) for all data aggregates",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM]
+    },
+    "requestTraceSimilarityBasedOnIncludedComponents": {
+        "name": "Request Trace similarity based on included components",
+        "calculation": "Average(Number of services using a data aggregate / Number of Services) for all data aggregates",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM]
     }
 } satisfies { [measureKey: string]: MeasureSpec }
 

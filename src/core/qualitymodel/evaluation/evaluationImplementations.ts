@@ -487,6 +487,23 @@ const productFactorEvaluationImplementation: {
 
         return squareRootedNumericalMapping(inverseCoupling as number);
     },
+    "functionalDecentralization": (parameters) => {
+        let dataAggregateSpread = parameters.calculatedMeasures.get("dataAggregateSpread").value;
+        let requestTraceSimilarityBasedOnIncludedComponents = parameters.calculatedMeasures.get("requestTraceSimilarityBasedOnIncludedComponents").value;
+
+        if (dataAggregateSpread === "n/a") {
+            if (requestTraceSimilarityBasedOnIncludedComponents === "n/a") {
+                return "n/a";
+            }
+            return linearNumericalMapping(1 - (requestTraceSimilarityBasedOnIncludedComponents as number));
+        } else {
+            if (requestTraceSimilarityBasedOnIncludedComponents === "n/a") {
+                return linearNumericalMapping(1 - (dataAggregateSpread as number));
+            } else {
+                return linearNumericalMapping(average([1 - (dataAggregateSpread as number), 1 - (requestTraceSimilarityBasedOnIncludedComponents as number)]));
+            }
+        }
+    },
 };
 
 

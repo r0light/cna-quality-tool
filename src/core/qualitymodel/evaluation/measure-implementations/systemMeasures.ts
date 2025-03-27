@@ -3,7 +3,7 @@ import { Calculation, CalculationParameters, MeasureValue } from "../../quamoco/
 import { average, median, lowest, partition } from "./general-functions";
 import { ASYNCHRONOUS_ENDPOINT_KIND, AUTOMATED_INFRASTRUCTURE_MAINTENANCE, AUTOMATED_RESTART_POLICIES, AUTOMATED_SCALING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, CONFIG_SERVICE_KIND, CONTRACT_ARTIFACT_TYPE, CUSTOM_SOFTWARE_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, EVENT_SOURCING_KIND, getEndpointKindWeight, getUsageRelationWeight, IAC_ARTIFACT_TYPE, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MESSAGE_BROKER_KIND, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SEND_EVENT_ENDPOINT_KIND, SERVICE_MESH_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND, VAULT_KIND } from "../../specifications/featureModel";
 import { calculateRatioOfEndpointsSupportingSsl, calculateRatioOfExternalEndpointsSupportingTls, componentMeasureImplementations, numberOfAsynchronousEndpointsOfferedByAService, numberOfComponentsAComponentIsLinkedTo, numberOfSynchronousEndpointsOfferedByAService, providesHealthAndReadinessEndpoints, serviceCouplingBasedOnEndpointEntropy } from "./componentMeasures";
-import { numberOfCyclesInRequestTraces, requestTraceComplexity } from "./requestTraceMeasures";
+import { getIncludedComponents, numberOfCyclesInRequestTraces, requestTraceComplexity } from "./requestTraceMeasures";
 import { supportsMonitoring as infrastructureSupportsMonitoring, ratioOfAutomaticallyProvisionedInfrastructure as infrastructureProvisionedAutomatically, ratioOfFullyManagedInfrastructure as infrastructureIsFullyManaged, nonProviderSpecificInfrastructureArtifacts as infrastructureHasOnlyNonProviderSpecificArtifacts } from "./infrastructureMeasures";
 import { supportsMonitoring as componentSupportsMonitoring, nonProviderSpecificComponentArtifacts as componentHasOnlyNonProviderSpecificArtifacts } from "./componentMeasures";
 import { serviceMeshUsage as componentServiceMeshUsage, namespaceSeparation as componentNamespaceSeparation } from "./componentMeasures";
@@ -2563,6 +2563,69 @@ export const degreeOfSeparationByGateways: Calculation = (parameters: Calculatio
     return 1 / degreeOfSharing;
 }
 
+export const dataAggregateSpread: Calculation = (parameters: CalculationParameters<System>) => {
+
+    let allDataAggregates = parameters.entity.getDataAggregateEntities;
+
+    if (allDataAggregates.size === 0) {
+        return "n/a";
+    }
+
+    let allServices = parameters.system.getComponentEntities.entries().filter(([componentId, component]) => component.constructor.name === Service.name).toArray();
+
+    if (allServices.length === 0) {
+        return "n/a";
+    }
+
+    let dataAggregateUsage: Map<string, string[]> = new Map();
+    allDataAggregates.entries().forEach(([dataAggregateId, dataAggregate]) => dataAggregateUsage.set(dataAggregateId, []));
+
+    allServices.forEach(([serviceId, service]) => {
+        service.getDataAggregateEntities.forEach(dataAggregateRelation => {
+            dataAggregateUsage.get(dataAggregateRelation.data.getId).push(serviceId);
+        })
+    })
+
+    let dataAggregateSpread = dataAggregateUsage.entries().map(([dataAggregateId, usage]) => {
+        if (usage.length === 0) {
+            return 0;
+        }
+        return usage.length / allServices.length;
+    }).toArray();
+
+    return average(dataAggregateSpread);
+}
+
+export const requestTraceSimilarityBasedOnIncludedComponents: Calculation = (parameters: CalculationParameters<System>) => {
+    let allRequestTraces = parameters.entity.getRequestTraceEntities;
+
+    if (allRequestTraces.size === 0) {
+        return "n/a";
+    }
+
+    let requestTraceComponents: Map<string, string[]> = new Map();
+
+    allRequestTraces.entries().forEach(([requestTraceId, requestTrace]) => {
+        let includedComponentIds = getIncludedComponents(requestTrace, parameters.system).map(component => component.getId);
+        if (includedComponentIds.length > 0) {
+            requestTraceComponents.set(requestTraceId, includedComponentIds);
+        }
+    })
+
+    let requestTracesSimilarity = [];
+
+    let requestTraceComponentsAsArray = requestTraceComponents.values().toArray();
+    for (const [index, componentIdsA] of requestTraceComponentsAsArray.entries()) {
+        for (const componentIdsB of requestTraceComponentsAsArray.slice(index+1)) {
+            let setA = new Set(componentIdsA);
+            let setB = new Set(componentIdsB);
+
+            requestTracesSimilarity.push(setA.intersection(setB).size / setA.union(setB).size);
+        }
+    }
+    return average(requestTracesSimilarity);
+}
+
 
 export const systemMeasureImplementations: { [measureKey: string]: Calculation } = {
     "serviceReplicationLevel": serviceReplicationLevel,
@@ -2681,5 +2744,7 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation }
     "cohesionBetweenEndpointsBasedOnDataAggregateUsage": cohesionBetweenEndpointsBasedOnDataAggregateUsage,
     "serviceInterfaceUsageCohesion": serviceInterfaceUsageCohesion,
     "readWriteSeparationForDataAggregates": readWriteSeparationForDataAggregates,
-    "degreeOfSeparationByGateways": degreeOfSeparationByGateways
+    "degreeOfSeparationByGateways": degreeOfSeparationByGateways,
+    "dataAggregateSpread": dataAggregateSpread,
+    "requestTraceSimilarityBasedOnIncludedComponents": requestTraceSimilarityBasedOnIncludedComponents
 }

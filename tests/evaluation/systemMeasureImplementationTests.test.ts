@@ -3846,3 +3846,81 @@ test("degreeOfSeparationByGateways", () => {
 
     expect(measureValue).toEqual(0.5);
 })
+
+test("dataAggregateSpread", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let dataAggregateA = new DataAggregate("da1", "data aggregate 1", getEmptyMetaData());
+    let dataAggregateB = new DataAggregate("da2", "data aggregate 2", getEmptyMetaData());
+
+    let serviceX = new Service("s1", "serviceA", getEmptyMetaData());
+    let relationXA = new RelationToDataAggregate("dar1", getEmptyMetaData());
+    relationXA.setPropertyValue("usage_relation", "usage");
+    serviceX.addDataAggregateEntity(dataAggregateA, relationXA);
+    
+    let relationXB = new RelationToDataAggregate("dar2", getEmptyMetaData());
+    relationXB.setPropertyValue("usage_relation", "persistence");
+    serviceX.addDataAggregateEntity(dataAggregateB, relationXB);
+
+    let serviceY = new Service("s2", "serviceB", getEmptyMetaData());
+    let relationYB = new RelationToDataAggregate("dar3", getEmptyMetaData());
+    relationYB.setPropertyValue("usage_relation", "persistence");
+    serviceY.addDataAggregateEntity(dataAggregateB, relationYB);
+
+    system.addEntities([dataAggregateA, dataAggregateB])
+    system.addEntities([serviceX, serviceY]);
+
+    let measureValue = systemMeasureImplementations["dataAggregateSpread"]({ entity: system, system: system });
+    expect(measureValue).toEqual(0.75);
+})
+
+test("requestTraceSimilarityBasedOnIncludedComponents", () => {
+
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA);
+    serviceA.addEndpoint(externalEndpointA);
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+
+    let serviceD = new Service("s4", "testService", getEmptyMetaData());
+    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    serviceD.addEndpoint(endpointD);
+
+    let serviceE = new Service("s5", "testService", getEmptyMetaData());
+    let endpointE = new Endpoint("e5", "endpoint 5", getEmptyMetaData());
+    let externalEndpointE = new ExternalEndpoint("ex2", "external endpoint 2", getEmptyMetaData());
+    serviceE.addEndpoint(endpointE);
+    serviceE.addEndpoint(externalEndpointE);
+
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+    let linkBC = new Link("l2", serviceB, endpointC);
+    let linkCD = new Link("l3", serviceC, endpointD);
+    let linkEC = new Link("l4", serviceE, endpointC);
+
+
+    let requestTraceA = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
+    requestTraceA.setLinks = [[linkAB], [linkBC], [linkCD]];
+    requestTraceA.setExternalEndpoint = externalEndpointA;
+
+    let requestTraceB = new RequestTrace("rq2", "request trace 2", getEmptyMetaData());
+    requestTraceB.setLinks = [[linkEC], [linkCD]];
+    requestTraceB.setExternalEndpoint = externalEndpointE;
+
+    system.addEntities([serviceA, serviceB, serviceC, serviceD, serviceE]);
+    system.addEntities([linkAB, linkBC, linkCD, linkEC]);
+    system.addEntities([requestTraceA, requestTraceB]);
+
+    let measureValue = systemMeasureImplementations["requestTraceSimilarityBasedOnIncludedComponents"]({ entity: system, system: system });
+    expect(measureValue).toEqual(2/5);
+})
