@@ -724,7 +724,7 @@ test("numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfComponents
     system.addEntities([linkAB, linkBC, linkDB, linkDC]);
 
     let measureValue = componentMeasureImplementations["numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfComponents"]({ entity: serviceD, system: system });
-    expect(measureValue).toEqual(0.5);
+    expect(measureValue).toEqual(2/3);
 })
 
 test("cyclicCommunication cycle found", () => {

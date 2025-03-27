@@ -465,6 +465,28 @@ const productFactorEvaluationImplementation: {
         }
         return linearNumericalMapping(ratioOfDeploymentsOnDynamicInfrastructure as number);
     },
+    "lowCouplingForComponent": (parameters) => {
+        let numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfComponents = parameters.calculatedMeasures.get("numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfComponents").value;
+
+        if (numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfComponents === "n/a") {
+            return "n/a";
+        }
+
+        let inverseCoupling = 1 - (numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfComponents as number);
+
+        return linearNumericalMapping(inverseCoupling as number);
+    },
+    "lowCouplingForSystem": (parameters) => {
+        let degreeOfCouplingInASystem = parameters.calculatedMeasures.get("degreeOfCouplingInASystem").value;
+
+        if (degreeOfCouplingInASystem === "n/a") {
+            return "n/a";
+        }
+
+        let inverseCoupling = 1 - (degreeOfCouplingInASystem as number);
+
+        return squareRootedNumericalMapping(inverseCoupling as number);
+    },
 };
 
 

@@ -385,13 +385,13 @@ export const averageNumberOfDirectlyConnectedServices: Calculation = (parameters
 
 export const numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfComponents: Calculation = (parameters) => {
 
-    if (parameters.system.getComponentEntities.size === 0) {
+    if (parameters.system.getComponentEntities.size <= 1) {
         return "n/a";
     }
 
     let numberOfComponentsAComponentIsLinkedToValue = numberOfComponentsAComponentIsLinkedTo(parameters);
 
-    return (numberOfComponentsAComponentIsLinkedToValue as number) / parameters.system.getComponentEntities.size;
+    return (numberOfComponentsAComponentIsLinkedToValue as number) / (parameters.system.getComponentEntities.size - 1);
 
 }
 

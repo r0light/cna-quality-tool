@@ -734,7 +734,17 @@ const productFactors = {
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT],
         "sources": [],
         "measures": ["numberOfLinksPerComponent", "numberOfConsumedEndpoints", "incomingOutgoingRatioOfAComponent", "ratioOfOutgoingLinksOfAService", "couplingDegreeBasedOnPotentialCoupling", "interactionDensityBasedOnComponents", "interactionDensityBasedOnLinks", "serviceCouplingBasedOnEndpointEntropy", "systemCouplingBasedOnEndpointEntropy", "modularityQualityBasedOnCohesionAndCoupling", "combinedMetricForIndirectDependency", "servicesInterdependenceInTheSystem", "indirectInteractionDensity", "averageNumberOfDirectlyConnectedServices", "numberOfComponentsThatAreLinkedToAComponent", "numberOfComponentsAComponentIsLinkedTo", "numberOfLinksBetweenTwoServices", "aggregateSystemMetricToMeasureServiceCoupling", "numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfComponents", "degreeOfCouplingInASystem", "serviceCouplingBasedOnDataExchangeComplexity", "simpleDegreeOfCouplingInASystem", "directServiceSharing", "transitivelySharedServices", "ratioOfSharedNonExternalComponentsToNonExternalComponents", "ratioOfSharedDependenciesOfNonExternalComponentsToPossibleDependencies", "degreeOfDependenceOnOtherComponents", "averageSystemCoupling", "couplingOfServicesBasedOnUsedDataAggregates", "couplingOfServicesBasedServicesWhichCallThem", "couplingOfServicesBasedServicesWhichAreCalledByThem", "couplingOfServicesBasedOnAmountOfRequestTracesThatIncludeASpecificLink", "couplingOfServicesBasedTimesThatTheyOccurInTheSameRequestTrace"],
-        "evaluations": []
+        "evaluations": [
+            {
+            "targetEntities": [ENTITIES.COMPONENT],
+            "evaluation": "lowCouplingForComponent",
+            "reasoning": "Evaluation is based on the number of components a component is linked to relative to the total amount of components. The higher this metric is, the less this factor is fulfilled."
+        },
+        {
+            "targetEntities": [ENTITIES.SYSTEM],
+            "evaluation": "lowCouplingForSystem",
+            "reasoning": "Evaluation is based on the degree of coupling in the system. The higher this degree is, the less this factor is fulfilled."
+        }]
     },
     "functionalDecentralization": {
         "name": "Functional decentralization",
@@ -1637,7 +1647,7 @@ const measures = {
     },
     "numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfComponents": {
         "name": "Number of Components a component is linked to relative to the total amount of components",
-        "calculation": "Number of Components a component is linked to / Total Number of Components",
+        "calculation": "Number of Components a component is linked to / Total Number of other Components",
         "sources": ["Raj2021", "Raj2018", "Zhang2009"],
         "applicableEntities": [ENTITIES.COMPONENT],
     },
