@@ -1013,20 +1013,37 @@ const productFactors = {
         "description": "Horizontal up- and down-scaling of components is automated and built into the infrastructure on which components run. Horizontal scaling means that component instances are replicated when the load increases and components instances are removed when load decreases. This autoscaling is based on rules which can be configured according to system needs.",
         "categories": ["applicationAdministration", "cloudInfrastructure"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.DEPLOYMENT_MAPPING],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE],
         "sources": [{ "key": "Scholl2019", "section": "6 Use Platform Autoscaling Features" }, { "key": "Ibryam2020", "section": "24 Elastic Scale" }, { "key": "Bastani2017", "section": "13 Autoscaling" }, { "key": "Indrasiri2021", "section": "1 Why container orchestration?; Scaling" }, { "key": "Goniwada2021", "section": "5 Elasticity in Microservices" }],
         "measures": ["deployedEntitiesAutoscaling", "infrastructureAutoscaling"],
-        "evaluations": []
+        "evaluations": [
+            {
+                "targetEntities": [ENTITIES.INFRASTRUCTURE, ENTITIES.SYSTEM],
+                "evaluation": "built-InAutoscaling",
+                "reasoning": "The evaluation of this factor considers whether the used infrastructure can on the one hand automatically scale the components deployed on it and on the other hand whether it can scale itself."
+            },
+            {
+                "targetEntities": [ENTITIES.COMPONENT],
+                "evaluation": "built-InAutoscalingForComponent",
+                "reasoning": "For single components it is evaluated whether the infrastructure that it is deployed on supports autoscaling."
+            },
+        ]
     },
     "infrastructureAbstraction": {
         "name": "Infrastructure abstraction",
         "description": "The used infrastructure such as physical hardware, virtual hardware, or software platform is abstracted by clear boundaries to enable a clear differentiation of responsibilities for operating and managing infrastructure. For example, when a managed container orchestration system is used, the system is operable on that level of abstraction meaning that the API of the orchestration system is the boundary. Problems with underlying hardware or VMs are handled transparently by the provider.",
         "categories": ["applicationAdministration", "cloudInfrastructure"],
         "relevantEntities": [ENTITIES.INFRASTRUCTURE],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE],
         "sources": [{ "key": "Bastani2017", "section": "14 Service Brokers (make use of service brokers as an additional level of abstraction to automatically add or remove backing services)" }, { "key": "Goniwada2021", "section": "3 Location-Independent Principle" }],
         "measures": ["ratioOfAbstractedHardware"],
-        "evaluations": []
+        "evaluations": [
+            {
+                "targetEntities": [ENTITIES.INFRASTRUCTURE, ENTITIES.SYSTEM],
+                "evaluation": "infrastructureAbstraction",
+                "reasoning": "The evaluation of this factor considers whether the used infrastructure abstracts from underlying hardware. Thus components can be deployed on a platform without having to consider the underlying hardware."
+            },
+        ]
     },
     "cloudVendorAbstraction": {
         "name": "Cloud vendor abstraction",

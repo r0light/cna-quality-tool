@@ -356,7 +356,7 @@ const productFactorEvaluationImplementation: {
                 return linearNumericalMapping(serviceInteractionViaBackingService as number);
             } else {
                 return linearNumericalMapping(
-                    (serviceInteractionViaBackingService as number * 0.4) + 
+                    (serviceInteractionViaBackingService as number * 0.4) +
                     (eventSourcingUtilizationMetric as number * 0.6)
                 )
             }
@@ -632,7 +632,7 @@ const productFactorEvaluationImplementation: {
                 return linearNumericalMapping(average([ratioOfInfrastructureEnforcingResourceBoundaries as number, ratioOfDeploymentMappingsWithStatedResourceRequirements as number]));
             }
         }
-    }, 
+    },
     "enforcementOfAppropriateResourceBoundariesForComponents": (parameters) => {
         let ratioOfDeploymentMappingsWithStatedResourceRequirements = parameters.calculatedMeasures.get("ratioOfDeploymentMappingsWithStatedResourceRequirements").value;
 
@@ -650,7 +650,42 @@ const productFactorEvaluationImplementation: {
         }
 
         return linearNumericalMapping(ratioOfAutomaticallyMaintainedInfrastructure as number);
-    }
+    },
+    "built-InAutoscaling": (parameters) => {
+        let infrastructureAutoscaling = parameters.calculatedMeasures.get("infrastructureAutoscaling").value;
+        let deployedEntitiesAutoscaling = parameters.calculatedMeasures.get("deployedEntitiesAutoscaling").value;
+
+        if (infrastructureAutoscaling === "n/a") {
+            if (deployedEntitiesAutoscaling === "n/a") {
+                return "n/a";
+            }
+            return linearNumericalMapping(deployedEntitiesAutoscaling as number);
+        } else {
+            if (deployedEntitiesAutoscaling === "n/a") {
+                return linearNumericalMapping(infrastructureAutoscaling as number);
+            } else {
+                return linearNumericalMapping(average([infrastructureAutoscaling as number, deployedEntitiesAutoscaling as number]));
+            }
+        }
+    },
+    "built-InAutoscalingForComponent": (parameters) => {
+        let deployedEntitiesAutoscaling = parameters.calculatedMeasures.get("deployedEntitiesAutoscaling").value;
+
+        if (deployedEntitiesAutoscaling === "n/a") {
+            return "n/a";
+        }
+
+        return linearNumericalMapping(deployedEntitiesAutoscaling as number);
+    },
+    "infrastructureAbstraction": (parameters) => {
+        let ratioOfAbstractedHardware = parameters.calculatedMeasures.get("ratioOfAbstractedHardware").value;
+
+        if (ratioOfAbstractedHardware === "n/a") {
+            return "n/a";
+        }
+
+        return linearNumericalMapping(ratioOfAbstractedHardware as number);
+    },
 };
 
 
