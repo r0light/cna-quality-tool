@@ -2506,3 +2506,118 @@ test("serviceInteractionViaBackingService", () => {
     let measureValue = requestTraceMeasureImplementations["serviceInteractionViaBackingService"]({ entity: requestTrace, system: system });
     expect(measureValue).toEqual(1);
 })
+
+
+
+
+
+test("rollingUpdates", () => {
+    let system = new System("sys1", "testSystem");
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    let logData = new BackingData("bd1", "logging data 1", getEmptyMetaData());
+    logData.setPropertyValue("kind", BACKING_DATA_LOGS_KIND);
+    let metricsData = new BackingData("bd2", "metrics data 1", getEmptyMetaData());
+    metricsData.setPropertyValue("kind", BACKING_DATA_METRICS_KIND);
+    infrastructureA.addBackingDataEntity(logData, new RelationToBackingData("r1", getEmptyMetaData()));
+    infrastructureA.addBackingDataEntity(metricsData, new RelationToBackingData("r2", getEmptyMetaData()));
+    let infrastructureB = new Infrastructure("i2", "infratstructure 2", getEmptyMetaData());
+
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA);
+    serviceA.addEndpoint(externalEndpointA);
+    let deploymentMappingA = new DeploymentMapping("dm1", serviceA, infrastructureA);
+    deploymentMappingA.setPropertyValue("update_strategy", "replace");
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+    let deploymentMappingB = new DeploymentMapping("dm2", serviceB, infrastructureA);
+    deploymentMappingB.setPropertyValue("update_strategy", "blue-green");
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+    let deploymentMappingC = new DeploymentMapping("dm2", serviceC, infrastructureB);
+    deploymentMappingC.setPropertyValue("update_strategy", "rolling");
+
+    let serviceD = new Service("s4", "testService", getEmptyMetaData());
+    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    serviceD.addEndpoint(endpointD);
+    let deploymentMappingD = new DeploymentMapping("dm3", serviceD, infrastructureB);
+    deploymentMappingD.setPropertyValue("update_strategy", "blue-green");
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+    let linkBC = new Link("l2", serviceB, endpointC);
+    let linkCD = new Link("l3", serviceC, endpointD);
+
+    let requestTrace = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
+    requestTrace.setLinks = [[linkAB], [linkBC], [linkCD]];
+    requestTrace.setExternalEndpoint = externalEndpointA;
+
+
+    system.addEntities([logData, metricsData]);
+    system.addEntities([infrastructureA, infrastructureB]);
+    system.addEntities([serviceA, serviceB, serviceC, serviceD]);
+    system.addEntities([deploymentMappingA, deploymentMappingB, deploymentMappingC, deploymentMappingD]);
+    system.addEntities([linkAB, linkBC, linkCD]);
+    system.addEntity(requestTrace);
+
+    let measureValue = requestTraceMeasureImplementations["rollingUpdates"]({ entity: requestTrace, system: system });
+    expect(measureValue).toEqual(2/3);
+
+})
+
+
+test("ratioOfComponentsWhoseIngressIsProxied", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService 1", getEmptyMetaData());
+    let externalEndpointA = new ExternalEndpoint("ee1", "external endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(externalEndpointA);
+    let serviceB = new Service("s2", "testService 2", getEmptyMetaData());
+    let endpointB = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+    let serviceC = new Service("s3", "testService 3", getEmptyMetaData());
+    let externalEndpointC = new ExternalEndpoint("ee2", "external endpoint 2", getEmptyMetaData());
+    serviceC.addEndpoint(externalEndpointC);
+
+    let serviceD = new Service("s4", "testService 3", getEmptyMetaData());
+    let endpointD = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceD.addEndpoint(endpointD);
+
+    let storageBackingService = new StorageBackingService("sbs1", "storageBackingService", getEmptyMetaData());
+    let endpointSBS = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    storageBackingService.addEndpoint(endpointSBS);
+
+    let gatewayServiceA = new ProxyBackingService("p1", "proxy 1", getEmptyMetaData());
+    gatewayServiceA.setPropertyValue("kind", "API Gateway");
+
+    let serviceMesh = new ProxyBackingService("p2", "proxy ", getEmptyMetaData());
+    serviceMesh.setPropertyValue("kind", "Service Mesh");
+
+    serviceA.setIngressProxiedBy = serviceMesh;
+    serviceA.setExternalIngressProxiedBy = gatewayServiceA;
+
+    serviceB.setIngressProxiedBy = serviceMesh;
+
+    storageBackingService.setIngressProxiedBy = serviceMesh;
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+    let linkDC = new Link("l2", serviceB, endpointD);
+    let linkCSBS = new Link("l3", serviceD, endpointSBS);
+
+    let requestTrace = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
+    requestTrace.setLinks = [[linkAB], [linkDC], [linkCSBS]];
+    requestTrace.setExternalEndpoint = externalEndpointA;
+
+    system.addEntities([serviceA, serviceB, serviceC, serviceD, storageBackingService, gatewayServiceA, serviceMesh]);
+    system.addEntities([linkAB, linkDC, linkCSBS])
+    system.addEntity(requestTrace);
+
+    let measureValue = requestTraceMeasureImplementations["ratioOfComponentsWhoseIngressIsProxied"]({ entity: requestTrace, system: system });
+    expect(measureValue).toEqual(1/4);
+})

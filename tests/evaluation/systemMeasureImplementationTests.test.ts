@@ -4002,3 +4002,28 @@ test("dataShardingLevel", () => {
     let measureValue = systemMeasureImplementations["dataShardingLevel"]({ entity: system, system: system });
     expect(measureValue).toEqual(3.5);
 })
+
+test("rollingUpdates", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    let infrastructureB = new Infrastructure("i2", "infrastructure 2", getEmptyMetaData());
+
+    let deploymentMappingA = new DeploymentMapping("dm1", serviceA, infrastructureA);
+    deploymentMappingA.setPropertyValue("update_strategy", "replace");
+    let deploymentMappingB = new DeploymentMapping("dm2", serviceB, infrastructureA);
+    deploymentMappingB.setPropertyValue("update_strategy", "rolling");
+    let deploymentMappingC = new DeploymentMapping("dm3", serviceA, infrastructureB);
+    deploymentMappingC.setPropertyValue("update_strategy", "blue-green");
+
+
+    system.addEntities([serviceA, serviceB]);
+    system.addEntities([infrastructureA, infrastructureB]);
+    system.addEntities([deploymentMappingA, deploymentMappingB, deploymentMappingC]);
+
+    let measureValue = systemMeasureImplementations["rollingUpdates"]({ entity: system, system: system });
+    expect(measureValue).toEqual(2/3);
+})

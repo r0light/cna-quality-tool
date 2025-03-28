@@ -2216,7 +2216,7 @@ export const replacingDeployments: Calculation = (parameters: CalculationParamet
     let allDeploymentMappings = parameters.entity.getDeploymentMappingEntities;
 
     if (allDeploymentMappings.size === 0) {
-        return 0;
+        return "n/a";
     }
 
     let replacing = [];
@@ -2682,6 +2682,23 @@ export const averageStorageBackendSharing: Calculation = (parameters: Calculatio
     return average(storageSharing);
 }
 
+export const rollingUpdates: Calculation = (parameters: CalculationParameters<System>) => {
+    let allDeploymentMappings = parameters.entity.getDeploymentMappingEntities;
+
+    if (allDeploymentMappings.size === 0) {
+        return "n/a";
+    }
+
+    let rolling = [];
+
+    allDeploymentMappings.entries().forEach(([deploymentMappingId, deploymentMapping]) => {
+        if (ROLLING_UPDATE_STRATEGY_OPTIONS.includes(deploymentMapping.getProperty("update_strategy").value)) {
+            rolling.push(deploymentMappingId);
+        }
+    })
+
+    return rolling.length / allDeploymentMappings.size;
+}
 
 
 export const systemMeasureImplementations: { [measureKey: string]: Calculation } = {
@@ -2805,5 +2822,6 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation }
     "dataAggregateSpread": dataAggregateSpread,
     "requestTraceSimilarityBasedOnIncludedComponents": requestTraceSimilarityBasedOnIncludedComponents,
     "averageBrokerBackendSharing": averageBrokerBackendSharing,
-    "averageStorageBackendSharing": averageStorageBackendSharing
+    "averageStorageBackendSharing": averageStorageBackendSharing,
+    "rollingUpdates": rollingUpdates
 }

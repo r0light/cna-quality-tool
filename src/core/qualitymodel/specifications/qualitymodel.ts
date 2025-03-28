@@ -1219,7 +1219,13 @@ const productFactors = {
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
         "sources": [],
         "measures": [],
-        "evaluations": []
+        "evaluations": [            {
+            "targetEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+            "evaluation": "aggregateImpacts",
+            "reasoning": "Seamless upgrades are possible if rolling upgrade of components can be done and are further simplified if components are proxied by gateways.",
+            "precondition": "at-least-one",
+            "impactsInterpretation": "median"
+        }]
     },
     "rollingUpgradesEnabled": {
         "name": "Rolling upgrades enabled",
@@ -1228,8 +1234,24 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.DEPLOYMENT_MAPPING],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Davis2019", "section": "7.2" }, { "key": "Scholl2019", "section": "6 Use Zero-Downtime Releases" }, { "key": "Ibryam2020", "section": "3 Declarative Deployment" }, { "key": "Reznik2019", "section": "10 Risk-Reducing Deployment Strategies" }, { "key": "Arundel2019", "section": "13 Rolling Updates" }, { "key": "Indrasiri2021", "section": "1 Why container orchestration?; Rolling upgrades" }],
-        "measures": ["rollingUpdateOption"],
-        "evaluations": []
+        "measures": ["rollingUpdateOption", "rollingUpdates"],
+        "evaluations": [
+            {
+                "targetEntities": [ENTITIES.SYSTEM],
+                "evaluation": "rollingUpgradesEnabled",
+                "reasoning": "The evaluation is based on whether the infrastructure entities on which components are deployed, support a rolling upgrade option and whether the components also use it via their deployment mappings"
+            },
+            {
+                "targetEntities": [ENTITIES.INFRASTRUCTURE],
+                "evaluation": "rollingUpgradesEnabledForInfrastructure",
+                "reasoning": "The evaluation is based on whether the infrastructure entities on which components are deployed, support a rolling upgrade option."
+            },
+            {
+                "targetEntities": [ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
+                "evaluation": "rollingUpgradesEnabledForComponents",
+                "reasoning": "The evaluation is based on whether the components use a rolling upgrade strategy via their deployment mappings"
+            }
+        ]
     },
     "automatedInfrastructureMaintenance": {
         "name": "Automated infrastructure maintenance",
@@ -2121,7 +2143,7 @@ const measures = {
         "name": "Ratio of components whose ingress is proxied",
         "calculation": "Number of components with an ingress proxy / Total number of components",
         "sources": ["Ntentos2022"],
-        "applicableEntities": [ENTITIES.SYSTEM],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
     },
     "ratioOfComponentsWhoseEgressIsProxied": {
         "name": "Ratio of components whose egress is proxied",
@@ -2574,6 +2596,12 @@ const measures = {
         "calculation": "Average(Number of services using a storage service / Number of services) for all storage services",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM],
+    },
+    "rollingUpdates": {
+        "name": "Rolling updates",
+        "calculation": "Deployment Mappings with rolling updates / All Deployment Mappings",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
     }
 } satisfies { [measureKey: string]: MeasureSpec }
 

@@ -3,7 +3,7 @@ import { Calculation, CalculationParameters } from "../../quamoco/Measure";
 import { average, lowest, median } from "./general-functions";
 import { calculateRatioOfEndpointsSupportingSsl, componentMeasureImplementations, providesHealthAndReadinessEndpoints } from "./componentMeasures";
 import { calculateNumberOfLinksWithServiceDiscovery, calculateRatioOfLinksToAsynchronousEndpoints, calculateRatioOfSecuredLinks, calculateRatioOfStatefulComponents, calculateRatioOfStatelessComponents, calculateReplicasPerService, countComponentsConnectedToCertainEndpoints, getServiceInteractions } from "./systemMeasures";
-import { BACKING_DATA_CONFIG_KIND, BACKING_DATA_SECRET_KIND, CONTRACT_ARTIFACT_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, EVENT_SOURCING_KIND, MESSAGE_BROKER_KIND, SERVICE_MESH_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "../../specifications/featureModel";
+import { BACKING_DATA_CONFIG_KIND, BACKING_DATA_SECRET_KIND, CONTRACT_ARTIFACT_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, EVENT_SOURCING_KIND, MESSAGE_BROKER_KIND, ROLLING_UPDATE_STRATEGY_OPTIONS, SERVICE_MESH_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "../../specifications/featureModel";
 import { supportsMonitoring as infrastructureSupportsMonitoring } from "./infrastructureMeasures";
 import { supportsMonitoring as componentSupportsMonitoring } from "./componentMeasures";
 import { serviceMeshUsage as componentServiceMeshUsage } from "./componentMeasures";
@@ -1047,6 +1047,48 @@ export const serviceInteractionViaBackingService: Calculation = (parameters: Cal
 
 }
 
+export const rollingUpdates: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+
+    let includedComponentIds = getIncludedComponents(parameters.entity, parameters.system).map(component => component.getId);
+
+    let deploymentMappingsForThisRequestTrace = [...parameters.system.getDeploymentMappingEntities.values()]
+        .filter(deploymentMapping => includedComponentIds.includes(deploymentMapping.getDeployedEntity.getId));
+
+    if (deploymentMappingsForThisRequestTrace.length === 0) {
+        return "n/a";
+    }
+
+    let rolling = [];
+
+    deploymentMappingsForThisRequestTrace.forEach(deploymentMapping => {
+        if (ROLLING_UPDATE_STRATEGY_OPTIONS.includes(deploymentMapping.getProperty("update_strategy").value)) {
+            rolling.push(deploymentMapping.getId);
+        }
+    })
+
+    return rolling.length / deploymentMappingsForThisRequestTrace.length;
+}
+
+export const ratioOfComponentsWhoseIngressIsProxied: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+
+    let includedComponents = getIncludedComponents(parameters.entity, parameters.system)
+
+    const proxyComponents = parameters.system.getComponentEntities.entries().filter(([componentId, component]) => component.constructor.name !== ProxyBackingService.name).toArray();
+
+    if (includedComponents.length === 0 || proxyComponents.length === 0) {
+        return "n/a";
+    }
+
+    let numberOfComponentsWithProxiedIngress = 0;
+
+    for (const component of includedComponents) {
+        if (component.getExternalIngressProxiedBy && component.getIngressProxiedBy) {
+            numberOfComponentsWithProxiedIngress++;
+        }
+    }
+
+    return numberOfComponentsWithProxiedIngress / includedComponents.length;
+}
 
 export const requestTraceMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
@@ -1099,6 +1141,8 @@ export const requestTraceMeasureImplementations: { [measureKey: string]: Calcula
     "degreeToWhichComponentsAreLinkedToStatefulComponents": degreeToWhichComponentsAreLinkedToStatefulComponents,
     "ratioOfSpecializedStatefulServices": ratioOfSpecializedStatefulServices,
     "degreeOfSeparationByGateways": degreeOfSeparationByGateways,
-    "serviceInteractionViaBackingService": serviceInteractionViaBackingService
+    "serviceInteractionViaBackingService": serviceInteractionViaBackingService,
+    "rollingUpdates": rollingUpdates,
+    "ratioOfComponentsWhoseIngressIsProxied": ratioOfComponentsWhoseIngressIsProxied
 }
 

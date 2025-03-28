@@ -2,7 +2,7 @@
 import { ref } from "vue";
 import { BackingService, BrokerBackingService, Component, Endpoint, ExternalEndpoint, ProxyBackingService, Service, StorageBackingService, System } from "../../../entities.js";
 import { Calculation, CalculationParameters, MeasureValue } from "../../quamoco/Measure.js";
-import { ASYNCHRONOUS_ENDPOINT_KIND, AUTOMATED_RESTART_POLICIES, AUTOMATED_SCALING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, CONFIG_SERVICE_KIND, CONTRACT_ARTIFACT_TYPE, CUSTOM_SOFTWARE_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, PROTOCOLS_SUPPORTING_TLS, SERVICE_MESH_KIND, SYNCHRONOUS_ENDPOINT_KIND, VAULT_KIND } from "../../specifications/featureModel.js";
+import { ASYNCHRONOUS_ENDPOINT_KIND, AUTOMATED_RESTART_POLICIES, AUTOMATED_SCALING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, CONFIG_SERVICE_KIND, CONTRACT_ARTIFACT_TYPE, CUSTOM_SOFTWARE_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SERVICE_MESH_KIND, SYNCHRONOUS_ENDPOINT_KIND, VAULT_KIND } from "../../specifications/featureModel.js";
 import { average } from "./general-functions.js";
 import { Artifact, getArtifactTypeProperties, getAvailableArtifactTypes } from "@/core/common/artifact.js";
 import { link } from "fs";
@@ -1444,6 +1444,33 @@ export const dataShardingLevel: Calculation = (parameters: CalculationParameters
     return parameters.entity.getProperty("shards").value;
 }
 
+export const rollingUpdates: Calculation = (parameters: CalculationParameters<Component>) => {
+
+    let deploymentMappingsForThisComponent = [...parameters.system.getDeploymentMappingEntities.values()].filter(deploymentMapping => deploymentMapping.getDeployedEntity.getId === parameters.entity.getId);
+
+    if (deploymentMappingsForThisComponent.length === 0) {
+        return "n/a";
+    }
+
+    let rolling = [];
+
+    deploymentMappingsForThisComponent.forEach(deploymentMapping => {
+        if (ROLLING_UPDATE_STRATEGY_OPTIONS.includes(deploymentMapping.getProperty("update_strategy").value)) {
+            rolling.push(deploymentMapping.getId);
+        }
+    })
+
+    return rolling.length / deploymentMappingsForThisComponent.length;
+}
+
+export const ratioOfComponentsWhoseIngressIsProxied: Calculation = (parameters: CalculationParameters<Component>) => {
+    if (parameters.entity.constructor.name === ProxyBackingService.name) {
+        return "n/a";
+    }
+
+    return  parameters.entity.getExternalIngressProxiedBy && parameters.entity.getIngressProxiedBy ? 1 : 0;
+}
+
 export const componentMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
     "ratioOfExternalEndpointsSupportingTls": ratioOfExternalEndpointsSupportingTls,
@@ -1523,6 +1550,8 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "ratioOfComponentsOrInfrastructureNodesThatExportMetrics": ratioOfComponentsOrInfrastructureNodesThatExportMetrics,
     "ratioOfBrokerBackendSharing": ratioOfBrokerBackendSharing,
     "ratioOfCachedDataAggregates": ratioOfCachedDataAggregates,
-    "dataShardingLevel": dataShardingLevel
+    "dataShardingLevel": dataShardingLevel,
+    "rollingUpdates": rollingUpdates,
+    "ratioOfComponentsWhoseIngressIsProxied": ratioOfComponentsWhoseIngressIsProxied
 }
 

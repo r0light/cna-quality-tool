@@ -2293,3 +2293,49 @@ test("dataShardingLevel", () => {
     let measureValue = componentMeasureImplementations["dataShardingLevel"]({ entity: storageBackingServiceA, system: system });
     expect(measureValue).toEqual(3);
 })
+
+test("rollingUpdates", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    let infrastructureB = new Infrastructure("i2", "infrastructure 2", getEmptyMetaData());
+
+    let deploymentMappingA = new DeploymentMapping("dm1", serviceA, infrastructureA);
+    deploymentMappingA.setPropertyValue("update_strategy", "replace");
+    let deploymentMappingC = new DeploymentMapping("dm3", serviceA, infrastructureB);
+    deploymentMappingC.setPropertyValue("update_strategy", "blue-green");
+
+
+    system.addEntities([serviceA]);
+    system.addEntities([infrastructureA, infrastructureB]);
+    system.addEntities([deploymentMappingA, deploymentMappingC]);
+
+    let measureValue = componentMeasureImplementations["rollingUpdates"]({ entity: serviceA, system: system });
+    expect(measureValue).toEqual(0.5);
+})
+
+
+test("ratioOfComponentsWhoseIngressIsProxied", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService 1", getEmptyMetaData());
+    let externalEndpointA = new ExternalEndpoint("ee1", "external endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(externalEndpointA);
+
+    let gatewayServiceA = new ProxyBackingService("p1", "proxy 1", getEmptyMetaData());
+    gatewayServiceA.setPropertyValue("kind", "API Gateway");
+
+    let serviceMesh = new ProxyBackingService("p2", "proxy ", getEmptyMetaData());
+    serviceMesh.setPropertyValue("kind", "Service Mesh");
+
+    serviceA.setExternalIngressProxiedBy = gatewayServiceA;
+    serviceA.setIngressProxiedBy = serviceMesh;;
+
+
+    system.addEntities([serviceA, gatewayServiceA, serviceMesh]);
+
+    let measureValue = componentMeasureImplementations["ratioOfComponentsWhoseIngressIsProxied"]({ entity: serviceA, system: system });
+    expect(measureValue).toEqual(1);
+})

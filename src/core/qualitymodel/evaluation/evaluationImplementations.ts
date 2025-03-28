@@ -783,6 +783,41 @@ const productFactorEvaluationImplementation: {
 
         return linearNumericalMapping(ratioOfComponentsWhoseIngressIsProxied as number);
     },
+    "rollingUpgradesEnabledForInfrastructure": (parameters) => {
+        let rollingUpdateOption = parameters.calculatedMeasures.get("rollingUpdateOption").value;
+
+        if (rollingUpdateOption === "n/a") {
+            return "n/a";
+        }
+
+        return linearNumericalMapping(rollingUpdateOption as number);
+    },
+    "rollingUpgradesEnabledForComponents": (parameters) => {
+        let rollingUpdates = parameters.calculatedMeasures.get("rollingUpdates").value;
+
+        if (rollingUpdates === "n/a") {
+            return "n/a";
+        }
+
+        return linearNumericalMapping(rollingUpdates as number);
+    },
+    "rollingUpgradesEnabled": (parameters) => {
+        let rollingUpdateOption = parameters.calculatedMeasures.get("rollingUpdateOption").value;
+        let rollingUpdates = parameters.calculatedMeasures.get("rollingUpdates").value;
+
+        if (rollingUpdateOption === "n/a") {
+            if (rollingUpdates === "n/a") {
+                return "n/a";
+            }
+            return linearNumericalMapping(rollingUpdates as number);
+        } else {
+            if (rollingUpdates === "n/a") {
+                return linearNumericalMapping(rollingUpdateOption as number);
+            } else {
+                return linearNumericalMapping(average([rollingUpdateOption as number, rollingUpdates as number]));
+            }
+        }
+    },
 };
 
 
