@@ -40,7 +40,7 @@ export const numberOfServiceHostedOnOneInfrastructure: Calculation = (parameters
     return numberOfServicesHostedOnInfrastructure;
 }
 
-export const numberOfAvailabilityZonesUsed: Calculation = (parameters: CalculationParameters<Infrastructure>) => {
+export const numberOfAvailabilityZonesUsedByInfrastructure: Calculation = (parameters: CalculationParameters<Infrastructure>) => {
 
     let availabilityZones: Set<string> = new Set();
 
@@ -393,7 +393,7 @@ export const configurationStoredInConfigService: Calculation = (parameters: Calc
 
 export const infrastructureMeasureImplementations: { [measureKey: string]: Calculation } = {
     "numberOfServiceHostedOnOneInfrastructure": numberOfServiceHostedOnOneInfrastructure,
-    "numberOfAvailabilityZonesUsed": numberOfAvailabilityZonesUsed,
+    "numberOfAvailabilityZonesUsedByInfrastructure": numberOfAvailabilityZonesUsedByInfrastructure,
     "rollingUpdateOption": rollingUpdateOption,
     "secretsExternalization": secretsExternalization,
     "configurationExternalization": configurationExternalization,

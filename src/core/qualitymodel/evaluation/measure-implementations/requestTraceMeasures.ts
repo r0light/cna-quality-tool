@@ -373,7 +373,7 @@ export const storageReplicationLevel: Calculation = (parameters: CalculationPara
     }
 }
 
-export const numberOfAvailabilityZonesUsed: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+export const numberOfAvailabilityZonesUsedByInfrastructure: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
     let includedServiceIds = getIncludedComponents(parameters.entity, parameters.system).map(component => component.getId);
 
     let availabilityZones: Set<string> = new Set();
@@ -1098,6 +1098,81 @@ export const ratioOfComponentsWhoseExternalIngressIsProxied: Calculation = (para
     return numberOfComponentsWithProxiedExternalIngress / allComponentsWithExternalEndpoints;
 }
 
+export const numberOfAvailabilityZonesUsedByServices: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+
+    let includedComponents = getIncludedComponents(parameters.entity, parameters.system)
+
+    let allServiceIds = includedComponents
+        .filter((component) => component.constructor.name === Service.name)
+        .map((component) => component.getId);
+
+    if (allServiceIds.length === 0) {
+        return "n/a";
+    }
+
+    let deploymentMappingsForServices = [...parameters.system.getDeploymentMappingEntities.values()].filter(deploymentMapping => allServiceIds.includes(deploymentMapping.getDeployedEntity.getId));
+
+    if (deploymentMappingsForServices.length === 0) {
+        return "n/a";
+    }
+
+    let infrastructureForServices = deploymentMappingsForServices.map(deploymentMapping =>  deploymentMapping.getUnderlyingInfrastructure);
+
+    let availabilityZones: Set<string> = new Set();
+
+    infrastructureForServices.forEach(infrastructure => {
+        let usedAvailabilityZones = (infrastructure.getProperty("availability_zone").value as string).split(",");
+        usedAvailabilityZones.forEach(zoneId => availabilityZones.add(zoneId));
+    })
+
+    return availabilityZones.size;
+}
+
+export const numberOfAvailabilityZonesUsedByStorageServices: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+
+    let includedComponents = getIncludedComponents(parameters.entity, parameters.system)
+
+    let allStorageServiceIds = includedComponents
+        .filter(component => component.constructor.name === StorageBackingService.name)
+        .map(component => component.getId);
+
+    if (allStorageServiceIds.length === 0) {
+        return "n/a";
+    }
+
+    let deploymentMappingsForServices = [...parameters.system.getDeploymentMappingEntities.values()].filter(deploymentMapping => allStorageServiceIds.includes(deploymentMapping.getDeployedEntity.getId));
+
+    if (deploymentMappingsForServices.length === 0) {
+        return "n/a";
+    }
+
+    let infrastructureForStorageServices = deploymentMappingsForServices.map(deploymentMapping =>  deploymentMapping.getUnderlyingInfrastructure);
+
+    let availabilityZones: Set<string> = new Set();
+
+    infrastructureForStorageServices.forEach(infrastructure => {
+        let usedAvailabilityZones = (infrastructure.getProperty("availability_zone").value as string).split(",");
+        usedAvailabilityZones.forEach(zoneId => availabilityZones.add(zoneId));
+    })
+
+    return availabilityZones.size;
+}
+
+export const linksWithTimeout: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+
+    let includedLinks = parameters.entity.getLinks.flatMap(step => step);
+
+    if (includedLinks.length === 0) {
+        return "n/a";
+    }
+
+    let linksWithTimeout = includedLinks.filter(link => link.getProperty("timeout").value > 0);
+
+    return linksWithTimeout.length / includedLinks.length;
+}
+
+
+
 export const requestTraceMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
     "ratioOfSecuredLinks": ratioOfSecuredLinks,
@@ -1121,7 +1196,7 @@ export const requestTraceMeasureImplementations: { [measureKey: string]: Calcula
     "medianServiceReplication": medianServiceReplication,
     "smallestReplicationValue": smallestReplicationValue,
     "storageReplicationLevel": storageReplicationLevel,
-    "numberOfAvailabilityZonesUsed": numberOfAvailabilityZonesUsed,
+    "numberOfAvailabilityZonesUsedByInfrastructure": numberOfAvailabilityZonesUsedByInfrastructure,
     "numberOfLinksWithRetryLogic": numberOfLinksWithRetryLogic,
     "numberOfLinksWithComplexFailover": numberOfLinksWithComplexFailover,
     "amountOfRedundancy": amountOfRedundancy,
@@ -1151,6 +1226,9 @@ export const requestTraceMeasureImplementations: { [measureKey: string]: Calcula
     "degreeOfSeparationByGateways": degreeOfSeparationByGateways,
     "serviceInteractionViaBackingService": serviceInteractionViaBackingService,
     "rollingUpdates": rollingUpdates,
-    "ratioOfComponentsWhoseExternalIngressIsProxied": ratioOfComponentsWhoseExternalIngressIsProxied
+    "ratioOfComponentsWhoseExternalIngressIsProxied": ratioOfComponentsWhoseExternalIngressIsProxied,
+    "numberOfAvailabilityZonesUsedByServices": numberOfAvailabilityZonesUsedByServices,
+    "numberOfAvailabilityZonesUsedByStorageServices": numberOfAvailabilityZonesUsedByStorageServices,
+    "linksWithTimeout": linksWithTimeout
 }
 

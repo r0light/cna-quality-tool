@@ -1152,7 +1152,7 @@ test("storageReplicationLevel", () => {
 
 })
 
-test("numberOfAvailabilityZonesUsed", () => {
+test("numberOfAvailabilityZonesUsedByInfrastructure", () => {
     let system = new System("sys1", "testSystem");
 
     let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
@@ -1196,7 +1196,7 @@ test("numberOfAvailabilityZonesUsed", () => {
     system.addEntities([linkAB, linkBC, linkCD]);
     system.addEntity(requestTrace);
 
-    let measureValue = requestTraceMeasureImplementations["numberOfAvailabilityZonesUsed"]({ entity: requestTrace, system: system });
+    let measureValue = requestTraceMeasureImplementations["numberOfAvailabilityZonesUsedByInfrastructure"]({ entity: requestTrace, system: system });
     expect(measureValue).toEqual(4);
 })
 
@@ -2620,4 +2620,124 @@ test("ratioOfComponentsWhoseExternalIngressIsProxied", () => {
 
     let measureValue = requestTraceMeasureImplementations["ratioOfComponentsWhoseExternalIngressIsProxied"]({ entity: requestTrace, system: system });
     expect(measureValue).toEqual(1);
+})
+
+test("numberOfAvailabilityZonesUsedByServices", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let externalEndpointA = new ExternalEndpoint("ee1", "external endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(externalEndpointA);
+    let serviceB = new Service("s2", "testService 2", getEmptyMetaData());
+    let endpointB = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    infrastructureA.setPropertyValue("availability_zone", "us-east1");
+    let infrastructureB = new Infrastructure("i2", "infrastructure 2", getEmptyMetaData());
+    infrastructureB.setPropertyValue("availability_zone", "us-east1,us-east2");
+
+    let deploymentMappingA = new DeploymentMapping("dm1", serviceA, infrastructureA);
+    let deploymentMappingB = new DeploymentMapping("dm2", serviceB, infrastructureB);
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+
+    let requestTrace = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
+    requestTrace.setLinks = [[linkAB]];
+    requestTrace.setExternalEndpoint = externalEndpointA;
+
+    system.addEntities([infrastructureA, infrastructureB]);
+    system.addEntities([serviceA, serviceB]);
+    system.addEntities([deploymentMappingA, deploymentMappingB]);
+    system.addEntities([linkAB]);
+    system.addEntity(requestTrace);
+
+    let measureValue = requestTraceMeasureImplementations["numberOfAvailabilityZonesUsedByServices"]({ entity: requestTrace, system: system });
+    expect(measureValue).toEqual(2);
+})
+
+test("numberOfAvailabilityZonesUsedByStorageServices", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let externalEndpointA = new ExternalEndpoint("ee1", "external endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(externalEndpointA);
+
+    let storageServiceA = new StorageBackingService("st1", "testService", getEmptyMetaData());
+    let endpointB = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    storageServiceA.addEndpoint(endpointB);
+    let storageServiceB = new StorageBackingService("st2", "testService 2", getEmptyMetaData());
+    let endpointC = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    storageServiceB.addEndpoint(endpointC);
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    infrastructureA.setPropertyValue("availability_zone", "us-east1");
+    let infrastructureB = new Infrastructure("i2", "infrastructure 2", getEmptyMetaData());
+    infrastructureB.setPropertyValue("availability_zone", "us-east1,us-east2");
+
+    let deploymentMappingA = new DeploymentMapping("dm1", serviceA, infrastructureA);
+    let deploymentMappingB = new DeploymentMapping("dm2", storageServiceA, infrastructureB);
+    let deploymentMappingC = new DeploymentMapping("dm2", storageServiceB, infrastructureB);
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+    let linkAC = new Link("l2", serviceA, endpointC);
+
+    let requestTrace = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
+    requestTrace.setLinks = [[linkAB,linkAC]];
+    requestTrace.setExternalEndpoint = externalEndpointA;
+
+    system.addEntities([infrastructureA, infrastructureB]);
+    system.addEntities([serviceA, storageServiceA, storageServiceB]);
+    system.addEntities([deploymentMappingA, deploymentMappingB, deploymentMappingC]);
+    system.addEntities([linkAB,linkAC]);
+    system.addEntity(requestTrace);
+
+    let measureValue = requestTraceMeasureImplementations["numberOfAvailabilityZonesUsedByStorageServices"]({ entity: requestTrace, system: system });
+    expect(measureValue).toEqual(2);
+})
+
+
+test("linksWithTimeout", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA);
+    serviceA.addEndpoint(externalEndpointA);
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+
+    let serviceD = new Service("s4", "testService", getEmptyMetaData());
+    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    serviceD.addEndpoint(endpointD);
+
+    let serviceE = new Service("s5", "testService", getEmptyMetaData());
+    let endpointE = new Endpoint("e5", "endpoint 5", getEmptyMetaData());
+    let externalEndpointE = new ExternalEndpoint("ex2", "external endpoint 2", getEmptyMetaData());
+    serviceE.addEndpoint(endpointE);
+    serviceE.addEndpoint(externalEndpointE);
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+    linkAB.setPropertyValue("timeout", "2000");
+    let linkBC = new Link("l2", serviceB, endpointC);
+    let linkCD = new Link("l3", serviceC, endpointD);
+    linkCD.setPropertyValue("timeout", "2000");
+
+    let requestTrace = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
+    requestTrace.setLinks = [[linkAB], [linkBC], [linkCD]];
+    requestTrace.setExternalEndpoint = externalEndpointA;
+
+    system.addEntities([serviceA, serviceB, serviceC, serviceD, serviceE]);
+    system.addEntities([linkAB, linkBC, linkCD]);
+    system.addEntity(requestTrace);
+
+    let measureValue = requestTraceMeasureImplementations["linksWithTimeout"]({ entity: requestTrace, system: system });
+    expect(measureValue).toEqual(2/3);
 })

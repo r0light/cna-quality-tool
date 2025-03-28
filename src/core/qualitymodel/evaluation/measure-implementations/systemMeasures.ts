@@ -832,7 +832,7 @@ export const componentDensity: Calculation = (parameters: CalculationParameters<
         [...allInfrastructure.entries()].filter(infrastructure => usedInfrastructureIds.includes(infrastructure[0])).reduce((accumulator, current) => accumulator + 1, 0);
 }
 
-export const numberOfAvailabilityZonesUsed: Calculation = (parameters: CalculationParameters<System>) => {
+export const numberOfAvailabilityZonesUsedByInfrastructure: Calculation = (parameters: CalculationParameters<System>) => {
 
     let availabilityZones: Set<string> = new Set();
 
@@ -2709,6 +2709,66 @@ export const rollingUpdates: Calculation = (parameters: CalculationParameters<Sy
 }
 
 
+export const numberOfAvailabilityZonesUsedByServices: Calculation = (parameters: CalculationParameters<System>) => {
+
+    let allServiceIds = parameters.entity.getComponentEntities.entries()
+        .filter(([componentId, component]) => component.constructor.name === Service.name)
+        .map(([componentId, component]) => componentId)
+        .toArray();
+
+    if (allServiceIds.length === 0) {
+        return "n/a";
+    }
+
+    let deploymentMappingsForServices = [...parameters.system.getDeploymentMappingEntities.values()].filter(deploymentMapping => allServiceIds.includes(deploymentMapping.getDeployedEntity.getId));
+
+    if (deploymentMappingsForServices.length === 0) {
+        return "n/a";
+    }
+
+    let infrastructureForServices = deploymentMappingsForServices.map(deploymentMapping =>  deploymentMapping.getUnderlyingInfrastructure);
+
+    let availabilityZones: Set<string> = new Set();
+
+    infrastructureForServices.forEach(infrastructure => {
+        let usedAvailabilityZones = (infrastructure.getProperty("availability_zone").value as string).split(",");
+        usedAvailabilityZones.forEach(zoneId => availabilityZones.add(zoneId));
+    })
+
+    return availabilityZones.size;
+}
+
+export const numberOfAvailabilityZonesUsedByStorageServices: Calculation = (parameters: CalculationParameters<System>) => {
+
+    let allStorageServiceIds = parameters.entity.getComponentEntities.entries()
+        .filter(([componentId, component]) => component.constructor.name === StorageBackingService.name)
+        .map(([componentId, component]) => componentId)
+        .toArray();
+
+    if (allStorageServiceIds.length === 0) {
+        return "n/a";
+    }
+
+    let deploymentMappingsForServices = [...parameters.system.getDeploymentMappingEntities.values()].filter(deploymentMapping => allStorageServiceIds.includes(deploymentMapping.getDeployedEntity.getId));
+
+    if (deploymentMappingsForServices.length === 0) {
+        return "n/a";
+    }
+
+    let infrastructureForStorageServices = deploymentMappingsForServices.map(deploymentMapping =>  deploymentMapping.getUnderlyingInfrastructure);
+
+    let availabilityZones: Set<string> = new Set();
+
+    infrastructureForStorageServices.forEach(infrastructure => {
+        let usedAvailabilityZones = (infrastructure.getProperty("availability_zone").value as string).split(",");
+        usedAvailabilityZones.forEach(zoneId => availabilityZones.add(zoneId));
+    })
+
+    return availabilityZones.size;
+}
+
+
+
 export const systemMeasureImplementations: { [measureKey: string]: Calculation } = {
     "serviceReplicationLevel": serviceReplicationLevel,
     "medianServiceReplication": medianServiceReplication,
@@ -2751,7 +2811,7 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation }
     "numberOfComponents": numberOfComponents,
     "ratioOfProviderManagedComponentsAndInfrastructure": ratioOfProviderManagedComponentsAndInfrastructure,
     "componentDensity": componentDensity,
-    "numberOfAvailabilityZonesUsed": numberOfAvailabilityZonesUsed,
+    "numberOfAvailabilityZonesUsedByInfrastructure": numberOfAvailabilityZonesUsedByInfrastructure,
     "rollingUpdateOption": rollingUpdateOption,
     "numberOfLinksWithRetryLogic": numberOfLinksWithRetryLogic,
     "numberOfLinksWithComplexFailover": numberOfLinksWithComplexFailover,
@@ -2831,5 +2891,7 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation }
     "requestTraceSimilarityBasedOnIncludedComponents": requestTraceSimilarityBasedOnIncludedComponents,
     "averageBrokerBackendSharing": averageBrokerBackendSharing,
     "averageStorageBackendSharing": averageStorageBackendSharing,
-    "rollingUpdates": rollingUpdates
+    "rollingUpdates": rollingUpdates,
+    "numberOfAvailabilityZonesUsedByServices": numberOfAvailabilityZonesUsedByServices,
+    "numberOfAvailabilityZonesUsedByStorageServices": numberOfAvailabilityZonesUsedByStorageServices
 }

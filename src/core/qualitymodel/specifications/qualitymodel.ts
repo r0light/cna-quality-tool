@@ -842,7 +842,13 @@ const productFactors = {
         "applicableEntities": [ENTITIES.SYSTEM],
         "sources": [],
         "measures": ["averageNumberOfEndpointsPerService", "numberOfDependencies", "numberOfVersionsPerService", "concurrentlyAvailableVersionsComplexity", "serviceSupportForTransactions", "numberOfComponents"],
-        "evaluations": []
+        "evaluations": [
+            {
+                "targetEntities": [ENTITIES.SYSTEM],
+                "evaluation": "sparsity",
+                "reasoning": "The more components there are in a system, the less sparse it is. Although the evaluation is quite subjective, for a general tendency, this evaluation considers systems sparse that have less than 10 components."
+            },
+        ]
     },
     "operationOutsourcing": {
         "name": "Operation outsourcing",
@@ -1188,28 +1194,49 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.DEPLOYMENT_MAPPING],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
         "sources": [],
-        "measures": ["componentDensity", "numberOfServiceHostedOnOneInfrastructure"],
-        "evaluations": []
+        "measures": ["componentDensity", "numberOfServiceHostedOnOneInfrastructure", "numberOfAvailabilityZonesUsedByInfrastructure"],
+        "evaluations": [
+            {
+                "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
+                "evaluation": "aggregateImpacts",
+                "reasoning": "The evaluation is based on the factors Physical Data Distribution and Physical Service Distribution.",
+                "precondition": "at-least-one",
+                "impactsInterpretation": "median"
+            },
+            {
+                "targetEntities": [ENTITIES.INFRASTRUCTURE],
+                "evaluation": "distribution",
+                "reasoning": "The evaluation is based on whether the infrastructure is using multiple availability zones. The factor is fulfilled low if more than one availability zone is used, and increasing to moderate if three are used to high if five or more are used."
+            }
+        ]
     },
     "physicalDataDistribution": {
         "name": "Physical data distribution",
         "description": "Storage Backing Service instances where Data aggregates are persisted are distributed across physical locations (e.g. availability zones of a cloud vendor) so that even in the case of a failure of one physical location, another physical location is still useable.",
         "categories": ["dataManagement", "cloudInfrastructure"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.DEPLOYMENT_MAPPING, ENTITIES.DATA_AGGREGATE, ENTITIES.STORAGE_BACKING_SERVICE],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Scholl2019", "section": "6 Keep Data in Multiple Regions or Zones" }, { "key": "Indrasiri2021", "section": "4 Data Sharding Pattern: Geographically distribute data" }],
-        "measures": ["numberOfAvailabilityZonesUsed"],
-        "evaluations": []
+        "measures": ["numberOfAvailabilityZonesUsedByStorageServices"],
+        "evaluations": [ {
+            "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
+            "evaluation": "physicalDataDistribution",
+            "reasoning": "The evaluation is based on whether the storage service are deployed on infrastructure using multiple availability zones. The factor is fulfilled low if more than one availability zone is used, and increasing to moderate if three are used to high if five or more are used."
+        },]
     },
     "physicalServiceDistribution": {
         "name": "Physical service distribution",
         "description": "Components are distributed through replication across physical locations (e.g. availability zones of a cloud vendor) so that even in the case of a failure of one physical location, another physical location is still useable.",
         "categories": ["cloudInfrastructure"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.DEPLOYMENT_MAPPING],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
         "sources": [],
-        "measures": ["numberOfAvailabilityZonesUsed"],
-        "evaluations": []
+        "measures": ["numberOfAvailabilityZonesUsedByServices"],
+        "evaluations": [{
+            "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
+            "evaluation": "physicalServiceDistribution",
+            "reasoning": "The evaluation is based on whether the services are deployed on infrastructure using multiple availability zones. The factor is fulfilled low if more than one availability zone is used, and increasing to moderate if three are used to high if five or more are used."
+        },]
     },
     "seamlessUpgrades": {
         "name": "Seamless upgrades",
@@ -1272,10 +1299,16 @@ const productFactors = {
         "description": "Services expect faults at different levels and either handle them or minimize their impact by relying on the capabilities of cloud environments.",
         "categories": ["networkCommunication", "cloudInfrastructure"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.LINK, ENTITIES.ENDPOINT, ENTITIES.INFRASTRUCTURE, ENTITIES.DEPLOYMENT_MAPPING],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
         "sources": [],
         "measures": [],
-        "evaluations": []
+        "evaluations": [{
+            "targetEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+            "evaluation": "aggregateImpacts",
+            "reasoning": "Autonomous fault handling is evaluated based on the factors impacting it, mainly those considering the fault tolerance of communication links",
+            "precondition": "at-least-one",
+            "impactsInterpretation": "median"
+        }]
     },
     "invocationTimeouts": {
         "name": "Invocation timeouts",
@@ -1285,7 +1318,11 @@ const productFactors = {
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Indrasiri2021", "section": "3 Resilient Connectivity Pattern: Time-out" }, { "key": "Richardson2019", "section": "3.2.3 Handling partial failures using the Circuit Breaker pattern" }, { "key": "Goniwada2021", "section": "5 Timeout" }],
         "measures": ["linksWithTimeout"],
-        "evaluations": []
+        "evaluations": [{
+            "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
+            "evaluation": "invocationTimeouts",
+            "reasoning": "The evaluation is simply based on whether links within the system use timeouts, not specific timeout durations. The more links use a timeout, the more this factor is fulfilled."
+        }]
     },
     "retriesForSafeInvocations": {
         "name": "Retries for safe invocations",
@@ -1295,7 +1332,11 @@ const productFactors = {
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Davis2019", "section": "9.1" }, { "key": "Scholl2019", "section": "6 Handle Transient Failures with Retries" }, { "key": "Scholl2019", "section": "6 Use a Finite Number of Retries" }, { "key": "Bastani2017", "section": "12 Isolating Failures and Graceful Degradation: Use retries" }, { "key": "Indrasiri2021", "section": "3 Resilient Connectivity Pattern: Retry" }, { "key": "Ruecker2021", "section": "9 Synchronous Request/Response (Use retries in synchronous communications)" }, { "key": "Ruecker2021", "section": "9 The Importance of Idempotency (Communication which is retried needs idempotency)" }, { "key": "Goniwada2021", "section": "Idempotent Service Operation, Retry, 5 Retry " }],
         "measures": ["numberOfLinksWithRetryLogic"],
-        "evaluations": []
+        "evaluations": [{
+            "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
+            "evaluation": "retriesForSafeInvocations",
+            "reasoning": "The evaluation is simply based on whether links within the system use retry logic if applicable. The more links use retries, the more this factor is fulfilled."
+        }]
     },
     "circuitBreakedCommunication": {
         "name": "Circuit breaked communication",
@@ -1305,7 +1346,11 @@ const productFactors = {
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Davis2019", "section": "10.1" }, { "key": "Scholl2019", "section": "6 Use Circuit Breakers for Nontransient Failures" }, { "key": "Richardson2019", "section": "3.2.3 Handling partial failures using the Circuit Breaker pattern" }, { "key": "Bastani2017", "section": "12 Isolating Failures and Graceful Degradation: circuit breaker" }, { "key": "Indrasiri2021", "section": "3 Resilient Connectivity Pattern: Circuit breaker" }, { "key": "Goniwada2021", "section": "4 Circuit Breaker" }],
         "measures": ["numberOfLinksWithComplexFailover"],
-        "evaluations": []
+        "evaluations": [{
+            "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
+            "evaluation": "circuitBreakedCommunication",
+            "reasoning": "The evaluation is simply based on whether links within the system use circuit breakers. The more links use circuit breakers, the more this factor is fulfilled."
+        }]
     },
     "automatedRestarts": {
         "name": "Automated restarts",
@@ -1315,7 +1360,11 @@ const productFactors = {
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE],
         "sources": [{ "key": "Bastani2017", "section": "13 automatic remediation" }, { "key": "Indrasiri2021", "section": "1 Why container orchestration?; High availability" }, { "key": "Goniwada2021", "section": "5 Self-Healing" }],
         "measures": ["deploymentsWithRestart"],
-        "evaluations": []
+        "evaluations": [{
+            "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE],
+            "evaluation": "automatedRestarts",
+            "reasoning": "The evaluation is based on whether the deployment mappings of components include automated restarts in case of failing health checks."
+        }]
     },
     "api-BasedCommunication": {
         "name": "API-based communication",
@@ -1325,7 +1374,13 @@ const productFactors = {
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Reznik2019", "section": "9 Communicate Through APIs" }, { "key": "Adkins2020", "section": "6 Understandable Interface Specifications (Use Interface specifications for understandability" }, { "key": "Bastani2017", "section": "6 Everything is an API (Services are integrated via APIs)" }, { "key": "Indrasiri2021", "section": "2 Service Definitions in Synchronous Communication (Use a service definition for each service);" }, { "key": "Indrasiri2021", "section": "2 Service Definition in Asynchronous Communication (Use schemas to define message formats);" }, { "key": "Goniwada2021", "section": "3 API First Principle" }],
         "measures": ["ratioOfDocumentedEndpoints"],
-        "evaluations": []
+        "evaluations": [
+            {
+                "targetEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+                "evaluation": "api-BasedCommunication",
+                "reasoning": "Communication is based on documented APIs if documentation artifacts exist that specify an API and cover the endpoints of components."
+            },
+        ]
     },
     "consistentlyMediatedCommunication": {
         "name": "Consistently mediated communication",
@@ -2158,11 +2213,23 @@ const measures = {
         "applicableEntities": [ENTITIES.SYSTEM],
         "aggregateOf": "numberOfServiceHostedOnOneInfrastructure"
     },
-    "numberOfAvailabilityZonesUsed": {
-        "name": "Number of Availability Zones used",
+    "numberOfAvailabilityZonesUsedByInfrastructure": {
+        "name": "Number of Availability Zones used by infrastructure",
         "calculation": "Number of unique availability zones in which the infrastructure is running",
         "sources": ["Guerron2020", "Baranwal2014"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
+    },
+    "numberOfAvailabilityZonesUsedByServices": {
+        "name": "Number of Availability Zones used by services",
+        "calculation": "Number of unique availability zones used by the infrastructure on which services run.",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
+    },
+    "numberOfAvailabilityZonesUsedByStorageServices": {
+        "name": "Number of Availability Zones used by storage services",
+        "calculation": "Number of unique availability zones used by the infrastructure on which storage services run.",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
     },
     "rollingUpdateOption": {
         "name": "Rolling Update Option",
@@ -2529,7 +2596,7 @@ const measures = {
         "name": "Links with timeout",
         "calculation": "Links with a specified timeout / All links",
         "sources": ["new"],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT]
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE]
     },
     "deploymentsWithRestart": {
         "name": "Deployments with restart",

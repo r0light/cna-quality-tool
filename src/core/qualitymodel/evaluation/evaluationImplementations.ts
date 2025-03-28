@@ -818,6 +818,118 @@ const productFactorEvaluationImplementation: {
             }
         }
     },
+    "physicalDataDistribution": (parameters) => {
+        let numberOfAvailabilityZonesUsedByStorageServices = parameters.calculatedMeasures.get("numberOfAvailabilityZonesUsedByStorageServices").value;
+
+        if (numberOfAvailabilityZonesUsedByStorageServices === "n/a" || numberOfAvailabilityZonesUsedByStorageServices === 0) {
+            return "n/a";
+        }
+
+        if (numberOfAvailabilityZonesUsedByStorageServices === 1) {
+            return "none";
+        } else if (numberOfAvailabilityZonesUsedByStorageServices as number > 1 && numberOfAvailabilityZonesUsedByStorageServices as number < 3) {
+            return "low";
+        } else if (numberOfAvailabilityZonesUsedByStorageServices as number >= 3 && numberOfAvailabilityZonesUsedByStorageServices as number < 5) {
+            return "moderate";
+        } else if (numberOfAvailabilityZonesUsedByStorageServices as number >= 5) {
+            return "high";
+        }
+    },
+    "physicalServiceDistribution": (parameters) => {
+        let numberOfAvailabilityZonesUsedByServices = parameters.calculatedMeasures.get("numberOfAvailabilityZonesUsedByServices").value;
+
+        if (numberOfAvailabilityZonesUsedByServices === "n/a" || numberOfAvailabilityZonesUsedByServices === 0) {
+            return "n/a";
+        }
+
+        if (numberOfAvailabilityZonesUsedByServices === 1) {
+            return "none";
+        } else if (numberOfAvailabilityZonesUsedByServices as number > 1 && numberOfAvailabilityZonesUsedByServices as number < 3) {
+            return "low";
+        } else if (numberOfAvailabilityZonesUsedByServices as number >= 3 && numberOfAvailabilityZonesUsedByServices as number < 5) {
+            return "moderate";
+        } else if (numberOfAvailabilityZonesUsedByServices as number >= 5) {
+            return "high";
+        }
+    },
+    "distribution": (parameters) => {
+        let numberOfAvailabilityZonesUsedByInfrastructure = parameters.calculatedMeasures.get("numberOfAvailabilityZonesUsedByInfrastructure").value;
+
+        if (numberOfAvailabilityZonesUsedByInfrastructure === "n/a" || numberOfAvailabilityZonesUsedByInfrastructure === 0) {
+            return "n/a";
+        }
+
+        if (numberOfAvailabilityZonesUsedByInfrastructure === 1) {
+            return "none";
+        } else if (numberOfAvailabilityZonesUsedByInfrastructure as number > 1 && numberOfAvailabilityZonesUsedByInfrastructure as number < 3) {
+            return "low";
+        } else if (numberOfAvailabilityZonesUsedByInfrastructure as number >= 3 && numberOfAvailabilityZonesUsedByInfrastructure as number < 5) {
+            return "moderate";
+        } else if (numberOfAvailabilityZonesUsedByInfrastructure as number >= 5) {
+            return "high";
+        }
+    },
+    "invocationTimeouts": (parameters) => {
+        let linksWithTimeout = parameters.calculatedMeasures.get("linksWithTimeout").value;
+
+        if (linksWithTimeout === "n/a") {
+            return "n/a";
+        }
+
+        return squareRootedNumericalMapping(linksWithTimeout as number);
+    },
+    "retriesForSafeInvocations": (parameters) => {
+        let numberOfLinksWithRetryLogic = parameters.calculatedMeasures.get("numberOfLinksWithRetryLogic").value;
+
+        if (numberOfLinksWithRetryLogic === "n/a") {
+            return "n/a";
+        }
+
+        return squareRootedNumericalMapping(numberOfLinksWithRetryLogic as number);
+    },
+    "circuitBreakedCommunication": (parameters) => {
+        let numberOfLinksWithComplexFailover = parameters.calculatedMeasures.get("numberOfLinksWithComplexFailover").value;
+
+        if (numberOfLinksWithComplexFailover === "n/a") {
+            return "n/a";
+        }
+
+        return squareRootedNumericalMapping(numberOfLinksWithComplexFailover as number);
+    },
+    "automatedRestarts": (parameters) => {
+        let deploymentsWithRestart = parameters.calculatedMeasures.get("deploymentsWithRestart").value;
+
+        if (deploymentsWithRestart === "n/a") {
+            return "n/a";
+        }
+
+        return squareRootedNumericalMapping(deploymentsWithRestart as number);
+    },
+    "api-BasedCommunication": (parameters) => {
+        let ratioOfDocumentedEndpoints = parameters.calculatedMeasures.get("ratioOfDocumentedEndpoints").value;
+
+        if (ratioOfDocumentedEndpoints === "n/a") {
+            return "n/a";
+        }
+
+        return linearNumericalMapping(ratioOfDocumentedEndpoints as number);
+    },
+    "sparsity": (parameters) => {
+        let numberOfComponents = parameters.calculatedMeasures.get("numberOfComponents").value;
+
+        if (numberOfComponents === "n/a") {
+            return "n/a";
+        }
+        if (numberOfComponents as number < 3) {
+            return "high";
+        } else if (numberOfComponents as number >= 3 && numberOfComponents as number < 6 ) {
+            return "moderate";
+        } else if (numberOfComponents as number >= 6 && numberOfComponents as number < 10 ) {
+            return "low";
+        } else {
+            return "none";
+        }
+    },
 };
 
 

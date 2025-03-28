@@ -2339,3 +2339,46 @@ test("ratioOfComponentsWhoseExternalIngressIsProxied", () => {
     let measureValue = componentMeasureImplementations["ratioOfComponentsWhoseExternalIngressIsProxied"]({ entity: serviceA, system: system });
     expect(measureValue).toEqual(1);
 })
+
+test("numberOfAvailabilityZonesUsedByServices", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    infrastructureA.setPropertyValue("availability_zone", "us-east1");
+    let infrastructureB = new Infrastructure("i2", "infrastructure 2", getEmptyMetaData());
+    infrastructureB.setPropertyValue("availability_zone", "us-east1,us-east2");
+
+    let deploymentMappingA = new DeploymentMapping("dm1", serviceA, infrastructureA);
+    let deploymentMappingC = new DeploymentMapping("dm3", serviceA, infrastructureB);
+
+    system.addEntities([infrastructureA, infrastructureB]);
+    system.addEntities([serviceA]);
+    system.addEntities([deploymentMappingA, deploymentMappingC]);
+
+    let measureValue = componentMeasureImplementations["numberOfAvailabilityZonesUsedByServices"]({ entity: serviceA, system: system });
+    expect(measureValue).toEqual(2);
+})
+
+
+test("numberOfAvailabilityZonesUsedByStorageServices", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new StorageBackingService("s1", "testService", getEmptyMetaData());
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    infrastructureA.setPropertyValue("availability_zone", "us-east1");
+    let infrastructureB = new Infrastructure("i2", "infrastructure 2", getEmptyMetaData());
+    infrastructureB.setPropertyValue("availability_zone", "us-east1,us-east2");
+
+    let deploymentMappingA = new DeploymentMapping("dm1", serviceA, infrastructureA);
+    let deploymentMappingC = new DeploymentMapping("dm3", serviceA, infrastructureB);
+
+    system.addEntities([infrastructureA, infrastructureB]);
+    system.addEntities([serviceA]);
+    system.addEntities([deploymentMappingA, deploymentMappingC]);
+
+    let measureValue = componentMeasureImplementations["numberOfAvailabilityZonesUsedByStorageServices"]({ entity: serviceA, system: system });
+    expect(measureValue).toEqual(2);
+})

@@ -60,7 +60,7 @@ test("numberOfServiceHostedOnOneInfrastructure", () => {
     expect(measureValue).toEqual(2);
 })
 
-test("numberOfAvailabilityZonesUsed", () => {
+test("numberOfAvailabilityZonesUsedByInfrastructure", () => {
     let system = new System("sys1", "testSystem");;
 
     let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
@@ -68,7 +68,7 @@ test("numberOfAvailabilityZonesUsed", () => {
 
     system.addEntities([infrastructureA]);
 
-    let measureValue = infrastructureMeasureImplementations["numberOfAvailabilityZonesUsed"]({ entity: infrastructureA, system: system });
+    let measureValue = infrastructureMeasureImplementations["numberOfAvailabilityZonesUsedByInfrastructure"]({ entity: infrastructureA, system: system });
     expect(measureValue).toEqual(3);
 })
 

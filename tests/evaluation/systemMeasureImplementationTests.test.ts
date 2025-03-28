@@ -1119,7 +1119,7 @@ test("componentDensity", () => {
 })
 
 
-test("numberOfAvailabilityZonesUsed", () => {
+test("numberOfAvailabilityZonesUsedByInfrastructure", () => {
     let system = new System("sys1", "testSystem");;
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
@@ -1142,7 +1142,7 @@ test("numberOfAvailabilityZonesUsed", () => {
     system.addEntities([infrastructureA, infrastructureB, infrastructureC]);
     system.addEntities([deploymentMappingA, deploymentMappingB, deploymentMappingC, deploymentMappingD]);
 
-    let measureValue = systemMeasureImplementations["numberOfAvailabilityZonesUsed"]({ entity: system, system: system });
+    let measureValue = systemMeasureImplementations["numberOfAvailabilityZonesUsedByInfrastructure"]({ entity: system, system: system });
     expect(measureValue).toEqual(3);
 })
 
@@ -3987,4 +3987,48 @@ test("rollingUpdates", () => {
 
     let measureValue = systemMeasureImplementations["rollingUpdates"]({ entity: system, system: system });
     expect(measureValue).toEqual(2/3);
+})
+
+test("numberOfAvailabilityZonesUsedByServices", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let serviceB = new Service("s2", "testService 2", getEmptyMetaData());
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    infrastructureA.setPropertyValue("availability_zone", "us-east1");
+    let infrastructureB = new Infrastructure("i2", "infrastructure 2", getEmptyMetaData());
+    infrastructureB.setPropertyValue("availability_zone", "us-east1,us-east2");
+
+    let deploymentMappingA = new DeploymentMapping("dm1", serviceA, infrastructureA);
+    let deploymentMappingB = new DeploymentMapping("dm2", serviceB, infrastructureB);
+
+    system.addEntities([infrastructureA, infrastructureB]);
+    system.addEntities([serviceA, serviceB]);
+    system.addEntities([deploymentMappingA, deploymentMappingB]);
+
+    let measureValue = systemMeasureImplementations["numberOfAvailabilityZonesUsedByServices"]({ entity: system, system: system });
+    expect(measureValue).toEqual(2);
+})
+
+test("numberOfAvailabilityZonesUsedByStorageServices", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new StorageBackingService("s1", "testService", getEmptyMetaData());
+    let serviceB = new StorageBackingService("s2", "testService 2", getEmptyMetaData());
+
+    let infrastructureA = new Infrastructure("i1", "infrastructure 1", getEmptyMetaData());
+    infrastructureA.setPropertyValue("availability_zone", "us-east1");
+    let infrastructureB = new Infrastructure("i2", "infrastructure 2", getEmptyMetaData());
+    infrastructureB.setPropertyValue("availability_zone", "us-east1,us-east2");
+
+    let deploymentMappingA = new DeploymentMapping("dm1", serviceA, infrastructureA);
+    let deploymentMappingB = new DeploymentMapping("dm2", serviceB, infrastructureB);
+
+    system.addEntities([infrastructureA, infrastructureB]);
+    system.addEntities([serviceA, serviceB]);
+    system.addEntities([deploymentMappingA, deploymentMappingB]);
+
+    let measureValue = systemMeasureImplementations["numberOfAvailabilityZonesUsedByStorageServices"]({ entity: system, system: system });
+    expect(measureValue).toEqual(2);
 })

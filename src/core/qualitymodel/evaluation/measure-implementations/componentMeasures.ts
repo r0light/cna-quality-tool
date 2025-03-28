@@ -1475,6 +1475,55 @@ export const ratioOfComponentsWhoseExternalIngressIsProxied: Calculation = (para
     return  parameters.entity.getExternalIngressProxiedBy ? 1 : 0;
 }
 
+
+export const numberOfAvailabilityZonesUsedByServices: Calculation = (parameters: CalculationParameters<Component>) => {
+
+    if (parameters.entity.constructor.name !== Service.name) {
+        return "n/a";
+    }
+
+    let deploymentMappingsForThisComponent = [...parameters.system.getDeploymentMappingEntities.values()].filter(deploymentMapping => deploymentMapping.getDeployedEntity.getId === parameters.entity.getId);
+
+    if (deploymentMappingsForThisComponent.length === 0) {
+        return "n/a";
+    }
+
+    let infrastructureForThisComponent = deploymentMappingsForThisComponent.map(deploymentMapping =>  deploymentMapping.getUnderlyingInfrastructure);
+
+    let availabilityZones: Set<string> = new Set();
+
+    infrastructureForThisComponent.forEach(infrastructure => {
+        let usedAvailabilityZones = (infrastructure.getProperty("availability_zone").value as string).split(",");
+        usedAvailabilityZones.forEach(zoneId => availabilityZones.add(zoneId));
+    })
+
+    return availabilityZones.size;
+}
+
+export const numberOfAvailabilityZonesUsedByStorageServices: Calculation = (parameters: CalculationParameters<Component>) => {
+
+    if (parameters.entity.constructor.name !== StorageBackingService.name) {
+        return "n/a";
+    }
+
+    let deploymentMappingsForThisComponent = [...parameters.system.getDeploymentMappingEntities.values()].filter(deploymentMapping => deploymentMapping.getDeployedEntity.getId === parameters.entity.getId);
+
+    if (deploymentMappingsForThisComponent.length === 0) {
+        return "n/a";
+    }
+
+    let infrastructureForThisComponent = deploymentMappingsForThisComponent.map(deploymentMapping =>  deploymentMapping.getUnderlyingInfrastructure);
+
+    let availabilityZones: Set<string> = new Set();
+
+    infrastructureForThisComponent.forEach(infrastructure => {
+        let usedAvailabilityZones = (infrastructure.getProperty("availability_zone").value as string).split(",");
+        usedAvailabilityZones.forEach(zoneId => availabilityZones.add(zoneId));
+    })
+
+    return availabilityZones.size;
+}
+
 export const componentMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
     "ratioOfExternalEndpointsSupportingTls": ratioOfExternalEndpointsSupportingTls,
@@ -1556,6 +1605,8 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "ratioOfCachedDataAggregates": ratioOfCachedDataAggregates,
     "dataShardingLevel": dataShardingLevel,
     "rollingUpdates": rollingUpdates,
-    "ratioOfComponentsWhoseExternalIngressIsProxied": ratioOfComponentsWhoseExternalIngressIsProxied
+    "ratioOfComponentsWhoseExternalIngressIsProxied": ratioOfComponentsWhoseExternalIngressIsProxied,
+    "numberOfAvailabilityZonesUsedByServices": numberOfAvailabilityZonesUsedByServices,
+    "numberOfAvailabilityZonesUsedByStorageServices": numberOfAvailabilityZonesUsedByStorageServices
 }
 
