@@ -12,7 +12,7 @@
     "parseProfiles": "cd ./src/totypa/parsers/v2dot0-parsers && npx tsx profileParser.ts && cd /../../.."
   },
   "dependencies": {
-    "@joint/core": "^4.0.2",
+    "@joint/core": "^4.1.3",
     "bootstrap": "^5.3.3",
     "core-js": "^3.35.1",
     "jquery": "^3.7.1",
