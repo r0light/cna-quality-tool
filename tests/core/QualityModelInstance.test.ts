@@ -32,3 +32,15 @@ test("each factor has an evaluation", () =>{
     
     expect(notEvaluatedFactors.size,`The following factors don't have an evaluation: ${Array.from(notEvaluatedFactors).map(factor => factor.getId).join(", ")}`).toEqual(0);
 })
+
+test("each quality aspect has an evaluation", () => {
+
+    let qualityModel = getQualityModel();
+    let qualityAspects = new Set(qualityModel.qualityAspects);
+
+    let evaluatedQualityAspects = new Set(qualityModel.qualityAspects.filter(aspect => aspect.isEvaluationAvailable()));
+
+    let notEvaluatedQualityAspects = qualityAspects.difference(evaluatedQualityAspects);
+
+    expect(notEvaluatedQualityAspects.size, `The following quality Aspects don't have an evaluation: ${Array.from(notEvaluatedQualityAspects).map(aspect => aspect.getId).join(", ")}`).toEqual(0);
+})
