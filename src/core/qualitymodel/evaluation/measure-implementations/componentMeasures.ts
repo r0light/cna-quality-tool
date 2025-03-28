@@ -1463,12 +1463,16 @@ export const rollingUpdates: Calculation = (parameters: CalculationParameters<Co
     return rolling.length / deploymentMappingsForThisComponent.length;
 }
 
-export const ratioOfComponentsWhoseIngressIsProxied: Calculation = (parameters: CalculationParameters<Component>) => {
+export const ratioOfComponentsWhoseExternalIngressIsProxied: Calculation = (parameters: CalculationParameters<Component>) => {
     if (parameters.entity.constructor.name === ProxyBackingService.name) {
         return "n/a";
     }
 
-    return  parameters.entity.getExternalIngressProxiedBy && parameters.entity.getIngressProxiedBy ? 1 : 0;
+    if (parameters.entity.getExternalEndpointEntities.length === 0) {
+        return "n/a";
+    }
+
+    return  parameters.entity.getExternalIngressProxiedBy ? 1 : 0;
 }
 
 export const componentMeasureImplementations: { [measureKey: string]: Calculation } = {
@@ -1552,6 +1556,6 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "ratioOfCachedDataAggregates": ratioOfCachedDataAggregates,
     "dataShardingLevel": dataShardingLevel,
     "rollingUpdates": rollingUpdates,
-    "ratioOfComponentsWhoseIngressIsProxied": ratioOfComponentsWhoseIngressIsProxied
+    "ratioOfComponentsWhoseExternalIngressIsProxied": ratioOfComponentsWhoseExternalIngressIsProxied
 }
 

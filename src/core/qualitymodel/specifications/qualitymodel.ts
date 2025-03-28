@@ -1174,11 +1174,11 @@ const productFactors = {
         "relevantEntities": [ENTITIES.ENDPOINT, ENTITIES.EXTERNAL_ENDPOINT, ENTITIES.COMPONENT, ENTITIES.PROXY_BACKING_SERVICE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Scholl2019", "section": "6 Implement Rate Limiting and Throttling" }, { "key": "Adkins2020", "section": "8 Throttling (Delaying processing or responding to remain functional and decrease traffic from individual clients) (should be automated, part of graceful degradation)" }, { "key": "Adkins2020", "section": "8 Load shedding (In case of traffic spike, deny low priority requests to remain functional) (should be automated, part of graceful degradation)" }, { "key": "Goniwada2021", "section": "5 Throttling " }],
-        "measures": ["ratioOfComponentsWhoseIngressIsProxied"],
+        "measures": ["ratioOfComponentsWhoseExternalIngressIsProxied"],
         "evaluations": [            {
             "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
             "evaluation": "guardedIngress",
-            "reasoning": "The evaluation is based on whether the ingress traffic on considered components is proxied. Proxies can provide analysis, transformation and filtering of incoming traffic."
+            "reasoning": "The evaluation is based on whether the external ingress traffic on considered components is proxied. Proxies can provide analysis, transformation and filtering of incoming traffic."
         },]
     },
     "distribution": {
@@ -2139,9 +2139,9 @@ const measures = {
         "sources": ["Apel2019"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },
-    "ratioOfComponentsWhoseIngressIsProxied": {
-        "name": "Ratio of components whose ingress is proxied",
-        "calculation": "Number of components with an ingress proxy / Total number of components",
+    "ratioOfComponentsWhoseExternalIngressIsProxied": {
+        "name": "Ratio of components whose external ingress is proxied",
+        "calculation": "Number of components with external endpoints and an external ingress proxy / Total number of components with external endpoints",
         "sources": ["Ntentos2022"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
     },

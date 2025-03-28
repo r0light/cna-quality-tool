@@ -2572,7 +2572,7 @@ test("rollingUpdates", () => {
 })
 
 
-test("ratioOfComponentsWhoseIngressIsProxied", () => {
+test("ratioOfComponentsWhoseExternalIngressIsProxied", () => {
     let system = new System("sys1", "testSystem");;
 
     let serviceA = new Service("s1", "testService 1", getEmptyMetaData());
@@ -2618,6 +2618,6 @@ test("ratioOfComponentsWhoseIngressIsProxied", () => {
     system.addEntities([linkAB, linkDC, linkCSBS])
     system.addEntity(requestTrace);
 
-    let measureValue = requestTraceMeasureImplementations["ratioOfComponentsWhoseIngressIsProxied"]({ entity: requestTrace, system: system });
-    expect(measureValue).toEqual(1/4);
+    let measureValue = requestTraceMeasureImplementations["ratioOfComponentsWhoseExternalIngressIsProxied"]({ entity: requestTrace, system: system });
+    expect(measureValue).toEqual(1);
 })

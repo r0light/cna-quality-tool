@@ -1069,7 +1069,7 @@ export const rollingUpdates: Calculation = (parameters: CalculationParameters<Re
     return rolling.length / deploymentMappingsForThisRequestTrace.length;
 }
 
-export const ratioOfComponentsWhoseIngressIsProxied: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+export const ratioOfComponentsWhoseExternalIngressIsProxied: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
 
     let includedComponents = getIncludedComponents(parameters.entity, parameters.system)
 
@@ -1079,15 +1079,23 @@ export const ratioOfComponentsWhoseIngressIsProxied: Calculation = (parameters: 
         return "n/a";
     }
 
-    let numberOfComponentsWithProxiedIngress = 0;
+    let allComponentsWithExternalEndpoints = 0;
+    let numberOfComponentsWithProxiedExternalIngress = 0;
 
     for (const component of includedComponents) {
-        if (component.getExternalIngressProxiedBy && component.getIngressProxiedBy) {
-            numberOfComponentsWithProxiedIngress++;
+        if (component.getExternalEndpointEntities.length > 0) {
+            allComponentsWithExternalEndpoints++;
+            if (component.getExternalIngressProxiedBy) {
+                numberOfComponentsWithProxiedExternalIngress++;
+            }
         }
     }
 
-    return numberOfComponentsWithProxiedIngress / includedComponents.length;
+    if (allComponentsWithExternalEndpoints === 0 ) {
+        return "n/a";
+    }
+
+    return numberOfComponentsWithProxiedExternalIngress / allComponentsWithExternalEndpoints;
 }
 
 export const requestTraceMeasureImplementations: { [measureKey: string]: Calculation } = {
@@ -1143,6 +1151,6 @@ export const requestTraceMeasureImplementations: { [measureKey: string]: Calcula
     "degreeOfSeparationByGateways": degreeOfSeparationByGateways,
     "serviceInteractionViaBackingService": serviceInteractionViaBackingService,
     "rollingUpdates": rollingUpdates,
-    "ratioOfComponentsWhoseIngressIsProxied": ratioOfComponentsWhoseIngressIsProxied
+    "ratioOfComponentsWhoseExternalIngressIsProxied": ratioOfComponentsWhoseExternalIngressIsProxied
 }
 

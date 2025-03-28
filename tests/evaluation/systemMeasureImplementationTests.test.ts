@@ -2192,7 +2192,7 @@ test("serviceDiscoveryUsage", () => {
     expect(measureValue).toEqual(3 / 5);
 })
 
-test("ratioOfComponentsWhoseIngressIsProxied", () => {
+test("ratioOfComponentsWhoseExternalIngressIsProxied", () => {
     let system = new System("sys1", "testSystem");;
 
     let serviceA = new Service("s1", "testService 1", getEmptyMetaData());
@@ -2230,47 +2230,8 @@ test("ratioOfComponentsWhoseIngressIsProxied", () => {
 
     system.addEntities([serviceA, serviceB, serviceC, serviceD, storageBackingService, gatewayServiceA, serviceMesh]);
 
-    let measureValue = systemMeasureImplementations["ratioOfComponentsWhoseIngressIsProxied"]({ entity: system, system: system });
-    expect(measureValue).toEqual(2 / 5);
-})
-
-test("ratioOfComponentsWhoseEgressIsProxied", () => {
-    let system = new System("sys1", "testSystem");;
-
-    let serviceA = new Service("s1", "testService 1", getEmptyMetaData());
-    let externalEndpointA = new ExternalEndpoint("ee1", "external endpoint 1", getEmptyMetaData());
-    serviceA.addEndpoint(externalEndpointA);
-    let serviceB = new Service("s2", "testService 2", getEmptyMetaData());
-    let endpointB = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
-    serviceB.addEndpoint(endpointB);
-    let serviceC = new Service("s3", "testService 3", getEmptyMetaData());
-    let externalEndpointC = new ExternalEndpoint("ee2", "external endpoint 2", getEmptyMetaData());
-    serviceC.addEndpoint(externalEndpointC);
-
-    let serviceD = new Service("s4", "testService 3", getEmptyMetaData());
-    let endpointD = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
-    serviceD.addEndpoint(endpointD);
-
-    let storageBackingService = new StorageBackingService("sbs1", "storageBackingService", getEmptyMetaData());
-    let endpointSBS = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
-    storageBackingService.addEndpoint(endpointSBS);
-
-    let gatewayServiceA = new ProxyBackingService("p1", "proxy 1", getEmptyMetaData());
-    gatewayServiceA.setPropertyValue("kind", "API Gateway");
-
-    let serviceMesh = new ProxyBackingService("p2", "proxy ", getEmptyMetaData());
-    serviceMesh.setPropertyValue("kind", "Service Mesh");
-
-    serviceA.setEgressProxiedBy = serviceMesh;
-
-    serviceB.setEgressProxiedBy = serviceMesh;
-
-    storageBackingService.setEgressProxiedBy = serviceMesh;
-
-    system.addEntities([serviceA, serviceB, serviceC, serviceD, storageBackingService, gatewayServiceA, serviceMesh]);
-
-    let measureValue = systemMeasureImplementations["ratioOfComponentsWhoseEgressIsProxied"]({ entity: system, system: system });
-    expect(measureValue).toEqual(3 / 5);
+    let measureValue = systemMeasureImplementations["ratioOfComponentsWhoseExternalIngressIsProxied"]({ entity: system, system: system });
+    expect(measureValue).toEqual(0.5);
 })
 
 test("ratioOfCachedDataAggregates", () => {

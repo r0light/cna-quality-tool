@@ -775,7 +775,7 @@ const productFactorEvaluationImplementation: {
         return linearNumericalMapping(replacingDeployments as number);
     },
     "guardedIngress": (parameters) => {
-        let ratioOfComponentsWhoseIngressIsProxied = parameters.calculatedMeasures.get("ratioOfComponentsWhoseIngressIsProxied").value;
+        let ratioOfComponentsWhoseIngressIsProxied = parameters.calculatedMeasures.get("ratioOfComponentsWhoseExternalIngressIsProxied").value;
 
         if (ratioOfComponentsWhoseIngressIsProxied === "n/a") {
             return "n/a";

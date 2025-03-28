@@ -1485,7 +1485,7 @@ export const serviceDiscoveryUsage: Calculation = (parameters: CalculationParame
     return calculateNumberOfLinksWithServiceDiscovery(allLinks) as number / allLinks.length;
 }
 
-export const ratioOfComponentsWhoseIngressIsProxied: Calculation = (parameters: CalculationParameters<System>) => {
+export const ratioOfComponentsWhoseExternalIngressIsProxied: Calculation = (parameters: CalculationParameters<System>) => {
 
     const [allNonProxyComponents, proxyComponents] = partition([...parameters.entity.getComponentEntities.entries()], ([componentId, component]) => component.constructor.name !== ProxyBackingService.name);
 
@@ -1493,15 +1493,23 @@ export const ratioOfComponentsWhoseIngressIsProxied: Calculation = (parameters: 
         return "n/a";
     }
 
-    let numberOfComponentsWithProxiedIngress = 0;
+    let allComponentsWithExternalEndpoints = 0;
+    let numberOfComponentsWithProxiedExternalIngress = 0;
 
     for (const [componentId, component] of allNonProxyComponents) {
-        if (component.getExternalIngressProxiedBy && component.getIngressProxiedBy) {
-            numberOfComponentsWithProxiedIngress++;
+        if (component.getExternalEndpointEntities.length > 0) {
+            allComponentsWithExternalEndpoints++;
+            if (component.getExternalIngressProxiedBy) {
+                numberOfComponentsWithProxiedExternalIngress++;
+            }
         }
     }
 
-    return numberOfComponentsWithProxiedIngress / allNonProxyComponents.length;
+    if (allComponentsWithExternalEndpoints === 0 ) {
+        return "n/a";
+    }
+
+    return numberOfComponentsWithProxiedExternalIngress / allComponentsWithExternalEndpoints;
 }
 
 export const ratioOfComponentsWhoseEgressIsProxied: Calculation = (parameters: CalculationParameters<System>) => {
@@ -2770,7 +2778,7 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation }
     "ratioOfComponentsOrInfrastructureNodesThatExportMetrics": ratioOfComponentsOrInfrastructureNodesThatExportMetrics,
     "distributedTracingSupport": distributedTracingSupport,
     "serviceDiscoveryUsage": serviceDiscoveryUsage,
-    "ratioOfComponentsWhoseIngressIsProxied": ratioOfComponentsWhoseIngressIsProxied,
+    "ratioOfComponentsWhoseExternalIngressIsProxied": ratioOfComponentsWhoseExternalIngressIsProxied,
     "ratioOfComponentsWhoseEgressIsProxied": ratioOfComponentsWhoseEgressIsProxied,
     "ratioOfCachedDataAggregates": ratioOfCachedDataAggregates,
     "ratioOfStateDependencyOfEndpoints": ratioOfStateDependencyOfEndpoints,

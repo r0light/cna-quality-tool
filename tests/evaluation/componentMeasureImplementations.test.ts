@@ -2317,7 +2317,7 @@ test("rollingUpdates", () => {
 })
 
 
-test("ratioOfComponentsWhoseIngressIsProxied", () => {
+test("ratioOfComponentsWhoseExternalIngressIsProxied", () => {
     let system = new System("sys1", "testSystem");;
 
     let serviceA = new Service("s1", "testService 1", getEmptyMetaData());
@@ -2336,6 +2336,6 @@ test("ratioOfComponentsWhoseIngressIsProxied", () => {
 
     system.addEntities([serviceA, gatewayServiceA, serviceMesh]);
 
-    let measureValue = componentMeasureImplementations["ratioOfComponentsWhoseIngressIsProxied"]({ entity: serviceA, system: system });
+    let measureValue = componentMeasureImplementations["ratioOfComponentsWhoseExternalIngressIsProxied"]({ entity: serviceA, system: system });
     expect(measureValue).toEqual(1);
 })
