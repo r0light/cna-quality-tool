@@ -686,6 +686,103 @@ const productFactorEvaluationImplementation: {
 
         return linearNumericalMapping(ratioOfAbstractedHardware as number);
     },
+    "cloudVendorAbstraction": (parameters) => {
+        let nonProviderSpecificInfrastructureArtifacts = parameters.calculatedMeasures.get("nonProviderSpecificInfrastructureArtifacts").value;
+        let nonProviderSpecificComponentArtifacts = parameters.calculatedMeasures.get("nonProviderSpecificComponentArtifacts").value;
+
+        if (nonProviderSpecificInfrastructureArtifacts === "n/a") {
+            if (nonProviderSpecificComponentArtifacts === "n/a") {
+                return "n/a";
+            }
+            return linearNumericalMapping(nonProviderSpecificComponentArtifacts as number);
+        } else {
+            if (nonProviderSpecificComponentArtifacts === "n/a") {
+                return linearNumericalMapping(nonProviderSpecificInfrastructureArtifacts as number);
+            } else {
+                return linearNumericalMapping(average([nonProviderSpecificInfrastructureArtifacts as number, nonProviderSpecificComponentArtifacts as number]));
+            }
+        }
+    },
+    "cloudVendorAbstractionForInfrastructure": (parameters) => {
+        let nonProviderSpecificInfrastructureArtifacts = parameters.calculatedMeasures.get("nonProviderSpecificInfrastructureArtifacts").value;
+
+        if (nonProviderSpecificInfrastructureArtifacts === "n/a") {
+            return "n/a";
+        }
+
+        return linearNumericalMapping(nonProviderSpecificInfrastructureArtifacts as number);
+    },
+    "cloudVendorAbstractionForComponents": (parameters) => {
+        let nonProviderSpecificComponentArtifacts = parameters.calculatedMeasures.get("nonProviderSpecificComponentArtifacts").value;
+
+        if (nonProviderSpecificComponentArtifacts === "n/a") {
+            return "n/a";
+        }
+
+        return linearNumericalMapping(nonProviderSpecificComponentArtifacts as number);
+    },
+    "isolatedConfiguration": (parameters) => {
+        let configurationExternalization = parameters.calculatedMeasures.get("configurationExternalization").value;
+
+        if (configurationExternalization === "n/a") {
+            return "n/a";
+        }
+
+        return linearNumericalMapping(configurationExternalization as number);
+    },
+    "configurationStoredInSpecializedServices": (parameters) => {
+        let configurationStoredInConfigService = parameters.calculatedMeasures.get("configurationStoredInConfigService").value;
+
+        if (configurationStoredInConfigService === "n/a") {
+            return "n/a";
+        }
+
+        return linearNumericalMapping(configurationStoredInConfigService as number);
+    },
+    "contract-BasedLinks": (parameters) => {
+        let ratioOfEndpointsCoveredByContract = parameters.calculatedMeasures.get("ratioOfEndpointsCoveredByContract").value;
+
+        if (ratioOfEndpointsCoveredByContract === "n/a") {
+            return "n/a";
+        }
+
+        return linearNumericalMapping(ratioOfEndpointsCoveredByContract as number);
+    },
+    "standardizedSelf-containedDeploymentUnit": (parameters) => {
+        let standardizedDeployments = parameters.calculatedMeasures.get("standardizedDeployments").value;
+        let selfContainedDeployments = parameters.calculatedMeasures.get("selfContainedDeployments").value;
+
+        if (standardizedDeployments === "n/a") {
+            if (selfContainedDeployments === "n/a") {
+                return "n/a";
+            }
+            return linearNumericalMapping(selfContainedDeployments as number);
+        } else {
+            if (selfContainedDeployments === "n/a") {
+                return linearNumericalMapping(standardizedDeployments as number);
+            } else {
+                return linearNumericalMapping(average([standardizedDeployments as number, selfContainedDeployments as number]));
+            }
+        }
+    },
+    "immutableArtifacts": (parameters) => {
+        let replacingDeployments = parameters.calculatedMeasures.get("replacingDeployments").value;
+
+        if (replacingDeployments === "n/a") {
+            return "n/a";
+        }
+
+        return linearNumericalMapping(replacingDeployments as number);
+    },
+    "guardedIngress": (parameters) => {
+        let ratioOfComponentsWhoseIngressIsProxied = parameters.calculatedMeasures.get("ratioOfComponentsWhoseIngressIsProxied").value;
+
+        if (ratioOfComponentsWhoseIngressIsProxied === "n/a") {
+            return "n/a";
+        }
+
+        return linearNumericalMapping(ratioOfComponentsWhoseIngressIsProxied as number);
+    },
 };
 
 

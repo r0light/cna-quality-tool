@@ -488,7 +488,7 @@ const productFactors = {
         "description": "For stateful components, that means components that do require durable disk space on the infrastructure that they run on, specialized software or frameworks are used that can handle distributed state by replicating it over several components or component instances while still ensuring consistency requirements for that state.",
         "categories": ["dataManagement", "businessDomain"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.STORAGE_BACKING_SERVICE, ENTITIES.DATA_AGGREGATE],
-        "applicableEntities":  [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Davis2019", "section": "5.4" }, { "key": "Ibryam2020", "section": "11 “Stateful Service”" }],
         "measures": ["ratioOfSpecializedStatefulServices", "suitablyReplicatedStatefulService"],
         "evaluations": [{
@@ -742,15 +742,15 @@ const productFactors = {
         "measures": ["numberOfLinksPerComponent", "numberOfConsumedEndpoints", "incomingOutgoingRatioOfAComponent", "ratioOfOutgoingLinksOfAService", "couplingDegreeBasedOnPotentialCoupling", "interactionDensityBasedOnComponents", "interactionDensityBasedOnLinks", "serviceCouplingBasedOnEndpointEntropy", "systemCouplingBasedOnEndpointEntropy", "modularityQualityBasedOnCohesionAndCoupling", "combinedMetricForIndirectDependency", "servicesInterdependenceInTheSystem", "indirectInteractionDensity", "averageNumberOfDirectlyConnectedServices", "numberOfComponentsThatAreLinkedToAComponent", "numberOfComponentsAComponentIsLinkedTo", "numberOfLinksBetweenTwoServices", "aggregateSystemMetricToMeasureServiceCoupling", "numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfComponents", "degreeOfCouplingInASystem", "serviceCouplingBasedOnDataExchangeComplexity", "simpleDegreeOfCouplingInASystem", "directServiceSharing", "transitivelySharedServices", "ratioOfSharedNonExternalComponentsToNonExternalComponents", "ratioOfSharedDependenciesOfNonExternalComponentsToPossibleDependencies", "degreeOfDependenceOnOtherComponents", "averageSystemCoupling", "couplingOfServicesBasedOnUsedDataAggregates", "couplingOfServicesBasedServicesWhichCallThem", "couplingOfServicesBasedServicesWhichAreCalledByThem", "couplingOfServicesBasedOnAmountOfRequestTracesThatIncludeASpecificLink", "couplingOfServicesBasedTimesThatTheyOccurInTheSameRequestTrace"],
         "evaluations": [
             {
-            "targetEntities": [ENTITIES.COMPONENT],
-            "evaluation": "lowCouplingForComponent",
-            "reasoning": "Evaluation is based on the number of components a component is linked to relative to the total amount of components. The higher this metric is, the less this factor is fulfilled."
-        },
-        {
-            "targetEntities": [ENTITIES.SYSTEM],
-            "evaluation": "lowCouplingForSystem",
-            "reasoning": "Evaluation is based on the simple degree of coupling in the system. The higher this degree is, the less this factor is fulfilled."
-        }]
+                "targetEntities": [ENTITIES.COMPONENT],
+                "evaluation": "lowCouplingForComponent",
+                "reasoning": "Evaluation is based on the number of components a component is linked to relative to the total amount of components. The higher this metric is, the less this factor is fulfilled."
+            },
+            {
+                "targetEntities": [ENTITIES.SYSTEM],
+                "evaluation": "lowCouplingForSystem",
+                "reasoning": "Evaluation is based on the simple degree of coupling in the system. The higher this degree is, the less this factor is fulfilled."
+            }]
     },
     "functionalDecentralization": {
         "name": "Functional decentralization",
@@ -1053,7 +1053,23 @@ const productFactors = {
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE],
         "sources": [{ "key": "Indrasiri2021", "section": "1 Dynamic Management; Multicloud support" }],
         "measures": ["servicePortability", "nonProviderSpecificInfrastructureArtifacts", "nonProviderSpecificComponentArtifacts"],
-        "evaluations": []
+        "evaluations": [
+            {
+                "targetEntities": [ENTITIES.SYSTEM],
+                "evaluation": "cloudVendorAbstraction",
+                "reasoning": "The evaluation of this factor considers whether artifacts used for components and infrastructure are specific to certain cloud providers or not."
+            },
+            {
+                "targetEntities": [ENTITIES.INFRASTRUCTURE],
+                "evaluation": "cloudVendorAbstractionForInfrastructure",
+                "reasoning": "The evaluation of this factor considers whether artifacts used for infrastructure are specific to certain cloud providers or not."
+            },
+            {
+                "targetEntities": [ENTITIES.COMPONENT],
+                "evaluation": "cloudVendorAbstractionForComponents",
+                "reasoning": "The evaluation of this factor considers whether artifacts used for components are specific to certain cloud providers or not."
+            },
+        ]
     },
     "configurationManagement": {
         "name": "Configuration management",
@@ -1063,7 +1079,15 @@ const productFactors = {
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
         "sources": [],
         "measures": [],
-        "evaluations": []
+        "evaluations": [
+            {
+                "targetEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+                "evaluation": "aggregateImpacts",
+                "reasoning": "Configuration management is concered with where and how config data is stored and how it is made accessible to components which need them.",
+                "precondition": "at-least-one",
+                "impactsInterpretation": "median"
+            }
+        ]
     },
     "isolatedConfiguration": {
         "name": "Isolated configuration",
@@ -1073,27 +1097,43 @@ const productFactors = {
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Davis2019", "section": "6.2 The app's configuration layer" }, { "key": "Ibryam2020", "section": "18" }, { "key": "Scholl2019", "section": "6 Never Store Secrets or Configuration Inside an Image" }, { "key": "Adkins2020", "section": "14 Treat Configuration as Code" }, { "key": "Indrasiri2021", "section": " Decoupled Configurations" }],
         "measures": ["configurationExternalization"],
-        "evaluations": []
+        "evaluations": [
+            {
+                "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
+                "evaluation": "isolatedConfiguration",
+                "reasoning": "Configuration is isolated, when it is externalized from those components that use it. The more configuration data is externalized, the more this factor is fulfilled."
+            },
+        ]
     },
     "configurationStoredInSpecializedServices": {
         "name": "Configuration stored in specialized services",
         "description": "Configuration values are stored in specialized backing services and not only environment variables for example. That way, changing configurations at runtime is facilitated and can be enabled by connecting components to such specialized backing services and checking for updated configurations at runtime. Additionally, configurations can be stored once, but accessed by different components.",
         "categories": ["applicationAdministration", "dataManagement"],
         "relevantEntities": [ENTITIES.BACKING_DATA, ENTITIES.INFRASTRUCTURE, ENTITIES.COMPONENT, ENTITIES.BACKING_SERVICE],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE],
         "sources": [{ "key": "Ibryam2020", "section": "19 Configuration Resource" }, { "key": "Richardson2019", "section": "11.2 “Designing configurable services" }, { "key": "Arundel2019", "section": "10 ConfigMaps" }, { "key": "Bastani2017", "section": "2 Centralized, Journaled Configuration" }, { "key": "Bastani2017", "section": "2 Refreshable Configuration" }],
         "measures": ["configurationStoredInConfigService"],
-        "evaluations": []
+        "evaluations": [{
+            "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE],
+            "evaluation": "configurationStoredInSpecializedServices",
+            "reasoning": "The more config data is stored in specialized config services, the more this factor is fulfilled."
+        },]
     },
     "contract-BasedLinks": {
         "name": "Contract-based links",
         "description": "Contracts are defined for the communication via links so that changes to endpoints can be evaluated by their impact on the contract and delayed when a contract would be broken. That way consumers of endpoints can adapt to changes when necessary without suddenly breaking communication via a link due to a changed endpoint.",
         "categories": ["networkCommunication", "businessDomain"],
         "relevantEntities": [ENTITIES.LINK, ENTITIES.ENDPOINT, ENTITIES.COMPONENT],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Bastani2017", "section": "4 Consumer-Driven Contract Testing (Use contracts for APIs to test against)" }],
         "measures": ["ratioOfEndpointsCoveredByContract"],
-        "evaluations": []
+        "evaluations": [
+            {
+                "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
+                "evaluation": "contract-BasedLinks",
+                "reasoning": "The more endpoints are covered by a contract artifact, the more this factor is fulfilled."
+            },
+        ]
     },
     "standardizedSelf-containedDeploymentUnit": {
         "name": "Standardized self-contained deployment unit",
@@ -1103,17 +1143,29 @@ const productFactors = {
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Reznik2019", "section": "10 Containerized Apps" }, { "key": "Adkins2020", "section": "7 Use Containers (smaller deployments, separated operating system, portable);" }, { "key": "Indrasiri2021", "section": "1 Use Containerization and Container Orchestration" }, { "key": "Garrison2017", "section": "7 Application Runtime and Isolation" }, { "key": "Goniwada2021", "section": "3 Deploy Independently Principle (deploy services in independent containers), Self-Containment Principle, 5 Containerization" }],
         "measures": ["standardizedDeployments", "selfContainedDeployments"],
-        "evaluations": []
+        "evaluations": [
+            {
+                "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
+                "evaluation": "standardizedSelf-containedDeploymentUnit",
+                "reasoning": "The evaluation is based on whether artifacts of components are standardized and self-contained, both aspects contribute equally to the fulfillment of this factor."
+            },
+        ]
     },
     "immutableArtifacts": {
         "name": "Immutable artifacts",
         "description": "Infrastructure and components of a system are defined and described in its entirety at development time so that artifacts are immutable at runtime. This means upgrades are introduced at runtime through replacement of components instead of modification. Furthermore components do not differ across environments and in case of replication all replicas are identical to avoid unexpected behavior.",
         "categories": ["applicationAdministration"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.DEPLOYMENT_MAPPING, ENTITIES.INFRASTRUCTURE],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE],
         "sources": [{ "key": "Scholl2019", "section": "6 Don't Modify Deployed Infrastructure" }, { "key": "Indrasiri2021", "section": "1 Containerization" }, { "key": "Goniwada2021", "section": "3 Process Disposability Principle, Image Immutability Principle" }],
         "measures": ["numberOfDeploymentTargetEnvironments", "replacingDeployments"],
-        "evaluations": []
+        "evaluations": [
+            {
+                "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE],
+                "evaluation": "immutableArtifacts",
+                "reasoning": "The evaluation is based on whether the deployment mappings in focus are immutable in the sense that they do not allow in-place updates, but instead replacing updates."
+            },
+        ]
     },
     "guardedIngress": {
         "name": "Guarded ingress",
@@ -1123,7 +1175,11 @@ const productFactors = {
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Scholl2019", "section": "6 Implement Rate Limiting and Throttling" }, { "key": "Adkins2020", "section": "8 Throttling (Delaying processing or responding to remain functional and decrease traffic from individual clients) (should be automated, part of graceful degradation)" }, { "key": "Adkins2020", "section": "8 Load shedding (In case of traffic spike, deny low priority requests to remain functional) (should be automated, part of graceful degradation)" }, { "key": "Goniwada2021", "section": "5 Throttling " }],
         "measures": ["ratioOfComponentsWhoseIngressIsProxied"],
-        "evaluations": []
+        "evaluations": [            {
+            "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
+            "evaluation": "guardedIngress",
+            "reasoning": "The evaluation is based on whether the ingress traffic on considered components is proxied. Proxies can provide analysis, transformation and filtering of incoming traffic."
+        },]
     },
     "distribution": {
         "name": "Distribution",
@@ -2415,7 +2471,7 @@ const measures = {
         "name": "Configuration stored in config service",
         "calculation": "Backing Data of type config stored in config service / All backing data of type config",
         "sources": ["new"],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT]
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE]
     },
     "ratioOfEndpointsCoveredByContract": {
         "name": "Ratio of endpoints covered by contract",

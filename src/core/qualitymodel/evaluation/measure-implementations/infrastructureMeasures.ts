@@ -1,6 +1,6 @@
 import { BackingService, DeploymentMapping, Infrastructure } from "@/core/entities";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure";
-import { AUTOMATED_INFRASTRUCTURE_MAINTENANCE, AUTOMATED_INFRASTRUCTURE_PROVISIONING, AUTOMATED_RESTART_POLICIES, AUTOMATED_SCALING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, IAC_ARTIFACT_TYPE, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MANAGED_INFRASTRUCTURE_MAINTENANCE, ROLLING_UPDATE_STRATEGY_OPTIONS, VAULT_KIND } from "../../specifications/featureModel";
+import { AUTOMATED_INFRASTRUCTURE_MAINTENANCE, AUTOMATED_INFRASTRUCTURE_PROVISIONING, AUTOMATED_RESTART_POLICIES, AUTOMATED_SCALING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, CONFIG_SERVICE_KIND, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, IAC_ARTIFACT_TYPE, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MANAGED_INFRASTRUCTURE_MAINTENANCE, ROLLING_UPDATE_STRATEGY_OPTIONS, VAULT_KIND } from "../../specifications/featureModel";
 
 
 export const supportsMonitoring: (infrastructure: Infrastructure) => boolean = (infrastructure: Infrastructure) => {
@@ -362,6 +362,34 @@ export const ratioOfComponentsOrInfrastructureNodesThatExportMetrics: Calculatio
     return 0;
 }
 
+export const configurationStoredInConfigService: Calculation = (parameters: CalculationParameters<Infrastructure>) => {
+
+    let referencedConfigs = parameters.entity.getBackingDataEntities.filter(backingData => backingData.backingData.getProperty("kind").value === BACKING_DATA_CONFIG_KIND);
+
+    if (referencedConfigs.length === 0) {
+        return "n/a";
+    }
+
+    let usedConfigs = referencedConfigs.filter(backingData => DATA_USAGE_RELATION_USAGE.includes(backingData.relation.getProperty("usage_relation").value));
+    let usedConfigIds = usedConfigs.map(backingData => backingData.backingData.getId);
+
+    let configsInConfigService: Set<string> = new Set();
+
+    let allConfigServices = [...parameters.system.getComponentEntities.entries()].filter(([componentId, component]) => {
+        return component.constructor.name === BackingService.name && CONFIG_SERVICE_KIND.includes(component.getProperty("providedFunctionality").value);
+    })
+
+    for (const [configServiceId, configService] of allConfigServices) {
+        let configs = configService.getBackingDataEntities.filter(backingData => { return backingData.backingData.getProperty("kind").value === BACKING_DATA_CONFIG_KIND });
+        configs.forEach(config => {
+            if (usedConfigIds.includes(config.backingData.getId) && DATA_USAGE_RELATION_PERSISTENCE.includes(config.relation.getProperty("usage_relation").value)) {
+                configsInConfigService.add(config.backingData.getId);
+            }
+        })
+    }
+
+    return (configsInConfigService.size / referencedConfigs.length);
+}
 
 export const infrastructureMeasureImplementations: { [measureKey: string]: Calculation } = {
     "numberOfServiceHostedOnOneInfrastructure": numberOfServiceHostedOnOneInfrastructure,
@@ -385,5 +413,6 @@ export const infrastructureMeasureImplementations: { [measureKey: string]: Calcu
     "deploymentsWithRestart": deploymentsWithRestart,
     "secretsStoredInVault": secretsStoredInVault,
     "ratioOfComponentsOrInfrastructureNodesThatExportLogsToACentralService": ratioOfComponentsOrInfrastructureNodesThatExportLogsToACentralService,
-    "ratioOfComponentsOrInfrastructureNodesThatExportMetrics": ratioOfComponentsOrInfrastructureNodesThatExportMetrics
+    "ratioOfComponentsOrInfrastructureNodesThatExportMetrics": ratioOfComponentsOrInfrastructureNodesThatExportMetrics,
+    "configurationStoredInConfigService": configurationStoredInConfigService
 }
