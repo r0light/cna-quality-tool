@@ -2733,7 +2733,98 @@ const qualityAspectEvaluations = [
         "reasoning": "The authenticity depends on how well authentication is implemented and managed in a system",
         "precondition": "at-least-one",
         "impactsInterpretation": "median"
-    }
+    },
+    {
+        "targetAspect": "modularity",
+        "evaluation": "aggregateImpacts",
+        "reasoning": "The modularity mainly depends on service-orientation and how coupled components of a system are.",
+        "precondition": "at-least-one",
+        "impactsInterpretation": "median"
+    },
+    {
+        "targetAspect": "reusability",
+        "evaluation": "aggregateImpacts",
+        "reasoning": "The reusability depends on whether components are standardized and similar to each other. Then there is potentialy for reusability.",
+        "precondition": "at-least-one",
+        "impactsInterpretation": "median"
+    },
+    {
+        "targetAspect": "modifiability",
+        "evaluation": "aggregateImpacts",
+        "reasoning": "The modifiability depends on automation for changes and redeployments as well as independence of components.",
+        "precondition": "at-least-one",
+        "impactsInterpretation": "median"
+    },
+    {
+        "targetAspect": "testability",
+        "evaluation": "aggregateImpacts",
+        "reasoning": "The testability depends on whether interfaces are well documented and can thus be tested against these specifications.",
+        "precondition": "at-least-one",
+        "impactsInterpretation": "median"
+    },
+    {
+        "targetAspect": "simplicity",
+        "evaluation": "aggregateImpacts",
+        "reasoning": "The simplicity depends on how many components there are and how complex a system is.",
+        "precondition": "at-least-one",
+        "impactsInterpretation": "median"
+    },
+    {
+        "targetAspect": "resourceUtilization",
+        "evaluation": "aggregateImpacts",
+        "reasoning": "Resource Utilization can be improved if resource requirements are clear and the system manages the resource consumption.",
+        "precondition": "at-least-one",
+        "impactsInterpretation": "median"
+    },
+    {
+        "targetAspect": "elasticity",
+        "evaluation": "aggregateImpacts",
+        "reasoning": "Elasticity is impacted by statelessness as well as infrastructure supporting elastic scaling.",
+        "precondition": "at-least-one",
+        "impactsInterpretation": "median"
+    },
+    {
+        "targetAspect": "adaptability",
+        "evaluation": "aggregateImpacts",
+        "reasoning": "The adaptability can be improved through automationa and codification of requirements.",
+        "precondition": "at-least-one",
+        "impactsInterpretation": "median"
+    },
+    {
+        "targetAspect": "installability",
+        "evaluation": "aggregateImpacts",
+        "reasoning": "The installability depends on types of artifacts used and suitable automation.",
+        "precondition": "at-least-one",
+        "impactsInterpretation": "median"
+    },
+    {
+        "targetAspect": "replaceability",
+        "evaluation": "aggregateImpacts",
+        "reasoning": "The replaceability depends on how state is managed and how communcation is managed.",
+        "precondition": "at-least-one",
+        "impactsInterpretation": "median"
+    },
+    {
+        "targetAspect": "faultTolerance",
+        "evaluation": "aggregateImpacts",
+        "reasoning": "Fault Tolerance can be improved through managing communcation and implementing measures mitigating faults.",
+        "precondition": "at-least-one",
+        "impactsInterpretation": "median"
+    },
+    {
+        "targetAspect": "recoverability",
+        "evaluation": "aggregateImpacts",
+        "reasoning": "The recoverability depends on how quickly problems can be detected and on how easy it is to set up a system again.",
+        "precondition": "at-least-one",
+        "impactsInterpretation": "median"
+    },
+    {
+        "targetAspect": "interoperability",
+        "evaluation": "aggregateImpacts",
+        "reasoning": "The interoperability depends on how well interfaces are described and thus useable by others.",
+        "precondition": "at-least-one",
+        "impactsInterpretation": "median"
+    },
 ] satisfies QualityAspectEvaluationSpec[]
 
 
