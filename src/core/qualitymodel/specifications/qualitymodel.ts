@@ -749,7 +749,7 @@ const productFactors = {
             {
                 "targetEntities": [ENTITIES.SYSTEM],
                 "evaluation": "lowCouplingForSystem",
-                "reasoning": "Evaluation is based on the simple degree of coupling in the system. The higher this degree is, the less this factor is fulfilled."
+                "reasoning": "Evaluation is based on the degree of coupling in the system. The higher this degree is, the less this factor is fulfilled."
             }]
     },
     "functionalDecentralization": {

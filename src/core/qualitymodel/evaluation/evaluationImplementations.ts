@@ -478,13 +478,13 @@ const productFactorEvaluationImplementation: {
         return linearNumericalMapping(inverseCoupling as number);
     },
     "lowCouplingForSystem": (parameters) => {
-        let simpleDegreeOfCouplingInASystem = parameters.calculatedMeasures.get("simpleDegreeOfCouplingInASystem").value;
+        let degreeOfCouplingInASystem = parameters.calculatedMeasures.get("degreeOfCouplingInASystem").value;
 
-        if (simpleDegreeOfCouplingInASystem === "n/a") {
+        if (degreeOfCouplingInASystem === "n/a") {
             return "n/a";
         }
 
-        let inverseCoupling = 1 - (simpleDegreeOfCouplingInASystem as number);
+        let inverseCoupling = 1 - (degreeOfCouplingInASystem as number);
 
         return squareRootedNumericalMapping(inverseCoupling as number);
     },
