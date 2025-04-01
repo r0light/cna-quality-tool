@@ -113,7 +113,7 @@
                                         <tr v-for="row of option.tableRows" class="tableRow"
                                             :class="[{ 'text-muted': row.attributes.disabled }, row.attributes.representationClass]">
                                             <td v-for="[columnKey, columnValue] of Object.entries(row.columns)"
-                                                :data-table-context="columnKey" >
+                                                :data-table-context="columnKey">
                                                 <span v-if="typeof columnValue === 'string'"
                                                     :class="{ 'font-weight-bold': row.attributes.isTheCurrentEntity }">
                                                     {{
@@ -126,9 +126,13 @@
                                                         v-model="columnValue.checked">
                                                 </div>
                                                 <div v-if="typeof columnValue === 'object' && columnValue.contentType === PropertyContent.INPUT_NUMBERBOX"
-                                                    class="form-check" >
-                                                    <input class="position-static form-control" :class="[option.validationState, { 'cell-highlighted': columnValue.highlight(columnValue.value) }]" :id="columnValue.id"
-                                                        type="number" :min="columnValue.min" :max="columnValue.max"  :step="columnValue.step" :value="columnValue.value" :disabled="columnValue.disabled" v-model="columnValue.value">
+                                                    class="form-check">
+                                                    <input class="position-static form-control"
+                                                        :class="[option.validationState, { 'cell-highlighted': columnValue.highlight(columnValue.value) }]"
+                                                        :id="columnValue.id" type="number" :min="columnValue.min"
+                                                        :max="columnValue.max" :step="columnValue.step"
+                                                        :value="columnValue.value" :disabled="columnValue.disabled"
+                                                        v-model="columnValue.value">
                                                 </div>
                                             </td>
                                         </tr>
@@ -157,12 +161,16 @@
                                     <table class="table table-hover">
                                         <thead class="thead-dark">
                                             <tr>
-                                                <th v-for="elementField of option.attributes.listElementFields.slice(0, Math.min(3, option.attributes.listElementFields.length))">
+                                                <th
+                                                    v-for="elementField of option.attributes.listElementFields.slice(0, Math.min(3, option.attributes.listElementFields.length))">
                                                     {{ elementField.label }}
                                                 </th>
-                                                <th v-if="option.attributes.listElementFields.length > 3" class="overloaded">
-                                                    <span v-for="elementField of option.attributes.listElementFields.slice(3)"> {{ elementField.label }}</span>
-                                                
+                                                <th v-if="option.attributes.listElementFields.length > 3"
+                                                    class="overloaded">
+                                                    <span
+                                                        v-for="elementField of option.attributes.listElementFields.slice(3)">
+                                                        {{ elementField.label }}</span>
+
                                                 </th>
                                                 <th>Edit/Delete</th>
                                             </tr>
@@ -181,9 +189,12 @@
                                                     <!-- list with literals -->
                                                     <span>{{ row }}</span>
                                                 </td>
-                                                <td v-if="typeof row === 'object' && Object.entries(row).length > 3" class="overloaded">
+                                                <td v-if="typeof row === 'object' && Object.entries(row).length > 3"
+                                                    class="overloaded">
                                                     <!-- list with objects -->
-                                                    <span v-for="[columnKey, columnValue] of Object.entries(row).slice(3)"> {{ columnValue
+                                                    <span
+                                                        v-for="[columnKey, columnValue] of Object.entries(row).slice(3)">
+                                                        {{ columnValue
                                                         }}</span>
                                                 </td>
                                                 <td>
@@ -213,12 +224,13 @@
                                             class="form-control" type="text" :placeholder="elementField.placeholder"
                                             v-model="option.newElementData[elementField.key]">
                                         <select v-if="elementField.fieldType === 'dropdown'" :id="elementField.key"
-                                            class="form-control"
-                                            v-model="option.newElementData[elementField.key]" @change="onChangeFromDropdown(option, elementField)">
-                                        <option v-for="dropdownOption of elementField.dropdownOptions" :value="dropdownOption"> {{ dropdownOption }}</option>
+                                            class="form-control" v-model="option.newElementData[elementField.key]"
+                                            @change="onChangeFromDropdown(option, elementField)">
+                                            <option v-for="dropdownOption of elementField.dropdownOptions"
+                                                :value="dropdownOption"> {{ dropdownOption }}</option>
 
-                                    </select>
-                                    <input v-if="elementField.fieldType === 'boolean'" :id="elementField.key"
+                                        </select>
+                                        <input v-if="elementField.fieldType === 'boolean'" :id="elementField.key"
                                             class="dialogCheckBox form-check-input form-control" type="checkbox"
                                             :checked="option.newElementData[elementField.key]"
                                             v-model="option.newElementData[elementField.key]">
@@ -493,7 +505,7 @@ function onEditInDynamicList(propertyOption: EditPropertySection, listIndex: num
         // special case artifacts: refresh editable fields 
         emit("on:ChangeFromDropdown", propertyOption, propertyOption.attributes.listElementFields.find(field => {
             return field.key === "type";
-        } ), elementToEdit[0]["type"]);
+        }), elementToEdit[0]["type"]);
     }
 
     for (const [key, value] of Object.entries(propertyOption.newElementData)) {

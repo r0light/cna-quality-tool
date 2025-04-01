@@ -1325,15 +1325,19 @@ function onChangeFromDropdown(propertyOption: EditPropertySection, elementField:
         let properties = getArtifactTypeProperties(value);
         properties.forEach(property => {
             artifactOption.newElementData[property.getKey] = property.value
-            artifactOption.attributes.listElementFields.push({
-                fieldType: property.getDataType,
+            let field = {
+                fieldType: property.getDataType === "select" ? "dropdown" : property.getDataType,
                 key: property.getKey,
                 label: property.getName,
                 helpText: property.getDescription,
                 labelIcon: "fa-solid fa-sliders",
                 placeholder: property.getExample,
                 value: property.value
-            },)
+            }
+            if (property.getDataType === "select") {
+                field["dropdownOptions"] = (property as SelectEntityProperty).getOptions.map(option => option.value);
+            }
+            artifactOption.attributes.listElementFields.push(field);
 
         })
     }
