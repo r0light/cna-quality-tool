@@ -2741,3 +2741,89 @@ test("linksWithTimeout", () => {
     let measureValue = requestTraceMeasureImplementations["linksWithTimeout"]({ entity: requestTrace, system: system });
     expect(measureValue).toEqual(2/3);
 })
+
+test("ratioOfExternalEndpointsSupportingTls", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
+    externalEndpointA.setPropertyValue("protocol", "HTTPS");
+    serviceA.addEndpoint(endpointA);
+    serviceA.addEndpoint(externalEndpointA);
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+
+    let serviceD = new Service("s4", "testService", getEmptyMetaData());
+    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    serviceD.addEndpoint(endpointD);
+
+    let serviceE = new Service("s5", "testService", getEmptyMetaData());
+    let endpointE = new Endpoint("e5", "endpoint 5", getEmptyMetaData());
+    let externalEndpointE = new ExternalEndpoint("ex2", "external endpoint 2", getEmptyMetaData());
+    serviceE.addEndpoint(endpointE);
+    serviceE.addEndpoint(externalEndpointE);
+
+    let linkAB = new Link("l1", serviceA, endpointB);
+    let linkBC = new Link("l2", serviceB, endpointC);
+    let linkCD = new Link("l3", serviceC, endpointD);
+
+    let requestTrace = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
+    requestTrace.setLinks = [[linkAB], [linkBC], [linkCD]];
+    requestTrace.setExternalEndpoint = externalEndpointA;
+
+    system.addEntities([serviceA, serviceB, serviceC, serviceD, serviceE]);
+    system.addEntities([linkAB, linkBC, linkCD]);
+    system.addEntity(requestTrace);
+
+    let measureValue = requestTraceMeasureImplementations["ratioOfExternalEndpointsSupportingTls"]({ entity: requestTrace, system: system });
+    expect(measureValue).toEqual(1);
+})
+
+
+test("degreeOfAsynchronousCommunication", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA);
+    serviceA.addEndpoint(externalEndpointA);
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointB1 = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    endpointB1.setPropertyValue("kind", SEND_EVENT_ENDPOINT_KIND);
+    serviceB.addEndpoint(endpointB1);
+    let endpointB2 = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+    endpointB2.setPropertyValue("kind", SUBSCRIBE_ENDPOINT_KIND);
+    serviceB.addEndpoint(endpointB2);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+
+    let serviceD = new Service("s4", "testService", getEmptyMetaData());
+    let endpointD = new Endpoint("e5", "endpoint 5", getEmptyMetaData());
+    serviceD.addEndpoint(endpointD);
+
+    let linkAB = new Link("l1", serviceA, endpointB1);
+    let linkCB = new Link("l2", serviceC, endpointB2);
+    let linkCD = new Link("l3", serviceC, endpointD);
+
+    let requestTrace = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
+    requestTrace.setLinks = [[linkAB], [linkCB], [linkCD]];
+    requestTrace.setExternalEndpoint = externalEndpointA;
+
+    system.addEntities([serviceA, serviceB, serviceC, serviceD]);
+    system.addEntities([linkAB, linkCB, linkCD]);
+    system.addEntity(requestTrace);
+
+    let measureValue = requestTraceMeasureImplementations["degreeOfAsynchronousCommunication"]({ entity: requestTrace, system: system });
+    expect(measureValue).toEqual(0.5);
+})

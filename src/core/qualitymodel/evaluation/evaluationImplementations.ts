@@ -286,7 +286,7 @@ const productFactorEvaluationImplementation: {
             return "n/a";
         }
 
-        return exponentialNumericalMapping(average([ratioOfStatelessComponents, degreeToWhichComponentsAreLinkedToStatefulComponents] as number[]));
+        return squareRootedNumericalMapping(average([ratioOfStatelessComponents, degreeToWhichComponentsAreLinkedToStatefulComponents] as number[]));
     },
     "specializedStatefulServices": (parameters) => {
         let ratioOfSpecializedStatefulServices = parameters.calculatedMeasures.get("ratioOfSpecializedStatefulServices").value;

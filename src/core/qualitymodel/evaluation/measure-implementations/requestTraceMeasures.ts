@@ -1,9 +1,9 @@
-import { BackingService, BrokerBackingService, Component, DeploymentMapping, Infrastructure, ProxyBackingService, RequestTrace, Service, StorageBackingService, System } from "@/core/entities";
+import { BackingService, BrokerBackingService, Component, DeploymentMapping, ExternalEndpoint, Infrastructure, ProxyBackingService, RequestTrace, Service, StorageBackingService, System } from "@/core/entities";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure";
 import { average, lowest, median } from "./general-functions";
-import { calculateRatioOfEndpointsSupportingSsl, componentMeasureImplementations, providesHealthAndReadinessEndpoints } from "./componentMeasures";
+import { calculateRatioOfEndpointsSupportingSsl, calculateRatioOfExternalEndpointsSupportingTls, componentMeasureImplementations, providesHealthAndReadinessEndpoints } from "./componentMeasures";
 import { calculateNumberOfLinksWithServiceDiscovery, calculateRatioOfLinksToAsynchronousEndpoints, calculateRatioOfSecuredLinks, calculateRatioOfStatefulComponents, calculateRatioOfStatelessComponents, calculateReplicasPerService, countComponentsConnectedToCertainEndpoints, getServiceInteractions } from "./systemMeasures";
-import { BACKING_DATA_CONFIG_KIND, BACKING_DATA_SECRET_KIND, CONTRACT_ARTIFACT_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, EVENT_SOURCING_KIND, MESSAGE_BROKER_KIND, ROLLING_UPDATE_STRATEGY_OPTIONS, SERVICE_MESH_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "../../specifications/featureModel";
+import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_CONFIG_KIND, BACKING_DATA_SECRET_KIND, CONTRACT_ARTIFACT_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, EVENT_SOURCING_KIND, MESSAGE_BROKER_KIND, ROLLING_UPDATE_STRATEGY_OPTIONS, SERVICE_MESH_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "../../specifications/featureModel";
 import { supportsMonitoring as infrastructureSupportsMonitoring } from "./infrastructureMeasures";
 import { supportsMonitoring as componentSupportsMonitoring } from "./componentMeasures";
 import { serviceMeshUsage as componentServiceMeshUsage } from "./componentMeasures";
@@ -1171,6 +1171,46 @@ export const linksWithTimeout: Calculation = (parameters: CalculationParameters<
     return linksWithTimeout.length / includedLinks.length;
 }
 
+export const ratioOfExternalEndpointsSupportingTls: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+
+    let allExternalEndpoints = [];
+
+    let allEndpoints = parameters.entity.getLinks.flatMap(links => links).map(link => link.getTargetEndpoint);
+    allEndpoints.forEach(endpoint => {
+        if (endpoint.constructor.name === ExternalEndpoint.name) {
+            allExternalEndpoints.push(endpoint);
+        }
+    })
+
+
+    if (parameters.entity.getExternalEndpoint) {
+        allExternalEndpoints.push(parameters.entity.getExternalEndpoint);
+    }
+
+    return calculateRatioOfExternalEndpointsSupportingTls(allExternalEndpoints);
+}
+
+export const degreeOfAsynchronousCommunication: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+    let allEndpoints = parameters.entity.getLinks.flatMap(links => links).map(link => link.getTargetEndpoint);
+        if (parameters.entity.getExternalEndpoint) {
+            allEndpoints.push(parameters.entity.getExternalEndpoint);
+        }
+
+    if (allEndpoints.length === 0) {
+        return "n/a";
+    }
+
+    let asynchronousEndpoints: string[]= [];
+
+    for (const endpoint of allEndpoints) {
+
+        if (ASYNCHRONOUS_ENDPOINT_KIND.includes(endpoint.getProperty("kind").value)) {
+            asynchronousEndpoints.push(endpoint.getId);
+        }
+    }
+
+    return asynchronousEndpoints.length / allEndpoints.length
+}
 
 
 export const requestTraceMeasureImplementations: { [measureKey: string]: Calculation } = {
@@ -1229,6 +1269,8 @@ export const requestTraceMeasureImplementations: { [measureKey: string]: Calcula
     "ratioOfComponentsWhoseExternalIngressIsProxied": ratioOfComponentsWhoseExternalIngressIsProxied,
     "numberOfAvailabilityZonesUsedByServices": numberOfAvailabilityZonesUsedByServices,
     "numberOfAvailabilityZonesUsedByStorageServices": numberOfAvailabilityZonesUsedByStorageServices,
-    "linksWithTimeout": linksWithTimeout
+    "linksWithTimeout": linksWithTimeout,
+    "ratioOfExternalEndpointsSupportingTls": ratioOfExternalEndpointsSupportingTls,
+    "degreeOfAsynchronousCommunication": degreeOfAsynchronousCommunication
 }
 

@@ -291,7 +291,7 @@ const productFactors = {
             "targetEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM],
             "evaluation": "aggregateImpacts",
             "precondition": "at-least-one",
-            "impactsInterpretation": "median",
+            "impactsInterpretation": "lowest",
             "reasoning": "How well access restriction is supported depends on the impacting factors. Their impacts are simply aggregated to evaluate this factor.",
         }
         ]
@@ -466,7 +466,7 @@ const productFactors = {
             "evaluation": "aggregateImpacts",
             "reasoning": "Depends on whether state is only stored in specific services (mostlyStatelessServices) and if those services that are stateful are handled properly (specializedStatefulServices)",
             "precondition": "at-least-one",
-            "impactsInterpretation": "median"
+            "impactsInterpretation": "lowest"
         }]
     },
     "mostlyStatelessServices": {
@@ -1530,7 +1530,7 @@ const measures = {
         "name": "Ratio of external endpoints that support TLS",
         "calculation": "External Endpoints that support TLS / All External Endpoints",
         "sources": ["new"],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
     },
     "ratioOfSecuredLinks": {
         "name": "Ratio of secured links",
@@ -1698,7 +1698,7 @@ const measures = {
         "name": "Degree of asynchronous communication",
         "calculation": "Average-of(Ratio of asynchronous endpoints) over all components",
         "sources": ["Qian2006"],
-        "applicableEntities": [ENTITIES.SYSTEM],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
     },
     "asynchronousCommunicationUtilization": {
         "name": "Asynchronous Communication Utilization",

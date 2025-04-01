@@ -1629,7 +1629,7 @@ export const secretsExternalization: Calculation = (parameters: CalculationParam
     })
 
     if (nonExternalizedSecrets + externalizedSecrets === 0) {
-        return 0;
+        return "n/a";
     }
     return externalizedSecrets / (nonExternalizedSecrets + externalizedSecrets);
 
