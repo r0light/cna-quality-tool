@@ -402,7 +402,7 @@ export const numberOfLinksWithRetryLogic: Calculation = (parameters: Calculation
 
     let linksWithRetryLogic = linksToSynchronousEndpoints.filter(link => link.getProperty("retries").value > 0);
 
-    return linksWithRetryLogic.length;
+    return linksWithRetryLogic.length / linksToSynchronousEndpoints.length;
 
 }
 

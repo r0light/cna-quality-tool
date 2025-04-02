@@ -716,6 +716,66 @@ export const cna_modeling_profile: TOSCA_File = {
       },
       "derived_from": "AWS.Resource"
     },
+    "AWS.EC2.LoadBalancer": {
+      "description": "An AWS EC2 LoadBalancer",
+      "properties": {
+        "provider_specific": true,
+        "based_on_standard": {
+          "type": "text",
+          "description": "If the artifact is based on a standard, specify it here.",
+          "required": true,
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "none",
+                "OCI",
+                "OpenAPI",
+                "other"
+              ]
+            ]
+          },
+          "default": "none"
+        },
+        "self_contained": {
+          "type": "boolean",
+          "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
+          "required": true,
+          "default": false
+        }
+      },
+      "derived_from": "AWS.Resource"
+    },
+    "AWS.EC2.NodeGroup": {
+      "description": "An AWS EC2 NodeGroup",
+      "properties": {
+        "provider_specific": true,
+        "based_on_standard": {
+          "type": "text",
+          "description": "If the artifact is based on a standard, specify it here.",
+          "required": true,
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "none",
+                "OCI",
+                "OpenAPI",
+                "other"
+              ]
+            ]
+          },
+          "default": "none"
+        },
+        "self_contained": {
+          "type": "boolean",
+          "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
+          "required": true,
+          "default": false
+        }
+      },
+      "derived_from": "AWS.Resource"
+    },
     "AWS.Beanstalk.Application": {
       "description": "An AWS Beanstalk application",
       "properties": {

@@ -130,6 +130,14 @@ artifact_types:
     derived_from: AWS.Resource
     description: An AWS EC2 Instance
 
+  AWS.EC2.LoadBalancer:
+    derived_from: AWS.Resource
+    description: An AWS EC2 LoadBalancer
+
+  AWS.EC2.NodeGroup:
+    derived_from: AWS.Resource
+    description: An AWS EC2 NodeGroup
+
   AWS.Beanstalk.Application:
     derived_from: AWS.Resource
     description: An AWS Beanstalk application
