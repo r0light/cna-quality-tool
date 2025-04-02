@@ -153,13 +153,13 @@ const evaluatedQualityAspects = ref<Map<QualityAspectKey, EvaluatedQualityAspect
 const currentEvaluationName: ComputedRef<string> = computed(() => {
     let nameToShow = "";
     if (selectedComponentId.value && selectedComponentId.value !== "none") {
-        nameToShow = " of ".concat(selectableEntities.value.components.find(component => component.id === selectedComponentId.value).name);
+        nameToShow = ` of component: ${selectableEntities.value.components.find(component => component.id === selectedComponentId.value).name} in system ${props.systemsData.find(system => system.id === selectedSystemId.value).name}`;
     } else if (selectedInfrastructureId.value && selectedInfrastructureId.value !== "none") {
-        nameToShow = " of ".concat(selectableEntities.value.infrastructures.find(infrastructure => infrastructure.id === selectedInfrastructureId.value).name);
+        nameToShow = ` of infrastructure: ${selectableEntities.value.infrastructures.find(infrastructure => infrastructure.id === selectedInfrastructureId.value).name} in system ${props.systemsData.find(system => system.id === selectedSystemId.value).name}`;
     } else if (selectedRequestTraceId.value && selectedRequestTraceId.value !== "none") {
-        nameToShow = " of ".concat(selectableEntities.value.requestTraces.find(requestTrace => requestTrace.id === selectedRequestTraceId.value).name);
+        nameToShow = ` of request trace: ${selectableEntities.value.requestTraces.find(requestTrace => requestTrace.id === selectedRequestTraceId.value).name} in system ${props.systemsData.find(system => system.id === selectedSystemId.value).name}`;
     } else if (selectedSystemId.value && props.systemsData.find(system => system.id === selectedSystemId.value)) {
-        nameToShow = " of ".concat(props.systemsData.find(system => system.id === selectedSystemId.value).name);
+        nameToShow = " of system: ".concat(props.systemsData.find(system => system.id === selectedSystemId.value).name);
     }
     return nameToShow;
 });

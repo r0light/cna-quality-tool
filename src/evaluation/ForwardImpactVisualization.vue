@@ -9,7 +9,7 @@ import mermaid from 'mermaid';
 import { onMounted } from 'vue';
 import { MermaidBuffer } from './MermaidBuffer';
 import { describeAspectStyle, describeFactor, describeFactorStyle, describeImpact, describeImpactStyle, describeNodeStyleClasses } from './evaluation-commons';
-import { EvaluatedProductFactor } from '@/core/qualitymodel/evaluation/Evaluation';
+import { EvaluatedProductFactor, EvaluatedQualityAspect } from '@/core/qualitymodel/evaluation/Evaluation';
 
 
 onMounted(() => {
@@ -22,6 +22,7 @@ const props = defineProps<{
 
 const graphId = `${props.rootFactors.map(factor => factor.id).join("-")}-impact-graph`;
 
+const currentFactors: Map<string, EvaluatedProductFactor | EvaluatedQualityAspect> = new Map();
 
 function renderImpactGraph() {
 
@@ -32,10 +33,11 @@ function renderImpactGraph() {
 
     let rootNodes = props.rootFactors;
     for (const node of rootNodes) {
-        mermaidBuffer.addElement(node.id, describeFactor(node));
+        currentFactors.set(node.id, node);
+        mermaidBuffer.addElement(node.id, describeFactor(node, currentFactors));
 
         if (node.factorType === "productFactor") {
-            mermaidBuffer.addStyling(describeFactorStyle(node));
+            mermaidBuffer.addStyling(describeFactorStyle(node, currentFactors));
         }
     }
 
@@ -56,11 +58,12 @@ function addImpacts(currentFactor: EvaluatedProductFactor, buffer: MermaidBuffer
     for (const impact of currentFactor.forwardImpacts) {
 
         if (buffer.isNotYetAdded(impact.impactedFactorKey)) {
-            buffer.addElement(impact.impactedFactorKey, describeFactor(impact.impactedFactor));
+            currentFactors.set(impact.impactedFactorKey, impact.impactedFactor);
+            buffer.addElement(impact.impactedFactorKey, describeFactor(impact.impactedFactor, currentFactors));
             if (impact.impactedFactor.factorType === "productFactor") {
-                buffer.addStyling(describeFactorStyle(impact.impactedFactor));
+                buffer.addStyling(describeFactorStyle(impact.impactedFactor, currentFactors));
             } else  if (impact.impactedFactor.factorType === "qualityAspect") {
-                buffer.addStyling(describeAspectStyle(impact.impactedFactor));
+                buffer.addStyling(describeAspectStyle(impact.impactedFactor, currentFactors));
             }
         }
 

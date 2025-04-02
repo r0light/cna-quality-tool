@@ -14,18 +14,27 @@ export function describeNodeStyleClasses(): string {
     `;
 }
 
-export function describeFactor(factor: EvaluatedProductFactor | EvaluatedQualityAspect): string {
+export function describeFactor(factor: EvaluatedProductFactor | EvaluatedQualityAspect, currentFactors: Map<string, EvaluatedProductFactor | EvaluatedQualityAspect>): string {
     let result = "";
     if (typeof factor.result === "string") {
         result = factor.result;
     } else if (typeof factor.result === "number") {
         result = factor.result.toString();
     }
+
+    // reset result, if current factors have no or neutral impacts
+    let currentImpactWeights = factor.backwardImpacts.filter(impact => currentFactors.keys().toArray().includes(impact.impactingFactorKey)).map(impact => impact.weight);
+    if (currentImpactWeights.length > 0 && currentImpactWeights.every(weight => weight === "n/a")) {
+        result = "n/a";
+    } else if (currentImpactWeights.length > 0 && currentImpactWeights.every(weight => weight === "n/a" || weight === "neutral")) {
+        result = "neutral";
+    }
+
     return `\n\t${factor.id}[${factor.name}\n\t<span class="evaluation-result">${result}</span>]`;
 }
 
 
-export function describeFactorStyle(factor: EvaluatedProductFactor): string {
+export function describeFactorStyle(factor: EvaluatedProductFactor, currentFactors: Map<string, EvaluatedProductFactor | EvaluatedQualityAspect>): string {
     let styleClass = "";
 
     if (typeof factor.result === "string") {
@@ -50,10 +59,19 @@ export function describeFactorStyle(factor: EvaluatedProductFactor): string {
     } else if (typeof factor.result === "number") {
         styleClass = "factor-applicable"; // TODO better solution
     }
+
+    // reset style, if current factors have no or neutral impacts
+    let currentImpactWeights = factor.backwardImpacts.filter(impact => currentFactors.keys().toArray().includes(impact.impactingFactorKey)).map(impact => impact.weight);
+    if (currentImpactWeights.length > 0 && currentImpactWeights.every(weight => weight === "n/a")) {
+        styleClass = "factor-not-applicable";
+    } else if (currentImpactWeights.length > 0 && currentImpactWeights.every(weight => weight === "n/a" || weight === "neutral")) {
+        styleClass = "factor-applicable";
+    }
+
     return `\n\tclass ${factor.id} ${styleClass}`;
 }
 
-export function describeAspectStyle(factor: EvaluatedQualityAspect): string {
+export function describeAspectStyle(factor: EvaluatedQualityAspect, currentFactors: Map<string, EvaluatedProductFactor | EvaluatedQualityAspect>): string {
     let styleClass = "";
 
     if (typeof factor.result === "string") {
@@ -82,6 +100,15 @@ export function describeAspectStyle(factor: EvaluatedQualityAspect): string {
     } else if (typeof factor.result === "number") {
         styleClass = "factor-applicable"; // TODO better solution
     }
+
+    // reset style, if current factors have no or neutral impacts
+    let currentImpactWeights = factor.backwardImpacts.filter(impact => currentFactors.keys().toArray().includes(impact.impactingFactorKey)).map(impact => impact.weight);
+    if (currentImpactWeights.length > 0 && currentImpactWeights.every(weight => weight === "n/a")) {
+        styleClass = "factor-not-applicable";
+    } else if (currentImpactWeights.length > 0 && currentImpactWeights.every(weight => weight === "n/a" || weight === "neutral")) {
+        styleClass = "factor-applicable";
+    }
+
     return `\n\tclass ${factor.id} ${styleClass}`;
 }
 
@@ -120,7 +147,7 @@ export function describeImpact(sourceFactorKey: string, impactWeight: ImpactWeig
 
 export function describeImpactStyle(count: number, impactWeight: ImpactWeight): string {
     let color = "#000";
-    let strokeWidth = "2px"; 
+    let strokeWidth = "2px";
 
     switch (impactWeight) {
         case "neutral":

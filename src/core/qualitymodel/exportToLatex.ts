@@ -111,7 +111,7 @@ fs.writeFile(`./${outerDir}/qualityAspects.tex`, `${qaOutput}`, (err) => {
 let entitiesTableOutput = "";
 
 for (const entity of qualityModel.entities) {
-    entitiesTableOutput += `        ${entity.getName} & ${entity.getDescription} & ${entity.getRelation.type} ${entity.getRelation.target}\\\\\ \\hline \n`;
+    entitiesTableOutput += `        ${entity.getName} (${entity.getSymbol}) & ${entity.getDescription} & ${entity.getRelation.type} ${entity.getRelation.target}\\\\\ \\hline \n`;
 }
 
 entitiesTableOutput = `
