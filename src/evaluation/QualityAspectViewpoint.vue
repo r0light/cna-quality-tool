@@ -67,9 +67,11 @@ function renderAspectGraph(nodeId: string, evaluatedQualityAspect: EvaluatedQual
 
     mermaidBuffer.addStyling(describeNodeStyleClasses());
 
-    mermaidBuffer.addElement(evaluatedQualityAspect.id, describeFactor(evaluatedQualityAspect));
+    let currentFactors: Map<string, EvaluatedProductFactor> = new Map();
+    getRelevantFactors(evaluatedQualityAspect).forEach(factor => currentFactors.set(factor.id, factor));
+    mermaidBuffer.addElement(evaluatedQualityAspect.id, describeFactor(evaluatedQualityAspect, currentFactors));
     if (evaluatedQualityAspect.factorType === "qualityAspect") {
-        mermaidBuffer.addStyling(describeAspectStyle(evaluatedQualityAspect));
+        mermaidBuffer.addStyling(describeAspectStyle(evaluatedQualityAspect, currentFactors));
     }
     addImpacts(evaluatedQualityAspect, mermaidBuffer);
 
@@ -86,11 +88,14 @@ function addImpacts(impactedFactor: EvaluatedQualityAspect | EvaluatedProductFac
 
     for (const impact of impactedFactor.backwardImpacts) {
 
+        let currentFactors: Map<string, EvaluatedProductFactor> = new Map();
+        getRelevantFactors(impact.impactingFactor).forEach(factor => currentFactors.set(factor.id, factor));
+
         if (buffer.isNotYetAdded(impact.impactingFactorKey)) {
-            buffer.addElement(impact.impactingFactorKey, describeFactor(impact.impactingFactor));
+            buffer.addElement(impact.impactingFactorKey, describeFactor(impact.impactingFactor, currentFactors));
 
             if (impact.impactingFactor.factorType === "productFactor") {
-                buffer.addStyling(describeFactorStyle(impact.impactingFactor));
+                buffer.addStyling(describeFactorStyle(impact.impactingFactor, currentFactors));
             }
         }
 
@@ -105,11 +110,11 @@ function addImpacts(impactedFactor: EvaluatedQualityAspect | EvaluatedProductFac
     }
 }
 
-function getRelevantFactors(qualityAspect: EvaluatedQualityAspect): EvaluatedProductFactor[] {
+function getRelevantFactors(factor: EvaluatedQualityAspect | EvaluatedProductFactor): EvaluatedProductFactor[] {
 
     let productFactors: EvaluatedProductFactor[] = [];
 
-    addImpactingFactors(qualityAspect, productFactors);
+    addImpactingFactors(factor, productFactors);
 
     return productFactors;
 
