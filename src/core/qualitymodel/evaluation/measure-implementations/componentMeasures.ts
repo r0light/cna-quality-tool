@@ -1524,6 +1524,30 @@ export const numberOfAvailabilityZonesUsedByStorageServices: Calculation = (para
     return availabilityZones.size;
 }
 
+export const degreeToWhichComponentsAreLinkedToStatefulComponents: Calculation = (parameters: CalculationParameters<Component>) => {
+
+    let linkedToComponents: Map<string, Component> = new Map();
+    parameters.system.getOutgoingLinksOfComponent(parameters.entity.getId).forEach(link => {
+        let targetComponent = parameters.system.searchComponentOfEndpoint(link.getTargetEndpoint.getId);
+        if (targetComponent) {
+            linkedToComponents.set(targetComponent.getId, targetComponent);
+        }
+    })
+    if (linkedToComponents.size === 0) {
+        return "n/a";
+    }
+
+    let statefulComponents = new Set();
+
+    for (const [componentId, component] of linkedToComponents.entries()) {
+            if (!component.getProperty("stateless").value) {
+                statefulComponents.add(componentId);
+            }
+        }
+    return statefulComponents.size / linkedToComponents.size;
+}
+
+
 export const componentMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
     "ratioOfExternalEndpointsSupportingTls": ratioOfExternalEndpointsSupportingTls,
@@ -1607,6 +1631,7 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "rollingUpdates": rollingUpdates,
     "ratioOfComponentsWhoseExternalIngressIsProxied": ratioOfComponentsWhoseExternalIngressIsProxied,
     "numberOfAvailabilityZonesUsedByServices": numberOfAvailabilityZonesUsedByServices,
-    "numberOfAvailabilityZonesUsedByStorageServices": numberOfAvailabilityZonesUsedByStorageServices
+    "numberOfAvailabilityZonesUsedByStorageServices": numberOfAvailabilityZonesUsedByStorageServices,
+    "degreeToWhichComponentsAreLinkedToStatefulComponents": degreeToWhichComponentsAreLinkedToStatefulComponents
 }
 

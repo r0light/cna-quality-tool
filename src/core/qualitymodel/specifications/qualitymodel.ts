@@ -1666,9 +1666,9 @@ const measures = {
     },
     "degreeToWhichComponentsAreLinkedToStatefulComponents": {
         "name": "Degree to which components are linked to stateful components",
-        "calculation": "(sum-of(Number of stateful Components a Component is linked to) for all components) / Total Number of Components)",
+        "calculation": "(sum-of(Ratio of stateful Components based on all Components a Component is linked to) for all Components) / Total Number of Components)",
         "sources": ["Qian2006"],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
     },
     "numberOfAsynchronousEndpointsOfferedByAService": {
         "name": "Number of asynchronous endpoints offered by a service",

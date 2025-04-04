@@ -73,6 +73,12 @@ artifact_types:
       Artifact type for a Java archive which might be executable
     file_ext: [ jar ]
 
+  Implementation.JavaScript:
+    derived_from: Implementation
+    description: >
+      Artifact type for a JavaScript implementation
+    file_ext: [ js ]
+
   Image.Container:
     derived_from: CNA.Artifact
     description: >

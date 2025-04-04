@@ -957,20 +957,29 @@ export const degreeToWhichComponentsAreLinkedToStatefulComponents: Calculation =
         return "n/a";
     }
 
-    let totalNumberOfConnectionsToStatefulComponents = 0;
+    let degrees = [];
     for (const component of includedComponents) {
+        let connectedToComponents = new Set<string>();
         let connectedToStatefulComponents = new Set<string>();
 
         for (const link of parameters.system.getOutgoingLinksOfComponent(component.getId).filter(outgoingLink => parameters.entity.getLinks.flatMap(step => step).map(link => link.getId).includes(outgoingLink.getId))) {
 
             let connectedToComponent = parameters.system.searchComponentOfEndpoint(link.getTargetEndpoint.getId)
+            connectedToComponents.add(connectedToComponent.getId);
             if (!connectedToComponent.getProperty("stateless").value) {
                 connectedToStatefulComponents.add(connectedToComponent.getId);
             }
         }
-        totalNumberOfConnectionsToStatefulComponents = totalNumberOfConnectionsToStatefulComponents + connectedToStatefulComponents.size;
+        if (connectedToComponents.size > 0) {
+            degrees.push(connectedToStatefulComponents.size / connectedToComponents.size);
+        }
     }
-    return totalNumberOfConnectionsToStatefulComponents / includedComponents.length;
+
+    if (degrees.length === 0) {
+        return "n/a";
+    }
+
+    return average(degrees);
 }
 
 export const ratioOfSpecializedStatefulServices: Calculation = (parameters: CalculationParameters<RequestTrace>) => {

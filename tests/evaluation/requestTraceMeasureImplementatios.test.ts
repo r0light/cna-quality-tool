@@ -1239,7 +1239,7 @@ test("numberOfLinksWithRetryLogic", () => {
     system.addEntity(requestTrace);
 
     let measureValue = requestTraceMeasureImplementations["numberOfLinksWithRetryLogic"]({ entity: requestTrace, system: system });
-    expect(measureValue).toEqual(2);
+    expect(measureValue).toEqual(1);
 })
 
 

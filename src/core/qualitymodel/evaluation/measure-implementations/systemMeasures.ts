@@ -5,7 +5,7 @@ import { ASYNCHRONOUS_ENDPOINT_KIND, AUTOMATED_INFRASTRUCTURE_MAINTENANCE, AUTOM
 import { calculateRatioOfEndpointsSupportingSsl, calculateRatioOfExternalEndpointsSupportingTls, componentMeasureImplementations, numberOfAsynchronousEndpointsOfferedByAService, numberOfComponentsAComponentIsLinkedTo, numberOfSynchronousEndpointsOfferedByAService, providesHealthAndReadinessEndpoints, serviceCouplingBasedOnEndpointEntropy } from "./componentMeasures";
 import { getIncludedComponents, numberOfCyclesInRequestTraces, requestTraceComplexity } from "./requestTraceMeasures";
 import { supportsMonitoring as infrastructureSupportsMonitoring, ratioOfAutomaticallyProvisionedInfrastructure as infrastructureProvisionedAutomatically, ratioOfFullyManagedInfrastructure as infrastructureIsFullyManaged, nonProviderSpecificInfrastructureArtifacts as infrastructureHasOnlyNonProviderSpecificArtifacts } from "./infrastructureMeasures";
-import { supportsMonitoring as componentSupportsMonitoring, nonProviderSpecificComponentArtifacts as componentHasOnlyNonProviderSpecificArtifacts } from "./componentMeasures";
+import { supportsMonitoring as componentSupportsMonitoring, nonProviderSpecificComponentArtifacts as componentHasOnlyNonProviderSpecificArtifacts, degreeToWhichComponentsAreLinkedToStatefulComponents as degreeToWhichComponentsAreLinkedToStatefulComponentsForComponentCalculation } from "./componentMeasures";
 import { serviceMeshUsage as componentServiceMeshUsage, namespaceSeparation as componentNamespaceSeparation } from "./componentMeasures";
 import { map } from "jquery";
 import { Artifact } from "@/core/common/artifact";
@@ -191,19 +191,21 @@ export const degreeToWhichComponentsAreLinkedToStatefulComponents: Calculation =
         return "n/a";
     }
 
-    let totalNumberOfConnectionsToStatefulComponents = 0;
-    for (const component of allComponents) {
-        let connectedToStatefulComponents = new Set<string>();
-        for (const link of parameters.entity.getOutgoingLinksOfComponent(component[0])) {
+    let componentDegrees = [];
 
-            let connectedToComponent = parameters.entity.searchComponentOfEndpoint(link.getTargetEndpoint.getId)
-            if (!connectedToComponent.getProperty("stateless").value) {
-                connectedToStatefulComponents.add(connectedToComponent.getId);
-            }
+    for (const [componentId, component] of allComponents) {
+        let degreeToWhichComponentsAreLinkedToStatefulComponentsForComponent = degreeToWhichComponentsAreLinkedToStatefulComponentsForComponentCalculation({entity: component, system: parameters.system});
+
+        if (degreeToWhichComponentsAreLinkedToStatefulComponentsForComponent !== "n/a") {
+            componentDegrees.push(degreeToWhichComponentsAreLinkedToStatefulComponentsForComponent);
         }
-        totalNumberOfConnectionsToStatefulComponents = totalNumberOfConnectionsToStatefulComponents + connectedToStatefulComponents.size;
     }
-    return totalNumberOfConnectionsToStatefulComponents / allComponents.length;
+
+    if (componentDegrees.length === 0) {
+        return "n/a";
+    }
+
+    return average(componentDegrees);
 }
 
 export const degreeOfAsynchronousCommunication: Calculation = (parameters: CalculationParameters<System>) => {

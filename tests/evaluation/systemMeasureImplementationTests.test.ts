@@ -127,7 +127,7 @@ test("ratioOfStatelessComponents", () => {
 test("degreeToWhichComponentsAreLinkedToStatefulComponents", () => {
     let measureValue = systemMeasureImplementations["degreeToWhichComponentsAreLinkedToStatefulComponents"]({ entity: systemToEvaluateA, system: systemToEvaluateA });
 
-    expect(measureValue).toEqual(1 / 3);
+    expect(measureValue).toEqual(1);
 })
 
 test("degreeOfAsynchronousCommunication", () => {

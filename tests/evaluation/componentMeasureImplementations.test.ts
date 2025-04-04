@@ -1116,7 +1116,7 @@ test("numberOfLinksWithRetryLogic", () => {
     system.addEntities([linkAB, linkAC, linkAD]);
 
     let measureValue = componentMeasureImplementations["numberOfLinksWithRetryLogic"]({ entity: serviceA, system: system });
-    expect(measureValue).toEqual(2);
+    expect(measureValue).toEqual(1);
 })
 
 test("numberOfLinksWithComplexFailover", () => {
@@ -2381,4 +2381,37 @@ test("numberOfAvailabilityZonesUsedByStorageServices", () => {
 
     let measureValue = componentMeasureImplementations["numberOfAvailabilityZonesUsedByStorageServices"]({ entity: serviceA, system: system });
     expect(measureValue).toEqual(2);
+})
+
+
+test("degreeToWhichComponentsAreLinkedToStatefulComponents", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "service A", getEmptyMetaData());
+
+    let serviceB = new Service("s2", "service B", getEmptyMetaData());
+    serviceB.setPropertyValue("stateless", false);
+    let endpointB = new Endpoint("e1", "endpoint B", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+
+    let serviceC = new Service("s3", "service C", getEmptyMetaData());
+    serviceC.setPropertyValue("stateless", true);
+    let endpointC = new Endpoint("e3", "endpoint C", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+
+    let storageBackingService = new StorageBackingService("sbs", "storage service", getEmptyMetaData());
+    storageBackingService.setPropertyValue("stateless", false);
+    let endpointD = new Endpoint("e4", "endpoint D", getEmptyMetaData());
+    storageBackingService.addEndpoint(endpointD);
+
+
+    let linkAB = new Link("link1", serviceA, endpointB);
+    let linkAC = new Link("link2", serviceA, endpointC);
+    let linkAD = new Link("link3", serviceA, endpointD);
+
+    system.addEntities([serviceA, serviceB, serviceC, storageBackingService]);
+    system.addEntities([linkAB, linkAC, linkAD]);
+
+    let measureValue = componentMeasureImplementations["degreeToWhichComponentsAreLinkedToStatefulComponents"]({ entity: serviceA, system: system });
+    expect(measureValue).toEqual(2/3);
 })

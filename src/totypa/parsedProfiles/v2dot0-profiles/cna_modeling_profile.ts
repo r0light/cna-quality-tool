@@ -318,6 +318,44 @@ export const cna_modeling_profile: TOSCA_File = {
         "jar"
       ]
     },
+    "Implementation.JavaScript": {
+      "description": "Artifact type for a JavaScript implementation\n",
+      "properties": {
+        "provider_specific": {
+          "type": "boolean",
+          "description": "Whether this artifact is (cloud) provider-specific or not.",
+          "required": true,
+          "default": false
+        },
+        "based_on_standard": {
+          "type": "text",
+          "description": "If the artifact is based on a standard, specify it here.",
+          "required": true,
+          "validation": {
+            "$valid_values": [
+              "$value",
+              [
+                "none",
+                "OCI",
+                "OpenAPI",
+                "other"
+              ]
+            ]
+          },
+          "default": "none"
+        },
+        "self_contained": {
+          "type": "boolean",
+          "description": "Whether this artifact is self-contained or not, that means whether it needs additional resources explicitly added to it to be used.",
+          "required": true,
+          "default": false
+        }
+      },
+      "derived_from": "Implementation",
+      "file_ext": [
+        "js"
+      ]
+    },
     "Image.Container": {
       "description": "Artifact type for a Container Image\n",
       "properties": {
