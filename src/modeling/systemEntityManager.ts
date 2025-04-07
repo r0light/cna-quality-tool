@@ -1493,6 +1493,10 @@ class SystemEntityManager {
                     newBackingData.prop(property.jointJsConfig.modelPath, backingData.backingData.getName);
                     break;
                 case "backingData-chooseEditMode":
+                    break;
+                case "backingData-includedData":
+                    newBackingData.prop(property.jointJsConfig.modelPath, backingData.backingData.getProperties().find(entityProperty => entityProperty.getKey === "included_data").value)
+                    break;
                 default:
                     // TODO handle additional attributes?; decide based on model path whether it can be found in data or relation    
                     if (property.jointJsConfig.modelPath) {
