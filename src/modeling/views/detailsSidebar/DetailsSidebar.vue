@@ -315,7 +315,7 @@ onUpdated(() => {
             let valueToSet: any = "";
             if (option.jointJsConfig.propertyType === "attribute") {
                 valueToSet = selectedEntity.model.attr(option.jointJsConfig.modelPath);
-            } else if (option.jointJsConfig.propertyType === "property" || option.jointJsConfig.propertyType === "customProperty" || option.jointJsConfig.propertyType === "providedMethod") {
+            } else if (option.jointJsConfig.propertyType === "property" || option.jointJsConfig.propertyType === "customProperty" || option.jointJsConfig.propertyType === "providedMethod" || option.jointJsConfig.propertyType === "relation") {
                 valueToSet = selectedEntity.model.prop(option.jointJsConfig.modelPath);
 
                 if (option.providedFeature === "entity-aspect-ratio" && valueToSet) {
@@ -1063,6 +1063,17 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
 
         } else if (propertyOption.jointJsConfig.propertyType === "property") {
             selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, propertyOption.value);
+
+            if (selectedEntityElement.prop("entity/type") === EntityTypes.BACKING_DATA && selectedEntityElement.prop("entity/assignedFamily")) {
+                // also change all other backing data elements of the same family
+                const relatedBackingDataEntities = props.graph.getElements().filter((entityElement) => {
+                    return entityElement.prop("entity/type") === EntityTypes.BACKING_DATA && entityElement.prop("entity/assignedFamily").localeCompare(selectedEntityElement.prop("entity/assignedFamily")) === 0;
+                });
+                for (const relatedBackingDataEntity of relatedBackingDataEntities) {
+                    relatedBackingDataEntity.prop(propertyOption.jointJsConfig.modelPath, propertyOption.value);
+                }
+                continue;
+            }
         } else if (propertyOption.jointJsConfig.propertyType === "customProperty") {
             switch (selectedEntityElement.prop("entity/type")) {
                 case EntityTypes.INFRASTRUCTURE:
@@ -1123,6 +1134,7 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                         for (let otherBackingData of propertyOption.tableRows) {
                             if (otherBackingData.columns["included"]["checked"]) {
                                 (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).attr("label/textWrap/text", currentFamilyName, { rewrite: true });
+                                (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).prop("entity", selectedEntityElement.prop("entity"), { rewrite: true });
                                 (props.graph.getCell(otherBackingData.columns["included"]["id"]) as dia.Element).prop("entity/assignedFamily", currentFamilyName, { rewrite: true });
                             } else {
                                 // TODO reset name or not?
@@ -1136,6 +1148,17 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                         continue;
                     } else if (propertyOption.providedFeature === "backingData-includedData") {
                         selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, toObject(propertyOption.value as any[]), { rewrite: true });
+
+                        if (selectedEntityElement.prop("entity/assignedFamily")) {
+                            // also change all other backing data elements of the same family
+                            const relatedBackingDataEntities = props.graph.getElements().filter((entityElement) => {
+                                return entityElement.prop("entity/type") === EntityTypes.BACKING_DATA && entityElement.prop("entity/assignedFamily").localeCompare(selectedEntityElement.prop("entity/assignedFamily")) === 0;
+                            });
+                            for (const relatedBackingDataEntity of relatedBackingDataEntities) {
+                                relatedBackingDataEntity.prop(propertyOption.jointJsConfig.modelPath, toObject(propertyOption.value as any[]), { rewrite: true });
+                            }
+                            continue;
+                        }
                     }
                     break;
                 case EntityTypes.COMPONENT:
@@ -1260,6 +1283,10 @@ function onEnterProperty(propertyOptions: EditPropertySection[]) {
                     } else if (propertyOption.providedFeature === "referred_endpoint") {
                         selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, propertyOption.value);
                     }
+                    break;
+                case EntityTypes.BACKING_DATA:
+                case EntityTypes.DATA_AGGREGATE:
+                    selectedEntityElement.prop(propertyOption.jointJsConfig.modelPath, propertyOption.value);
                     break;
                 default:
                     console.error("no custom handling for this property defined: " + propertyOption.providedFeature);

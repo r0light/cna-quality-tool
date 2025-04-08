@@ -192,7 +192,7 @@ function parseProperties(properties: EntityProperty[], path: "entity" | "relatio
             show: true,
             provideEnterButton: false,
             jointJsConfig: { //TODO add values 
-                propertyType: "property",
+                propertyType: path === "entity" ? "property" : "relation",
                 modelPath: `${path}/properties/${property.getKey}`,
                 defaultPropPath: "",
                 minPath: "", // TODO set dynamically?
