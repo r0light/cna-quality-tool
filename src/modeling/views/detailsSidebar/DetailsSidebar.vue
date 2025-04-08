@@ -73,7 +73,7 @@ import { DEPLOYMENT_MAPPING_TOSCA_KEY } from '@/core/entities/deploymentMapping'
 import { ENTITIES } from '@/core/qualitymodel/specifications/entities';
 import { SelectEntityProperty } from '@/core/common/entityProperty';
 import { UniqueKeyManager } from '@/core/common/UniqueKeyManager';
-import { identity } from 'lodash';
+import { identity, update } from 'lodash';
 
 const toArray = (o: object, keyName: string, valueName: string) => {
     let asArray = [];
@@ -246,12 +246,15 @@ onMounted(() => {
         if (changedObject.prop("entity/type") === EntityTypes.BACKING_DATA || changedObject.prop("entity/type") === EntityTypes.DATA_AGGREGATE) {
             refreshHighlightOptions();
         }
+        updateAction(true);
     })
 
 
 })
 
-onUpdated(() => {
+onUpdated(updateAction)
+
+function updateAction(graphChange: boolean) {
 
     // if no entity is selected / an entity was deselected, clear the current values
     if (!props.selectedEntity) {
@@ -266,7 +269,7 @@ onUpdated(() => {
         return;
     }
     // if the selection has stayed the same, do nothing
-    if (props.selectedEntity.model.id.toString() === selectedEntityId.value) {
+    if (props.selectedEntity.model.id.toString() === selectedEntityId.value && !graphChange) {
         return;
     }
 
@@ -921,7 +924,7 @@ onUpdated(() => {
         yOption.value = selectedEntity.model.prop(yOption.jointJsConfig.modelPath);
     }, "detailsSidebar")
 
-})
+}
 
 function getParentRelationLabel(parentId: string) {
     if (parentId) {
