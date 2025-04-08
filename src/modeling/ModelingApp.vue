@@ -142,6 +142,7 @@ onMounted(() => {
     })
     */
 
+    /*
     document.addEventListener("keydown", (keydownEvent) => {
         if (keydownEvent.code === "Delete") {
             // check if Element is selected
@@ -151,6 +152,7 @@ onMounted(() => {
             }
         }
     }, false);
+    */
 
 })
 
