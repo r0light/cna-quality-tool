@@ -806,7 +806,7 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.LINK, ENTITIES.BACKING_SERVICE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT],
         "sources": [{ "key": "Indrasiri2021", "section": "4 Decentralized Data Management (decentralized data leads to higher service independence while centralized data leads to higher consistency.)" }, { "key": "Indrasiri2021", "section": "4 Data Service Pattern (As having a negative impact because multiple services should not access the same data);" }, { "key": "Ruecker2021", "section": "2 Different Workflow Engines for different services" }, { "key": "Goniwada2021", "section": "5 Distributed State, Decentralized Data" }],
-        "measures": ["degreeOfStorageBackendSharing", "ratioOfStorageBackendSharing", "sharedStorageBackingServiceInteractions", "databaseTypeUtilization", "numberOfServiceConnectedToStorageBackingService", "ratioOfBrokerBackendSharing", "averageStorageBackendSharing", "averageBrokerBackendSharing"],
+        "measures": ["degreeOfStorageBackendSharing", "ratioOfStorageBackendSharing", "sharedStorageBackingServiceInteractions", "databaseTypeUtilization", "numberOfServiceConnectedToStorageBackingService", "ratioOfBrokerBackendSharing", "averageStorageBackendSharing", "averageWeightedStorageBackendSharing", "averageBrokerBackendSharing", "averageWeightedBrokerBackendSharing"],
         "evaluations": [{
             "targetEntities": [ENTITIES.SYSTEM],
             "evaluation": "backingServiceDecentralizationForSystem",
@@ -2658,9 +2658,21 @@ const measures = {
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },
+    "averageWeightedBrokerBackendSharing": {
+        "name": "Average Weighted Broker Backend Sharing",
+        "calculation": "Average(Number of services (transitively) using a broker service weighted by their distance / Number of services) for all broker services",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM],
+    },
     "averageStorageBackendSharing": {
         "name": "Average Storage Backend Sharing",
         "calculation": "Average(Number of services using a storage service / Number of services) for all storage services",
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM],
+    },
+    "averageWeightedStorageBackendSharing": {
+        "name": "Average Weighted Storage Backend Sharing",
+        "calculation": "Average(Number of services (transitively) using a storage service weighted by their distance / Number of services) for all storage services",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },

@@ -2664,6 +2664,47 @@ export const averageBrokerBackendSharing: Calculation = (parameters: Calculation
     return average(brokerSharing);
 }
 
+export const averageWeightedBrokerBackendSharing: Calculation = (parameters: CalculationParameters<System>) => {
+    let allBrokerServiceIds = parameters.entity.getComponentEntities.entries().filter(([componentId, component]) => component.constructor.name === BrokerBackingService.name).map(([componentId, component]) => componentId).toArray();
+
+    let allServiceIds = parameters.entity.getComponentEntities.entries().filter(([componentId, component]) => component.constructor.name === Service.name).map(([componentId, component]) => componentId).toArray();
+
+    if (allBrokerServiceIds.length === 0 || allServiceIds.length === 0) {
+        return "n/a";
+    }
+
+    let servicesPerBrokerService: Map<string, Map<string,number>> = new Map();
+    allBrokerServiceIds.forEach(brokerServiceId => servicesPerBrokerService.set(brokerServiceId, new Map()));
+
+
+    allBrokerServiceIds.forEach(brokerServiceId => {
+        // search for all services with a (transitive) connection to this storage service
+        let distanceToBrokerService = 1;
+        let servicesToCheck = [];
+        
+        // first initialize with all directly connected services
+        servicesToCheck.push(...parameters.system.getIncomingLinksOfComponent(brokerServiceId).map(link => link.getSourceEntity.getId).filter(componentId => allServiceIds.includes(componentId) && !servicesPerBrokerService.get(brokerServiceId).has(componentId)));
+
+        while(servicesToCheck.length > 0) {
+            let nextStage = [];
+            while(servicesToCheck.length > 0) {
+                let serviceIdToCheck = servicesToCheck.pop();
+                nextStage.push(...parameters.system.getIncomingLinksOfComponent(serviceIdToCheck).map(link => link.getSourceEntity.getId).filter(componentId => allServiceIds.includes(componentId) && !servicesPerBrokerService.get(brokerServiceId).has(componentId)));
+                servicesPerBrokerService.get(brokerServiceId).set(serviceIdToCheck, distanceToBrokerService);
+            }
+            servicesToCheck.push(...nextStage);
+            distanceToBrokerService = distanceToBrokerService + 1;
+        }
+    })
+
+    let brokerSharing = servicesPerBrokerService.entries().filter(([brokerServiceId, serviceIdWeights]) => serviceIdWeights.size > 0).map(([storageServiceId, serviceIdWeights]) => {
+        let weightedServicesSum = serviceIdWeights.values().reduce((accumulator, distance) => accumulator + (1 / distance), 0);
+        return weightedServicesSum / allServiceIds.length;
+    }).toArray();
+
+    return average(brokerSharing);
+}
+
 export const averageStorageBackendSharing: Calculation = (parameters: CalculationParameters<System>) => {
     let allStorageServiceIds = parameters.entity.getComponentEntities.entries().filter(([componentId, component]) => component.constructor.name === StorageBackingService.name).map(([componentId, component]) => componentId).toArray();
 
@@ -2674,7 +2715,7 @@ export const averageStorageBackendSharing: Calculation = (parameters: Calculatio
     }
 
     let servicesPerStorageService: Map<string, Set<string>> = new Map();
-    allStorageServiceIds.forEach(brokerServiceId => servicesPerStorageService.set(brokerServiceId, new Set()));
+    allStorageServiceIds.forEach(storageServiceId => servicesPerStorageService.set(storageServiceId, new Set()));
 
     for (const [linkId, link] of parameters.system.getLinkEntities) {
         let targetComponent = parameters.system.searchComponentOfEndpoint(link.getTargetEndpoint.getId);
@@ -2687,6 +2728,47 @@ export const averageStorageBackendSharing: Calculation = (parameters: Calculatio
 
     let storageSharing = servicesPerStorageService.entries().map(([brokerId, serviceIds]) => {
         return serviceIds.size / allServiceIds.length;
+    }).toArray();
+
+    return average(storageSharing);
+}
+
+export const averageWeightedStorageBackendSharing: Calculation = (parameters: CalculationParameters<System>) => {
+    let allStorageServiceIds = parameters.entity.getComponentEntities.entries().filter(([componentId, component]) => component.constructor.name === StorageBackingService.name).map(([componentId, component]) => componentId).toArray();
+
+    let allServiceIds = parameters.entity.getComponentEntities.entries().filter(([componentId, component]) => component.constructor.name === Service.name).map(([componentId, component]) => componentId).toArray();
+
+    if (allStorageServiceIds.length === 0 || allServiceIds.length === 0) {
+        return "n/a";
+    }
+
+    let servicesPerStorageService: Map<string, Map<string,number>> = new Map();
+    allStorageServiceIds.forEach(storageServiceId => servicesPerStorageService.set(storageServiceId, new Map()));
+
+
+    allStorageServiceIds.forEach(storageServiceId => {
+        // search for all services with a (transitive) connection to this storage service
+        let distanceToStorageService = 1;
+        let servicesToCheck = [];
+        
+        // first initialize with all directly connected services
+        servicesToCheck.push(...parameters.system.getIncomingLinksOfComponent(storageServiceId).map(link => link.getSourceEntity.getId).filter(componentId => allServiceIds.includes(componentId) && !servicesPerStorageService.get(storageServiceId).has(componentId)));
+
+        while(servicesToCheck.length > 0) {
+            let nextStage = [];
+            while(servicesToCheck.length > 0) {
+                let serviceIdToCheck = servicesToCheck.pop();
+                nextStage.push(...parameters.system.getIncomingLinksOfComponent(serviceIdToCheck).map(link => link.getSourceEntity.getId).filter(componentId => allServiceIds.includes(componentId) && !servicesPerStorageService.get(storageServiceId).has(componentId)));
+                servicesPerStorageService.get(storageServiceId).set(serviceIdToCheck, distanceToStorageService);
+            }
+            servicesToCheck.push(...nextStage);
+            distanceToStorageService = distanceToStorageService + 1;
+        }
+    })
+
+    let storageSharing = servicesPerStorageService.entries().filter(([storageServiceId, serviceIdWeights]) => serviceIdWeights.size > 0).map(([storageServiceId, serviceIdWeights]) => {
+        let weightedServicesSum = serviceIdWeights.values().reduce((accumulator, distance) => accumulator + (1 / distance), 0);
+        return weightedServicesSum / allServiceIds.length;
     }).toArray();
 
     return average(storageSharing);
@@ -2895,5 +2977,7 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation }
     "averageStorageBackendSharing": averageStorageBackendSharing,
     "rollingUpdates": rollingUpdates,
     "numberOfAvailabilityZonesUsedByServices": numberOfAvailabilityZonesUsedByServices,
-    "numberOfAvailabilityZonesUsedByStorageServices": numberOfAvailabilityZonesUsedByStorageServices
+    "numberOfAvailabilityZonesUsedByStorageServices": numberOfAvailabilityZonesUsedByStorageServices,
+    "averageWeightedStorageBackendSharing": averageWeightedStorageBackendSharing,
+    "averageWeightedBrokerBackendSharing": averageWeightedBrokerBackendSharing
 }

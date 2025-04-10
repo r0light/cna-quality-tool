@@ -3916,6 +3916,41 @@ test("averageStorageBackendSharing", () => {
     expect(measureValue).toEqual(0.5);
 })
 
+test("averageWeightedStorageBackendSharing", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointB = new Endpoint("e1", "endpoint B", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+
+    let serviceD = new Service("s4", "testService", getEmptyMetaData());
+
+    let storageBackingServiceA = new StorageBackingService("sbs1", "storage service A", getEmptyMetaData());
+    let endpointSA = new Endpoint("e2", "storage endpoint A", getEmptyMetaData());
+    storageBackingServiceA.addEndpoint(endpointSA);
+
+    let storageBackingServiceB = new StorageBackingService("sbs2", "storage service B", getEmptyMetaData());
+    let endpointSB = new Endpoint("e3", "storage endpoint B", getEmptyMetaData());
+    storageBackingServiceB.addEndpoint(endpointSB);
+
+
+    let linkAS = new Link("l1", serviceA, endpointSA);
+    let linkBS = new Link("l2", serviceB, endpointSA);
+    let linkCB = new Link("l3", serviceC, endpointB);
+    let linkDS = new Link("l4", serviceD, endpointSB);
+
+    system.addEntities([serviceA, serviceB, serviceC, serviceD]);
+    system.addEntities([storageBackingServiceA, storageBackingServiceB]);
+    system.addEntities([linkAS, linkBS, linkCB, linkDS]);
+
+    let measureValue = systemMeasureImplementations["averageWeightedStorageBackendSharing"]({ entity: system, system: system });
+    expect(measureValue).toEqual(0.4375);
+})
+
 test("averageBrokerBackendSharing", () => {
     let system = new System("sys1", "testSystem");;
 
@@ -3944,6 +3979,33 @@ test("averageBrokerBackendSharing", () => {
 
     let measureValue = systemMeasureImplementations["averageBrokerBackendSharing"]({ entity: system, system: system });
     expect(measureValue).toEqual(0.5);
+})
+
+test("averageWeightedBrokerBackendSharing", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointB = new Endpoint("e1", "endpoint B", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+
+    let brokerBackingServiceA = new BrokerBackingService("bbs1", "broker service A", getEmptyMetaData());
+    let endpointBA = new Endpoint("e2", "broker endpoint A", getEmptyMetaData());
+    brokerBackingServiceA.addEndpoint(endpointBA);
+
+    let linkAS = new Link("l1", serviceA, endpointBA);
+    let linkBS = new Link("l2", serviceB, endpointBA);
+    let linkCB = new Link("l3", serviceC, endpointB);
+
+    system.addEntities([serviceA, serviceB, serviceC]);
+    system.addEntities([brokerBackingServiceA]);
+    system.addEntities([linkAS, linkBS, linkCB]);
+
+    let measureValue = systemMeasureImplementations["averageWeightedBrokerBackendSharing"]({ entity: system, system: system });
+    expect(measureValue).toEqual(2.5/3);
 })
 
 test("dataShardingLevel", () => {

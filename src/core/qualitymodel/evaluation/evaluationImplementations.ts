@@ -572,19 +572,19 @@ const productFactorEvaluationImplementation: {
         }
     },
     "backingServiceDecentralizationForSystem": (parameters) => {
-        let averageStorageBackendSharing = parameters.calculatedMeasures.get("averageStorageBackendSharing").value;
-        let averageBrokerBackendSharing = parameters.calculatedMeasures.get("averageBrokerBackendSharing").value;
+        let averageWeightedStorageBackendSharing = parameters.calculatedMeasures.get("averageWeightedStorageBackendSharing").value;
+        let averageWeightedBrokerBackendSharing = parameters.calculatedMeasures.get("averageWeightedBrokerBackendSharing").value;
 
-        if (averageStorageBackendSharing === "n/a") {
-            if (averageBrokerBackendSharing === "n/a") {
+        if (averageWeightedStorageBackendSharing === "n/a") {
+            if (averageWeightedBrokerBackendSharing === "n/a") {
                 return "n/a";
             }
-            return linearNumericalMapping(1 - (averageBrokerBackendSharing as number));
+            return squareRootedNumericalMapping(1 - (averageWeightedBrokerBackendSharing as number));
         } else {
-            if (averageBrokerBackendSharing === "n/a") {
-                return linearNumericalMapping(1 - (averageStorageBackendSharing as number));
+            if (averageWeightedBrokerBackendSharing === "n/a") {
+                return squareRootedNumericalMapping(1 - (averageWeightedStorageBackendSharing as number));
             } else {
-                return linearNumericalMapping(average([1 - (averageStorageBackendSharing as number), 1 - (averageBrokerBackendSharing as number)]));
+                return squareRootedNumericalMapping(average([1 - (averageWeightedStorageBackendSharing as number), 1 - (averageWeightedBrokerBackendSharing as number)]));
             }
         }
     },
