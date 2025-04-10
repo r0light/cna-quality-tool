@@ -1250,7 +1250,7 @@ test("numberOfAvailabilityZonesUsedByInfrastructure", () => {
     expect(measureValue).toEqual(4);
 })
 
-test("numberOfLinksWithRetryLogic", () => {
+test("ratioOfLinksWithRetryLogic", () => {
     let system = new System("sys1", "testSystem");;
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
@@ -1288,12 +1288,12 @@ test("numberOfLinksWithRetryLogic", () => {
     system.addEntities([linkAB, linkBC, linkCD]);
     system.addEntity(requestTrace);
 
-    let measureValue = requestTraceMeasureImplementations["numberOfLinksWithRetryLogic"]({ entity: requestTrace, system: system });
+    let measureValue = requestTraceMeasureImplementations["ratioOfLinksWithRetryLogic"]({ entity: requestTrace, system: system });
     expect(measureValue).toEqual(1);
 })
 
 
-test("numberOfLinksWithComplexFailover", () => {
+test("ratioOfLinksWithComplexFailover", () => {
     let system = new System("sys1", "testSystem");;
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
@@ -1331,8 +1331,8 @@ test("numberOfLinksWithComplexFailover", () => {
     system.addEntities([linkAB, linkBC, linkCD]);
     system.addEntity(requestTrace);
 
-    let measureValue = requestTraceMeasureImplementations["numberOfLinksWithComplexFailover"]({ entity: requestTrace, system: system });
-    expect(measureValue).toEqual(1);
+    let measureValue = requestTraceMeasureImplementations["ratioOfLinksWithComplexFailover"]({ entity: requestTrace, system: system });
+    expect(measureValue).toEqual(0.5);
 })
 
 test("amountOfRedundancy", () => {
@@ -2747,7 +2747,7 @@ test("numberOfAvailabilityZonesUsedByStorageServices", () => {
 })
 
 
-test("linksWithTimeout", () => {
+test("ratioOfLinksWithTimeout", () => {
     let system = new System("sys1", "testSystem");;
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
@@ -2788,7 +2788,7 @@ test("linksWithTimeout", () => {
     system.addEntities([linkAB, linkBC, linkCD]);
     system.addEntity(requestTrace);
 
-    let measureValue = requestTraceMeasureImplementations["linksWithTimeout"]({ entity: requestTrace, system: system });
+    let measureValue = requestTraceMeasureImplementations["ratioOfLinksWithTimeout"]({ entity: requestTrace, system: system });
     expect(measureValue).toEqual(2/3);
 })
 

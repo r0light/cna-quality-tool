@@ -1317,7 +1317,7 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.LINK, ENTITIES.ENDPOINT],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Indrasiri2021", "section": "3 Resilient Connectivity Pattern: Time-out" }, { "key": "Richardson2019", "section": "3.2.3 Handling partial failures using the Circuit Breaker pattern" }, { "key": "Goniwada2021", "section": "5 Timeout" }],
-        "measures": ["linksWithTimeout"],
+        "measures": ["ratioOfLinksWithTimeout"],
         "evaluations": [{
             "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
             "evaluation": "invocationTimeouts",
@@ -1331,7 +1331,7 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.LINK, ENTITIES.ENDPOINT],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Davis2019", "section": "9.1" }, { "key": "Scholl2019", "section": "6 Handle Transient Failures with Retries" }, { "key": "Scholl2019", "section": "6 Use a Finite Number of Retries" }, { "key": "Bastani2017", "section": "12 Isolating Failures and Graceful Degradation: Use retries" }, { "key": "Indrasiri2021", "section": "3 Resilient Connectivity Pattern: Retry" }, { "key": "Ruecker2021", "section": "9 Synchronous Request/Response (Use retries in synchronous communications)" }, { "key": "Ruecker2021", "section": "9 The Importance of Idempotency (Communication which is retried needs idempotency)" }, { "key": "Goniwada2021", "section": "Idempotent Service Operation, Retry, 5 Retry " }],
-        "measures": ["numberOfLinksWithRetryLogic"],
+        "measures": ["ratioOfLinksWithRetryLogic"],
         "evaluations": [{
             "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
             "evaluation": "retriesForSafeInvocations",
@@ -1345,7 +1345,7 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.LINK, ENTITIES.ENDPOINT],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Davis2019", "section": "10.1" }, { "key": "Scholl2019", "section": "6 Use Circuit Breakers for Nontransient Failures" }, { "key": "Richardson2019", "section": "3.2.3 Handling partial failures using the Circuit Breaker pattern" }, { "key": "Bastani2017", "section": "12 Isolating Failures and Graceful Degradation: circuit breaker" }, { "key": "Indrasiri2021", "section": "3 Resilient Connectivity Pattern: Circuit breaker" }, { "key": "Goniwada2021", "section": "4 Circuit Breaker" }],
-        "measures": ["numberOfLinksWithComplexFailover"],
+        "measures": ["ratioOfLinksWithComplexFailover"],
         "evaluations": [{
             "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
             "evaluation": "circuitBreakedCommunication",
@@ -2243,14 +2243,14 @@ const measures = {
         "sources": ["Straesser2023"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE],
     },
-    "numberOfLinksWithRetryLogic": {
-        "name": "Number of Links with retry logic",
+    "ratioOfLinksWithRetryLogic": {
+        "name": "Ratio of Links with retry logic",
         "calculation": "Number of Links to a synchronous endpoint with retries > 0 / Total number of Links to a synchronous endpoint",
         "sources": ["Apel2019"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
     },
-    "numberOfLinksWithComplexFailover": {
-        "name": "Number of Links with Complex Failover",
+    "ratioOfLinksWithComplexFailover": {
+        "name": "Ratio of Links with Complex Failover",
         "calculation": "Number of Links to a synchronous endpoint with a circuit breaker / Total number of Links to a synchronous endpoint",
         "sources": ["Apel2019"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
@@ -2598,8 +2598,8 @@ const measures = {
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE]
     },
-    "linksWithTimeout": {
-        "name": "Links with timeout",
+    "ratioOfLinksWithTimeout": {
+        "name": "Ratio of links with timeout",
         "calculation": "Links with a specified timeout / All links",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE]

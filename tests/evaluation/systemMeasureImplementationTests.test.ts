@@ -1195,7 +1195,7 @@ test("rollingUpdateOption", () => {
     expect(measureValue).toEqual(1 / 2);
 })
 
-test("numberOfLinksWithRetryLogic", () => {
+test("ratioOfLinksWithRetryLogic", () => {
     let system = new System("sys1", "testSystem");;
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
@@ -1235,11 +1235,11 @@ test("numberOfLinksWithRetryLogic", () => {
     system.addEntities([serviceA, serviceB, serviceC, serviceD, serviceE]);
     system.addEntities([linkAB, linkBC, linkED, linkDB]);
 
-    let measureValue = systemMeasureImplementations["numberOfLinksWithRetryLogic"]({ entity: system, system: system });
+    let measureValue = systemMeasureImplementations["ratioOfLinksWithRetryLogic"]({ entity: system, system: system });
     expect(measureValue).toEqual(2 / 3);
 })
 
-test("numberOfLinksWithComplexFailover", () => {
+test("ratioOfLinksWithComplexFailover", () => {
     let system = new System("sys1", "testSystem");;
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
@@ -1279,7 +1279,7 @@ test("numberOfLinksWithComplexFailover", () => {
     system.addEntities([serviceA, serviceB, serviceC, serviceD, serviceE]);
     system.addEntities([linkAB, linkBC, linkED, linkDB]);
 
-    let measureValue = systemMeasureImplementations["numberOfLinksWithComplexFailover"]({ entity: system, system: system });
+    let measureValue = systemMeasureImplementations["ratioOfLinksWithComplexFailover"]({ entity: system, system: system });
     expect(measureValue).toEqual(2 / 3);
 })
 
@@ -3438,7 +3438,7 @@ test("ratioOfAutomaticallyMaintainedInfrastructure", () => {
     expect(measureValue).toEqual(0.5);
 })
 
-test("linksWithTimeout", () => {
+test("ratioOfLinksWithTimeout", () => {
     let system = new System("sys1", "testSystem");
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
@@ -3470,7 +3470,7 @@ test("linksWithTimeout", () => {
     system.addEntities([serviceA, serviceB, serviceC, serviceD]);
     system.addEntities([linkAB, linkAC, linkAD]);
 
-    let measureValue = systemMeasureImplementations["linksWithTimeout"]({ entity: system, system: system });
+    let measureValue = systemMeasureImplementations["ratioOfLinksWithTimeout"]({ entity: system, system: system });
     expect(measureValue).toEqual(1/3);
 })
 

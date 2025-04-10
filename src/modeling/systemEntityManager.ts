@@ -1601,6 +1601,14 @@ class SystemEntityManager {
             }));
         }
 
+        if (externalEndpoint.getAllowedAccounts) {
+            newExternalEndpoint.prop("entity/relations/allow_access_to", externalEndpoint.getAllowedAccounts);
+         }
+
+        if (externalEndpoint.getDocumentedBy) {
+            newExternalEndpoint.prop("entity/relations/documented_by", externalEndpoint.getDocumentedBy);
+        }
+
         return newExternalEndpoint;
     }
 

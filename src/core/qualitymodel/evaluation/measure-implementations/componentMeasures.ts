@@ -485,7 +485,7 @@ export const numberOfWriteEndpointsProvidedByAService: Calculation = (parameters
     }).length;
 }
 
-export const numberOfLinksWithRetryLogic: Calculation = (parameters: CalculationParameters<Component>) => {
+export const ratioOfLinksWithRetryLogic: Calculation = (parameters: CalculationParameters<Component>) => {
 
     let outgoingLinks = parameters.system.getOutgoingLinksOfComponent(parameters.entity.getId);
 
@@ -501,7 +501,7 @@ export const numberOfLinksWithRetryLogic: Calculation = (parameters: Calculation
     return linksWithRetryLogic.length / linksToSynchronousEndpoints.length;
 }
 
-export const numberOfLinksWithComplexFailover: Calculation = (parameters: CalculationParameters<Component>) => {
+export const ratioOfLinksWithComplexFailover: Calculation = (parameters: CalculationParameters<Component>) => {
 
     let outgoingLinks = parameters.system.getOutgoingLinksOfComponent(parameters.entity.getId);
 
@@ -514,7 +514,7 @@ export const numberOfLinksWithComplexFailover: Calculation = (parameters: Calcul
 
     let linksWithCircuitBreaker = linksToSynchronousEndpoints.filter(link => link.getProperty("circuit_breaker").value !== "none");
 
-    return linksWithCircuitBreaker.length;
+    return linksWithCircuitBreaker.length / linksToSynchronousEndpoints.length;
 }
 
 
@@ -1022,7 +1022,7 @@ export const replacingDeployments: Calculation = (parameters: CalculationParamet
     return replacing.length / relevantDeploymentMappings.length;
 }
 
-export const linksWithTimeout: Calculation = (parameters: CalculationParameters<Component>) => {
+export const ratioOfLinksWithTimeout: Calculation = (parameters: CalculationParameters<Component>) => {
 
     let outgoingLinks = parameters.system.getOutgoingLinksOfComponent(parameters.entity.getId);
 
@@ -1599,8 +1599,8 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "unusedEndpointCount": unusedEndpointCount,
     "numberOfReadEndpointsProvidedByAService": numberOfReadEndpointsProvidedByAService,
     "numberOfWriteEndpointsProvidedByAService": numberOfWriteEndpointsProvidedByAService,
-    "numberOfLinksWithRetryLogic": numberOfLinksWithRetryLogic,
-    "numberOfLinksWithComplexFailover": numberOfLinksWithComplexFailover,
+    "ratioOfLinksWithRetryLogic": ratioOfLinksWithRetryLogic,
+    "ratioOfLinksWithComplexFailover": ratioOfLinksWithComplexFailover,
     "serviceReplicationLevel": serviceReplicationLevel,
     "amountOfRedundancy": amountOfRedundancy,
     "storageReplicationLevel": storageReplicationLevel,
@@ -1625,7 +1625,7 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "standardizedDeployments": standardizedDeployments,
     "selfContainedDeployments": selfContainedDeployments,
     "replacingDeployments": replacingDeployments,
-    "linksWithTimeout": linksWithTimeout,
+    "ratioOfLinksWithTimeout": ratioOfLinksWithTimeout,
     "deploymentsWithRestart": deploymentsWithRestart,
     "ratioOfDocumentedEndpoints": ratioOfDocumentedEndpoints,
     "ratioOfEndpointsThatSupportTokenBasedAuthentication": ratioOfEndpointsThatSupportTokenBasedAuthentication,

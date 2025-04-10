@@ -408,7 +408,7 @@ export const numberOfAvailabilityZonesUsedByInfrastructure: Calculation = (param
     return availabilityZones.size;
 }
 
-export const numberOfLinksWithRetryLogic: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+export const ratioOfLinksWithRetryLogic: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
     let allLinks = parameters.entity.getLinks.flat();
 
     // TODO also limit to endpoints which are safe/idempotent
@@ -425,7 +425,7 @@ export const numberOfLinksWithRetryLogic: Calculation = (parameters: Calculation
 }
 
 
-export const numberOfLinksWithComplexFailover: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+export const ratioOfLinksWithComplexFailover: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
 
     let allLinks = parameters.entity.getLinks.flat();
 
@@ -438,7 +438,7 @@ export const numberOfLinksWithComplexFailover: Calculation = (parameters: Calcul
 
     let linksWithCircuitBreaker = linksToSynchronousEndpoints.filter(link => link.getProperty("circuit_breaker").value !== "none");
 
-    return linksWithCircuitBreaker.length;
+    return linksWithCircuitBreaker.length / linksToSynchronousEndpoints.length ;
 }
 
 export const amountOfRedundancy: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
@@ -1185,7 +1185,7 @@ export const numberOfAvailabilityZonesUsedByStorageServices: Calculation = (para
     return availabilityZones.size;
 }
 
-export const linksWithTimeout: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+export const ratioOfLinksWithTimeout: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
 
     let includedLinks = parameters.entity.getLinks.flatMap(step => step);
 
@@ -1265,8 +1265,8 @@ export const requestTraceMeasureImplementations: { [measureKey: string]: Calcula
     "smallestReplicationValue": smallestReplicationValue,
     "storageReplicationLevel": storageReplicationLevel,
     "numberOfAvailabilityZonesUsedByInfrastructure": numberOfAvailabilityZonesUsedByInfrastructure,
-    "numberOfLinksWithRetryLogic": numberOfLinksWithRetryLogic,
-    "numberOfLinksWithComplexFailover": numberOfLinksWithComplexFailover,
+    "ratioOfLinksWithRetryLogic": ratioOfLinksWithRetryLogic,
+    "ratioOfLinksWithComplexFailover": ratioOfLinksWithComplexFailover,
     "amountOfRedundancy": amountOfRedundancy,
     "dataShardingLevel": dataShardingLevel,
     "serviceMeshUsage": serviceMeshUsage,
@@ -1297,7 +1297,7 @@ export const requestTraceMeasureImplementations: { [measureKey: string]: Calcula
     "ratioOfComponentsWhoseExternalIngressIsProxied": ratioOfComponentsWhoseExternalIngressIsProxied,
     "numberOfAvailabilityZonesUsedByServices": numberOfAvailabilityZonesUsedByServices,
     "numberOfAvailabilityZonesUsedByStorageServices": numberOfAvailabilityZonesUsedByStorageServices,
-    "linksWithTimeout": linksWithTimeout,
+    "ratioOfLinksWithTimeout": ratioOfLinksWithTimeout,
     "ratioOfExternalEndpointsSupportingTls": ratioOfExternalEndpointsSupportingTls,
     "degreeOfAsynchronousCommunication": degreeOfAsynchronousCommunication
 }

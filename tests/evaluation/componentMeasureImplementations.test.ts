@@ -1081,7 +1081,7 @@ test("ratioOfExternalEndpointsSupportingTls", () => {
 })
 
 
-test("numberOfLinksWithRetryLogic", () => {
+test("ratioOfLinksWithRetryLogic", () => {
     let system = new System("sys1", "testSystem");
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
@@ -1115,11 +1115,11 @@ test("numberOfLinksWithRetryLogic", () => {
     system.addEntities([serviceA, serviceB, serviceC, serviceD]);
     system.addEntities([linkAB, linkAC, linkAD]);
 
-    let measureValue = componentMeasureImplementations["numberOfLinksWithRetryLogic"]({ entity: serviceA, system: system });
+    let measureValue = componentMeasureImplementations["ratioOfLinksWithRetryLogic"]({ entity: serviceA, system: system });
     expect(measureValue).toEqual(1);
 })
 
-test("numberOfLinksWithComplexFailover", () => {
+test("ratioOfLinksWithComplexFailover", () => {
     let system = new System("sys1", "testSystem");
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
@@ -1152,8 +1152,8 @@ test("numberOfLinksWithComplexFailover", () => {
     system.addEntities([serviceA, serviceB, serviceC, serviceD]);
     system.addEntities([linkAB, linkAC, linkAD]);
 
-    let measureValue = componentMeasureImplementations["numberOfLinksWithComplexFailover"]({ entity: serviceA, system: system });
-    expect(measureValue).toEqual(1);
+    let measureValue = componentMeasureImplementations["ratioOfLinksWithComplexFailover"]({ entity: serviceA, system: system });
+    expect(measureValue).toEqual(0.5);
 })
 
 
@@ -1864,7 +1864,7 @@ test("replacingDeployments", () => {
     expect(measureValue).toEqual(0.5);
 })
 
-test("linksWithTimeout", () => {
+test("ratioOfLinksWithTimeout", () => {
     let system = new System("sys1", "testSystem");
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
@@ -1897,7 +1897,7 @@ test("linksWithTimeout", () => {
     system.addEntities([serviceA, serviceB, serviceC, serviceD]);
     system.addEntities([linkAB, linkAC, linkAD]);
 
-    let measureValue = componentMeasureImplementations["linksWithTimeout"]({ entity: serviceA, system: system });
+    let measureValue = componentMeasureImplementations["ratioOfLinksWithTimeout"]({ entity: serviceA, system: system });
     expect(measureValue).toEqual(2/3);
 })
 

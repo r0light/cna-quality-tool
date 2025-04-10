@@ -880,31 +880,31 @@ const productFactorEvaluationImplementation: {
         }
     },
     "invocationTimeouts": (parameters) => {
-        let linksWithTimeout = parameters.calculatedMeasures.get("linksWithTimeout").value;
+        let ratioOfLinksWithTimeout = parameters.calculatedMeasures.get("ratioOfLinksWithTimeout").value;
 
-        if (linksWithTimeout === "n/a") {
+        if (ratioOfLinksWithTimeout === "n/a") {
             return "n/a";
         }
 
-        return squareRootedNumericalMapping(linksWithTimeout as number);
+        return squareRootedNumericalMapping(ratioOfLinksWithTimeout as number);
     },
     "retriesForSafeInvocations": (parameters) => {
-        let numberOfLinksWithRetryLogic = parameters.calculatedMeasures.get("numberOfLinksWithRetryLogic").value;
+        let ratioOfLinksWithRetryLogic = parameters.calculatedMeasures.get("ratioOfLinksWithRetryLogic").value;
 
-        if (numberOfLinksWithRetryLogic === "n/a") {
+        if (ratioOfLinksWithRetryLogic === "n/a") {
             return "n/a";
         }
 
-        return squareRootedNumericalMapping(numberOfLinksWithRetryLogic as number);
+        return squareRootedNumericalMapping(ratioOfLinksWithRetryLogic as number);
     },
     "circuitBreakedCommunication": (parameters) => {
-        let numberOfLinksWithComplexFailover = parameters.calculatedMeasures.get("numberOfLinksWithComplexFailover").value;
+        let ratioOfLinksWithComplexFailover = parameters.calculatedMeasures.get("ratioOfLinksWithComplexFailover").value;
 
-        if (numberOfLinksWithComplexFailover === "n/a") {
+        if (ratioOfLinksWithComplexFailover === "n/a") {
             return "n/a";
         }
 
-        return squareRootedNumericalMapping(numberOfLinksWithComplexFailover as number);
+        return squareRootedNumericalMapping(ratioOfLinksWithComplexFailover as number);
     },
     "automatedRestarts": (parameters) => {
         let deploymentsWithRestart = parameters.calculatedMeasures.get("deploymentsWithRestart").value;

@@ -1,4 +1,4 @@
-import { BackingService, BrokerBackingService, Component, DeploymentMapping, Infrastructure, Link, ProxyBackingService, Service, StorageBackingService, System } from "@/core/entities";
+import { BackingService, BrokerBackingService, Component, DeploymentMapping, Infrastructure, Link, Network, ProxyBackingService, Service, StorageBackingService, System } from "@/core/entities";
 import { Calculation, CalculationParameters, MeasureValue } from "../../quamoco/Measure";
 import { average, median, lowest, partition } from "./general-functions";
 import { ASYNCHRONOUS_ENDPOINT_KIND, AUTOMATED_INFRASTRUCTURE_MAINTENANCE, AUTOMATED_RESTART_POLICIES, AUTOMATED_SCALING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, CONFIG_SERVICE_KIND, CONTRACT_ARTIFACT_TYPE, CUSTOM_SOFTWARE_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, EVENT_SOURCING_KIND, getEndpointKindWeight, getUsageRelationWeight, IAC_ARTIFACT_TYPE, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MESSAGE_BROKER_KIND, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SEND_EVENT_ENDPOINT_KIND, SERVICE_MESH_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND, VAULT_KIND } from "../../specifications/featureModel";
@@ -890,7 +890,7 @@ export const rollingUpdateOption: Calculation = (parameters: CalculationParamete
     return infrastructureEnablingRollingUpdates.length / infrastructureDeployingComponents.size;
 }
 
-export const numberOfLinksWithRetryLogic: Calculation = (parameters: CalculationParameters<System>) => {
+export const ratioOfLinksWithRetryLogic: Calculation = (parameters: CalculationParameters<System>) => {
 
     // TODO also limit to endpoints which are safe/idempotent
     let linksToSynchronousEndpoints = [...parameters.entity.getLinkEntities.entries()].filter(([linkId, link]) => SYNCHRONOUS_ENDPOINT_KIND.includes(link.getTargetEndpoint.getProperty("kind").value)).map(([linkId, link]) => link);
@@ -905,7 +905,7 @@ export const numberOfLinksWithRetryLogic: Calculation = (parameters: Calculation
 
 }
 
-export const numberOfLinksWithComplexFailover: Calculation = (parameters: CalculationParameters<System>) => {
+export const ratioOfLinksWithComplexFailover: Calculation = (parameters: CalculationParameters<System>) => {
     // TODO also limit to endpoints which are safe/idempotent
     let linksToSynchronousEndpoints = [...parameters.entity.getLinkEntities.entries()].filter(([linkId, link]) => SYNCHRONOUS_ENDPOINT_KIND.includes(link.getTargetEndpoint.getProperty("kind").value)).map(([linkId, link]) => link);
 
@@ -1488,7 +1488,10 @@ export const calculateNumberOfLinksWithServiceDiscovery: (links: Link[]) => numb
         let addressResolutionComponent = sourceComponent.getAddressResolutionBy;
         if (addressResolutionComponent &&
             ((addressResolutionComponent.constructor.name === BackingService.name && addressResolutionComponent.getProperty("address_resolution_kind").value !== "none")
-                || (addressResolutionComponent.constructor.name === ProxyBackingService.name))
+                || (addressResolutionComponent.constructor.name === ProxyBackingService.name) 
+                || (addressResolutionComponent.constructor.name === Network.name)
+                || (addressResolutionComponent.constructor.name === Infrastructure.name && addressResolutionComponent.getProperty("address_resolution_kind").value !== "none")
+            )
         ) {
             linksWithServiceDiscovery++;
         }
@@ -2279,7 +2282,7 @@ export const ratioOfAutomaticallyMaintainedInfrastructure: Calculation = (parame
     return automaticallyMaintained.length / allInfrastructureInstances.size;
 }
 
-export const linksWithTimeout: Calculation = (parameters: CalculationParameters<System>) => {
+export const ratioOfLinksWithTimeout: Calculation = (parameters: CalculationParameters<System>) => {
 
     let allLinks = parameters.entity.getLinkEntities;
 
@@ -2919,8 +2922,8 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation }
     "componentDensity": componentDensity,
     "numberOfAvailabilityZonesUsedByInfrastructure": numberOfAvailabilityZonesUsedByInfrastructure,
     "rollingUpdateOption": rollingUpdateOption,
-    "numberOfLinksWithRetryLogic": numberOfLinksWithRetryLogic,
-    "numberOfLinksWithComplexFailover": numberOfLinksWithComplexFailover,
+    "ratioOfLinksWithRetryLogic": ratioOfLinksWithRetryLogic,
+    "ratioOfLinksWithComplexFailover": ratioOfLinksWithComplexFailover,
     "totalNumberOfComponents": totalNumberOfComponents,
     "numberOfServices": numberOfServices,
     "numberOfBackingServices": numberOfBackingServices,
@@ -2980,7 +2983,7 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation }
     "selfContainedDeployments": selfContainedDeployments,
     "replacingDeployments": replacingDeployments,
     "ratioOfAutomaticallyMaintainedInfrastructure": ratioOfAutomaticallyMaintainedInfrastructure,
-    "linksWithTimeout": linksWithTimeout,
+    "ratioOfLinksWithTimeout": ratioOfLinksWithTimeout,
     "deploymentsWithRestart": deploymentsWithRestart,
     "ratioOfDocumentedEndpoints": ratioOfDocumentedEndpoints,
     "ratioOfEndpointsThatSupportTokenBasedAuthentication": ratioOfEndpointsThatSupportTokenBasedAuthentication,
