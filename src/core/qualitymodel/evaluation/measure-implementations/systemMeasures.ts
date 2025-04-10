@@ -2,7 +2,7 @@ import { BackingService, BrokerBackingService, Component, DeploymentMapping, Inf
 import { Calculation, CalculationParameters, MeasureValue } from "../../quamoco/Measure";
 import { average, median, lowest, partition } from "./general-functions";
 import { ASYNCHRONOUS_ENDPOINT_KIND, AUTOMATED_INFRASTRUCTURE_MAINTENANCE, AUTOMATED_RESTART_POLICIES, AUTOMATED_SCALING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, CONFIG_SERVICE_KIND, CONTRACT_ARTIFACT_TYPE, CUSTOM_SOFTWARE_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, EVENT_SOURCING_KIND, getEndpointKindWeight, getUsageRelationWeight, IAC_ARTIFACT_TYPE, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MESSAGE_BROKER_KIND, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SEND_EVENT_ENDPOINT_KIND, SERVICE_MESH_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND, VAULT_KIND } from "../../specifications/featureModel";
-import { calculateRatioOfEndpointsSupportingSsl, calculateRatioOfExternalEndpointsSupportingTls, componentMeasureImplementations, numberOfAsynchronousEndpointsOfferedByAService, numberOfComponentsAComponentIsLinkedTo, numberOfSynchronousEndpointsOfferedByAService, providesHealthAndReadinessEndpoints, serviceCouplingBasedOnEndpointEntropy } from "./componentMeasures";
+import { calculateRatioOfEndpointsSupportingSsl, calculateRatioOfExternalEndpointsSupportingTls, componentMeasureImplementations, numberOfAsynchronousEndpointsOfferedByAService, numberOfComponentsAComponentIsLinkedTo, numberOfSynchronousEndpointsOfferedByAService, providesHealthEndpoints, providesReadinessEndpoints, serviceCouplingBasedOnEndpointEntropy } from "./componentMeasures";
 import { getIncludedComponents, numberOfCyclesInRequestTraces, requestTraceComplexity } from "./requestTraceMeasures";
 import { supportsMonitoring as infrastructureSupportsMonitoring, ratioOfAutomaticallyProvisionedInfrastructure as infrastructureProvisionedAutomatically, ratioOfFullyManagedInfrastructure as infrastructureIsFullyManaged, nonProviderSpecificInfrastructureArtifacts as infrastructureHasOnlyNonProviderSpecificArtifacts } from "./infrastructureMeasures";
 import { supportsMonitoring as componentSupportsMonitoring, nonProviderSpecificComponentArtifacts as componentHasOnlyNonProviderSpecificArtifacts, degreeToWhichComponentsAreLinkedToStatefulComponents as degreeToWhichComponentsAreLinkedToStatefulComponentsForComponentCalculation } from "./componentMeasures";
@@ -261,15 +261,36 @@ export const ratioOfServicesThatProvideHealthEndpoints: Calculation = (parameter
         return "n/a";
     }
 
-    let numberOfServicesWithHealthAndReadinessEndpoint = 0;
+    let numberOfServicesWithHealthEndpoint = 0;
 
     for (const service of allServices) {
-        if (providesHealthAndReadinessEndpoints(service)) {
-            numberOfServicesWithHealthAndReadinessEndpoint++;
+        if (providesHealthEndpoints(service)) {
+            numberOfServicesWithHealthEndpoint++;
         }
     }
 
-    return numberOfServicesWithHealthAndReadinessEndpoint / allServices.length;
+    return numberOfServicesWithHealthEndpoint / allServices.length;
+}
+
+export const ratioOfServicesThatProvideReadinessEndpoints: Calculation = (parameters: CalculationParameters<System>) => {
+
+    let allServices = [...parameters.entity.getComponentEntities.entries()]
+        .map(entry => entry[1])
+        .filter(entity => entity.constructor.name === Service.name);
+
+    if (allServices.length === 0) {
+        return "n/a";
+    }
+
+    let numberOfServicesWithReadinessEndpoint = 0;
+
+    for (const service of allServices) {
+        if (providesReadinessEndpoints(service)) {
+            numberOfServicesWithReadinessEndpoint++;
+        }
+    }
+
+    return numberOfServicesWithReadinessEndpoint / allServices.length;
 }
 
 export const couplingDegreeBasedOnPotentialCoupling: Calculation = (parameters: CalculationParameters<System>) => {
@@ -2870,6 +2891,7 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation }
     "degreeOfAsynchronousCommunication": degreeOfAsynchronousCommunication,
     "asynchronousCommunicationUtilization": asynchronousCommunicationUtilization,
     "ratioOfServicesThatProvideHealthEndpoints": ratioOfServicesThatProvideHealthEndpoints,
+    "ratioOfServicesThatProvideReadinessEndpoints": ratioOfServicesThatProvideReadinessEndpoints,
     "couplingDegreeBasedOnPotentialCoupling": couplingDegreeBasedOnPotentialCoupling,
     "interactionDensityBasedOnComponents": interactionDensityBasedOnComponents,
     "interactionDensityBasedOnLinks": interactionDensityBasedOnLinks,

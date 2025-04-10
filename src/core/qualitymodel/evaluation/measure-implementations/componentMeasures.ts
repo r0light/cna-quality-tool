@@ -26,13 +26,19 @@ export const supportsMonitoring: (component: Component) => boolean = (component)
     return supportsMetrics && supportsLogging;
 }
 
-export const providesHealthAndReadinessEndpoints: (component: Component) => boolean = (component) => {
+export const providesHealthEndpoints: (component: Component) => boolean = (component) => {
     let hasHealthEndpoint = [...component.getEndpointEntities.entries()].filter(endpoint => endpoint[1].getProperty("health_check").value).length > 0;
-    let hasReadinessEndpoint = [...component.getEndpointEntities.entries()].filter(endpoint => endpoint[1].getProperty("readiness_check").value).length > 0;
 
-    return hasHealthEndpoint && hasReadinessEndpoint;
+    return hasHealthEndpoint;
 
 }
+
+export const providesReadinessEndpoints: (component: Component) => boolean = (component) => {
+    let hasReadinessEndpoint = [...component.getEndpointEntities.entries()].filter(endpoint => endpoint[1].getProperty("readiness_check").value).length > 0;
+
+    return hasReadinessEndpoint;
+}
+
 
 export const calculateRatioOfEndpointsSupportingSsl: (endpoints: Endpoint[]) => MeasureValue = (allEndpoints) => {
     let numberOfEndpointsSupportingSsl = allEndpoints.map(endpoint => endpoint.getProperties().find(property => property.getKey === "protocol").value)
@@ -1209,7 +1215,16 @@ export const ratioOfServicesThatProvideHealthEndpoints: Calculation = (parameter
         return "n/a";
     }
 
-    return providesHealthAndReadinessEndpoints(parameters.entity) ? 1 : 0;
+    return providesHealthEndpoints(parameters.entity) ? 1 : 0;
+}
+
+export const ratioOfServicesThatProvideReadinessEndpoints: Calculation = (parameters: CalculationParameters<Component>) => {
+
+    if (parameters.entity.constructor.name !== Service.name) {
+        return "n/a";
+    }
+
+    return providesReadinessEndpoints(parameters.entity) ? 1 : 0;
 }
 
 export const degreeOfSeparationByGateways: Calculation = (parameters: CalculationParameters<Component>) => {
@@ -1621,6 +1636,7 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "externalEndpointAccessConsistency": externalEndpointAccessConsistency,
     "readWriteSeparationForDataAggregates": readWriteSeparationForDataAggregates,
     "ratioOfServicesThatProvideHealthEndpoints": ratioOfServicesThatProvideHealthEndpoints,
+    "ratioOfServicesThatProvideReadinessEndpoints": ratioOfServicesThatProvideReadinessEndpoints,
     "degreeOfSeparationByGateways": degreeOfSeparationByGateways,
     "distributedTracingSupport": distributedTracingSupport,
     "ratioOfComponentsOrInfrastructureNodesThatExportLogsToACentralService": ratioOfComponentsOrInfrastructureNodesThatExportLogsToACentralService,

@@ -320,11 +320,21 @@ const productFactorEvaluationImplementation: {
     },
     "healthAndReadinessChecks": (parameters) => {
         let ratioOfServicesThatProvideHealthEndpoints = parameters.calculatedMeasures.get("ratioOfServicesThatProvideHealthEndpoints").value;
+        let ratioOfServicesThatProvideReadinessEndpoints = parameters.calculatedMeasures.get("ratioOfServicesThatProvideHealthEndpoints").value;
 
         if (ratioOfServicesThatProvideHealthEndpoints === "n/a") {
-            return "n/a";
+            if (ratioOfServicesThatProvideReadinessEndpoints === "n/a") {
+                return "n/a";
+            }
+            return squareRootedNumericalMapping(ratioOfServicesThatProvideReadinessEndpoints as number * 0.5);
+        } else {
+            if (ratioOfServicesThatProvideReadinessEndpoints === "n/a") {
+                return squareRootedNumericalMapping(ratioOfServicesThatProvideHealthEndpoints as number * 0.5);
+            } else {
+                return squareRootedNumericalMapping(average([ratioOfServicesThatProvideHealthEndpoints,ratioOfServicesThatProvideReadinessEndpoints] as number[])
+                )
+            }
         }
-        return squareRootedNumericalMapping(ratioOfServicesThatProvideHealthEndpoints as number);
     },
     "separationByGateways": (parameters) => {
         let degreeOfSeparationByGateways = parameters.calculatedMeasures.get("degreeOfSeparationByGateways").value;

@@ -2116,6 +2116,22 @@ test("ratioOfServicesThatProvideHealthEndpoints", () => {
     let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
     endpointA.setPropertyValue("health_check", true);
     serviceX.addEndpoint(endpointA);
+    let externalEndpointA = new ExternalEndpoint("ee1", "external endpoint 1", getEmptyMetaData());
+    serviceX.addEndpoint(externalEndpointA);
+
+    system.addEntities([serviceX]);
+
+    let measureValue = componentMeasureImplementations["ratioOfServicesThatProvideHealthEndpoints"]({ entity: serviceX, system: system });
+
+    expect(measureValue).toEqual(1);
+})
+
+test("ratioOfServicesThatProvideReadinessEndpoints", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceX = new Service("s1", "serviceA", getEmptyMetaData());
+
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
     let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
     endpointB.setPropertyValue("readiness_check", true);
     serviceX.addEndpoint(endpointB);
@@ -2124,7 +2140,7 @@ test("ratioOfServicesThatProvideHealthEndpoints", () => {
 
     system.addEntities([serviceX]);
 
-    let measureValue = componentMeasureImplementations["ratioOfServicesThatProvideHealthEndpoints"]({ entity: serviceX, system: system });
+    let measureValue = componentMeasureImplementations["ratioOfServicesThatProvideReadinessEndpoints"]({ entity: serviceX, system: system });
 
     expect(measureValue).toEqual(1);
 })

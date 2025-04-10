@@ -667,7 +667,7 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.ENDPOINT],
         "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Scholl2019", "section": "6 Implement Health Checks and Readiness Checks" }, { "key": "Ibryam2020", "section": "4 Health Probe" }, { "key": "Richardson2019", "section": "11.3.1 Using the Health check API pattern" }, { "key": "Garrison2017", "section": "7 State Management" }, { "key": "Arundel2019", "section": "5 Liveness Probes" }, { "key": "Arundel2019", "section": "5 Readiness Probes" }, { "key": "Bastani2017", "section": "13 Health Checks" }, { "key": "Indrasiri2021", "section": "1 Why container orchestration?, Health monitoring" }, { "key": "Goniwada2021", "section": "4 Fail Fast, 16 Health Probe" }],
-        "measures": ["ratioOfServicesThatProvideHealthEndpoints"],
+        "measures": ["ratioOfServicesThatProvideHealthEndpoints", "ratioOfServicesThatProvideReadinessEndpoints"],
         "evaluations": [{
             "targetEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
             "evaluation": "healthAndReadinessChecks",
@@ -1750,8 +1750,14 @@ const measures = {
     },
     "ratioOfServicesThatProvideHealthEndpoints": {
         "name": "Ratio of Services that provide Health endpoints",
-        "calculation": "Number of Service with at least one health endpoint and at least one readiness endpoint / Number of all Services",
+        "calculation": "Number of Service with at least one health endpoint / Number of all Services",
         "sources": ["Ntentos2022"],
+        "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+    },
+    "ratioOfServicesThatProvideReadinessEndpoints": {
+        "name": "Ratio of Services that provide Readiness endpoints",
+        "calculation": "Number of Service with at least one readiness endpoint / Number of all Services",
+        "sources": ["new"],
         "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
     },
     "linesOfCodeForDeploymentConfiguration": {

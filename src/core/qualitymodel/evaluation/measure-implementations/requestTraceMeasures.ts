@@ -1,7 +1,7 @@
 import { BackingService, BrokerBackingService, Component, DeploymentMapping, ExternalEndpoint, Infrastructure, ProxyBackingService, RequestTrace, Service, StorageBackingService, System } from "@/core/entities";
 import { Calculation, CalculationParameters } from "../../quamoco/Measure";
 import { average, lowest, median } from "./general-functions";
-import { calculateRatioOfEndpointsSupportingSsl, calculateRatioOfExternalEndpointsSupportingTls, componentMeasureImplementations, providesHealthAndReadinessEndpoints } from "./componentMeasures";
+import { calculateRatioOfEndpointsSupportingSsl, calculateRatioOfExternalEndpointsSupportingTls, componentMeasureImplementations, providesHealthEndpoints, providesReadinessEndpoints } from "./componentMeasures";
 import { calculateNumberOfLinksWithServiceDiscovery, calculateRatioOfLinksToAsynchronousEndpoints, calculateRatioOfSecuredLinks, calculateRatioOfStatefulComponents, calculateRatioOfStatelessComponents, calculateReplicasPerService, countComponentsConnectedToCertainEndpoints, getServiceInteractions } from "./systemMeasures";
 import { ASYNCHRONOUS_ENDPOINT_KIND, BACKING_DATA_CONFIG_KIND, BACKING_DATA_SECRET_KIND, CONTRACT_ARTIFACT_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, EVENT_SOURCING_KIND, MESSAGE_BROKER_KIND, ROLLING_UPDATE_STRATEGY_OPTIONS, SERVICE_MESH_KIND, SYNCHRONOUS_ENDPOINT_KIND } from "../../specifications/featureModel";
 import { supportsMonitoring as infrastructureSupportsMonitoring } from "./infrastructureMeasures";
@@ -212,20 +212,38 @@ export const ratioOfServicesThatProvideHealthEndpoints: Calculation = (parameter
 
     let allServices = getIncludedComponents(parameters.entity, parameters.system).filter(component => component.constructor.name === Service.name);
 
+    if (allServices.length === 0) {
+        return "n/a";
+    }
+
+    let numberOfServicesWithHealthEndpoint = 0;
+
+    for (const service of allServices) {
+        if (providesHealthEndpoints(service)) {
+            numberOfServicesWithHealthEndpoint++;
+        }
+    }
+
+    return numberOfServicesWithHealthEndpoint / allServices.length;
+}
+
+export const ratioOfServicesThatProvideReadinessEndpoints: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+
+    let allServices = getIncludedComponents(parameters.entity, parameters.system).filter(component => component.constructor.name === Service.name);
 
     if (allServices.length === 0) {
         return "n/a";
     }
 
-    let numberOfServicesWithHealthAndReadinessEndpoint = 0;
+    let numberOfServicesWithReadinessEndpoint = 0;
 
     for (const service of allServices) {
-        if (providesHealthAndReadinessEndpoints(service)) {
-            numberOfServicesWithHealthAndReadinessEndpoint++;
+        if (providesReadinessEndpoints(service)) {
+            numberOfServicesWithReadinessEndpoint++;
         }
     }
 
-    return numberOfServicesWithHealthAndReadinessEndpoint / allServices.length;
+    return numberOfServicesWithReadinessEndpoint / allServices.length;
 }
 
 export const distributedTracingSupport: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
@@ -1238,6 +1256,7 @@ export const requestTraceMeasureImplementations: { [measureKey: string]: Calcula
     "ratioOfComponentsThatSupportMonitoring": ratioOfComponentsThatSupportMonitoring,
     "distributedTracingSupport": distributedTracingSupport,
     "ratioOfServicesThatProvideHealthEndpoints": ratioOfServicesThatProvideHealthEndpoints,
+    "ratioOfServicesThatProvideReadinessEndpoints": ratioOfServicesThatProvideReadinessEndpoints,
     "maximumNumberOfServicesWithinARequestTrace": maximumNumberOfServicesWithinARequestTrace,
     "databaseTypeUtilization": databaseTypeUtilization,
     "serviceDiscoveryUsage": serviceDiscoveryUsage,
