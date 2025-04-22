@@ -57,8 +57,9 @@ for (const factor of qualityModel.productFactors) {
         let impactDesc = `${getImpactSymbol(impact.getImpactType)}  \\textbf{\\hyperref[${labelPrefix}:${impact.getImpactedFactor.getId}]{${impact.getImpactedFactor.getName}}}`;
         output += `${indent(2)}${impactDesc}\n`;
     }
-    output += `${indent(2)}\\\\`;
+    output += `${indent(2)}\\`;
     if (factor.getIncomingImpacts.length > 0) {
+        output += `\\`;
         output += `${indent(2)}Impacted by:\n`;
         let impactedBy = [];
         for (const impact of factor.getIncomingImpacts) {
@@ -66,13 +67,14 @@ for (const factor of qualityModel.productFactors) {
             let impactDesc = `\\textbf{\\hyperref[${labelPrefix}:${impact.getSourceFactor.getId}]{${impact.getSourceFactor.getName}}}`;
             impactedBy.push(impactDesc);
         }
-        output += `${indent(2)}${impactedBy.join(", ")}\n\\\\`;
+        output += `${indent(2)}${impactedBy.join(", ")}\n\\`;
     }
     if (factor.getSources.length > 0) {
-        output += `${indent(2)}Read more:\\\\\n`;
+        output += `\\`;
+        output += `${indent(2)}Read more:\n`;
         for (const source of factor.getSources) {
             let sourceDesc = `\\cite{${source.getKey}} ${source.getInfo}`;
-            output += `${indent(2)}${sourceDesc}\\\\\n`;
+            output += `\\\\${indent(2)}${sourceDesc}\n`;
         }
     }
     output += `${indent()}\\end{mdframed}\n`;
