@@ -1014,7 +1014,7 @@ const productFactors = {
             },
         ]
     },
-    "built-InAutoscaling": {
+    "builtInAutoscaling": {
         "name": "Built-in autoscaling",
         "description": "Horizontal up- and down-scaling of components is automated and built into the infrastructure on which components run. Horizontal scaling means that component instances are replicated when the load increases and components instances are removed when load decreases. This autoscaling is based on rules which can be configured according to system needs.",
         "categories": ["applicationAdministration", "cloudInfrastructure"],
@@ -1025,12 +1025,12 @@ const productFactors = {
         "evaluations": [
             {
                 "targetEntities": [ENTITIES.INFRASTRUCTURE, ENTITIES.SYSTEM],
-                "evaluation": "built-InAutoscaling",
+                "evaluation": "builtInAutoscaling",
                 "reasoning": "The evaluation of this factor considers whether the used infrastructure can on the one hand automatically scale the components deployed on it and on the other hand whether it can scale itself."
             },
             {
                 "targetEntities": [ENTITIES.COMPONENT],
-                "evaluation": "built-InAutoscalingForComponent",
+                "evaluation": "builtInAutoscalingForComponent",
                 "reasoning": "For single components it is evaluated whether the infrastructure that it is deployed on supports autoscaling."
             },
         ]
@@ -1125,7 +1125,7 @@ const productFactors = {
             "reasoning": "The more config data is stored in specialized config services, the more this factor is fulfilled."
         },]
     },
-    "contract-BasedLinks": {
+    "contractBasedLinks": {
         "name": "Contract-based links",
         "description": "Contracts are defined for the communication via links so that changes to endpoints can be evaluated by their impact on the contract and delayed when a contract would be broken. That way consumers of endpoints can adapt to changes when necessary without suddenly breaking communication via a link due to a changed endpoint.",
         "categories": ["networkCommunication", "businessDomain"],
@@ -1136,12 +1136,12 @@ const productFactors = {
         "evaluations": [
             {
                 "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
-                "evaluation": "contract-BasedLinks",
+                "evaluation": "contractBasedLinks",
                 "reasoning": "The more endpoints are covered by a contract artifact, the more this factor is fulfilled."
             },
         ]
     },
-    "standardizedSelf-containedDeploymentUnit": {
+    "standardizedSelfContainedDeploymentUnit": {
         "name": "Standardized self-contained deployment unit",
         "description": "The components are deployed as standardized self-contained units so that the same artifact can reliably be installed and run in different environments and on different infrastructure.",
         "categories": ["cloudInfrastructure", "applicationAdministration"],
@@ -1152,7 +1152,7 @@ const productFactors = {
         "evaluations": [
             {
                 "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
-                "evaluation": "standardizedSelf-containedDeploymentUnit",
+                "evaluation": "standardizedSelfContainedDeploymentUnit",
                 "reasoning": "The evaluation is based on whether artifacts of components are standardized and self-contained, both aspects contribute equally to the fulfillment of this factor."
             },
         ]
@@ -1366,7 +1366,7 @@ const productFactors = {
             "reasoning": "The evaluation is based on whether the deployment mappings of components include automated restarts in case of failing health checks."
         }]
     },
-    "api-BasedCommunication": {
+    "apiBasedCommunication": {
         "name": "API-based communication",
         "description": "All endpoints that are offered by a service are part of a well-defined and documented API. That means, the APIs are based on common principles, are declarative instead of imperative, and are documented in a standardized or specified format (such as the OpenAPI specification). Communication only happens via endpoints that are part of such APIs and can be both synchronous or asynchronous.",
         "categories": ["networkCommunication", "businessDomain"],
@@ -1377,7 +1377,7 @@ const productFactors = {
         "evaluations": [
             {
                 "targetEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
-                "evaluation": "api-BasedCommunication",
+                "evaluation": "apiBasedCommunication",
                 "reasoning": "Communication is based on documented APIs if documentation artifacts exist that specify an API and cover the endpoints of components."
             },
         ]
@@ -1479,16 +1479,16 @@ const impacts = [
     { "impactedFactor": "replication", "sourceFactor": "shardedDataStoreReplication", "impactType": "positive" },
     { "impactedFactor": "resourceUtilization", "sourceFactor": "enforcementOfAppropriateResourceBoundaries", "impactType": "positive" },
     { "impactedFactor": "availability", "sourceFactor": "enforcementOfAppropriateResourceBoundaries", "impactType": "positive" },
-    { "impactedFactor": "availability", "sourceFactor": "built-InAutoscaling", "impactType": "positive" },
-    { "impactedFactor": "elasticity", "sourceFactor": "built-InAutoscaling", "impactType": "positive" },
+    { "impactedFactor": "availability", "sourceFactor": "builtInAutoscaling", "impactType": "positive" },
+    { "impactedFactor": "elasticity", "sourceFactor": "builtInAutoscaling", "impactType": "positive" },
     { "impactedFactor": "adaptability", "sourceFactor": "infrastructureAbstraction", "impactType": "positive" },
     { "impactedFactor": "adaptability", "sourceFactor": "cloudVendorAbstraction", "impactType": "positive" },
     { "impactedFactor": "reusability", "sourceFactor": "cloudVendorAbstraction", "impactType": "positive" },
     { "impactedFactor": "adaptability", "sourceFactor": "configurationManagement", "impactType": "positive" },
     { "impactedFactor": "configurationManagement", "sourceFactor": "isolatedConfiguration", "impactType": "positive" },
     { "impactedFactor": "configurationManagement", "sourceFactor": "configurationStoredInSpecializedServices", "impactType": "positive" },
-    { "impactedFactor": "adaptability", "sourceFactor": "contract-BasedLinks", "impactType": "positive" },
-    { "impactedFactor": "installability", "sourceFactor": "standardizedSelf-containedDeploymentUnit", "impactType": "positive" },
+    { "impactedFactor": "adaptability", "sourceFactor": "contractBasedLinks", "impactType": "positive" },
+    { "impactedFactor": "installability", "sourceFactor": "standardizedSelfContainedDeploymentUnit", "impactType": "positive" },
     { "impactedFactor": "replaceability", "sourceFactor": "immutableArtifacts", "impactType": "positive" },
     { "impactedFactor": "availability", "sourceFactor": "guardedIngress", "impactType": "positive" },
     { "impactedFactor": "availability", "sourceFactor": "distribution", "impactType": "positive" },
@@ -1502,8 +1502,8 @@ const impacts = [
     { "impactedFactor": "autonomousFaultHandling", "sourceFactor": "retriesForSafeInvocations", "impactType": "positive" },
     { "impactedFactor": "autonomousFaultHandling", "sourceFactor": "circuitBreakedCommunication", "impactType": "positive" },
     { "impactedFactor": "recoverability", "sourceFactor": "automatedRestarts", "impactType": "positive" },
-    { "impactedFactor": "interoperability", "sourceFactor": "api-BasedCommunication", "impactType": "positive" },
-    { "impactedFactor": "testability", "sourceFactor": "api-BasedCommunication", "impactType": "positive" },
+    { "impactedFactor": "interoperability", "sourceFactor": "apiBasedCommunication", "impactType": "positive" },
+    { "impactedFactor": "testability", "sourceFactor": "apiBasedCommunication", "impactType": "positive" },
     { "impactedFactor": "interoperability", "sourceFactor": "consistentlyMediatedCommunication", "impactType": "positive" },
     { "impactedFactor": "timeBehaviour", "sourceFactor": "consistentlyMediatedCommunication", "impactType": "negative" },
     { "impactedFactor": "analyzability", "sourceFactor": "consistentlyMediatedCommunication", "impactType": "positive" }

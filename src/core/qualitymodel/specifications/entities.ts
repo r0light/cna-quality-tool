@@ -45,13 +45,13 @@ export const entities: {[key in ENTITIES]: EntitySpec}  = {
         "description": "An abstract entity for representing distinguishable executable parts of the system that provide certain functionalities. It can for example be a service or a certain cloud resource. Regarding its granularity, it should, generally speaking, correspond to something that can be run as an OS process.",
         "relation": {"type": "part-of", "target": ENTITIES.SYSTEM},
         "symbol": "C",
-        "formal": `\tC := (id,name,props,providedEndpoints,artifacts,RDA,RBD,RN,externalIngressProxiedBy,ingressProxiedBy,egressProxiedBy,addressResolutionBy,authenticationBy)
+        "formal": `\tC := (id,name,props,RDA,RBD,RN,artifacts,providedEndpoints,externalIngressProxiedBy,ingressProxiedBy,egressProxiedBy,addressResolutionBy,authenticationBy)
         props<sub>C</sub> := {${getComponentProperties().map(property => property.getKey).join(",")}}
-        providedEndpoints ⊆ E
-        artifacts ⊆ A
         RDA ⊆ C ⨯ DA
         RBD ⊆ C ⨯ BD
         RN ⊆ C ⨯ N
+        artifacts ⊆ A
+        providedEndpoints ⊆ E
         externalIngressProxiedBy ∈ PBS
         ingressProxiedBy ∈ PBS
         egressProxiedBy ∈ PBS

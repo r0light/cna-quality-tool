@@ -40,7 +40,7 @@ class ProductFactor {
         this.getImpactingFactors = this.getImpactingFactors.bind(this);
     }
 
-    get getFactorType() {
+    get getFactorType(): "productFactor" {
         return "productFactor";
     }
 

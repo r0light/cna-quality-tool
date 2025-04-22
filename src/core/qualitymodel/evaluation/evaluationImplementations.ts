@@ -661,7 +661,7 @@ const productFactorEvaluationImplementation: {
 
         return linearNumericalMapping(ratioOfAutomaticallyMaintainedInfrastructure as number);
     },
-    "built-InAutoscaling": (parameters) => {
+    "builtInAutoscaling": (parameters) => {
         let infrastructureAutoscaling = parameters.calculatedMeasures.get("infrastructureAutoscaling").value;
         let deployedEntitiesAutoscaling = parameters.calculatedMeasures.get("deployedEntitiesAutoscaling").value;
 
@@ -678,7 +678,7 @@ const productFactorEvaluationImplementation: {
             }
         }
     },
-    "built-InAutoscalingForComponent": (parameters) => {
+    "builtInAutoscalingForComponent": (parameters) => {
         let deployedEntitiesAutoscaling = parameters.calculatedMeasures.get("deployedEntitiesAutoscaling").value;
 
         if (deployedEntitiesAutoscaling === "n/a") {
@@ -749,7 +749,7 @@ const productFactorEvaluationImplementation: {
 
         return linearNumericalMapping(configurationStoredInConfigService as number);
     },
-    "contract-BasedLinks": (parameters) => {
+    "contractBasedLinks": (parameters) => {
         let ratioOfEndpointsCoveredByContract = parameters.calculatedMeasures.get("ratioOfEndpointsCoveredByContract").value;
 
         if (ratioOfEndpointsCoveredByContract === "n/a") {
@@ -758,7 +758,7 @@ const productFactorEvaluationImplementation: {
 
         return linearNumericalMapping(ratioOfEndpointsCoveredByContract as number);
     },
-    "standardizedSelf-containedDeploymentUnit": (parameters) => {
+    "standardizedSelfContainedDeploymentUnit": (parameters) => {
         let standardizedDeployments = parameters.calculatedMeasures.get("standardizedDeployments").value;
         let selfContainedDeployments = parameters.calculatedMeasures.get("selfContainedDeployments").value;
 
@@ -915,7 +915,7 @@ const productFactorEvaluationImplementation: {
 
         return squareRootedNumericalMapping(deploymentsWithRestart as number);
     },
-    "api-BasedCommunication": (parameters) => {
+    "apiBasedCommunication": (parameters) => {
         let ratioOfDocumentedEndpoints = parameters.calculatedMeasures.get("ratioOfDocumentedEndpoints").value;
 
         if (ratioOfDocumentedEndpoints === "n/a") {

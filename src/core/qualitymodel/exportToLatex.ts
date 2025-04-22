@@ -5,6 +5,8 @@ import { getQualityModel } from './QualityModelInstance.js';
 import { ImpactType } from './quamoco/Impact.js';
 import { getBackingDataProperties, getBackingServiceProperties, getBrokerBackingServiceProperties, getComponentProperties, getDataAggregateProperties, getDeploymentMappingProperties, getEndpointProperties, getExternalEndpointProperties, getInfrastructureProperties, getLinkProperties, getNetworkProperties, getProxyBackingServiceProperties, getRequestTraceProperties, getServiceProperties, getStorageBackingServiceProperties, Infrastructure, Link, Network, ProxyBackingService, RequestTrace, Service, StorageBackingService } from '../entities.js';
 import { EntityProperty, SelectEntityProperty } from '../common/entityProperty.js';
+import { ENTITIES } from './specifications/entities.js';
+import { getArtifactTypeProperties } from '../common/artifact.js';
 
 const qualityModel = getQualityModel();
 
@@ -35,6 +37,8 @@ fs.mkdirSync(`./${outerDir}/${innerDir}`, { recursive: true });
 
 // Product Factors
 
+let factorCommands = "";
+
 for (const factor of qualityModel.productFactors) {
 
     let output = "";
@@ -43,15 +47,27 @@ for (const factor of qualityModel.productFactors) {
 
     output += `\\begin{minipage}{\\textwidth}\n`;
     output += `${indent()}\\begin{mdframed}[backgroundcolor=black!6]\n`;
+    output += `${indent(2)}\\refstepcounter{productfactor}\\label{productfactor:${factor.getId}}\n`;
     output += `${indent(2)}Factor \\textbf{${factor.getName}}\\\\\n`;
     output += `${indent(2)}\\textit{${factor.getDescription}}\\\\\n`;
     output += `${indent(2)}Categories: ${categories}\\\\\n`;
     output += `${indent(2)}Impacts:\n`;
     for (const impact of factor.getOutgoingImpacts) {
-        let impactDesc = `${getImpactSymbol(impact.getImpactType)}  \\textbf{${impact.getImpactedFactor.getName}}`;
+        let labelPrefix = impact.getImpactedFactor.getFactorType === 'qualityAspect' ? "qualityaspect" : "productfactor";
+        let impactDesc = `${getImpactSymbol(impact.getImpactType)}  \\textbf{\\hyperref[${labelPrefix}:${impact.getImpactedFactor.getId}]{${impact.getImpactedFactor.getName}}}`;
         output += `${indent(2)}${impactDesc}\n`;
     }
     output += `${indent(2)}\\\\`;
+    if (factor.getIncomingImpacts.length > 0) {
+        output += `${indent(2)}Impacted by:\n`;
+        let impactedBy = [];
+        for (const impact of factor.getIncomingImpacts) {
+            let labelPrefix = impact.getSourceFactor.getFactorType === 'productFactor' ? "productfactor" : "??";
+            let impactDesc = `\\textbf{\\hyperref[${labelPrefix}:${impact.getSourceFactor.getId}]{${impact.getSourceFactor.getName}}}`;
+            impactedBy.push(impactDesc);
+        }
+        output += `${indent(2)}${impactedBy.join(", ")}\n\\\\`;
+    }
     if (factor.getSources.length > 0) {
         output += `${indent(2)}Read more:\\\\\n`;
         for (const source of factor.getSources) {
@@ -63,6 +79,7 @@ for (const factor of qualityModel.productFactors) {
     output += `\\end{minipage}\n`;
     output += `\n`;
 
+    factorCommands += `\\newcommand\\${factor.getId}{\\hyperref[productfactor:${factor.getId}]{\\textbf{${factor.getName}}}}\n`
     frameOutput += `\\input{${innerDir}/${factor.getId}.tex}\n\n`;
 
     fs.writeFile(`./${outerDir}/${innerDir}/${factor.getId}.tex`, `${output}`, (err) => {
@@ -72,7 +89,7 @@ for (const factor of qualityModel.productFactors) {
     })
 }
 
-fs.writeFile(`./${outerDir}/factors-frame.tex`, `${frameOutput}`, (err) => {
+fs.writeFile(`./${outerDir}/factors-frame.tex`, `\\newcounter{productfactor}\n\n${factorCommands}\n\n${frameOutput}`, (err) => {
     if (err) {
         console.error(`Could not export factor frame to LaTeX`)
     }
@@ -80,7 +97,7 @@ fs.writeFile(`./${outerDir}/factors-frame.tex`, `${frameOutput}`, (err) => {
 
 // Quality Aspects
 
-let qaOutput = "";
+let qaOutput = "\\newcounter{qualityaspect}\n\n";
 
 for (const highlevelAspect of qualityModel.highLevelAspects) {
 
@@ -92,6 +109,7 @@ for (const highlevelAspect of qualityModel.highLevelAspects) {
 
     for (const qualityAspect of qualityAspects) {
 
+        qaOutput += `\\refstepcounter{qualityaspect}\\label{qualityaspect:${qualityAspect.getId}}\n`;
         if (["simplicity", "elasticity"].includes(qualityAspect.getId)) {
             qaOutput += `\\definitionown{${qualityAspect.getName}}{${qualityAspect.getDescription}}\n\n`;
         } else {
@@ -144,83 +162,33 @@ function prepareForTex(formalSpec: string) {
                      .replaceAll("</sub>", "}");
 }
 
-let entitiesListing1Output = "";
+let entitiesListingOutput = "";
+let entityKeys2 = [ "system", "dataAggregate", "bakingData", "network", "component","service","backingService","storageBackingService","proxyBackingService","brokerBackingService","endpoint","externalEndpoint","artifact","link","requestTrace","infrastructure","deploymentMapping"];
+let entityKeys: ENTITIES[] = [ENTITIES.SYSTEM, ENTITIES.DATA_AGGREGATE, ENTITIES.BACKING_DATA, ENTITIES.NETWORK, ENTITIES.COMPONENT, ENTITIES.SERVICE, ENTITIES.BACKING_SERVICE, ENTITIES.STORAGE_BACKING_SERVICE, ENTITIES.PROXY_BACKING_SERVICE, ENTITIES.BROKER_BACKING_SERVICE ,ENTITIES.ENDPOINT, ENTITIES.EXTERNAL_ENDPOINT, ENTITIES.ARTIFACT, ENTITIES.LINK, ENTITIES.REQUEST_TRACE, ENTITIES.INFRASTRUCTURE, ENTITIES.DEPLOYMENT_MAPPING];
 
-for (const entity of qualityModel.entities.filter(entity => ["system","dataAggregate","backingData","network"].includes(entity.getKey))) {
-
+for (const entityKey of entityKeys) {
+    let entity = qualityModel.entities.find(entity => entity.getKey === entityKey);
     let formalSpecification = prepareForTex(entity.getFormalSpecification);
  
     let latexSpec = "";
     let parts = formalSpecification.split("\n");
 
     if (parts.length > 1) {
-        latexSpec = `#${entity.getName}\n`;
         latexSpec += `$${parts.join("\n")}$\n\n`
     } else {
-        latexSpec = `#${entity.getName}\n$${formalSpecification}$ \n`;
+        latexSpec = `$${formalSpecification}$ \n`;
     }
 
-    entitiesListing1Output += latexSpec;
+    entitiesListingOutput += latexSpec;
 }
 
-entitiesListing1Output = `
-\\begin{lstlisting}[float=h,caption={Formal specifiation of entities - I},label=lst:results:qualitymodel:entities1,mathescape=true]
-${entitiesListing1Output}
+entitiesListingOutput = `
+\\begin{lstlisting}[float=h,caption={Formal specifiation of entities},label=lst:results:qualitymodel:entities,mathescape=true]
+${entitiesListingOutput}
 \\end{lstlisting}
 `;
 
-let entitiesListing2Output = "";
-
-for (const entity of qualityModel.entities.filter(entity => ["component","service","backingService","storageBackingService","proxyBackingService","brokerBackingService","endpoint","externalEndpoint","artifact"].includes(entity.getKey))) {
-
-    let formalSpecification = prepareForTex(entity.getFormalSpecification);
- 
-    let latexSpec = "";
-    let parts = formalSpecification.split("\n");
-
-    if (parts.length > 1) {
-        latexSpec = `#${entity.getName}\n`;
-        latexSpec += `$${parts.join("\n")}$\n\n`
-    } else {
-        latexSpec = `#${entity.getName}\n$${formalSpecification}$ \n`;
-    }
-
-    entitiesListing2Output += latexSpec;
-}
-
-entitiesListing2Output = `
-\\begin{lstlisting}[float=h,caption={Formal specifiation of entities - II},label=lst:results:qualitymodel:entities2,mathescape=true]
-${entitiesListing2Output}
-\\end{lstlisting}
-`;
-
-let entitiesListing3Output = "";
-
-for (const entity of qualityModel.entities.filter(entity => ["link","requestTrace","infrastructure","deploymentMapping"].includes(entity.getKey))) {
-
-    let formalSpecification = prepareForTex(entity.getFormalSpecification);
- 
-    let latexSpec = "";
-    let parts = formalSpecification.split("\n");
-
-    if (parts.length > 1) {
-        latexSpec = `#${entity.getName}\n`;
-        latexSpec += `$${parts.join("\n")}$\n\n`
-    } else {
-        latexSpec = `#${entity.getName}\n$${formalSpecification}$ \n`;
-    }
-
-    entitiesListing3Output += latexSpec;
-}
-
-entitiesListing3Output = `
-\\begin{lstlisting}[float=h,caption={Formal specifiation of entities - III},label=lst:results:qualitymodel:entities3,mathescape=true]
-${entitiesListing3Output}
-\\end{lstlisting}
-`;
-
-
-fs.writeFile(`./${outerDir}/entities.tex`, `${entitiesTableOutput}\n${entitiesListing1Output}\n${entitiesListing2Output}\n${entitiesListing3Output}`, (err) => {
+fs.writeFile(`./${outerDir}/entities.tex`, `${entitiesTableOutput}\n${entitiesListingOutput}`, (err) => {
     if (err) {
         console.error(`Could not export entities to LaTeX`)
     }
@@ -291,6 +259,10 @@ let entityProperties: { name: string, properties: EntityProperty[] }[] = [
         name: "Network",
         properties: getNetworkProperties()
     },
+    {
+        name: "Artifact",
+        properties: getArtifactTypeProperties("CNA.Artifact")
+    }
 ];
 
 
