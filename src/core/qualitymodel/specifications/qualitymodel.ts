@@ -459,7 +459,7 @@ const productFactors = {
         "categories": ["dataManagement", "businessDomain"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.DATA_AGGREGATE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
-        "sources": [{ "key": "Goniwada2021", "section": "3 Coupling (Services should be as loosely coupled as possible)" }],
+        "sources": [{ "key": "Goniwada2021", "section": "3 Be Smart with State Principle" }],
         "measures": [],
         "evaluations": [{
             "targetEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
@@ -638,7 +638,7 @@ const productFactors = {
         "categories": ["applicationAdministration", "businessDomain"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.BACKING_DATA, ENTITIES.BACKING_SERVICE, ENTITIES.LINK],
         "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.SYSTEM],
-        "sources": [{ "key": "Davis2019", "section": "11.2" }, { "key": "Scholl2019", "section": "6 Tag Your Metrics Appropriately" }, { "key": "Richardson2019", "section": "11.3.4 Applying the Applications metrics pattern" }, { "key": "Garrison2017", "section": "7 Monitoring and Logging, Metrics Aggregation" }, { "key": "Reznik2019", "section": "10 Observability" }, { "key": "Arundel2019", "section": "15 Metrics help predict problems" }, { "key": "Arundel2019", "section": "15 Logging" }, { "key": "Bastani2017", "section": "13 Metrics" }, { "key": "Arundel2019", "section": "16 The RED Pattern (common metrics you should have for services" }, { "key": "Arundel2019", "section": "16 The USE Pattern (common metrics for resources" }, { "key": "Goniwada2021", "section": "19 One Source of Truth" }],
+        "sources": [{ "key": "Davis2019", "section": "11.2" }, { "key": "Scholl2019", "section": "6 Tag Your Metrics Appropriately" }, { "key": "Richardson2019", "section": "11.3.4 Applying the Applications metrics pattern" }, { "key": "Garrison2017", "section": "7 Monitoring and Logging, Metrics Aggregation" }, { "key": "Reznik2019", "section": "10 Observability" }, { "key": "Arundel2019", "section": "15 Metrics help predict problems" }, { "key": "Bastani2017", "section": "13 Metrics" }, { "key": "Arundel2019", "section": "16 The RED Pattern (common metrics you should have for services" }, { "key": "Arundel2019", "section": "16 The USE Pattern (common metrics for resources" }, { "key": "Goniwada2021", "section": "19 One Source of Truth" }],
         "measures": ["ratioOfComponentsOrInfrastructureNodesThatExportMetrics", "ratioOfComponentsOrInfrastructureNodesThatEnablePerformanceAnalytics"],
         "evaluations": [{
             "targetEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.SYSTEM],
