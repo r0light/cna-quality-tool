@@ -100,6 +100,7 @@ fs.writeFile(`./${outerDir}/factors-frame.tex`, `\\newcounter{productfactor}\n\n
 // Quality Aspects
 
 let qaOutput = "\\newcounter{qualityaspect}\n\n";
+let qaCommands = "";
 
 for (const highlevelAspect of qualityModel.highLevelAspects) {
 
@@ -117,10 +118,11 @@ for (const highlevelAspect of qualityModel.highLevelAspects) {
         } else {
             qaOutput += `\\definitioncited{${qualityAspect.getName}}{${qualityAspect.getDescription}}{\\cite{ISO/IEC2014}}\n\n`;
         }
+        qaCommands += `\\newcommand\\${qualityAspect.getId}{\\hyperref[qualityaspect:${qualityAspect.getId}]{\\textbf{${qualityAspect.getName}}}}\n`;
     }
 }
 
-fs.writeFile(`./${outerDir}/qualityAspects.tex`, `${qaOutput}`, (err) => {
+fs.writeFile(`./${outerDir}/qualityAspects.tex`, `${qaOutput}\n\n${qaCommands}`, (err) => {
     if (err) {
         console.error(`Could not export quality aspects to LaTeX`)
     }
