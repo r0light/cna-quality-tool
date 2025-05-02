@@ -1488,6 +1488,7 @@ const impacts = [
     { "impactedFactor": "adaptability", "sourceFactor": "configurationManagement", "impactType": "positive" },
     { "impactedFactor": "configurationManagement", "sourceFactor": "isolatedConfiguration", "impactType": "positive" },
     { "impactedFactor": "configurationManagement", "sourceFactor": "configurationStoredInSpecializedServices", "impactType": "positive" },
+    { "impactedFactor": "interoperability", "sourceFactor": "contractBasedLinks", "impactType": "positive" },
     { "impactedFactor": "adaptability", "sourceFactor": "contractBasedLinks", "impactType": "positive" },
     { "impactedFactor": "installability", "sourceFactor": "standardizedSelfContainedDeploymentUnit", "impactType": "positive" },
     { "impactedFactor": "replaceability", "sourceFactor": "immutableArtifacts", "impactType": "positive" },
