@@ -930,7 +930,7 @@ const productFactors = {
         "categories": ["applicationAdministration", "cloudInfrastructure"],
         "relevantEntities": [ENTITIES.SYSTEM, ENTITIES.SERVICE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
-        "sources": [],
+        "sources": [{ "key": "Davis2019", "section": "5.1. Cloud-native apps have many instances deployed"}, {"key": "Scholl2019", "section": "6 Design Stateless Services That Scale Out"}],
         "measures": ["amountOfRedundancy", "serviceReplicationLevel", "medianServiceReplication", "smallestReplicationValue"],
         "evaluations": [
             {
@@ -1101,7 +1101,7 @@ const productFactors = {
         "categories": ["applicationAdministration", "dataManagement"],
         "relevantEntities": [ENTITIES.BACKING_DATA, ENTITIES.INFRASTRUCTURE, ENTITIES.COMPONENT],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
-        "sources": [{ "key": "Davis2019", "section": "6.2 The app's configuration layer" }, { "key": "Ibryam2020", "section": "18" }, { "key": "Scholl2019", "section": "6 Never Store Secrets or Configuration Inside an Image" }, { "key": "Adkins2020", "section": "14 Treat Configuration as Code" }, { "key": "Indrasiri2021", "section": " Decoupled Configurations" }],
+        "sources": [{ "key": "Davis2019", "section": "6.2 The app's configuration layer" }, { "key": "Ibryam2020", "section": "18 EnvVar Configuration" }, { "key": "Scholl2019", "section": "6 Never Store Secrets or Configuration Inside an Image" }, { "key": "Adkins2020", "section": "14 Treat Configuration as Code" }, { "key": "Indrasiri2021", "section": "1 Decoupled Configurations" }],
         "measures": ["configurationExternalization"],
         "evaluations": [
             {
@@ -1117,7 +1117,7 @@ const productFactors = {
         "categories": ["applicationAdministration", "dataManagement"],
         "relevantEntities": [ENTITIES.BACKING_DATA, ENTITIES.INFRASTRUCTURE, ENTITIES.COMPONENT, ENTITIES.BACKING_SERVICE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE],
-        "sources": [{ "key": "Ibryam2020", "section": "19 Configuration Resource" }, { "key": "Richardson2019", "section": "11.2 “Designing configurable services" }, { "key": "Arundel2019", "section": "10 ConfigMaps" }, { "key": "Bastani2017", "section": "2 Centralized, Journaled Configuration" }, { "key": "Bastani2017", "section": "2 Refreshable Configuration" }],
+        "sources": [{ "key": "Ibryam2020", "section": "19 Configuration Resource" }, { "key": "Richardson2019", "section": "11.2 “Designing configurable services" }, { "key": "Arundel2019", "section": "10 ConfigMaps" }, { "key": "Bastani2017", "section": "3 Centralized, Journaled Configuration" }, { "key": "Bastani2017", "section": "3 Refreshable Configuration" }],
         "measures": ["configurationStoredInConfigService"],
         "evaluations": [{
             "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE],
@@ -1473,6 +1473,7 @@ const impacts = [
     { "impactedFactor": "replication", "sourceFactor": "serviceReplication", "impactType": "positive" },
     { "impactedFactor": "availability", "sourceFactor": "serviceReplication", "impactType": "positive" },
     { "impactedFactor": "replication", "sourceFactor": "horizontalDataReplication", "impactType": "positive" },
+    { "impactedFactor": "availability", "sourceFactor": "horizontalDataReplication", "impactType": "positive" },
     { "impactedFactor": "replication", "sourceFactor": "verticalDataReplication", "impactType": "positive" },
     { "impactedFactor": "analyzability", "sourceFactor": "verticalDataReplication", "impactType": "negative" },
     { "impactedFactor": "availability", "sourceFactor": "verticalDataReplication", "impactType": "positive" },

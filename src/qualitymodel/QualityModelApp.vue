@@ -10,6 +10,9 @@
                 <div class="detailsHeading">Factor Details</div>
                 <div class="detailsBody p-2">
                     <div v-if="!!selectedFactor" class="factorDetails">
+                        <div v-if="selectedFactor.getFactorType === 'qualityAspect'">
+                            <h5>{{ qualityModel.highLevelAspects.find(aspect => aspect.getId === (selectedFactor as QualityAspect).getHighLevelAspectKey).getName }}</h5>
+                        </div>
                         <h3>{{ selectedFactor.getName }}</h3>
                         <p class="font-italic">{{ selectedFactor.getDescription }}</p>
                         <div v-if="selectedFactor.getFactorType === 'productFactor'">
