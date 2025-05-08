@@ -7,6 +7,7 @@ import { getBackingDataProperties, getBackingServiceProperties, getBrokerBacking
 import { EntityProperty, SelectEntityProperty } from '../common/entityProperty.js';
 import { ENTITIES } from './specifications/entities.js';
 import { getArtifactTypeProperties } from '../common/artifact.js';
+import { Measure } from './quamoco/Measure.js';
 
 const qualityModel = getQualityModel();
 
@@ -75,6 +76,18 @@ for (const factor of qualityModel.productFactors) {
         for (const source of factor.getSources) {
             let sourceDesc = `\\cite{${source.getKey}} ${source.getInfo}`;
             output += `\\\\${indent(2)}${sourceDesc}\n`;
+        }
+    }
+    let uniqueMeasures = new Map<string, Measure>();
+    factor.getAllEvaluations().flatMap(evaluation => evaluation.getEvaluationDetails.getUsedMeasures).forEach(measure => uniqueMeasures.set(measure.getId, measure));
+    let measuresForFactor = [...uniqueMeasures.values()];
+    if (measuresForFactor.length > 0) {
+        output += `\\\\`;
+        output += `${indent(2)}Measure(s) used for evaluation:\n`;
+        for (const measure of measuresForFactor) {
+            let measureDesc = `\\textbf{${measure.getName}}`;
+            //TODO add hyperref to measure
+            output += `\\\\${indent(2)}${measureDesc}\n`;
         }
     }
     output += `${indent()}\\end{mdframed}\n`;
