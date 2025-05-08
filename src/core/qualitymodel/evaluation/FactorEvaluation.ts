@@ -1,3 +1,4 @@
+import { Measure } from "../quamoco/Measure";
 import { ProductFactor } from "../quamoco/ProductFactor";
 import { QualityAspect } from "../quamoco/QualityAspect";
 import { EvaluationPrecondition, IncomingImpactsInterpretation, MeasureKey, ProductFactorKey } from "../specifications/qualitymodel";
@@ -103,13 +104,15 @@ class EvaluationDetails {
     
     #evaluationId: string;
     #reasoning: string;    
+    #usedMeasures: Measure[];
     #precondition: EvaluationPrecondition;
     #impactsInterpretation: IncomingImpactsInterpretation;
     #customImpactInterpretation: (impactWeights: number[]) => number;
 
-    constructor(evaluationId: string, reasoning: string, precondition: EvaluationPrecondition, impactsInterpretation: IncomingImpactsInterpretation, customImpactInterpretation: (impactWeights: number[]) => number) {
+    constructor(evaluationId: string, reasoning: string, usedMeasures: Measure[], precondition: EvaluationPrecondition, impactsInterpretation: IncomingImpactsInterpretation, customImpactInterpretation: (impactWeights: number[]) => number) {
         this.#evaluationId = evaluationId;
         this.#reasoning = reasoning;
+        this.#usedMeasures = usedMeasures;
         this.#precondition = precondition;
         this.#impactsInterpretation = impactsInterpretation;
         this.#customImpactInterpretation = customImpactInterpretation;
@@ -121,6 +124,10 @@ class EvaluationDetails {
 
     get getReasoning() {
         return this.#reasoning;
+    }
+
+    get getUsedMeasures() {
+        return this.#usedMeasures;
     }
 
     get getPrecondition() {

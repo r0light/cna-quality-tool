@@ -184,14 +184,6 @@ const productFactorEvaluationImplementation: {
         }
         return linearNumericalMapping(average([securedExternalEndpoints as number, securedLinks as number]));
     },
-    "linkDataEncryptionInTransit": (parameters) => {
-        let securedLinks = parameters.calculatedMeasures.get("ratioOfSecuredLinks").value;
-
-        if (securedLinks === "n/a") {
-            return "n/a";
-        }
-        return linearNumericalMapping(securedLinks as number);
-    },
     "isolatedSecrets": (parameters) => {
         let externalizedSecrets = parameters.calculatedMeasures.get("secretsExternalization").value;
 

@@ -115,8 +115,20 @@ function getQualityModel(): QualityModelInstance {
 
         // add all product factor evaluations
         for (const productFactorEvaluation of productFactor.evaluations) {
+
+            let usedMeasures = productFactorEvaluation.measures.map(measureKey => {
+                // try to get measure for one of the applicable entities only, because if an evaluation is valid for a certain entity, then the mentioned measure should also be valid for that entity 
+                let foundMeasure = newQualityModel.measures.get(productFactorEvaluation.targetEntities[0]).find(measure => measure.getId === measureKey);
+                if (foundMeasure) {
+                    return foundMeasure;
+                } else {
+                    throw new Error("Measure " + measureKey + " defined for evaluation " +  productFactorEvaluation.evaluation + " but not found for entity "+ productFactorEvaluation.targetEntities[0]);
+                }
+            })
+
             let evaluationDetails = new EvaluationDetails(productFactorEvaluation.evaluation,
                 productFactorEvaluation.reasoning,
+                usedMeasures,
                 productFactorEvaluation.precondition ? productFactorEvaluation.precondition : DEFAULT_PRECONDITION,
                 productFactorEvaluation.impactsInterpretation ? productFactorEvaluation.impactsInterpretation : DEFAULT_IMPACTS_INTERPRETATION,
                 productFactorEvaluation.customImpactInterpretation ? productFactorEvaluation.customImpactInterpretation : (impacts: number[]) => 0
@@ -185,6 +197,7 @@ function getQualityModel(): QualityModelInstance {
 
             let evaluationDetails = new EvaluationDetails(qualityAspectEvaluation.evaluation,
                 qualityAspectEvaluation.reasoning,
+                [],
                 qualityAspectEvaluation.precondition ? qualityAspectEvaluation.precondition : DEFAULT_PRECONDITION,
                 qualityAspectEvaluation.impactsInterpretation ? qualityAspectEvaluation.impactsInterpretation : DEFAULT_IMPACTS_INTERPRETATION,
                 qualityAspectEvaluation.customImpactInterpretation ? qualityAspectEvaluation.customImpactInterpretation : (impacts: number[]) => 0
