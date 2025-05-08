@@ -185,6 +185,7 @@ export type IncomingImpactsInterpretation = "lowest" | "highest" | "mean" | "med
 type ProductFactorEvaluationSpec = {
     targetEntities: `${ENTITIES}`[],
     evaluation: string,
+    measures: MeasureKey[],
     reasoning: string,
     precondition?: EvaluationPrecondition,
     impactsInterpretation?: IncomingImpactsInterpretation,
@@ -218,11 +219,13 @@ const productFactors = {
             {
                 "targetEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
                 "evaluation": "dataEncryptionInTransit",
+                "measures": ["ratioOfExternalEndpointsSupportingTls", "ratioOfSecuredLinks"],
                 "reasoning": "The more communication is encrypted, the better confidential data is protected. It can be measured by links targeting secure endpoints."
             },
             {
                 "targetEntities": [ENTITIES.LINK],
                 "evaluation": "linkDataEncryptionInTransit",
+                "measures": ["ratioOfSecuredLinks"],
                 "reasoning": "The more communication is encrypted, the better confidential data is protected. It can be measured by links targeting secure endpoints."
             }
         ]
@@ -239,6 +242,7 @@ const productFactors = {
             {
                 "targetEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
                 "evaluation": "aggregateImpacts",
+                "measures": [],
                 "reasoning": "Secrets management is concered with where and how secrets are stored and how they are made accessible to components which need them.",
                 "precondition": "at-least-one",
                 "impactsInterpretation": "mean"
@@ -257,6 +261,7 @@ const productFactors = {
             {
                 "targetEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
                 "evaluation": "isolatedSecrets",
+                "measures": ["secretsExternalization"],
                 "reasoning": "The more secrets are stored outside of the components which use them, the more secrets are isolated."
             },
         ]
@@ -275,6 +280,7 @@ const productFactors = {
             {
                 "targetEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.SYSTEM],
                 "evaluation": "secretsStoredInSpecializedServices",
+                "measures": ["secretsStoredInVault"],
                 "reasoning": "The more secrets are stored in vaults, the more they are stored in specialized services which encrypt them and offer management features."
             }
         ]
@@ -290,6 +296,7 @@ const productFactors = {
         "evaluations": [{
             "targetEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM],
             "evaluation": "aggregateImpacts",
+            "measures": [],
             "precondition": "at-least-one",
             "impactsInterpretation": "lowest",
             "reasoning": "How well access restriction is supported depends on the impacting factors. Their impacts are simply aggregated to evaluate this factor.",
@@ -308,6 +315,7 @@ const productFactors = {
             {
                 "targetEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM],
                 "evaluation": "leastPrivilegedAccess",
+                "measures": ["accessRestrictedToCallers"],
                 "reasoning": "Access to endpoints is minimal if access is allowed only to those who actually need. it",
             },
         ]
@@ -324,6 +332,7 @@ const productFactors = {
             {
                 "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT],
                 "evaluation": "accessControlManagementConsistency",
+                "measures": ["endpointAccessConsistency", "externalEndpointAccessConsistency"],
                 "reasoning": "Access control consistency is calculated for all endpoints and all external endpoints separately. Both results are averaged and the factor is evaluated as high if this consistency is also high. If there are not endpoints in the system, the evaluation is none."
             }
         ]
@@ -340,6 +349,7 @@ const productFactors = {
             {
                 "targetEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
                 "evaluation": "accountSeparation",
+                "measures": ["ratioOfUniqueAccountUsage"],
                 "reasoning": "The higher the ratio of unique account usage, the more this product factor is present."
             }
         ]
@@ -356,6 +366,7 @@ const productFactors = {
             {
                 "targetEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
                 "evaluation": "authenticationDelegation",
+                "measures": ["ratioOfDelegatedAuthentication"],
                 "reasoning": "The higher the ratio of delegated authentication, the more this product factor is present."
             }
         ]
@@ -371,6 +382,7 @@ const productFactors = {
         "evaluations": [{
             "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT],
             "evaluation": "aggregateImpacts",
+            "measures": [], 
             "reasoning": "Service-orientation has a number of aspects that need to be considered. Therefore, the evaluation for this factor just aggregates the impacts from other factors impacting this factor.",
             "precondition": "majority",
             "impactsInterpretation": "median"
@@ -388,6 +400,7 @@ const productFactors = {
             {
                 "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT],
                 "evaluation": "aggregateImpacts",
+                "measures": [], 
                 "reasoning": "The limited functional scope of a component or system is evaluated simply by aggregating the results of limited data scope and limited functional scope.",
                 "precondition": "at-least-one",
                 "impactsInterpretation": "median"
@@ -406,6 +419,7 @@ const productFactors = {
             {
                 "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT],
                 "evaluation": "limitedDataScope",
+                "measures": ["cohesionBetweenEndpointsBasedOnDataAggregateUsage"],
                 "reasoning": "Based on cohesionBetweenEndpointsBasedOnDataAggregateUsage. The higher the cohesion is, the more this factor is present. For the system entity, the measure is aggregated across services."
             }
         ]
@@ -421,6 +435,7 @@ const productFactors = {
         "evaluations": [{
             "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT],
             "evaluation": "limitedEndpointScope",
+            "measures": ["serviceInterfaceUsageCohesion"],
             "reasoning": "Based on serviceInterfaceUsageCohesion. The higher the cohesion is, the more this factor is present. For the system entity, the measure is aggregated across services."
         }]
     },
@@ -435,6 +450,7 @@ const productFactors = {
         "evaluations": [{
             "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT],
             "evaluation": "commandQueryResponsibilitySegregation",
+            "measures": ["readWriteSeparationForDataAggregates"],
             "reasoning": "Based on readWriteSeparationForDataAggregates the factor is evaluated as being present, the higher the separation of read and write operations on the same data aggregate is, across one or more component(s)."
         }]
     },
@@ -450,6 +466,7 @@ const productFactors = {
         "evaluations": [{
             "targetEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
             "evaluation": "separationByGateways",
+            "measures": ["degreeOfSeparationByGateways"],
             "reasoning": "Based on degreeOfSeparationByGateways the factor is evaluated as being present, the higher the degree of separation by gateways is."
         }]
     },
@@ -464,6 +481,7 @@ const productFactors = {
         "evaluations": [{
             "targetEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
             "evaluation": "aggregateImpacts",
+            "measures": [],
             "reasoning": "Depends on whether state is only stored in specific services (mostlyStatelessServices) and if those services that are stateful are handled properly (specializedStatefulServices)",
             "precondition": "at-least-one",
             "impactsInterpretation": "lowest"
@@ -480,6 +498,7 @@ const productFactors = {
         "evaluations": [{
             "targetEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
             "evaluation": "mostlyStatelessServices",
+            "measures": ["ratioOfStatelessComponents", "degreeToWhichComponentsAreLinkedToStatefulComponents"],
             "reasoning": "This factor is fulfilled if the ratio of stateless services is rather high and if in addition the degree to which components are linked to stateful components is rather low. These two measures are aggregated."
         }]
     },
@@ -494,6 +513,7 @@ const productFactors = {
         "evaluations": [{
             "targetEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
             "evaluation": "specializedStatefulServices",
+            "measures": ["ratioOfSpecializedStatefulServices", "suitablyReplicatedStatefulService"],
             "reasoning": "This factor is fulfilled if the ratio of specialized stateful services is rather high. If stateful services are replicated, also suitablyReplicatedStatefulService is included in the evaluation and needs to be rather high."
         }]
     },
@@ -508,6 +528,7 @@ const productFactors = {
         "evaluations": [{
             "targetEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
             "evaluation": "aggregateImpacts",
+            "measures": [],
             "reasoning": "Depends on whether communication is asynchronous and in addition, if event sourcing is used.",
             "precondition": "at-least-one",
             "impactsInterpretation": "median"
@@ -524,6 +545,7 @@ const productFactors = {
         "evaluations": [{
             "targetEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
             "evaluation": "asynchronousCommunication",
+            "measures": ["degreeOfAsynchronousCommunication", "asynchronousCommunicationUtilization"],
             "reasoning": "This factor is fulfilled if the degree of asychronous communication and the asynchronousCommunicationUtilization are rather high. Both measures are relevant and therefore aggregated."
         }]
     },
@@ -538,6 +560,7 @@ const productFactors = {
         "evaluations": [{
             "targetEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
             "evaluation": "communicationPartnerAbstraction",
+            "measures": ["eventSourcingUtilizationMetric"],
             "reasoning": "This factor is fulfilled if the degree of communication via an event store is rather high."
         }]
     },
@@ -552,6 +575,7 @@ const productFactors = {
         "evaluations": [{
             "targetEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
             "evaluation": "persistentCommunication",
+            "measures": ["serviceInteractionViaBackingService", "eventSourcingUtilizationMetric"],
             "reasoning": "This factor is fulfilled if communication is persistent. It can be partly persistent if communication happens via a message broker which at least temporarily stores messages. But for a higher fullfillment an event store should be utilized."
         }]
     },
@@ -566,6 +590,7 @@ const productFactors = {
         "evaluations": [{
             "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT],
             "evaluation": "usageOfExistingSolutionsForNonCoreCapabilities",
+            "measures": ["ratioOfNonCustomBackingServices"],
             "reasoning": "This factor depends on the ratio of non-custom backing services used. The higher this ratio is, the more this factor is fulfilled."
         }]
     },
@@ -580,6 +605,7 @@ const productFactors = {
         "evaluations": [{
             "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
             "evaluation": "standardization",
+            "measures": ["ratioOfStandardizedArtifacts", "ratioOfEntitiesProvidingStandardizedArtifacts"],
             "reasoning": "This factor is present, if entities include standardized artifacts. It is evaluated on the one hand based on whether entities include standardized artifacts at all and on the other hand the ratio of standardized artifacts."
         }]
     },
@@ -594,11 +620,13 @@ const productFactors = {
         "evaluations": [{
             "targetEntities": [ENTITIES.REQUEST_TRACE],
             "evaluation": "componentSimilarityRequestTrace",
+            "measures": ["componentArtifactsSimilarity"],
             "reasoning": "On the level of a request trace, the evaluation of this factor only considers the component similarity of the components involved in the request trace. The similarity is based on the artifacts."
         },
         {
             "targetEntities": [ENTITIES.SYSTEM],
             "evaluation": "componentSimilaritySystem",
+            "measures": ["componentArtifactsSimilarity", "infrastructureArtifactsSimilarity"],
             "reasoning": "On the level of the whole system, the evaluation of this factor considers the component similarity and infrastructure similarity based on their included artifacts."
         }]
     },
@@ -613,6 +641,7 @@ const productFactors = {
         "evaluations": [{
             "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
             "evaluation": "aggregateImpacts",
+            "measures": [],
             "reasoning": "Depends on whether components and infrastructure support monitoring through logging, metrics, distributed tracing and health and readiness checks.",
             "precondition": "at-least-one",
             "impactsInterpretation": "median"
@@ -629,6 +658,7 @@ const productFactors = {
         "evaluations": [{
             "targetEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.SYSTEM],
             "evaluation": "consistentCentralizedLogging",
+            "measures": ["ratioOfComponentsOrInfrastructureNodesThatExportLogsToACentralService"],
             "reasoning": "The factor is fullfilled, if services export logs to a logging service. This is checked by the ratio of components or infrastructure that export logs to a central service."
         }]
     },
@@ -643,6 +673,7 @@ const productFactors = {
         "evaluations": [{
             "targetEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.SYSTEM],
             "evaluation": "consistentCentralizedMetrics",
+            "measures": ["ratioOfComponentsOrInfrastructureNodesThatExportMetrics"],
             "reasoning": "The factor is fullfilled, if services export metrics to a metrics service. This is checked by the ratio of components or infrastructure that export metrics to a central service."
         }]
     },
@@ -657,6 +688,7 @@ const productFactors = {
         "evaluations": [{
             "targetEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
             "evaluation": "distributedTracingOfInvocations",
+            "measures": ["distributedTracingSupport"],
             "reasoning": "The more components are connected to a distributed tracing service, the more this factor is fulfilled."
         }]
     },
@@ -671,6 +703,7 @@ const productFactors = {
         "evaluations": [{
             "targetEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
             "evaluation": "healthAndReadinessChecks",
+            "measures": ["ratioOfServicesThatProvideHealthEndpoints", "ratioOfServicesThatProvideReadinessEndpoints"],
             "reasoning": "The higher the number of services providing health and readiness checks, the more this factor is fulfilled."
         }]
     },
@@ -685,6 +718,7 @@ const productFactors = {
         "evaluations": [{
             "targetEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE],
             "evaluation": "automatedInfrastructureProvisioning",
+            "measures": ["ratioOfAutomaticallyProvisionedInfrastructure"],
             "reasoning": "The higher the number of infrastructure entites that are provisioned automatically, the more this factor is fulfilled."
         }]
     },
@@ -699,6 +733,7 @@ const productFactors = {
         "evaluations": [{
             "targetEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE],
             "evaluation": "useInfrastructureAsCode",
+            "measures": ["ratioOfInfrastructureWithIaCArtifact"],
             "reasoning": "The higher the number of infrastructure entites that include an IaC (Infrastructure as Code) artifact, the more this factor is fulfilled."
         }]
     },
@@ -713,6 +748,7 @@ const productFactors = {
         "evaluations": [{
             "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
             "evaluation": "dynamicScheduling",
+            "measures": ["ratioOfDeploymentsOnDynamicInfrastructure"],
             "reasoning": "The higher the number of deployment mappings on a platform or cloud service, the more this factor is fulfilled."
         }]
     },
@@ -728,6 +764,7 @@ const productFactors = {
             "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT],
             "evaluation": "aggregateImpacts",
             "reasoning": "Depends on various aspects of how services depend on each other. Each aspect can have an impact",
+            "measures": [],
             "precondition": "majority",
             "impactsInterpretation": "mean"
         }]
@@ -744,11 +781,13 @@ const productFactors = {
             {
                 "targetEntities": [ENTITIES.COMPONENT],
                 "evaluation": "lowCouplingForComponent",
+                "measures": ["numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfComponents"],
                 "reasoning": "Evaluation is based on the number of components a component is linked to relative to the total amount of components. The higher this metric is, the less this factor is fulfilled."
             },
             {
                 "targetEntities": [ENTITIES.SYSTEM],
                 "evaluation": "lowCouplingForSystem",
+                "measures": ["degreeOfCouplingInASystem"],
                 "reasoning": "Evaluation is based on the degree of coupling in the system. The higher this degree is, the less this factor is fulfilled."
             }]
     },
@@ -763,6 +802,7 @@ const productFactors = {
         "evaluations": [{
             "targetEntities": [ENTITIES.SYSTEM],
             "evaluation": "functionalDecentralization",
+            "measures": ["dataAggregateSpread", "requestTraceSimilarityBasedOnIncludedComponents"],
             "reasoning": "Evaluation is based on Data Aggregate Spread and Request trace simiarlity. If both measures are available, they equally contribute to the evaluation. If only on measure is available, only this is used."
         }]
     },
@@ -777,11 +817,13 @@ const productFactors = {
         "evaluations": [{
             "targetEntities": [ENTITIES.SYSTEM],
             "evaluation": "limitedRequestTraceScopeForSystem",
+            "measures": ["averageComplexityOfRequestTraces", "maximumNumberOfServicesWithinARequestTrace"],
             "reasoning": "Evaluation is based on the number of involved links and components of request traces. On the system level, the evaluation is averaged across request traces."
         },
         {
             "targetEntities": [ENTITIES.REQUEST_TRACE],
             "evaluation": "limitedRequestTraceScopeForRequestTrace",
+            "measures": ["requestTraceComplexity", "maximumNumberOfServicesWithinARequestTrace"],
             "reasoning": "Evaluation is based on the number of involved links and components of a request traces"
         }]
     },
@@ -796,6 +838,7 @@ const productFactors = {
         "evaluations": [{
             "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT],
             "evaluation": "logicalGrouping",
+            "measures": ["namespaceSeparation"],
             "reasoning": "Evaluation of this factor is based on namespaces. The more components are separated and thus grouped by namespaces, the more the factor is fullfilled"
         }]
     },
@@ -810,11 +853,13 @@ const productFactors = {
         "evaluations": [{
             "targetEntities": [ENTITIES.SYSTEM],
             "evaluation": "backingServiceDecentralizationForSystem",
+            "measures": ["averageWeightedStorageBackendSharing", "averageWeightedBrokerBackendSharing"],
             "reasoning": "Evaluation is based on the average sharing of backing services (storage backing services and broker services). The lower the sharing, the higher the decentralization and thus the fulfillment of this factor"
         },
         {
             "targetEntities": [ENTITIES.COMPONENT],
             "evaluation": "backingServiceDecentralizationForComponent",
+            "measures": ["ratioOfStorageBackendSharing", "ratioOfBrokerBackendSharing"],
             "reasoning": "Evaluation is based on the ratio of backend sharing (storage backing services and broker services). The lower the sharing, the higher the decentralization and thus the fulfillment of this factor"
         }]
     },
@@ -830,6 +875,7 @@ const productFactors = {
             {
                 "targetEntities": [ENTITIES.LINK, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
                 "evaluation": "addressingAbstraction",
+                "measures": ["serviceDiscoveryUsage"],
                 "reasoning": "The more communication uses abstract addresses for communication partners, the higher is the adressing abstraction. Usage of abstract addresses can be measured by the usage of service discovery mechanisms."
             },
         ]
@@ -846,6 +892,7 @@ const productFactors = {
             {
                 "targetEntities": [ENTITIES.SYSTEM],
                 "evaluation": "sparsity",
+                "measures": ["numberOfComponents"],
                 "reasoning": "The more components there are in a system, the less sparse it is. Although the evaluation is quite subjective, for a general tendency, this evaluation considers systems sparse that have less than 10 components."
             },
         ]
@@ -861,18 +908,21 @@ const productFactors = {
         "evaluations": [{
             "targetEntities": [ENTITIES.SYSTEM],
             "evaluation": "operationOutsourcing",
+            "measures": ["ratioOfProviderManagedComponentsAndInfrastructure"],
             "reasoning": "Depends on both the outsourcing (management by provider) of components and infrastructure.",
         },
         {
             "targetEntities": [ENTITIES.COMPONENT],
             "evaluation": "aggregateImpacts",
             "reasoning": "Depends on the factor Managed backing services",
+            "measures": [],
             "precondition": "at-least-one",
             "impactsInterpretation": "median"
         },
         {
             "targetEntities": [ENTITIES.INFRASTRUCTURE],
             "evaluation": "aggregateImpacts",
+            "measures": [],
             "reasoning": "Depends on the factor Managed infrastructure",
             "precondition": "at-least-one",
             "impactsInterpretation": "median"
@@ -889,6 +939,7 @@ const productFactors = {
         "evaluations": [{
             "targetEntities": [ENTITIES.INFRASTRUCTURE, ENTITIES.SYSTEM],
             "evaluation": "managedInfrastructure",
+            "measures": ["ratioOfFullyManagedInfrastructure"],
             "reasoning": "The more infrastructure entities are managed by a provider, the more this factor is fulfilled."
         }]
     },
@@ -903,6 +954,7 @@ const productFactors = {
         "evaluations": [{
             "targetEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM],
             "evaluation": "managedBackingServices",
+            "measures": ["ratioOfManagedBackingServices"],
             "reasoning": "The more backing services are managed by a provider, the more this factor is fulfilled."
         }]
     },
@@ -918,6 +970,7 @@ const productFactors = {
             {
                 "targetEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
                 "evaluation": "aggregateImpacts",
+                "measures": [],
                 "reasoning": "Replication can be achieved in different ways, each way already having a positive impact. Therefore if any of the underlying factors is present, replication is increased.",
                 "precondition": "at-least-one",
                 "impactsInterpretation": "mean"
@@ -936,6 +989,7 @@ const productFactors = {
             {
                 "targetEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
                 "evaluation": "serviceReplication",
+                "measures": ["serviceReplicationLevel", "amountOfRedundancy"],
                 "reasoning": "Service replication is measured by the number of replicas for a service and the redudancy introduced by deploying it on multiple infrastructure instances."
             },
         ]
@@ -952,6 +1006,7 @@ const productFactors = {
             {
                 "targetEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
                 "evaluation": "horizontalDataReplication",
+                "measures": ["storageReplicationLevel"],
                 "reasoning": "Horizontal data replication is measured by the number of replicas for storage backing services."
             },
         ]
@@ -968,11 +1023,13 @@ const productFactors = {
             {
                 "targetEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM],
                 "evaluation": "systemVerticalDataReplication",
+                "measures": ["ratioOfCachedDataAggregates"],
                 "reasoning": "Data is replicated vertically if data aggregates are cached by those components using them."
             },
             {
                 "targetEntities": [ENTITIES.REQUEST_TRACE],
                 "evaluation": "requestTraceVerticalDataReplication",
+                "measures": ["dataReplicationAlongRequestTrace"],
                 "reasoning": "Data is replicated vertically if data aggregates used throughout a request trace are cached by the involved components."
             },
         ]
@@ -989,6 +1046,7 @@ const productFactors = {
             {
                 "targetEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE, ENTITIES.COMPONENT],
                 "evaluation": "shardedDataStoreReplication",
+                "measures": ["dataShardingLevel"],
                 "reasoning": "Sharding is a specific form of replication and is measured by the amount of shards used by each storage backing service."
             },
         ]
@@ -1005,11 +1063,13 @@ const productFactors = {
             {
                 "targetEntities": [ENTITIES.INFRASTRUCTURE, ENTITIES.SYSTEM],
                 "evaluation": "enforcementOfAppropriateResourceBoundaries",
+                "measures": ["ratioOfInfrastructureEnforcingResourceBoundaries", "ratioOfDeploymentMappingsWithStatedResourceRequirements"],
                 "reasoning": "Enforcement of appropriate resource boundaries is evaluated based on infrastructure entities. The more infrastructure entities support it, the more this factor is fullfilled."
             },
             {
                 "targetEntities": [ENTITIES.COMPONENT],
                 "evaluation": "enforcementOfAppropriateResourceBoundariesForComponents",
+                "measures": ["ratioOfDeploymentMappingsWithStatedResourceRequirements"],
                 "reasoning": "Enforcement of appropriate resource boundaries is evaluated based on deployment mappings of components that state resource boundaries. Only then it is possible to have suitable resource boundaries."
             },
         ]
@@ -1026,11 +1086,13 @@ const productFactors = {
             {
                 "targetEntities": [ENTITIES.INFRASTRUCTURE, ENTITIES.SYSTEM],
                 "evaluation": "builtInAutoscaling",
+                "measures": ["deployedEntitiesAutoscaling", "infrastructureAutoscaling"],
                 "reasoning": "The evaluation of this factor considers whether the used infrastructure can on the one hand automatically scale the components deployed on it and on the other hand whether it can scale itself."
             },
             {
                 "targetEntities": [ENTITIES.COMPONENT],
                 "evaluation": "builtInAutoscalingForComponent",
+                "measures": ["deployedEntitiesAutoscaling"],
                 "reasoning": "For single components it is evaluated whether the infrastructure that it is deployed on supports autoscaling."
             },
         ]
@@ -1047,6 +1109,7 @@ const productFactors = {
             {
                 "targetEntities": [ENTITIES.INFRASTRUCTURE, ENTITIES.SYSTEM],
                 "evaluation": "infrastructureAbstraction",
+                "measures": ["ratioOfAbstractedHardware"],
                 "reasoning": "The evaluation of this factor considers whether the used infrastructure abstracts from underlying hardware. Thus components can be deployed on a platform without having to consider the underlying hardware."
             },
         ]
@@ -1063,16 +1126,19 @@ const productFactors = {
             {
                 "targetEntities": [ENTITIES.SYSTEM],
                 "evaluation": "cloudVendorAbstraction",
+                "measures": ["nonProviderSpecificInfrastructureArtifacts", "nonProviderSpecificComponentArtifacts"],
                 "reasoning": "The evaluation of this factor considers whether artifacts used for components and infrastructure are specific to certain cloud providers or not."
             },
             {
                 "targetEntities": [ENTITIES.INFRASTRUCTURE],
                 "evaluation": "cloudVendorAbstractionForInfrastructure",
+                "measures": ["nonProviderSpecificInfrastructureArtifacts"],
                 "reasoning": "The evaluation of this factor considers whether artifacts used for infrastructure are specific to certain cloud providers or not."
             },
             {
                 "targetEntities": [ENTITIES.COMPONENT],
                 "evaluation": "cloudVendorAbstractionForComponents",
+                "measures": ["nonProviderSpecificComponentArtifacts"],
                 "reasoning": "The evaluation of this factor considers whether artifacts used for components are specific to certain cloud providers or not."
             },
         ]
@@ -1089,6 +1155,7 @@ const productFactors = {
             {
                 "targetEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
                 "evaluation": "aggregateImpacts",
+                "measures": [],
                 "reasoning": "Configuration management is concered with where and how config data is stored and how it is made accessible to components which need them.",
                 "precondition": "at-least-one",
                 "impactsInterpretation": "median"
@@ -1107,6 +1174,7 @@ const productFactors = {
             {
                 "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
                 "evaluation": "isolatedConfiguration",
+                "measures": ["configurationExternalization"],
                 "reasoning": "Configuration is isolated, when it is externalized from those components that use it. The more configuration data is externalized, the more this factor is fulfilled."
             },
         ]
@@ -1122,6 +1190,7 @@ const productFactors = {
         "evaluations": [{
             "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE],
             "evaluation": "configurationStoredInSpecializedServices",
+            "measures": ["configurationStoredInConfigService"],
             "reasoning": "The more config data is stored in specialized config services, the more this factor is fulfilled."
         },]
     },
@@ -1137,6 +1206,7 @@ const productFactors = {
             {
                 "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
                 "evaluation": "contractBasedLinks",
+                "measures": ["ratioOfEndpointsCoveredByContract"],
                 "reasoning": "The more endpoints are covered by a contract artifact, the more this factor is fulfilled."
             },
         ]
@@ -1153,6 +1223,7 @@ const productFactors = {
             {
                 "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
                 "evaluation": "standardizedSelfContainedDeploymentUnit",
+                "measures": ["standardizedDeployments", "selfContainedDeployments"],
                 "reasoning": "The evaluation is based on whether artifacts of components are standardized and self-contained, both aspects contribute equally to the fulfillment of this factor."
             },
         ]
@@ -1169,6 +1240,7 @@ const productFactors = {
             {
                 "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE],
                 "evaluation": "immutableArtifacts",
+                "measures": ["replacingDeployments"],
                 "reasoning": "The evaluation is based on whether the deployment mappings in focus are immutable in the sense that they do not allow in-place updates, but instead replacing updates."
             },
         ]
@@ -1184,6 +1256,7 @@ const productFactors = {
         "evaluations": [            {
             "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
             "evaluation": "guardedIngress",
+            "measures": ["ratioOfComponentsWhoseExternalIngressIsProxied"],
             "reasoning": "The evaluation is based on whether the external ingress traffic on considered components is proxied. Proxies can provide analysis, transformation and filtering of incoming traffic."
         },]
     },
@@ -1199,6 +1272,7 @@ const productFactors = {
             {
                 "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
                 "evaluation": "aggregateImpacts",
+                "measures": [],
                 "reasoning": "The evaluation is based on the factors Physical Data Distribution and Physical Service Distribution.",
                 "precondition": "at-least-one",
                 "impactsInterpretation": "median"
@@ -1206,6 +1280,7 @@ const productFactors = {
             {
                 "targetEntities": [ENTITIES.INFRASTRUCTURE],
                 "evaluation": "distribution",
+                "measures": ["numberOfAvailabilityZonesUsedByInfrastructure"],
                 "reasoning": "The evaluation is based on whether the infrastructure is using multiple availability zones. The factor is fulfilled low if more than one availability zone is used, and increasing to moderate if three are used to high if five or more are used."
             }
         ]
@@ -1221,6 +1296,7 @@ const productFactors = {
         "evaluations": [ {
             "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
             "evaluation": "physicalDataDistribution",
+            "measures": ["numberOfAvailabilityZonesUsedByStorageServices"],
             "reasoning": "The evaluation is based on whether the storage service are deployed on infrastructure using multiple availability zones. The factor is fulfilled low if more than one availability zone is used, and increasing to moderate if three are used to high if five or more are used."
         },]
     },
@@ -1235,6 +1311,7 @@ const productFactors = {
         "evaluations": [{
             "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
             "evaluation": "physicalServiceDistribution",
+            "measures": ["numberOfAvailabilityZonesUsedByServices"],
             "reasoning": "The evaluation is based on whether the services are deployed on infrastructure using multiple availability zones. The factor is fulfilled low if more than one availability zone is used, and increasing to moderate if three are used to high if five or more are used."
         },]
     },
@@ -1249,6 +1326,7 @@ const productFactors = {
         "evaluations": [            {
             "targetEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
             "evaluation": "aggregateImpacts",
+            "measures": [],
             "reasoning": "Seamless upgrades are possible if rolling upgrade of components can be done and are further simplified if components are proxied by gateways.",
             "precondition": "at-least-one",
             "impactsInterpretation": "median"
@@ -1266,16 +1344,19 @@ const productFactors = {
             {
                 "targetEntities": [ENTITIES.SYSTEM],
                 "evaluation": "rollingUpgradesEnabled",
+                "measures": ["rollingUpdateOption", "rollingUpdates"],
                 "reasoning": "The evaluation is based on whether the infrastructure entities on which components are deployed, support a rolling upgrade option and whether the components also use it via their deployment mappings"
             },
             {
                 "targetEntities": [ENTITIES.INFRASTRUCTURE],
                 "evaluation": "rollingUpgradesEnabledForInfrastructure",
+                "measures": ["rollingUpdateOption"],
                 "reasoning": "The evaluation is based on whether the infrastructure entities on which components are deployed, support a rolling upgrade option."
             },
             {
                 "targetEntities": [ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
                 "evaluation": "rollingUpgradesEnabledForComponents",
+                "measures": ["rollingUpdates"],
                 "reasoning": "The evaluation is based on whether the components use a rolling upgrade strategy via their deployment mappings"
             }
         ]
@@ -1291,6 +1372,7 @@ const productFactors = {
         "evaluations": [{
             "targetEntities": [ENTITIES.INFRASTRUCTURE, ENTITIES.SYSTEM],
             "evaluation": "automatedInfrastructureMaintenance",
+            "measures": ["ratioOfAutomaticallyMaintainedInfrastructure"],
             "reasoning": "The more infrastructure entities are automatically maintained, the more this factor is fulfilled."
         }]
     },
@@ -1305,6 +1387,7 @@ const productFactors = {
         "evaluations": [{
             "targetEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
             "evaluation": "aggregateImpacts",
+            "measures": [],
             "reasoning": "Autonomous fault handling is evaluated based on the factors impacting it, mainly those considering the fault tolerance of communication links",
             "precondition": "at-least-one",
             "impactsInterpretation": "median"
@@ -1321,6 +1404,7 @@ const productFactors = {
         "evaluations": [{
             "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
             "evaluation": "invocationTimeouts",
+            "measures": ["ratioOfLinksWithTimeout"],
             "reasoning": "The evaluation is simply based on whether links within the system use timeouts, not specific timeout durations. The more links use a timeout, the more this factor is fulfilled."
         }]
     },
@@ -1335,6 +1419,7 @@ const productFactors = {
         "evaluations": [{
             "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
             "evaluation": "retriesForSafeInvocations",
+            "measures": ["ratioOfLinksWithRetryLogic"],
             "reasoning": "The evaluation is simply based on whether links within the system use retry logic if applicable. The more links use retries, the more this factor is fulfilled."
         }]
     },
@@ -1349,6 +1434,7 @@ const productFactors = {
         "evaluations": [{
             "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
             "evaluation": "circuitBreakedCommunication",
+            "measures": ["ratioOfLinksWithComplexFailover"],
             "reasoning": "The evaluation is simply based on whether links within the system use circuit breakers. The more links use circuit breakers, the more this factor is fulfilled."
         }]
     },
@@ -1363,6 +1449,7 @@ const productFactors = {
         "evaluations": [{
             "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE],
             "evaluation": "automatedRestarts",
+            "measures": ["deploymentsWithRestart"],
             "reasoning": "The evaluation is based on whether the deployment mappings of components include automated restarts in case of failing health checks."
         }]
     },
@@ -1378,6 +1465,7 @@ const productFactors = {
             {
                 "targetEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
                 "evaluation": "apiBasedCommunication",
+                "measures": ["ratioOfDocumentedEndpoints"],
                 "reasoning": "Communication is based on documented APIs if documentation artifacts exist that specify an API and cover the endpoints of components."
             },
         ]
@@ -1394,6 +1482,7 @@ const productFactors = {
             {
                 "targetEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
                 "evaluation": "consistentlyMediatedCommunication",
+                "measures": ["serviceMeshUsage"],
                 "reasoning": "Communication is mediated, if ingress and egress of components is proxied for example by a service mesh"
             },
         ]
