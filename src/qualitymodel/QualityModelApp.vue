@@ -45,11 +45,11 @@
                         <div
                             v-if="selectedFactor.getFactorType === 'productFactor' && (selectedFactor as ProductFactor).getAllMeasures().length > 0">
                             <div
-                                v-if="(selectedFactor as ProductFactor).getAllMeasures().filter(measure => measure.isCalculationAvailable()).length > 0">
-                                <span>Implemented measures:</span>
+                                v-if="getUsedMeasures(selectedFactor as ProductFactor).length > 0">
+                                <span>Measures used in evaluations:</span>
                                 <ul class="listWithoutBullets">
                                     <li
-                                        v-for="measure of (selectedFactor as ProductFactor).getAllMeasures().filter(measure => measure.isCalculationAvailable())">
+                                        v-for="measure of getUsedMeasures(selectedFactor as ProductFactor)">
                                         <details>
                                             <summary>
                                                 <span class="font-italics">{{ measure.getName }}</span>
@@ -68,11 +68,35 @@
                                     </li>
                                 </ul>
                             </div>
-                            <div>
+                            <div
+                                v-if="getImplementedAndNotUsedMeasures(selectedFactor as ProductFactor).length > 0">
+                                <span>Further implemented measures:</span>
+                                <ul class="listWithoutBullets">
+                                    <li
+                                        v-for="measure of getImplementedAndNotUsedMeasures(selectedFactor as ProductFactor)">
+                                        <details>
+                                            <summary>
+                                                <span class="font-italics">{{ measure.getName }}</span>
+                                                <span> (</span>
+                                                <span v-for="source of measure.getSources">
+                                                    <a v-if="!!source.getUrl" :href="source.getUrl"><span>{{
+                                                        source.getKey }},
+                                                        </span></a>
+                                                    <span v-else="!source.getUrl.length">{{ source.getKey }}</span>
+                                                </span>
+                                                <span> )</span>
+                                            </summary>
+                                            <span class="indented">Calculation: {{ measure.getCalculationDescription
+                                                }}</span>
+                                        </details>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div v-if="getPotentialMeasures(selectedFactor as ProductFactor).length > 0">
                                 <span>Potential measures:</span>
                                 <ul>
                                     <li
-                                        v-for="measure of (selectedFactor as ProductFactor).getAllMeasures().filter(measure => !measure.isCalculationAvailable())">
+                                        v-for="measure of getPotentialMeasures(selectedFactor as ProductFactor)">
                                         <span class="font-italics">{{ measure.getName }}</span>
                                         <span> (</span>
                                         <span v-for="source of measure.getSources">
@@ -115,6 +139,7 @@ import { orderQualityAspects, placeProductFactors, placeQualityAspects } from '.
 import FilterToolbar, { createFactorCategoryFilter, createHighLevelAspectFilter, getActiveElements, getActiveFilterItems, ItemFilter } from './FilterToolbar.vue';
 import { useRouter } from 'vue-router';
 import { ProductFactorKey, QualityAspectKey } from '@/core/qualitymodel/specifications/qualitymodel';
+import { Measure } from '@/core/qualitymodel/quamoco/Measure';
 
 type QualityModelFilterConfig = {
     highLevelAspectFilter: ItemFilter,
@@ -448,6 +473,27 @@ function unselectElement() {
     graph.getLinks().forEach(function (link) {
         highlighters.stroke.remove(link.findView(paperRef.value as dia.Paper));
     });
+}
+
+
+function getUsedMeasures(productFactor: ProductFactor) {
+    let uniqueMeasures = new Map<string, Measure>();
+    productFactor.getAllEvaluations().flatMap(evaluation => evaluation.getEvaluationDetails.getUsedMeasures).forEach(measure => uniqueMeasures.set(measure.getId, measure));
+    return [...uniqueMeasures.values()];
+}
+
+function getImplementedMeasures(productFactor: ProductFactor) {
+    return productFactor.getAllMeasures().filter(measure => measure.isCalculationAvailable());
+}
+
+function getImplementedAndNotUsedMeasures(productFactor: ProductFactor) {
+    let usedMeasureKeys = getUsedMeasures(productFactor).map(measure => measure.getId);
+    let implementedMeasures =  productFactor.getAllMeasures().filter(measure => measure.isCalculationAvailable());
+    return implementedMeasures.filter(measure => !usedMeasureKeys.includes(measure.getId));
+}
+
+function getPotentialMeasures(productFactor: ProductFactor) {
+    return productFactor.getAllMeasures().filter(measure => !measure.isCalculationAvailable());
 }
 
 

@@ -135,6 +135,10 @@ class ProductFactor {
         return this.#evaluations.has(forEntity);
     }
 
+    getAllEvaluations(): ProductFactorEvaluation[] {
+        return [...this.#evaluations.values()];
+    }
+
     getEvaluation(forEntity: `${ENTITIES}`): ProductFactorEvaluation {
         return this.#evaluations.get(forEntity);
     }
