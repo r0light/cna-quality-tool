@@ -12,13 +12,15 @@ class Measure {
     #id: MeasureKey;
     #name: string;
     #calculationDescription: string;
+    #calculationFormula: string;
     #calculation: Calculation;
     #sources: LiteratureSource[];
 
-    constructor(id: MeasureKey, name: string, calculationDescription: string) {
+    constructor(id: MeasureKey, name: string, calculationDescription: string, calculationFormula: string) {
         this.#id = id;
         this.#name = name;
         this.#calculationDescription = calculationDescription;
+        this.#calculationFormula = calculationFormula;
         this.#calculation = undefined;
         this.#sources = [];
     }
@@ -33,6 +35,10 @@ class Measure {
 
     get getCalculationDescription() {
         return this.#calculationDescription;
+    }
+    
+    get getCalculationFormula() {
+        return this.#calculationFormula;
     }
 
     get getSources() {
