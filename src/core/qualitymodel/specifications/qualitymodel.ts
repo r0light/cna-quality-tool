@@ -1607,7 +1607,8 @@ type MeasureSpec = {
 const measures = {
     "ratioOfEndpointsSupportingSsl": {
         "name": "Ratio of endpoints that support SSL",
-        "calculation": "Endpoints that support SSL / All endpoints",
+        //"calculation": "Endpoints that support SSL / All endpoints",
+        "calculation": "\\frac{| \\{ e | e \\in E \\land e.protocol \\in SUPPORTS\\_TLS \\} |}{|E|}",
         "sources": ["Ntentos2022"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
     },

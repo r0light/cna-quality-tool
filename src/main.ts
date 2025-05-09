@@ -1,7 +1,6 @@
 import { createApp } from 'vue'
-import { createRouter, createWebHashHistory, createWebHistory } from 'vue-router';
+import { createRouter, createWebHistory } from 'vue-router';
 import App from './App.vue'
-import Home from './Home.vue';
 
 // TODO workaround to avoid crashing error, seems to be a JointJS bug...
 window.onerror = (error) => {

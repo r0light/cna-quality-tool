@@ -62,8 +62,7 @@
                                                 </span>
                                                 <span> )</span>
                                             </summary>
-                                            <span class="indented">Calculation: {{ measure.getCalculationDescription
-                                                }}</span>
+                                            <span class="indented equationWrapper">Calculation: <span class="equation" v-html="katex.renderToString(measure.getCalculationDescription)"></span></span>
                                         </details>
                                     </li>
                                 </ul>
@@ -86,8 +85,7 @@
                                                 </span>
                                                 <span> )</span>
                                             </summary>
-                                            <span class="indented">Calculation: {{ measure.getCalculationDescription
-                                                }}</span>
+                                            <span class="indented equationWrapper">Calculation: <span class="equation" v-html="katex.renderToString(measure.getCalculationDescription)"></span></span>
                                         </details>
                                     </li>
                                 </ul>
@@ -128,6 +126,7 @@
 
 <script lang="ts" setup>
 import $ from 'jquery';
+import katex from 'katex';
 import { ref, onMounted, onUpdated, watch, Ref, ComputedRef, computed } from 'vue';
 import { dia, shapes, util, highlighters } from '@joint/core';
 import { QualityAspectElement, ProductFactorElement, ImpactElement, quamocoShapes } from './config/elementShapes';
@@ -594,5 +593,20 @@ function getPotentialMeasures(productFactor: ProductFactor) {
     padding: 5px;
     white-space: pre-wrap;
 }
+
+.katex { font-size: 1.5em; }
+
+.equationWrapper {
+    display: flex;
+    align-items: center;
+}
+
+.equation {
+    display: flex;
+    margin-top: 5px;
+    margin-bottom: 5px;
+
+}
+
 
 </style>
