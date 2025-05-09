@@ -601,13 +601,16 @@ function getPotentialMeasures(productFactor: ProductFactor) {
 .equationWrapper {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
 }
 
 .equation {
     display: flex;
     margin-top: 5px;
     margin-bottom: 5px;
-
+    padding-top: 8px;
+    padding-bottom: 8px;
+    overflow: scroll;
 }
 
 
