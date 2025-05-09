@@ -1660,7 +1660,7 @@ const measures = {
         "calculation": "(\"Service Interface Data Cohesion\" + \"Service Interface Usage Cohesion\") / 2",
         "calculationFormula": "\\frac{Service Interface Data Cohesion + Service Interface Usage Cohesion}{2}",
         "sources": ["Bogner2017", "Perepletchikov2007"],
-        "applicableEntities": [ENTITIES.COMPONENT] // TODO or Service?
+        "applicableEntities": [ENTITIES.COMPONENT]
     },
     "cohesivenessOfService": {
         "name": "Cohesiveness of Service",
@@ -1679,14 +1679,14 @@ const measures = {
     "dataAggregateScope": {
         "name": "Data aggregate scope",
         "calculation": "Total number of Data Aggregates in a Component/System",
-        "calculationFormula": "",
+        "calculationFormula": "| SYS.DA | or | C.RDA |",
         "sources": ["Shim2008", "Zimmermann2015"],
         "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM],
     },
     "serviceInterfaceDataCohesion": {
         "name": "Service Interface Data Cohesion",
         "calculation": "| Set of Service Endpoints that use the same Data Aggregate | / Number of Data Aggregates used in a Service",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{| \\{ e | e \\in c.E \\land \\exists e_n (e_n \\in c.E \\land ((e.RDA \\cap e_n.RDA) \\ne \\emptyset))\\} |}{|c.RDA|}",
         "sources": ["Bogner2017", "Perepletchikov2007", "Kazemi2011", "Brito2021", "Jin2021", "Jin2018", "Athanasopoulos2011", "Athanasopoulos2015", "Bogner2020"],
         "applicableEntities": [ENTITIES.COMPONENT],
     },

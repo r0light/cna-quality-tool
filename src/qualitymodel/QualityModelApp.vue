@@ -596,7 +596,10 @@ function getPotentialMeasures(productFactor: ProductFactor) {
     white-space: pre-wrap;
 }
 
-.katex { font-size: 1.5em; }
+.katex { 
+    font-size: 1.5em;
+    letter-spacing: 1px;
+}
 
 .equationWrapper {
     display: flex;
