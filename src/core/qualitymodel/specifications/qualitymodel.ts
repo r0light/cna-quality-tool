@@ -1812,21 +1812,21 @@ const measures = {
     "degreeOfAsynchronousCommunication": {
         "name": "Degree of asynchronous communication",
         "calculation": "Average-of(Ratio of asynchronous endpoints) over all components",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{\\sum_{i=1}^{|C|} \\frac{|\\{ e | e \\in c_i.E \\land (e.kind = \"event\" \\lor e.kind = \"subscribe\")  \\}|}{|\\{ e | e \\in c_i.E\\}|}  }{|C|}",
         "sources": ["Qian2006"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
     },
     "asynchronousCommunicationUtilization": {
         "name": "Asynchronous Communication Utilization",
         "calculation": "Number of Links targeting an asynchronous Endpoint / Total number of Links",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{|\\{ l | l \\in L \\land (l.targetEndpoint.kind = \"event\" \\lor l.targetEndpoint.kind = \"subscribe\") \\}| }{|L|}",
         "sources": ["Ntentos2020a"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE]
     },
     "eventSourcingUtilizationMetric": {
         "name": "Event Sourcing utilization metric",
         "calculation": "Number of service interconnections via an Event Store / Total number of service interconnections",
-        "calculationFormula": "",
+        "calculationFormula": "eventBasedInteractions = \\{ (l_1,l_2) | l_1.targetEndpoint = e_1 \\land l_2.targetEndpoint = e_2 \\land (e_1,e_2 \\in bbs.E | bbs \\in BBS \\land bbs.kind = \"log\" ) \\land e_1.kind = \"event\" \\land e_2.kind = \"subscribe\" \\land e_1.url = e_2.url \\} \\\\ \\frac{eventBasedInteractions}{eventBasedInteractions + |\\{ l | l \\in L \\land (l.targetEndpoint.kind = \"query\" \\lor l.targetEndpoint.kind = \"command\")  \\} | }",
         "sources": ["Ntentos2020", "Ntentos2021"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE]
     },
