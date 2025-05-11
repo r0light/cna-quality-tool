@@ -342,7 +342,7 @@ export const interactionDensityBasedOnComponents: Calculation = (parameters: Cal
 
 export const interactionDensityBasedOnLinks: Calculation = (parameters: CalculationParameters<System>) => {
 
-    let maximumPotentialNumberOfLinks = parameters.entity.getComponentEntities.size * (parameters.entity.getComponentEntities.size - 1) * (parameters.entity.getComponentEntities.size - 1);
+    let maximumPotentialNumberOfLinks = parameters.entity.getComponentEntities.size * (parameters.entity.getComponentEntities.size - 1);
 
     if (maximumPotentialNumberOfLinks === 0) {
         return 0;
