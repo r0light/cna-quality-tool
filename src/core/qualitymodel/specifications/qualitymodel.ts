@@ -1938,7 +1938,7 @@ const measures = {
     "interactionDensityBasedOnLinks": {
         "name": "Interaction density based on links",
         "calculation": "Number of links in a system / Number of potential links in a system",
-        "calculationFormula": "\\frac{|L|}{ }",
+        "calculationFormula": "\\frac{|L|}{ }", //TODO
         "sources": ["Tiwari2014", "Karhikeyan2012"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },
@@ -1959,7 +1959,7 @@ const measures = {
     "systemCouplingBasedOnEndpointEntropy": {
         "name": "System Coupling based on Endpoint Entropy",
         "calculation": "sum-of(\"Service Coupling based on Endpoint Entropy\" for all components",
-        "calculationFormula": "",
+        "calculationFormula": "", //TODO
         "sources": ["Wang2009"],
         "applicableEntities": [ENTITIES.SYSTEM]
     },
@@ -1973,56 +1973,56 @@ const measures = {
     "combinedMetricForIndirectDependency": {
         "name": "Combined metric for indirect dependency",
         "calculation": "(\"Indirect Interaction density of a system\" + \"Indirect Dependency because of shared data repository\") / 2",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{ \"Indirect Interaction density of a system\" + \"Indirect Dependency because of shared data repository\" }{2} ",
         "sources": ["Karhikeyan2012"],
         "applicableEntities": [ENTITIES.COMPONENT],
     },
     "servicesInterdependenceInTheSystem": {
         "name": "Services Interdependence in the System",
         "calculation": "Number of service pairs which are bi-directionally linked",
-        "calculationFormula": "",
+        "calculationFormula": "|\\{ (c_1,c_2) | c_1,c_2 \\in C \\land \\exists l (l \\in L \\land l.sourceComponent = c_1 \\land l.targetEndpoint \\in c_2.E) \\land \\exists l (l \\in L \\land \\land l.sourceComponent = c_2 \\land l.targetEndpoint \\in c_1.E) \\} |",
         "sources": ["Bogner2017", "Rud2006"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },
     "averageNumberOfDirectlyConnectedServices": {
         "name": "Average Number of Directly Connected Services",
         "calculation": "(\"Number of Components a component is linked to\" + \"Number of Components that are linked to a component\") / Number of services in the system",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{| \\{ c' | c' \\in C \\land \\exists l (l \\in L \\land l.sourceComponent = c \\land l.targetEndpoint \\in c'.E) \\} | + | \\{ c' | c' \\in C \\land \\exists l (l \\in L \\land l.sourceComponent = c' \\land l.targetEndpoint \\in c.E) \\} | }{ |C| } ",
         "sources": ["Shim2008"],
         "applicableEntities": [ENTITIES.COMPONENT],
     },
     "numberOfComponentsThatAreLinkedToAComponent": {
         "name": "Number of Components that are linked to a component",
         "calculation": "Number of Components that are linked to a component (consumers)",
-        "calculationFormula": "",
+        "calculationFormula": "| \\{ c' | c' \\in C \\land \\exists l (l \\in L \\land l.sourceComponent = c' \\land l.targetEndpoint \\in c.E) \\} |",
         "sources": ["Bogner2017", "Rud2009", "Shim2008", "Zhang2009", "Asik2017", "Gamage2021", "Perera2018"],
         "applicableEntities": [ENTITIES.COMPONENT],
     },
     "numberOfComponentsAComponentIsLinkedTo": {
         "name": "Number of Components a component is linked to",
         "calculation": "Number of Components a component is linked to",
-        "calculationFormula": "",
+        "calculationFormula": "| \\{ c' | c' \\in C \\land \\exists l (l \\in L \\land l.sourceComponent = c \\land l.targetEndpoint \\in c'.E) \\} |",
         "sources": ["Bogner2017", "Rud2009", "Engel2018", "Shim2008", "Raj2021", "Raj2018", "Hofmeister2008", "PhamThiQuynh2009", "Zhang2009"],
         "applicableEntities": [ENTITIES.COMPONENT],
     },
     "numberOfLinksBetweenTwoServices": {
         "name": "Number of links between two services",
-        "calculation": "Number of Links from component to unique endpoints of component B",
-        "calculationFormula": "",
+        "calculation": "Number of Links from component A to unique endpoints of component B",
+        "calculationFormula": "| \\{ l | l \\in L \\land l.sourceComponent = c \\land l.targetEndpoint \\in c'.E \\} |",
         "sources": ["Hofmeister2008"],
         "applicableEntities": [ENTITIES.COMPONENT],
     },
     "aggregateSystemMetricToMeasureServiceCoupling": {
         "name": "Aggregate System metric to measure service coupling",
         "calculation": "(sum-of(\"Number of Components a component is linked to\" for all Service Consumers)) / (Number of services) * (Number of services - 1)",
-        "calculationFormula": "",
+        "calculationFormula": "", //TODO
         "sources": ["Hofmeister2008", "Gamage2021"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },
     "numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfComponents": {
         "name": "Number of Components a component is linked to relative to the total amount of components",
         "calculation": "Number of Components a component is linked to / Total Number of other Components",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{| \\{ c' | c' \\in C \\land \\exists l (l \\in L \\land l.sourceComponent = c \\land l.targetEndpoint \\in c'.E) \\} |}{|C| - 1}",
         "sources": ["Raj2021", "Raj2018", "Zhang2009"],
         "applicableEntities": [ENTITIES.COMPONENT],
     },
