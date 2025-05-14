@@ -155,7 +155,8 @@ export const entities: {[key in ENTITIES]: EntitySpec}  = {
         "symbol": "RT",
         "formal": `\tRT := (id,name,props,involvedLinks,referencedEndpoint)
         props<sub>RT</sub> := {${getRequestTraceProperties().map(property => property.getKey).join(",")}}
-        involvedLinks ⊆ L
+        involvedLinks ⊆ STEP
+        STEP := (l₁,l₂,...,lₙ) | lᵢ ∈ L
         referencedEndpoint ∈ EE`
     },
     "dataAggregate": {
