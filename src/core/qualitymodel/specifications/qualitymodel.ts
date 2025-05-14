@@ -2029,7 +2029,7 @@ const measures = {
     "degreeOfCouplingInASystem": {
         "name": "Degree of coupling in a system",
         "calculation": "Sum-of(Number of Components a component is linked to) / ((Total Number of Components)² - (Total Number of Components))",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{ \\sum_{i=1}^{|C|} | \\{ c' | c' \\in C \\land \\exists l (l \\in L \\land l.sourceComponent = c_i \\land l.targetEndpoint \\in c'.E) \\} | } {|C|^2 - |C| }",
         "sources": ["Raj2021", "Raj2018", "Hofmeister2008", "Zhang2009"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },
@@ -2043,35 +2043,35 @@ const measures = {
     "simpleDegreeOfCouplingInASystem": {
         "name": "Simple Degree of coupling in a system",
         "calculation": "Sum-of(Number of Components a component is linked to) / (Total Number of Components)",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{ \\sum_{i=1}^{|C|} | \\{ c' | c' \\in C \\land \\exists l (l \\in L \\land l.sourceComponent = c_i \\land l.targetEndpoint \\in c'.E) \\} | } {|C|}",
         "sources": ["Qian2006"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },
     "directServiceSharing": {
         "name": "Direct Service Sharing",
         "calculation": "((Number of Services with at least two incoming links from different services / Total number of services) + (Number of Endpoints with at least two incoming links from different services / Total number of links)) / 2",
-        "calculationFormula": "",
+        "calculationFormula": "", //TODO
         "sources": ["Ntentos2020a"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },
     "transitivelySharedServices": {
         "name": "Transitively Shared Services",
         "calculation": "((Number of Services which are transitively reachable by another service / Total number of services) + (Number of Endpoints which are transitively reachable by another service / Total number of links)) / 2",
-        "calculationFormula": "",
+        "calculationFormula": "", //TODO
         "sources": ["Ntentos2020a"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },
     "ratioOfSharedNonExternalComponentsToNonExternalComponents": {
         "name": "Ratio of shared non-external components to non-external components",
         "calculation": "Number of Services with at least two incoming links from different services / Total number of services",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{| \\{ s | s \\in S \\land \\exists s',s'' (s',s'' \\in S \\land s' \\neq s'' \\land \\exists l (l \\in L \\land l.sourceComponent = s' \\land l.targetEndpoint \\in s.E) \\land \\exists l' (l' \\in L \\land l'.sourceComponent = s'' \\land l'.targetEndpoint \\in s.E)) \\}|}{|S|}",
         "sources": ["Zdun2017"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },
     "ratioOfSharedDependenciesOfNonExternalComponentsToPossibleDependencies": {
         "name": "Ratio of shared dependencies of non-external components to possible dependencies",
         "calculation": "Number of component sharing relationships / (Number of components)²",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{ \\sum_{i=1}^{|C|} | \\Set{ (c',c'') | c',c'' \\neq c_i \\land \\exists l (l \\in L \\land l.sourceComponent = c' \\land l.targetEndpoint \\in c_i.E) \\land \\exists l' (l' \\in L \\land l'.sourceComponent = c'' \\land l'.targetEndpoint \\in c_i.E) }| }{|C|}",
         "sources": ["Zdun2017"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },
@@ -2085,42 +2085,42 @@ const measures = {
     "averageSystemCoupling": {
         "name": "Average System Coupling",
         "calculation": "Sum-of(relationship weights of links between services) / Number of services",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{ \\sum_{i=1}^{|L|} \\begin{cases} 0.1 &\\text{if } l.targetEndpoint.kind = \"event\" \\\\ 0.5 &\\text{if } l.targetEndpoint.kind = \"command\" \\\\ 0.2 &\\text{else } \\end{cases} + \\frac{\\sum_{i=1}^{|l.targetEndpoint.RDA|} \\begin{cases} 0.1 &\\text{if } l.targetEndpoint.RDA.usage\\_relation = \"persistence\" \\\\ 0.5 &\\text{if } l.targetEndpoint.RDA.usage\\_relation = \"cached-usage\" \\\\ 0.25 &\\text{else } \\end{cases}   }{|l.targetEndpoint.RDA|} } { |C| }",
         "sources": ["Filippone2023"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },
     "couplingOfServicesBasedOnUsedDataAggregates": {
         "name": "Coupling of services based on used Data Aggregates",
         "calculation": "Data Aggregates used by both two services / All Data Aggregates used by two services",
-        "calculationFormula": "",
+        "calculationFormula": "", // TODO
         "sources": ["Peng2022"],
         "applicableEntities": [ENTITIES.COMPONENT], // TODO actually Component Pair
     },
     "couplingOfServicesBasedServicesWhichCallThem": {
         "name": "Coupling of services based services which call them",
         "calculation": "Services which call both two services / All services calling either of the two services",
-        "calculationFormula": "",
+        "calculationFormula": "", // TODO
         "sources": ["Peng2022"],
         "applicableEntities": [ENTITIES.COMPONENT], // TODO actually Component Pair
     },
     "couplingOfServicesBasedServicesWhichAreCalledByThem": {
         "name": "Coupling of services based services which are called by them",
         "calculation": "Services which are called by both two services / All services called by either of the two services",
-        "calculationFormula": "",
+        "calculationFormula": "", // TODO
         "sources": ["Peng2022"],
         "applicableEntities": [ENTITIES.COMPONENT], // TODO actually Component Pair
     },
     "couplingOfServicesBasedOnAmountOfRequestTracesThatIncludeASpecificLink": {
         "name": "Coupling of services based on amount of request traces that include a specific link",
         "calculation": "Maximum of probabilities that one service is called by the other in all requests traces in which the first service is included.",
-        "calculationFormula": "",
+        "calculationFormula": "", // TODO
         "sources": ["Peng2022"],
         "applicableEntities": [ENTITIES.COMPONENT], // TODO actually Component Pair
     },
     "couplingOfServicesBasedTimesThatTheyOccurInTheSameRequestTrace": {
         "name": "Coupling of services based times that they occur in the same request trace",
         "calculation": "Number of request traces which contain the same two services / Number of request traces",
-        "calculationFormula": "",
+        "calculationFormula": "", // TODO
         "sources": ["Peng2022"],
         "applicableEntities": [ENTITIES.COMPONENT], // TODO actually Component Pair
     },
@@ -2134,28 +2134,28 @@ const measures = {
     "cyclicCommunication": {
         "name": "Cyclic Communication",
         "calculation": "Whether or not a Service is part of a cyclic communication path",
-        "calculationFormula": "",
+        "calculationFormula": "\\exists (l_1,l_2,...,l_n) (l_i \\in L \\land l_1.sourceComponent = c \\land l_n.targetEndpoint \\in c.E)",
         "sources": ["Apel2019", "Ntentos2020a"],
         "applicableEntities": [ENTITIES.COMPONENT],
     },
     "numberOfSynchronousCycles": {
         "name": "Number of synchronous cycles",
         "calculation": "Number of cycles that exist between services based on synchronous links",
-        "calculationFormula": "",
+        "calculationFormula": "| \\Set{ (l_1,l_2,...,l_n) | \\forall l_i \\in L (l_i.targetEndpoint.kind = \"query\" \\lor l_i.targetEndpoint.kind = \"command\") \\land l_n.targetEndpoint \\in l_1.sourceComponent.E } |",
         "sources": ["Engel2018"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },
     "relativeImportanceOfTheService": {
         "name": "Relative Importance of the Service",
         "calculation": "Number of Components that are linked to a component (consumers) / Total Number of Components",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{| \\Set{ c' | c' \\in C \\land \\exists l (l \\in L \\land l.sourceComponent = c' \\land l.targetEndpoint \\in c.E) } |}{ |C| }",
         "sources": ["Zhang2009"],
         "applicableEntities": [ENTITIES.COMPONENT],
     },
     "extentOfAggregationComponents": {
         "name": "Extent of Aggregation components",
         "calculation": "(sum-of((sum-of(Incoming Links) of all components with in- and outgoing links) / (sum-of(Outgoing Links) for all components with only incoming Links)) for all components that have only outgoing links )",
-        "calculationFormula": "",
+        "calculationFormula": "", //TODO
         "sources": ["Hofmeister2008"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },
@@ -2169,7 +2169,7 @@ const measures = {
     "densityOfAggregation": {
         "name": "Density of Aggregation",
         "calculation": "sum-of(ln(number of outoging links / total number of outgoing and incoming links * 2)) for all aggregators that means services which have incoming and outgoing links",
-        "calculationFormula": "",
+        "calculationFormula": "", //TODO
         "sources": ["Hofmeister2008"],
         "applicableEntities": [ENTITIES.SYSTEM]
     },
@@ -2183,28 +2183,28 @@ const measures = {
     "dataAggregateConvergenceAcrossComponents": {
         "name": "Data Aggregate Convergence across Components",
         "calculation": "((sum-of(number of data aggregates used in a service) for all services) / Number of Services) + ((sum-of(Services that use a data aggregate) for all data aggregates) / Number of Data Aggregates)",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{\\sum_{i=1}^{|C|} |c_i.RDA|}{|C|} + \\frac{\\sum_{i=1}^{|DA|} |\\Set{ c | \\exists c.RDA (c.RDA.da = da_i)}| }{ |DA| }",
         "sources": ["Kazemi2013", "Ma2009"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },
     "serviceCriticality": {
         "name": "Service Criticality",
         "calculation": "Number of Components that are linked to a component * Number of Components a component is linked to",
-        "calculationFormula": "",
+        "calculationFormula": "| \\{ c' | c' \\in C \\land \\exists l (l \\in L \\land l.sourceComponent = c' \\land l.targetEndpoint \\in c.E) \\} | * | \\{ c' | c' \\in C \\land \\exists l (l \\in L \\land l.sourceComponent = c \\land l.targetEndpoint \\in c'.E) \\} | ",
         "sources": ["Bogner2017", "Rud2009"],
         "applicableEntities": [ENTITIES.COMPONENT],
     },
     "ratioOfCyclicRequestTraces": {
         "name": "Ratio of cyclic request traces",
         "calculation": "Number of request traces with a cycle / Total number of request traces",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{|\\Set{ rt | rt \\in RT \\land \\exists (l_1,l_2,...l_n) (\\forall l_i \\in rt.involvedLinks \\land l_n.targetEndpoint \\in l_1.sourceComponent.E) }}{|RT|}",
         "sources": ["Genfer2021"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },
     "numberOfPotentialCyclesInASystem": {
         "name": "Number of potential cycles in a system",
         "calculation": "Number of cycles found in a system based on defined links",
-        "calculationFormula": "",
+        "calculationFormula": "| \\Set{ (l_1,l_2,...,l_n) | \\forall l_i \\in L \\land l_n.targetEndpoint \\in l_1.sourceComponent.E } |",
         "sources": ["Peng2022"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },
