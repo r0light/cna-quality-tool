@@ -2211,7 +2211,7 @@ const measures = {
     "maximumLengthOfServiceLinkChainPerRequestTrace": {
         "name": "Maximum Length of Service Link chain per request trace",
         "calculation": "Maximum of number-of links of request trace for all request traces",
-        "calculationFormula": "",
+        "calculationFormula": "(| rt.involvedLinks |) | \\forall rt' (rt' \\in RT \\land rt' \\neq rt \\land rt'.involvedLinks \\leq rt.involvedLinks",
         "sources": ["Apel2019", "Engel2018", "Rosa2020"],
         "applicableEntities": [ENTITIES.SYSTEM],
         "aggregateOf": "requestTraceLength"
