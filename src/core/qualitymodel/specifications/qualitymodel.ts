@@ -1693,7 +1693,7 @@ const measures = {
     "cohesionBetweenEndpointsBasedOnDataAggregateUsage": {
         "name": "Cohesion between Endpoints based on data aggregate usage",
         "calculation": "Average-of(Number of Shared Usage of Data Aggregates per endpoint pair) over all endpoints / All Data Aggregates used by endpoints",
-        "calculationFormula": "\\frac{\\frac{\\sum_{i=1}^{|c.E|} |\\{(e_i,e_n) | n>i \\land ((e_i.RDA \\cap e_n.RDA) \\neq \\emptyset) \\}|}{|c.E|}}{ | \\{da | \\exists e (e \\in c.providedEndpoints \\land (e,da) \\in e.RDA) \\} |}",
+        "calculationFormula": "\\frac{\\frac{\\displaystyle\\sum_{i=1}^{|c.E|} |\\{(e_i,e_n) | n>i \\land ((e_i.RDA \\cap e_n.RDA) \\neq \\emptyset) \\}|}{|c.E|}}{ | \\{da | \\exists e (e \\in c.providedEndpoints \\land (e,da) \\in e.RDA) \\} |}",
         "sources": ["Peng2022"],
         "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM],
     },
@@ -1714,7 +1714,7 @@ const measures = {
     "serviceInterfaceUsageCohesion": {
         "name": "Service Interface Usage Cohesion",
         "calculation": "Sum-of(Number of endpoints used per client of this service) / (number of clients of this service * number of endpoints of this service)",
-        "calculationFormula": "\\frac{\\sum_{i=1}^{|C|} |\\{e | e \\in c.providedEndpoints \\land \\exists l (l \\in L \\land l.sourceComponent = c_i \\land l.targetEndpoint = e) \\}|}{ |\\{ c' | c' \\in C \\land \\exists l (l \\in L \\land l.sourceComponent = c' \\land l.targetEndpoint \\in c.E) \\}| \\times |c.E| }",
+        "calculationFormula": "\\frac{\\displaystyle\\sum_{i=1}^{|C|} |\\{e | e \\in c.providedEndpoints \\land \\exists l (l \\in L \\land l.sourceComponent = c_i \\land l.targetEndpoint = e) \\}|}{ |\\{ c' | c' \\in C \\land \\exists l (l \\in L \\land l.sourceComponent = c' \\land l.targetEndpoint \\in c.E) \\}| \\times |c.E| }",
         "sources": ["Bogner2017", "Perepletchikov2007", "Kazemi2011"],
         "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM],
     },
@@ -1812,7 +1812,7 @@ const measures = {
     "degreeOfAsynchronousCommunication": {
         "name": "Degree of asynchronous communication",
         "calculation": "Average-of(Ratio of asynchronous endpoints) over all components",
-        "calculationFormula": "\\frac{\\sum_{i=1}^{|C|} \\frac{|\\{ e | e \\in c_i.providedEndpoints \\land (e.kind = \"send event\" \\lor e.kind = \"subscribe\")  \\}|}{|\\{ e | e \\in c_i.E\\}|}  }{|C|}",
+        "calculationFormula": "\\frac{\\displaystyle\\sum_{i=1}^{|C|} \\frac{|\\{ e | e \\in c_i.providedEndpoints \\land (e.kind = \"send event\" \\lor e.kind = \"subscribe\")  \\}|}{|\\{ e | e \\in c_i.E\\}|}  }{|C|}",
         "sources": ["Qian2006"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
     },
@@ -2029,7 +2029,7 @@ const measures = {
     "degreeOfCouplingInASystem": {
         "name": "Degree of coupling in a system",
         "calculation": "Sum-of(Number of Components a component is linked to) / ((Total Number of Components)² - (Total Number of Components))",
-        "calculationFormula": "\\frac{ \\sum_{i=1}^{|C|} | \\{ c' | c' \\in C \\land \\exists l (l \\in L \\land l.sourceComponent = c_i \\land l.targetEndpoint \\in c'.E) \\} | } {|C|^2 - |C| }",
+        "calculationFormula": "\\frac{ \\displaystyle\\sum_{i=1}^{|C|} | \\{ c' | c' \\in C \\land \\exists l (l \\in L \\land l.sourceComponent = c_i \\land l.targetEndpoint \\in c'.E) \\} | } {|C|^2 - |C| }",
         "sources": ["Raj2021", "Raj2018", "Hofmeister2008", "Zhang2009"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },
@@ -2043,7 +2043,7 @@ const measures = {
     "simpleDegreeOfCouplingInASystem": {
         "name": "Simple Degree of coupling in a system",
         "calculation": "Sum-of(Number of Components a component is linked to) / (Total Number of Components)",
-        "calculationFormula": "\\frac{ \\sum_{i=1}^{|C|} | \\{ c' | c' \\in C \\land \\exists l (l \\in L \\land l.sourceComponent = c_i \\land l.targetEndpoint \\in c'.E) \\} | } {|C|}",
+        "calculationFormula": "\\frac{ \\displaystyle\\sum_{i=1}^{|C|} | \\{ c' | c' \\in C \\land \\exists l (l \\in L \\land l.sourceComponent = c_i \\land l.targetEndpoint \\in c'.E) \\} | } {|C|}",
         "sources": ["Qian2006"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },
@@ -2071,7 +2071,7 @@ const measures = {
     "ratioOfSharedDependenciesOfNonExternalComponentsToPossibleDependencies": {
         "name": "Ratio of shared dependencies of non-external components to possible dependencies",
         "calculation": "Number of component sharing relationships / (Number of components)²",
-        "calculationFormula": "\\frac{ \\sum_{i=1}^{|C|} | \\Set{ (c',c'') | c',c'' \\neq c_i \\land \\exists l (l \\in L \\land l.sourceComponent = c' \\land l.targetEndpoint \\in c_i.E) \\land \\exists l' (l' \\in L \\land l'.sourceComponent = c'' \\land l'.targetEndpoint \\in c_i.E) }| }{|C|}",
+        "calculationFormula": "\\frac{ \\displaystyle\\sum_{i=1}^{|C|} | \\Set{ (c',c'') | c',c'' \\neq c_i \\land \\exists l (l \\in L \\land l.sourceComponent = c' \\land l.targetEndpoint \\in c_i.E) \\land \\exists l' (l' \\in L \\land l'.sourceComponent = c'' \\land l'.targetEndpoint \\in c_i.E) }| }{|C|}",
         "sources": ["Zdun2017"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },
@@ -2085,7 +2085,7 @@ const measures = {
     "averageSystemCoupling": {
         "name": "Average System Coupling",
         "calculation": "Sum-of(relationship weights of links between services) / Number of services",
-        "calculationFormula": "\\frac{ \\sum_{i=1}^{|L|} \\begin{cases} 0.1 &\\text{if } l.targetEndpoint.kind = \"send event\" \\\\ 0.5 &\\text{if } l.targetEndpoint.kind = \"command\" \\\\ 0.2 &\\text{else } \\end{cases} + \\frac{\\sum_{i=1}^{|l.targetEndpoint.RDA|} \\begin{cases} 0.1 &\\text{if } l.targetEndpoint.RDA.usage\\_relation = \"persistence\" \\\\ 0.5 &\\text{if } l.targetEndpoint.RDA.usage\\_relation = \"cached-usage\" \\\\ 0.25 &\\text{else } \\end{cases}   }{|l.targetEndpoint.RDA|} } { |C| }",
+        "calculationFormula": "\\frac{ \\displaystyle\\sum_{i=1}^{|L|} \\begin{cases} 0.1 &\\text{if } l.targetEndpoint.kind = \"send event\" \\\\ 0.5 &\\text{if } l.targetEndpoint.kind = \"command\" \\\\ 0.2 &\\text{else } \\end{cases} + \\frac{\\displaystyle\\sum_{i=1}^{|l.targetEndpoint.RDA|} \\begin{cases} 0.1 &\\text{if } l.targetEndpoint.RDA.usage\\_relation = \"persistence\" \\\\ 0.5 &\\text{if } l.targetEndpoint.RDA.usage\\_relation = \"cached-usage\" \\\\ 0.25 &\\text{else } \\end{cases}   }{|l.targetEndpoint.RDA|} } { |C| }",
         "sources": ["Filippone2023"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },
@@ -2183,7 +2183,7 @@ const measures = {
     "dataAggregateConvergenceAcrossComponents": {
         "name": "Data Aggregate Convergence across Components",
         "calculation": "((sum-of(number of data aggregates used in a service) for all services) / Number of Services) + ((sum-of(Services that use a data aggregate) for all data aggregates) / Number of Data Aggregates)",
-        "calculationFormula": "\\frac{\\sum_{i=1}^{|C|} |c_i.RDA|}{|C|} + \\frac{\\sum_{i=1}^{|DA|} |\\Set{ c | \\exists c.RDA (c.RDA.da = da_i)}| }{ |DA| }",
+        "calculationFormula": "\\frac{\\displaystyle\\sum_{i=1}^{|C|} |c_i.RDA|}{|C|} + \\frac{\\displaystyle\\sum_{i=1}^{|DA|} |\\Set{ c | \\exists c.RDA (c.RDA.da = da_i)}| }{ |DA| }",
         "sources": ["Kazemi2013", "Ma2009"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },
@@ -2211,7 +2211,7 @@ const measures = {
     "maximumLengthOfServiceLinkChainPerRequestTrace": {
         "name": "Maximum Length of Service Link chain per request trace",
         "calculation": "Maximum of number-of links of request trace for all request traces",
-        "calculationFormula": "(\\sum_{i=1}^{|rt.involvedLinks|} |rt.involvedLinksᵢ.links|) | \\forall rt' (rt' \\in RT \\land rt' \\neq rt \\land \\sum_{i=1}^{|rt'.involvedLinks|} |rt'.involvedLinksᵢ.links| \\leq \\sum_{i=1}^{|rt.involvedLinks|} |rt.involvedLinksᵢ.links|",
+        "calculationFormula": "(\\displaystyle\\sum_{i=1}^{|rt.involvedLinks|} |rt.involvedLinksᵢ.links|) | \\forall rt' (rt' \\in RT \\land rt' \\neq rt \\land \\displaystyle\\sum_{i=1}^{|rt'.involvedLinks|} |rt'.involvedLinksᵢ.links| \\leq \\displaystyle\\sum_{i=1}^{|rt.involvedLinks|} |rt.involvedLinksᵢ.links|",
         "sources": ["Apel2019", "Engel2018", "Rosa2020"],
         "applicableEntities": [ENTITIES.SYSTEM],
         "aggregateOf": "requestTraceLength"
@@ -2233,7 +2233,7 @@ const measures = {
     "averageComplexityOfRequestTraces": {
         "name": "Average Complexity of Request Traces",
         "calculation": "(sum-of(Number of Links in Request Trace) for all Request Traces) / Total number of request traces",
-        "calculationFormula": "\\frac{\\sum_{i=1}^{|RT|} | \\sum_{j=1}^{|rt.involvedLinks|} |rt.involvedLinksⱼ.links|) |  }{ |RT| }",
+        "calculationFormula": "\\frac{\\displaystyle\\sum_{i=1}^{|RT|} | \\displaystyle\\sum_{j=1}^{|rt.involvedLinks|} |rt.involvedLinksⱼ.links|) |  }{ |RT| }",
         "sources": ["Zimmermann2015"],
         "applicableEntities": [ENTITIES.SYSTEM],
         "aggregateOf": "requestTraceComplexity"
@@ -2248,7 +2248,7 @@ const measures = {
     "requestTraceComplexity": {
         "name": "Request Trace Complexity",
         "calculation": "Number of links in a request trace",
-        "calculationFormula": "\\sum_{i=1}^{|rt.involvedLinks|} |rt.involvedLinksᵢ.links|)",
+        "calculationFormula": "\\displaystyle\\sum_{i=1}^{|rt.involvedLinks|} |rt.involvedLinksᵢ.links|)",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.REQUEST_TRACE],
     },
@@ -2346,35 +2346,35 @@ const measures = {
     "amountOfRedundancy": {
         "name": "Amount of redundancy",
         "calculation": "sum-of(deployment mappings) for all Components / Number of deployed Components",
-        "calculationFormula": "\\frac{ \\sum_{i=1}^{|C|} | \\Set{ dm | dm \\in DM \\land dm.deployed = c_i} | }{ | \\Set{ c | c \\in C \\land \\exists dm (dm \\in DM \\land dm.deployed = c)} |}",
+        "calculationFormula": "\\frac{ \\displaystyle\\sum_{i=1}^{|C|} | \\Set{ dm | dm \\in DM \\land dm.deployed = c_i} | }{ | \\Set{ c | c \\in C \\land \\exists dm (dm \\in DM \\land dm.deployed = c)} |}",
         "sources": ["Zimmermann2015"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE, ENTITIES.COMPONENT],
     },
     "serviceReplicationLevel": {
         "name": "Service Replication level",
         "calculation": "The average value of replicas per service",
-        "calculationFormula": "\\frac{\\sum_{i=1}^{|DM|} dm_i.replicas | dm_i.deployed \\in S  }{ | \\Set{ s | s \\in S \\land \\exists dm (dm \\in DM \\land dm.deployed = s)} | }",
+        "calculationFormula": "\\frac{\\displaystyle\\sum_{i=1}^{|DM|} dm_i.replicas | dm_i.deployed \\in S  }{ | \\Set{ s | s \\in S \\land \\exists dm (dm \\in DM \\land dm.deployed = s)} | }",
         "sources": ["Guerron2020", "Souza2016"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE, ENTITIES.COMPONENT],
     },
     "medianServiceReplication": {
         "name": "Median Service Replication level",
         "calculation": "The median value of replicas per service",
-        "calculationFormula": "median(\\Set{ \\sum_{i=1}^{| \\Set{ dm | dm \\in DM \\land dm.deployed = s}|} dm_i.replicas | s \\in S})",
+        "calculationFormula": "median(\\Set{ \\displaystyle\\sum_{i=1}^{| \\Set{ dm | dm \\in DM \\land dm.deployed = s}|} dm_i.replicas | s \\in S})",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
     },
     "smallestReplicationValue": {
         "name": "Smallelst Service Replication Value",
         "calculation": "minimum(value of replicas per service)",
-        "calculationFormula": "min(\\Set{ \\sum_{i=1}^{| \\Set{ dm | dm \\in DM \\land dm.deployed = s}|} dm_i.replicas | s \\in S})",
+        "calculationFormula": "min(\\Set{ \\displaystyle\\sum_{i=1}^{| \\Set{ dm | dm \\in DM \\land dm.deployed = s}|} dm_i.replicas | s \\in S})",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
     },
     "storageReplicationLevel": {
         "name": "Storage Replication level",
         "calculation": "The average value of replicas per storage backing service",
-        "calculationFormula": "\\frac{\\sum_{i=1}^{|DM|} dm_i.replicas | dm_i.deployed \\in SBS  }{ | \\Set{ sbs | sbs \\in SBS \\land \\exists dm (dm \\in DM \\land dm.deployed = sbs)} | }",
+        "calculationFormula": "\\frac{\\displaystyle\\sum_{i=1}^{|DM|} dm_i.replicas | dm_i.deployed \\in SBS  }{ | \\Set{ sbs | sbs \\in SBS \\land \\exists dm (dm \\in DM \\land dm.deployed = sbs)} | }",
         "sources": ["Guerron2020", "Souza2016"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE, ENTITIES.COMPONENT],
     },
@@ -2607,7 +2607,7 @@ const measures = {
     "ratioOfRequestTracesThroughGateway": {
         "name": "Ratio of request traces through a gateway",
         "calculation": "Number of request traces including an API Gateway as a proxy / Total number of request traces",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{|\\Set{ rt | rt \\in RT \\land ((rt.referencedEndpoint \\in c.providedEndpoints \\land c.externalIngressProxiedBy = p \\land p \\in PBS \\land p.kind = \"API Gateway\") \\lor (rt.referencedEndpoint \\in g.providedEndpoints \\land g \\in PBS \\land g.kind = \"API Gateway\")) }|}{|RT|}",
         "sources": ["Zdun2023a"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },
@@ -2621,70 +2621,70 @@ const measures = {
     "dataShardingLevel": {
         "name": "Level of sharding across storage backing services",
         "calculation": "Average number of shards per Storage Backing Service",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{\\displaystyle\\sum_{i=1}^{|SBS|} sbs_i.shards}{|SBS|}",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
     },
     "ratioOfCachedDataAggregates": {
         "name": "Ratio of Cached Data Aggregates",
         "calculation": "Sum-of(Cached usage of a Data Aggregate in a Component) / Sum-of(Cached and uncached usage of a Data Aggregate in a Component",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{\\displaystyle\\sum_{i=1}^{|C|} \\displaystyle\\sum_{j=1}^{|c_i.RDA|} \\begin{cases} 1 &\\text{if } c_i.rda_j.usage\\_relation = \"cached\\text{-}usage\" \\\\ 0 &\\text{else } \\end{cases}}{ \\displaystyle\\sum_{i=1}^{|C|} \\displaystyle\\sum_{j=1}^{|c_i.RDA|} \\begin{cases} 1 &\\text{if } c_i.rda_j.usage\\_relation = \"cached\\text{-}usage\" \\lor c_i.rda_j.usage\\_relation = \"usage\" \\\\ 0 &\\text{else } \\end{cases} }",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM],
     },
     "dataReplicationAlongRequestTrace": {
         "name": "Data Replication Along Request Trace",
         "calculation": "Average(Replication of Data Aggregates along request trace)",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{\\displaystyle\\sum_{i=1}^{|rt.involvedLinks|} \\displaystyle\\sum_{j=1}^{|rt.involvedLinks_i.RDA|} \\begin{cases} 1 &\\text{if } rt.involvedLinks_i.rda_j.usage\\_relation = \"cached\\text{-}usage\" \\lor rt.involvedLinks_i.rda_j.usage\\_relation = \"persistence\" \\\\ 0 &\\text{else } \\end{cases} + \\displaystyle\\sum_{i=1}^{|rt.referencedEndpoint.RDA|} \\begin{cases} 1 &\\text{if } rt.referencedEndpoint.rda_i.usage\\_relation = \"cached\\text{-}usage\" \\lor rt.involvedLinks_i.rda_j.usage\\_relation = \"persistence\" \\\\ 0 &\\text{else } \\end{cases}}{ \\displaystyle\\sum_{i=1}^{|rt.involvedLinks|} |rt.involvedLinks_i.RDA| + |rt.referencedEndpoint.RDA|}",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.REQUEST_TRACE],
     },
     "serviceMeshUsage": {
         "name": "Service Mesh Usage",
-        "calculation": "Average(Component Communcation proxied by Service Mesh)",
-        "calculationFormula": "",
+        "calculation": "Average(Component Communication proxied by Service Mesh)",
+        "calculationFormula": "\\frac{\\displaystyle\\sum_{i=1}^{|C|} \\begin{cases} 0.5 &\\text{if } c_i.ingressProxiedBy = p \\land p \\in PBS \\land p.kind = \"Service Mesh\" \\\\ 0 &\\text{else } \\end{cases} + \\begin{cases} 0.5 &\\text{if } c_i.egressProxiedBy = p \\land p \\in PBS \\land p.kind = \"Service Mesh\" \\\\ 0 &\\text{else } \\end{cases}}{|C|}",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE]
     },
     "secretsExternalization": {
         "name": "Secrets Externalization",
         "calculation": "Secrets used in a component but stored in another / All secrets used in a component",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{| \\Set{ bd | bd \\in BD \\land bd.kind = \"secret\" \\land \\exists (ci,bd) (ci \\in C \\cap I \\land (ci,bd) \\in ci.RBD \\land (ci,bd).usage\\_relation = \"usage\") \\land \\exists (ci',bd) (ci' \\in C \\cap I \\land (ci',bd) \\in ci'.RBD \\land (ci',bd).usage\\_relation = \"persistence\") } |}{ | \\Set{ bd | bd \\in BD \\land bd.kind = \"secret\" \\land \\exists (ci,bd) (ci \\in C \\cap I \\land (ci,bd) \\in ci.RBD)}|}",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE]
     },
     "ratioOfSpecializedStatefulServices": {
         "name": "Ratio of specialized stateful services",
         "calculation": "Stateful services that are Backing Services, Storage Backing Services, or Broker Backing Services / All stateful services",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{|\\Set{ bs | bs \\in BS \\cap SBS \\cap BBS \\land bs.stateless = false}|}{ |\\Set{ c | c \\in C \\land c.stateless = false}| }",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE]
     },
     "suitablyReplicatedStatefulService": {
         "name": "Ratio of suitably replicated stateful services",
         "calculation": "Stateful Backing Services, Storage Backing Services, or Broker Backing Services that are replicated with a strategy other than \"none\" / All Stateful Backing Services, Storage Backing Services, or Broker Backing Services",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{|\\Set{ bs | bs \\in BS \\cap SBS \\cap BBS \\land bs.stateless = false \\land \\exists dm (dm \\in DM \\land dm.deployed = bs \\land dm.replicas > 1) \\land bs.replication\\_strategy \\neq \"none\"}|}{|\\Set{ bs | bs \\in BS \\cap SBS \\cap BBS \\land bs.stateless = false \\land \\exists dm (dm \\in DM \\land dm.deployed = bs \\land dm.replicas > 1)}|}",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE]
     },
     "ratioOfUniqueAccountUsage": {
         "name": "Ratio of unique account usage",
         "calculation": "Number of unique accounts used by components and infrastructure / Number of components and infrastructure",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{|\\Set{ account | \\exists ci (ci \\in C\\cap I \\land account \\in ci.identities)}|}{|C| + |I|} ",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE]
     },
     "ratioOfNonCustomBackingServices": {
         "name": "Ratio of non-custom backing services",
-        "calculation": "Backing Services, Storage Backing Services, Proxy Backing Services, and Broker Backing Services which are not of type custom / All Backing Services, Storage Backing Services, Proxy Backing Services, and Broker Backing Services",
-        "calculationFormula": "",
+        "calculation": "Backing Services, Storage Backing Services, Proxy Backing Services, and Broker Backing Services which are not of software type custom / All Backing Services, Storage Backing Services, Proxy Backing Services, and Broker Backing Services",
+        "calculationFormula": "\\frac{|\\Set{ bs | bs \\in BS \\cap SBS \\cap PBS \\cap BBS \\land bs.software\\_type \\neq \"custom\" }|}{|\\Set{ bs | bs \\in BS \\cap SBS \\cap PBS \\cap BBS}|}",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT]
     },
     "secretsStoredInVault": {
         "name": "Secrets stored in vault",
         "calculation": "Backing Data of type secret stored in vault / All backing data of type secret",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{|\\Set{bd | bd \\in BD \\land bd.kind = \"secret\" \\land \\exists vault (vault \\in BS \\land vault.kind = \"vault\" \\land \\exists (vault,bd) ((vault,bd) \\in vault.RBD \\land (vault,bd).usage\\_relation = \"persistence\")) \\land \\nexists (c,bd) ((c,bd) \\in c.RBD \\land (c \\notin BS \\lor c.kind \\neq \"vault\") \\land (c,bd).usage\\_relation = \"persistence\")) }|}{ |\\Set{bd | bd \\in BD \\land bd.kind = \"secret\"}| }",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE]
     },

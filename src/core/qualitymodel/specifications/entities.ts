@@ -110,6 +110,7 @@ export const entities: {[key in ENTITIES]: EntitySpec}  = {
         "formal": `\tE := (id,name,props,RDA,documentedBy)
         props<sub>E</sub> := {${getEndpointProperties().map(property => property.getKey).join(",")}}
         RDA ⊆ E ⨯ DA
+        props<sub>RDA</sub> := {${getDataAggregateRelationshipProperties().map(property => property.getKey).join(",")}}
         documentedBy ⊆ A`
     },
     "externalEndpoint": {

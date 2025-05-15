@@ -1224,7 +1224,7 @@ export const ratioOfRequestTracesThroughGateway: Calculation = (parameters: Calc
     let numberOfRequestTracesThroughGateway = 0;
 
     requestTraceLoop: for (const [requestTraceId, requestTrace] of allRequestTraces) {
-        // consider a request trace as going through a gateway if either the component owning the external endpoint is a Gateway or a gateway is included in the request trace
+        // consider a request trace as going through a gateway if either the component owning the external endpoint has its external ingress proxied by a Gateway or the component owning the external endpoint is a Gateway 
 
         if (requestTrace.getExternalEndpoint) {
             let componentWithExternalEndpoint = parameters.entity.searchComponentOfEndpoint(requestTrace.getExternalEndpoint.getId);
