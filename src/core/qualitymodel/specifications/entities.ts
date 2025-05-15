@@ -1,3 +1,4 @@
+import { getArtifactTypeProperties } from "@/core/common/artifact";
 import { getBackingDataProperties, getBackingServiceProperties, getBrokerBackingServiceProperties, getComponentProperties, getDataAggregateProperties, getDeploymentMappingProperties, getEndpointProperties, getInfrastructureProperties, getLinkProperties, getNetworkProperties, getProxyBackingServiceProperties, getRequestTraceProperties, getServiceProperties, getStorageBackingServiceProperties } from "@/core/entities";
 import { getBackingDataRelationshipProperties } from "@/core/entities/relationToBackingData";
 import { getDataAggregateRelationshipProperties } from "@/core/entities/relationToDataAggregate";
@@ -194,7 +195,8 @@ export const entities: {[key in ENTITIES]: EntitySpec}  = {
         "description": "An artifact associcated with a component or an infrastructure entity that enables the actual deployment or execution of that entity. For example, a Jar-File or a Container Image",
         "relation": {"type": "part-of", "target": ENTITIES.COMPONENT},
         "symbol": "A",
-        "formal": `\tA := (id, type, props)`
+        "formal": `\tA := (id, type, props)
+        props<sub>A</sub> := {${getArtifactTypeProperties("CNA.Artifact").map(property => property.getKey).join(",")}}`
     }
 };
 

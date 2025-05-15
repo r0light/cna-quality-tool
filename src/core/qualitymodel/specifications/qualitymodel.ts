@@ -2705,14 +2705,14 @@ const measures = {
     "ratioOfStandardizedArtifacts": {
         "name": "Ratio of standardized artifacts",
         "calculation": "Artifacts complying to a standard / All artifacts",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{|\\Set{a | a \\in A \\land a.based\\_on\\_standard = true}|}{|\\Set{a | a \\in A }|}",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE]
     },
     "ratioOfEntitiesProvidingStandardizedArtifacts": {
         "name": "Ratio of entities providing standardized artifacts",
         "calculation": "Components and infrastructure entities having a standardized artifact / All components and infrastructure entities",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{|\\Set{ci | ci \\in C \\cap I \\land \\exists a (a \\in ci.artifacts \\land a.based\\_on\\_standard = true)} |}{|C| + |I|}",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE]
     },
