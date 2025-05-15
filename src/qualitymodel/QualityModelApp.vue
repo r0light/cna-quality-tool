@@ -594,6 +594,7 @@ function getPotentialMeasures(productFactor: ProductFactor) {
     border: #343a40 1px solid;
     padding: 5px;
     white-space: pre-wrap;
+    word-wrap: anywhere;
 }
 
 .katex { 

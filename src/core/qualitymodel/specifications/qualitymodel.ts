@@ -2388,7 +2388,7 @@ const measures = {
     "configurationExternalization": {
         "name": "Configuration externalization",
         "calculation": "Number of configuration usages where config data is stored externally / Total number of configuration usages",
-        "calculationFormula": "\\frac{| \\Set{ bd | bd \\in BD \\land bd.kind = \"config\" \\land \\exists (ci,bd) (ci \\in C \\cap I \\land (ci,bd) \\in ci.RBD \\land (ci,bd).usage\\_relation = \"usage\") \\land \\exists (ci',bd) (ci' \\in C \\cap I \\land (ci',bd) \\in ci'.RBD \\land (ci',bd).usage\\_relation = \"persistence\") } |}{ | \\Set{ bd | bd \\in BD \\land bd.kind = \"config\" \\land \\exists (ci,bd) (ci \\in C \\cap I \\land (ci,bd) \\in ci.RBD)}|}",
+        "calculationFormula": "\\frac{| \\Set{ bd | bd \\in BD \\land bd.kind = \"config\" \\land \\exists (ci,bd) (ci \\in C \\cup I \\land (ci,bd) \\in ci.RBD \\land (ci,bd).usage\\_relation = \"usage\") \\land \\exists (ci',bd) (ci' \\in C \\cup I \\land (ci',bd) \\in ci'.RBD \\land (ci',bd).usage\\_relation = \"persistence\") } |}{ | \\Set{ bd | bd \\in BD \\land bd.kind = \"config\" \\land \\exists (ci,bd) (ci \\in C \\cup I \\land (ci,bd) \\in ci.RBD)}|}",
         "sources": ["Apel2019"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
     },
@@ -2649,35 +2649,35 @@ const measures = {
     "secretsExternalization": {
         "name": "Secrets Externalization",
         "calculation": "Secrets used in a component but stored in another / All secrets used in a component",
-        "calculationFormula": "\\frac{| \\Set{ bd | bd \\in BD \\land bd.kind = \"secret\" \\land \\exists (ci,bd) (ci \\in C \\cap I \\land (ci,bd) \\in ci.RBD \\land (ci,bd).usage\\_relation = \"usage\") \\land \\exists (ci',bd) (ci' \\in C \\cap I \\land (ci',bd) \\in ci'.RBD \\land (ci',bd).usage\\_relation = \"persistence\") } |}{ | \\Set{ bd | bd \\in BD \\land bd.kind = \"secret\" \\land \\exists (ci,bd) (ci \\in C \\cap I \\land (ci,bd) \\in ci.RBD)}|}",
+        "calculationFormula": "\\frac{| \\Set{ bd | bd \\in BD \\land bd.kind = \"secret\" \\land \\exists (ci,bd) (ci \\in C \\cup I \\land (ci,bd) \\in ci.RBD \\land (ci,bd).usage\\_relation = \"usage\") \\land \\exists (ci',bd) (ci' \\in C \\cup I \\land (ci',bd) \\in ci'.RBD \\land (ci',bd).usage\\_relation = \"persistence\") } |}{ | \\Set{ bd | bd \\in BD \\land bd.kind = \"secret\" \\land \\exists (ci,bd) (ci \\in C \\cup I \\land (ci,bd) \\in ci.RBD)}|}",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE]
     },
     "ratioOfSpecializedStatefulServices": {
         "name": "Ratio of specialized stateful services",
         "calculation": "Stateful services that are Backing Services, Storage Backing Services, or Broker Backing Services / All stateful services",
-        "calculationFormula": "\\frac{|\\Set{ bs | bs \\in BS \\cap SBS \\cap BBS \\land bs.stateless = false}|}{ |\\Set{ c | c \\in C \\land c.stateless = false}| }",
+        "calculationFormula": "\\frac{|\\Set{ bs | bs \\in BS \\cup SBS \\cup BBS \\land bs.stateless = false}|}{ |\\Set{ c | c \\in C \\land c.stateless = false}| }",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE]
     },
     "suitablyReplicatedStatefulService": {
         "name": "Ratio of suitably replicated stateful services",
         "calculation": "Stateful Backing Services, Storage Backing Services, or Broker Backing Services that are replicated with a strategy other than \"none\" / All Stateful Backing Services, Storage Backing Services, or Broker Backing Services",
-        "calculationFormula": "\\frac{|\\Set{ bs | bs \\in BS \\cap SBS \\cap BBS \\land bs.stateless = false \\land \\exists dm (dm \\in DM \\land dm.deployed = bs \\land dm.replicas > 1) \\land bs.replication\\_strategy \\neq \"none\"}|}{|\\Set{ bs | bs \\in BS \\cap SBS \\cap BBS \\land bs.stateless = false \\land \\exists dm (dm \\in DM \\land dm.deployed = bs \\land dm.replicas > 1)}|}",
+        "calculationFormula": "\\frac{|\\Set{ bs | bs \\in BS \\cup SBS \\cup BBS \\land bs.stateless = false \\land \\exists dm (dm \\in DM \\land dm.deployed = bs \\land dm.replicas > 1) \\land bs.replication\\_strategy \\neq \"none\"}|}{|\\Set{ bs | bs \\in BS \\cup SBS \\cup BBS \\land bs.stateless = false \\land \\exists dm (dm \\in DM \\land dm.deployed = bs \\land dm.replicas > 1)}|}",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE]
     },
     "ratioOfUniqueAccountUsage": {
         "name": "Ratio of unique account usage",
         "calculation": "Number of unique accounts used by components and infrastructure / Number of components and infrastructure",
-        "calculationFormula": "\\frac{|\\Set{ account | \\exists ci (ci \\in C\\cap I \\land account \\in ci.identities)}|}{|C| + |I|} ",
+        "calculationFormula": "\\frac{|\\Set{ account | \\exists ci (ci \\in C\\cup I \\land account \\in ci.identities)}|}{|C| + |I|} ",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE]
     },
     "ratioOfNonCustomBackingServices": {
         "name": "Ratio of non-custom backing services",
         "calculation": "Backing Services, Storage Backing Services, Proxy Backing Services, and Broker Backing Services which are not of software type custom / All Backing Services, Storage Backing Services, Proxy Backing Services, and Broker Backing Services",
-        "calculationFormula": "\\frac{|\\Set{ bs | bs \\in BS \\cap SBS \\cap PBS \\cap BBS \\land bs.software\\_type \\neq \"custom\" }|}{|\\Set{ bs | bs \\in BS \\cap SBS \\cap PBS \\cap BBS}|}",
+        "calculationFormula": "\\frac{|\\Set{ bs | bs \\in BS \\cup SBS \\cup PBS \\cup BBS \\land bs.software\\_type \\neq \"custom\" }|}{|\\Set{ bs | bs \\in BS \\cup SBS \\cup PBS \\cup BBS}|}",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT]
     },
@@ -2712,70 +2712,70 @@ const measures = {
     "ratioOfEntitiesProvidingStandardizedArtifacts": {
         "name": "Ratio of entities providing standardized artifacts",
         "calculation": "Components and infrastructure entities having a standardized artifact / All components and infrastructure entities",
-        "calculationFormula": "\\frac{|\\Set{ci | ci \\in C \\cap I \\land \\exists a (a \\in ci.artifacts \\land a.based\\_on\\_standard = true)} |}{|C| + |I|}",
+        "calculationFormula": "\\frac{|\\Set{ci | ci \\in C \\cup I \\land \\exists a (a \\in ci.artifacts \\land a.based\\_on\\_standard = true)} |}{|C| + |I|}",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE]
     },
     "componentArtifactsSimilarity": {
         "name": "Component Artifacts Similarity",
         "calculation": "Average similarity of components based on a pairwise comparison of component artifacts.",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{\\displaystyle\\sum_{i=1}^{|C|}\\sum_{j=i+1}^{|C|} \\begin{cases} 0 &\\text{if } | c_i \\cup c_j | = 0 \\\\ \\frac{| c_i \\cap c_j |}{| c_i \\cup c_j |} &\\text{else } \\end{cases}}{\\frac{|C| * (|C| - 1)}{2}}",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE]
     },
     "infrastructureArtifactsSimilarity": {
         "name": "Infrastructure Artifacts Similarity",
         "calculation": "Average similarity of infrastructure entities based on a pairwise comparison of infrastructure artifacts.",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{\\displaystyle\\sum_{k=1}^{|I|}\\sum_{l=k+1}^{|I|} \\begin{cases} 0 &\\text{if } | i_k \\cup i_l | = 0 \\\\ \\frac{| i_k \\cap i_l |}{| i_k \\cup i_l |} &\\text{else } \\end{cases}}{\\frac{|I| * (|I| - 1)}{2}}",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM]
     },
     "ratioOfAutomaticallyProvisionedInfrastructure": {
         "name": "Ratio of automatically provisioned infrastructure",
         "calculation": "Infrastructure entities that are provisioned automatically / All infrastructure entities",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{ |\\Set{i | i \\in I \\land (i.provisioning = \"automated-coded\" \\lor i.provisioning = \"automated-inferred\" \\lor i.provisioning = \"transparent\")} |}{ |I| }",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE]
     },
     "ratioOfDeploymentsOnDynamicInfrastructure": {
         "name": "Ratio of components deployed dynamically",
         "calculation": "DeploymentMappings of components on a software platform or cloud service / All deployment mappings of components",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{|\\Set{ dm | dm \\in DM \\land dm.deployed \\in C \\land (dm.host.kind = \"software-platform\" \\lor dm.host.kind = \"cloud-service\") }|}{ |\\Set{ dm | dm \\in DM \\land dm.deployed \\in C}|}",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE]
     },
     "ratioOfInfrastructureWithIaCArtifact": {
         "name": "Ratio of infrastructure with IaC artifact",
         "calculation": "Infrastructure entities with an IaC artifact / All infrastructure entities",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{ |\\Set{ i | i \\in I \\land \\exists a ( a \\in i.artifacts \\land isIaC(a)) }|  }{ |I| }",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE]
     },
     "namespaceSeparation": {
         "name": "Namespace Separation",
         "calculation": "1 - (Average sharing of namespaces)",
-        "calculationFormula": "",
+        "calculationFormula": "", //TODO
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT]
     },
     "ratioOfFullyManagedInfrastructure": {
         "name": "Ratio of fully managed infrastructure",
         "calculation": "Infrastructure entities with no environment access and transparent maintenance / All infrastructure entities",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{|\\Set{ i | i \\in I \\land (i.environment\\_access = \"none\" \\lor  i.environment\\_access = \"limited\") \\land i.maintenance = \"transparent\"  }|  }{|I|}",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE]
     },
     "ratioOfManagedBackingServices": {
         "name": "Ratio of managed backing services",
         "calculation": "Managed Backing Services, Storage Backing Services, Proxy Backing Services and Broker Backing Services / All Backing Services, Storage Backing Services, Proxy Backing Services and Broker Backing Services",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{|\\Set{bs | bs \\in BS \\cup SBS \\cup PBS \\cup BBS \\land bs.managed = true)} | }{|\\Set{bs | bs \\in BS \\cup SBS \\cup PBS \\cup BBS}|}",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT]
     },
     "ratioOfInfrastructureEnforcingResourceBoundaries": {
         "name": "Ratio infrastructure enforcing resource boundaries",
         "calculation": "Infrastructure entities enforcing resource boundaries / All infrastructure entities",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{|\\Set{i | i \\in I \\land t.enforced\\_resource\\_bounds = true}|}{|I|}",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE]
     },
