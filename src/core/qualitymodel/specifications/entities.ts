@@ -1,4 +1,6 @@
 import { getBackingDataProperties, getBackingServiceProperties, getBrokerBackingServiceProperties, getComponentProperties, getDataAggregateProperties, getDeploymentMappingProperties, getEndpointProperties, getInfrastructureProperties, getLinkProperties, getNetworkProperties, getProxyBackingServiceProperties, getRequestTraceProperties, getServiceProperties, getStorageBackingServiceProperties } from "@/core/entities";
+import { getBackingDataRelationshipProperties } from "@/core/entities/relationToBackingData";
+import { getDataAggregateRelationshipProperties } from "@/core/entities/relationToDataAggregate";
 import { getDefaultAppSettings } from "@/modeling/config/appSettings";
 
 let componentPropertyKeys = getComponentProperties().map(property => property.getKey);
@@ -48,7 +50,9 @@ export const entities: {[key in ENTITIES]: EntitySpec}  = {
         "formal": `\tC := (id,name,props,RDA,RBD,RN,artifacts,providedEndpoints,externalIngressProxiedBy,ingressProxiedBy,egressProxiedBy,addressResolutionBy,authenticationBy)
         props<sub>C</sub> := {${getComponentProperties().map(property => property.getKey).join(",")}}
         RDA ⊆ C ⨯ DA
+        props<sub>RDA</sub> := {${getDataAggregateRelationshipProperties().map(property => property.getKey).join(",")}}
         RBD ⊆ C ⨯ BD
+        props<sub>RBD</sub> := {${getBackingDataRelationshipProperties().map(property => property.getKey).join(",")}}
         RN ⊆ C ⨯ N
         artifacts ⊆ A
         providedEndpoints ⊆ E
@@ -135,6 +139,7 @@ export const entities: {[key in ENTITIES]: EntitySpec}  = {
         props<sub>I</sub> := {${getInfrastructureProperties().map(property => property.getKey).join(",")}}
         artifacts ⊆ A
         RBD ⊆ I ⨯ BD
+        props<sub>RBD</sub> := {${getBackingDataRelationshipProperties().map(property => property.getKey).join(",")}}
         RN ⊆ I ⨯ N`
     },
     "deploymentMapping": {
