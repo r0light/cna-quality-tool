@@ -2269,7 +2269,7 @@ const measures = {
     "ratioOfStorageBackendSharing": {
         "name": "Ratio of Storage Backend Sharing",
         "calculation": "(sum-of(Number of Services sharing the same Storage Backing Service) for all Storage Backing Services) / (Total Number of Services * Total Number of Storage Backing Service)",
-        "calculationFormula": "",
+        "calculationFormula": "", // TODO
         "sources": ["Karhikeyan2012"],
         "applicableEntities": [ENTITIES.COMPONENT],
     },
@@ -2691,14 +2691,14 @@ const measures = {
     "accessRestrictedToCallers": {
         "name": "Access restricted to callers",
         "calculation": "Average-of(Accounts allowed to access Endpoint / Accounts accessing Endpoint) over all Endpoints",
-        "calculationFormula": "",
+        "calculationFormula": "", //TODO
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE]
     },
     "ratioOfDelegatedAuthentication": {
         "name": "Ratio of delegated authentication",
         "calculation": "Component delegating authentication / All components (excluding authentication backing services)",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{|\\Set{c | c \\in C \\land (c \\notin BS \\lor c.providedFunctionality \\neq \"authentication/authorization\") \\land c.authenticationBy \\neq \\empty}|}{ |\\Set{c | c \\in C \\land (c \\notin BS \\lor c.providedFunctionality \\neq \"authentication/authorization\")}|  }",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE]
     },
