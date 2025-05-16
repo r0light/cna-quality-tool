@@ -1686,14 +1686,14 @@ const measures = {
     "serviceInterfaceDataCohesion": {
         "name": "Service Interface Data Cohesion",
         "calculation": "| Set of Service Endpoints that use the same Data Aggregate | / Number of Data Aggregates used in a Service",
-        "calculationFormula": "\\frac{| \\{ e | e \\in c.providedEndpoints \\land \\exists e_n (e_n \\in c.providedEndpoints \\land ((e.RDA \\cap e_n.RDA) \\neq \\emptyset))\\} |}{|c.RDA|}",
+        "calculationFormula": "\\frac{| \\{ e | e \\in c.providedEndpoints \\land \\exists e_n \\in c.providedEndpoints (\\land ((e.RDA \\cap e_n.RDA) \\neq \\emptyset))\\} |}{|c.RDA|}",
         "sources": ["Bogner2017", "Perepletchikov2007", "Kazemi2011", "Brito2021", "Jin2021", "Jin2018", "Athanasopoulos2011", "Athanasopoulos2015", "Bogner2020"],
         "applicableEntities": [ENTITIES.COMPONENT],
     },
     "cohesionBetweenEndpointsBasedOnDataAggregateUsage": {
         "name": "Cohesion between Endpoints based on data aggregate usage",
         "calculation": "Average-of(Number of Shared Usage of Data Aggregates per endpoint pair) over all endpoints / All Data Aggregates used by endpoints",
-        "calculationFormula": "\\frac{\\frac{\\displaystyle\\sum_{i=1}^{|c.E|} |\\{(e_i,e_n) | n>i \\land ((e_i.RDA \\cap e_n.RDA) \\neq \\emptyset) \\}|}{|c.E|}}{ | \\{da | \\exists e (e \\in c.providedEndpoints \\land (e,da) \\in e.RDA) \\} |}",
+        "calculationFormula": "\\frac{\\frac{\\displaystyle\\sum_{i=1}^{|c.E|} |\\{(e_i,e_n) | n>i \\land ((e_i.RDA \\cap e_n.RDA) \\neq \\emptyset) \\}|}{|c.E|}}{ | \\{da | \\exists e \\in c.providedEndpoints ( \\exists (e,da) \\in e.RDA) \\} |}",
         "sources": ["Peng2022"],
         "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM],
     },
@@ -1714,7 +1714,7 @@ const measures = {
     "serviceInterfaceUsageCohesion": {
         "name": "Service Interface Usage Cohesion",
         "calculation": "Sum-of(Number of endpoints used per client of this service) / (number of clients of this service * number of endpoints of this service)",
-        "calculationFormula": "\\frac{\\displaystyle\\sum_{i=1}^{|C|} |\\{e | e \\in c.providedEndpoints \\land \\exists l (l \\in L \\land l.sourceComponent = c_i \\land l.targetEndpoint = e) \\}|}{ |\\{ c' | c' \\in C \\land \\exists l (l \\in L \\land l.sourceComponent = c' \\land l.targetEndpoint \\in c.E) \\}| \\times |c.E| }",
+        "calculationFormula": "\\frac{\\displaystyle\\sum_{i=1}^{|C|} |\\{e | e \\in c.providedEndpoints \\land \\exists l \\in L (l.sourceComponent = c_i \\land l.targetEndpoint = e) \\}|}{ |\\{ c' | c' \\in C \\land \\exists l \\in L (l.sourceComponent = c' \\land l.targetEndpoint \\in c.E) \\}| \\times |c.E| }",
         "sources": ["Bogner2017", "Perepletchikov2007", "Kazemi2011"],
         "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM],
     },
@@ -1833,28 +1833,28 @@ const measures = {
     "ratioOfInfrastructureNodesThatSupportMonitoring": {
         "name": "Ratio of Infrastructure nodes that support Monitoring",
         "calculation": "Number of Infrastructure nodes providing metrics and logs / Total number of Infrastructure nodes",
-        "calculationFormula": "\\frac{ |\\{ i | i \\in I \\land \\exists bd ((i,bd) \\in i.BDA \\land bd.kind = \"metrics\" \\land bd.kind = \"logs\" )\\} | }{|I|}",
+        "calculationFormula": "\\frac{ |\\{ i | i \\in I \\land \\exists bd \\in BD (\\exists (i,bd) \\in i.BDA \\land bd.kind = \"metrics\" \\land bd.kind = \"logs\" )\\} | }{|I|}",
         "sources": ["Ntentos2022", "Zdun2023"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
     },
     "ratioOfComponentsThatSupportMonitoring": {
         "name": "Ratio of Components that support Monitoring",
         "calculation": "Number of Components providing metrics and logs / Total number of Components",
-        "calculationFormula": "\\frac{ |\\{ c | c \\in C \\land \\exists bd ((c,bd) \\in c.BDA \\land bd.kind = \"metrics\" \\land bd.kind = \"logs\" )\\} | }{|C|}",
+        "calculationFormula": "\\frac{ |\\{ c | c \\in C \\land \\exists bd \\in BD (\\exists (c,bd) \\in c.BDA \\land bd.kind = \"metrics\" \\land bd.kind = \"logs\" )\\} | }{|C|}",
         "sources": ["Ntentos2022", "Zdun2023"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
     },
     "ratioOfComponentsOrInfrastructureNodesThatExportLogsToACentralService": {
         "name": "Ratio of Components or Infrastructure nodes that export logs to a central service",
         "calculation": "Number of Components or Infrastrcture Entities exporting logs to a central service / Total number of Components and Infrastructure entities",
-        "calculationFormula": "componentsExportingLogs = \\{ c | c \\in C \\land (\\exists l(l\\in L \\land l.sourceComponent = c \\land l.targetEndpoint \\in ls \\land ls \\in BS \\land ls.kind = \"logging\") \\lor \\exists  l(l\\in L \\land l.sourceComponent = ls \\land ls \\in BS \\land ls.kind = \"logging\" \\land l.targetEndpoint \\in c.E)) \\land \\exists bd (bd \\in BD \\land bd.kind = \"logs\" \\land \\exists (c,bd) ((c,bd) \\in c.RBD) \\land \\exists (ls,bd) ((ls,bd) \\in ls.RBD) )  \\} \\\\  infrastructureExportingLogs = \\{ i | i \\in I \\land \\exists bd (bd \\in BD \\land bd.kind = \"logs\" \\land \\exists (i,bd) ((i,bd) \\in i.RBD) \\land \\exists (ls,bd) ((ls,bd) \\in ls.RBD) )  \\} \\\\  \\frac{ |componentsExportingLogs| + |infrastructureExportingLogs|}{ |C| + |I|}",
+        "calculationFormula": "componentsExportingLogs = \\{ c | c \\in C \\land (\\exists l \\in L (l.sourceComponent = c \\land l.targetEndpoint \\in ls \\land ls \\in BS \\land ls.kind = \"logging\") \\lor \\exists  l\\in L ( l.sourceComponent = ls \\land ls \\in BS \\land ls.kind = \"logging\" \\land l.targetEndpoint \\in c.E)) \\land \\exists bd \\in BD (bd.kind = \"logs\" \\land \\exists (c,bd) \\in c.RBD \\land \\exists (ls,bd) \\in ls.RBD)  \\} \\\\  infrastructureExportingLogs = \\{ i | i \\in I \\land \\exists bd \\in BD (bd.kind = \"logs\" \\land \\exists (i,bd) \\in i.RBD \\land \\exists (ls,bd) \\in ls.RBD )  \\} \\\\  \\frac{ |componentsExportingLogs| + |infrastructureExportingLogs|}{ |C| + |I|}",
         "sources": ["Ntentos2022"],
         "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.SYSTEM],
     },
     "ratioOfComponentsOrInfrastructureNodesThatExportMetrics": {
         "name": "Ratio of Components or Infrastructure nodes that export metrics",
         "calculation": "Number of Components or Infrastructure Entities exporting metrics to a central service / Total number of Components and Infrastructure entities",
-        "calculationFormula": "componentsExportingMetrics = \\{ c | c \\in C \\land (\\exists l(l\\in L \\land l.sourceComponent = c \\land l.targetEndpoint \\in ms \\land ms \\in BS \\land ms.kind = \"metrics\") \\lor \\exists  l(l\\in L \\land l.sourceComponent = ms \\land ms \\in BS \\land ms.kind = \"metrics\" \\land l.targetEndpoint \\in c.E)) \\land \\exists bd (bd \\in BD \\land bd.kind = \"metrics\" \\land \\exists (c,bd) ((c,bd) \\in c.RBD) \\land \\exists (ms,bd) ((ms,bd) \\in ms.RBD) )  \\} \\\\  infrastructureExportingMetrics = \\{ i | i \\in I \\land \\exists bd (bd \\in BD \\land bd.kind = \"metrics\" \\land \\exists (i,bd) ((i,bd) \\in i.RBD) \\land \\exists (ms,bd) ((ms,bd) \\in ms.RBD) )  \\} \\\\  \\frac{ |componentsExportingMetrics| + |infrastructureExportingMetrics|}{ |C| + |I|}",
+        "calculationFormula": "componentsExportingMetrics = \\{ c | c \\in C \\land (\\exists l\\in L (l.sourceComponent = c \\land l.targetEndpoint \\in ms \\land ms \\in BS \\land ms.kind = \"metrics\") \\lor \\exists  l\\in L  (l.sourceComponent = ms \\land ms \\in BS \\land ms.kind = \"metrics\" \\land l.targetEndpoint \\in c.E)) \\land \\exists bd \\in BD (bd.kind = \"metrics\" \\land \\exists (c,bd) \\in c.RBD \\land \\exists (ms,bd) \\in ms.RBD )  \\} \\\\  infrastructureExportingMetrics = \\{ i | i \\in I \\land \\exists bd \\in BD (bd.kind = \"metrics\" \\land \\exists (i,bd) \\in i.RBD \\land \\exists (ms,bd) \\in ms.RBD )  \\} \\\\  \\frac{ |componentsExportingMetrics| + |infrastructureExportingMetrics|}{ |C| + |I|}",
         "sources": ["Ntentos2022"],
         "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.SYSTEM],
     },
@@ -1868,21 +1868,21 @@ const measures = {
     "distributedTracingSupport": {
         "name": "Distributed Tracing Support",
         "calculation": "Number of Components linked to a tracing service / Total Number of Components which are not tracing services themselves",
-        "calculationFormula": "\\frac{ |\\{ c | c \\in C \\land \\lnot(c \\in BS \\land c.kind = \"tracing\") \\land \\exists l ( l \\in L \\land l.sourceComponent = c \\land l.targetEndpoint \\in ts.providedEndpoints \\land ts \\in BS \\land ts.kind \"tracing\")  \\}| }{ |\\{ c | c \\in C \\land \\lnot(c \\in BS \\land c.kind = \"tracing\") \\}|  }",
+        "calculationFormula": "\\frac{ |\\{ c | c \\in C \\land \\lnot(c \\in BS \\land c.kind = \"tracing\") \\land \\exists l \\in L (l.sourceComponent = c \\land l.targetEndpoint \\in ts.providedEndpoints \\land ts \\in BS \\land ts.kind \"tracing\")  \\}| }{ |\\{ c | c \\in C \\land \\lnot(c \\in BS \\land c.kind = \"tracing\") \\}|  }",
         "sources": ["Ntentos2020", "Ntentos2021"],
         "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
     },
     "ratioOfServicesThatProvideHealthEndpoints": {
         "name": "Ratio of Services that provide Health endpoints",
         "calculation": "Number of Service with at least one health endpoint / Number of all Services",
-        "calculationFormula": "\\frac{ | \\{ s | s \\in S \\land \\exists e ( e \\in s.providedEndpoints \\land e.health\\_check = true ) \\} | } {|S|} ",
+        "calculationFormula": "\\frac{ | \\{ s | s \\in S \\land \\exists e \\in s.providedEndpoints (e.health\\_check = true ) \\} | } {|S|} ",
         "sources": ["Ntentos2022"],
         "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
     },
     "ratioOfServicesThatProvideReadinessEndpoints": {
         "name": "Ratio of Services that provide Readiness endpoints",
         "calculation": "Number of Service with at least one readiness endpoint / Number of all Services",
-        "calculationFormula": "\\frac{ | \\{ s | s \\in S \\land \\exists e ( e \\in s.providedEndpoints \\land e.readiness\\_check = true ) \\} | } {|S|} ",
+        "calculationFormula": "\\frac{ | \\{ s | s \\in S \\land \\exists e \\in s.providedEndpoints (e.readiness\\_check = true ) \\} | } {|S|} ",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
     },
@@ -1903,7 +1903,7 @@ const measures = {
     "numberOfConsumedEndpoints": {
         "name": "Number of Consumed Endpoints",
         "calculation": "Number of endpoints a service is linked to",
-        "calculationFormula": "| \\{ e | e \\in E \\land \\exists l (l\\in L \\land l.sourceComponent = s \\land l.targetEndpoint = e)  \\} | ",
+        "calculationFormula": "| \\{ e | e \\in E \\land \\exists l \\in L (l.sourceComponent = s \\land l.targetEndpoint = e)  \\} | ",
         "sources": ["Apel2019", "Gamage2021", "Perera2018"],
         "applicableEntities": [ENTITIES.COMPONENT],
     },
@@ -1980,28 +1980,28 @@ const measures = {
     "servicesInterdependenceInTheSystem": {
         "name": "Services Interdependence in the System",
         "calculation": "Number of service pairs which are bi-directionally linked",
-        "calculationFormula": "|\\{ (c_1,c_2) | c_1,c_2 \\in C \\land \\exists l (l \\in L \\land l.sourceComponent = c_1 \\land l.targetEndpoint \\in c_2.E) \\land \\exists l (l \\in L \\land \\land l.sourceComponent = c_2 \\land l.targetEndpoint \\in c_1.E) \\} |",
+        "calculationFormula": "|\\{ (c_1,c_2) | c_1,c_2 \\in C \\land \\exists l \\in L (l.sourceComponent = c_1 \\land l.targetEndpoint \\in c_2.E) \\land \\exists l \\in L (l.sourceComponent = c_2 \\land l.targetEndpoint \\in c_1.E) \\} |",
         "sources": ["Bogner2017", "Rud2006"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },
     "averageNumberOfDirectlyConnectedServices": {
         "name": "Average Number of Directly Connected Services",
         "calculation": "(\"Number of Components a component is linked to\" + \"Number of Components that are linked to a component\") / Number of services in the system",
-        "calculationFormula": "\\frac{| \\{ c' | c' \\in C \\land \\exists l (l \\in L \\land l.sourceComponent = c \\land l.targetEndpoint \\in c'.E) \\} | + | \\{ c' | c' \\in C \\land \\exists l (l \\in L \\land l.sourceComponent = c' \\land l.targetEndpoint \\in c.E) \\} | }{ |C| } ",
+        "calculationFormula": "\\frac{| \\{ c' | c' \\in C \\land \\exists l \\in L (l.sourceComponent = c \\land l.targetEndpoint \\in c'.E) \\} | + | \\{ c' | c' \\in C \\land \\exists l \\in L (l.sourceComponent = c' \\land l.targetEndpoint \\in c.E) \\} | }{ |C| } ",
         "sources": ["Shim2008"],
         "applicableEntities": [ENTITIES.COMPONENT],
     },
     "numberOfComponentsThatAreLinkedToAComponent": {
         "name": "Number of Components that are linked to a component",
         "calculation": "Number of Components that are linked to a component (consumers)",
-        "calculationFormula": "| \\{ c' | c' \\in C \\land \\exists l (l \\in L \\land l.sourceComponent = c' \\land l.targetEndpoint \\in c.E) \\} |",
+        "calculationFormula": "| \\{ c' | c' \\in C \\land \\exists l \\in L (l.sourceComponent = c' \\land l.targetEndpoint \\in c.E) \\} |",
         "sources": ["Bogner2017", "Rud2009", "Shim2008", "Zhang2009", "Asik2017", "Gamage2021", "Perera2018"],
         "applicableEntities": [ENTITIES.COMPONENT],
     },
     "numberOfComponentsAComponentIsLinkedTo": {
         "name": "Number of Components a component is linked to",
         "calculation": "Number of Components a component is linked to",
-        "calculationFormula": "| \\{ c' | c' \\in C \\land \\exists l (l \\in L \\land l.sourceComponent = c \\land l.targetEndpoint \\in c'.E) \\} |",
+        "calculationFormula": "| \\{ c' | c' \\in C \\land \\exists l \\in L (l.sourceComponent = c \\land l.targetEndpoint \\in c'.E) \\} |",
         "sources": ["Bogner2017", "Rud2009", "Engel2018", "Shim2008", "Raj2021", "Raj2018", "Hofmeister2008", "PhamThiQuynh2009", "Zhang2009"],
         "applicableEntities": [ENTITIES.COMPONENT],
     },
@@ -2022,14 +2022,14 @@ const measures = {
     "numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfComponents": {
         "name": "Number of Components a component is linked to relative to the total amount of components",
         "calculation": "Number of Components a component is linked to / Total Number of other Components",
-        "calculationFormula": "\\frac{| \\{ c' | c' \\in C \\land \\exists l (l \\in L \\land l.sourceComponent = c \\land l.targetEndpoint \\in c'.E) \\} |}{|C| - 1}",
+        "calculationFormula": "\\frac{| \\{ c' | c' \\in C \\land \\exists l \\in L (l.sourceComponent = c \\land l.targetEndpoint \\in c'.E) \\} |}{|C| - 1}",
         "sources": ["Raj2021", "Raj2018", "Zhang2009"],
         "applicableEntities": [ENTITIES.COMPONENT],
     },
     "degreeOfCouplingInASystem": {
         "name": "Degree of coupling in a system",
         "calculation": "Sum-of(Number of Components a component is linked to) / ((Total Number of Components)² - (Total Number of Components))",
-        "calculationFormula": "\\frac{ \\displaystyle\\sum_{i=1}^{|C|} | \\{ c' | c' \\in C \\land \\exists l (l \\in L \\land l.sourceComponent = c_i \\land l.targetEndpoint \\in c'.E) \\} | } {|C|^2 - |C| }",
+        "calculationFormula": "\\frac{ \\displaystyle\\sum_{i=1}^{|C|} | \\{ c' | c' \\in C \\land \\exists l \\in L (l.sourceComponent = c_i \\land l.targetEndpoint \\in c'.E) \\} | } {|C|^2 - |C| }",
         "sources": ["Raj2021", "Raj2018", "Hofmeister2008", "Zhang2009"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },
@@ -2043,7 +2043,7 @@ const measures = {
     "simpleDegreeOfCouplingInASystem": {
         "name": "Simple Degree of coupling in a system",
         "calculation": "Sum-of(Number of Components a component is linked to) / (Total Number of Components)",
-        "calculationFormula": "\\frac{ \\displaystyle\\sum_{i=1}^{|C|} | \\{ c' | c' \\in C \\land \\exists l (l \\in L \\land l.sourceComponent = c_i \\land l.targetEndpoint \\in c'.E) \\} | } {|C|}",
+        "calculationFormula": "\\frac{ \\displaystyle\\sum_{i=1}^{|C|} | \\{ c' | c' \\in C \\land \\exists l \\in L (l.sourceComponent = c_i \\land l.targetEndpoint \\in c'.E) \\} | } {|C|}",
         "sources": ["Qian2006"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },
@@ -2064,14 +2064,14 @@ const measures = {
     "ratioOfSharedNonExternalComponentsToNonExternalComponents": {
         "name": "Ratio of shared non-external components to non-external components",
         "calculation": "Number of Services with at least two incoming links from different services / Total number of services",
-        "calculationFormula": "\\frac{| \\{ s | s \\in S \\land \\exists s',s'' (s',s'' \\in S \\land s' \\neq s'' \\land \\exists l (l \\in L \\land l.sourceComponent = s' \\land l.targetEndpoint \\in s.E) \\land \\exists l' (l' \\in L \\land l'.sourceComponent = s'' \\land l'.targetEndpoint \\in s.E)) \\}|}{|S|}",
+        "calculationFormula": "\\frac{| \\{ s | s \\in S \\land \\exists s',s'' \\in S (s' \\neq s'' \\land \\exists l \\in L (l.sourceComponent = s' \\land l.targetEndpoint \\in s.E) \\land \\exists l' \\in L (l'.sourceComponent = s'' \\land l'.targetEndpoint \\in s.E)) \\}|}{|S|}",
         "sources": ["Zdun2017"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },
     "ratioOfSharedDependenciesOfNonExternalComponentsToPossibleDependencies": {
         "name": "Ratio of shared dependencies of non-external components to possible dependencies",
         "calculation": "Number of component sharing relationships / (Number of components)²",
-        "calculationFormula": "\\frac{ \\displaystyle\\sum_{i=1}^{|C|} | \\Set{ (c',c'') | c',c'' \\neq c_i \\land \\exists l (l \\in L \\land l.sourceComponent = c' \\land l.targetEndpoint \\in c_i.E) \\land \\exists l' (l' \\in L \\land l'.sourceComponent = c'' \\land l'.targetEndpoint \\in c_i.E) }| }{|C|}",
+        "calculationFormula": "\\frac{ \\displaystyle\\sum_{i=1}^{|C|} | \\Set{ (c',c'') | c',c'' \\neq c_i \\land \\exists l \\in L (l.sourceComponent = c' \\land l.targetEndpoint \\in c_i.E) \\land \\exists l' \\in L (\\land l'.sourceComponent = c'' \\land l'.targetEndpoint \\in c_i.E) }| }{|C|}",
         "sources": ["Zdun2017"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },
@@ -2134,7 +2134,7 @@ const measures = {
     "cyclicCommunication": {
         "name": "Cyclic Communication",
         "calculation": "Whether or not a Service is part of a cyclic communication path",
-        "calculationFormula": "\\exists (l_1,l_2,...,l_n) (l_i \\in L \\land l_1.sourceComponent = c \\land l_n.targetEndpoint \\in c.E)",
+        "calculationFormula": "\\exists (l_1,l_2,...,l_n) \\in L (l_1.sourceComponent = c \\land l_n.targetEndpoint \\in c.E)",
         "sources": ["Apel2019", "Ntentos2020a"],
         "applicableEntities": [ENTITIES.COMPONENT],
     },
@@ -2148,7 +2148,7 @@ const measures = {
     "relativeImportanceOfTheService": {
         "name": "Relative Importance of the Service",
         "calculation": "Number of Components that are linked to a component (consumers) / Total Number of Components",
-        "calculationFormula": "\\frac{| \\Set{ c' | c' \\in C \\land \\exists l (l \\in L \\land l.sourceComponent = c' \\land l.targetEndpoint \\in c.E) } |}{ |C| }",
+        "calculationFormula": "\\frac{| \\Set{ c' | c' \\in C \\land \\exists l \\in L (l.sourceComponent = c' \\land l.targetEndpoint \\in c.E) } |}{ |C| }",
         "sources": ["Zhang2009"],
         "applicableEntities": [ENTITIES.COMPONENT],
     },
@@ -2190,14 +2190,14 @@ const measures = {
     "serviceCriticality": {
         "name": "Service Criticality",
         "calculation": "Number of Components that are linked to a component * Number of Components a component is linked to",
-        "calculationFormula": "| \\{ c' | c' \\in C \\land \\exists l (l \\in L \\land l.sourceComponent = c' \\land l.targetEndpoint \\in c.E) \\} | * | \\{ c' | c' \\in C \\land \\exists l (l \\in L \\land l.sourceComponent = c \\land l.targetEndpoint \\in c'.E) \\} | ",
+        "calculationFormula": "| \\{ c' | c' \\in C \\land \\exists l (l \\in L \\land l.sourceComponent = c' \\land l.targetEndpoint \\in c.E) \\} | * | \\{ c' | c' \\in C \\land \\exists l \\in L (l.sourceComponent = c \\land l.targetEndpoint \\in c'.E) \\} | ",
         "sources": ["Bogner2017", "Rud2009"],
         "applicableEntities": [ENTITIES.COMPONENT],
     },
     "ratioOfCyclicRequestTraces": {
         "name": "Ratio of cyclic request traces",
         "calculation": "Number of request traces with a cycle / Total number of request traces",
-        "calculationFormula": "\\frac{|\\Set{ rt | rt \\in RT \\land \\exists (l_1,l_2,...l_n) (\\forall l_i \\in rt.involvedLinks \\land l_n.targetEndpoint \\in l_1.sourceComponent.E) }}{|RT|}",
+        "calculationFormula": "\\frac{|\\Set{ rt | rt \\in RT \\land \\exists (l_1,l_2,...l_n) \\in rt.involvedLinks (l_n.targetEndpoint \\in l_1.sourceComponent.E) }}{|RT|}",
         "sources": ["Genfer2021"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },
@@ -2255,14 +2255,14 @@ const measures = {
     "numberOfCyclesInRequestTraces": {
         "name": "Number of Cycles in Request Traces",
         "calculation": "Number of Cycles in Request Trace",
-        "calculationFormula": "| \\Set{ (l_1,l_2,...,l_n) | \\forall l_i \\in L \\land \\forall l_i \\exists rt.involvedLinks ( l_i \\in rt.involvedLinks.links \\land l_n.targetEndpoint \\in l_1.sourceComponent.providedEndpoints } |",
+        "calculationFormula": "| \\Set{ (l_1,l_2,...,l_n) | l_i \\in L \\land \\forall l_i \\exists rt.involvedLinks ( l_i \\in rt.involvedLinks.links \\land l_n.targetEndpoint \\in l_1.sourceComponent.providedEndpoints } |",
         "sources": ["Peng2022", "Gamage2021"],
         "applicableEntities": [ENTITIES.REQUEST_TRACE],
     },
     "degreeOfStorageBackendSharing": {
         "name": "Degree of Storage Backend Sharing",
         "calculation": "Number of Services sharing the same Storage Backing Service",
-        "calculationFormula": "| \\{ c' | c' \\in C \\land \\exists l (l \\in L \\land l.sourceComponent = c' \\land l.targetEndpoint \\in sbs.E) \\} |",
+        "calculationFormula": "| \\{ c' | c' \\in C \\land \\exists l \\in L (l.sourceComponent = c' \\land l.targetEndpoint \\in sbs.E) \\} |",
         "sources": ["Rosa2020"],
         "applicableEntities": [ENTITIES.COMPONENT],
     },
@@ -2283,7 +2283,7 @@ const measures = {
     "databaseTypeUtilization": {
         "name": "Database Type Utilization",
         "calculation": "Storage Backing Services used by individual services / Total number of Storage Backing Services",
-        "calculationFormula": "\\frac{| \\Set{ sbs | sbs \\in SBS \\land | \\Set{ c' | \\exists l (l \\in L \\land l.sourceComponent = c' \\land l.targetEndpoint \\in sbs.E) }| = 1 } | }{|SBS|}   ",
+        "calculationFormula": "\\frac{| \\Set{ sbs | sbs \\in SBS \\land | \\Set{ c' | \\exists l\\in L (l.sourceComponent = c' \\land l.targetEndpoint \\in sbs.E) }| = 1 } | }{|SBS|}   ",
         "sources": ["Ntentos2020a"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
     },
@@ -2346,14 +2346,14 @@ const measures = {
     "amountOfRedundancy": {
         "name": "Amount of redundancy",
         "calculation": "sum-of(deployment mappings) for all Components / Number of deployed Components",
-        "calculationFormula": "\\frac{ \\displaystyle\\sum_{i=1}^{|C|} | \\Set{ dm | dm \\in DM \\land dm.deployed = c_i} | }{ | \\Set{ c | c \\in C \\land \\exists dm (dm \\in DM \\land dm.deployed = c)} |}",
+        "calculationFormula": "\\frac{ \\displaystyle\\sum_{i=1}^{|C|} | \\Set{ dm | dm \\in DM \\land dm.deployed = c_i} | }{ | \\Set{ c | c \\in C \\land \\exists dm \\in DM (dm.deployed = c)} |}",
         "sources": ["Zimmermann2015"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE, ENTITIES.COMPONENT],
     },
     "serviceReplicationLevel": {
         "name": "Service Replication level",
         "calculation": "The average value of replicas per service",
-        "calculationFormula": "\\frac{\\displaystyle\\sum_{i=1}^{|DM|} dm_i.replicas | dm_i.deployed \\in S  }{ | \\Set{ s | s \\in S \\land \\exists dm (dm \\in DM \\land dm.deployed = s)} | }",
+        "calculationFormula": "\\frac{\\displaystyle\\sum_{i=1}^{|DM|} dm_i.replicas | dm_i.deployed \\in S  }{ | \\Set{ s | s \\in S \\land \\exists dm \\in DM (dm.deployed = s)} | }",
         "sources": ["Guerron2020", "Souza2016"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE, ENTITIES.COMPONENT],
     },
@@ -2374,7 +2374,7 @@ const measures = {
     "storageReplicationLevel": {
         "name": "Storage Replication level",
         "calculation": "The average value of replicas per storage backing service",
-        "calculationFormula": "\\frac{\\displaystyle\\sum_{i=1}^{|DM|} dm_i.replicas | dm_i.deployed \\in SBS  }{ | \\Set{ sbs | sbs \\in SBS \\land \\exists dm (dm \\in DM \\land dm.deployed = sbs)} | }",
+        "calculationFormula": "\\frac{\\displaystyle\\sum_{i=1}^{|DM|} dm_i.replicas | dm_i.deployed \\in SBS  }{ | \\Set{ sbs | sbs \\in SBS \\land \\exists dm \\in DM (dm.deployed = sbs)} | }",
         "sources": ["Guerron2020", "Souza2016"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE, ENTITIES.COMPONENT],
     },
@@ -2388,7 +2388,7 @@ const measures = {
     "configurationExternalization": {
         "name": "Configuration externalization",
         "calculation": "Number of configuration usages where config data is stored externally / Total number of configuration usages",
-        "calculationFormula": "\\frac{| \\Set{ bd | bd \\in BD \\land bd.kind = \"config\" \\land \\exists (ci,bd) (ci \\in C \\cup I \\land (ci,bd) \\in ci.RBD \\land (ci,bd).usage\\_relation = \"usage\") \\land \\exists (ci',bd) (ci' \\in C \\cup I \\land (ci',bd) \\in ci'.RBD \\land (ci',bd).usage\\_relation = \"persistence\") } |}{ | \\Set{ bd | bd \\in BD \\land bd.kind = \"config\" \\land \\exists (ci,bd) (ci \\in C \\cup I \\land (ci,bd) \\in ci.RBD)}|}",
+        "calculationFormula": "\\frac{| \\Set{ bd | bd \\in BD \\land bd.kind = \"config\" \\land \\exists (ci,bd) \\in ci.RBD (ci \\in C \\cup I \\land (ci,bd).usage\\_relation = \"usage\") \\land \\exists (ci',bd) \\in ci'.RBD (ci' \\in C \\cup I \\land (ci',bd).usage\\_relation = \"persistence\") } |}{ | \\Set{ bd | bd \\in BD \\land bd.kind = \"config\" \\land \\exists (ci,bd) \\in ci.RBD (ci \\in C \\cup I)}|}",
         "sources": ["Apel2019"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
     },
@@ -2402,7 +2402,7 @@ const measures = {
     "ratioOfComponentsWhoseExternalIngressIsProxied": {
         "name": "Ratio of components whose external ingress is proxied",
         "calculation": "Number of components with external endpoints and an external ingress proxy / Total number of components with external endpoints",
-        "calculationFormula": "\\frac{|\\Set{ c | c \\in C \\land \\exists ee (ee \\in EE \\land ee \\in c.providedEndpoints) \\land c.externalIngressProxiedBy \\neq \\empty }|}{ |\\Set{ c | c \\in C \\land \\exists ee (ee \\in EE \\land ee \\in c.providedEndpoints)}| }",
+        "calculationFormula": "\\frac{|\\Set{ c | c \\in C \\land \\exists ee \\in EE (ee \\in c.providedEndpoints) \\land c.externalIngressProxiedBy \\neq \\empty }|}{ |\\Set{ c | c \\in C \\land \\exists ee \\in EE (ee \\in c.providedEndpoints)}| }",
         "sources": ["Ntentos2022"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
     },
@@ -2416,7 +2416,7 @@ const measures = {
     "componentDensity": {
         "name": "Component density",
         "calculation": "Number of deployed components / Number of infrastructure entities on which one or more components are deployed",
-        "calculationFormula": "\\frac{ | \\Set{ c | c \\in C \\land \\exists dm (dm \\in DM \\land dm.deployed = c)} |  }{ | \\Set{ i | i \\in I \\land \\exists dm (dm \\in DM \\land dm.host = i \\land dm.deployed \\in C)} |  }",
+        "calculationFormula": "\\frac{ | \\Set{ c | c \\in C \\land \\exists dm \\in DM (dm.deployed = c)} |  }{ | \\Set{ i | i \\in I \\land \\exists dm \\in DM (dm.host = i \\land dm.deployed \\in C)} |  }",
         "sources": ["Guerron2020", "Rizvi2017"],
         "applicableEntities": [ENTITIES.SYSTEM],
         "aggregateOf": "numberOfServiceHostedOnOneInfrastructure"
@@ -2431,21 +2431,21 @@ const measures = {
     "numberOfAvailabilityZonesUsedByServices": {
         "name": "Number of Availability Zones used by services",
         "calculation": "Number of unique availability zones used by the infrastructure on which services run.",
-        "calculationFormula": "| \\Set{ az | \\exists i (i \\in I \\land \\exists dm (dm \\in DM \\land dm.host = i \\land dm.deployed \\in S) \\land az \\in i.availability\\_zone) } |",
+        "calculationFormula": "| \\Set{ az | \\exists i \\in I (\\exists dm \\in DM (dm.host = i \\land dm.deployed \\in S) \\land az \\in i.availability\\_zone) } |",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
     },
     "numberOfAvailabilityZonesUsedByStorageServices": {
         "name": "Number of Availability Zones used by storage services",
         "calculation": "Number of unique availability zones used by the infrastructure on which storage services run.",
-        "calculationFormula": "| \\Set{ az | \\exists i (i \\in I \\land \\exists dm (dm \\in DM \\land dm.host = i \\land dm.deployed \\in SBS) \\land az \\in i.availability\\_zone) } |",
+        "calculationFormula": "| \\Set{ az | \\exists i \\in I (\\exists dm \\in DM (dm.host = i \\land dm.deployed \\in SBS) \\land az \\in i.availability\\_zone) } |",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
     },
     "rollingUpdateOption": {
         "name": "Rolling Update Option",
         "calculation": "Number of Infrastructure entities deploying components and supporting rolling update strategies / All Infrastructure entities deploying components",
-        "calculationFormula": "\\frac{ | \\Set{ i | i \\in I \\land \\exists dm (dm \\in DM \\land dm.host = i \\land dm.deployed \\in C) \\land (\"rolling\" \\in i.supported\\_update\\_strategies \\lor \"blue\\text{-}green\" \\in i.supported\\_update\\_strategies )}  |}{| \\Set{ i | i \\in I \\land \\exists dm (dm \\in DM \\land dm.host = i \\land dm.deployed \\in C) }|}",
+        "calculationFormula": "\\frac{ | \\Set{ i | i \\in I \\land \\exists dm \\in DM (dm.host = i \\land dm.deployed \\in C) \\land (\"rolling\" \\in i.supported\\_update\\_strategies \\lor \"blue\\text{-}green\" \\in i.supported\\_update\\_strategies )}  |}{| \\Set{ i | i \\in I \\land \\exists dm \\in DM (dm.host = i \\land dm.deployed \\in C) }|}",
         "sources": ["Straesser2023"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE],
     },
@@ -2515,21 +2515,21 @@ const measures = {
     "numberOfServicesWhichHaveIncomingLinks": {
         "name": "Number of Services which have incoming links",
         "calculation": "Total number of services which have at least one incoming link",
-        "calculationFormula": "|\\Set{ s | s \\in S \\land \\exists l (l \\in L \\land l.targetEndpoint \\in s.providedEndpoints) }|",
+        "calculationFormula": "|\\Set{ s | s \\in S \\land \\exists l \\in L (l.targetEndpoint \\in s.providedEndpoints) }|",
         "sources": ["Shim2008", "Hofmeister2008"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },
     "numberOfServicesWhichHaveOutgoingLinks": {
         "name": "Number of Services which have outgoing links",
         "calculation": "Total number of services which have at least one outgoing link",
-        "calculationFormula": "|\\Set{ s | s \\in S \\land \\exists l (l \\in L \\land l.sourceComponent = s) }|",
+        "calculationFormula": "|\\Set{ s | s \\in S \\land \\exists l \\in L (l.sourceComponent = s) }|",
         "sources": ["Shim2008", "Hofmeister2008"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },
     "numberOfServicesWhichHaveBothIncomingAndOutgoingLinks": {
         "name": "Number of Services which have both incoming and outgoing links",
         "calculation": "Total number of services which have at least one incoming link and at least one outgoing link",
-        "calculationFormula": "|\\Set{ s | s \\in S \\land \\exists l (l \\in L \\land l.sourceComponent = s) \\exists l (l \\in L \\land l.targetEndpoint \\in s.providedEndpoints) }|",
+        "calculationFormula": "|\\Set{ s | s \\in S \\land \\exists l \\in L (l.sourceComponent = s) \\exists l \\in L (l.targetEndpoint \\in s.providedEndpoints) }|",
         "sources": ["Shim2008", "Hofmeister2008"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },
@@ -2551,7 +2551,7 @@ const measures = {
     "serviceSize": {
         "name": "Size of a service",
         "calculation": "\"Number of Data Aggregates used in a service\" + \"Number of Components that are linked to a component\"",
-        "calculationFormula": "|c.RDA| + |\\Set{ c' | \\exists l (l \\in L \\land l.sourceComponent = c' \\land l.targetEndpoint \\in c.providedEndpoints) }|",
+        "calculationFormula": "|c.RDA| + |\\Set{ c' | \\exists l \\in L (l.sourceComponent = c' \\land l.targetEndpoint \\in c.providedEndpoints) }|",
         "sources": ["Asik2017"],
         "applicableEntities": [ENTITIES.COMPONENT],
     },
@@ -2579,7 +2579,7 @@ const measures = {
     "numberOfServiceConnectedToStorageBackingService": {
         "name": "Number of Services connected to a Storage Backing Service",
         "calculation": "Number of Services with a link to an Endpoint of a Storage Backing Service",
-        "calculationFormula": "|\\Set{s | s \\in S \\land \\exists l (l \\in L \\land l.sourceComponent = s \\land l.targetEndpoint \\in sbs.providedEndpoints \\land sbs \\in SBS) }|",
+        "calculationFormula": "|\\Set{s | s \\in S \\land \\exists l \\in L (l.sourceComponent = s \\land l.targetEndpoint \\in sbs.providedEndpoints \\land sbs \\in SBS) }|",
         "sources": ["Daniel2023"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },
@@ -2600,7 +2600,7 @@ const measures = {
     "numberOfServiceHostedOnOneInfrastructure": {
         "name": "Number of Services hosted on one infrastructure entity",
         "calculation": "Number of Service deployed on an infrastructure entity",
-        "calculationFormula": "|\\Set{ s | s \\in S \\land \\exists dm (dm \\in DM \\land dm.deployed = s \\land dm.host = i)}|",
+        "calculationFormula": "|\\Set{ s | s \\in S \\land \\exists dm \\in DM (dm.deployed = s \\land dm.host = i)}|",
         "sources": ["Daniel2023"],
         "applicableEntities": [ENTITIES.INFRASTRUCTURE],
     },
@@ -2649,7 +2649,7 @@ const measures = {
     "secretsExternalization": {
         "name": "Secrets Externalization",
         "calculation": "Secrets used in a component but stored in another / All secrets used in a component",
-        "calculationFormula": "\\frac{| \\Set{ bd | bd \\in BD \\land bd.kind = \"secret\" \\land \\exists (ci,bd) (ci \\in C \\cup I \\land (ci,bd) \\in ci.RBD \\land (ci,bd).usage\\_relation = \"usage\") \\land \\exists (ci',bd) (ci' \\in C \\cup I \\land (ci',bd) \\in ci'.RBD \\land (ci',bd).usage\\_relation = \"persistence\") } |}{ | \\Set{ bd | bd \\in BD \\land bd.kind = \"secret\" \\land \\exists (ci,bd) (ci \\in C \\cup I \\land (ci,bd) \\in ci.RBD)}|}",
+        "calculationFormula": "\\frac{| \\Set{ bd | bd \\in BD \\land bd.kind = \"secret\" \\land \\exists (ci,bd) \\in ci.RBD (ci \\in C \\cup I \\land (ci,bd).usage\\_relation = \"usage\") \\land \\exists (ci',bd) \\in ci'.RBD  (ci' \\in C \\cup I \\land (ci',bd).usage\\_relation = \"persistence\") } |}{ | \\Set{ bd | bd \\in BD \\land bd.kind = \"secret\" \\land \\exists (ci,bd) \\in ci.RBD (ci \\in C \\cup I)}|}",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE]
     },
@@ -2663,14 +2663,14 @@ const measures = {
     "suitablyReplicatedStatefulService": {
         "name": "Ratio of suitably replicated stateful services",
         "calculation": "Stateful Backing Services, Storage Backing Services, or Broker Backing Services that are replicated with a strategy other than \"none\" / All Stateful Backing Services, Storage Backing Services, or Broker Backing Services",
-        "calculationFormula": "\\frac{|\\Set{ bs | bs \\in BS \\cup SBS \\cup BBS \\land bs.stateless = false \\land \\exists dm (dm \\in DM \\land dm.deployed = bs \\land dm.replicas > 1) \\land bs.replication\\_strategy \\neq \"none\"}|}{|\\Set{ bs | bs \\in BS \\cup SBS \\cup BBS \\land bs.stateless = false \\land \\exists dm (dm \\in DM \\land dm.deployed = bs \\land dm.replicas > 1)}|}",
+        "calculationFormula": "\\frac{|\\Set{ bs | bs \\in BS \\cup SBS \\cup BBS \\land bs.stateless = false \\land \\exists dm \\in DM (dm.deployed = bs \\land dm.replicas > 1) \\land bs.replication\\_strategy \\neq \"none\"}|}{|\\Set{ bs | bs \\in BS \\cup SBS \\cup BBS \\land bs.stateless = false \\land \\exists dm \\in DM (dm.deployed = bs \\land dm.replicas > 1)}|}",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE]
     },
     "ratioOfUniqueAccountUsage": {
         "name": "Ratio of unique account usage",
         "calculation": "Number of unique accounts used by components and infrastructure / Number of components and infrastructure",
-        "calculationFormula": "\\frac{|\\Set{ account | \\exists ci (ci \\in C\\cup I \\land account \\in ci.identities)}|}{|C| + |I|} ",
+        "calculationFormula": "\\frac{|\\Set{ account | \\exists ci \\in C\\cup I (account \\in ci.identities)}|}{|C| + |I|} ",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE]
     },
@@ -2684,7 +2684,7 @@ const measures = {
     "secretsStoredInVault": {
         "name": "Secrets stored in vault",
         "calculation": "Backing Data of type secret stored in vault / All backing data of type secret",
-        "calculationFormula": "\\frac{|\\Set{bd | bd \\in BD \\land bd.kind = \"secret\" \\land \\exists vault (vault \\in BS \\land vault.kind = \"vault\" \\land \\exists (vault,bd) ((vault,bd) \\in vault.RBD \\land (vault,bd).usage\\_relation = \"persistence\")) \\land \\nexists (c,bd) ((c,bd) \\in c.RBD \\land (c \\notin BS \\lor c.kind \\neq \"vault\") \\land (c,bd).usage\\_relation = \"persistence\")) }|}{ |\\Set{bd | bd \\in BD \\land bd.kind = \"secret\"}| }",
+        "calculationFormula": "\\frac{|\\Set{bd | bd \\in BD \\land bd.kind = \"secret\" \\land \\exists vault \\in BS (vault.kind = \"vault\" \\land \\exists (vault,bd) \\in vault.RBD ((vault,bd).usage\\_relation = \"persistence\")) \\land \\nexists (c,bd) ((c,bd) \\in c.RBD \\land (c \\notin BS \\lor c.kind \\neq \"vault\") \\land (c,bd).usage\\_relation = \"persistence\")) }|}{ |\\Set{bd | bd \\in BD \\land bd.kind = \"secret\"}| }",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE]
     },
@@ -2712,7 +2712,7 @@ const measures = {
     "ratioOfEntitiesProvidingStandardizedArtifacts": {
         "name": "Ratio of entities providing standardized artifacts",
         "calculation": "Components and infrastructure entities having a standardized artifact / All components and infrastructure entities",
-        "calculationFormula": "\\frac{|\\Set{ci | ci \\in C \\cup I \\land \\exists a (a \\in ci.artifacts \\land a.based\\_on\\_standard = true)} |}{|C| + |I|}",
+        "calculationFormula": "\\frac{|\\Set{ci | ci \\in C \\cup I \\land \\exists a \\in ci.artifacts (a.based\\_on\\_standard = true)} |}{|C| + |I|}",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE]
     },
@@ -2747,7 +2747,7 @@ const measures = {
     "ratioOfInfrastructureWithIaCArtifact": {
         "name": "Ratio of infrastructure with IaC artifact",
         "calculation": "Infrastructure entities with an IaC artifact / All infrastructure entities",
-        "calculationFormula": "\\frac{ |\\Set{ i | i \\in I \\land \\exists a ( a \\in i.artifacts \\land isIaC(a)) }|  }{ |I| }",
+        "calculationFormula": "\\frac{ |\\Set{ i | i \\in I \\land \\exists a \\in i.artifacts (isIaC(a)) }|  }{ |I| }",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE]
     },
@@ -2782,189 +2782,189 @@ const measures = {
     "ratioOfDeploymentMappingsWithStatedResourceRequirements": {
         "name": "Ratio of Deployment Mappings with stated resource requirements",
         "calculation": "Deployment Mappings with stated resource requirements / All Deployment Mappings",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{|\\Set{dm | dm \\in DM \\land t.resource\\_requirements \\neq  \"unstated\"}|}{|DM|}",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE]
     },
     "deployedEntitiesAutoscaling": {
         "name": "Deployed Entities Autoscaling",
         "calculation": "Infrastructure that hosts Components and automatically scales them via the infrastructure they are deployed on / All infrastructure",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{|\\Set{i | i \\in I \\land \\exists dm \\in DM (dm.host = i \\land dm.deployed \\in C) \\land (i.deployed\\_entities\\_scaling = \"automated-built-in\" \\lor i.deployed\\_entities\\_scaling = \"automated-separate\")}|}{|\\Set{i | i \\in I \\land \\exists dm \\in DM (dm.host = i \\land dm.deployed \\in C)}|}",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE]
     },
     "infrastructureAutoscaling": {
         "name": "Infrastructure Autoscaling",
         "calculation": "Infrastructure entities that scale themselves automatically / All infrastructure entities",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{|\\Set{i | i \\in I \\land (i.self\\_scaling = \"automated-built-in\" \\lor i.self\\_scaling = \"automated-separate\")}|}{|I|}",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE]
     },
     "ratioOfAbstractedHardware": {
         "name": "Ratio of abstracted hardware",
         "calculation": "Infrastructure entities that are software-platform or cloud-service/ All infrastructure entities",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{|\\Set{i | i \\in I \\land (i.kind = \"software-platform\" \\lor i.kind = \"cloud-service\" )}|}{|I|}",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE]
     },
     "nonProviderSpecificInfrastructureArtifacts": {
         "name": "Non-provider-specific infrastructure artifacts",
         "calculation": "Infrastructure entities with all artifacts being non-provider-specific / All infrastructure entities",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{|\\Set{i | i \\in I \\land \\forall a \\in i.artifacts (a.provider\\_specific = false)}|}{|I|}",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE]
     },
     "nonProviderSpecificComponentArtifacts": {
         "name": "Non-provider-specific component artifacts",
         "calculation": "Component entities with all artifacts being non-provider-specific / All components",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{|\\Set{c | c \\in C \\land \\forall a \\in c.artifacts (a.provider\\_specific = false)}|}{|C|}",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT]
     },
     "configurationStoredInConfigService": {
         "name": "Configuration stored in config service",
         "calculation": "Backing Data of type config stored in config service / All backing data of type config",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{ |\\Set{ bd | bd \\in BD \\land bd.kind = \"config\" \\exists bs \\in BS (bs.providedFunctionality = \"configuration\") \\land \\exists (bs,bd) \\in bs.RBD ((bs,bd).usage\\_relation = \"persistence\") }|   }{ |\\Set{ bd | bd \\in BD \\land bd.kind = \"config\"}|  }",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE]
     },
     "ratioOfEndpointsCoveredByContract": {
         "name": "Ratio of endpoints covered by contract",
         "calculation": "Endpoints documented by contract / All endpoints",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{ |\\Set{ e | e \\in E \\land e.documentedBy \\neq \\empty \\land (e.documentedBy.type = \"Spring.CloudContract\" \\lor e.documentedBy.type = \"Pact.Contract\") } | }{|E|}",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE]
     },
     "standardizedDeployments": {
         "name": "Standardized Deployments",
         "calculation": "DeploymentMappings of components with a standardized deployment unit / All deployment mappings of components",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{ |\\Set{ dm | dm \\in DM \\land dm.deployed \\in C \\land dm.deployment\\_unit.based\\_on\\_standard = true} |}{|\\Set{ dm | dm \\in DM \\land dm.deployed \\in C}|}",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE]
     },
     "selfContainedDeployments": {
         "name": "Self-contained Deployments",
         "calculation": "DeploymentMappings of components with a self-contained deployment unit / All deployment mappings of components",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{ |\\Set{ dm | dm \\in DM \\land dm.deployed \\in C \\land dm.deployment\\_unit.self\\_contained = true} |}{|\\Set{ dm | dm \\in DM \\land dm.deployed \\in C}|}",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE]
     },
     "replacingDeployments": {
         "name": "Replacing Deployments",
         "calculation": "DeploymentMappings that disallow in-place updates / All deployment mappings",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{ |\\Set{ dm | dm \\in DM \\land dm.update\\_strategy \\neq \"in-place\"} |}{|DM|}",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE]
     },
     "ratioOfAutomaticallyMaintainedInfrastructure": {
         "name": "Ratio of automatically maintained infrastructure",
         "calculation": "Infrastructure maintained in a non-manual way / All infrastructure entities",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{|\\Set{i | i \\in I \\land (i.maintenance = \"automated\" \\lor i.maintenance = \"transparent\")}|}{|I|}",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE]
     },
     "ratioOfLinksWithTimeout": {
         "name": "Ratio of links with timeout",
         "calculation": "Links with a specified timeout / All links",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{ |\\Set{l | l \\in L \\land l.timeout > 0}| }{|L|}",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE]
     },
     "deploymentsWithRestart": {
         "name": "Deployments with restart",
         "calculation": "DeploymentMappings with configured restart / All deployment mappings",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{ |\\Set{ dm | dm \\in DM \\land (dm.automated\\_restart\\_policy = \"onProcessFailure\" \\lor dm.automated\\_restart\\_policy = \"onHealthFailure\")} |}{|DM|}",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE]
     },
     "ratioOfDocumentedEndpoints": {
         "name": "Ratio of documented endpoints",
         "calculation": "Endpoints documented / All endpoints",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{ |\\Set{ e | e \\in E \\land e.documentedBy \\neq \\empty} | }{|E|}",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE]
     },
     "endpointAccessConsistency": {
         "name": "Consistency of supported authentication methods of endpoints",
         "calculation": "Similarity of supported authentication methods / All endpoints",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{\\displaystyle\\sum_{i=1}^{|E \\setminus EE|}\\sum_{j=i+1}^{|E \\setminus EE|} \\begin{cases} 0 &\\text{if } | e_i.supported\\_authentication\\_methods \\cup e_j.supported\\_authentication\\_methods | = 0 \\\\ \\frac{| e_i.supported\\_authentication\\_methods \\cap e_j.supported\\_authentication\\_methods |}{| e_i.supported\\_authentication\\_methods \\cup e_j.supported\\_authentication\\_methods |} &\\text{else } \\end{cases}}{\\frac{|E \\setminus EE | * (|E \\setminus EE | - 1)}{2}}",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE]
     },
     "externalEndpointAccessConsistency": {
         "name": "Consistency of supported authentication methods of external endpoints",
         "calculation": "Similarity of supported authentication methods / All external endpoints",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{\\displaystyle\\sum_{i=1}^{|EE|}\\sum_{j=i+1}^{|EE|} \\begin{cases} 0 &\\text{if } | ee_i.supported\\_authentication\\_methods \\cup ee_j.supported\\_authentication\\_methods | = 0 \\\\ \\frac{| ee_i.supported\\_authentication\\_methods \\cap ee_j.supported\\_authentication\\_methods |}{| ee_i.supported\\_authentication\\_methods \\cup ee_j.supported\\_authentication\\_methods |} &\\text{else } \\end{cases}}{\\frac{|EE | * (|EE | - 1)}{2}}",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT]
     },
     "readWriteSeparationForDataAggregates": {
         "name": "Read Write Separation for Data Aggregates",
         "calculation": "Average(Exclusive Read or Write Access to Data Aggregate by Endpoint(s)) over all Data Aggregates",
-        "calculationFormula": "",
+        "calculationFormula": "", //TODO
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT]
     },
     "degreeOfSeparationByGateways": {
         "name": "Degree of separation by gateways",
         "calculation": "1 / (Number of services proxied by an API gateway / Number of API gateways)",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{1}{\\frac{ |\\Set{s | s \\in S \\land s.externalIngressProxiedBy = g \\land g \\in PBS \\land g.kind = \"API Gateway\"}|}{|\\Set{g | g \\in PBS \\land \\land g.kind = \"API Gateway\"}| }}",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE]
     },
     "dataAggregateSpread": {
         "name": "Data Aggregate Spread",
         "calculation": "Average(Number of services using a data aggregate / Number of Services) for all data aggregates",
-        "calculationFormula": "",
+        "calculationFormula": "", //TODO
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM]
     },
     "requestTraceSimilarityBasedOnIncludedComponents": {
         "name": "Request Trace similarity based on included components",
         "calculation": "Average(Number of services using a data aggregate / Number of Services) for all data aggregates",
-        "calculationFormula": "",
+        "calculationFormula": "", //TODO
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM]
     },
     "ratioOfBrokerBackendSharing": {
         "name": "Ratio of Broker Backend Sharing",
         "calculation": "(sum-of(Number of Services sharing the same Broker Backing Service) for all Broker Backing Services) / (Total Number of Services * Total Number of Broker Backing Service)",
-        "calculationFormula": "",
+        "calculationFormula": "", //TODO
         "sources": ["new"],
         "applicableEntities": [ENTITIES.COMPONENT],
     },
     "averageBrokerBackendSharing": {
         "name": "Average Broker Backend Sharing",
         "calculation": "Average(Number of services using a broker service / Number of services) for all broker services",
-        "calculationFormula": "",
+        "calculationFormula": "", //TODO
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },
     "averageWeightedBrokerBackendSharing": {
         "name": "Average Weighted Broker Backend Sharing",
         "calculation": "Average(Number of services (transitively) using a broker service weighted by their distance / Number of services) for all broker services",
-        "calculationFormula": "",
+        "calculationFormula": "", //TODO
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },
     "averageStorageBackendSharing": {
         "name": "Average Storage Backend Sharing",
         "calculation": "Average(Number of services using a storage service / Number of services) for all storage services",
-        "calculationFormula": "",
+        "calculationFormula": "", //TODO
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },
     "averageWeightedStorageBackendSharing": {
         "name": "Average Weighted Storage Backend Sharing",
         "calculation": "Average(Number of services (transitively) using a storage service weighted by their distance / Number of services) for all storage services",
-        "calculationFormula": "",
+        "calculationFormula": "", //TODO
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },
     "rollingUpdates": {
         "name": "Rolling updates",
         "calculation": "Deployment Mappings with rolling updates / All Deployment Mappings",
-        "calculationFormula": "",
+        "calculationFormula": "\\frac{ |\\Set{ dm | dm \\in DM \\land (dm.update\\_strategy = \"rolling\" \\lor dm.update\\_strategy = \"blue-green\")} |}{|DM|}",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
     }
