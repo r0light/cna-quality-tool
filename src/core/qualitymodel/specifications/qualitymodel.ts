@@ -1777,7 +1777,7 @@ const measures = {
     "degreeToWhichComponentsAreLinkedToStatefulComponents": {
         "name": "Degree to which components are linked to stateful components",
         "calculation": "(sum-of(Ratio of stateful Components based on all Components a Component is linked to) for all Components) / Total Number of Components)",
-        "calculationFormula": "", //TODO
+        "calculationFormula": "\\frac{ \\displaystyle\\sum_{i=1}^{|C|} \\frac{ |\\Set{ c' | c' \\in C \\land \\exists l \\in L (l.sourceComponent = c_i \\land l.targetEndpoint \\in c'.providedEndpoints) \\land c'.stateless = false  }| }{ |\\Set{ c' | c' \\in C \\land \\exists l \\in L (l.sourceComponent = c_i \\land l.targetEndpoint \\in c'.providedEndpoints)}| } }{ |C|0 }",
         "sources": ["Qian2006"],
         "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
     },
@@ -1924,7 +1924,7 @@ const measures = {
     "couplingDegreeBasedOnPotentialCoupling": {
         "name": "Coupling degree based on potential coupling",
         "calculation": "(Sum-of(Maximum path lengths between components when no links exist) - Sum-of(path lengths between components based on actually existing links)) / Sum-of(Maximum path lengths between components when no links exist) - Sum-of(Minimum path lengths when links exist between all components)",
-        "calculationFormula": "", //TODO
+        "calculationFormula": "\\frac{ (|C| * (|C| - 1) * (|C| - 1)) - \\displaystyle\\sum_{i=1}^{|C|}\\sum_{j=1}^{|C|} |(l_1,...,l_n)| | (l_1.sourceComponent = c_i \\land l_n.targetEndpoint \\in c_j.providedEndpoints) \\lor (l_1.sourceComponent = c_j \\land l_n.targetEndpoint \\in c_i.providedEndpoints) \\land \\min(n) }{(|C| * (|C| - 1) * (|C| - 1)) - (|C| * (|C| - 1))}",
         "sources": ["PhamThiQuynh2009"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },
@@ -1938,28 +1938,27 @@ const measures = {
     "interactionDensityBasedOnLinks": {
         "name": "Interaction density based on links",
         "calculation": "Number of links in a system / Number of potential links in a system",
-        "calculationFormula": "\\frac{|L|}{ }", //TODO
+        "calculationFormula": "\\frac{|L|}{ |C| * (|C| - 1)}",
         "sources": ["Tiwari2014", "Karhikeyan2012"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },
     "indirectInteractionDensity": {
         "name": "Indirect Interaction density of a system",
         "calculation": "Number of other components to which an indirect dependency exist / Number of components to which an indirect dependency could exist (because they are not direct dependencies) ",
-        "calculationFormula": "\\frac{|C|}{|C| - 1}",
+        "calculationFormula": "\\frac{ \\displaystyle\\sum_{i=1}^{|C| \\setminus c} \\begin{cases} 0 &\\text{if } \\exists l \\in L (l.sourceComponent = c \\land l.targetEndpoint \\in c_i.providedEndpoints) \\\\ 1 &\\text{if } \\exists (l_1,...,l_n) \\sub L (l_1.sourceComponent = c \\land l_n.targetEndpoint \\in c_i.providedEndpoints \\land n > 1) \\end{cases} }{ |\\Set{ c' | \\exists (l_1,...,l_n) \\sub L (l_1.sourceComponent = c \\land l_n.targetEndpoint \\in c'.providedEndpoints) }|}",
         "sources": ["Karhikeyan2012"],
         "applicableEntities": [ENTITIES.COMPONENT],
     },
     "serviceCouplingBasedOnEndpointEntropy": {
         "name": "Service Coupling based on Endpoint Entropy",
         "calculation": "(sum-of(-log(1 /(Number of links connected to an endpoint + 1))) for all endpoints of a service) / Number of endpoints of a component",
-        "calculationFormula": "", //TODO
-        "sources": ["Wang2009"],
+        "calculationFormula": "\\frac{ \\displaystyle\\sum_{i=1}^{|c.providedEndpoints|} - \\log (\\frac{1}{ |\\Set{ l | l \\in L \\land l.targetEndpoint = e_i}| + 1}) }{ |c.providedEndpoints|  }",        "sources": ["Wang2009"],
         "applicableEntities": [ENTITIES.COMPONENT],
     },
     "systemCouplingBasedOnEndpointEntropy": {
         "name": "System Coupling based on Endpoint Entropy",
         "calculation": "sum-of(\"Service Coupling based on Endpoint Entropy\" for all components",
-        "calculationFormula": "", //TODO
+        "calculationFormula": "\\displaystyle\\sum_{j=1}^{|C|}(\\frac{ \\displaystyle\\sum_{i=1}^{|c.providedEndpoints|} - \\log (\\frac{1}{ |\\Set{ l | l \\in L \\land l.targetEndpoint = e_i}| + 1}) }{ |c.providedEndpoints|  })",  
         "sources": ["Wang2009"],
         "applicableEntities": [ENTITIES.SYSTEM]
     },
@@ -2015,7 +2014,7 @@ const measures = {
     "aggregateSystemMetricToMeasureServiceCoupling": {
         "name": "Aggregate System metric to measure service coupling",
         "calculation": "(sum-of(\"Number of Components a component is linked to\" for all Service Consumers)) / (Number of services) * (Number of services - 1)",
-        "calculationFormula": "", //TODO
+        "calculationFormula": "\\frac{ \\sum_{i=1}^{|S|} | \\{ s' | s' \\in S \\land \\exists l \\in L (l.sourceComponent = s_i \\land l.targetEndpoint \\in s'.E) \\} |  }{|S| * (|S| - 1) }",
         "sources": ["Hofmeister2008", "Gamage2021"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },
@@ -2050,7 +2049,7 @@ const measures = {
     "directServiceSharing": {
         "name": "Direct Service Sharing",
         "calculation": "((Number of Services with at least two incoming links from different services / Total number of services) + (Number of Endpoints with at least two incoming links from different services / Total number of links)) / 2",
-        "calculationFormula": "", //TODO
+        "calculationFormula": "\\frac{\\frac{ |\\Set{ s | s \\in S \\land \\exists (l_1,l_2) \\sub L (l_1.sourceComponent = s' \\land l_1.targetEndpoint \\in s.providedEndpoints \\land l_2.sourceComponent = s'' \\land l_2.targetEndpoint \\in s.providedEndpoints) }|  }{|S|} + \\frac{ |\\Set{e | e \\in E \\land \\exists (l_1,l_2) \\sub L (l_1.sourceComponent = s' \\land l_1.targetEndpoint \\in s.providedEndpoints \\land l_2.sourceComponent = s'' \\land l_2.targetEndpoint \\in s.providedEndpoints)}| }{|L|}}{2}  ", 
         "sources": ["Ntentos2020a"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },
