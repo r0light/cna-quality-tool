@@ -1945,7 +1945,7 @@ const measures = {
     "indirectInteractionDensity": {
         "name": "Indirect Interaction density of a system",
         "calculation": "Number of other components to which an indirect dependency exist / Number of components to which an indirect dependency could exist (because they are not direct dependencies) ",
-        "calculationFormula": "\\frac{ \\displaystyle\\sum_{i=1}^{|C| \\setminus c} \\begin{cases} 0 &\\text{if } \\exists l \\in L (l.sourceComponent = c \\land l.targetEndpoint \\in c_i.providedEndpoints) \\\\ 1 &\\text{if } \\exists (l_1,...,l_n) \\sub L (l_1.sourceComponent = c \\land l_n.targetEndpoint \\in c_i.providedEndpoints \\land n > 1) \\end{cases} }{ |\\Set{ c' | \\exists (l_1,...,l_n) \\sub L (l_1.sourceComponent = c \\land l_n.targetEndpoint \\in c'.providedEndpoints) }|}",
+        "calculationFormula": "\\frac{ \\displaystyle\\sum_{i=1}^{|C \\setminus c|} \\begin{cases} 0 &\\text{if } \\exists l \\in L (l.sourceComponent = c \\land l.targetEndpoint \\in c_i.providedEndpoints) \\\\ 1 &\\text{if } \\exists (l_1,...,l_n) \\sub L (l_1.sourceComponent = c \\land l_n.targetEndpoint \\in c_i.providedEndpoints \\land n > 1) \\end{cases} }{ |\\Set{ c' | \\exists (l_1,...,l_n) \\sub L (l_1.sourceComponent = c \\land l_n.targetEndpoint \\in c'.providedEndpoints) }|}",
         "sources": ["Karhikeyan2012"],
         "applicableEntities": [ENTITIES.COMPONENT],
     },
@@ -2056,7 +2056,7 @@ const measures = {
     "transitivelySharedServices": {
         "name": "Transitively Shared Services",
         "calculation": "((Number of Services which are transitively reachable by another service / Total number of services) + (Number of Endpoints which are transitively reachable by another service / Total number of links)) / 2",
-        "calculationFormula": "", //TODO
+        "calculationFormula": "\\frac{ \\frac{ |\\Set{ c | c \\in C \\land \\exists (l_1,l_2) \\sub L (l_1.targetEndpoint \\in l_2.sourceComponent.providedEndpoints \\land l_2.targetEndpoint \\in c.providedEndpoints \\land l_1.sourceComponent \\neq c) }|  }{|C|}  + \\frac{ |\\Set{ e | e \\in E \\land \\exists (l_1,l_2) \\sub L (l_1.targetEndpoint \\in l_2.sourceComponent.providedEndpoints \\land l_2.targetEndpoint = e \\land e \\notin l_1.sourceComponent.providedEndpoints) }| }{|L|}   }{2}",
         "sources": ["Ntentos2020a"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },
@@ -2091,35 +2091,35 @@ const measures = {
     "couplingOfServicesBasedOnUsedDataAggregates": {
         "name": "Coupling of services based on used Data Aggregates",
         "calculation": "Data Aggregates used by both two services / All Data Aggregates used by two services",
-        "calculationFormula": "", // TODO
+        "calculationFormula": "\\frac{ |\\Set{ da | da \\in DA \\land \\exists (c_x, da) \\in c_x.RDA } \\cap \\Set{ da | da \\in DA \\land \\exists (c_y, da) \\in c_y.RDA }|  }{|\\Set{ da | da \\in DA \\land \\exists (c_x, da) \\in c_x.RDA } \\cup \\Set{ da | da \\in DA \\land \\exists (c_y, da) \\in c_y.RDA }|}",
         "sources": ["Peng2022"],
         "applicableEntities": [ENTITIES.COMPONENT], // TODO actually Component Pair
     },
     "couplingOfServicesBasedServicesWhichCallThem": {
         "name": "Coupling of services based services which call them",
         "calculation": "Services which call both two services / All services calling either of the two services",
-        "calculationFormula": "", // TODO
+        "calculationFormula": "\\frac{ |\\Set{ c | c \\in C \\land \\exists l \\in L (l.sourceComponent = c \\land l.targetEndpoint \\in c_x.providedEndpoints) } \\cap \\Set{ c | c \\in C \\land \\exists l \\in L (l.sourceComponent = c \\land l.targetEndpoint \\in c_y.providedEndpoints)}|  }{|\\Set{ c | c \\in C \\land \\exists l \\in L (l.sourceComponent = c \\land l.targetEndpoint \\in c_x.providedEndpoints) } \\cup \\Set{ c | c \\in C \\land \\exists l \\in L (l.sourceComponent = c \\land l.targetEndpoint \\in c_y.providedEndpoints)}| }",
         "sources": ["Peng2022"],
         "applicableEntities": [ENTITIES.COMPONENT], // TODO actually Component Pair
     },
     "couplingOfServicesBasedServicesWhichAreCalledByThem": {
         "name": "Coupling of services based services which are called by them",
         "calculation": "Services which are called by both two services / All services called by either of the two services",
-        "calculationFormula": "", // TODO
+        "calculationFormula": "\\frac{ |\\Set{ c | c \\in C \\land \\exists l \\in L (l.sourceComponent = c_x \\land l.targetEndpoint \\in c.providedEndpoints) } \\cap \\Set{ c | c \\in C \\land \\exists l \\in L (l.sourceComponent = c_y \\land l.targetEndpoint \\in c.providedEndpoints)}|  }{|\\Set{ c | c \\in C \\land \\exists l \\in L (l.sourceComponent = c_x \\land l.targetEndpoint \\in c.providedEndpoints) } \\cup \\Set{ c | c \\in C \\land \\exists l \\in L (l.sourceComponent = c_y \\land l.targetEndpoint \\in c.providedEndpoints)}| }",
         "sources": ["Peng2022"],
         "applicableEntities": [ENTITIES.COMPONENT], // TODO actually Component Pair
     },
     "couplingOfServicesBasedOnAmountOfRequestTracesThatIncludeASpecificLink": {
         "name": "Coupling of services based on amount of request traces that include a specific link",
         "calculation": "Maximum of probabilities that one service is called by the other in all requests traces in which the first service is included.",
-        "calculationFormula": "", // TODO
+        "calculationFormula": "\\max(\\frac{ |\\Set{ rt | rt \\in RT \\land \\exists l \\in rt.involvedLinks (l.sourceComponent = c_x \\land l.targetEndpoint \\in c_y.providedEndpoints)}|  }{ |\\Set{ rt | rt \\in RT \\land c_y \\in rt.nodes}| }, \\frac{|\\Set{ rt | rt \\in RT \\land \\exists l \\in rt.involvedLinks (l.sourceComponent = c_y \\land l.targetEndpoint \\in c_x.providedEndpoints)}|   }{ |\\Set{ rt | rt \\in RT \\land c_x \\in rt.nodes}| }",
         "sources": ["Peng2022"],
         "applicableEntities": [ENTITIES.COMPONENT], // TODO actually Component Pair
     },
     "couplingOfServicesBasedTimesThatTheyOccurInTheSameRequestTrace": {
         "name": "Coupling of services based times that they occur in the same request trace",
         "calculation": "Number of request traces which contain the same two services / Number of request traces",
-        "calculationFormula": "", // TODO
+        "calculationFormula": "\\frac{|\\Set{rt | rt \\in RT \\land c_x,c_y \\in rt.nodes}| }{|RT|}",
         "sources": ["Peng2022"],
         "applicableEntities": [ENTITIES.COMPONENT], // TODO actually Component Pair
     },
@@ -2153,8 +2153,8 @@ const measures = {
     },
     "extentOfAggregationComponents": {
         "name": "Extent of Aggregation components",
-        "calculation": "(sum-of((sum-of(Incoming Links) of all components with in- and outgoing links) / (sum-of(Outgoing Links) for all components with only incoming Links)) for all components that have only outgoing links )",
-        "calculationFormula": "", //TODO
+        "calculation": "",
+        "calculationFormula": "",
         "sources": ["Hofmeister2008"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },
@@ -2168,7 +2168,7 @@ const measures = {
     "densityOfAggregation": {
         "name": "Density of Aggregation",
         "calculation": "sum-of(ln(number of outoging links / total number of outgoing and incoming links * 2)) for all aggregators that means services which have incoming and outgoing links",
-        "calculationFormula": "", //TODO
+        "calculationFormula": "\\displaystyle\\sum_{i=1}^{|\\Set{c | c \\in C \\land \\exists l_1,l_2 \\in L (l_1.sourceComponent = c \\land l_2.targetEndpoint \\in c.providedEndpoints)}|} \\ln( \\frac{ |\\Set{l | l \\in L \\land l.sourceComponent = c_i } |  }{|\\Set{l | l \\in L \\land (l.sourceComponent = c_i \\lor l.targetEndpoint \\in c_i.providedEndpoints) } | * 2}   ) ",
         "sources": ["Hofmeister2008"],
         "applicableEntities": [ENTITIES.SYSTEM]
     },
@@ -2268,7 +2268,7 @@ const measures = {
     "ratioOfStorageBackendSharing": {
         "name": "Ratio of Storage Backend Sharing",
         "calculation": "(sum-of(Number of Services sharing the same Storage Backing Service) for all Storage Backing Services) / (Total Number of Services * Total Number of Storage Backing Service)",
-        "calculationFormula": "", // TODO
+        "calculationFormula": "\\frac{\\displaystyle\\sum_{i=1}^{|SBS|} |\\Set{ s' | s' \\in S \\land \\exists l_1,l_2 \\sub L (l_1.sourceComponent = s \\land l_2.sourceComponent = s' \\land l_1.targetEndpoint \\in sbs_i.providedEndpoints \\land l_2.targetEndpoint \\in sbs_i.providedEndpoints) }|  }{|S| * |SBS|}", 
         "sources": ["Karhikeyan2012"],
         "applicableEntities": [ENTITIES.COMPONENT],
     },
@@ -2689,8 +2689,8 @@ const measures = {
     },
     "accessRestrictedToCallers": {
         "name": "Access restricted to callers",
-        "calculation": "Average-of(Accounts allowed to access Endpoint / Accounts accessing Endpoint) over all Endpoints",
-        "calculationFormula": "", //TODO
+        "calculation": "Average-of(1 - (allowed accounts which do not call the endpoint / allowed accounts)) over all Endpoints",
+        "calculationFormula": "\\frac{\\displaystyle\\sum_{i=1}^{|E|} 1 - \\frac{e_i.allow\\_acces\\_to \\setminus \\Set{acc | acc \\in e_i.allow\\_acces\\_to \\land \\nexists l \\in L (acc \\in l.sourceComponent.identities \\land l.targetEndpoint = e_i)}}{|e_i.allow\\_acces\\_to|}  }{|E|}", 
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE]
     },
@@ -2753,7 +2753,7 @@ const measures = {
     "namespaceSeparation": {
         "name": "Namespace Separation",
         "calculation": "1 - (Average sharing of namespaces)",
-        "calculationFormula": "", //TODO
+        "calculationFormula": "\\frac{ \\displaystyle\\sum_{i=1}^{|C|} 1 - \\frac{\\displaystyle\\sum_{j=1}^{|C \\setminus c_i|} \\begin{cases} 1 &\\text{if } c_i.namespace = c_j.namespace \\\\ 0 &\\text{else } \\end{cases} }{|C \\setminus c_i|} }{|C|}",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT]
     },
@@ -2900,7 +2900,7 @@ const measures = {
     "readWriteSeparationForDataAggregates": {
         "name": "Read Write Separation for Data Aggregates",
         "calculation": "Average(Exclusive Read or Write Access to Data Aggregate by Endpoint(s)) over all Data Aggregates",
-        "calculationFormula": "", //TODO
+        "calculationFormula": "\\frac{ \\displaystyle\\sum_{i=1}^{|DA|} \\frac{\\sum_{j=1}^{|C|} \\begin{cases} 1 &\\text{if } \\exists e_1 \\in c_j.providedEndpoints (\\exists (e_1,da_i) \\in e_1.RDA) \\land e_1.kind = \"query\") \\land  \\nexists e_2 \\in c_j.providedEndpoints (\\exists (e_2,da_i) \\in e_2.RDA) \\land e_2.kind = \"command\")  \\\\ 1 &\\text{if } \\exists e_1 \\in c_j.providedEndpoints (\\exists (e_1,da_i) \\in e_1.RDA) \\land e_1.kind = \"command\") \\land  \\nexists e_2 \\in c_j.providedEndpoints (\\exists (e_2,da_i) \\in e_2.RDA) \\land e_2.kind = \"query\") \\\\ 0 &\\text{if } \\exists e_1 \\in c_j.providedEndpoints (\\exists (e_1,da_i) \\in e_1.RDA) \\land e_1.kind = \"command\") \\land  \\exists e_2 \\in c_j.providedEndpoints (\\exists (e_2,da_i) \\in e_2.RDA) \\land e_2.kind = \"query\")  \\end{cases}}{|C|}  }{|DA|}",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT]
     },
@@ -2914,49 +2914,49 @@ const measures = {
     "dataAggregateSpread": {
         "name": "Data Aggregate Spread",
         "calculation": "Average(Number of services using a data aggregate / Number of Services) for all data aggregates",
-        "calculationFormula": "", //TODO
+        "calculationFormula": "\\frac{ \\displaystyle\\sum_{i=1}^{|DA|} \\frac{\\sum_{j=1}^{|S|} \\begin{cases} 1 &\\text{if } \\exists (c_j,da_i) \\in c_j.RDA \\\\ 0 &\\text{else } \\end{cases} }{|S|} }{|DA|}",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM]
     },
     "requestTraceSimilarityBasedOnIncludedComponents": {
         "name": "Request Trace similarity based on included components",
-        "calculation": "Average(Number of services using a data aggregate / Number of Services) for all data aggregates",
-        "calculationFormula": "", //TODO
+        "calculation": "Average(Request trace similarity based on included components) for all request traces",
+        "calculationFormula": "\\frac{ \\displaystyle\\sum_{i=1}^{|RT|} \\sum_{j=i+1}^{|RT|}  \\frac{|rt_i.nodes \\cap rt_j.nodes|}{|rt_i.nodes \\cup rt_j.nodes|} }{|RT| * (|RT| - 1)}",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM]
     },
     "ratioOfBrokerBackendSharing": {
         "name": "Ratio of Broker Backend Sharing",
         "calculation": "(sum-of(Number of Services sharing the same Broker Backing Service) for all Broker Backing Services) / (Total Number of Services * Total Number of Broker Backing Service)",
-        "calculationFormula": "", //TODO
+        "calculationFormula": "\\frac{\\displaystyle\\sum_{i=1}^{|BBS|} |\\Set{ s' | s' \\in S \\land \\exists l_1,l_2 \\sub L (l_1.sourceComponent = s \\land l_2.sourceComponent = s' \\land l_1.targetEndpoint \\in bbs_i.providedEndpoints \\land l_2.targetEndpoint \\in bbs_i.providedEndpoints) }|  }{|S| * |BBS|}", 
         "sources": ["new"],
         "applicableEntities": [ENTITIES.COMPONENT],
     },
     "averageBrokerBackendSharing": {
         "name": "Average Broker Backend Sharing",
         "calculation": "Average(Number of services using a broker service / Number of services) for all broker services",
-        "calculationFormula": "", //TODO
+        "calculationFormula": "\\frac{ \\displaystyle\\sum_{i=1}^{|BBS|} \\frac{\\displaystyle\\sum_{j=1}^{|S|} \\begin{cases} 1 &\\text{if } \\exists l \\in L (l.sourceComponent = s_j \\land l.targetEndpoint \\in bbs_i.providedEndpoints) \\\\ 0 &\\text{else } \\end{cases}}{|S|} }{|BBS|}",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },
     "averageWeightedBrokerBackendSharing": {
         "name": "Average Weighted Broker Backend Sharing",
         "calculation": "Average(Number of services (transitively) using a broker service weighted by their distance / Number of services) for all broker services",
-        "calculationFormula": "", //TODO
+        "calculationFormula": "\\frac{ \\displaystyle\\sum_{i=1}^{|BBS|} \\frac{\\displaystyle\\sum_{j=1}^{|S|} \\begin{cases} 1/n &\\text{if } \\exists (l_1,...,l_n) \\sub L (l_1.sourceComponent = s_j \\land l_n.targetEndpoint \\in bbs_i.providedEndpoints) \\\\ 0 &\\text{else } \\end{cases}}{|S|} }{|BBS|}",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },
     "averageStorageBackendSharing": {
         "name": "Average Storage Backend Sharing",
         "calculation": "Average(Number of services using a storage service / Number of services) for all storage services",
-        "calculationFormula": "", //TODO
+        "calculationFormula": "\\frac{ \\displaystyle\\sum_{i=1}^{|SBS|} \\frac{\\displaystyle\\sum_{j=1}^{|S|} \\begin{cases} 1 &\\text{if } \\exists l \\in L (l.sourceComponent = s_j \\land l.targetEndpoint \\in sbs_i.providedEndpoints) \\\\ 0 &\\text{else } \\end{cases}}{|S|} }{|SBS|}",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },
     "averageWeightedStorageBackendSharing": {
         "name": "Average Weighted Storage Backend Sharing",
         "calculation": "Average(Number of services (transitively) using a storage service weighted by their distance / Number of services) for all storage services",
-        "calculationFormula": "", //TODO
+        "calculationFormula": "\\frac{ \\displaystyle\\sum_{i=1}^{|SBS|} \\frac{\\displaystyle\\sum_{j=1}^{|S|} \\begin{cases} 1/n &\\text{if } \\exists (l_1,...,l_n) \\sub L (l_1.sourceComponent = s_j \\land l_n.targetEndpoint \\in sbs_i.providedEndpoints) \\\\ 0 &\\text{else } \\end{cases}}{|S|} }{|SBS|}",
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM],
     },

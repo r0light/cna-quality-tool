@@ -108,11 +108,12 @@ export const entities: {[key in ENTITIES]: EntitySpec}  = {
         "description": "A communication endpoint, for example a REST endpoint, message producer/listener.",
         "relation": {"type": "part-of", "target": ENTITIES.COMPONENT},
         "symbol": "E",
-        "formal": `\tE := (id,name,props,RDA,documentedBy)
+        "formal": `\tE := (id,name,props,RDA,documentedBy,allow_access_to)
         props<sub>E</sub> := {${getEndpointProperties().map(property => property.getKey).join(",")}}
         RDA ⊆ E ⨯ DA
         props<sub>RDA</sub> := {${getDataAggregateRelationshipProperties().map(property => property.getKey).join(",")}}
-        documentedBy ⊆ A`
+        documentedBy ⊆ A
+        allow_acces_to ⊆ accounts `
     },
     "externalEndpoint": {
         "name": "External Endpoint",
