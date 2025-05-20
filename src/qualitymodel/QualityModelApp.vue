@@ -62,7 +62,11 @@
                                                 </span>
                                                 <span> )</span>
                                             </summary>
-                                            <span v-if="measure.getCalculationFormula.length > 0" class="indented equationWrapper">Calculation: <span class="equation" v-html="katex.renderToString(measure.getCalculationFormula)"></span></span>
+                                            <span v-if="measure.getCalculationFormula.length > 0" class="indented equationWrapper">Calculation: <span class="equation" v-html="katex.renderToString(measure.getCalculationFormula)"></span>
+                                                <span v-if="measure.getHelperFunctions.length > 0">
+                                                  <span v-for="helper of measure.getHelperFunctions"><span class="equation" v-html="katex.renderToString(helper)"></span></span>
+                                                </span>
+                                            </span>
                                             <span v-else class="indented">Calculation: <span> {{ measure.getCalculationDescription }}</span></span>
                                         </details>
                                     </li>
@@ -86,7 +90,11 @@
                                                 </span>
                                                 <span> )</span>
                                             </summary>
-                                            <span v-if="measure.getCalculationFormula.length > 0" class="indented equationWrapper">Calculation: <span class="equation" v-html="katex.renderToString(measure.getCalculationFormula)"></span></span>
+                                            <span v-if="measure.getCalculationFormula.length > 0" class="indented equationWrapper">Calculation: <span class="equation" v-html="katex.renderToString(measure.getCalculationFormula)"></span>
+                                            <span v-if="measure.getHelperFunctions.length > 0">
+                                                  <span v-for="helper of measure.getHelperFunctions"><span class="equation" v-html="katex.renderToString(helper)"></span></span>
+                                                </span>
+                                            </span>
                                             <span v-else class="indented">Calculation: <span> {{ measure.getCalculationDescription }}</span></span>
                                         </details>
                                     </li>

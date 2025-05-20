@@ -53,7 +53,7 @@ function getQualityModel(): QualityModelInstance {
     for (const [measureKey, measure] of Object.entries(specifiedQualityModel.measures)) {
         for (const entityKey of measure.applicableEntities) {
 
-            let newMeasure = new Measure(measureKey as MeasureKey, measure.name, measure.calculation, measure.calculationFormula);
+            let newMeasure = new Measure(measureKey as MeasureKey, measure.name, measure.calculation, measure.calculationFormula, measure.helperFunctions);
             measure.sources.forEach(sourceKey => {
                 let url = literature[sourceKey] ? literature[sourceKey].url : "";
                 newMeasure.addSource(new LiteratureSource(sourceKey, "", url));

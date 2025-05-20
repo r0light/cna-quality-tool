@@ -8,8 +8,12 @@ import { EntityProperty, SelectEntityProperty } from '../common/entityProperty.j
 import { ENTITIES } from './specifications/entities.js';
 import { getArtifactTypeProperties } from '../common/artifact.js';
 import { Measure } from './quamoco/Measure.js';
+import { MeasureKey, ProductFactorKey, qualityModel, QualityModelSpec } from './specifications/qualitymodel.js';
+import { QualityAspect } from './quamoco/QualityAspect.js';
+import { ProductFactor } from './quamoco/ProductFactor.js';
 
-const qualityModel = getQualityModel();
+const specifiedQualityModel = qualityModel as QualityModelSpec;
+const qualityModelInstance = getQualityModel();
 
 let frameOutput = "";
 
@@ -40,11 +44,11 @@ fs.mkdirSync(`./${outerDir}/${innerDir}`, { recursive: true });
 
 let factorCommands = "";
 
-for (const factor of qualityModel.productFactors) {
+for (const factor of qualityModelInstance.productFactors) {
 
     let output = "";
 
-    let categories = factor.getCategories.map(categoryKey => qualityModel.factorCategories.find(category => category.categoryKey === categoryKey).categoryName).join(", ");
+    let categories = factor.getCategories.map(categoryKey => qualityModelInstance.factorCategories.find(category => category.categoryKey === categoryKey).categoryName).join(", ");
 
     output += `\\begin{minipage}{\\textwidth}\n`;
     output += `${indent()}\\begin{mdframed}[backgroundcolor=black!6]\n`;
@@ -115,13 +119,13 @@ fs.writeFile(`./${outerDir}/factors-frame.tex`, `\\newcounter{productfactor}\n\n
 let qaOutput = "\\newcounter{qualityaspect}\n\n";
 let qaCommands = "";
 
-for (const highlevelAspect of qualityModel.highLevelAspects) {
+for (const highlevelAspect of qualityModelInstance.highLevelAspects) {
 
     qaOutput += `\\subsection{${highlevelAspect.getName}}\n\\label{sec:qualitymodel:qualityaspects:${highlevelAspect.getId}}\n\n`;
 
-    let qualityAspects = qualityModel.qualityAspects.filter(qa => qa.getHighLevelAspectKey === highlevelAspect.getId);
+    let qualityAspects = qualityModelInstance.qualityAspects.filter(qa => qa.getHighLevelAspectKey === highlevelAspect.getId);
     // filter out aspects without any impacts
-    qualityAspects = qualityAspects.filter(qualityAspect => qualityModel.impacts.some(impact => impact.getImpactedFactor.getId === qualityAspect.getId));
+    qualityAspects = qualityAspects.filter(qualityAspect => qualityModelInstance.impacts.some(impact => impact.getImpactedFactor.getId === qualityAspect.getId));
 
     for (const qualityAspect of qualityAspects) {
 
@@ -145,7 +149,7 @@ fs.writeFile(`./${outerDir}/qualityAspects.tex`, `${qaOutput}\n\n${qaCommands}`,
 
 let entitiesTableOutput = "";
 
-for (const entity of qualityModel.entities) {
+for (const entity of qualityModelInstance.entities) {
     entitiesTableOutput += `        ${entity.getName} (${entity.getSymbol}) & ${entity.getDescription} & ${entity.getRelation.type} ${entity.getRelation.target}\\\\\ \\hline \n`;
 }
 
@@ -184,7 +188,7 @@ let entityKeys2 = [ "system", "dataAggregate", "bakingData", "network", "compone
 let entityKeys: ENTITIES[] = [ENTITIES.SYSTEM, ENTITIES.DATA_AGGREGATE, ENTITIES.BACKING_DATA, ENTITIES.NETWORK, ENTITIES.COMPONENT, ENTITIES.SERVICE, ENTITIES.BACKING_SERVICE, ENTITIES.STORAGE_BACKING_SERVICE, ENTITIES.PROXY_BACKING_SERVICE, ENTITIES.BROKER_BACKING_SERVICE ,ENTITIES.ENDPOINT, ENTITIES.EXTERNAL_ENDPOINT, ENTITIES.ARTIFACT, ENTITIES.LINK, ENTITIES.REQUEST_TRACE, ENTITIES.INFRASTRUCTURE, ENTITIES.DEPLOYMENT_MAPPING];
 
 for (const entityKey of entityKeys) {
-    let entity = qualityModel.entities.find(entity => entity.getKey === entityKey);
+    let entity = qualityModelInstance.entities.find(entity => entity.getKey === entityKey);
     let formalSpecification = prepareForTex(entity.getFormalSpecification);
  
     let latexSpec = "";
@@ -319,5 +323,126 @@ let entityPropertiesTableOutput = `
 fs.writeFile(`./${outerDir}/entityProperties.tex`, `${entityPropertiesTableOutput}`, (err) => {
     if (err) {
         console.error(`Could not export entity properties to LaTeX`)
+    }
+})
+
+
+// Measures
+
+// prepare dataset 
+
+type LatexMeasure = {
+    id: String,
+    name: String,
+    formula: String,
+    status: "IN USE" | "IMPLEMENTED" | "UNSUPPORTED",
+    functions: string[],
+    entities: ENTITIES[],
+    factorKey: String,
+    sources: String[],
+    qualityAspects: String[]
+}
+
+let measuresToExport: LatexMeasure[] = [];
+
+for (const [measureKey, measure] of Object.entries(specifiedQualityModel.measures)) {
+
+    let productFactor = Object.entries(specifiedQualityModel.productFactors).find(([factorKey, factor]) => factor.measures.includes(measureKey as MeasureKey));
+    let status: "IN USE" | "IMPLEMENTED" | "UNSUPPORTED" = "UNSUPPORTED";
+    if (qualityModelInstance.findMeasure(measure.applicableEntities[0], measureKey as MeasureKey).isCalculationAvailable()) {
+        status = "IMPLEMENTED";
+    }
+
+    if (productFactor[1].evaluations.some(evaluation => evaluation.measures.includes(measureKey as MeasureKey))) {
+        status = "IN USE";
+    }
+    let qualityAspects = [];
+    let search: (QualityAspect | ProductFactor)[] = qualityModelInstance.findProductFactor(productFactor[0] as ProductFactorKey).getImpactedFactors();
+    while (search.length > 0) {
+        let current = search[0];
+        if (current.getFactorType === "productFactor") {
+            search.push(...current.getImpactedFactors());
+        }
+        if (current.getFactorType === "qualityAspect") {
+            qualityAspects.push(current.getId);
+        }
+        search.splice(0,1);
+    }
+
+    measuresToExport.push({
+        id: measureKey,
+        name: measure.name,
+        formula: measure.calculationFormula === "" ? "n/a" : measure.calculationFormula,
+        functions: measure.helperFunctions,
+        status: status,
+        entities: measure.applicableEntities,
+        factorKey: productFactor[0],
+        sources: measure.sources,
+        qualityAspects: qualityAspects
+    })
+}
+
+function compareFactorKey(measureA: LatexMeasure, measureB: LatexMeasure) {
+    if (measureA.factorKey < measureB.factorKey)
+       return -1;
+    if (measureA.factorKey > measureB.factorKey)
+      return 1;
+    return 0;
+  }
+  
+measuresToExport =  measuresToExport.sort(compareFactorKey);
+
+function formatMeasureForExport(measureToExport: LatexMeasure) {
+    let helperFunctions = "";
+    if (measureToExport.functions.length > 0) {
+        let helpers = measureToExport.functions.map(helper => `\\multicolumn{2}{|p{15.05cm}|}{$\\scriptstyle ${helper} $} \\\\`).join("\n");
+        helperFunctions = `
+        Functions: & \\\\
+        ${helpers}
+        `;
+    }
+
+    return `\\textbf{${measureToExport.name}} & ${measureToExport.status} \\T \\\\
+    Formula: & \\T \\\\
+    \\multicolumn{2}{|>{\\centering\\arraybackslash}p{15.05cm}|}{$\\displaystyle ${measureToExport.formula}$} \\T\\B \\\\ ${helperFunctions} \\cline{1-2}
+    Applicable Entities: & Associated Factor: \\T \\\\
+    ${measureToExport.entities} & ${measureToExport.factorKey} \\\\
+    Associated Quality Aspects: & Literature Sources: \\T \\\\
+    ${measureToExport.qualityAspects} & ${measureToExport.sources} \\\\ \\hline`;
+}
+
+let completeMeasuresOutput = measuresToExport.map(formatMeasureForExport).join("\\hline \n");
+let usedMeasuresOutput = measuresToExport.filter(measure => measure.status === "IN USE");
+let measuresOutput = usedMeasuresOutput.map(formatMeasureForExport).join("\\hline \n");
+
+let measuresPerTable = 3;
+
+let measuresTableOutput =  `
+\\newcommand\\T{\\rule{0pt}{2.6ex}}       % Top strut
+\\newcommand\\B{\\rule[-3ex]{0pt}{0pt}}   % Bottom strut
+`;
+
+for (let i = 1; i <measuresToExport.length; i = i + measuresPerTable) {
+    let currentMeasures = measuresToExport.slice(i, i + measuresPerTable);
+
+    measuresTableOutput += `
+    \\begin{table}[h]
+        \\caption{Measures}
+        \\label{tab:results:qualitymodel:measures${i}}
+        \\fontsize{10}{12}\\selectfont
+        \\begin{tabularx}{\\linewidth}{|Xr|}
+            \\hline
+            ${currentMeasures.map(formatMeasureForExport).join("\\hline \n")}
+        \\end{tabularx}%
+    \\end{table}
+`;
+    if (i % 5 == 0) {
+        measuresTableOutput += "\\clearpage"
+    }
+}
+
+fs.writeFile(`./${outerDir}/measures.tex`, `${measuresTableOutput}`, (err) => {
+    if (err) {
+        console.error(`Could not export measures to LaTeX`)
     }
 })
