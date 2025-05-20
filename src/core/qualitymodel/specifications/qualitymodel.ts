@@ -1644,7 +1644,7 @@ const measures = {
         "calculation": "Endpoints supporting API keys / All endpoints",
         "calculationFormula": "\\frac{| \\Set{ e | e \\in E \\land \"API-Key\" \\in e.supported\\_authentication\\_methods } |}{|E|}",
         "helperFunctions": [],
-        "sources": ["Ntentos2022", "Ntentos2022"],
+        "sources": ["Ntentos2022"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
     },
     "ratioOfEndpointsThatSupportPlaintextAuthentication": {

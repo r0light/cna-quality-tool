@@ -406,9 +406,9 @@ function formatMeasureForExport(measureToExport: LatexMeasure) {
     Formula: & \\T \\\\
     \\multicolumn{2}{|>{\\centering\\arraybackslash}p{15.05cm}|}{$\\displaystyle ${measureToExport.formula}$} \\T\\B \\\\ ${helperFunctions} \\cline{1-2}
     Applicable Entities: & Associated Factor: \\T \\\\
-    ${measureToExport.entities} & ${measureToExport.factorKey} \\\\
+    ${measureToExport.entities} & \\${measureToExport.factorKey} \\\\
     Associated Quality Aspects: & Literature Sources: \\T \\\\
-    ${measureToExport.qualityAspects} & ${measureToExport.sources} \\\\ \\hline`;
+    \\${measureToExport.qualityAspects} & ${measureToExport.sources.map(source => `\\cite{${source}}`).join(",")} \\\\ \\hline`;
 }
 
 let completeMeasuresOutput = measuresToExport.map(formatMeasureForExport).join("\\hline \n");
