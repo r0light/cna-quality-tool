@@ -147,18 +147,23 @@ fs.writeFile(`./${outerDir}/qualityAspects.tex`, `${qaOutput}\n\n${qaCommands}`,
 
 // Entitites
 
+let entityCommandsOutput = "\\newcounter{entity} \n";
 let entitiesTableOutput = "";
 
 for (const entity of qualityModelInstance.entities) {
-    entitiesTableOutput += `        ${entity.getName} (${entity.getSymbol}) & ${entity.getDescription} & ${entity.getRelation.type} ${entity.getRelation.target}\\\\\ \\hline \n`;
+    entitiesTableOutput += `    \\refstepcounter{entity}\\label{entity:${entity.getKey}}
+    ${entity.getName} (${entity.getSymbol}) & ${entity.getDescription} & ${entity.getRelation.type} ${entity.getRelation.target}\\\\\ \\hline \n`;
+    entityCommandsOutput += `\\newcommand\\${entity.getKey}{\\hyperref[entity:${entity.getKey}]{\\textbf{${entity.getName}}}} \n`;
 }
 
 entitiesTableOutput = `
+${entityCommandsOutput}
+
 \\begin{table}[h]
-	\\caption{Entities of the modeling approach, adopted from \\cite{Lichtenthaeler2024}}
+	\\caption{Entities of the quality model}
 	\\label{tab:results:qualitymodel:entities}
-    \\fontsize{12}{14}\\selectfont
-	\\begin{tabular}{p{0.15\\textwidth}|p{0.6\\textwidth}|p{0.15\\textwidth}}
+    \\fontsize{11}{13}\\selectfont
+	\\begin{tabular}{p{0.22\\textwidth}|p{0.55\\textwidth}|p{0.18\\textwidth}}
 		\\textbf{Name}         & \\textbf{Description}  & \\textbf{Relation}  \\\\\ \\hline
         ${entitiesTableOutput}
 	\\end{tabular}%
@@ -402,13 +407,13 @@ function formatMeasureForExport(measureToExport: LatexMeasure) {
         `;
     }
 
-    return `\\textbf{${measureToExport.name}} & ${measureToExport.status} \\T \\\\
+    return `\\textbf{${measureToExport.name}} \\refstepcounter{measure}\\label{measure:${measureToExport.id}}  & ${measureToExport.status} \\T \\\\
     Formula: & \\T \\\\
     \\multicolumn{2}{|>{\\centering\\arraybackslash}p{15.05cm}|}{$\\displaystyle ${measureToExport.formula}$} \\T\\B \\\\ ${helperFunctions} \\cline{1-2}
     Applicable Entities: & Associated Factor: \\T \\\\
-    ${measureToExport.entities} & \\${measureToExport.factorKey} \\\\
+    ${measureToExport.entities.map(entity => `\\${entity}`).join(", ")} & \\${measureToExport.factorKey} \\\\
     Associated Quality Aspects: & Literature Sources: \\T \\\\
-    \\${measureToExport.qualityAspects} & ${measureToExport.sources.map(source => `\\cite{${source}}`).join(",")} \\\\ \\hline`;
+    ${measureToExport.qualityAspects.map(qa => `\\${qa}`).join(", ")} & ${measureToExport.sources.map(source => `\\cite{${source}}`).join(", ")} \\\\ \\hline`;
 }
 
 let completeMeasuresOutput = measuresToExport.map(formatMeasureForExport).join("\\hline \n");
@@ -420,7 +425,15 @@ let measuresPerTable = 3;
 let measuresTableOutput =  `
 \\newcommand\\T{\\rule{0pt}{2.6ex}}       % Top strut
 \\newcommand\\B{\\rule[-3ex]{0pt}{0pt}}   % Bottom strut
+
+\\newcounter{measure}
+
 `;
+
+for (let measure of measuresToExport) {
+    measuresTableOutput += `\\newcommand\\${measure.id}{\\hyperref[measure:${measure.id}]{\\textbf{${measure.name   }}}} \n`;
+}
+
 
 for (let i = 1; i <measuresToExport.length; i = i + measuresPerTable) {
     let currentMeasures = measuresToExport.slice(i, i + measuresPerTable);

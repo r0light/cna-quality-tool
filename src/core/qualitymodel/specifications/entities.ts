@@ -15,7 +15,7 @@ export enum ENTITIES {
     STORAGE_BACKING_SERVICE = "storageBackingService",
     PROXY_BACKING_SERVICE = "proxyBackingService",
     BROKER_BACKING_SERVICE = "brokerBackingService",
-    ENDPOINT = "endpoint",
+    ENDPOINT = "iendpoint",
     EXTERNAL_ENDPOINT = "externalEndpoint",
     LINK = "link",
     INFRASTRUCTURE = "infrastructure",
@@ -103,7 +103,7 @@ export const entities: {[key in ENTITIES]: EntitySpec}  = {
         "formal": `\tBBS ⊆ C
         props<sub>BBS</sub> := props<sub>C</sub> ∪ {${getBrokerBackingServiceProperties().filter(prop => !componentPropertyKeys.includes(prop.getKey)).map(property => property.getKey).join(",")}}`
     },
-    "endpoint": {
+    "iendpoint": {
         "name": "Endpoint",
         "description": "A communication endpoint, for example a REST endpoint, message producer/listener.",
         "relation": {"type": "part-of", "target": ENTITIES.COMPONENT},

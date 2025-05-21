@@ -2434,7 +2434,7 @@ export const ratioOfEndpointsThatAreIncludedInASingleSignOnApproach: Calculation
 }
 
 
-export const endpointAccessConsistency: Calculation = (parameters: CalculationParameters<System>) => {
+export const iendpointAccessMethodsConsistency: Calculation = (parameters: CalculationParameters<System>) => {
     let allComponents = parameters.entity.getComponentEntities.entries();
     let allEndpoints = allComponents.flatMap(([componentId, component]) => {
         return component.getEndpointEntities;
@@ -2990,7 +2990,7 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation }
     "ratioOfEndpointsThatSupportApiKeys": ratioOfEndpointsThatSupportApiKeys,
     "ratioOfEndpointsThatSupportPlaintextAuthentication": ratioOfEndpointsThatSupportPlaintextAuthentication,
     "ratioOfEndpointsThatAreIncludedInASingleSignOnApproach": ratioOfEndpointsThatAreIncludedInASingleSignOnApproach,
-    "endpointAccessConsistency": endpointAccessConsistency,
+    "iendpointAccessMethodsConsistency": iendpointAccessMethodsConsistency,
     "externalEndpointAccessConsistency": externalEndpointAccessConsistency,
     "cohesionBetweenEndpointsBasedOnDataAggregateUsage": cohesionBetweenEndpointsBasedOnDataAggregateUsage,
     "serviceInterfaceUsageCohesion": serviceInterfaceUsageCohesion,

@@ -1109,7 +1109,7 @@ export const ratioOfEndpointsThatAreIncludedInASingleSignOnApproach: Calculation
     return endpointsSupportingTokens.length / allComponentEndpoints.length;
 }
 
-export const endpointAccessConsistency: Calculation = (parameters: CalculationParameters<Component>) => {
+export const iendpointAccessMethodsConsistency: Calculation = (parameters: CalculationParameters<Component>) => {
 
     let allComponentEndpoints = parameters.entity.getEndpointEntities;
 
@@ -1632,7 +1632,7 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "ratioOfEndpointsThatSupportApiKeys": ratioOfEndpointsThatSupportApiKeys,
     "ratioOfEndpointsThatSupportPlaintextAuthentication": ratioOfEndpointsThatSupportPlaintextAuthentication,
     "ratioOfEndpointsThatAreIncludedInASingleSignOnApproach": ratioOfEndpointsThatAreIncludedInASingleSignOnApproach,
-    "endpointAccessConsistency": endpointAccessConsistency,
+    "iendpointAccessMethodsConsistency": iendpointAccessMethodsConsistency,
     "externalEndpointAccessConsistency": externalEndpointAccessConsistency,
     "readWriteSeparationForDataAggregates": readWriteSeparationForDataAggregates,
     "ratioOfServicesThatProvideHealthEndpoints": ratioOfServicesThatProvideHealthEndpoints,

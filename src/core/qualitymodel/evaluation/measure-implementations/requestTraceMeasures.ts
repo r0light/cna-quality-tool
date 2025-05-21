@@ -938,7 +938,7 @@ export const ratioOfEndpointsThatAreIncludedInASingleSignOnApproach: Calculation
     return supportingToken.length / allEndpoints.length;
 }
 
-export const endpointAccessConsistency: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+export const iendpointAccessMethodsConsistency: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
     let allEndpoints = parameters.entity.getLinks.flatMap(links => links).map(link => link.getTargetEndpoint);
 
     let endpointsWithAccessControl = allEndpoints.filter(endpoint => endpoint.getProperty("supported_authentication_methods").value.length !== 0);
@@ -1288,7 +1288,7 @@ export const requestTraceMeasureImplementations: { [measureKey: string]: Calcula
     "ratioOfEndpointsThatSupportApiKeys": ratioOfEndpointsThatSupportApiKeys,
     "ratioOfEndpointsThatSupportPlaintextAuthentication": ratioOfEndpointsThatSupportPlaintextAuthentication,
     "ratioOfEndpointsThatAreIncludedInASingleSignOnApproach": ratioOfEndpointsThatAreIncludedInASingleSignOnApproach,
-    "endpointAccessConsistency": endpointAccessConsistency,
+    "iendpointAccessMethodsConsistency": iendpointAccessMethodsConsistency,
     "degreeToWhichComponentsAreLinkedToStatefulComponents": degreeToWhichComponentsAreLinkedToStatefulComponents,
     "ratioOfSpecializedStatefulServices": ratioOfSpecializedStatefulServices,
     "degreeOfSeparationByGateways": degreeOfSeparationByGateways,

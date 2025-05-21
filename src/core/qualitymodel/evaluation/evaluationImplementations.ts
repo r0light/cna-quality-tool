@@ -210,18 +210,18 @@ const productFactorEvaluationImplementation: {
         return linearNumericalMapping(accessRestrictedToCallers as number);
     },
     "accessControlManagementConsistency": (parameters) => {
-        let endpointAccessConsistency = parameters.calculatedMeasures.get("endpointAccessConsistency").value;
+        let iendpointAccessMethodsConsistency = parameters.calculatedMeasures.get("iendpointAccessMethodsConsistency").value;
         let externalEndpointAccessConsistency = parameters.calculatedMeasures.get("externalEndpointAccessConsistency").value;
 
-        if (endpointAccessConsistency === "n/a") {
+        if (iendpointAccessMethodsConsistency === "n/a") {
             if (externalEndpointAccessConsistency === "n/a") {
                 return "n/a";
             }
             return linearNumericalMapping(externalEndpointAccessConsistency as number);
         } else if (externalEndpointAccessConsistency === "n/a") {
-            return linearNumericalMapping(endpointAccessConsistency as number);
+            return linearNumericalMapping(iendpointAccessMethodsConsistency as number);
         } else {
-            return linearNumericalMapping(average([endpointAccessConsistency, externalEndpointAccessConsistency] as number[]) as number);
+            return linearNumericalMapping(average([iendpointAccessMethodsConsistency, externalEndpointAccessConsistency] as number[]) as number);
         }
     },
     "accountSeparation": (parameters) => {

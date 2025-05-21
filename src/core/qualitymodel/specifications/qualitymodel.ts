@@ -321,12 +321,12 @@ const productFactors = {
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.ENDPOINT, ENTITIES.BACKING_SERVICE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT],
         "sources": [{ "key": "Adkins2020", "section": "6 Access Control (Access control managed by framework)" }, { "key": "Goniwada2021", "section": "9 Policy as Code (consistently describe your security policies in form of code)" }],
-        "measures": ["ratioOfEndpointsThatSupportTokenBasedAuthentication", "ratioOfEndpointsThatSupportApiKeys", "ratioOfEndpointsThatSupportPlaintextAuthentication", "ratioOfEndpointsThatAreIncludedInASingleSignOnApproach", "endpointAccessConsistency", "externalEndpointAccessConsistency"],
+        "measures": ["ratioOfEndpointsThatSupportTokenBasedAuthentication", "ratioOfEndpointsThatSupportApiKeys", "ratioOfEndpointsThatSupportPlaintextAuthentication", "ratioOfEndpointsThatAreIncludedInASingleSignOnApproach", "iendpointAccessMethodsConsistency", "externalEndpointAccessConsistency"],
         "evaluations": [
             {
                 "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT],
                 "evaluation": "accessControlManagementConsistency",
-                "measures": ["endpointAccessConsistency", "externalEndpointAccessConsistency"],
+                "measures": ["iendpointAccessMethodsConsistency", "externalEndpointAccessConsistency"],
                 "reasoning": "Access control consistency is calculated for all endpoints and all external endpoints separately. Both results are averaged and the factor is evaluated as high if this consistency is also high. If there are not endpoints in the system, the evaluation is none."
             }
         ]
@@ -1642,7 +1642,7 @@ const measures = {
     "ratioOfEndpointsThatSupportApiKeys": {
         "name": "Ratio of endpoints that support API Keys",
         "calculation": "Endpoints supporting API keys / All endpoints",
-        "calculationFormula": "\\frac{| \\Set{ e | e \\in E \\land \"API-Key\" \\in e.supported\\_authentication\\_methods } |}{|E|}",
+        "calculationFormula": "\\frac{| \\Set{ e | e \\in E \\land \\text{\"API-Key\"} \\in e.supported\\_authentication\\_methods } |}{|E|}",
         "helperFunctions": [],
         "sources": ["Ntentos2022"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
@@ -1650,7 +1650,7 @@ const measures = {
     "ratioOfEndpointsThatSupportPlaintextAuthentication": {
         "name": "Ratio of endpoints that support plaintext authentication",
         "calculation": "Endpoints supporting basic authentication / All endpoints",
-        "calculationFormula": "\\frac{| \\Set{ e | e \\in E \\land \"basic\\_authentication\" \\in e.supported\\_authentication\\_methods } |}{|E|}",
+        "calculationFormula": "\\frac{| \\Set{ e | e \\in E \\land \\text{\"basic\\_authentication\"} \\in e.supported\\_authentication\\_methods } |}{|E|}",
         "helperFunctions": [],
         "sources": ["Ntentos2022", "Zdun2023", "Zdun2023a"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
@@ -1658,7 +1658,7 @@ const measures = {
     "ratioOfEndpointsThatAreIncludedInASingleSignOnApproach": {
         "name": "Ratio of endpoints that are included in an single-sign-on approach",
         "calculation": "Endpoints supporting a Single Sign-On approach / All endpoints",
-        "calculationFormula": "\\frac{| \\Set{ e | e \\in E \\land \"Single Sign-On\" \\in e.supported\\_authentication\\_methods } |}{|E|}",
+        "calculationFormula": "\\frac{| \\Set{ e | e \\in E \\land \\text{\"Single Sign-On\"} \\in e.supported\\_authentication\\_methods } |}{|E|}",
         "helperFunctions": [],
         "sources": ["Ntentos2022"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
@@ -3072,7 +3072,7 @@ const measures = {
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE]
     },
-    "endpointAccessConsistency": {
+    "iendpointAccessMethodsConsistency": {
         "name": "Consistency of supported authentication methods of endpoints",
         "calculation": "Similarity of supported authentication methods / All endpoints",
         "calculationFormula": "\\frac{\\displaystyle\\sum_{i=1}^{|E \\setminus EE|}\\sum_{j=i+1}^{|E \\setminus EE|} \\begin{cases} 0 &\\text{if } none(e_i,e_j) \\\\ similarity(e_i,e_j) &\\text{else } \\end{cases}}{\\frac{|E \\setminus EE | * (|E \\setminus EE | - 1)}{2}}",
