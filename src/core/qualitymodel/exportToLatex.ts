@@ -172,30 +172,30 @@ ${entityCommandsOutput}
 
 function prepareForTex(formalSpec: string) {
     return formalSpec.replaceAll("_", "\\_")
-                     .replaceAll("{", "\\{")
-                     .replaceAll("}", "\\}")
-                     .replaceAll("∪", "\\cup ")
-                     .replaceAll("⊆", "\\subseteq")
-                     .replaceAll("→", "\\rightarrow")
-                     .replaceAll("ℕ", "\\mathbb{N}")
-                     .replaceAll("∈", "\\in")
-                     .replaceAll("∉", "\\notin")
-                     .replaceAll("⨯", "\\times ")
-                     .replaceAll("≠", "\\neq")
-                     .replaceAll("\t", "")
-                     .replaceAll("\n", "$\n$")
-                     .replaceAll("<sub>", "_{")
-                     .replaceAll("</sub>", "}");
+        .replaceAll("{", "\\{")
+        .replaceAll("}", "\\}")
+        .replaceAll("∪", "\\cup ")
+        .replaceAll("⊆", "\\subseteq")
+        .replaceAll("→", "\\rightarrow")
+        .replaceAll("ℕ", "\\mathbb{N}")
+        .replaceAll("∈", "\\in")
+        .replaceAll("∉", "\\notin")
+        .replaceAll("⨯", "\\times ")
+        .replaceAll("≠", "\\neq")
+        .replaceAll("\t", "")
+        .replaceAll("\n", "$\n$")
+        .replaceAll("<sub>", "_{")
+        .replaceAll("</sub>", "}");
 }
 
 let entitiesListingOutput = "";
-let entityKeys2 = [ "system", "dataAggregate", "bakingData", "network", "component","service","backingService","storageBackingService","proxyBackingService","brokerBackingService","endpoint","externalEndpoint","artifact","link","requestTrace","infrastructure","deploymentMapping"];
-let entityKeys: ENTITIES[] = [ENTITIES.SYSTEM, ENTITIES.DATA_AGGREGATE, ENTITIES.BACKING_DATA, ENTITIES.NETWORK, ENTITIES.COMPONENT, ENTITIES.SERVICE, ENTITIES.BACKING_SERVICE, ENTITIES.STORAGE_BACKING_SERVICE, ENTITIES.PROXY_BACKING_SERVICE, ENTITIES.BROKER_BACKING_SERVICE ,ENTITIES.ENDPOINT, ENTITIES.EXTERNAL_ENDPOINT, ENTITIES.ARTIFACT, ENTITIES.LINK, ENTITIES.REQUEST_TRACE, ENTITIES.INFRASTRUCTURE, ENTITIES.DEPLOYMENT_MAPPING];
+let entityKeys2 = ["system", "dataAggregate", "bakingData", "network", "component", "service", "backingService", "storageBackingService", "proxyBackingService", "brokerBackingService", "endpoint", "externalEndpoint", "artifact", "link", "requestTrace", "infrastructure", "deploymentMapping"];
+let entityKeys: ENTITIES[] = [ENTITIES.SYSTEM, ENTITIES.DATA_AGGREGATE, ENTITIES.BACKING_DATA, ENTITIES.NETWORK, ENTITIES.COMPONENT, ENTITIES.SERVICE, ENTITIES.BACKING_SERVICE, ENTITIES.STORAGE_BACKING_SERVICE, ENTITIES.PROXY_BACKING_SERVICE, ENTITIES.BROKER_BACKING_SERVICE, ENTITIES.ENDPOINT, ENTITIES.EXTERNAL_ENDPOINT, ENTITIES.ARTIFACT, ENTITIES.LINK, ENTITIES.REQUEST_TRACE, ENTITIES.INFRASTRUCTURE, ENTITIES.DEPLOYMENT_MAPPING];
 
 for (const entityKey of entityKeys) {
     let entity = qualityModelInstance.entities.find(entity => entity.getKey === entityKey);
     let formalSpecification = prepareForTex(entity.getFormalSpecification);
- 
+
     let latexSpec = "";
     let parts = formalSpecification.split("\n");
 
@@ -300,9 +300,9 @@ for (const properties of entityProperties) {
     if (properties.properties.length > 0) {
         let noOfProperties = properties.properties.length;
         entityPropertiesOutput += `\\multirow[b]{${noOfProperties}}{*}{${properties.name}}`;
-    
-        for (const [i,property] of properties.properties.entries()) {
-            let lineType = i === noOfProperties-1 ? "\\hline" : "\\cline{2-4}";
+
+        for (const [i, property] of properties.properties.entries()) {
+            let lineType = i === noOfProperties - 1 ? "\\hline" : "\\cline{2-4}";
 
             let dataTypeDesc = property.getDataType === "select" ? (property as SelectEntityProperty).getOptions.map(option => option.text).join(", ") : property.getDataType;
 
@@ -371,7 +371,7 @@ for (const [measureKey, measure] of Object.entries(specifiedQualityModel.measure
         if (current.getFactorType === "qualityAspect") {
             qualityAspects.push(current.getId);
         }
-        search.splice(0,1);
+        search.splice(0, 1);
     }
 
     measuresToExport.push({
@@ -389,13 +389,15 @@ for (const [measureKey, measure] of Object.entries(specifiedQualityModel.measure
 
 function compareFactorKey(measureA: LatexMeasure, measureB: LatexMeasure) {
     if (measureA.factorKey < measureB.factorKey)
-       return -1;
+        return -1;
     if (measureA.factorKey > measureB.factorKey)
-      return 1;
+        return 1;
     return 0;
-  }
-  
-measuresToExport =  measuresToExport.sort(compareFactorKey);
+}
+
+measuresToExport = measuresToExport.sort(compareFactorKey);
+let usedMeasuresOutput = measuresToExport.filter(measure => measure.status === "IN USE");
+let notUsedMeasuresOutput = measuresToExport.filter(measure => measure.status !== "IN USE");
 
 function formatMeasureForExport(measureToExport: LatexMeasure) {
     let helperFunctions = "";
@@ -413,48 +415,49 @@ function formatMeasureForExport(measureToExport: LatexMeasure) {
     Applicable Entities: & Associated Factor: \\T \\\\
     ${measureToExport.entities.map(entity => `\\${entity}`).join(", ")} & \\${measureToExport.factorKey} \\\\
     Associated Quality Aspects: & Literature Sources: \\T \\\\
-    ${measureToExport.qualityAspects.map(qa => `\\${qa}`).join(", ")} & ${measureToExport.sources.map(source => `\\cite{${source}}`).join(", ")} \\\\ \\hline`;
+    ${measureToExport.qualityAspects.map(qa => `\\${qa}`).join(", ")} & ${measureToExport.sources.map(source => source === "new" ? source : `\\cite{${source}}`).join(", ")} \\\\ \\hline`;
 }
 
-let completeMeasuresOutput = measuresToExport.map(formatMeasureForExport).join("\\hline \n");
-let usedMeasuresOutput = measuresToExport.filter(measure => measure.status === "IN USE");
-let measuresOutput = usedMeasuresOutput.map(formatMeasureForExport).join("\\hline \n");
-
-let measuresPerTable = 3;
-
-let measuresTableOutput =  `
-\\newcommand\\T{\\rule{0pt}{2.6ex}}       % Top strut
-\\newcommand\\B{\\rule[-3ex]{0pt}{0pt}}   % Bottom strut
-
-\\newcounter{measure}
-
-`;
-
-for (let measure of measuresToExport) {
-    measuresTableOutput += `\\newcommand\\${measure.id}{\\hyperref[measure:${measure.id}]{\\textbf{${measure.name   }}}} \n`;
-}
-
-
-for (let i = 1; i <measuresToExport.length; i = i + measuresPerTable) {
-    let currentMeasures = measuresToExport.slice(i, i + measuresPerTable);
-
-    measuresTableOutput += `
-    \\begin{table}[h]
-        \\caption{Measures}
-        \\label{tab:results:qualitymodel:measures${i}}
-        \\fontsize{10}{12}\\selectfont
-        \\begin{tabularx}{\\linewidth}{|Xr|}
-            \\hline
-            ${currentMeasures.map(formatMeasureForExport).join("\\hline \n")}
-        \\end{tabularx}%
-    \\end{table}
-`;
-    if (i % 5 == 0) {
-        measuresTableOutput += "\\clearpage"
+function exportMeasures(measuresToExport: LatexMeasure[], measuresPerTable: number, caption: string) {
+    let measuresTableOutput = `
+    \\newcommand\\T{\\rule{0pt}{2.6ex}}       % Top strut
+    \\newcommand\\B{\\rule[-3ex]{0pt}{0pt}}   % Bottom strut
+    
+    \\newcounter{measure}
+    
+    `;
+    for (let measure of measuresToExport) {
+        measuresTableOutput += `\\newcommand\\${measure.id}{\\hyperref[measure:${measure.id}]{\\textbf{${measure.name}}}} \n`;
     }
+    for (let i = 1; i < measuresToExport.length; i = i + measuresPerTable) {
+        let currentMeasures = measuresToExport.slice(i, i + measuresPerTable);
+
+        measuresTableOutput += `
+        \\begin{table}[h]
+            \\caption{${caption} - ${Math.trunc(i/ measuresPerTable) + 1}}
+            \\label{tab:results:qualitymodel:${caption.replace(/\s+/g, "").toLocaleLowerCase()}${Math.trunc(i/ measuresPerTable) + 1}}
+            \\fontsize{10}{12}\\selectfont
+            \\begin{tabularx}{\\linewidth}{|Xr|}
+                \\hline
+                ${currentMeasures.map(formatMeasureForExport).join("\\hline \n")}
+            \\end{tabularx}%
+        \\end{table}
+    `;
+        if (i % 5 == 0) {
+            measuresTableOutput += "\\clearpage"
+        }
+    }
+    return measuresTableOutput;
 }
 
-fs.writeFile(`./${outerDir}/measures.tex`, `${measuresTableOutput}`, (err) => {
+
+fs.writeFile(`./${outerDir}/usedMeasures.tex`, `${exportMeasures(usedMeasuresOutput, 4, "Architectural Measures")}`, (err) => {
+    if (err) {
+        console.error(`Could not export measures to LaTeX`)
+    }
+})
+
+fs.writeFile(`./${outerDir}/unusedMeasures.tex`, `${exportMeasures(notUsedMeasuresOutput, 4, "Additional Architectural Measures")}`, (err) => {
     if (err) {
         console.error(`Could not export measures to LaTeX`)
     }
