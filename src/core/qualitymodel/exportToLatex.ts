@@ -89,7 +89,8 @@ for (const factor of qualityModelInstance.productFactors) {
         output += `\\\\`;
         output += `${indent(2)}Measure(s) used for evaluation:\n`;
         for (const measure of measuresForFactor) {
-            let measureDesc = `\\textbf{${measure.getName}}`;
+            //let measureDesc = `\\textbf{${measure.getName}}`;
+            let measureDesc = `\\${measure.getId}`;
             //TODO add hyperref to measure
             output += `\\\\${indent(2)}${measureDesc}\n`;
         }
@@ -426,9 +427,6 @@ function exportMeasures(measuresToExport: LatexMeasure[], measuresPerTable: numb
     \\newcounter{measure}
     
     `;
-    for (let measure of measuresToExport) {
-        measuresTableOutput += `\\newcommand\\${measure.id}{\\hyperref[measure:${measure.id}]{\\textbf{${measure.name}}}} \n`;
-    }
     for (let i = 1; i < measuresToExport.length; i = i + measuresPerTable) {
         let currentMeasures = measuresToExport.slice(i, i + measuresPerTable);
 
@@ -449,6 +447,13 @@ function exportMeasures(measuresToExport: LatexMeasure[], measuresPerTable: numb
     }
     return measuresTableOutput;
 }
+function exportMeasureCommands(measuresToExport: LatexMeasure[]) {
+    let measureCommandsOutput = "";
+    for (let measure of measuresToExport) {
+        measureCommandsOutput += `\\newcommand\\${measure.id}{\\hyperref[measure:${measure.id}]{\\textbf{${measure.name}}}} \n`;
+    }
+    return measureCommandsOutput;
+}
 
 
 fs.writeFile(`./${outerDir}/usedMeasures.tex`, `${exportMeasures(usedMeasuresOutput, 4, "Architectural Measures")}`, (err) => {
@@ -457,8 +462,20 @@ fs.writeFile(`./${outerDir}/usedMeasures.tex`, `${exportMeasures(usedMeasuresOut
     }
 })
 
+fs.writeFile(`./${outerDir}/usedMeasuresCommands.tex`, `${exportMeasureCommands(usedMeasuresOutput)}`, (err) => {
+    if (err) {
+        console.error(`Could not export used measure commands to LaTeX`)
+    }
+})
+
 fs.writeFile(`./${outerDir}/unusedMeasures.tex`, `${exportMeasures(notUsedMeasuresOutput, 4, "Additional Architectural Measures")}`, (err) => {
     if (err) {
         console.error(`Could not export measures to LaTeX`)
+    }
+})
+
+fs.writeFile(`./${outerDir}/unusedMeasuresCommands.tex`, `${exportMeasureCommands(notUsedMeasuresOutput)}`, (err) => {
+    if (err) {
+        console.error(`Could not export used measure commands to LaTeX`)
     }
 })
