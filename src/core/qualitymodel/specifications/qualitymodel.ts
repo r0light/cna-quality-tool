@@ -2797,9 +2797,11 @@ const measures = {
     "dataReplicationAlongRequestTrace": {
         "name": "Data Replication Along Request Trace",
         "calculation": "Average(Replication of Data Aggregates along request trace)",
-        "calculationFormula": "\\frac{\\displaystyle\\sum_{i=1}^{|rt.involvedLinks|}  replicatedDAs(rt.involvedLinks_i)+ \\displaystyle\\sum_{i=1}^{|rt.referencedEndpoint.RDA|} \\begin{cases} 1 &\\text{if } replicated(rt.referencedEndpoint.rda_i)\\\\ 0 &\\text{else } \\end{cases}}{ \\displaystyle\\sum_{i=1}^{|rt.involvedLinks|} |rt.involvedLinks_i.RDA| + |rt.referencedEndpoint.RDA|}",
+        "calculationFormula": "\\frac{replicationAlong(rt)+ replicationInEndpoint(rt)}{ \\displaystyle\\sum_{i=1}^{|rt.involvedLinks|} |rt.involvedLinks_i.RDA| + |rt.referencedEndpoint.RDA|}",
         "helperFunctions": [
-            "replicatedDAs: link \\to (\\displaystyle\\sum_{j=1}^{|link.targetEndpoint.RDA|} \\begin{cases} 1 &\\text{if } replicated(link.targetEndpoint.rda_j) \\\\ 0 &\\text{else } \\end{cases})",
+            "replicationAlong: rt \\to \\bigg( \\displaystyle\\sum_{i=1}^{|rt.involvedLinks|}  replicatedDAs(rt.involvedLinks_i) \\bigg)",
+            "replicatedDAs: link \\to \\bigg( \\displaystyle\\sum_{j=1}^{|link.targetEndpoint.RDA|} \\begin{cases} 1 &\\text{if } replicated(link.targetEndpoint.rda_j) \\\\ 0 &\\text{else } \\end{cases} \\bigg)",
+            "replicationInE: rt \\to \\bigg( \\displaystyle\\sum_{i=1}^{|rt.referencedEndpoint.RDA|} \\begin{cases} 1 &\\text{if } replicated(rt.referencedEndpoint.rda_i)\\\\ 0 &\\text{else } \\end{cases} \\bigg)",
             "replicated: rda \\to (rda.usage\\_relation = \"cached\\text{-}usage\" \\lor rt.involvedLinks_i.rda_j.usage\\_relation = \\text{\"persistence\"})"],
         "sources": ["new"],
         "applicableEntities": [ENTITIES.REQUEST_TRACE],
