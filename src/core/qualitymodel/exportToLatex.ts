@@ -42,6 +42,8 @@ fs.mkdirSync(`./${outerDir}/${innerDir}`, { recursive: true });
 
 // Product Factors
 
+// Product Factors for LaTeX
+
 let factorCommands = "";
 
 for (const factor of qualityModelInstance.productFactors) {
@@ -115,13 +117,11 @@ fs.writeFile(`./${outerDir}/factors-frame.tex`, `\\newcounter{productfactor}\n\n
     }
 })
 
-
+// Product Factors as CSV
 
 const factorSimpleFieldHeaders = ["id", "name"];
 const factorEntitiesHeaders = Object.values(ENTITIES);
 const factorCategoryHeaders = qualityModelInstance.factorCategories.map(category => category.categoryKey);
-
-qualityModelInstance.factorCategories
 
 const exportFactorsAsCSV = [
     factorSimpleFieldHeaders.concat(factorEntitiesHeaders).concat(factorCategoryHeaders).join(';'), // header row first
@@ -140,7 +140,28 @@ fs.writeFile(`./${outerDir}/productFactors.csv`, `${exportFactorsAsCSV}`, (err) 
     }
 })
 
+// Categories as CSV
+
+const categorySimpleFieldHeaders = ["key", "name"];
+
+const categoriesAsCSV = [
+    categorySimpleFieldHeaders.join(';'), // header row first
+    ...qualityModelInstance.factorCategories.map(category => {
+        let simpleValues = [category.categoryKey, category.categoryName];
+        
+        return simpleValues.join(";")
+    })
+].join('\n');
+
+fs.writeFile(`./${outerDir}/categories.csv`, `${categoriesAsCSV}`, (err) => {
+    if (err) {
+        console.error(`Could not export categories to CSV`)
+    }
+})
+
 // Quality Aspects
+
+// Quality Aspects for LaTeX
 
 let qaOutput = "\\newcounter{qualityaspect}\n\n";
 let qaCommands = "";
@@ -171,7 +192,46 @@ fs.writeFile(`./${outerDir}/qualityAspects.tex`, `${qaOutput}\n\n${qaCommands}`,
     }
 })
 
+//  Quality Aspects as CSV
+
+const qaSimpleFieldHeaders = ["id", "name", "highLevelAspect"];
+
+const exportQualityAspectsAsCSV = [
+    qaSimpleFieldHeaders.join(';'), // header row first
+    ...qualityModelInstance.qualityAspects.map(qa => {
+        let simpleValues = [qa.getId, qa.getName, qa.getHighLevelAspectKey];
+
+        return simpleValues.join(";")
+    })
+].join('\n');
+
+fs.writeFile(`./${outerDir}/qualityAspects.csv`, `${exportQualityAspectsAsCSV}`, (err) => {
+    if (err) {
+        console.error(`Could not export quality aspects to CSV`)
+    }
+})
+// Highlevel Quality Aspects as CSV
+
+const hqaSimpleFieldHeaders = ["id", "name" ];
+
+const exportHighlevelQualityAspectsAsCSV = [
+    hqaSimpleFieldHeaders.join(';'), // header row first
+    ...qualityModelInstance.highLevelAspects.map(qa => {
+        let simpleValues = [qa.getId, qa.getName];
+
+        return simpleValues.join(";")
+    })
+].join('\n');
+
+fs.writeFile(`./${outerDir}/highlevelQualityAspects.csv`, `${exportHighlevelQualityAspectsAsCSV}`, (err) => {
+    if (err) {
+        console.error(`Could not export highlevel quality aspects to CSV`)
+    }
+})
+
 // Entitites
+
+// Entities as LaTeX
 
 let entityCommandsOutput = "\\newcounter{entity} \n";
 let entitiesTableOutput = "";
@@ -245,6 +305,26 @@ fs.writeFile(`./${outerDir}/entities.tex`, `${entitiesTableOutput}\n${entitiesLi
         console.error(`Could not export entities to LaTeX`)
     }
 })
+
+// Entities as CSV
+
+const entitySimpleFieldHeaders = ["key", "name", "symbol"];
+
+const exportEntitiesAsCSV = [
+    entitySimpleFieldHeaders.join(';'), // header row first
+    ...qualityModelInstance.entities.map(entity => {
+        let simpleValues = [entity.getKey, entity.getName, entity.getSymbol];
+
+        return simpleValues.join(";")
+    })
+].join('\n');
+
+fs.writeFile(`./${outerDir}/entities.csv`, `${exportEntitiesAsCSV}`, (err) => {
+    if (err) {
+        console.error(`Could not export entities to CSV`)
+    }
+})
+
 
 // Entity properties
 
