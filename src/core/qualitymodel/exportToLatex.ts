@@ -115,6 +115,31 @@ fs.writeFile(`./${outerDir}/factors-frame.tex`, `\\newcounter{productfactor}\n\n
     }
 })
 
+
+
+const factorSimpleFieldHeaders = ["id", "name"];
+const factorEntitiesHeaders = Object.values(ENTITIES);
+const factorCategoryHeaders = qualityModelInstance.factorCategories.map(category => category.categoryKey);
+
+qualityModelInstance.factorCategories
+
+const exportFactorsAsCSV = [
+    factorSimpleFieldHeaders.concat(factorEntitiesHeaders).concat(factorCategoryHeaders).join(';'), // header row first
+    ...qualityModelInstance.productFactors.map(factor => {
+        let simpleValues = [factor.getId, factor.getName];
+        let entitiesValues = factorEntitiesHeaders.map(entityKey => factor.getApplicableEntities.includes(entityKey) ? "1" : "0");
+        let categoriesValues = factorCategoryHeaders.map(categoryKey => factor.getCategories.includes(categoryKey) ? "1" : "0");
+        
+        return simpleValues.concat(simpleValues).concat(entitiesValues).concat(categoriesValues).join(";")
+    })
+].join('\n');
+
+fs.writeFile(`./${outerDir}/productFactors.csv`, `${exportFactorsAsCSV}`, (err) => {
+    if (err) {
+        console.error(`Could not export product factors to CSV`)
+    }
+})
+
 // Quality Aspects
 
 let qaOutput = "\\newcounter{qualityaspect}\n\n";
@@ -397,6 +422,29 @@ function compareFactorKey(measureA: LatexMeasure, measureB: LatexMeasure) {
 }
 
 measuresToExport = measuresToExport.sort(compareFactorKey);
+
+const simpleFieldHeaders = ["id", "name", "status", "factorKey"];
+const sourceHeader = ["sourceType"];
+const entitiesHeaders = Object.values(ENTITIES);
+const qualityAspectsHeaders = Object.entries(qualityModel.qualityAspects).flatMap(([hlaKey, hla]) => Object.keys(hla.aspects));
+const exportMeasuresAsCSV = [
+    simpleFieldHeaders.concat(sourceHeader).concat(entitiesHeaders).concat(qualityAspectsHeaders).join(';'), // header row first
+    ...measuresToExport.map(row => {
+        let simpleValues = simpleFieldHeaders.map(fieldName => JSON.stringify(row[fieldName]));
+        let sourceValue = [row.sources.includes("new") ? "new" : "existing"];
+        let entitiesValues = entitiesHeaders.map(entityKey => row.entities.includes(entityKey) ? "1" : "0");
+        let qualityAspectsValues = qualityAspectsHeaders.map(qualityAspectKey => row.qualityAspects.includes(qualityAspectKey) ? "1" : "0");
+        
+        return simpleValues.concat(sourceValue).concat(entitiesValues).concat(qualityAspectsValues).join(";")
+    })
+].join('\n');
+
+fs.writeFile(`./${outerDir}/measures.csv`, `${exportMeasuresAsCSV}`, (err) => {
+    if (err) {
+        console.error(`Could not export measures to CSV`)
+    }
+})
+
 let usedMeasuresOutput = measuresToExport.filter(measure => measure.status === "IN USE");
 let notUsedMeasuresOutput = measuresToExport.filter(measure => measure.status !== "IN USE");
 
@@ -432,8 +480,8 @@ function exportMeasures(measuresToExport: LatexMeasure[], measuresPerTable: numb
 
         measuresTableOutput += `
         \\begin{table}[h]
-            \\caption{${caption} - ${Math.trunc(i/ measuresPerTable) + 1}}
-            \\label{tab:results:qualitymodel:${caption.replace(/\s+/g, "").toLocaleLowerCase()}${Math.trunc(i/ measuresPerTable) + 1}}
+            \\caption{${caption} - ${Math.trunc(i / measuresPerTable) + 1}}
+            \\label{tab:results:qualitymodel:${caption.replace(/\s+/g, "").toLocaleLowerCase()}${Math.trunc(i / measuresPerTable) + 1}}
             \\fontsize{10}{12}\\selectfont
             \\begin{tabularx}{\\linewidth}{|Xr|}
                 \\hline
