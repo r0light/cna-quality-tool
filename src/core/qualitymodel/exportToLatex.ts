@@ -130,7 +130,7 @@ const exportFactorsAsCSV = [
         let entitiesValues = factorEntitiesHeaders.map(entityKey => factor.getApplicableEntities.includes(entityKey) ? "1" : "0");
         let categoriesValues = factorCategoryHeaders.map(categoryKey => factor.getCategories.includes(categoryKey) ? "1" : "0");
         
-        return simpleValues.concat(simpleValues).concat(entitiesValues).concat(categoriesValues).join(";")
+        return simpleValues.concat(entitiesValues).concat(categoriesValues).join(";")
     })
 ].join('\n');
 
