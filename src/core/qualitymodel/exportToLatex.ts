@@ -122,15 +122,31 @@ fs.writeFile(`./${outerDir}/factors-frame.tex`, `\\newcounter{productfactor}\n\n
 const factorSimpleFieldHeaders = ["id", "name"];
 const factorEntitiesHeaders = Object.values(ENTITIES);
 const factorCategoryHeaders = qualityModelInstance.factorCategories.map(category => category.categoryKey);
+const factorQualityAspectHeaders = Object.entries(qualityModel.qualityAspects).flatMap(([hlaKey, hla]) => Object.keys(hla.aspects));
 
 const exportFactorsAsCSV = [
-    factorSimpleFieldHeaders.concat(factorEntitiesHeaders).concat(factorCategoryHeaders).join(';'), // header row first
+    factorSimpleFieldHeaders.concat(factorEntitiesHeaders).concat(factorCategoryHeaders).concat(factorQualityAspectHeaders).join(';'), // header row first
     ...qualityModelInstance.productFactors.map(factor => {
         let simpleValues = [factor.getId, factor.getName];
         let entitiesValues = factorEntitiesHeaders.map(entityKey => factor.getApplicableEntities.includes(entityKey) ? "1" : "0");
         let categoriesValues = factorCategoryHeaders.map(categoryKey => factor.getCategories.includes(categoryKey) ? "1" : "0");
+
+        let qualityAspects = [];
+        let search: (QualityAspect | ProductFactor)[] = qualityModelInstance.findProductFactor(factor.getId).getImpactedFactors();
+        while (search.length > 0) {
+            let current = search[0];
+            if (current.getFactorType === "productFactor") {
+                search.push(...current.getImpactedFactors());
+            }
+            if (current.getFactorType === "qualityAspect") {
+                qualityAspects.push(current.getId);
+            }
+            search.splice(0, 1);
+        }
         
-        return simpleValues.concat(entitiesValues).concat(categoriesValues).join(";")
+        let qualityAspectValues = factorQualityAspectHeaders.map(qaKey => qualityAspects.includes(qaKey) ? "1" : "0");
+        
+        return simpleValues.concat(entitiesValues).concat(categoriesValues).concat(qualityAspectValues).join(";")
     })
 ].join('\n');
 
