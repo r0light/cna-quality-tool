@@ -101,7 +101,7 @@ for (const factor of qualityModelInstance.productFactors) {
     output += `\\end{minipage}\n`;
     output += `\n`;
 
-    factorCommands += `\\newcommand\\${factor.getId}{\\hyperref[productfactor:${factor.getId}]{\\textbf{${factor.getName}}}}\n`
+    factorCommands += `\\newcommand\\${factor.getId}{\\hyperref[productfactor:${factor.getId}]{${factor.getName}}}\n`
     frameOutput += `\\input{${innerDir}/${factor.getId}.tex}\n\n`;
 
     fs.writeFile(`./${outerDir}/${innerDir}/${factor.getId}.tex`, `${output}`, (err) => {
@@ -198,7 +198,7 @@ for (const highlevelAspect of qualityModelInstance.highLevelAspects) {
         } else {
             qaOutput += `\\definitioncited{${qualityAspect.getName}}{${qualityAspect.getDescription}}{\\cite{ISO/IEC2014}}\n\n`;
         }
-        qaCommands += `\\newcommand\\${qualityAspect.getId}{\\hyperref[qualityaspect:${qualityAspect.getId}]{\\textbf{${qualityAspect.getName}}}}\n`;
+        qaCommands += `\\newcommand\\${qualityAspect.getId}{\\hyperref[qualityaspect:${qualityAspect.getId}]{${qualityAspect.getName}}}\n`;
     }
 }
 
