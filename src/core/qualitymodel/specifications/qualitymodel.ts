@@ -2502,15 +2502,15 @@ const measures = {
     "medianServiceReplication": {
         "name": "Median Service Replication level",
         "calculation": "The median value of replicas per service",
-        "calculationFormula": "median(\\Set{ \\displaystyle\\sum_{i=1}^{| \\Set{ dm | dm \\in DM \\land dm.deployed = s}|} dm_i.replicas | s \\in S})",
+        "calculationFormula": "median(\\Set{ (repl_1,...,repl_n) | repl_i = \\displaystyle\\sum_{j=1}^{| \\Set{ dm | dm \\in DM \\land dm.deployed = s_i \\land s \\in S}|} dm_j.replicas })",
         "helperFunctions": [],
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
     },
     "smallestReplicationValue": {
-        "name": "Smallelst Service Replication Value",
+        "name": "Smallest Service Replication Value",
         "calculation": "minimum(value of replicas per service)",
-        "calculationFormula": "min(\\Set{ \\displaystyle\\sum_{i=1}^{| \\Set{ dm | dm \\in DM \\land dm.deployed = s}|} dm_i.replicas | s \\in S})",
+        "calculationFormula": "min(\\Set{ (repl_1,...,repl_n) | repl_i = \\displaystyle\\sum_{j=1}^{| \\Set{ dm | dm \\in DM \\land dm.deployed = s_i \\land s \\in S}|} dm_j.replicas })",
         "helperFunctions": [],
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],

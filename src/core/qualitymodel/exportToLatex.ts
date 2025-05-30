@@ -585,9 +585,9 @@ function exportMeasures(measuresToExport: LatexMeasure[], measuresPerTable: numb
             \\end{tabularx}%
         \\end{table}
     `;
-        if (i % 5 == 0) {
+        /*if (i % 5 == 0) {
             measuresTableOutput += "\\clearpage"
-        }
+        }*/
     }
     return measuresTableOutput;
 }
