@@ -2422,7 +2422,7 @@ const measures = {
     "serviceDiscoveryUsage": {
         "name": "Service Discovery Usage",
         "calculation": "Number of Links whose outgoing component is using address resolution / Total number of Links",
-        "calculationFormula": "\\frac{|\\Set{ l | l \\in L \\land l.sourceComponent.addressResolutionBy.address\\_resolution\\_kind != \\text{\"none\"}}|}{|L|}",
+        "calculationFormula": "\\frac{|\\Set{ l | l \\in L \\land l.sourceComponent.addressResolutionBy.address\\_resolution\\_kind \\neq \\text{\"none\"}}|}{|L|}",
         "helperFunctions": [],
         "sources": ["Apel2019"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
