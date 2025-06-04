@@ -517,7 +517,17 @@ function compareFactorKey(measureA: LatexMeasure, measureB: LatexMeasure) {
     return 0;
 }
 
-measuresToExport = measuresToExport.sort(compareFactorKey);
+function compareSource(measureA: LatexMeasure, measureB: LatexMeasure) {
+    let aNew = measureA.sources.includes("new");
+    let bNew = measureB.sources.includes("new");
+    if (!aNew && bNew)
+        return -1;
+    if (aNew && !bNew)
+        return 1;
+    return 0;
+}
+
+measuresToExport = measuresToExport.sort(compareFactorKey).sort(compareSource);
 
 const simpleFieldHeaders = ["id", "name", "status", "factorKey"];
 const sourceHeader = ["sourceType"];

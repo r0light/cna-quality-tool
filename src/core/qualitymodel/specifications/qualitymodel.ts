@@ -2921,16 +2921,16 @@ const measures = {
     "componentArtifactsSimilarity": {
         "name": "Component Artifacts Similarity",
         "calculation": "Average similarity of components based on a pairwise comparison of component artifacts.",
-        "calculationFormula": "\\frac{\\displaystyle\\sum_{i=1}^{|C|}\\sum_{j=i+1}^{|C|} \\begin{cases} 0 &\\text{if } | c_i \\cup c_j | = 0 \\\\ \\frac{| c_i \\cap c_j |}{| c_i \\cup c_j |} &\\text{else } \\end{cases}}{\\frac{|C| * (|C| - 1)}{2}}",
-        "helperFunctions": [],
+        "calculationFormula": "\\frac{\\displaystyle\\sum_{i=1}^{|C|}\\sum_{j=i+1}^{|C|} \\begin{cases} 0 &\\text{if } | artifactTypes(c_i) \\cup artifactTypes(c_j) | = 0 \\\\ \\frac{| artifactTypes(c_i) \\cap artifactTypes(c_j) |}{| artifactTypes(c_i) \\cup artifactTypes(c_j) |} &\\text{else } \\end{cases}}{\\frac{|C| * (|C| - 1)}{2}}",
+        "helperFunctions": ["artifactTypes: c \\to \\Set{ t | t = a.type \\land a \\in c.artifacts }"],
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE]
     },
     "infrastructureArtifactsSimilarity": {
         "name": "Infrastructure Artifacts Similarity",
         "calculation": "Average similarity of infrastructure entities based on a pairwise comparison of infrastructure artifacts.",
-        "calculationFormula": "\\frac{\\displaystyle\\sum_{k=1}^{|I|}\\sum_{l=k+1}^{|I|} \\begin{cases} 0 &\\text{if } | i_k \\cup i_l | = 0 \\\\ \\frac{| i_k \\cap i_l |}{| i_k \\cup i_l |} &\\text{else } \\end{cases}}{\\frac{|I| * (|I| - 1)}{2}}",
-        "helperFunctions": [],
+        "calculationFormula": "\\frac{\\displaystyle\\sum_{k=1}^{|I|}\\sum_{l=k+1}^{|I|} \\begin{cases} 0 &\\text{if } | artifactTypes(i_k) \\cup artifactTypes(i_l) | = 0 \\\\ \\frac{| artifactTypes(i_k) \\cap artifactTypes(i_l) |}{| artifactTypes(i_k) \\cup artifactTypes(i_l) |} &\\text{else } \\end{cases}}{\\frac{|I| * (|I| - 1)}{2}}",
+        "helperFunctions": ["artifactTypes: i \\to \\Set{ t | t = a.type \\land a \\in i.artifacts }"],
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM]
     },
