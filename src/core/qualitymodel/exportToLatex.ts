@@ -101,7 +101,8 @@ for (const factor of qualityModelInstance.productFactors) {
     output += `\\end{minipage}\n`;
     output += `\n`;
 
-    factorCommands += `\\newcommand\\${factor.getId}{\\hyperref[productfactor:${factor.getId}]{${factor.getName}}}\n`
+    factorCommands += `\\newglossaryentry{${factor.getId}}{name=${factor.getName},description={}}\n`
+    factorCommands += `\\newcommand\\${factor.getId}{\\hyperref[productfactor:${factor.getId}]{\\gls{${factor.getId}}}}\n`
     frameOutput += `\\input{${innerDir}/${factor.getId}.tex}\n\n`;
 
     fs.writeFile(`./${outerDir}/${innerDir}/${factor.getId}.tex`, `${output}`, (err) => {
@@ -255,7 +256,7 @@ let entitiesTableOutput = "";
 for (const entity of qualityModelInstance.entities) {
     entitiesTableOutput += `    \\refstepcounter{entity}\\label{entity:${entity.getKey}}
     ${entity.getName} (${entity.getSymbol}) & ${entity.getDescription} & ${entity.getRelation.type} ${entity.getRelation.target}\\\\\ \\hline \n`;
-    entityCommandsOutput += `\\newcommand\\${entity.getKey}{\\hyperref[entity:${entity.getKey}]{\\textbf{${entity.getName}}}} \n`;
+    entityCommandsOutput += `\\newcommand\\${entity.getKey}{\\hyperref[entity:${entity.getKey}]{${entity.getName}}} \n`;
 }
 
 entitiesTableOutput = `
@@ -568,9 +569,9 @@ function formatMeasureForExport(measureToExport: LatexMeasure) {
     Formula: & \\T \\\\
     \\multicolumn{2}{|>{\\centering\\arraybackslash}p{15.05cm}|}{$\\displaystyle ${measureToExport.formula}$} \\T\\B \\\\ ${helperFunctions} \\cline{1-2}
     Applicable Entities: & Associated Factor: \\T \\\\
-    ${measureToExport.entities.map(entity => `\\${entity}`).join(", ")} & \\${measureToExport.factorKey} \\\\
+    ${measureToExport.entities.map(entity => `\\textbf{\\${entity}}`).join(", ")} & \\textbf{\\${measureToExport.factorKey}} \\\\
     Associated Quality Aspects: & Literature Sources: \\T \\\\
-    ${measureToExport.qualityAspects.map(qa => `\\${qa}`).join(", ")} & ${measureToExport.sources.map(source => source === "new" ? source : `\\cite{${source}}`).join(", ")} \\\\ \\hline`;
+    ${measureToExport.qualityAspects.map(qa => `\\textbf{\\${qa}}`).join(", ")} & ${measureToExport.sources.map(source => source === "new" ? source : `\\cite{${source}}`).join(", ")} \\\\ \\hline`;
 }
 
 function exportMeasures(measuresToExport: LatexMeasure[], measuresPerTable: number, caption: string) {
@@ -604,13 +605,13 @@ function exportMeasures(measuresToExport: LatexMeasure[], measuresPerTable: numb
 function exportMeasureCommands(measuresToExport: LatexMeasure[]) {
     let measureCommandsOutput = "";
     for (let measure of measuresToExport) {
-        measureCommandsOutput += `\\newcommand\\${measure.id}{\\hyperref[measure:${measure.id}]{\\textbf{${measure.name}}}} \n`;
+        measureCommandsOutput += `\\newcommand\\${measure.id}{\\hyperref[measure:${measure.id}]{${measure.name}}} \n`;
     }
     return measureCommandsOutput;
 }
 
 
-fs.writeFile(`./${outerDir}/usedMeasures.tex`, `${exportMeasures(usedMeasuresOutput, 4, "Architectural Measures")}`, (err) => {
+fs.writeFile(`./${outerDir}/usedMeasures.tex`, `${exportMeasures(usedMeasuresOutput, 4, "Architectural measures")}`, (err) => {
     if (err) {
         console.error(`Could not export measures to LaTeX`)
     }
@@ -622,7 +623,7 @@ fs.writeFile(`./${outerDir}/usedMeasuresCommands.tex`, `${exportMeasureCommands(
     }
 })
 
-fs.writeFile(`./${outerDir}/unusedMeasures.tex`, `${exportMeasures(notUsedMeasuresOutput, 4, "Additional Architectural Measures")}`, (err) => {
+fs.writeFile(`./${outerDir}/unusedMeasures.tex`, `${exportMeasures(notUsedMeasuresOutput, 4, "Additional architectural measures")}`, (err) => {
     if (err) {
         console.error(`Could not export measures to LaTeX`)
     }
