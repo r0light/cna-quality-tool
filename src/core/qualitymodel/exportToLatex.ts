@@ -101,7 +101,8 @@ for (const factor of qualityModelInstance.productFactors) {
     output += `\\end{minipage}\n`;
     output += `\n`;
 
-    factorCommands += `\\newglossaryentry{${factor.getId}}{name=${factor.getName},description={}}\n`
+
+    factorCommands += `\\newglossaryentry{${factor.getId}}{name=${factor.getName},description={see \\pageref{productfactor:${factor.getId}}}}\n`
     factorCommands += `\\newcommand\\${factor.getId}{\\hyperref[productfactor:${factor.getId}]{\\gls{${factor.getId}}}}\n`
     frameOutput += `\\input{${innerDir}/${factor.getId}.tex}\n\n`;
 
