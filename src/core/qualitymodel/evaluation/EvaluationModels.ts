@@ -76,16 +76,25 @@ class EvaluatedEntityModel<T extends `${ENTITIES}`, E> implements Evaluation {
 
 
             // add measures for this factor
-            let measuresForThisFactor = new Map();
+			let evaluationMeasures = new Map();
+            let otherMeasures = new Map();
             currentFactor.getMeasuresFor(this.#entityKey).forEach(measure => {
                 if (this.#evaluationModel.calculatedMeasures.has(measure.getId)) {
-                    measuresForThisFactor.set(measure.getId, this.#evaluationModel.calculatedMeasures.get(measure.getId));
+					if (currentFactor.getEvaluation(this.#entityKey).getEvaluationDetails.getUsedMeasures.map(measure => measure.getId).includes(measure.getId)) {
+						evaluationMeasures.set(measure.getId, this.#evaluationModel.calculatedMeasures.get(measure.getId));
+					} else {
+						otherMeasures.set(measure.getId, this.#evaluationModel.calculatedMeasures.get(measure.getId));
+					}
                     return;
                 }
                 if (measure.isCalculationAvailable()) {
                     let calculatedMeasure: CalculatedMeasure = { name: measure.getName, entity: this.#entityKey, value: measure.calculate({ entity: this.#entity, system: this.#system }), description: measure.getCalculationDescription };
 
-                    measuresForThisFactor.set(measure.getId, calculatedMeasure)
+					if (currentFactor.getEvaluation(this.#entityKey).getEvaluationDetails.getUsedMeasures.map(measure => measure.getId).includes(measure.getId)) {
+						evaluationMeasures.set(measure.getId, calculatedMeasure);
+					} else {
+						otherMeasures.set(measure.getId, calculatedMeasure);
+					}
                     this.#evaluationModel.calculatedMeasures.set(measure.getId, calculatedMeasure);
                 }
             })
@@ -98,7 +107,8 @@ class EvaluatedEntityModel<T extends `${ENTITIES}`, E> implements Evaluation {
                 productFactor: currentFactor,
                 result: currentFactor.isEvaluationAvailable(this.#entityKey) ? currentFactor.evaluate(this.#entityKey, this) : "n/a",
                 evaluationReasoning: currentFactor.isEvaluationAvailable(this.#entityKey) ? currentFactor.getEvaluation(this.#entityKey).getEvaluationDetails.getReasoning : "",
-                measures: measuresForThisFactor,
+				measuresForEvaluation: evaluationMeasures,
+				otherMeasures: otherMeasures,
                 forwardImpacts: [],
                 backwardImpacts: []
             }

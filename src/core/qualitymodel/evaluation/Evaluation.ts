@@ -26,7 +26,8 @@ export type EvaluatedProductFactor = {
     productFactor: ProductFactor,
     result: FactorEvaluationResult, 
     evaluationReasoning: string,
-    measures: Map<string, CalculatedMeasure>,
+	measuresForEvaluation: Map<string, CalculatedMeasure>,
+    otherMeasures: Map<string, CalculatedMeasure>,
     forwardImpacts: ForwardImpactingPath[],
     backwardImpacts: BackwardImpactingPath[]
 }

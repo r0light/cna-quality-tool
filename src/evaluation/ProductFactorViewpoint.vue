@@ -22,9 +22,16 @@
                             <span class="font-italic"> {{ productFactor.evaluationReasoning }}</span>
                         </div>
                         <div>
-                            <span v-if="productFactor.measures.size > 0">Relevant measures:</span>
-                            <ul>
-                                <li v-for="[key, measure] of productFactor.measures">
+                            <span v-if="productFactor.measuresForEvaluation.size > 0">Measures used for evaluation:</span>
+							<ul>
+                                <li v-for="[key, measure] of productFactor.measuresForEvaluation">
+                                    <span>{{ measure.name }}</span>: <span class="font-weight-bold"> {{ measure.value
+                                        }}</span><span> ({{ measure.description }})</span>
+                                </li>
+                            </ul>
+							<span v-if="productFactor.otherMeasures.size > 0">Other relevant measures:</span>
+							<ul>
+                                <li v-for="[key, measure] of productFactor.otherMeasures">
                                     <span>{{ measure.name }}</span>: <span class="font-weight-bold"> {{ measure.value
                                         }}</span><span> ({{ measure.description }})</span>
                                 </li>
