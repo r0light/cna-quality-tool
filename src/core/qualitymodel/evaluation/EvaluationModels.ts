@@ -80,7 +80,8 @@ class EvaluatedEntityModel<T extends `${ENTITIES}`, E> implements Evaluation {
             let otherMeasures = new Map();
             currentFactor.getMeasuresFor(this.#entityKey).forEach(measure => {
                 if (this.#evaluationModel.calculatedMeasures.has(measure.getId)) {
-					if (currentFactor.getEvaluation(this.#entityKey).getEvaluationDetails.getUsedMeasures.map(measure => measure.getId).includes(measure.getId)) {
+                    let evaluation = currentFactor.getEvaluation(this.#entityKey);
+					if (evaluation && evaluation.getEvaluationDetails.getUsedMeasures.map(measure => measure.getId).includes(measure.getId)) {
 						evaluationMeasures.set(measure.getId, this.#evaluationModel.calculatedMeasures.get(measure.getId));
 					} else {
 						otherMeasures.set(measure.getId, this.#evaluationModel.calculatedMeasures.get(measure.getId));
@@ -90,7 +91,8 @@ class EvaluatedEntityModel<T extends `${ENTITIES}`, E> implements Evaluation {
                 if (measure.isCalculationAvailable()) {
                     let calculatedMeasure: CalculatedMeasure = { name: measure.getName, entity: this.#entityKey, value: measure.calculate({ entity: this.#entity, system: this.#system }), description: measure.getCalculationDescription };
 
-					if (currentFactor.getEvaluation(this.#entityKey).getEvaluationDetails.getUsedMeasures.map(measure => measure.getId).includes(measure.getId)) {
+                    let evaluation = currentFactor.getEvaluation(this.#entityKey);
+					if (evaluation && evaluation.getEvaluationDetails.getUsedMeasures.map(measure => measure.getId).includes(measure.getId)) {
 						evaluationMeasures.set(measure.getId, calculatedMeasure);
 					} else {
 						otherMeasures.set(measure.getId, calculatedMeasure);
