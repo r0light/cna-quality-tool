@@ -2,7 +2,6 @@
     <div class="full-width">
         <div class="d-flex flex-column p-1 evaluation-background">
             <h2>Evaluation {{ currentEvaluationName }}</h2>
-            <p class="font-weight-bold">The evaluation feature is still in development...</p>
             <FilterToolbar :highLevelAspectFilter="highLevelAspectFilter" :factorCategoryFilter="factorCategoryFilter"
                 @update:filters="saveEvaluationConfig(); triggerEvaluation()"></FilterToolbar>
             <div class="d-flex flex-row selection-bar">
