@@ -176,3 +176,10 @@ export function describeImpactStyle(count: number, impactWeight: ImpactWeight): 
     return `\n\tlinkStyle ${count} stroke-width:${strokeWidth},fill:none,stroke:${color},color:#000`;
 }
 
+
+export function roundValue(value: string | number) {
+    if (typeof value === "number") {
+        return value.toFixed(3);
+    }
+    return value;
+}

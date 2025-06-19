@@ -25,14 +25,14 @@
                             <span v-if="productFactor.measuresForEvaluation.size > 0">Measures used for evaluation:</span>
 							<ul>
                                 <li v-for="[key, measure] of productFactor.measuresForEvaluation">
-                                    <span>{{ measure.name }}</span>: <span class="font-weight-bold"> {{ measure.value
+                                    <span>{{ measure.name }}</span>: <span class="font-weight-bold"> {{ roundValue(measure.value)
                                         }}</span><span> ({{ measure.description }})</span>
                                 </li>
                             </ul>
 							<span v-if="productFactor.otherMeasures.size > 0">Other relevant measures:</span>
 							<ul>
                                 <li v-for="[key, measure] of productFactor.otherMeasures">
-                                    <span>{{ measure.name }}</span>: <span class="font-weight-bold"> {{ measure.value
+                                    <span>{{ measure.name }}</span>: <span class="font-weight-bold"> {{ roundValue(measure.value)
                                         }}</span><span> ({{ measure.description }})</span>
                                 </li>
                             </ul>
@@ -48,6 +48,7 @@
 import ForwardImpactVisualization from './ForwardImpactVisualization.vue';
 import { ComputedRef, computed } from 'vue';
 import { EvaluatedProductFactor } from '@/core/qualitymodel/evaluation/Evaluation';
+import { roundValue } from '@/evaluation/evaluation-commons';
 
 const props = defineProps<{
     evaluatedProductFactors: Map<string, EvaluatedProductFactor>,
