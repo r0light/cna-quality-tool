@@ -363,6 +363,15 @@ function onSelectRequestTrace(element: dia.Element) {
     allInvolvedEntities.add(element.id.toString());
     // add referred External Endpoint
     allInvolvedEntities.add(element.prop("entity/relations/referred_endpoint"));
+    if (element.prop("entity/relations/referred_endpoint") && element.prop("entity/relations/referred_endpoint").length > 0) {
+        let externalEndpoint = currentSystemGraph.value.getCell(element.prop("entity/relations/referred_endpoint"));
+        if (externalEndpoint.prop("entity/relations/uses_data")) {
+                for (const usedData of externalEndpoint.prop("entity/relations/uses_data")) {
+                    allInvolvedEntities.add(currentSystemGraph.value.getCell(usedData).id.toString());
+                }
+            }
+    }
+
 
     if (involvedLinks && involvedLinks.length > 0) {
         for (const involvedLink of involvedLinks) {
