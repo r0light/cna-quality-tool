@@ -63,6 +63,10 @@ class QualityAspect {
         return this.#evaluation !== undefined;
     }
 
+    getEvaluation(): QualityAspectEvaluation {
+        return this.#evaluation;
+    }
+
     evaluate(evaluation: Evaluation): QualityAspectEvaluationResult {
         return this.#evaluation.evaluate(evaluation.getCalculatedMeasures(), evaluation.getEvaluatedProductFactors());
     }

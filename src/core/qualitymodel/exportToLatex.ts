@@ -145,9 +145,9 @@ const exportFactorsAsCSV = [
             }
             search.splice(0, 1);
         }
-        
+
         let qualityAspectValues = factorQualityAspectHeaders.map(qaKey => qualityAspects.includes(qaKey) ? "1" : "0");
-        
+
         return simpleValues.concat(entitiesValues).concat(categoriesValues).concat(qualityAspectValues).join(";")
     })
 ].join('\n');
@@ -166,7 +166,7 @@ const categoriesAsCSV = [
     categorySimpleFieldHeaders.join(';'), // header row first
     ...qualityModelInstance.factorCategories.map(category => {
         let simpleValues = [category.categoryKey, category.categoryName];
-        
+
         return simpleValues.join(";")
     })
 ].join('\n');
@@ -230,7 +230,7 @@ fs.writeFile(`./${outerDir}/qualityAspects.csv`, `${exportQualityAspectsAsCSV}`,
 })
 // Highlevel Quality Aspects as CSV
 
-const hqaSimpleFieldHeaders = ["id", "name" ];
+const hqaSimpleFieldHeaders = ["id", "name"];
 
 const exportHighlevelQualityAspectsAsCSV = [
     hqaSimpleFieldHeaders.join(';'), // header row first
@@ -542,7 +542,7 @@ const exportMeasuresAsCSV = [
         let sourceValue = [row.sources.includes("new") ? "new" : "existing"];
         let entitiesValues = entitiesHeaders.map(entityKey => row.entities.includes(entityKey) ? "1" : "0");
         let qualityAspectsValues = qualityAspectsHeaders.map(qualityAspectKey => row.qualityAspects.includes(qualityAspectKey) ? "1" : "0");
-        
+
         return simpleValues.concat(sourceValue).concat(entitiesValues).concat(qualityAspectsValues).join(";")
     })
 ].join('\n');
@@ -640,11 +640,12 @@ fs.writeFile(`./${outerDir}/unusedMeasuresCommands.tex`, `${exportMeasureCommand
 // Evaluations
 
 
-let leafFactorEvaluationsOutput = "";
+// Evaluations for leaf factors
+
 let leafFactorEvaluationsTableOutput = "";
 
 for (let leafProductFactor of qualityModelInstance.productFactors.filter(factor => factor.getIncomingImpacts.length === 0)) {
-    
+
     let applicableEntities = leafProductFactor.getApplicableEntities;
 
     if (applicableEntities.length > 1) {
@@ -656,8 +657,6 @@ for (let leafProductFactor of qualityModelInstance.productFactors.filter(factor 
         leafFactorEvaluationsTableOutput += `    \\${leafProductFactor.getId} & \\${applicableEntities[0]} & ${leafProductFactor.getEvaluation(applicableEntities[0]).getEvaluationDetails.getUsedMeasures.map(measure => `\\${measure.getId}`).join(", ")} & \\\\ \n`;
     }
 }
-
-
 
 leafFactorEvaluationsTableOutput = `
 \\begin{table}[h]
@@ -681,24 +680,68 @@ fs.writeFile(`./${outerDir}/leafEvaluationsTable.tex`, `${leafFactorEvaluationsT
 })
 
 
+// Evaluations for intermediate factors
 
-
-let intermediateFactorEvaluationsOutput = "";
 let intermediateFactorEvaluationsTableOutput = "";
 
+for (let intermediateProductFactor of qualityModelInstance.productFactors.filter(factor => factor.getIncomingImpacts.length > 0)) {
 
+    let applicableEntities = intermediateProductFactor.getApplicableEntities;
 
-
+    if (applicableEntities.length > 1) {
+        intermediateFactorEvaluationsTableOutput += `    \\multirow[t]{${applicableEntities.length}}{*}{\\${intermediateProductFactor.getId}}& \\${applicableEntities[0]} & ${intermediateProductFactor.getEvaluation(applicableEntities[0]).getEvaluationDetails.getImpactsInterpretation} & ${intermediateProductFactor.getEvaluation(applicableEntities[0]).getEvaluationDetails.getPrecondition} \\\\ \n`;
+        for (let i = 1; i < applicableEntities.length; i++) {
+            intermediateFactorEvaluationsTableOutput += `    & \\${applicableEntities[i]} & ${intermediateProductFactor.getEvaluation(applicableEntities[i]).getEvaluationDetails.getImpactsInterpretation} & ${intermediateProductFactor.getEvaluation(applicableEntities[i]).getEvaluationDetails.getPrecondition} \\\\ \n`;
+        }
+    } else {
+        intermediateFactorEvaluationsTableOutput += `    \\${intermediateProductFactor.getId} & \\${applicableEntities[0]} & ${intermediateProductFactor.getEvaluation(applicableEntities[0]).getEvaluationDetails.getImpactsInterpretation} & ${intermediateProductFactor.getEvaluation(applicableEntities[0]).getEvaluationDetails.getPrecondition} \\\\ \n`;
+    }
+}
 
 intermediateFactorEvaluationsTableOutput = `
 \\begin{table}[h]
-	\\caption{Evaluation overview}
+	\\caption{Evaluation overview for intermediate factors}
 	\\label{tab:results:qualitymodel:evaluationIntermediate}
 	\\centering
-    \\fontsize{11}{13}\\selectfont
-	\begin{tabular}{llll}
+    \\def\\arraystretch{1.2}
+    \\fontsize{9}{11}\\selectfont
+	\\begin{tabularx}{\\textwidth}{XXXX}
 		\\textbf{Product Factor}  & \\textbf{Entity}  & \\textbf{Impacts Aggregation} & \\textbf{Precondition} \\\\\ \\hline
         ${intermediateFactorEvaluationsTableOutput}
-	\\end{tabular}%
+	\\end{tabularx}%
 \\end{table}
 `;
+
+fs.writeFile(`./${outerDir}/intermediateEvaluationsTable.tex`, `${intermediateFactorEvaluationsTableOutput}`, (err) => {
+    if (err) {
+        console.error(`Could not export used intermediate factor evaluations to LaTeX`)
+    }
+})
+
+// Evaluations for quality aspects
+
+let qualityAspectEvaluationsTableOutput = "";
+
+for (let qualityAspect of qualityModelInstance.qualityAspects.filter(qa => qa.getIncomingImpacts.length > 0)) {
+    qualityAspectEvaluationsTableOutput += `    \\${qualityAspect.getId} & ${qualityAspect.getEvaluation().getEvaluationDetails.getImpactsInterpretation} & ${qualityAspect.getEvaluation().getEvaluationDetails.getPrecondition} \\\\ \n`;
+}
+
+qualityAspectEvaluationsTableOutput = `
+\\begin{table}[h]
+	\\caption{Evaluation overview for quality aspects}
+	\\label{tab:results:qualitymodel:evaluationQualityAspects}
+	\\centering
+    \\def\\arraystretch{1.2}
+    \\fontsize{9}{11}\\selectfont
+	\\begin{tabularx}{\\textwidth}{XXXX}
+		\\textbf{Quality Aspect}   & \\textbf{Impacts Aggregation} & \\textbf{Precondition} \\\\\ \\hline
+        ${qualityAspectEvaluationsTableOutput}
+	\\end{tabularx}%
+\\end{table}
+`;
+
+fs.writeFile(`./${outerDir}/qualityAspectEvaluationsTable.tex`, `${qualityAspectEvaluationsTableOutput}`, (err) => {
+    if (err) {
+        console.error(`Could not export used quality aspect evaluations to LaTeX`)
+    }
+})
