@@ -2760,7 +2760,7 @@ const measures = {
     },
     "numberOfReadEndpointsProvidedByAService": {
         "name": "Number of Read Endpoints provided by a service",
-        "calculation": "Number of Endpoints of kind \\text{\"query\"} of a component",
+        "calculation": "Number of Endpoints of kind \"query\" of a component",
         "calculationFormula": "|\\Set{ e | e \\in c.providedEndpoints \\land e.kind = \\text{\"query\"}}|",
         "helperFunctions": [],
         "sources": ["Daniel2023"],
@@ -2768,7 +2768,7 @@ const measures = {
     },
     "numberOfWriteEndpointsProvidedByAService": {
         "name": "Number of Write Endpoints provided by a service",
-        "calculation": "Number of Endpoints of kind \\text{\"command\"} or \\text{\"send event\"} of a component",
+        "calculation": "Number of Endpoints of kind \"command\" or \"send event\" of a component",
         "calculationFormula": "|\\Set{ e | e \\in c.providedEndpoints \\land (e.kind = \\text{\"command\"} \\lor e.kind = \\text{\"send event\"})}|",
         "helperFunctions": [],
         "sources": ["Daniel2023"],
@@ -2854,7 +2854,7 @@ const measures = {
     },
     "suitablyReplicatedStatefulService": {
         "name": "Ratio of suitably replicated stateful services",
-        "calculation": "Stateful Backing Services, Storage Backing Services, or Broker Backing Services that are replicated with a strategy other than \\text{\"none\"} / All Stateful Backing Services, Storage Backing Services, or Broker Backing Services",
+        "calculation": "Stateful Backing Services, Storage Backing Services, or Broker Backing Services that are replicated with a strategy other than \"none\" / All Stateful Backing Services, Storage Backing Services, or Broker Backing Services",
         "calculationFormula": "\\frac{|\\Set{ bs | bs \\in BS \\cup SBS \\cup BBS \\land bs.stateless = false \\land suitablyReplicated(bs)}|}{|\\Set{ bs | bs \\in BS \\cup SBS \\cup BBS \\land bs.stateless = false \\land replicated(bs)}|}",
         "helperFunctions": ["suitablyReplicated bs \\to (\\exists dm \\in DM (dm.deployed = bs \\land dm.replicas > 1) \\land bs.replication\\_strategy \\neq \\text{\"none\"})",
             "replicated: bs \\to (\\exists dm \\in DM (dm.deployed = bs \\land dm.replicas > 1))"
