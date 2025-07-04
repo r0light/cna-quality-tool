@@ -918,10 +918,6 @@ export const ratioOfLinksWithComplexFailover: Calculation = (parameters: Calcula
     return linksWithCircuitBreaker.length / linksToSynchronousEndpoints.length;
 }
 
-export const totalNumberOfComponents: Calculation = (parameters: CalculationParameters<System>) => {
-    return parameters.entity.getComponentEntities.size;
-}
-
 export const numberOfServices: Calculation = (parameters: CalculationParameters<System>) => {
     return [...parameters.entity.getComponentEntities.entries()].filter(([componentId, component]) => component.constructor.name === Service.name).length;
 }
@@ -2927,7 +2923,6 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation }
     "rollingUpdateOption": rollingUpdateOption,
     "ratioOfLinksWithRetryLogic": ratioOfLinksWithRetryLogic,
     "ratioOfLinksWithComplexFailover": ratioOfLinksWithComplexFailover,
-    "totalNumberOfComponents": totalNumberOfComponents,
     "numberOfServices": numberOfServices,
     "numberOfBackingServices": numberOfBackingServices,
     "totalNumberOfLinksInASystem": totalNumberOfLinksInASystem,

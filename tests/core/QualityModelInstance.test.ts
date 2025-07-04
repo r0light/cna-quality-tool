@@ -2,14 +2,16 @@ import { getQualityModel } from "@/core/qualitymodel/QualityModelInstance";
 import { ProductFactor } from "@/core/qualitymodel/quamoco/ProductFactor";
 import { expect, test } from "vitest";
 
+
+const qualityModel = getQualityModel();
+
 test("quality model specification is correct", () => {
 
-    let qualityModel = getQualityModel();
     expect(qualityModel).toBeDefined();
 })
 
 test("each leaf factor has at least one implemented measure", () => {
-    let qualityModel = getQualityModel();
+
     let impactedFactorIds = qualityModel.impacts.filter(impact => impact.getImpactedFactor.getId).map(impact => impact.getImpactedFactor.getId);
 
     let leafFactors = qualityModel.productFactors.filter(factor => !impactedFactorIds.includes(factor.getId));
@@ -23,7 +25,7 @@ test("each leaf factor has at least one implemented measure", () => {
 })
 
 test("each factor has an evaluation", () =>{
-    let qualityModel = getQualityModel();
+
     let factors = new Set(qualityModel.productFactors);
 
     let evaluatedFactors = new Set(qualityModel.productFactors.filter(factor => factor.getApplicableEntities.every(entity => factor.isEvaluationAvailable(entity))));
@@ -35,7 +37,6 @@ test("each factor has an evaluation", () =>{
 
 test("each quality aspect has an evaluation", () => {
 
-    let qualityModel = getQualityModel();
     let qualityAspectsWithImpactingFactors = new Set(qualityModel.qualityAspects.filter(aspect => aspect.getImpactingFactors.length > 0));
 
     let evaluatedQualityAspects = new Set(qualityModel.qualityAspects.filter(aspect => aspect.getImpactingFactors.length > 0).filter(aspect => aspect.isEvaluationAvailable()));

@@ -635,3 +635,70 @@ fs.writeFile(`./${outerDir}/unusedMeasuresCommands.tex`, `${exportMeasureCommand
         console.error(`Could not export used measure commands to LaTeX`)
     }
 })
+
+
+// Evaluations
+
+
+let leafFactorEvaluationsOutput = "";
+let leafFactorEvaluationsTableOutput = "";
+
+for (let leafProductFactor of qualityModelInstance.productFactors.filter(factor => factor.getIncomingImpacts.length === 0)) {
+    
+    let applicableEntities = leafProductFactor.getApplicableEntities;
+
+    if (applicableEntities.length > 1) {
+        leafFactorEvaluationsTableOutput += `    \\multirow[t]{${applicableEntities.length}}{3cm}{\\${leafProductFactor.getId}}& \\${applicableEntities[0]} & ${leafProductFactor.getEvaluation(applicableEntities[0]).getEvaluationDetails.getUsedMeasures.map(measure => `\\${measure.getId}`).join(", ")} & \\\\ \n`;
+        for (let i = 1; i < applicableEntities.length; i++) {
+            leafFactorEvaluationsTableOutput += `    & \\${applicableEntities[i]} & ${leafProductFactor.getEvaluation(applicableEntities[i]).getEvaluationDetails.getUsedMeasures.map(measure => `\\${measure.getId}`).join(", ")} & \\\\ \n`;
+        }
+    } else {
+        leafFactorEvaluationsTableOutput += `    \\${leafProductFactor.getId} & \\${applicableEntities[0]} & ${leafProductFactor.getEvaluation(applicableEntities[0]).getEvaluationDetails.getUsedMeasures.map(measure => `\\${measure.getId}`).join(", ")} & \\\\ \n`;
+    }
+}
+
+
+
+leafFactorEvaluationsTableOutput = `
+\\begin{table}[h]
+	\\caption{Evaluation overview for leaf factors}
+	\\label{tab:results:qualitymodel:evaluationLeaf}
+	\\centering
+    \\def\\arraystretch{1.2}
+    \\fontsize{9}{11}\\selectfont
+	\\begin{tabularx}{\\textwidth}{p{3cm}p{2cm}XX}
+		\\textbf{Product Factor}  & \\textbf{Entity}  & \\textbf{Measures used} & \\textbf{Evaluation function} \\\\\ \\hline
+        ${leafFactorEvaluationsTableOutput}
+	\\end{tabularx}%
+\\end{table}
+`;
+
+
+fs.writeFile(`./${outerDir}/leafEvaluationsTable.tex`, `${leafFactorEvaluationsTableOutput}`, (err) => {
+    if (err) {
+        console.error(`Could not export used leaf factor evaluations to LaTeX`)
+    }
+})
+
+
+
+
+let intermediateFactorEvaluationsOutput = "";
+let intermediateFactorEvaluationsTableOutput = "";
+
+
+
+
+
+intermediateFactorEvaluationsTableOutput = `
+\\begin{table}[h]
+	\\caption{Evaluation overview}
+	\\label{tab:results:qualitymodel:evaluationIntermediate}
+	\\centering
+    \\fontsize{11}{13}\\selectfont
+	\begin{tabular}{llll}
+		\\textbf{Product Factor}  & \\textbf{Entity}  & \\textbf{Impacts Aggregation} & \\textbf{Precondition} \\\\\ \\hline
+        ${intermediateFactorEvaluationsTableOutput}
+	\\end{tabular}%
+\\end{table}
+`;

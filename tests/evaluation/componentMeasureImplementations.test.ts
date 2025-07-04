@@ -2036,7 +2036,7 @@ test("ratioOfEndpointsThatAreIncludedInASingleSignOnApproach", () => {
     expect(measureValue).toEqual(0.5);
 })
 
-test("endpointAccessConsistency", () => {
+test("iendpointAccessMethodsConsistency", () => {
     let system = new System("sys1", "testSystem");
 
     let serviceA = new Service("s1", "service A", getEmptyMetaData())
@@ -2054,7 +2054,7 @@ test("endpointAccessConsistency", () => {
 
     system.addEntities([serviceA, backingServiceB]);
 
-    let measureValue = componentMeasureImplementations["endpointAccessConsistency"]({ entity: serviceA, system: system });
+    let measureValue = componentMeasureImplementations["iendpointAccessMethodsConsistency"]({ entity: serviceA, system: system });
     expect(measureValue).toEqual(0.5);
 })
 
@@ -2100,9 +2100,16 @@ test("readWriteSeparationForDataAggregates", () => {
     service.addEndpoint(endpointB);
     endpointB.addDataAggregateEntity(dataAggregateB, new RelationToDataAggregate("r4", getEmptyMetaData()));
 
+    let serviceB = new Service("s2", "testService 2", getEmptyMetaData());
+    serviceB.addDataAggregateEntity(dataAggregateA, new RelationToDataAggregate("r5", getEmptyMetaData()));
+
+    let endpointC = new ExternalEndpoint("e3", "endpoint 3", getEmptyMetaData());
+    endpointC.setPropertyValue("kind", "command");
+    serviceB.addEndpoint(endpointC);
+    endpointC.addDataAggregateEntity(dataAggregateA, new RelationToDataAggregate("r6", getEmptyMetaData()));
 
     system.addEntities([dataAggregateA, dataAggregateB]);
-    system.addEntity(service);
+    system.addEntities([service, serviceB]);
 
     let measureValue = componentMeasureImplementations["readWriteSeparationForDataAggregates"]({ entity: service, system: system });
     expect(measureValue).toEqual(1);

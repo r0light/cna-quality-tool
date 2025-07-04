@@ -423,7 +423,7 @@ const productFactors = {
         "description": "To keep the functional scope of services limited, the number of endpoints of a service is limited to a cohesive set of endpoints that provide related operations.",
         "categories": ["businessDomain"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.ENDPOINT, ENTITIES.LINK],
-        "applicableEntities": [ENTITIES.COMPONENT],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT],
         "sources": [],
         "measures": ["numberOfProvidedSynchronousAndAsynchronousEndpoints", "numberOfSynchronousEndpointsOfferedByAService", "serviceInterfaceUsageCohesion", "distributionOfSynchronousCalls", "cohesionOfEndpointsBasedOnInvocationByOtherServices", "unusedEndpointCount"],
         "evaluations": [{
@@ -438,7 +438,7 @@ const productFactors = {
         "description": "Endpoints for read (query) and write (command) operations on the same data aggregate are separated into different services. Changes to these operations can then be made independently and also different representations for data aggregates can be used. That way operations on data aggregates can be adjusted to differing usage patterns, different format requirements, or if they are changed for different reasons.",
         "categories": ["networkCommunication", "businessDomain"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.ENDPOINT, ENTITIES.LINK],
-        "applicableEntities": [ENTITIES.SYSTEM],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT],
         "sources": [{ "key": "Davis2019", "section": "4.4" }, { "key": "Richardson2019", "section": "7.2 Using the CQRS pattern" }, { "key": "Bastani2017", "section": "12 CQRS (Command Query Responsibility Segregation)" }, { "key": "Indrasiri2021", "section": "4 Command and Query Responsibility Segregation Pattern" }, { "key": "Goniwada2021", "section": "4 Command and Query Responsibility Segregation Pattern" }],
         "measures": ["numberOfReadEndpointsProvidedByAService", "numberOfWriteEndpointsProvidedByAService", "readWriteSeparationForDataAggregates"],
         "evaluations": [{

@@ -2337,7 +2337,7 @@ test("ratioOfEndpointsThatAreIncludedInASingleSignOnApproach", () => {
     expect(measureValue).toEqual(2 / 3);
 })
 
-test("endpointAccessConsistency", () => {
+test("iendpointAccessMethodsConsistency", () => {
     let system = new System("sys1", "testSystem");;
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
@@ -2369,7 +2369,7 @@ test("endpointAccessConsistency", () => {
     system.addEntities([linkAB, linkBC]);
     system.addEntity(requestTrace);
 
-    let measureValue = requestTraceMeasureImplementations["endpointAccessConsistency"]({ entity: requestTrace, system: system });
+    let measureValue = requestTraceMeasureImplementations["iendpointAccessMethodsConsistency"]({ entity: requestTrace, system: system });
     expect(measureValue).toEqual(1);
 })
 

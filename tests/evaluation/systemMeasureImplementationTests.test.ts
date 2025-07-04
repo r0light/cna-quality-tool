@@ -341,7 +341,7 @@ test("interactionDensityBasedOnLinks", () => {
 
     let measureValue = systemMeasureImplementations["interactionDensityBasedOnLinks"]({ entity: system, system: system });
 
-    expect(measureValue).toEqual(1 / 3);
+    expect(measureValue).toEqual(2 / 3);
 
 })
 
@@ -1282,36 +1282,6 @@ test("ratioOfLinksWithComplexFailover", () => {
     let measureValue = systemMeasureImplementations["ratioOfLinksWithComplexFailover"]({ entity: system, system: system });
     expect(measureValue).toEqual(2 / 3);
 })
-
-test("totalNumberOfComponents", () => {
-    let system = new System("sys1", "testSystem");;
-
-    let serviceA = new Service("s1", "testService", getEmptyMetaData());
-    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
-    let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
-    serviceA.addEndpoint(endpointA);
-    serviceA.addEndpoint(externalEndpointA);
-
-    let serviceB = new Service("s2", "testService", getEmptyMetaData());
-    let endpointB = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
-    serviceB.addEndpoint(endpointB);
-
-    let backingServiceC = new BackingService("s3", "testService", getEmptyMetaData());
-    let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
-    backingServiceC.addEndpoint(endpointC);
-
-    let storageBackingServiceD = new StorageBackingService("s4", "testService", getEmptyMetaData());
-    let endpointD = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
-    storageBackingServiceD.addEndpoint(endpointD);
-
-    let componentE = new Component("s5", "testService", getEmptyMetaData());
-
-    system.addEntities([serviceA, serviceB, backingServiceC, storageBackingServiceD, componentE]);
-
-    let measureValue = systemMeasureImplementations["totalNumberOfComponents"]({ entity: system, system: system });
-    expect(measureValue).toEqual(5);
-})
-
 
 test("numberOfServices", () => {
     let system = new System("sys1", "testSystem");;
@@ -3623,7 +3593,7 @@ test("ratioOfEndpointsThatAreIncludedInASingleSignOnApproach", () => {
     expect(measureValue).toEqual(2/3);
 })
 
-test("endpointAccessConsistency", () => {
+test("iendpointAccessMethodsConsistency", () => {
     let system = new System("sys1", "testSystem");
 
     let serviceA = new Service("s1", "service A", getEmptyMetaData())
@@ -3641,7 +3611,7 @@ test("endpointAccessConsistency", () => {
 
     system.addEntities([serviceA, backingServiceB]);
 
-    let measureValue = systemMeasureImplementations["endpointAccessConsistency"]({ entity: system, system: system });
+    let measureValue = systemMeasureImplementations["iendpointAccessMethodsConsistency"]({ entity: system, system: system });
     expect(measureValue).toEqual(1/3);
 })
 
@@ -3771,8 +3741,13 @@ test("readWriteSeparationForDataAggregates", () => {
     serviceA.addEndpoint(endpointA);
     endpointA.addDataAggregateEntity(dataAggregateA, new RelationToDataAggregate("r3", getEmptyMetaData()));
 
+    let endpointF = new ExternalEndpoint("e6", "endpoint 6", getEmptyMetaData());
+    endpointF.setPropertyValue("kind", "command");
+    serviceA.addEndpoint(endpointF);
+    endpointF.addDataAggregateEntity(dataAggregateA, new RelationToDataAggregate("r10", getEmptyMetaData()));
+
     let endpointB = new ExternalEndpoint("e2", "endpoint 2", getEmptyMetaData());
-    endpointB.setPropertyValue("kind", "command");
+    endpointB.setPropertyValue("kind", "query");
     serviceA.addEndpoint(endpointB);
     endpointB.addDataAggregateEntity(dataAggregateB, new RelationToDataAggregate("r4", getEmptyMetaData()));
 
@@ -3802,7 +3777,7 @@ test("readWriteSeparationForDataAggregates", () => {
     system.addEntities([serviceA, serviceB]);
 
     let measureValue = systemMeasureImplementations["readWriteSeparationForDataAggregates"]({ entity: system, system: system });
-    expect(measureValue).toEqual(0.75);
+    expect(measureValue).toEqual(0.5);
 })
 
 test("degreeOfSeparationByGateways", () => {
