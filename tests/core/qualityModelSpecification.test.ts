@@ -4,7 +4,6 @@ import { qualityModel } from "@/core/qualitymodel/specifications/qualitymodel";
 const qualityModelSpecification = qualityModel;
 
 test.each(Object.entries(qualityModelSpecification.productFactors).map(([key, value]) => value))("applicable entities should match target entities", (productFactor) => {
-    console.log(productFactor);
 
     let applicableEntities = new Set(productFactor.applicableEntities);
 
