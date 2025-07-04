@@ -229,7 +229,7 @@ const productFactors = {
         "description": "Secrets (e.g. passwords, access tokens, encryption keys) which allow access to other components or data are managed specifically to make sure they stay confidential and only authorized components or persons can access them. Managed in this case refers to where and how secrets are stored and how components which need them can access them.",
         "categories": ["applicationAdministration", "cloudInfrastructure", "dataManagement"],
         "relevantEntities": [ENTITIES.BACKING_SERVICE, ENTITIES.INFRASTRUCTURE, ENTITIES.BACKING_DATA, ENTITIES.COMPONENT],
-        "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
+        "applicableEntities": [ENTITIES.COMPONENT,  ENTITIES.INFRASTRUCTURE, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
         "sources": [],
         "measures": [],
         "evaluations": [
@@ -957,7 +957,7 @@ const productFactors = {
         "description": "Business logic and needed data is replicated at various points in a system so that latencies can be minimized and requests can be distributed for fast request handling.",
         "categories": ["applicationAdministration", "dataManagement", "cloudInfrastructure"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.DATA_AGGREGATE, ENTITIES.DEPLOYMENT_MAPPING, ENTITIES.INFRASTRUCTURE],
-        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT,  ENTITIES.REQUEST_TRACE],
         "sources": [],
         "measures": [],
         "evaluations": [
