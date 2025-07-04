@@ -133,7 +133,6 @@ function saveEvaluationConfig() {
     })
 }
 
-const selectedEntityId = ref<string>("");
 type SelectatableEntity = { id: string, name: string };
 const unselectedEntity = { id: "none", name: "" };
 const selectableEntities = ref<{ components: SelectatableEntity[], infrastructures: SelectatableEntity[], requestTraces: SelectatableEntity[] }>({ components: [unselectedEntity], infrastructures: [unselectedEntity], requestTraces: [unselectedEntity] });
@@ -218,6 +217,7 @@ function onSelectSystem() {
         // selectedSystem might not be findable, if it has been deleted
         selectedSystemId.value = -1;
         clearEvaluation();
+        resetEntitySelection();
         return;
     }
     emit("update:evaluatedSystem", selectedSystemId.value);
@@ -268,8 +268,11 @@ function clearEvaluation() {
 }
 
 function resetEntitySelection() {
+    selectedComponentId.value = "none";
     selectableEntities.value.components = [unselectedEntity];
+    selectedInfrastructureId.value = "none";
     selectableEntities.value.infrastructures = [unselectedEntity];
+    selectedRequestTraceId.value = "none";
     selectableEntities.value.requestTraces = [unselectedEntity];
 }
 

@@ -3131,11 +3131,11 @@ const measures = {
     },
     "readWriteSeparationForDataAggregates": {
         "name": "Read Write Separation for Data Aggregates",
-        "calculation": "Average(Exclusive Read or Write Access to Data Aggregate by Endpoint(s)) over all Data Aggregates",
-        "calculationFormula": "\\frac{ \\displaystyle\\sum_{i=1}^{|DA|} \\frac{\\sum_{j=1}^{|C|} \\begin{cases} 1 &\\text{if } onlyRead(c_j,da_i)  \\\\ 1 &\\text{if } onlyWrite(c_j,da_i)  \\\\ 0 &\\text{if } readWrite(c_j,da_i)  \\end{cases}}{|C|}  }{|DA|}",
-        "helperFunctions": ["onlyRead: c,da \\to (\\exists e_1 \\in c.providedEndpoints (\\exists (e_1,da) \\in e_1.RDA (\\land e_1.kind = \\text{\"query\"}) \\land \\nexists e_2 \\in c.providedEndpoints (\\exists (e_2,da) \\in e_2.RDA) \\land e_2.kind = \\text{\"command\"}))",
-            "onlyWrite: c,da \\to (\\exists e_1 \\in c.providedEndpoints (\\exists (e_1,da) \\in e_1.RDA ( \\land e_1.kind = \\text{\"command\"}) \\land  \\nexists e_2 \\in c.providedEndpoints (\\exists (e_2,da) \\in e_2.RDA ( \\land e_2.kind = \\text{\"query\"}))",
-            "readWrite: c,da \\to (\\exists e_1 \\in c_j.providedEndpoints (\\exists (e_1,da_i) \\in e_1.RDA) \\land e_1.kind = \\text{\"command\"}) \\land  \\exists e_2 \\in c_j.providedEndpoints (\\exists (e_2,da_i) \\in e_2.RDA) \\land e_2.kind = \\text{\"query\"}))"
+        "calculation": "Average(Separated Read and Write Access to Data Aggregate by Endpoint(s)) over all Data Aggregates",
+        "calculationFormula": "\\frac{ \\displaystyle\\sum_{i=1}^{|DA|} \\begin{cases} 1 &\\text{if } separated(da_i)  \\\\ 0 & else \\end{cases} }{|DA|}",
+        "helperFunctions": ["separatedRead: da \\to (\\exists c_1,c_2 \\in C (c_1 \\neq c_2 \\land \\exists (e_1,da) (e_1 \\in c_1.providedEndpoints  \\land \\exists(e_1, da) \\in e_1.RDA \\land e_1.kind = \\text{\"query\"} \\land \\nexists (e_2,da) (e_2 \\in c_1.providedEndpoints \\land (e_2,da) \\in e_2.RDA \\land e_2.kind = \\text{\"command\"})) \\land \\exists (e_3,da) (e_3 \\in c_2.providedEndpoints \\land \\exists (e_3,da) \\in e_3.RDA \\land e_3.kind = \\text{\"command\"})))",
+            "separatedWrite: da \\to (\\exists c_1,c_2 \\in C (c_1 \\neq c_2 \\land \\exists (e_1,da) (e_1 \\in c_1.providedEndpoints  \\land \\exists(e_1, da) \\in e_1.RDA \\land e_1.kind = \\text{\"command\"} \\land \\nexists (e_2,da) (e_2 \\in c_1.providedEndpoints \\land (e_2,da) \\in e_2.RDA \\land e_2.kind = \\text{\"query\"})) \\land \\exists (e_3,da) (e_3 \\in c_2.providedEndpoints \\land \\exists (e_3,da) \\in e_3.RDA \\land e_3.kind = \\text{\"query\"})))",
+            "separated: da \\to (separatedRead(da) \\lor separatedWrite(da))",
         ],
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT]

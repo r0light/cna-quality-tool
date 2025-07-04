@@ -1169,44 +1169,60 @@ export const externalEndpointAccessConsistency: Calculation = (parameters: Calcu
 
 export const readWriteSeparationForDataAggregates: Calculation = (parameters: CalculationParameters<Component>) => {
     // initialize map to track data aggregate usage
-    let dataAggregateUsage = new Map<string, { "read": boolean, "write": boolean }>();
-    parameters.entity.getDataAggregateEntities.forEach(dataAggregate => {
-        dataAggregateUsage.set(dataAggregate.data.getId, { "read": false, "write": false });
+    let dataAggregateUsageSeparation = new Map<string, {"readBy": string[], "writeBy": string[]}>();
+    parameters.entity.getDataAggregateEntities.forEach((dataAggregateRelation) => {
+        dataAggregateUsageSeparation.set(dataAggregateRelation.data.getId, {"readBy": [], "writeBy": []});
     })
+    let dataAggregatesUsedByThisComponent = dataAggregateUsageSeparation.keys().toArray();
 
-    let allComponentEndpoints = parameters.entity.getEndpointEntities.concat(parameters.entity.getExternalEndpointEntities);
-
-    if (allComponentEndpoints.length === 0 || dataAggregateUsage.size === 0) {
-        return "n/a";
-    }
-
-    for (const endpoint of allComponentEndpoints) {
-        for (const usageRelation of endpoint.getDataAggregateEntities) {
-            if (endpoint.getProperty("kind").value === "query") {
-                dataAggregateUsage.get(usageRelation.data.getId).read = true;
-            } else if (endpoint.getProperty("kind").value === "command") {
-                dataAggregateUsage.get(usageRelation.data.getId).write = true;
+    let allComponentEntities = parameters.system.getComponentEntities;
+    for (const [componentId, component] of allComponentEntities) {
+    
+        let allComponentEndpoints = component.getEndpointEntities.concat(component.getExternalEndpointEntities);
+    
+        if (allComponentEndpoints.length === 0 || component.getDataAggregateEntities.length === 0) {
+            continue;
+        }
+    
+        for (const endpoint of allComponentEndpoints) {
+            for (const usageRelation of endpoint.getDataAggregateEntities.filter(usageRelation => dataAggregatesUsedByThisComponent.includes(usageRelation.data.getId))) {
+                if (endpoint.getProperty("kind").value === "query") {
+                    dataAggregateUsageSeparation.get(usageRelation.data.getId).readBy.push(componentId);
+                } else  if (endpoint.getProperty("kind").value === "command") {
+                    dataAggregateUsageSeparation.get(usageRelation.data.getId).writeBy.push(componentId);
+                }
             }
         }
     }
 
-    let readWriteSeparation = [];
+    let separationPerDataAggregate = new Map<string, number>();
+    
+    dataAggregateUsageSeparation.entries().forEach(([dataAggregateId, readWriteBy]) => {
+        let readBy = new Set(readWriteBy.readBy);
+        let writeBy = new Set(readWriteBy.writeBy);
 
-    dataAggregateUsage.entries().forEach(([dataAggregateId, usage]) => {
-        if (usage.read && usage.write) {
-            // both read and write
-            readWriteSeparation.push(0);
-        } else if (usage.read != usage.write) {
-            // either read or write => separation
-            readWriteSeparation.push(1)
-        } // else no usage...
+        if (readBy.size === 0 || writeBy.size === 0) {
+            return;
+        }
+
+        if (readBy.difference(writeBy).size === 0 && writeBy.difference(readBy).size === 0) {
+            // both read and write by same components
+            separationPerDataAggregate.set(dataAggregateId, 0);
+            return;   
+        }
+
+        if (readBy.difference(writeBy).size > 0 || writeBy.difference(readBy).size > 0 ) {
+            separationPerDataAggregate.set(dataAggregateId, 1);
+            return;   
+        }
+
     })
 
-    if (readWriteSeparation.length === 0) {
+    if (separationPerDataAggregate.size === 0) {
         return "n/a";
     }
 
-    return average(readWriteSeparation);
+    return average(separationPerDataAggregate.values().toArray());
 }
 
 export const ratioOfServicesThatProvideHealthEndpoints: Calculation = (parameters: CalculationParameters<Component>) => {

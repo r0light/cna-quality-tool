@@ -7,7 +7,7 @@ import { getIncludedComponents, numberOfCyclesInRequestTraces, requestTraceCompl
 import { supportsMonitoring as infrastructureSupportsMonitoring, ratioOfAutomaticallyProvisionedInfrastructure as infrastructureProvisionedAutomatically, ratioOfFullyManagedInfrastructure as infrastructureIsFullyManaged, nonProviderSpecificInfrastructureArtifacts as infrastructureHasOnlyNonProviderSpecificArtifacts } from "./infrastructureMeasures";
 import { supportsMonitoring as componentSupportsMonitoring, nonProviderSpecificComponentArtifacts as componentHasOnlyNonProviderSpecificArtifacts, degreeToWhichComponentsAreLinkedToStatefulComponents as degreeToWhichComponentsAreLinkedToStatefulComponentsForComponentCalculation } from "./componentMeasures";
 import { serviceMeshUsage as componentServiceMeshUsage, namespaceSeparation as componentNamespaceSeparation } from "./componentMeasures";
-import { map } from "jquery";
+import { data, map } from "jquery";
 import { Artifact } from "@/core/common/artifact";
 
 
@@ -2522,50 +2522,53 @@ export const serviceInterfaceUsageCohesion: Calculation = (parameters: Calculati
 
 export const readWriteSeparationForDataAggregates: Calculation = (parameters: CalculationParameters<System>) => {
     // initialize map to track data aggregate usage
-    let dataAggregateUsageSeparation = new Map<string, number[]>();
+    let dataAggregateUsageSeparation = new Map<string, {"readBy": string[], "writeBy": string[]}>();
     parameters.entity.getDataAggregateEntities.entries().forEach(([dataAggregateId, dataAggregate]) => {
-        dataAggregateUsageSeparation.set(dataAggregateId, []);
+        dataAggregateUsageSeparation.set(dataAggregateId, {"readBy": [], "writeBy": []});
     })
 
     let allComponentEntities = parameters.entity.getComponentEntities;
 
     for (const [componentId, component] of allComponentEntities) {
-        let dataAggregateUsage = new Map<string, {"read": boolean, "write": boolean}>();
-        component.getDataAggregateEntities.forEach(dataAggregate => {
-            dataAggregateUsage.set(dataAggregate.data.getId, {"read": false, "write": false});
-        })
     
         let allComponentEndpoints = component.getEndpointEntities.concat(component.getExternalEndpointEntities);
     
-        if (allComponentEndpoints.length === 0 || dataAggregateUsage.size === 0) {
+        if (allComponentEndpoints.length === 0 || component.getDataAggregateEntities.length === 0) {
             continue;
         }
     
         for (const endpoint of allComponentEndpoints) {
             for (const usageRelation of endpoint.getDataAggregateEntities) {
                 if (endpoint.getProperty("kind").value === "query") {
-                    dataAggregateUsage.get(usageRelation.data.getId).read = true;
+                    dataAggregateUsageSeparation.get(usageRelation.data.getId).readBy.push(componentId);
                 } else  if (endpoint.getProperty("kind").value === "command") {
-                    dataAggregateUsage.get(usageRelation.data.getId).write = true;
+                    dataAggregateUsageSeparation.get(usageRelation.data.getId).writeBy.push(componentId);
                 }
             }
         }
-    
-        dataAggregateUsage.entries().forEach(([dataAggregateId, usage]) => {
-            if (usage.read && usage.write) {
-                // both read and write
-                dataAggregateUsageSeparation.get(dataAggregateId).push(0);
-            } else if (usage.read != usage.write) {
-                // either read or write => separation
-                dataAggregateUsageSeparation.get(dataAggregateId).push(1);
-            } // else no usage...
-        })
     }
 
     let separationPerDataAggregate = new Map<string, number>();
     
-    dataAggregateUsageSeparation.entries().filter(([dataAggregateId, usageSeparations]) => usageSeparations.length > 0).forEach(([dataAggregateId, usageSeparations]) => {
-        separationPerDataAggregate.set(dataAggregateId, average(usageSeparations));
+    dataAggregateUsageSeparation.entries().forEach(([dataAggregateId, readWriteBy]) => {
+        let readBy = new Set(readWriteBy.readBy);
+        let writeBy = new Set(readWriteBy.writeBy);
+
+        if (readBy.size === 0 || writeBy.size === 0) {
+            return;
+        }
+
+        if (readBy.difference(writeBy).size === 0 && writeBy.difference(readBy).size === 0) {
+            // both read and write by same components
+            separationPerDataAggregate.set(dataAggregateId, 0);
+            return;   
+        }
+
+        if (readBy.difference(writeBy).size > 0 || writeBy.difference(readBy).size > 0 ) {
+            separationPerDataAggregate.set(dataAggregateId, 1);
+            return;   
+        }
+
     })
 
     if (separationPerDataAggregate.size === 0) {
