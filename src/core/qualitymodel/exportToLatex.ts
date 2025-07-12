@@ -648,13 +648,35 @@ for (let leafProductFactor of qualityModelInstance.productFactors.filter(factor 
 
     let applicableEntities = leafProductFactor.getApplicableEntities;
 
-    if (applicableEntities.length > 1) {
-        leafFactorEvaluationsTableOutput += `    \\multirow[t]{${applicableEntities.length}}{3cm}{\\${leafProductFactor.getId}}& \\${applicableEntities[0]} & ${leafProductFactor.getEvaluation(applicableEntities[0]).getEvaluationDetails.getUsedMeasures.map(measure => `\\${measure.getId}`).join(", ")} & \\\\ \n`;
-        for (let i = 1; i < applicableEntities.length; i++) {
-            leafFactorEvaluationsTableOutput += `    & \\${applicableEntities[i]} & ${leafProductFactor.getEvaluation(applicableEntities[i]).getEvaluationDetails.getUsedMeasures.map(measure => `\\${measure.getId}`).join(", ")} & \\\\ \n`;
+    let entries: { entities: string, measures: string, evalFunction: string }[] = [];
+    let currentEntry = undefined;
+    for (const entity of applicableEntities) {
+        let measures = leafProductFactor.getEvaluation(entity).getEvaluationDetails.getUsedMeasures.map(measure => `\\${measure.getId}`).join(", ");
+        //let functions = leafProductFactor.getEvaluation(entity)
+        if (!currentEntry) {
+            currentEntry = { entities: `\\${entity}`, measures: measures, evalFunction: "" };
+        } else {
+            if (currentEntry.measures === measures) {
+                // add to entry, if measures are the same
+                currentEntry.entities += `, \\${entity}`;
+            } else {
+                // create new entry, if measures are different
+                entries.push(currentEntry);
+                currentEntry = { entities: `\\${entity}`, measures: measures, evalFunction: "" };
+            }
+        }
+    }
+    if (currentEntry) {
+        entries.push(currentEntry);
+    }
+
+    if (entries.length > 1) {
+        leafFactorEvaluationsTableOutput += `    \\multirow[t]{${entries.length}}{3cm}{\\${leafProductFactor.getId}}& ${entries[0].entities} & ${entries[0].measures} & \\\\ \n`;
+        for (let i = 1; i < entries.length; i++) {
+            leafFactorEvaluationsTableOutput += `    & ${entries[i].entities} & ${entries[i].measures} & \\\\ \n`;
         }
     } else {
-        leafFactorEvaluationsTableOutput += `    \\${leafProductFactor.getId} & \\${applicableEntities[0]} & ${leafProductFactor.getEvaluation(applicableEntities[0]).getEvaluationDetails.getUsedMeasures.map(measure => `\\${measure.getId}`).join(", ")} & \\\\ \n`;
+        leafFactorEvaluationsTableOutput += `    \\${leafProductFactor.getId} & ${entries[0].entities} & ${entries[0].measures} & \\\\ \n`;
     }
 }
 
@@ -665,7 +687,7 @@ leafFactorEvaluationsTableOutput = `
 	\\centering
     \\def\\arraystretch{1.2}
     \\fontsize{9}{11}\\selectfont
-	\\begin{tabularx}{\\textwidth}{p{3cm}p{2cm}XX}
+	\\begin{tabularx}{\\textwidth}{p{3.5cm}p{3cm}XX}
 		\\textbf{Product Factor}  & \\textbf{Entity}  & \\textbf{Measures used} & \\textbf{Evaluation function} \\\\\ \\hline
         ${leafFactorEvaluationsTableOutput}
 	\\end{tabularx}%

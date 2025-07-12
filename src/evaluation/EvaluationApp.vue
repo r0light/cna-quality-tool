@@ -27,6 +27,10 @@
                     <button class="btn btn-secondary selection-bar-button" :disabled="selectedSystemId === -1"
                         @click="exportMeasures">Export measures as CSV</button>
                 </div>
+                <div class="m-1 evaluation-tool">
+                    <button class="btn btn-secondary selection-bar-button" :disabled="selectedSystemId === -1"
+                        @click="exportEvaluation">Export evaluation as CSV</button>
+                </div>
             </div>
             <div class="d-flex flex-row selection-bar" v-if="selectedSystemId > -1">
                 <div class="m-1 evaluation-tool">
@@ -413,6 +417,121 @@ function exportMeasures() {
     });
 
     triggerDownload(headers.concat("\n").concat(measuresAsCsv.join("\n")), "text/csv", `${systemName}-measures.csv`);
+}
+
+function exportEvaluation() {
+
+    let systemData = props.systemsData.find(data => data.id === selectedSystemId.value);
+    let system = (systemData.entityManager ? toRaw(systemData.entityManager) : createTemporaryEntityManager(systemData)).getSystemEntity();
+    let systemName = systemData.name;
+
+    let activeElements = getActiveElements(getActiveFilterItems(highLevelAspectFilter.value), getActiveFilterItems(factorCategoryFilter.value), qualityModel);
+
+    let headers: string[] = ["entity","type", "key", "name", systemName];
+    let indexCount = 0;
+    const entityToIndex: Map<string, number> = new Map();
+    evaluationModelsWrapper.value.getAvailableComponents().forEach(componentId => {
+        headers.push(system.getComponentEntities.get(componentId).getName);
+        entityToIndex.set(componentId, indexCount);
+        indexCount++;
+    })
+    evaluationModelsWrapper.value.getAvailableInfrastructureEntities().forEach(infrastructureId => {
+        headers.push(system.getInfrastructureEntities.get(infrastructureId).getName);
+        entityToIndex.set(infrastructureId, indexCount);
+        indexCount++;
+    })
+    evaluationModelsWrapper.value.getAvailableRequestTraces().forEach(requestTraceId => {
+        headers.push(system.getRequestTraceEntities.get(requestTraceId).getName);
+        entityToIndex.set(requestTraceId, indexCount);
+        indexCount++;
+    })
+
+    let asCSVrows = [];
+    const otherColumns = new Array(entityToIndex.size).fill("n/a");
+
+    const systemEvaluationModel = evaluationModelsWrapper.value.getEvaluatedSystemModel(activeElements.activeQualityAspects, activeElements.activeProductFactors);
+    systemEvaluationModel.getEvaluatedQualityAspects().forEach(qualityAspect => {
+        let qualityAspectRow = `system;${qualityAspect.factorType};${qualityAspect.id};${qualityAspect.name};${qualityAspect.result};${otherColumns.join(";")}`;
+        asCSVrows.push(qualityAspectRow);
+    })
+    systemEvaluationModel.getEvaluatedProductFactors().forEach(factor => {
+        let factorRow = `system;${factor.factorType};${factor.id};${factor.name};${factor.result};${otherColumns.join(";")}`;
+        asCSVrows.push(factorRow);
+        factor.measuresForEvaluation.entries().forEach(([measureKey, measure]) => {
+            let measureRow = `system;measure;${measureKey};${measure.name};${measure.value};${otherColumns.join(";")}`;
+            asCSVrows.push(measureRow);
+        })
+    })
+
+    evaluationModelsWrapper.value.getAvailableComponents().forEach(componentId => {
+        let evaluatedComponentModel = evaluationModelsWrapper.value.getEvaluatedComponentModel(componentId, activeElements.activeQualityAspects, activeElements.activeProductFactors);
+        evaluatedComponentModel.getEvaluatedQualityAspects().forEach(qualityAspect => {
+            let otherColumnsCopy = [...otherColumns];
+            otherColumnsCopy[entityToIndex.get(componentId)] = qualityAspect.result;
+            let qualityAspectRow = `component;${qualityAspect.factorType};${qualityAspect.id};${qualityAspect.name};n/a;${otherColumnsCopy.join(";")}`;
+            asCSVrows.push(qualityAspectRow);
+        })
+        evaluatedComponentModel.getEvaluatedProductFactors().forEach(factor => {
+            let otherColumnsCopy = [...otherColumns];
+            otherColumnsCopy[entityToIndex.get(componentId)] = factor.result;
+            let factorRow = `component;${factor.factorType};${factor.id};${factor.name};n/a;${otherColumnsCopy.join(";")}`;
+            asCSVrows.push(factorRow);
+            factor.measuresForEvaluation.entries().forEach(([measureKey, measure]) => {
+                let otherColumnsCopy = [...otherColumns];
+                otherColumnsCopy[entityToIndex.get(componentId)] = measure.value;
+                let measureRow = `component;measure;${measureKey};${measure.name};n/a;${otherColumnsCopy.join(";")}`;
+                asCSVrows.push(measureRow);
+            })
+        })
+    });
+
+    evaluationModelsWrapper.value.getAvailableInfrastructureEntities().forEach(infrastructureId => {
+        let evaluatedInfrastructureModel = evaluationModelsWrapper.value.getEvaluatedInfrastructureModel(infrastructureId, activeElements.activeQualityAspects, activeElements.activeProductFactors);
+        evaluatedInfrastructureModel.getEvaluatedQualityAspects().forEach(qualityAspect => {
+            let otherColumnsCopy = [...otherColumns];
+            otherColumnsCopy[entityToIndex.get(infrastructureId)] = qualityAspect.result;
+            let qualityAspectRow = `infrastructure;${qualityAspect.factorType};${qualityAspect.id};${qualityAspect.name};n/a;${otherColumnsCopy.join(";")}`;
+            asCSVrows.push(qualityAspectRow);
+        })
+        evaluatedInfrastructureModel.getEvaluatedProductFactors().forEach(factor => {
+            let otherColumnsCopy = [...otherColumns];
+            otherColumnsCopy[entityToIndex.get(infrastructureId)] = factor.result;
+            let factorRow = `infrastructure;${factor.factorType};${factor.id};${factor.name};n/a;${otherColumnsCopy.join(";")}`;
+            asCSVrows.push(factorRow);
+            factor.measuresForEvaluation.entries().forEach(([measureKey, measure]) => {
+                let otherColumnsCopy = [...otherColumns];
+                otherColumnsCopy[entityToIndex.get(infrastructureId)] = measure.value;
+                let measureRow = `infrastructure;measure;${measureKey};${measure.name};n/a;${otherColumnsCopy.join(";")}`;
+                asCSVrows.push(measureRow);
+            })
+        })
+    });
+
+    evaluationModelsWrapper.value.getAvailableRequestTraces().forEach(requestTraceId => {
+        let evaluatedRequestTraceModel = evaluationModelsWrapper.value.getEvaluatedRequestTraceModel(requestTraceId, activeElements.activeQualityAspects, activeElements.activeProductFactors);
+        evaluatedRequestTraceModel.getEvaluatedQualityAspects().forEach(qualityAspect => {
+            let otherColumnsCopy = [...otherColumns];
+            otherColumnsCopy[entityToIndex.get(requestTraceId)] = qualityAspect.result;
+            let qualityAspectRow = `requestTrace;${qualityAspect.factorType};${qualityAspect.id};${qualityAspect.name};n/a;${otherColumnsCopy.join(";")}`;
+            asCSVrows.push(qualityAspectRow);
+        })
+        evaluatedRequestTraceModel.getEvaluatedProductFactors().forEach(factor => {
+            let otherColumnsCopy = [...otherColumns];
+            otherColumnsCopy[entityToIndex.get(requestTraceId)] = factor.result;
+            let factorRow = `requestTrace;${factor.factorType};${factor.id};${factor.name};n/a;${otherColumnsCopy.join(";")}`;
+            asCSVrows.push(factorRow);
+            factor.measuresForEvaluation.entries().forEach(([measureKey, measure]) => {
+                let otherColumnsCopy = [...otherColumns];
+                otherColumnsCopy[entityToIndex.get(requestTraceId)] = measure.value;
+                let measureRow = `requestTrace;measure;${measureKey};${measure.name};n/a;${otherColumnsCopy.join(";")}`;
+                asCSVrows.push(measureRow);
+            })
+        })
+    });
+
+
+
+    triggerDownload(headers.join(";").concat("\n").concat(asCSVrows.join("\n")), "text/csv", `${systemName}-evaluation.csv`);
 }
 
 </script>
