@@ -419,6 +419,13 @@ function exportMeasures() {
     triggerDownload(headers.concat("\n").concat(measuresAsCsv.join("\n")), "text/csv", `${systemName}-measures.csv`);
 }
 
+function roundIfNumeric(value: string | number) {
+    if (typeof value === "number" && !isNaN(value)) {
+        return value.toFixed(3);
+    }
+    return value;
+}
+
 function exportEvaluation() {
 
     let systemData = props.systemsData.find(data => data.id === selectedSystemId.value);
@@ -427,7 +434,7 @@ function exportEvaluation() {
 
     let activeElements = getActiveElements(getActiveFilterItems(highLevelAspectFilter.value), getActiveFilterItems(factorCategoryFilter.value), qualityModel);
 
-    let headers: string[] = ["entity","type", "key", "name", systemName];
+    let headers: string[] = ["entity", "type", "key", "name", systemName];
     let indexCount = 0;
     const entityToIndex: Map<string, number> = new Map();
     evaluationModelsWrapper.value.getAvailableComponents().forEach(componentId => {
@@ -455,79 +462,92 @@ function exportEvaluation() {
         asCSVrows.push(qualityAspectRow);
     })
     systemEvaluationModel.getEvaluatedProductFactors().forEach(factor => {
-        let factorRow = `system;${factor.factorType};${factor.id};${factor.name};${factor.result};${otherColumns.join(";")}`;
+        let factorRow = `system;${factor.factorType};${factor.id};${factor.name};${roundIfNumeric(factor.result)};${otherColumns.join(";")}`;
         asCSVrows.push(factorRow);
         factor.measuresForEvaluation.entries().forEach(([measureKey, measure]) => {
-            let measureRow = `system;measure;${measureKey};${measure.name};${measure.value};${otherColumns.join(";")}`;
+            let measureRow = `system;measure;${measureKey};${measure.name};${roundIfNumeric(measure.value)};${otherColumns.join(";")}`;
             asCSVrows.push(measureRow);
         })
     })
 
+    const componentRows: Map<string, { commons: string, otherColumns: (string | number)[] }> = new Map();
     evaluationModelsWrapper.value.getAvailableComponents().forEach(componentId => {
         let evaluatedComponentModel = evaluationModelsWrapper.value.getEvaluatedComponentModel(componentId, activeElements.activeQualityAspects, activeElements.activeProductFactors);
         evaluatedComponentModel.getEvaluatedQualityAspects().forEach(qualityAspect => {
-            let otherColumnsCopy = [...otherColumns];
-            otherColumnsCopy[entityToIndex.get(componentId)] = qualityAspect.result;
-            let qualityAspectRow = `component;${qualityAspect.factorType};${qualityAspect.id};${qualityAspect.name};n/a;${otherColumnsCopy.join(";")}`;
-            asCSVrows.push(qualityAspectRow);
+            if (!componentRows.has(qualityAspect.id)) {
+                componentRows.set(qualityAspect.id, { commons: `component;${qualityAspect.factorType};${qualityAspect.id};${qualityAspect.name};n/a;`, otherColumns: [...otherColumns] });
+            }
+            componentRows.get(qualityAspect.id).otherColumns[entityToIndex.get(componentId)] = qualityAspect.result;
         })
         evaluatedComponentModel.getEvaluatedProductFactors().forEach(factor => {
-            let otherColumnsCopy = [...otherColumns];
-            otherColumnsCopy[entityToIndex.get(componentId)] = factor.result;
-            let factorRow = `component;${factor.factorType};${factor.id};${factor.name};n/a;${otherColumnsCopy.join(";")}`;
-            asCSVrows.push(factorRow);
+            if (!componentRows.has(factor.id)) {
+                componentRows.set(factor.id, { commons: `component;${factor.factorType};${factor.id};${factor.name};n/a;`, otherColumns: [...otherColumns] });
+            }
+            componentRows.get(factor.id).otherColumns[entityToIndex.get(componentId)] = roundIfNumeric(factor.result);
             factor.measuresForEvaluation.entries().forEach(([measureKey, measure]) => {
-                let otherColumnsCopy = [...otherColumns];
-                otherColumnsCopy[entityToIndex.get(componentId)] = measure.value;
-                let measureRow = `component;measure;${measureKey};${measure.name};n/a;${otherColumnsCopy.join(";")}`;
-                asCSVrows.push(measureRow);
+                if (!componentRows.has(measureKey)) {
+                    componentRows.set(measureKey, { commons: `component;measure;${measureKey};${measure.name};n/a;`, otherColumns: [...otherColumns] });
+                }
+                componentRows.get(measureKey).otherColumns[entityToIndex.get(componentId)] = roundIfNumeric(measure.value);
             })
         })
     });
+    componentRows.entries().forEach(([key, value]) => {
+        asCSVrows.push(`${value.commons}${value.otherColumns.join(";")}`);
+    })
 
+    const infrastructureRows: Map<string, { commons: string, otherColumns: (string | number)[] }> = new Map();
     evaluationModelsWrapper.value.getAvailableInfrastructureEntities().forEach(infrastructureId => {
         let evaluatedInfrastructureModel = evaluationModelsWrapper.value.getEvaluatedInfrastructureModel(infrastructureId, activeElements.activeQualityAspects, activeElements.activeProductFactors);
         evaluatedInfrastructureModel.getEvaluatedQualityAspects().forEach(qualityAspect => {
-            let otherColumnsCopy = [...otherColumns];
-            otherColumnsCopy[entityToIndex.get(infrastructureId)] = qualityAspect.result;
-            let qualityAspectRow = `infrastructure;${qualityAspect.factorType};${qualityAspect.id};${qualityAspect.name};n/a;${otherColumnsCopy.join(";")}`;
-            asCSVrows.push(qualityAspectRow);
+            if (!infrastructureRows.has(qualityAspect.id)) {
+                infrastructureRows.set(qualityAspect.id, { commons: `infrastructure;${qualityAspect.factorType};${qualityAspect.id};${qualityAspect.name};n/a;`, otherColumns: [...otherColumns] });
+            }
+            infrastructureRows.get(qualityAspect.id).otherColumns[entityToIndex.get(infrastructureId)] = qualityAspect.result;
         })
         evaluatedInfrastructureModel.getEvaluatedProductFactors().forEach(factor => {
-            let otherColumnsCopy = [...otherColumns];
-            otherColumnsCopy[entityToIndex.get(infrastructureId)] = factor.result;
-            let factorRow = `infrastructure;${factor.factorType};${factor.id};${factor.name};n/a;${otherColumnsCopy.join(";")}`;
-            asCSVrows.push(factorRow);
+            if (!infrastructureRows.has(factor.id)) {
+                infrastructureRows.set(factor.id, { commons: `infrastructure;${factor.factorType};${factor.id};${factor.name};n/a;`, otherColumns: [...otherColumns] });
+            }
+            infrastructureRows.get(factor.id).otherColumns[entityToIndex.get(infrastructureId)] = roundIfNumeric(factor.result);
             factor.measuresForEvaluation.entries().forEach(([measureKey, measure]) => {
-                let otherColumnsCopy = [...otherColumns];
-                otherColumnsCopy[entityToIndex.get(infrastructureId)] = measure.value;
-                let measureRow = `infrastructure;measure;${measureKey};${measure.name};n/a;${otherColumnsCopy.join(";")}`;
-                asCSVrows.push(measureRow);
+                if (!infrastructureRows.has(measureKey)) {
+                    infrastructureRows.set(measureKey, { commons: `infrastructure;measure;${measureKey};${measure.name};n/a;`, otherColumns: [...otherColumns] });
+                }
+                infrastructureRows.get(measureKey).otherColumns[entityToIndex.get(infrastructureId)] = roundIfNumeric(measure.value);
             })
         })
     });
+    infrastructureRows.entries().forEach(([key, value]) => {
+        asCSVrows.push(`${value.commons}${value.otherColumns.join(";")}`);
+    })
 
+
+    const requestTraceRows: Map<string, { commons: string, otherColumns: (string | number)[] }> = new Map();
     evaluationModelsWrapper.value.getAvailableRequestTraces().forEach(requestTraceId => {
         let evaluatedRequestTraceModel = evaluationModelsWrapper.value.getEvaluatedRequestTraceModel(requestTraceId, activeElements.activeQualityAspects, activeElements.activeProductFactors);
         evaluatedRequestTraceModel.getEvaluatedQualityAspects().forEach(qualityAspect => {
-            let otherColumnsCopy = [...otherColumns];
-            otherColumnsCopy[entityToIndex.get(requestTraceId)] = qualityAspect.result;
-            let qualityAspectRow = `requestTrace;${qualityAspect.factorType};${qualityAspect.id};${qualityAspect.name};n/a;${otherColumnsCopy.join(";")}`;
-            asCSVrows.push(qualityAspectRow);
+            if (!requestTraceRows.has(qualityAspect.id)) {
+                requestTraceRows.set(qualityAspect.id, { commons: `requestTrace;${qualityAspect.factorType};${qualityAspect.id};${qualityAspect.name};n/a;`, otherColumns: [...otherColumns] });
+            }
+            requestTraceRows.get(qualityAspect.id).otherColumns[entityToIndex.get(requestTraceId)] = qualityAspect.result;
         })
         evaluatedRequestTraceModel.getEvaluatedProductFactors().forEach(factor => {
-            let otherColumnsCopy = [...otherColumns];
-            otherColumnsCopy[entityToIndex.get(requestTraceId)] = factor.result;
-            let factorRow = `requestTrace;${factor.factorType};${factor.id};${factor.name};n/a;${otherColumnsCopy.join(";")}`;
-            asCSVrows.push(factorRow);
+            if (!requestTraceRows.has(factor.id)) {
+                requestTraceRows.set(factor.id, { commons: `requestTrace;${factor.factorType};${factor.id};${factor.name};n/a;`, otherColumns: [...otherColumns] });
+            }
+            requestTraceRows.get(factor.id).otherColumns[entityToIndex.get(requestTraceId)] = roundIfNumeric(factor.result);
             factor.measuresForEvaluation.entries().forEach(([measureKey, measure]) => {
-                let otherColumnsCopy = [...otherColumns];
-                otherColumnsCopy[entityToIndex.get(requestTraceId)] = measure.value;
-                let measureRow = `requestTrace;measure;${measureKey};${measure.name};n/a;${otherColumnsCopy.join(";")}`;
-                asCSVrows.push(measureRow);
+                if (!requestTraceRows.has(measureKey)) {
+                    requestTraceRows.set(measureKey, { commons: `requestTrace;measure;${measureKey};${measure.name};n/a;`, otherColumns: [...otherColumns] });
+                }
+                requestTraceRows.get(measureKey).otherColumns[entityToIndex.get(requestTraceId)] = roundIfNumeric(measure.value);
             })
         })
     });
+    requestTraceRows.entries().forEach(([key, value]) => {
+        asCSVrows.push(`${value.commons}${value.otherColumns.join(";")}`);
+    })
 
 
 
