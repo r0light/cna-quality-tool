@@ -2983,7 +2983,7 @@ const measures = {
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT]
     },
     "ratioOfInfrastructureEnforcingResourceBoundaries": {
-        "name": "Ratio infrastructure enforcing resource boundaries",
+        "name": "Ratio of infrastructure entities enforcing resource boundaries",
         "calculation": "Infrastructure entities enforcing resource boundaries / All infrastructure entities",
         "calculationFormula": "\\frac{|\\Set{i | i \\in I \\land t.enforced\\_resource\\_bounds = true}|}{|I|}",
         "helperFunctions": [],
