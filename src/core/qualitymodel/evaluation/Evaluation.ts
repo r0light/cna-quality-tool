@@ -42,7 +42,7 @@ export type EvaluatedQualityAspect = {
 }
 
 export type ForwardImpactingPath = {
-    impactedFactorKey: string,
+    impactedFactorKey: ProductFactorKey | QualityAspectKey,
     impactedFactorName: string,
     impactType: ImpactType,
     weight: ImpactWeight,
@@ -50,7 +50,7 @@ export type ForwardImpactingPath = {
 }
 
 export type BackwardImpactingPath = {
-    impactingFactorKey: string,
+    impactingFactorKey: ProductFactorKey,
     impactingFactorName: string,
     impactType: ImpactType,
     weight: ImpactWeight,

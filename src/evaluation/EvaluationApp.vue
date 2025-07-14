@@ -434,7 +434,7 @@ function exportEvaluation() {
 
     let activeElements = getActiveElements(getActiveFilterItems(highLevelAspectFilter.value), getActiveFilterItems(factorCategoryFilter.value), qualityModel);
 
-    let headers: string[] = ["entity", "type", "key", "name", systemName];
+    let headers: string[] = ["entity", "hierarchy", "type", "key", "name", systemName];
     let indexCount = 0;
     const entityToIndex: Map<string, number> = new Map();
     evaluationModelsWrapper.value.getAvailableComponents().forEach(componentId => {
@@ -458,18 +458,128 @@ function exportEvaluation() {
 
     const systemEvaluationModel = evaluationModelsWrapper.value.getEvaluatedSystemModel(activeElements.activeQualityAspects, activeElements.activeProductFactors);
     systemEvaluationModel.getEvaluatedQualityAspects().forEach(qualityAspect => {
-        let qualityAspectRow = `system;${qualityAspect.factorType};${qualityAspect.id};${qualityAspect.name};${qualityAspect.result};${otherColumns.join(";")}`;
+        let qualityAspectRow = `system;${qualityAspect.id};${qualityAspect.factorType};${qualityAspect.id};${qualityAspect.name};${qualityAspect.result};${otherColumns.join(";")}`;
         asCSVrows.push(qualityAspectRow);
-    })
-    systemEvaluationModel.getEvaluatedProductFactors().forEach(factor => {
-        let factorRow = `system;${factor.factorType};${factor.id};${factor.name};${roundIfNumeric(factor.result)};${otherColumns.join(";")}`;
-        asCSVrows.push(factorRow);
-        factor.measuresForEvaluation.entries().forEach(([measureKey, measure]) => {
-            let measureRow = `system;measure;${measureKey};${measure.name};${roundIfNumeric(measure.value)};${otherColumns.join(";")}`;
-            asCSVrows.push(measureRow);
-        })
+        let impacts = qualityAspect.backwardImpacts;
+        while (impacts.length > 0) {
+            let currentImpact = impacts.shift();
+            let factor = currentImpact.impactingFactor;
+            let factorRow = `system;${qualityAspect.id};${factor.factorType};${factor.id};${factor.name};${roundIfNumeric(factor.result)};${otherColumns.join(";")}`;
+            asCSVrows.push(factorRow);
+            factor.measuresForEvaluation.entries().forEach(([measureKey, measure]) => {
+                let measureRow = `system;${qualityAspect.id};measure;${measureKey};${measure.name};${roundIfNumeric(measure.value)};${otherColumns.join(";")}`;
+                asCSVrows.push(measureRow);
+            })
+            let deepImpacting = factor.backwardImpacts;
+            impacts.unshift(...deepImpacting);
+        }
     })
 
+    const componentRows: Map<string, { commons: string, otherColumns: (string | number)[] }> = new Map();
+    evaluationModelsWrapper.value.getAvailableComponents().forEach(componentId => {
+        let evaluatedComponentModel = evaluationModelsWrapper.value.getEvaluatedComponentModel(componentId, activeElements.activeQualityAspects, activeElements.activeProductFactors);
+        evaluatedComponentModel.getEvaluatedQualityAspects().forEach(qualityAspect => {
+            if (!componentRows.has(qualityAspect.id)) {
+                componentRows.set(qualityAspect.id, { commons: `component;${qualityAspect.id};${qualityAspect.factorType};${qualityAspect.id};${qualityAspect.name};n/a;`, otherColumns: [...otherColumns] });
+            }
+            componentRows.get(qualityAspect.id).otherColumns[entityToIndex.get(componentId)] = qualityAspect.result;
+
+            let impacts = qualityAspect.backwardImpacts;
+            while (impacts.length > 0) {
+                let currentImpact = impacts.shift();
+                let factor = currentImpact.impactingFactor;
+
+                if (!componentRows.has(factor.id)) {
+                    componentRows.set(factor.id, { commons: `component;${qualityAspect.id};${factor.factorType};${factor.id};${factor.name};n/a;`, otherColumns: [...otherColumns] });
+                }
+                componentRows.get(factor.id).otherColumns[entityToIndex.get(componentId)] = roundIfNumeric(factor.result);
+                factor.measuresForEvaluation.entries().forEach(([measureKey, measure]) => {
+                    if (!componentRows.has(measureKey)) {
+                        componentRows.set(measureKey, { commons: `component;${qualityAspect.id};measure;${measureKey};${measure.name};n/a;`, otherColumns: [...otherColumns] });
+                    }
+                    componentRows.get(measureKey).otherColumns[entityToIndex.get(componentId)] = roundIfNumeric(measure.value);
+                })
+
+                let deepImpacting = factor.backwardImpacts;
+                impacts.unshift(...deepImpacting);
+            }
+        })
+    });
+    componentRows.entries().forEach(([key, value]) => {
+        asCSVrows.push(`${value.commons}${value.otherColumns.join(";")}`);
+    })
+
+    const infrastructureRows: Map<string, { commons: string, otherColumns: (string | number)[] }> = new Map();
+    evaluationModelsWrapper.value.getAvailableInfrastructureEntities().forEach(infrastructureId => {
+        let evaluatedInfrastructureModel = evaluationModelsWrapper.value.getEvaluatedInfrastructureModel(infrastructureId, activeElements.activeQualityAspects, activeElements.activeProductFactors);
+        evaluatedInfrastructureModel.getEvaluatedQualityAspects().forEach(qualityAspect => {
+            if (!infrastructureRows.has(qualityAspect.id)) {
+                infrastructureRows.set(qualityAspect.id, { commons: `infrastructure;${qualityAspect.id};${qualityAspect.factorType};${qualityAspect.id};${qualityAspect.name};n/a;`, otherColumns: [...otherColumns] });
+            }
+            infrastructureRows.get(qualityAspect.id).otherColumns[entityToIndex.get(infrastructureId)] = qualityAspect.result;
+
+            let impacts = qualityAspect.backwardImpacts;
+            while (impacts.length > 0) {
+                let currentImpact = impacts.shift();
+                let factor = currentImpact.impactingFactor;
+
+                if (!infrastructureRows.has(factor.id)) {
+                    infrastructureRows.set(factor.id, { commons: `infrastructure;${qualityAspect.id};${factor.factorType};${factor.id};${factor.name};n/a;`, otherColumns: [...otherColumns] });
+                }
+                infrastructureRows.get(factor.id).otherColumns[entityToIndex.get(infrastructureId)] = roundIfNumeric(factor.result);
+                factor.measuresForEvaluation.entries().forEach(([measureKey, measure]) => {
+                    if (!infrastructureRows.has(measureKey)) {
+                        infrastructureRows.set(measureKey, { commons: `infrastructure;${qualityAspect.id};measure;${measureKey};${measure.name};n/a;`, otherColumns: [...otherColumns] });
+                    }
+                    infrastructureRows.get(measureKey).otherColumns[entityToIndex.get(infrastructureId)] = roundIfNumeric(measure.value);
+                })
+                let deepImpacting = factor.backwardImpacts;
+                impacts.unshift(...deepImpacting);
+            }
+
+        })
+    });
+    infrastructureRows.entries().forEach(([key, value]) => {
+        asCSVrows.push(`${value.commons}${value.otherColumns.join(";")}`);
+    })
+
+
+    const requestTraceRows: Map<string, { commons: string, otherColumns: (string | number)[] }> = new Map();
+    evaluationModelsWrapper.value.getAvailableRequestTraces().forEach(requestTraceId => {
+        let evaluatedRequestTraceModel = evaluationModelsWrapper.value.getEvaluatedRequestTraceModel(requestTraceId, activeElements.activeQualityAspects, activeElements.activeProductFactors);
+        evaluatedRequestTraceModel.getEvaluatedQualityAspects().forEach(qualityAspect => {
+            if (!requestTraceRows.has(qualityAspect.id)) {
+                requestTraceRows.set(qualityAspect.id, { commons: `requestTrace;${qualityAspect.id};${qualityAspect.factorType};${qualityAspect.id};${qualityAspect.name};n/a;`, otherColumns: [...otherColumns] });
+            }
+            requestTraceRows.get(qualityAspect.id).otherColumns[entityToIndex.get(requestTraceId)] = qualityAspect.result;
+
+            let impacts = qualityAspect.backwardImpacts;
+            while (impacts.length > 0) {
+                let currentImpact = impacts.shift();
+                let factor = currentImpact.impactingFactor;
+
+                if (!requestTraceRows.has(factor.id)) {
+                    requestTraceRows.set(factor.id, { commons: `requestTrace;${qualityAspect.id};${factor.factorType};${factor.id};${factor.name};n/a;`, otherColumns: [...otherColumns] });
+                }
+                requestTraceRows.get(factor.id).otherColumns[entityToIndex.get(requestTraceId)] = roundIfNumeric(factor.result);
+                factor.measuresForEvaluation.entries().forEach(([measureKey, measure]) => {
+                    if (!requestTraceRows.has(measureKey)) {
+                        requestTraceRows.set(measureKey, { commons: `requestTrace;${qualityAspect.id};measure;${measureKey};${measure.name};n/a;`, otherColumns: [...otherColumns] });
+                    }
+                    requestTraceRows.get(measureKey).otherColumns[entityToIndex.get(requestTraceId)] = roundIfNumeric(measure.value);
+                })
+
+                let deepImpacting = factor.backwardImpacts;
+                impacts.unshift(...deepImpacting);
+            }
+        })
+    });
+    requestTraceRows.entries().forEach(([key, value]) => {
+        asCSVrows.push(`${value.commons}${value.otherColumns.join(";")}`);
+    })
+
+
+    /*
     const componentRows: Map<string, { commons: string, otherColumns: (string | number)[] }> = new Map();
     evaluationModelsWrapper.value.getAvailableComponents().forEach(componentId => {
         let evaluatedComponentModel = evaluationModelsWrapper.value.getEvaluatedComponentModel(componentId, activeElements.activeQualityAspects, activeElements.activeProductFactors);
@@ -495,7 +605,7 @@ function exportEvaluation() {
     componentRows.entries().forEach(([key, value]) => {
         asCSVrows.push(`${value.commons}${value.otherColumns.join(";")}`);
     })
-
+ 
     const infrastructureRows: Map<string, { commons: string, otherColumns: (string | number)[] }> = new Map();
     evaluationModelsWrapper.value.getAvailableInfrastructureEntities().forEach(infrastructureId => {
         let evaluatedInfrastructureModel = evaluationModelsWrapper.value.getEvaluatedInfrastructureModel(infrastructureId, activeElements.activeQualityAspects, activeElements.activeProductFactors);
@@ -521,8 +631,8 @@ function exportEvaluation() {
     infrastructureRows.entries().forEach(([key, value]) => {
         asCSVrows.push(`${value.commons}${value.otherColumns.join(";")}`);
     })
-
-
+ 
+ 
     const requestTraceRows: Map<string, { commons: string, otherColumns: (string | number)[] }> = new Map();
     evaluationModelsWrapper.value.getAvailableRequestTraces().forEach(requestTraceId => {
         let evaluatedRequestTraceModel = evaluationModelsWrapper.value.getEvaluatedRequestTraceModel(requestTraceId, activeElements.activeQualityAspects, activeElements.activeProductFactors);
@@ -548,6 +658,7 @@ function exportEvaluation() {
     requestTraceRows.entries().forEach(([key, value]) => {
         asCSVrows.push(`${value.commons}${value.otherColumns.join(";")}`);
     })
+        */
 
 
 
