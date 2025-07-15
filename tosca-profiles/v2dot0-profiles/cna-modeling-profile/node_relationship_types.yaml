@@ -175,7 +175,7 @@ node_types:
         entry_schema:
           type: string
           description: The type of the identity which can be an account, a user name, or a role
-          validation: { $valid_values: [ $value, [ "account", "usernane", "role"]]}
+          validation: { $valid_values: [ $value, [ "account", "username", "role"]]}
       namespace:
         type: string
         description: If the underlying infrastructure enables the usage of namespaces, this can be specified here to logically group components. If not, everything is in the same default namespace

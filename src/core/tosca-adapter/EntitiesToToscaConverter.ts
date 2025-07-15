@@ -657,6 +657,7 @@ class EntitiesToToscaConverter {
             }
         })
 
+        template.properties.allow_access_to = endpoint.getAllowedAccounts; 
         template.properties.documented_by = endpoint.getDocumentedBy ? endpoint.getDocumentedBy : ""; 
 
         return template;
