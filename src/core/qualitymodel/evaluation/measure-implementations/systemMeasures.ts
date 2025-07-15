@@ -1921,7 +1921,7 @@ export const componentArtifactsSimilarity: Calculation = (parameters: Calculatio
 
 export const infrastructureArtifactsSimilarity: Calculation = (parameters: CalculationParameters<System>) => {
 
-    let allInfrastructure = [...parameters.entity.getInfrastructureEntities.values()];
+    let allInfrastructure = [...parameters.entity.getInfrastructureEntities.values().filter((infrastructure) => infrastructure.getArtifacts.size > 0)];
 
     if (allInfrastructure.length <= 1) {
         return "n/a";

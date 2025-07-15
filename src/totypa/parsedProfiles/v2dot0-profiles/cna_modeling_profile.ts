@@ -1411,7 +1411,8 @@ export const cna_modeling_profile: TOSCA_File = {
                 [
                   "account",
                   "username",
-                  "role"
+                  "role",
+                  "credentials"
                 ]
               ]
             }
@@ -1604,7 +1605,8 @@ export const cna_modeling_profile: TOSCA_File = {
                 [
                   "account",
                   "username",
-                  "role"
+                  "role",
+                  "credentials"
                 ]
               ]
             }
@@ -1798,7 +1800,8 @@ export const cna_modeling_profile: TOSCA_File = {
                 [
                   "account",
                   "username",
-                  "role"
+                  "role",
+                  "credentials"
                 ]
               ]
             }
@@ -2053,7 +2056,8 @@ export const cna_modeling_profile: TOSCA_File = {
                 [
                   "account",
                   "username",
-                  "role"
+                  "role",
+                  "credentials"
                 ]
               ]
             }
@@ -2277,7 +2281,8 @@ export const cna_modeling_profile: TOSCA_File = {
                 [
                   "account",
                   "username",
-                  "role"
+                  "role",
+                  "credentials"
                 ]
               ]
             }
@@ -2503,7 +2508,8 @@ export const cna_modeling_profile: TOSCA_File = {
                 [
                   "account",
                   "username",
-                  "role"
+                  "role",
+                  "credentials"
                 ]
               ]
             }
