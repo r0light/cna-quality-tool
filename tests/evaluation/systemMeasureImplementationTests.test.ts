@@ -90,7 +90,7 @@ test("all implemented measure must provide information on the calculation", () =
 test("ratioOfEndpointsSupportingSsl", () => {
     let measureValue = systemMeasureImplementations["ratioOfEndpointsSupportingSsl"]({ entity: systemToEvaluateA, system: systemToEvaluateA });
 
-    expect(measureValue).toEqual(1/3);
+    expect(measureValue).toEqual(1 / 3);
 })
 
 test("ratioOfExternalEndpointsSupportingTls", () => {
@@ -2450,7 +2450,7 @@ test("serviceMeshUsage", () => {
     system.addEntities([serviceA, serviceB, serviceC]);
 
     let measureValue = systemMeasureImplementations["serviceMeshUsage"]({ entity: system, system: system });
-    expect(measureValue).toEqual(2/3);
+    expect(measureValue).toEqual(2 / 3);
 })
 
 test("secretsExternalization", () => {
@@ -2561,15 +2561,15 @@ test("suitablyReplicatedStatefulService", () => {
 test("ratioOfUniqueAccountUsage", () => {
     let system = new System("sys1", "testSystem");;
     let infrastructureA = new Infrastructure("i1", "Infrastructure 1", getEmptyMetaData());
-    infrastructureA.setPropertyValue("identities", {"infraAccount": "account"});
+    infrastructureA.setPropertyValue("identities", { "infraAccount": "account" });
     let infrastructureB = new Infrastructure("i2", "Infrastruture B", getEmptyMetaData());
-    infrastructureB.setPropertyValue("identities", {"default-account": "account"});
+    infrastructureB.setPropertyValue("identities", { "default-account": "account" });
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
-    serviceA.setPropertyValue("identities", {"serviceAccount": "account"});
+    serviceA.setPropertyValue("identities", { "serviceAccount": "account" });
 
     let serviceB = new Service("s2", "testService", getEmptyMetaData());
-    serviceB.setPropertyValue("identities", {"default-account": "account"});
+    serviceB.setPropertyValue("identities", { "default-account": "account" });
 
     system.addEntities([infrastructureA, infrastructureB]);
     system.addEntities([serviceA, serviceB]);
@@ -2657,7 +2657,7 @@ test("accessRestrictedToCallers", () => {
     serviceB.addEndpoint(endpointB);
 
     let serviceC = new Service("s3", "service C", getEmptyMetaData())
-    serviceC.setPropertyValue("identities", {"a1": "account"});
+    serviceC.setPropertyValue("identities", { "a1": "account" });
 
     let serviceD = new Service("s4", "service D", getEmptyMetaData())
     let endpointD = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
@@ -2692,7 +2692,7 @@ test("ratioOfDelegatedAuthentication", () => {
     system.addEntities([authService, serviceA, serviceB, serviceC]);
 
     let measureValue = systemMeasureImplementations["ratioOfDelegatedAuthentication"]({ entity: system, system: system });
-    expect(measureValue).toEqual(2/3);
+    expect(measureValue).toEqual(2 / 3);
 })
 
 
@@ -2727,7 +2727,7 @@ test("ratioOfStandardizedArtifacts", () => {
     system.addEntities([serviceA, backingService]);
 
     let measureValue = systemMeasureImplementations["ratioOfStandardizedArtifacts"]({ entity: system, system: system });
-    expect(measureValue).toEqual(2/3);
+    expect(measureValue).toEqual(2 / 3);
 })
 
 test("ratioOfEntitiesProvidingStandardizedArtifacts", () => {
@@ -2755,7 +2755,7 @@ test("ratioOfEntitiesProvidingStandardizedArtifacts", () => {
     system.addEntities([serviceA, backingService]);
 
     let measureValue = systemMeasureImplementations["ratioOfEntitiesProvidingStandardizedArtifacts"]({ entity: system, system: system });
-    expect(measureValue).toEqual(1/3);
+    expect(measureValue).toEqual(1 / 3);
 })
 
 test("componentArtifactsSimilarity", () => {
@@ -2794,7 +2794,7 @@ test("componentArtifactsSimilarity", () => {
     system.addEntities([serviceA, serviceB, serviceC]);
 
     let measureValue = systemMeasureImplementations["componentArtifactsSimilarity"]({ entity: system, system: system });
-    expect(measureValue).toEqual(1/3);
+    expect(measureValue).toEqual(1 / 3);
 })
 
 
@@ -2849,7 +2849,7 @@ test("ratioOfAutomaticallyProvisionedInfrastructure", () => {
     system.addEntities([backingService]);
 
     let measureValue = systemMeasureImplementations["ratioOfAutomaticallyProvisionedInfrastructure"]({ entity: system, system: system });
-    expect(measureValue).toEqual(2/3);
+    expect(measureValue).toEqual(2 / 3);
 })
 
 test("ratioOfDeploymentsOnDynamicInfrastructure", () => {
@@ -2870,7 +2870,7 @@ test("ratioOfDeploymentsOnDynamicInfrastructure", () => {
     system.addEntities([infrastructureA, infrastructureB]);
     system.addEntities([deploymentMappingA, deploymentMappingB, deploymentMappingC]);
     let measureValue = systemMeasureImplementations["ratioOfDeploymentsOnDynamicInfrastructure"]({ entity: system, system: system });
-    expect(measureValue).toEqual(2/3);
+    expect(measureValue).toEqual(2 / 3);
 })
 
 test("ratioOfInfrastructureWithIaCArtifact", () => {
@@ -2884,7 +2884,7 @@ test("ratioOfInfrastructureWithIaCArtifact", () => {
     ));
     let propertiesAA = getArtifactTypeProperties("Azure.Resource");
     infrastructureA.setArtifact("art2", new Artifact(
-       "Azure.Resource",
+        "Azure.Resource",
         "", "", "", "", "", "", "", propertiesAA
     ));
 
@@ -2898,7 +2898,7 @@ test("ratioOfInfrastructureWithIaCArtifact", () => {
     let infrastructureC = new Infrastructure("i3", "infrastructure C", getEmptyMetaData())
     let propertiesC = getArtifactTypeProperties("Azure.Resource");
     infrastructureC.setArtifact("art4", new Artifact(
-       "Azure.Resource",
+        "Azure.Resource",
         "", "", "", "", "", "", "", propertiesC
     ));
 
@@ -2908,7 +2908,7 @@ test("ratioOfInfrastructureWithIaCArtifact", () => {
     system.addEntities([backingService]);
 
     let measureValue = systemMeasureImplementations["ratioOfInfrastructureWithIaCArtifact"]({ entity: system, system: system });
-    expect(measureValue).toEqual(2/3);
+    expect(measureValue).toEqual(2 / 3);
 })
 
 
@@ -2951,7 +2951,7 @@ test("namespaceSeparation - mixed", () => {
     system.addEntities([serviceA, serviceB, serviceC, serviceD]);
 
     let measureValue = systemMeasureImplementations["namespaceSeparation"]({ entity: system, system: system });
-    expect(measureValue).toBeCloseTo(2/3, 5);
+    expect(measureValue).toBeCloseTo(2 / 3, 5);
 })
 
 test("namespaceSeparation - none", () => {
@@ -3000,7 +3000,7 @@ test("ratioOfFullyManagedInfrastructure", () => {
     system.addEntities([infrastructureA, infrastructureB, infrastructureC, infrastructureD]);
 
     let measureValue = systemMeasureImplementations["ratioOfFullyManagedInfrastructure"]({ entity: system, system: system });
-    expect(measureValue).toEqual(1/4);
+    expect(measureValue).toEqual(1 / 4);
 })
 
 test("ratioOfManagedBackingServices", () => {
@@ -3072,7 +3072,7 @@ test("ratioOfDeploymentMappingsWithStatedResourceRequirements", () => {
     system.addEntities([deploymentMappingA, deploymentMappingB, deploymentMappingC]);
 
     let measureValue = systemMeasureImplementations["ratioOfDeploymentMappingsWithStatedResourceRequirements"]({ entity: system, system: system });
-    expect(measureValue).toEqual(2/3);
+    expect(measureValue).toEqual(2 / 3);
 })
 
 test("deployedEntitiesAutoscaling", () => {
@@ -3098,7 +3098,7 @@ test("deployedEntitiesAutoscaling", () => {
     system.addEntities([deploymentMappingA, deploymentMappingB, deploymentMappingC]);
 
     let measureValue = systemMeasureImplementations["deployedEntitiesAutoscaling"]({ entity: system, system: system });
-    expect(measureValue).toEqual(2/3);
+    expect(measureValue).toEqual(2 / 3);
 })
 
 
@@ -3125,7 +3125,7 @@ test("infrastructureAutoscaling", () => {
     system.addEntities([deploymentMappingA, deploymentMappingB, deploymentMappingC]);
 
     let measureValue = systemMeasureImplementations["infrastructureAutoscaling"]({ entity: system, system: system });
-    expect(measureValue).toEqual(1/3);
+    expect(measureValue).toEqual(1 / 3);
 })
 
 
@@ -3153,7 +3153,7 @@ test("ratioOfAbstractedHardware", () => {
     system.addEntities([deploymentMappingA, deploymentMappingB, deploymentMappingC]);
 
     let measureValue = systemMeasureImplementations["ratioOfAbstractedHardware"]({ entity: system, system: system });
-    expect(measureValue).toEqual(2/3);
+    expect(measureValue).toEqual(2 / 3);
 })
 
 
@@ -3208,7 +3208,7 @@ test("nonProviderSpecificComponentArtifacts", () => {
     system.addEntities([backingService]);
 
     let measureValue = systemMeasureImplementations["nonProviderSpecificComponentArtifacts"]({ entity: system, system: system });
-    expect(measureValue).toEqual(1/3);
+    expect(measureValue).toEqual(1 / 3);
 })
 
 test("configurationStoredInConfigService", () => {
@@ -3324,7 +3324,7 @@ test("standardizedDeployments", () => {
     system.addEntities([deploymentMappingA, deploymentMappingB, deploymentMappingC]);
 
     let measureValue = systemMeasureImplementations["standardizedDeployments"]({ entity: system, system: system });
-    expect(measureValue).toEqual(2/3);
+    expect(measureValue).toEqual(2 / 3);
 })
 
 test("selfContainedDeployments", () => {
@@ -3360,7 +3360,7 @@ test("selfContainedDeployments", () => {
     system.addEntities([deploymentMappingA, deploymentMappingB, deploymentMappingC]);
 
     let measureValue = systemMeasureImplementations["selfContainedDeployments"]({ entity: system, system: system });
-    expect(measureValue).toEqual(2/3);
+    expect(measureValue).toEqual(2 / 3);
 })
 
 test("replacingDeployments", () => {
@@ -3385,7 +3385,7 @@ test("replacingDeployments", () => {
     system.addEntities([deploymentMappingA, deploymentMappingB, deploymentMappingC]);
 
     let measureValue = systemMeasureImplementations["replacingDeployments"]({ entity: system, system: system });
-    expect(measureValue).toEqual(2/3);
+    expect(measureValue).toEqual(2 / 3);
 })
 
 test("ratioOfAutomaticallyMaintainedInfrastructure", () => {
@@ -3441,7 +3441,7 @@ test("ratioOfLinksWithTimeout", () => {
     system.addEntities([linkAB, linkAC, linkAD]);
 
     let measureValue = systemMeasureImplementations["ratioOfLinksWithTimeout"]({ entity: system, system: system });
-    expect(measureValue).toEqual(1/3);
+    expect(measureValue).toEqual(1 / 3);
 })
 
 test("deploymentsWithRestart", () => {
@@ -3465,7 +3465,7 @@ test("deploymentsWithRestart", () => {
     system.addEntities([deploymentMappingA, deploymentMappingB, deploymentMappingC]);
 
     let measureValue = systemMeasureImplementations["deploymentsWithRestart"]({ entity: system, system: system });
-    expect(measureValue).toEqual(2/3);
+    expect(measureValue).toEqual(2 / 3);
 })
 
 test("ratioOfDocumentedEndpoints", () => {
@@ -3524,7 +3524,7 @@ test("ratioOfEndpointsThatSupportTokenBasedAuthentication", () => {
     system.addEntities([serviceA, backingServiceB]);
 
     let measureValue = systemMeasureImplementations["ratioOfEndpointsThatSupportTokenBasedAuthentication"]({ entity: system, system: system });
-    expect(measureValue).toEqual(2/3);
+    expect(measureValue).toEqual(2 / 3);
 })
 
 test("ratioOfEndpointsThatSupportApiKeys", () => {
@@ -3546,7 +3546,7 @@ test("ratioOfEndpointsThatSupportApiKeys", () => {
     system.addEntities([serviceA, backingServiceB]);
 
     let measureValue = systemMeasureImplementations["ratioOfEndpointsThatSupportApiKeys"]({ entity: system, system: system });
-    expect(measureValue).toEqual(2/3);
+    expect(measureValue).toEqual(2 / 3);
 })
 
 test("ratioOfEndpointsThatSupportPlaintextAuthentication", () => {
@@ -3568,7 +3568,7 @@ test("ratioOfEndpointsThatSupportPlaintextAuthentication", () => {
     system.addEntities([serviceA, backingServiceB]);
 
     let measureValue = systemMeasureImplementations["ratioOfEndpointsThatSupportPlaintextAuthentication"]({ entity: system, system: system });
-    expect(measureValue).toEqual(2/3);
+    expect(measureValue).toEqual(2 / 3);
 })
 
 test("ratioOfEndpointsThatAreIncludedInASingleSignOnApproach", () => {
@@ -3590,7 +3590,7 @@ test("ratioOfEndpointsThatAreIncludedInASingleSignOnApproach", () => {
     system.addEntities([serviceA, backingServiceB]);
 
     let measureValue = systemMeasureImplementations["ratioOfEndpointsThatAreIncludedInASingleSignOnApproach"]({ entity: system, system: system });
-    expect(measureValue).toEqual(2/3);
+    expect(measureValue).toEqual(2 / 3);
 })
 
 test("iendpointAccessMethodsConsistency", () => {
@@ -3612,7 +3612,7 @@ test("iendpointAccessMethodsConsistency", () => {
     system.addEntities([serviceA, backingServiceB]);
 
     let measureValue = systemMeasureImplementations["iendpointAccessMethodsConsistency"]({ entity: system, system: system });
-    expect(measureValue).toEqual(1/3);
+    expect(measureValue).toEqual(1 / 3);
 })
 
 test("externalEndpointAccessConsistency", () => {
@@ -3634,7 +3634,7 @@ test("externalEndpointAccessConsistency", () => {
     system.addEntities([serviceA, backingServiceB]);
 
     let measureValue = systemMeasureImplementations["externalEndpointAccessConsistency"]({ entity: system, system: system });
-    expect(measureValue).toEqual(1/3);
+    expect(measureValue).toEqual(1 / 3);
 })
 
 test("cohesionBetweenEndpointsBasedOnDataAggregateUsage", () => {
@@ -3815,7 +3815,7 @@ test("dataAggregateSpread", () => {
     let relationXA = new RelationToDataAggregate("dar1", getEmptyMetaData());
     relationXA.setPropertyValue("usage_relation", "usage");
     serviceX.addDataAggregateEntity(dataAggregateA, relationXA);
-    
+
     let relationXB = new RelationToDataAggregate("dar2", getEmptyMetaData());
     relationXB.setPropertyValue("usage_relation", "persistence");
     serviceX.addDataAggregateEntity(dataAggregateB, relationXB);
@@ -3880,7 +3880,7 @@ test("requestTraceSimilarityBasedOnIncludedComponents", () => {
     system.addEntities([requestTraceA, requestTraceB]);
 
     let measureValue = systemMeasureImplementations["requestTraceSimilarityBasedOnIncludedComponents"]({ entity: system, system: system });
-    expect(measureValue).toEqual(2/5);
+    expect(measureValue).toEqual(2 / 5);
 })
 
 test("averageStorageBackendSharing", () => {
@@ -4002,7 +4002,7 @@ test("averageWeightedBrokerBackendSharing", () => {
     system.addEntities([linkAS, linkBS, linkCB]);
 
     let measureValue = systemMeasureImplementations["averageWeightedBrokerBackendSharing"]({ entity: system, system: system });
-    expect(measureValue).toEqual(2.5/3);
+    expect(measureValue).toEqual(2.5 / 3);
 })
 
 test("dataShardingLevel", () => {
@@ -4045,7 +4045,7 @@ test("rollingUpdates", () => {
     system.addEntities([deploymentMappingA, deploymentMappingB, deploymentMappingC]);
 
     let measureValue = systemMeasureImplementations["rollingUpdates"]({ entity: system, system: system });
-    expect(measureValue).toEqual(2/3);
+    expect(measureValue).toEqual(2 / 3);
 })
 
 test("numberOfAvailabilityZonesUsedByServices", () => {
@@ -4090,4 +4090,25 @@ test("numberOfAvailabilityZonesUsedByStorageServices", () => {
 
     let measureValue = systemMeasureImplementations["numberOfAvailabilityZonesUsedByStorageServices"]({ entity: system, system: system });
     expect(measureValue).toEqual(2);
+})
+
+test("ratioOfRateLimitingEndpoints", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointEA = new ExternalEndpoint("e1", "endpoint EA", getEmptyMetaData());
+    endpointEA.setPropertyValue("rate_limiting", "60 requests per second");
+    serviceA.addEndpoint(endpointEA);
+    let endpointA = new Endpoint("e2", "endpoint A", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA);
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointB = new Endpoint("e3", "endpoint B", getEmptyMetaData());
+    endpointB.setPropertyValue("rate_limiting", "60 requests per second");
+    serviceB.addEndpoint(endpointB);
+
+    system.addEntities([serviceA, serviceB]);
+
+    let measureValue = systemMeasureImplementations["ratioOfRateLimitingEndpoints"]({ entity: system, system: system });
+    expect(measureValue).toEqual(2 / 3);
 })

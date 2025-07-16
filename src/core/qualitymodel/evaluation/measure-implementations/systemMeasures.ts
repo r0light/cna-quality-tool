@@ -1,4 +1,4 @@
-import { BackingService, BrokerBackingService, Component, DeploymentMapping, Infrastructure, Link, Network, ProxyBackingService, Service, StorageBackingService, System } from "@/core/entities";
+import { BackingService, BrokerBackingService, Component, DeploymentMapping, Endpoint, Infrastructure, Link, Network, ProxyBackingService, Service, StorageBackingService, System } from "@/core/entities";
 import { Calculation, CalculationParameters, MeasureValue } from "../../quamoco/Measure";
 import { average, median, lowest, partition } from "./general-functions";
 import { ASYNCHRONOUS_ENDPOINT_KIND, AUTOMATED_INFRASTRUCTURE_MAINTENANCE, AUTOMATED_RESTART_POLICIES, AUTOMATED_SCALING, BACKING_DATA_CONFIG_KIND, BACKING_DATA_LOGS_KIND, BACKING_DATA_METRICS_KIND, BACKING_DATA_SECRET_KIND, CONFIG_SERVICE_KIND, CONTRACT_ARTIFACT_TYPE, CUSTOM_SOFTWARE_TYPE, DATA_USAGE_RELATION_PERSISTENCE, DATA_USAGE_RELATION_USAGE, DYNAMIC_INFRASTRUCTURE, EVENT_SOURCING_KIND, getEndpointKindWeight, getUsageRelationWeight, IAC_ARTIFACT_TYPE, MANAGED_INFRASTRUCTURE_ENVIRONMENT_ACCESS, MESSAGE_BROKER_KIND, PROTOCOLS_SUPPORTING_TLS, ROLLING_UPDATE_STRATEGY_OPTIONS, SEND_EVENT_ENDPOINT_KIND, SERVICE_MESH_KIND, SUBSCRIBE_ENDPOINT_KIND, SYNCHRONOUS_ENDPOINT_KIND, VAULT_KIND } from "../../specifications/featureModel";
@@ -2874,6 +2874,17 @@ export const numberOfAvailabilityZonesUsedByStorageServices: Calculation = (para
     return availabilityZones.size;
 }
 
+export const ratioOfRateLimitingEndpoints: Calculation = (parameters: CalculationParameters<System>) => {
+
+    let allEndpoints = [...parameters.entity.getComponentEntities.entries().flatMap(([componentId, component]) => component.getEndpointEntities.concat(component.getExternalEndpointEntities))];
+
+    if (allEndpoints.length === 0) {
+        return "n/a";
+    }
+
+    return allEndpoints.filter(endpoint => endpoint.getProperty("rate_limiting").value !== "none").length / allEndpoints.length;
+}
+
 
 
 export const systemMeasureImplementations: { [measureKey: string]: Calculation } = {
@@ -3002,5 +3013,6 @@ export const systemMeasureImplementations: { [measureKey: string]: Calculation }
     "numberOfAvailabilityZonesUsedByServices": numberOfAvailabilityZonesUsedByServices,
     "numberOfAvailabilityZonesUsedByStorageServices": numberOfAvailabilityZonesUsedByStorageServices,
     "averageWeightedStorageBackendSharing": averageWeightedStorageBackendSharing,
-    "averageWeightedBrokerBackendSharing": averageWeightedBrokerBackendSharing
+    "averageWeightedBrokerBackendSharing": averageWeightedBrokerBackendSharing,
+    "ratioOfRateLimitingEndpoints": ratioOfRateLimitingEndpoints
 }

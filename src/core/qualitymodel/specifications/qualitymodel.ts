@@ -1246,12 +1246,12 @@ const productFactors = {
         "relevantEntities": [ENTITIES.ENDPOINT, ENTITIES.EXTERNAL_ENDPOINT, ENTITIES.COMPONENT, ENTITIES.PROXY_BACKING_SERVICE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
         "sources": [{ "key": "Scholl2019", "section": "6 Implement Rate Limiting and Throttling" }, { "key": "Adkins2020", "section": "8 Throttling (Delaying processing or responding to remain functional and decrease traffic from individual clients) (should be automated, part of graceful degradation)" }, { "key": "Adkins2020", "section": "8 Load shedding (In case of traffic spike, deny low priority requests to remain functional) (should be automated, part of graceful degradation)" }, { "key": "Goniwada2021", "section": "5 Throttling " }],
-        "measures": ["ratioOfComponentsWhoseExternalIngressIsProxied"],
+        "measures": ["ratioOfComponentsWhoseExternalIngressIsProxied", "ratioOfRateLimitingEndpoints"],
         "evaluations": [{
             "targetEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
             "evaluation": "guardedIngress",
-            "measures": ["ratioOfComponentsWhoseExternalIngressIsProxied"],
-            "reasoning": "The evaluation is based on whether the external ingress traffic on considered components is proxied. Proxies can provide analysis, transformation and filtering of incoming traffic."
+            "measures": ["ratioOfComponentsWhoseExternalIngressIsProxied", "ratioOfRateLimitingEndpoints"],
+            "reasoning": "The evaluation is based on whether the external ingress traffic on considered components is proxied. Proxies can provide analysis, transformation and filtering of incoming traffic. Furthermore, it is considered whether rate limiting is applied by endpoints"
         },]
     },
     "distribution": {
@@ -3208,6 +3208,14 @@ const measures = {
         "name": "Rolling updates",
         "calculation": "Deployment Mappings with rolling updates / All Deployment Mappings",
         "calculationFormula": "\\frac{ |\\Set{ dm | dm \\in DM \\land (dm.update\\_strategy = \\text{\"rolling\"} \\lor dm.update\\_strategy = \"blue-green\")} |}{|DM|}",
+        "helperFunctions": [],
+        "sources": ["new"],
+        "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
+    },
+    "ratioOfRateLimitingEndpoints": {
+        "name": "Ratio of rate limiting endpoints",
+        "calculation": "Endpoints with rate limiting / All Endpoints",
+        "calculationFormula": "\\frac{ |\\Set{ e | e \\in E \\land e.rate\\_limiting \\neq \\text{\"none\"}} |}{|E|}",
         "helperFunctions": [],
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],

@@ -2438,3 +2438,19 @@ test("degreeToWhichComponentsAreLinkedToStatefulComponents", () => {
     let measureValue = componentMeasureImplementations["degreeToWhichComponentsAreLinkedToStatefulComponents"]({ entity: serviceA, system: system });
     expect(measureValue).toEqual(2/3);
 })
+
+test("ratioOfRateLimitingEndpoints", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointEA = new ExternalEndpoint("e1", "endpoint EA", getEmptyMetaData());
+    endpointEA.setPropertyValue("rate_limiting", "60 requests per second");
+    serviceA.addEndpoint(endpointEA);
+    let endpointA = new Endpoint("e2", "endpoint A", getEmptyMetaData());
+    serviceA.addEndpoint(endpointA);
+
+    system.addEntities([serviceA]);
+
+    let measureValue = componentMeasureImplementations["ratioOfRateLimitingEndpoints"]({ entity: serviceA, system: system });
+    expect(measureValue).toEqual(0.5);
+})

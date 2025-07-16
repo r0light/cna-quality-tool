@@ -2877,3 +2877,45 @@ test("degreeOfAsynchronousCommunication", () => {
     let measureValue = requestTraceMeasureImplementations["degreeOfAsynchronousCommunication"]({ entity: requestTrace, system: system });
     expect(measureValue).toEqual(0.5);
 })
+
+
+test("ratioOfRateLimitingEndpoints", () => {
+    let system = new System("sys1", "testSystem");;
+
+    let serviceA = new Service("s1", "testService", getEmptyMetaData());
+    let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
+    let externalEndpointA = new ExternalEndpoint("ex1", "external endpoint 1", getEmptyMetaData());
+    externalEndpointA.setPropertyValue("rate_limiting", "60 requests per second");
+    serviceA.addEndpoint(endpointA);
+    serviceA.addEndpoint(externalEndpointA);
+
+    let serviceB = new Service("s2", "testService", getEmptyMetaData());
+    let endpointB1 = new Endpoint("e2", "endpoint 2", getEmptyMetaData());
+    serviceB.addEndpoint(endpointB1);
+    let endpointB2 = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
+        endpointB2.setPropertyValue("rate_limiting", "60 requests per second");
+    serviceB.addEndpoint(endpointB2);
+
+    let serviceC = new Service("s3", "testService", getEmptyMetaData());
+    let endpointC = new Endpoint("e4", "endpoint 4", getEmptyMetaData());
+    serviceC.addEndpoint(endpointC);
+
+    let serviceD = new Service("s4", "testService", getEmptyMetaData());
+    let endpointD = new Endpoint("e5", "endpoint 5", getEmptyMetaData());
+    serviceD.addEndpoint(endpointD);
+
+    let linkAB = new Link("l1", serviceA, endpointB2);
+    let linkCB = new Link("l2", serviceB, endpointC);
+    let linkCD = new Link("l3", serviceC, endpointD);
+
+    let requestTrace = new RequestTrace("rq1", "request trace 1", getEmptyMetaData());
+    requestTrace.setLinks = [[linkAB], [linkCB], [linkCD]];
+    requestTrace.setExternalEndpoint = externalEndpointA;
+
+    system.addEntities([serviceA, serviceB, serviceC, serviceD]);
+    system.addEntities([linkAB, linkCB, linkCD]);
+    system.addEntity(requestTrace);
+
+    let measureValue = requestTraceMeasureImplementations["ratioOfRateLimitingEndpoints"]({ entity: requestTrace, system: system });
+    expect(measureValue).toEqual(0.5);
+})

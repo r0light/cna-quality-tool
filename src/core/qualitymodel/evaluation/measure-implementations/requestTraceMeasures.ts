@@ -438,7 +438,7 @@ export const ratioOfLinksWithComplexFailover: Calculation = (parameters: Calcula
 
     let linksWithCircuitBreaker = linksToSynchronousEndpoints.filter(link => link.getProperty("circuit_breaker").value !== "none");
 
-    return linksWithCircuitBreaker.length / linksToSynchronousEndpoints.length ;
+    return linksWithCircuitBreaker.length / linksToSynchronousEndpoints.length;
 }
 
 export const amountOfRedundancy: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
@@ -1118,7 +1118,7 @@ export const ratioOfComponentsWhoseExternalIngressIsProxied: Calculation = (para
         }
     }
 
-    if (allComponentsWithExternalEndpoints === 0 ) {
+    if (allComponentsWithExternalEndpoints === 0) {
         return "n/a";
     }
 
@@ -1143,7 +1143,7 @@ export const numberOfAvailabilityZonesUsedByServices: Calculation = (parameters:
         return "n/a";
     }
 
-    let infrastructureForServices = deploymentMappingsForServices.map(deploymentMapping =>  deploymentMapping.getUnderlyingInfrastructure);
+    let infrastructureForServices = deploymentMappingsForServices.map(deploymentMapping => deploymentMapping.getUnderlyingInfrastructure);
 
     let availabilityZones: Set<string> = new Set();
 
@@ -1173,7 +1173,7 @@ export const numberOfAvailabilityZonesUsedByStorageServices: Calculation = (para
         return "n/a";
     }
 
-    let infrastructureForStorageServices = deploymentMappingsForServices.map(deploymentMapping =>  deploymentMapping.getUnderlyingInfrastructure);
+    let infrastructureForStorageServices = deploymentMappingsForServices.map(deploymentMapping => deploymentMapping.getUnderlyingInfrastructure);
 
     let availabilityZones: Set<string> = new Set();
 
@@ -1219,15 +1219,15 @@ export const ratioOfExternalEndpointsSupportingTls: Calculation = (parameters: C
 
 export const degreeOfAsynchronousCommunication: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
     let allEndpoints = parameters.entity.getLinks.flatMap(links => links).map(link => link.getTargetEndpoint);
-        if (parameters.entity.getExternalEndpoint) {
-            allEndpoints.push(parameters.entity.getExternalEndpoint);
-        }
+    if (parameters.entity.getExternalEndpoint) {
+        allEndpoints.push(parameters.entity.getExternalEndpoint);
+    }
 
     if (allEndpoints.length === 0) {
         return "n/a";
     }
 
-    let asynchronousEndpoints: string[]= [];
+    let asynchronousEndpoints: string[] = [];
 
     for (const endpoint of allEndpoints) {
 
@@ -1237,6 +1237,21 @@ export const degreeOfAsynchronousCommunication: Calculation = (parameters: Calcu
     }
 
     return asynchronousEndpoints.length / allEndpoints.length
+}
+
+
+export const ratioOfRateLimitingEndpoints: Calculation = (parameters: CalculationParameters<RequestTrace>) => {
+
+    let allEndpoints = parameters.entity.getLinks.flatMap(links => links).map(link => link.getTargetEndpoint);
+    if (parameters.entity.getExternalEndpoint) {
+        allEndpoints.push(parameters.entity.getExternalEndpoint);
+    }
+
+    if (allEndpoints.length === 0) {
+        return "n/a";
+    }
+
+    return allEndpoints.filter(endpoint => endpoint.getProperty("rate_limiting").value !== "none").length / allEndpoints.length;
 }
 
 
@@ -1299,6 +1314,7 @@ export const requestTraceMeasureImplementations: { [measureKey: string]: Calcula
     "numberOfAvailabilityZonesUsedByStorageServices": numberOfAvailabilityZonesUsedByStorageServices,
     "ratioOfLinksWithTimeout": ratioOfLinksWithTimeout,
     "ratioOfExternalEndpointsSupportingTls": ratioOfExternalEndpointsSupportingTls,
-    "degreeOfAsynchronousCommunication": degreeOfAsynchronousCommunication
+    "degreeOfAsynchronousCommunication": degreeOfAsynchronousCommunication,
+    "ratioOfRateLimitingEndpoints": ratioOfRateLimitingEndpoints
 }
 

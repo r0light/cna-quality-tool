@@ -778,12 +778,20 @@ const productFactorEvaluationImplementation: {
     },
     "guardedIngress": (parameters) => {
         let ratioOfComponentsWhoseIngressIsProxied = parameters.calculatedMeasures.get("ratioOfComponentsWhoseExternalIngressIsProxied").value;
+        let ratioOfRateLimitingEndpoints = parameters.calculatedMeasures.get("ratioOfRateLimitingEndpoints").value
 
         if (ratioOfComponentsWhoseIngressIsProxied === "n/a") {
-            return "n/a";
+            if (ratioOfRateLimitingEndpoints === "n/a") {
+                return "n/a";
+            }
+            return linearNumericalMapping(ratioOfRateLimitingEndpoints as number * 0.5);
+        } else {
+            if (ratioOfRateLimitingEndpoints === "n/a") {
+                return linearNumericalMapping(ratioOfComponentsWhoseIngressIsProxied as number * 0.5);
+            } else {
+                return linearNumericalMapping(average([ratioOfComponentsWhoseIngressIsProxied as number, ratioOfRateLimitingEndpoints as number]));
+            }
         }
-
-        return linearNumericalMapping(ratioOfComponentsWhoseIngressIsProxied as number);
     },
     "rollingUpgradesEnabledForInfrastructure": (parameters) => {
         let rollingUpdateOption = parameters.calculatedMeasures.get("rollingUpdateOption").value;

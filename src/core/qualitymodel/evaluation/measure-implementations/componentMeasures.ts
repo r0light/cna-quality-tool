@@ -1578,6 +1578,18 @@ export const degreeToWhichComponentsAreLinkedToStatefulComponents: Calculation =
     return statefulComponents.size / linkedToComponents.size;
 }
 
+export const ratioOfRateLimitingEndpoints: Calculation = (parameters: CalculationParameters<Component>) => {
+
+    let allEndpoints = [...parameters.entity.getEndpointEntities.concat(parameters.entity.getExternalEndpointEntities)];
+
+    if (allEndpoints.length === 0) {
+        return "n/a";
+    }
+
+    return allEndpoints.filter(endpoint => endpoint.getProperty("rate_limiting").value !== "none").length / allEndpoints.length;
+}
+
+
 
 export const componentMeasureImplementations: { [measureKey: string]: Calculation } = {
     "ratioOfEndpointsSupportingSsl": ratioOfEndpointsSupportingSsl,
@@ -1664,6 +1676,7 @@ export const componentMeasureImplementations: { [measureKey: string]: Calculatio
     "ratioOfComponentsWhoseExternalIngressIsProxied": ratioOfComponentsWhoseExternalIngressIsProxied,
     "numberOfAvailabilityZonesUsedByServices": numberOfAvailabilityZonesUsedByServices,
     "numberOfAvailabilityZonesUsedByStorageServices": numberOfAvailabilityZonesUsedByStorageServices,
-    "degreeToWhichComponentsAreLinkedToStatefulComponents": degreeToWhichComponentsAreLinkedToStatefulComponents
+    "degreeToWhichComponentsAreLinkedToStatefulComponents": degreeToWhichComponentsAreLinkedToStatefulComponents,
+    "ratioOfRateLimitingEndpoints": ratioOfRateLimitingEndpoints
 }
 
