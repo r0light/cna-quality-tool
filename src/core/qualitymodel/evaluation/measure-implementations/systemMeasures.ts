@@ -2103,17 +2103,19 @@ export const ratioOfAbstractedHardware: Calculation = (parameters: CalculationPa
 
 export const nonProviderSpecificInfrastructureArtifacts: Calculation = (parameters: CalculationParameters<System>) => {
 
-    let allInfrastructure = parameters.entity.getInfrastructureEntities;
+    let allInfrastructureWithArtifacts = parameters.entity.getInfrastructureEntities.entries().filter(([infrastructureKey, infrastructure]) => {
+        return infrastructure.getArtifacts.size !== 0
+    }).toArray();
 
-    if (allInfrastructure.size === 0) {
+    if (allInfrastructureWithArtifacts.length === 0) {
         return "n/a";
     }
 
-    let nonProviderSpecificArtifacts = allInfrastructure.entries().filter(([infrastructureKey, infrastructure]) => {
+    let nonProviderSpecificArtifacts = allInfrastructureWithArtifacts.filter(([infrastructureKey, infrastructure]) => {
         return infrastructureHasOnlyNonProviderSpecificArtifacts({ entity: infrastructure, system: parameters.system }) === 1
-    }).toArray();
+    });
 
-    return nonProviderSpecificArtifacts.length / allInfrastructure.size;
+    return nonProviderSpecificArtifacts.length / allInfrastructureWithArtifacts.length;
 }
 
 export const nonProviderSpecificComponentArtifacts: Calculation = (parameters: CalculationParameters<System>) => {
