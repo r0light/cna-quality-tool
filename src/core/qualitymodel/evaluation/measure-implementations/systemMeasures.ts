@@ -2536,7 +2536,11 @@ export const readWriteSeparationForDataAggregates: Calculation = (parameters: Ca
         }
     
         for (const endpoint of allComponentEndpoints) {
-            for (const usageRelation of endpoint.getDataAggregateEntities) {
+            let persistenceRelations = endpoint.getDataAggregateEntities.filter(usageRelation => {
+                let componentUsageRelation = component.getDataAggregateEntities.find(componentRelation => componentRelation.data.getId === usageRelation.data.getId);
+                 return componentUsageRelation && DATA_USAGE_RELATION_PERSISTENCE.includes(componentUsageRelation.relation.getProperty("usage_relation").value);
+            });
+            for (const usageRelation of persistenceRelations) {
                 if (endpoint.getProperty("kind").value === "query") {
                     dataAggregateUsageSeparation.get(usageRelation.data.getId).readBy.push(componentId);
                 } else  if (endpoint.getProperty("kind").value === "command") {

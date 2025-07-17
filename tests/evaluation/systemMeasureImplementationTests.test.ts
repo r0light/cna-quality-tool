@@ -3732,9 +3732,13 @@ test("readWriteSeparationForDataAggregates", () => {
 
     let serviceA = new Service("s1", "testService", getEmptyMetaData());
     let dataAggregateA = new DataAggregate("d1", "data 1", getEmptyMetaData());
-    serviceA.addDataAggregateEntity(dataAggregateA, new RelationToDataAggregate("r1", getEmptyMetaData()));
+    let relationAtoA = new RelationToDataAggregate("r1", getEmptyMetaData());
+    relationAtoA.setPropertyValue("usage_relation", "persistence");
+    serviceA.addDataAggregateEntity(dataAggregateA, relationAtoA);
     let dataAggregateB = new DataAggregate("d2", "data 2", getEmptyMetaData());
-    serviceA.addDataAggregateEntity(dataAggregateB, new RelationToDataAggregate("r2", getEmptyMetaData()));
+    let relationAtoB = new RelationToDataAggregate("r2", getEmptyMetaData());
+    relationAtoB.setPropertyValue("usage_relation", "persistence");
+    serviceA.addDataAggregateEntity(dataAggregateB, relationAtoB);
 
     let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
     endpointA.setPropertyValue("kind", "query");
@@ -3753,8 +3757,12 @@ test("readWriteSeparationForDataAggregates", () => {
 
 
     let serviceB = new Service("s2", "testService 2", getEmptyMetaData());
-    serviceB.addDataAggregateEntity(dataAggregateA, new RelationToDataAggregate("r5", getEmptyMetaData()));
-    serviceB.addDataAggregateEntity(dataAggregateB, new RelationToDataAggregate("r6", getEmptyMetaData()));
+    let relationBtoA = new RelationToDataAggregate("r5", getEmptyMetaData());
+    relationBtoA.setPropertyValue("usage_relation", "persistence");
+    serviceB.addDataAggregateEntity(dataAggregateA, relationBtoA);
+    let relationBtoB = new RelationToDataAggregate("r6", getEmptyMetaData());
+    relationBtoB.setPropertyValue("usage_relation", "persistence");
+    serviceB.addDataAggregateEntity(dataAggregateB, relationBtoB);
 
     let endpointC = new Endpoint("e3", "endpoint 3", getEmptyMetaData());
     endpointC.setPropertyValue("kind", "query");

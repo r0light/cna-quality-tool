@@ -1169,26 +1169,32 @@ export const externalEndpointAccessConsistency: Calculation = (parameters: Calcu
 
 export const readWriteSeparationForDataAggregates: Calculation = (parameters: CalculationParameters<Component>) => {
     // initialize map to track data aggregate usage
-    let dataAggregateUsageSeparation = new Map<string, {"readBy": string[], "writeBy": string[]}>();
+    let dataAggregateUsageSeparation = new Map<string, { "readBy": string[], "writeBy": string[] }>();
     parameters.entity.getDataAggregateEntities.forEach((dataAggregateRelation) => {
-        dataAggregateUsageSeparation.set(dataAggregateRelation.data.getId, {"readBy": [], "writeBy": []});
+        if (DATA_USAGE_RELATION_PERSISTENCE.includes(dataAggregateRelation.relation.getProperty("usage_relation").value)) {
+            dataAggregateUsageSeparation.set(dataAggregateRelation.data.getId, { "readBy": [], "writeBy": [] });
+        }
     })
     let dataAggregatesUsedByThisComponent = dataAggregateUsageSeparation.keys().toArray();
 
     let allComponentEntities = parameters.system.getComponentEntities;
     for (const [componentId, component] of allComponentEntities) {
-    
+
         let allComponentEndpoints = component.getEndpointEntities.concat(component.getExternalEndpointEntities);
-    
+
         if (allComponentEndpoints.length === 0 || component.getDataAggregateEntities.length === 0) {
             continue;
         }
-    
+
         for (const endpoint of allComponentEndpoints) {
-            for (const usageRelation of endpoint.getDataAggregateEntities.filter(usageRelation => dataAggregatesUsedByThisComponent.includes(usageRelation.data.getId))) {
+            let persistenceRelations = endpoint.getDataAggregateEntities.filter(usageRelation => {
+                let componentUsageRelation = component.getDataAggregateEntities.find(componentRelation => componentRelation.data.getId === usageRelation.data.getId);
+                 return dataAggregatesUsedByThisComponent.includes(usageRelation.data.getId) && componentUsageRelation && DATA_USAGE_RELATION_PERSISTENCE.includes(componentUsageRelation.relation.getProperty("usage_relation").value);
+            });
+            for (const usageRelation of persistenceRelations) {
                 if (endpoint.getProperty("kind").value === "query") {
                     dataAggregateUsageSeparation.get(usageRelation.data.getId).readBy.push(componentId);
-                } else  if (endpoint.getProperty("kind").value === "command") {
+                } else if (endpoint.getProperty("kind").value === "command") {
                     dataAggregateUsageSeparation.get(usageRelation.data.getId).writeBy.push(componentId);
                 }
             }
@@ -1196,7 +1202,7 @@ export const readWriteSeparationForDataAggregates: Calculation = (parameters: Ca
     }
 
     let separationPerDataAggregate = new Map<string, number>();
-    
+
     dataAggregateUsageSeparation.entries().forEach(([dataAggregateId, readWriteBy]) => {
         let readBy = new Set(readWriteBy.readBy);
         let writeBy = new Set(readWriteBy.writeBy);
@@ -1208,12 +1214,12 @@ export const readWriteSeparationForDataAggregates: Calculation = (parameters: Ca
         if (readBy.difference(writeBy).size === 0 && writeBy.difference(readBy).size === 0) {
             // both read and write by same components
             separationPerDataAggregate.set(dataAggregateId, 0);
-            return;   
+            return;
         }
 
-        if (readBy.difference(writeBy).size > 0 || writeBy.difference(readBy).size > 0 ) {
+        if (readBy.difference(writeBy).size > 0 || writeBy.difference(readBy).size > 0) {
             separationPerDataAggregate.set(dataAggregateId, 1);
-            return;   
+            return;
         }
 
     })
@@ -1503,7 +1509,7 @@ export const ratioOfComponentsWhoseExternalIngressIsProxied: Calculation = (para
         return "n/a";
     }
 
-    return  parameters.entity.getExternalIngressProxiedBy ? 1 : 0;
+    return parameters.entity.getExternalIngressProxiedBy ? 1 : 0;
 }
 
 
@@ -1519,7 +1525,7 @@ export const numberOfAvailabilityZonesUsedByServices: Calculation = (parameters:
         return "n/a";
     }
 
-    let infrastructureForThisComponent = deploymentMappingsForThisComponent.map(deploymentMapping =>  deploymentMapping.getUnderlyingInfrastructure);
+    let infrastructureForThisComponent = deploymentMappingsForThisComponent.map(deploymentMapping => deploymentMapping.getUnderlyingInfrastructure);
 
     let availabilityZones: Set<string> = new Set();
 
@@ -1543,7 +1549,7 @@ export const numberOfAvailabilityZonesUsedByStorageServices: Calculation = (para
         return "n/a";
     }
 
-    let infrastructureForThisComponent = deploymentMappingsForThisComponent.map(deploymentMapping =>  deploymentMapping.getUnderlyingInfrastructure);
+    let infrastructureForThisComponent = deploymentMappingsForThisComponent.map(deploymentMapping => deploymentMapping.getUnderlyingInfrastructure);
 
     let availabilityZones: Set<string> = new Set();
 
@@ -1571,10 +1577,10 @@ export const degreeToWhichComponentsAreLinkedToStatefulComponents: Calculation =
     let statefulComponents = new Set();
 
     for (const [componentId, component] of linkedToComponents.entries()) {
-            if (!component.getProperty("stateless").value) {
-                statefulComponents.add(componentId);
-            }
+        if (!component.getProperty("stateless").value) {
+            statefulComponents.add(componentId);
         }
+    }
     return statefulComponents.size / linkedToComponents.size;
 }
 

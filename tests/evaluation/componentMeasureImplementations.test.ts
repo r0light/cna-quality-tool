@@ -724,7 +724,7 @@ test("numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfComponents
     system.addEntities([linkAB, linkBC, linkDB, linkDC]);
 
     let measureValue = componentMeasureImplementations["numberOfComponentsAComponentIsLinkedToRelativeToTheTotalAmountOfComponents"]({ entity: serviceD, system: system });
-    expect(measureValue).toEqual(2/3);
+    expect(measureValue).toEqual(2 / 3);
 })
 
 test("cyclicCommunication cycle found", () => {
@@ -1055,7 +1055,7 @@ test("ratioOfEndpointsSupportingSsl", () => {
     system.addEntity(service);
 
     let measureValue = componentMeasureImplementations["ratioOfEndpointsSupportingSsl"]({ entity: service, system: system });
-    expect(measureValue).toEqual(2/3);
+    expect(measureValue).toEqual(2 / 3);
 
 })
 
@@ -1464,7 +1464,7 @@ test("accessRestrictedToCallers", () => {
     serviceB.addEndpoint(endpointB);
 
     let serviceC = new Service("s3", "service C", getEmptyMetaData())
-    serviceC.setPropertyValue("identities", {"a1": "account"});
+    serviceC.setPropertyValue("identities", { "a1": "account" });
 
     let linkCA = new Link("l1", serviceC, endpointA);
     let linkCB = new Link("l2", serviceC, endpointB);
@@ -1898,7 +1898,7 @@ test("ratioOfLinksWithTimeout", () => {
     system.addEntities([linkAB, linkAC, linkAD]);
 
     let measureValue = componentMeasureImplementations["ratioOfLinksWithTimeout"]({ entity: serviceA, system: system });
-    expect(measureValue).toEqual(2/3);
+    expect(measureValue).toEqual(2 / 3);
 })
 
 test("deploymentsWithRestart", () => {
@@ -2086,27 +2086,36 @@ test("readWriteSeparationForDataAggregates", () => {
 
     let service = new Service("s1", "testService", getEmptyMetaData());
     let dataAggregateA = new DataAggregate("d1", "data 1", getEmptyMetaData());
-    service.addDataAggregateEntity(dataAggregateA, new RelationToDataAggregate("r1", getEmptyMetaData()));
+    let relationStoA = new RelationToDataAggregate("r1", getEmptyMetaData());
+    relationStoA.setPropertyValue("usage_relation", "persistence");
+    service.addDataAggregateEntity(dataAggregateA, relationStoA);
     let dataAggregateB = new DataAggregate("d2", "data 2", getEmptyMetaData());
-    service.addDataAggregateEntity(dataAggregateB, new RelationToDataAggregate("r2", getEmptyMetaData()));
+    let relationStoB = new RelationToDataAggregate("r2", getEmptyMetaData());
+    relationStoB.setPropertyValue("usage_relation", "persistence");
+    service.addDataAggregateEntity(dataAggregateB, relationStoB);
 
     let endpointA = new Endpoint("e1", "endpoint 1", getEmptyMetaData());
     endpointA.setPropertyValue("kind", "query");
     service.addEndpoint(endpointA);
-    endpointA.addDataAggregateEntity(dataAggregateA, new RelationToDataAggregate("r3", getEmptyMetaData()));
+    let relationAtoA = new RelationToDataAggregate("r3", getEmptyMetaData());
+    endpointA.addDataAggregateEntity(dataAggregateA, relationAtoA);
 
     let endpointB = new ExternalEndpoint("e2", "endpoint 2", getEmptyMetaData());
     endpointB.setPropertyValue("kind", "command");
     service.addEndpoint(endpointB);
-    endpointB.addDataAggregateEntity(dataAggregateB, new RelationToDataAggregate("r4", getEmptyMetaData()));
+    let relationBtoB = new RelationToDataAggregate("r4", getEmptyMetaData());
+    endpointB.addDataAggregateEntity(dataAggregateB, relationBtoB);
 
     let serviceB = new Service("s2", "testService 2", getEmptyMetaData());
-    serviceB.addDataAggregateEntity(dataAggregateA, new RelationToDataAggregate("r5", getEmptyMetaData()));
+    let relationSBAtoA = new RelationToDataAggregate("r5", getEmptyMetaData());
+    relationSBAtoA.setPropertyValue("usage_relation", "persistence");
+    serviceB.addDataAggregateEntity(dataAggregateA, relationSBAtoA);
 
     let endpointC = new ExternalEndpoint("e3", "endpoint 3", getEmptyMetaData());
     endpointC.setPropertyValue("kind", "command");
     serviceB.addEndpoint(endpointC);
-    endpointC.addDataAggregateEntity(dataAggregateA, new RelationToDataAggregate("r6", getEmptyMetaData()));
+    let relationCtoA = new RelationToDataAggregate("r6", getEmptyMetaData());
+    endpointC.addDataAggregateEntity(dataAggregateA, relationCtoA);
 
     system.addEntities([dataAggregateA, dataAggregateB]);
     system.addEntities([service, serviceB]);
@@ -2436,7 +2445,7 @@ test("degreeToWhichComponentsAreLinkedToStatefulComponents", () => {
     system.addEntities([linkAB, linkAC, linkAD]);
 
     let measureValue = componentMeasureImplementations["degreeToWhichComponentsAreLinkedToStatefulComponents"]({ entity: serviceA, system: system });
-    expect(measureValue).toEqual(2/3);
+    expect(measureValue).toEqual(2 / 3);
 })
 
 test("ratioOfRateLimitingEndpoints", () => {
