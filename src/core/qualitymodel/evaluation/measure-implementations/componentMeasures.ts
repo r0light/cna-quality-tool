@@ -135,19 +135,21 @@ export const totalServiceInterfaceCohesion: Calculation = (parameters: Calculati
 
 export const cohesionBetweenEndpointsBasedOnDataAggregateUsage: Calculation = (parameters: CalculationParameters<Component>) => {
     let allEndpoints = parameters.entity.getEndpointEntities.concat(parameters.entity.getExternalEndpointEntities);
+    let endpointsUsingDataAggregates = allEndpoints.filter(endpoint => endpoint.getDataAggregateEntities.length > 0);
 
-    if (allEndpoints.length === 0 || parameters.entity.getDataAggregateEntities.length === 0) {
+    if (endpointsUsingDataAggregates.length === 0 || parameters.entity.getDataAggregateEntities.length === 0) {
         return "n/a";
     }
 
     let dataAggregateUsage = new Map<string, Set<string>>();
     let sharedUsages: number[] = [];
 
-    for (const [index, endpoint] of allEndpoints.entries()) {
+
+    for (const [index, endpoint] of endpointsUsingDataAggregates.entries()) {
         if (!dataAggregateUsage.has(endpoint.getId)) {
             dataAggregateUsage.set(endpoint.getId, new Set([...endpoint.getDataAggregateEntities.entries()].map(entry => entry[1].data.getId)));
         }
-        for (const otherEndpoint of allEndpoints.slice(index + 1)) {
+        for (const otherEndpoint of endpointsUsingDataAggregates.slice(index + 1)) {
             if (!dataAggregateUsage.has(otherEndpoint.getId)) {
                 dataAggregateUsage.set(otherEndpoint.getId, new Set([...otherEndpoint.getDataAggregateEntities.entries()].map(entry => entry[1].data.getId)));
             }
