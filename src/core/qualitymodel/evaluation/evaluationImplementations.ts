@@ -249,7 +249,7 @@ const productFactorEvaluationImplementation: {
             return "n/a";
         }
 
-        return squareRootedNumericalMapping(cohesionBetweenEndpointsBasedOnDataAggregateUsage as number);
+        return linearNumericalMapping(cohesionBetweenEndpointsBasedOnDataAggregateUsage as number);
     },
     "limitedEndpointScope": (parameters) => {
         let serviceInterfaceUsageCohesion = parameters.calculatedMeasures.get("serviceInterfaceUsageCohesion").value;
@@ -258,7 +258,7 @@ const productFactorEvaluationImplementation: {
             return "n/a";
         }
 
-        return squareRootedNumericalMapping(serviceInterfaceUsageCohesion as number);
+        return linearNumericalMapping(serviceInterfaceUsageCohesion as number);
     },
     "commandQueryResponsibilitySegregation": (parameters) => {
         let readWriteSeparationForDataAggregates = parameters.calculatedMeasures.get("readWriteSeparationForDataAggregates").value;
