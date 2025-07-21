@@ -78,12 +78,7 @@ function getGroupsOfRelatedFactors() {
     let relatedFactorGroups: RelatedFactorGroup[] = [];
 
     factorsToCheck: for (const [factorKey, evaluatedProductFactor] of props.evaluatedProductFactors.entries()) {
-
-        // ignore non-leaf factors
-        if (evaluatedProductFactor.backwardImpacts.length > 0) {
-            continue factorsToCheck;
-        }
-
+        
         let impactedFactors = searchForImpactedFactors(evaluatedProductFactor, false);
 
         for (const relatedFactorsGroup of relatedFactorGroups) {

@@ -360,10 +360,7 @@ function updateEvaluation(evaluation: Evaluation) {
     });
 
     evaluation.getEvaluatedProductFactors().forEach((value, key, map) => {
-        // only add leaf factors ? Otherwise also a specific entry for aggregating factors would be possible
-        if (value.productFactor.getImpactingFactors().length === 0) {
-            evaluatedProductFactors.value.set(key, value);
-        }
+        evaluatedProductFactors.value.set(key, value);
     });
 
     evaluation.getEvaluatedQualityAspects().forEach((value, key, map) => {
