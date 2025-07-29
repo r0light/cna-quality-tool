@@ -46,6 +46,9 @@ cd src/totypa/parsers/v2dot0-parsers
 npx tsx profileParser.ts
 ```
 
+**Caution**: This script assumes that on the same level of the project folder, there is another folder called `tosca-profiles` which includes all profiles that should be parsed in corresponding folders.
+This app relies on the [CNA Modeling TOSCA Profile](https://github.com/r0light/cna-modeling-tosca-profile). Therefore, to run the script successfully, clone the repository of the profile into a newly created `tosca-profiles` folder as described.
+
 ## Modifying and extending the quality model
 
 The tool is intended to be customizable. Therefore you can edit the underlying quality model and extend the evaluation through additional implementations.

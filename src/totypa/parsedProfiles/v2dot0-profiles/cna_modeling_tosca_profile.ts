@@ -4,9 +4,9 @@
 
 import { TOSCA_File } from '../../tosca-types/v2dot0-types/definition-types.js';
 
-export const cna_modeling_profile: TOSCA_File = {
+export const cna_modeling_tosca_profile: TOSCA_File = {
   "tosca_definitions_version": "tosca_2_0",
-  "profile": "org.dsg.cna-modeling:0.4",
+  "profile": "org.dsg.cna-modeling:0.6",
   "metadata": {
     "template_name": "profile.yaml",
     "template_author": "Distributed Systems Group",
@@ -3235,38 +3235,6 @@ export const cna_modeling_profile: TOSCA_File = {
     },
     "cna-modeling.entities.Network": {
       "description": "Node Type to model a (virtual) network (e.g. a subnet)\n",
-      "attributes": {
-        "state": {
-          "type": "string"
-        }
-      },
-      "capabilities": {
-        "feature": {
-          "type": "Node"
-        },
-        "link": {
-          "type": "cna-modeling.capabilities.Linkable"
-        }
-      },
-      "requirements": [
-        {
-          "dependency": {
-            "capability": "Node",
-            "node": "Root",
-            "relationship": "DependsOn",
-            "count_range": [
-              0,
-              "UNBOUNDED"
-            ]
-          }
-        }
-      ],
-      "interfaces": {
-        "Standard": {
-          "type": "Lifecycle.Standard"
-        }
-      },
-      "derived_from": "Root",
       "properties": {
         "ip_version": {
           "description": "The IP version of the requested  Valid values are 4 for ipv4 or 6 for ipv6.\n",
@@ -3298,6 +3266,11 @@ export const cna_modeling_profile: TOSCA_File = {
           "description": "Specifies the nature of the network in the underlying cloud infrastructure.\n",
           "type": "string",
           "required": false
+        }
+      },
+      "capabilities": {
+        "link": {
+          "type": "cna-modeling.capabilities.Linkable"
         }
       }
     }

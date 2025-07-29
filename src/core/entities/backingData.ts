@@ -1,5 +1,5 @@
 import { EntityPropertyKey } from '@/totypa/parsedProfiles/v2dot0-profiles/propertyKeys.js';
-import { cna_modeling_profile } from '../../totypa/parsedProfiles/v2dot0-profiles/cna_modeling_profile.js'
+import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/v2dot0-profiles/cna_modeling_tosca_profile.js'
 import { MetaData } from '../common/entityDataTypes.js';
 import { EntityProperty, parseProperties } from '../common/entityProperty.js';
 
@@ -9,7 +9,7 @@ import { EntityProperty, parseProperties } from '../common/entityProperty.js';
  */
 
 const BACKING_DATA_TOSCA_KEY = "cna-modeling.entities.BackingData";
-const BACKING_DATA_TOSCA_EQUIVALENT = cna_modeling_profile.node_types[BACKING_DATA_TOSCA_KEY];
+const BACKING_DATA_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types[BACKING_DATA_TOSCA_KEY];
 
 function getBackingDataProperties(): EntityProperty[] {
     let parsed = parseProperties(BACKING_DATA_TOSCA_EQUIVALENT.properties);

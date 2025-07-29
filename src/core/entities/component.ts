@@ -3,7 +3,7 @@ import { Endpoint } from './endpoint.js'
 import { ExternalEndpoint } from './externalEndpoint.js'
 import { DataAggregate } from './dataAggregate.js'
 import { BackingData } from './backingData.js'
-import { cna_modeling_profile } from '../../totypa/parsedProfiles/v2dot0-profiles/cna_modeling_profile.js'
+import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/v2dot0-profiles/cna_modeling_tosca_profile.js'
 import { MetaData } from '../common/entityDataTypes.js'
 import { RelationToDataAggregate } from './relationToDataAggregate.js'
 import { RelationToBackingData } from './relationToBackingData.js'
@@ -20,7 +20,7 @@ import { EntityPropertyKey } from '@/totypa/parsedProfiles/v2dot0-profiles/prope
  * @module entities/component
  */
 const COMPONENT_TOSCA_KEY = "cna-modeling.entities.Component"
-const COMPONENT_TOSCA_EQUIVALENT = cna_modeling_profile.node_types[COMPONENT_TOSCA_KEY];
+const COMPONENT_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types[COMPONENT_TOSCA_KEY];
 
 function getComponentProperties(): EntityProperty[] {
     let parsed = parseProperties(COMPONENT_TOSCA_EQUIVALENT.properties);

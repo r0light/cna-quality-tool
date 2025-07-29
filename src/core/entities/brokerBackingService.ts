@@ -1,6 +1,6 @@
 import { EntityProperty, parseProperties } from '../common/entityProperty.js'
 import { Component } from './component.js'
-import { cna_modeling_profile } from '../../totypa/parsedProfiles/v2dot0-profiles/cna_modeling_profile.js'
+import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/v2dot0-profiles/cna_modeling_tosca_profile.js'
 import { MetaData } from '../common/entityDataTypes.js'
 
 /**
@@ -9,7 +9,7 @@ import { MetaData } from '../common/entityDataTypes.js'
  */
 
 const BROKER_BACKING_SERVICE_TOSCA_KEY = "cna-modeling.entities.BrokerBackingService";
-const BROKER_BACKING_SERVICE_TOSCA_EQUIVALENT = cna_modeling_profile.node_types[BROKER_BACKING_SERVICE_TOSCA_KEY];
+const BROKER_BACKING_SERVICE_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types[BROKER_BACKING_SERVICE_TOSCA_KEY];
 
 
 function getBrokerBackingServiceProperties(): EntityProperty[] {

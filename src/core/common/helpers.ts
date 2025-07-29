@@ -2,7 +2,7 @@ import { TOSCA_Node_Definition, TOSCA_Property_Definition, TOSCA_Property_Refine
 import { all_profiles } from '../../totypa/parsedProfiles/v2dot0-profiles/all_profiles.js'
 import { TOSCA_Property_Name } from '@/totypa/tosca-types/v2dot0-types/alias-types';
 import { COMPONENT_TOSCA_KEY } from '../entities/component.js';
-import { cna_modeling_profile } from '@/totypa/parsedProfiles/v2dot0-profiles/cna_modeling_profile.js';
+import { cna_modeling_tosca_profile } from '@/totypa/parsedProfiles/v2dot0-profiles/cna_modeling_tosca_profile.js';
 import { ENDPOINT_TOSCA_EQUIVALENT, ENDPOINT_TOSCA_KEY } from '../entities/endpoint.js';
 
 
@@ -117,7 +117,7 @@ const refineValue = (thingToRefine: any, thingWithRefinements: any) => {
 
 
 function getIdentityTypes(): {value: string, text: string}[] {
-    const COMPONENT_TOSCA_EQUIVALENT = cna_modeling_profile.node_types[COMPONENT_TOSCA_KEY];
+    const COMPONENT_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types[COMPONENT_TOSCA_KEY];
 
     if (COMPONENT_TOSCA_EQUIVALENT.properties 
         && COMPONENT_TOSCA_EQUIVALENT.properties.identities 
@@ -132,7 +132,7 @@ function getIdentityTypes(): {value: string, text: string}[] {
 }
 
 function getAuthenticationMethods(): string[] {
-    const ENDPOINT_TOSCA_EQUIVALENT = cna_modeling_profile.node_types[ENDPOINT_TOSCA_KEY];
+    const ENDPOINT_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types[ENDPOINT_TOSCA_KEY];
 
     if (ENDPOINT_TOSCA_EQUIVALENT.properties 
         && ENDPOINT_TOSCA_EQUIVALENT.properties.supported_authentication_methods 

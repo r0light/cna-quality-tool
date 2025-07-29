@@ -1,10 +1,10 @@
 import { EntityProperty, mergeAllCapabilitiesProperties, parseCapabilitiesProperties, parseProperties } from "../common/entityProperty";
 import { MetaData } from "../common/entityDataTypes";
 import { EntityPropertyKey } from "@/totypa/parsedProfiles/v2dot0-profiles/propertyKeys";
-import { cna_modeling_profile } from "@/totypa/parsedProfiles/v2dot0-profiles/cna_modeling_profile";
+import { cna_modeling_tosca_profile } from "@/totypa/parsedProfiles/v2dot0-profiles/cna_modeling_tosca_profile";
 
 const NETWORK_TOSCA_KEY = "cna-modeling.entities.Network"
-const NETWORK_TOSCA_EQUIVALENT = cna_modeling_profile.node_types[NETWORK_TOSCA_KEY];
+const NETWORK_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types[NETWORK_TOSCA_KEY];
 
 function getNetworkProperties(): EntityProperty[] {
     let parsed = parseProperties(NETWORK_TOSCA_EQUIVALENT.properties).concat(mergeAllCapabilitiesProperties(parseCapabilitiesProperties(NETWORK_TOSCA_EQUIVALENT.capabilities)));

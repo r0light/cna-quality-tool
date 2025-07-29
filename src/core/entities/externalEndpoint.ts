@@ -1,15 +1,14 @@
 import { EntityProperty, mergeAllCapabilitiesProperties, parseCapabilitiesProperties, parseProperties, TextEntityProperty } from "../common/entityProperty.js"
 import { Endpoint } from "./endpoint.js";
-import { tosca_simple_2_0 } from '../../totypa/parsedProfiles/v2dot0-profiles/tosca_simple_2_0.js'
 import { MetaData } from "../common/entityDataTypes.js";
-import { cna_modeling_profile } from '../../totypa/parsedProfiles/v2dot0-profiles/cna_modeling_profile.js'
+import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/v2dot0-profiles/cna_modeling_tosca_profile.js'
 
 /**
  * The module for aspects related to a External Endpoint quality model Entity.
  * @module entities/externalEndpoint
  */
 const EXTERNAL_ENDPOINT_TOSCA_KEY = "cna-modeling.entities.Endpoint.External";
-const EXTERNAL_ENDPOINT_TOSCA_EQUIVALENT = cna_modeling_profile.node_types[EXTERNAL_ENDPOINT_TOSCA_KEY];
+const EXTERNAL_ENDPOINT_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types[EXTERNAL_ENDPOINT_TOSCA_KEY];
 
 function getExternalEndpointProperties(): EntityProperty[] {
     let parsed = parseProperties(EXTERNAL_ENDPOINT_TOSCA_EQUIVALENT.properties).concat(mergeAllCapabilitiesProperties(parseCapabilitiesProperties(EXTERNAL_ENDPOINT_TOSCA_EQUIVALENT.capabilities))).filter(property => !["allow_access_to", "documented_by"].includes(property.getKey));

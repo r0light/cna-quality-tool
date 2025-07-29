@@ -1,13 +1,13 @@
 import { EntityProperty, TextEntityProperty, mergeAllCapabilitiesProperties, parseCapabilitiesProperties, parseProperties } from "../common/entityProperty.js";
 import { MetaData } from "../common/entityDataTypes.js";
-import { cna_modeling_profile } from '../../totypa/parsedProfiles/v2dot0-profiles/cna_modeling_profile.js'
+import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/v2dot0-profiles/cna_modeling_tosca_profile.js'
 import { DataAggregate } from "./dataAggregate.js";
 import { RelationToDataAggregate } from "./relationToDataAggregate.js";
 import { EntityPropertyKey } from "@/totypa/parsedProfiles/v2dot0-profiles/propertyKeys.js";
 import { Artifact } from "../common/artifact.js";
 
 const ENDPOINT_TOSCA_KEY = "cna-modeling.entities.Endpoint";
-const ENDPOINT_TOSCA_EQUIVALENT = cna_modeling_profile.node_types[ENDPOINT_TOSCA_KEY];
+const ENDPOINT_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types[ENDPOINT_TOSCA_KEY];
 
 /**
  * The module for aspects related to a Endpoint quality model Entity.

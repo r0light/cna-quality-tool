@@ -1,6 +1,6 @@
 import { EntityProperty, mergeAllCapabilitiesProperties, parseCapabilitiesProperties, parseProperties } from '../common/entityProperty.js'
 import { Component } from './component.js'
-import { cna_modeling_profile } from '../../totypa/parsedProfiles/v2dot0-profiles/cna_modeling_profile.js'
+import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/v2dot0-profiles/cna_modeling_tosca_profile.js'
 import { MetaData } from '../common/entityDataTypes.js'
 
 /**
@@ -9,7 +9,7 @@ import { MetaData } from '../common/entityDataTypes.js'
  */
 
 const PROXY_BACKING_SERVICE_TOSCA_KEY = "cna-modeling.entities.ProxyBackingService";
-const PROXY_BACKING_SERVICE_TOSCA_EQUIVALENT = cna_modeling_profile.node_types[PROXY_BACKING_SERVICE_TOSCA_KEY];
+const PROXY_BACKING_SERVICE_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types[PROXY_BACKING_SERVICE_TOSCA_KEY];
 
 
 function getProxyBackingServiceProperties(): EntityProperty[] {

@@ -1,6 +1,6 @@
 import { ExternalEndpoint } from "./externalEndpoint.js";
 import { Link } from "./link.js";
-import { cna_modeling_profile } from '../../totypa/parsedProfiles/v2dot0-profiles/cna_modeling_profile.js'
+import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/v2dot0-profiles/cna_modeling_tosca_profile.js'
 import { MetaData } from "../common/entityDataTypes.js";
 import { EntityProperty, parseProperties } from "../common/entityProperty.js";
 import { EntityPropertyKey } from "@/totypa/parsedProfiles/v2dot0-profiles/propertyKeys.js";
@@ -13,7 +13,7 @@ import { EntityPropertyKey } from "@/totypa/parsedProfiles/v2dot0-profiles/prope
  */
 
 const REQUEST_TRACE_TOSCA_KEY = "cna-modeling.entities.RequestTrace";
-const REQUEST_TRACE_TOSCA_EQUIVALENT = cna_modeling_profile.node_types[REQUEST_TRACE_TOSCA_KEY];
+const REQUEST_TRACE_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types[REQUEST_TRACE_TOSCA_KEY];
 
 function getRequestTraceProperties(): EntityProperty[] {
     // ignore involved_links, because this is actually a relation to links, but this cannot be modeled as a requirement in tosca.. 

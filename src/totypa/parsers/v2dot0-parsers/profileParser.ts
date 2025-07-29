@@ -96,7 +96,7 @@ const refineValue = (thingToRefine: any, thingWithRefinements: any) => {
 startParsing();
 
 export async function startParsing() {
-    parseAllProfiles("../../../../tosca-profiles/v2dot0-profiles/").then(promises => {
+    parseAllProfiles("../../../../../tosca-profiles").then(promises => {
         return Promise.all(promises).then(profiles => {
 
             let results: Promise<void>[] = [];

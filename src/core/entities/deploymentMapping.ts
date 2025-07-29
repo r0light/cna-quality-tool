@@ -1,7 +1,7 @@
 import { Component } from './component.js'
 import { Infrastructure } from './infrastructure.js'
 import { EntityProperty, SelectEntityProperty, parseProperties } from '../common/entityProperty.js';
-import { cna_modeling_profile } from '../../totypa/parsedProfiles/v2dot0-profiles/cna_modeling_profile.js'
+import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/v2dot0-profiles/cna_modeling_tosca_profile.js'
 import { EntityPropertyKey } from '@/totypa/parsedProfiles/v2dot0-profiles/propertyKeys.js';
 import { getAvailableArtifactTypes } from '../common/artifact.js';
 
@@ -10,7 +10,7 @@ import { getAvailableArtifactTypes } from '../common/artifact.js';
  * @module entities/deploymentMapping
  */
 const DEPLOYMENT_MAPPING_TOSCA_KEY = "cna-modeling.relationships.HostedOn.DeploymentMapping";
-const DEPLOYMENT_MAPPING_TOSCA_EQUIVALENT = cna_modeling_profile.relationship_types[DEPLOYMENT_MAPPING_TOSCA_KEY];
+const DEPLOYMENT_MAPPING_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.relationship_types[DEPLOYMENT_MAPPING_TOSCA_KEY];
 
 function getDeploymentMappingProperties(): EntityProperty[] {
     let parsed = parseProperties(DEPLOYMENT_MAPPING_TOSCA_EQUIVALENT.properties);

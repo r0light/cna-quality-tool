@@ -1,6 +1,6 @@
 import { BackingData } from "./backingData.js";
 import { EntityProperty, SelectEntityProperty, mergeAllCapabilitiesProperties, parseCapabilitiesProperties, parseProperties } from "../common/entityProperty.js";
-import { cna_modeling_profile } from '../../totypa/parsedProfiles/v2dot0-profiles/cna_modeling_profile.js'
+import { cna_modeling_tosca_profile } from '../../totypa/parsedProfiles/v2dot0-profiles/cna_modeling_tosca_profile.js'
 import { MetaData } from "../common/entityDataTypes.js";
 import { RelationToBackingData } from "./relationToBackingData.js";
 import { Artifact } from "../common/artifact.js";
@@ -14,7 +14,7 @@ import { EntityPropertyKey } from "@/totypa/parsedProfiles/v2dot0-profiles/prope
  */
 
 const INFRASTRUCTURE_TOSCA_KEY = "cna-modeling.entities.Infrastructure";
-const INFRASTRUCTURE_TOSCA_EQUIVALENT = cna_modeling_profile.node_types[INFRASTRUCTURE_TOSCA_KEY];
+const INFRASTRUCTURE_TOSCA_EQUIVALENT = cna_modeling_tosca_profile.node_types[INFRASTRUCTURE_TOSCA_KEY];
 
 function getInfrastructureProperties() {
     let parsed = parseProperties(INFRASTRUCTURE_TOSCA_EQUIVALENT.properties).concat(mergeAllCapabilitiesProperties(parseCapabilitiesProperties(INFRASTRUCTURE_TOSCA_EQUIVALENT.capabilities)));
