@@ -1234,7 +1234,7 @@ export const cna_modeling_tosca_profile: TOSCA_File = {
         }
       },
       "valid_capability_types": [
-        "Compute"
+        "cna-modeling.capabilities.Host"
       ],
       "valid_target_node_types": [
         "cna-modeling.entities.Infrastructure"
