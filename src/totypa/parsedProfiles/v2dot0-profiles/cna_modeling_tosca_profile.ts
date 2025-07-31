@@ -1152,6 +1152,14 @@ export const cna_modeling_tosca_profile: TOSCA_File = {
       "valid_target_node_types": [
         "cna-modeling.entities.Endpoint",
         "cna-modeling.entities.Endpoint.External"
+      ],
+      "valid_source_node_types": [
+        "cna-modeling.entities.Component",
+        "cna-modeling.entities.Service",
+        "cna-modeling.entities.BackingService",
+        "cna-modeling.entities.StorageBackingService",
+        "cna-modeling.entities.ProxyBackingService",
+        "cna-modeling.entities.BrokerBackingService"
       ]
     },
     "cna-modeling.relationships.HostedOn.DeploymentMapping": {
@@ -1238,6 +1246,15 @@ export const cna_modeling_tosca_profile: TOSCA_File = {
       ],
       "valid_target_node_types": [
         "cna-modeling.entities.Infrastructure"
+      ],
+      "valid_source_node_types": [
+        "cna-modeling.entities.Component",
+        "cna-modeling.entities.Service",
+        "cna-modeling.entities.BackingService",
+        "cna-modeling.entities.StorageBackingService",
+        "cna-modeling.entities.ProxyBackingService",
+        "cna-modeling.entities.BrokerBackingService",
+        "cna-modeling.entities.Infrastructure"
       ]
     },
     "cna-modeling.relationships.Provides.Endpoint": {
@@ -1248,6 +1265,14 @@ export const cna_modeling_tosca_profile: TOSCA_File = {
       "valid_target_node_types": [
         "cna-modeling.entities.Endpoint",
         "cna-modeling.entities.Endpoint.External"
+      ],
+      "valid_source_node_types": [
+        "cna-modeling.entities.Component",
+        "cna-modeling.entities.Service",
+        "cna-modeling.entities.BackingService",
+        "cna-modeling.entities.StorageBackingService",
+        "cna-modeling.entities.ProxyBackingService",
+        "cna-modeling.entities.BrokerBackingService"
       ]
     },
     "cna-modeling.relationships.AttachesTo.DataAggregate": {
@@ -1280,6 +1305,16 @@ export const cna_modeling_tosca_profile: TOSCA_File = {
       ],
       "valid_target_node_types": [
         "cna-modeling.entities.DataAggregate"
+      ],
+      "valid_source_node_types": [
+        "cna-modeling.entities.Component",
+        "cna-modeling.entities.Service",
+        "cna-modeling.entities.BackingService",
+        "cna-modeling.entities.StorageBackingService",
+        "cna-modeling.entities.ProxyBackingService",
+        "cna-modeling.entities.BrokerBackingService",
+        "cna-modeling.entities.Endpoint",
+        "cna-modeling.entities.Endpoint.External"
       ]
     },
     "cna-modeling.relationships.AttachesTo.BackingData": {
@@ -1306,6 +1341,15 @@ export const cna_modeling_tosca_profile: TOSCA_File = {
       ],
       "valid_target_node_types": [
         "cna-modeling.entities.BackingData"
+      ],
+      "valid_source_node_types": [
+        "cna-modeling.entities.Component",
+        "cna-modeling.entities.Service",
+        "cna-modeling.entities.BackingService",
+        "cna-modeling.entities.StorageBackingService",
+        "cna-modeling.entities.ProxyBackingService",
+        "cna-modeling.entities.BrokerBackingService",
+        "cna-modeling.entities.Infrastructure"
       ]
     },
     "cna-modeling.relationships.ProxiedBy.ProxyBackingService": {
@@ -1315,6 +1359,14 @@ export const cna_modeling_tosca_profile: TOSCA_File = {
       ],
       "valid_target_node_types": [
         "cna-modeling.entities.ProxyBackingService"
+      ],
+      "valid_source_node_types": [
+        "cna-modeling.entities.Component",
+        "cna-modeling.entities.Service",
+        "cna-modeling.entities.BackingService",
+        "cna-modeling.entities.StorageBackingService",
+        "cna-modeling.entities.ProxyBackingService",
+        "cna-modeling.entities.BrokerBackingService"
       ]
     },
     "cna-modeling.relationships.LinksTo": {
@@ -1324,6 +1376,15 @@ export const cna_modeling_tosca_profile: TOSCA_File = {
       ],
       "valid_target_node_types": [
         "cna-modeling.entities.Network"
+      ],
+      "valid_source_node_types": [
+        "cna-modeling.entities.Component",
+        "cna-modeling.entities.Service",
+        "cna-modeling.entities.BackingService",
+        "cna-modeling.entities.StorageBackingService",
+        "cna-modeling.entities.ProxyBackingService",
+        "cna-modeling.entities.BrokerBackingService",
+        "cna-modeling.entities.Infrastructure"
       ]
     },
     "cna-modeling.relationships.UseAddressResolution": {
@@ -1335,7 +1396,15 @@ export const cna_modeling_tosca_profile: TOSCA_File = {
         "cna-modeling.entities.BackingService",
         "cna-modeling.entities.ProxyBackingService",
         "cna-modeling.entities.Infrastructure",
-        "Network"
+        "cna-modeling.entities.Network"
+      ],
+      "valid_source_node_types": [
+        "cna-modeling.entities.Component",
+        "cna-modeling.entities.Service",
+        "cna-modeling.entities.BackingService",
+        "cna-modeling.entities.StorageBackingService",
+        "cna-modeling.entities.ProxyBackingService",
+        "cna-modeling.entities.BrokerBackingService"
       ]
     },
     "cna-modeling.relationships.DelegateAuthentication": {
@@ -1345,6 +1414,14 @@ export const cna_modeling_tosca_profile: TOSCA_File = {
       ],
       "valid_target_node_types": [
         "cna-modeling.entities.BackingService"
+      ],
+      "valid_source_node_types": [
+        "cna-modeling.entities.Component",
+        "cna-modeling.entities.Service",
+        "cna-modeling.entities.BackingService",
+        "cna-modeling.entities.StorageBackingService",
+        "cna-modeling.entities.ProxyBackingService",
+        "cna-modeling.entities.BrokerBackingService"
       ]
     },
     "cna-modeling.relationships.PartOf": {
@@ -1354,6 +1431,9 @@ export const cna_modeling_tosca_profile: TOSCA_File = {
       ],
       "valid_target_node_types": [
         "cna-modeling.entities.Endpoint.External"
+      ],
+      "valid_source_node_types": [
+        "cna-modeling.entities.RequestTrace"
       ]
     }
   },
@@ -2997,7 +3077,15 @@ export const cna_modeling_tosca_profile: TOSCA_File = {
       },
       "capabilities": {
         "endpoint": {
-          "type": "cna-modeling.capabilities.Endpoint"
+          "type": "cna-modeling.capabilities.Endpoint",
+          "valid_source_node_types": [
+            "cna-modeling.entities.Component",
+            "cna-modeling.entities.Service",
+            "cna-modeling.entities.BackingService",
+            "cna-modeling.entities.StorageBackingService",
+            "cna-modeling.entities.ProxyBackingService",
+            "cna-modeling.entities.BrokerBackingService"
+          ]
         }
       },
       "requirements": [
@@ -3115,10 +3203,27 @@ export const cna_modeling_tosca_profile: TOSCA_File = {
       },
       "capabilities": {
         "endpoint": {
-          "type": "cna-modeling.capabilities.Endpoint"
+          "type": "cna-modeling.capabilities.Endpoint",
+          "valid_source_node_types": [
+            "cna-modeling.entities.Component",
+            "cna-modeling.entities.Service",
+            "cna-modeling.entities.BackingService",
+            "cna-modeling.entities.StorageBackingService",
+            "cna-modeling.entities.ProxyBackingService",
+            "cna-modeling.entities.BrokerBackingService"
+          ]
         },
         "external_endpoint": {
-          "type": "cna-modeling.capabilities.Endpoint"
+          "type": "cna-modeling.capabilities.Endpoint",
+          "valid_source_node_types": [
+            "cna-modeling.entities.Component",
+            "cna-modeling.entities.Service",
+            "cna-modeling.entities.BackingService",
+            "cna-modeling.entities.StorageBackingService",
+            "cna-modeling.entities.ProxyBackingService",
+            "cna-modeling.entities.BrokerBackingService",
+            "cna-modeling.entities.RequestTrace"
+          ]
         }
       },
       "requirements": [
@@ -3195,7 +3300,8 @@ export const cna_modeling_tosca_profile: TOSCA_File = {
             "cna-modeling.entities.BackingService",
             "cna-modeling.entities.StorageBackingService",
             "cna-modeling.entities.BrokerBackingService",
-            "cna-modeling.entities.Endpoint"
+            "cna-modeling.entities.Endpoint",
+            "cna-modeling.entities.Endpoint.External"
           ]
         }
       }
@@ -3270,7 +3376,15 @@ export const cna_modeling_tosca_profile: TOSCA_File = {
       },
       "capabilities": {
         "link": {
-          "type": "cna-modeling.capabilities.Linkable"
+          "type": "cna-modeling.capabilities.Linkable",
+          "valid_source_node_types": [
+            "cna-modeling.entities.Component",
+            "cna-modeling.entities.Service",
+            "cna-modeling.entities.BackingService",
+            "cna-modeling.entities.StorageBackingService",
+            "cna-modeling.entities.BrokerBackingService",
+            "cna-modeling.entities.Infrastructure"
+          ]
         }
       }
     }
