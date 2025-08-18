@@ -11,6 +11,7 @@ import { Measure } from './quamoco/Measure.js';
 import { MeasureKey, ProductFactorKey, qualityModel, QualityModelSpec } from './specifications/qualitymodel.js';
 import { QualityAspect } from './quamoco/QualityAspect.js';
 import { ProductFactor } from './quamoco/ProductFactor.js';
+import { start } from 'repl';
 
 const specifiedQualityModel = qualityModel as QualityModelSpec;
 const qualityModelInstance = getQualityModel();
@@ -34,6 +35,24 @@ function getImpactSymbol(impactType: ImpactType) {
             return "";
     }
 }
+
+function transformToLowercase(input: string, startFrom: number): string {
+    if (input.length === 0 || startFrom >= input.length) {
+        return input;
+    }
+    if (startFrom <= 0) {
+        return input.toLocaleLowerCase();
+    }
+    return input.substring(0, startFrom + 1) + input.slice(startFrom + 1).toLowerCase();
+}
+
+function firstUppercase(input: string): string {
+    if (input.length === 0) {
+        return input;
+    }
+    return input.charAt(0).toLocaleUpperCase() + input.slice(1);
+}
+
 
 const outerDir = "latex-generated-qualitymodel";
 const innerDir = "factors";
@@ -258,6 +277,11 @@ for (const entity of qualityModelInstance.entities) {
     entitiesTableOutput += `    \\refstepcounter{entity}\\label{entity:${entity.getKey}}
     ${entity.getName} (${entity.getSymbol}) & ${entity.getDescription} & ${entity.getRelation.type} ${entity.getRelation.target}\\\\\ \\hline \n`;
     entityCommandsOutput += `\\newcommand\\${entity.getKey}{\\hyperref[entity:${entity.getKey}]{${entity.getName}}} \n`;
+    entityCommandsOutput += `\\newcommand\\${entity.getKey}p{\\hyperref[entity:${entity.getKey}]{${entity.getName}s}} \n`;
+    entityCommandsOutput += `\\newcommand\\${entity.getKey}nocap{\\hyperref[entity:${entity.getKey}]{${transformToLowercase(entity.getName, 0)}}} \n`;
+    entityCommandsOutput += `\\newcommand\\${entity.getKey}nocapp{\\hyperref[entity:${entity.getKey}]{${transformToLowercase(entity.getName, 0)}s}} \n`;
+    entityCommandsOutput += `\\newcommand\\${firstUppercase(entity.getKey)}nocap{\\hyperref[entity:${entity.getKey}]{${transformToLowercase(entity.getName, 1)}}} \n`;
+    entityCommandsOutput += `\\newcommand\\${firstUppercase(entity.getKey)}nocapp{\\hyperref[entity:${entity.getKey}]{${transformToLowercase(entity.getName, 1)}s}} \n`;
 }
 
 entitiesTableOutput = `
@@ -687,7 +711,7 @@ leafFactorEvaluationsTableOutput = `
 	\\centering
     \\def\\arraystretch{1.2}
     \\fontsize{9}{11}\\selectfont
-	\\begin{tabularx}{\\textwidth}{p{3.5cm}p{3cm}XX}
+	\\begin{tabularx}{\\textwidth}{p{3cm}p{3cm}XL}
 		\\textbf{Product Factor}  & \\textbf{Entity}  & \\textbf{Measures used} & \\textbf{Evaluation function} \\\\\ \\hline
         ${leafFactorEvaluationsTableOutput}
 	\\end{tabularx}%
