@@ -590,20 +590,18 @@ function formatMeasureForExport(measureToExport: LatexMeasure) {
         `;
     }
 
-    return `\\textbf{${measureToExport.name}} \\refstepcounter{measure}\\label{measure:${measureToExport.id}}  & ${measureToExport.status} \\T \\\\
-    Formula: & \\T \\\\
-    \\multicolumn{2}{|>{\\centering\\arraybackslash}p{15.05cm}|}{$\\displaystyle ${measureToExport.formula}$} \\T\\B \\\\ ${helperFunctions} \\cline{1-2}
-    Applicable Entities: & Associated Factor: \\T \\\\
+    return `\\textbf{${measureToExport.name}} \\refstepcounter{measure}\\label{measure:${measureToExport.id}}  & ${measureToExport.status}  \\\\
+    Formula: &  \\\\
+    \\multicolumn{2}{|>{\\centering\\arraybackslash}p{15.05cm}|}{$\\displaystyle ${measureToExport.formula}$}  \\\\ ${helperFunctions} \\cline{1-2}
+    Applicable Entities: & Associated Factor:  \\\\
     ${measureToExport.entities.map(entity => `\\textbf{\\${entity}}`).join(", ")} & \\textbf{\\${measureToExport.factorKey}} \\\\
-    Associated Quality Aspects: & Literature Sources: \\T \\\\
+    Associated Quality Aspects: & Literature Sources: \\\\
     ${measureToExport.qualityAspects.map(qa => `\\textbf{\\${qa}}`).join(", ")} & ${measureToExport.sources.map(source => source === "new" ? source : `\\cite{${source}}`).join(", ")} \\\\ \\hline`;
 }
 
 function exportMeasures(measuresToExport: LatexMeasure[], measuresPerTable: number, caption: string) {
     let measuresTableOutput = `
-    \\newcommand\\T{\\rule{0pt}{2.6ex}}       % Top strut
-    \\newcommand\\B{\\rule[-3ex]{0pt}{0pt}}   % Bottom strut
-    
+
     \\newcounter{measure}
     
     `;
@@ -615,6 +613,7 @@ function exportMeasures(measuresToExport: LatexMeasure[], measuresPerTable: numb
             \\caption{${caption} - ${Math.trunc(i / measuresPerTable) + 1}}
             \\label{tab:results:qualitymodel:${caption.replace(/\s+/g, "").toLocaleLowerCase()}${Math.trunc(i / measuresPerTable) + 1}}
             \\fontsize{10}{12}\\selectfont
+            \\def\\arraystretch{1.2}
             \\begin{tabularx}{\\linewidth}{|Xr|}
                 \\hline
                 ${currentMeasures.map(formatMeasureForExport).join("\\hline \n")}
