@@ -1,0 +1,17 @@
+@media print {
+
+    /* #jointPaper,
+    #jointPaper * { */
+    .system-container-modeling-area
+    .system-container-modeling-area * {
+        visibility: visible;
+    }
+
+    /* #jointPaper { */
+    .system-container-modeling-area {
+        display:block;
+        overflow: visible !important;
+        width: fit-content !important;
+        height: fit-content !important;
+    }
+}
