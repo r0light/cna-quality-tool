@@ -8,6 +8,34 @@
 
             Email: <a href="mailto:robin.lichtenthaeler@uni-bamberg.de">robin.lichtenthaeler@uni-bamberg.de</a>
         </p>
+        <h4>Licenses</h4>
+        <h5><a href="https://vuejs.org/">Vue.js</a></h5>
+        <p>
+        The MIT License (MIT) <br>
+        Copyright (c) 2018-present, Yuxi (Evan) You and Vue contributors
+        </p>
+        <h5><a href="https://www.jointjs.com/">JointJS</a></h5>
+        <p>
+        Copyright 2013 client IO <br>
+        http://client.io <br>
+        Mozilla Public License Version 2.0
+        </p>
+        <h5><a href="https://github.com/twbs/bootstrap">Bootstrap</a></h5>
+        <p>
+        The MIT License (MIT) <br>
+        Copyright (c) 2011-2025 The Bootstrap Authors
+        </p>
+        <h5><a href="https://github.com/mermaid-js/mermaid">Mermaid</a></h5>
+        <p>
+        The MIT License (MIT) <br>
+        Copyright (c) 2014 - 2022 Knut Sveidqvist
+        </p>
+        <h5><a href="https://github.com/FortAwesome/Font-Awesome">Font Awesome</a></h5>
+        <p>
+        Font Awesome Free License <br>
+        Fonticons, Inc. (https://fontawesome.com) <br>
+        # Icons: CC BY 4.0 License (https://creativecommons.org/licenses/by/4.0/)
+        </p>
         <h4>Datenschutzerklärung</h4>
         <p> clounaq.de nimmt den Schutz Ihrer persönlichen Daten sehr ernst. Wir selbst erfassen oder speichern keinerlei persönliche Daten.
         Allerdings wird diese Seite auf Servern Dritter gehostet.
