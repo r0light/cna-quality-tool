@@ -48,13 +48,13 @@ export const entities: {[key in ENTITIES]: EntitySpec}  = {
         "description": "An abstract entity for representing distinguishable executable parts of the system that provide certain functionalities. It can for example be a service or a certain cloud resource. Regarding its granularity, it should, generally speaking, correspond to something that can be run as an OS process.",
         "relation": {"type": "part-of", "target": ENTITIES.SYSTEM},
         "symbol": "C",
-        "formal": `\tC := (id,name,props,RDA,RBD,RN,artifacts,providedEndpoints,externalIngressProxiedBy,ingressProxiedBy,egressProxiedBy,addressResolutionBy,authenticationBy)
+        "formal": `\tC := (id,name,props,RDA<sub>C</sub>,RBD<sub>C</sub>,RN<sub>C</sub>,artifacts,providedEndpoints,externalIngressProxiedBy,ingressProxiedBy,egressProxiedBy,addressResolutionBy,authenticationBy)
         props<sub>C</sub> := {${getComponentProperties().map(property => property.getKey).join(",")}}
-        RDA ⊆ C ⨯ DA
-        props<sub>RDA</sub> := {${getDataAggregateRelationshipProperties().map(property => property.getKey).join(",")}}
-        RBD ⊆ C ⨯ BD
-        props<sub>RBD</sub> := {${getBackingDataRelationshipProperties().map(property => property.getKey).join(",")}}
-        RN ⊆ C ⨯ N
+        RDA<sub>C</sub> ⊆ C ⨯ DA
+        props<sub>RDA<sub>C</sub></sub> := {${getDataAggregateRelationshipProperties().map(property => property.getKey).join(",")}}
+        RBD<sub>C</sub> ⊆ C ⨯ BD
+        props<sub>RBD<sub>C</sub></sub> := {${getBackingDataRelationshipProperties().map(property => property.getKey).join(",")}}
+        RN<sub>C</sub> ⊆ C ⨯ N
         artifacts ⊆ A
         providedEndpoints ⊆ E
         externalIngressProxiedBy ∈ PBS
@@ -108,10 +108,10 @@ export const entities: {[key in ENTITIES]: EntitySpec}  = {
         "description": "A communication endpoint, for example a REST endpoint, message producer/listener.",
         "relation": {"type": "part-of", "target": ENTITIES.COMPONENT},
         "symbol": "E",
-        "formal": `\tE := (id,name,props,RDA,documentedBy,allow_access_to)
+        "formal": `\tE := (id,name,props,RDA<sub>E</sub>,documentedBy,allow_access_to)
         props<sub>E</sub> := {${getEndpointProperties().map(property => property.getKey).join(",")}}
-        RDA ⊆ E ⨯ DA
-        props<sub>RDA</sub> := {${getDataAggregateRelationshipProperties().map(property => property.getKey).join(",")}}
+        RDA<sub>E</sub> ⊆ E ⨯ DA
+        props<sub>RDA<sub>E</sub></sub> := {${getDataAggregateRelationshipProperties().map(property => property.getKey).join(",")}}
         documentedBy ⊆ A
         allow_acces_to ⊆ accounts `
     },
@@ -138,12 +138,12 @@ export const entities: {[key in ENTITIES]: EntitySpec}  = {
         "description": "The technical foundation where components are deployed, e.g., a container orchestration system.",
         "relation": {"type": "part-of", "target": ENTITIES.SYSTEM},
         "symbol": "I",
-        "formal": `\tI := (id,name,props,artifacts,RBD,RN)
+        "formal": `\tI := (id,name,props,artifacts,RBD<sub>I</sub>,RN<sub>I</sub>)
         props<sub>I</sub> := {${getInfrastructureProperties().map(property => property.getKey).join(",")}}
         artifacts ⊆ A
-        RBD ⊆ I ⨯ BD
-        props<sub>RBD</sub> := {${getBackingDataRelationshipProperties().map(property => property.getKey).join(",")}}
-        RN ⊆ I ⨯ N`
+        RBD<sub>I</sub> ⊆ I ⨯ BD
+        props<sub>RBD<sub>I</sub></sub> := {${getBackingDataRelationshipProperties().map(property => property.getKey).join(",")}}
+        RN<sub>I</sub> ⊆ I ⨯ N`
     },
     "deploymentMapping": {
         "name": "Deployment Mapping",
@@ -193,7 +193,7 @@ export const entities: {[key in ENTITIES]: EntitySpec}  = {
     },
     "artifact": {
         "name": "Artifact",
-        "description": "An artifact associcated with a component or an infrastructure entity that enables the actual deployment or execution of that entity. For example, a Jar-File or a Container Image",
+        "description": "An artifact associated with a component or an infrastructure entity that enables the actual deployment or execution of that entity. For example, a Jar-File or a Container Image",
         "relation": {"type": "part-of", "target": ENTITIES.COMPONENT},
         "symbol": "A",
         "formal": `\tA := (id, type, props)

@@ -1690,7 +1690,7 @@ const measures = {
     "dataAggregateScope": {
         "name": "Data aggregate scope",
         "calculation": "Total number of data aggregates in a component/system",
-        "calculationFormula": "| SYS.DA | or | C.RDA |",
+        "calculationFormula": "| SYS.DA | or | C.RDA_C |",
         "helperFunctions": [],
         "sources": ["Shim2008", "Zimmermann2015"],
         "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM],
@@ -1698,7 +1698,7 @@ const measures = {
     "serviceInterfaceDataCohesion": {
         "name": "Service interface data cohesion",
         "calculation": "| Set of Service Endpoints that use the same Data Aggregate | / Number of Data Aggregates used in a Service",
-        "calculationFormula": "\\frac{| \\Set{ e | e \\in c.providedEndpoints \\land \\exists e' \\in c.providedEndpoints (\\land ((e.RDA \\cap e'.RDA) \\neq \\emptyset))} |}{|c.RDA|}",
+        "calculationFormula": "\\frac{| \\Set{ e | e \\in c.providedEndpoints \\land \\exists e' \\in c.providedEndpoints (\\land ((e.RDA_E \\cap e'.RDA_E) \\neq \\emptyset))} |}{|c.RDA_C|}",
         "helperFunctions": [],
         "sources": ["Bogner2017", "Perepletchikov2007", "Kazemi2011", "Brito2021", "Jin2021", "Jin2018", "Athanasopoulos2011", "Athanasopoulos2015", "Bogner2020"],
         "applicableEntities": [ENTITIES.COMPONENT],
@@ -1706,7 +1706,7 @@ const measures = {
     "cohesionBetweenEndpointsBasedOnDataAggregateUsage": {
         "name": "Cohesion between endpoints based on data aggregate usage",
         "calculation": "Average-of(Number of Shared Usage of Data Aggregates per endpoint pair) over all endpoints / All Data Aggregates used by endpoints",
-        "calculationFormula": "\\frac{\\frac{\\displaystyle\\sum_{i=1}^{|c.providedEndpoints|} |\\Set{(e_i,e_n) | n>i \\land ((e_i.RDA \\cap e_n.RDA) \\neq \\emptyset) }|}{|c.providedEndpoints|}}{ | \\Set{da | \\exists e \\in c.providedEndpoints ( \\exists (e,da) \\in e.RDA) } |}",
+        "calculationFormula": "\\frac{\\frac{\\displaystyle\\sum_{i=1}^{|c.providedEndpoints|} |\\Set{(e_i,e_n) | n>i \\land ((e_i.RDA_E \\cap e_n.RDA_E) \\neq \\emptyset) }|}{|c.providedEndpoints|}}{ | \\Set{da | \\exists e \\in c.providedEndpoints ( \\exists (e,da) \\in e.RDA_E) } |}",
         "helperFunctions": [],
         "sources": ["Peng2022"],
         "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM],
@@ -1780,7 +1780,7 @@ const measures = {
     "ratioOfStateDependencyOfEndpoints": {
         "name": "Ratio of state dependency of endpoints",
         "calculation": "Number of Endpoints requiring a Data Aggregate / Total number of Endpoints",
-        "calculationFormula": "\\frac{ |\\Set{e | e \\in E \\land e.RDA \\neq \\emptyset }| }{ |E|  }",
+        "calculationFormula": "\\frac{ |\\Set{e | e \\in E \\land e.RDA_E \\neq \\emptyset }| }{ |E|  }",
         "helperFunctions": [],
         "sources": ["Karhikeyan2012"],
         "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
@@ -1892,7 +1892,7 @@ const measures = {
         "calculationFormula": "\\frac{ |componentsExportingLogs| + |infrastructureExportingLogs|}{ |C| + |I|}",
         "helperFunctions": [
             "linkedToLogger: c \\to (\\exists l \\in L (l.sourceComponent = c \\land l.targetEndpoint \\in ls \\land ls \\in BS \\land ls.kind = \\text{\"logging\"}) \\lor \\exists  l\\in L ( l.sourceComponent = ls \\land ls \\in BS \\land ls.kind = \\text{\"logging\"} \\land l.targetEndpoint \\in c.providedEndpoints))",
-            "sharesLogs: c \\to (\\exists bd \\in BD (bd.kind = \\text{\"logs\"} \\land \\exists (c,bd) \\in c.RBD \\land \\exists (ls,bd) \\in ls.RBD (ls \\in BS \\land ls.kind = \\text{\"logging\"})))",
+            "sharesLogs: c \\to (\\exists bd \\in BD (bd.kind = \\text{\"logs\"} \\land \\exists (c,bd) \\in c.RBD_C \\land \\exists (ls,bd) \\in ls.RBD_C (ls \\in BS \\land ls.kind = \\text{\"logging\"})))",
             "componentsExportingLogs = \\Set{ c | c \\in C \\land linkedToLogger(c) \\land sharesLogs(c) }",
             "infrastructureExportingLogs = \\Set{ i | i \\in I \\land sharesLogs(i)  }"
         ],
@@ -1905,7 +1905,7 @@ const measures = {
         "calculationFormula": "\\frac{ |componentsExportingMetrics| + |infrastructureExportingMetrics|}{ |C| + |I|}",
         "helperFunctions": [  
             "linkedToMetrics: c \\to (\\exists l \\in L (l.sourceComponent = c \\land l.targetEndpoint \\in ms \\land ms \\in BS \\land ms.kind = \\text{\"metrics\"}) \\lor \\exists  l\\in L ( l.sourceComponent = ms \\land ms \\in BS \\land ms.kind = \\text{\"metrics\"} \\land l.targetEndpoint \\in c.providedEndpoints))",
-            "sharesMetrics: c \\to (\\exists bd \\in BD (bd.kind = \\text{\"metrics\"} \\land \\exists (c,bd) \\in c.RBD \\land \\exists (ms,bd) \\in ms.RBD (ms \\in BS \\land ms.kind = \\text{\"metrics\"})))",
+            "sharesMetrics: c \\to (\\exists bd \\in BD (bd.kind = \\text{\"metrics\"} \\land \\exists (c,bd) \\in c.RBD_C \\land \\exists (ms,bd) \\in ms.RBD_C (ms \\in BS \\land ms.kind = \\text{\"metrics\"})))",
             "componentsExportingMetrics = \\Set{ c | c \\in C \\land linkedToMetrics(c) \\land sharesMetrics(c) }",
             "infrastructureExportingMetrics = \\Set{ i | i \\in I \\land sharesMetrics(i)  }"],
         "sources": ["Ntentos2022"],
@@ -2178,7 +2178,7 @@ const measures = {
     "averageSystemCoupling": {
         "name": "Average system coupling",
         "calculation": "Sum-of(relationship weights of links between services) / Number of services",
-        "calculationFormula": "\\frac{ \\displaystyle\\sum_{i=1}^{|L|} \\begin{cases} 0.1 &\\text{if } isSend(l_i)  \\\\ 0.5 &\\text{if } isCommand(l_i) \\\\ 0.2 &\\text{else } \\end{cases} + \\frac{\\displaystyle\\sum_{j=1}^{|l.targetEndpoint.RDA|} \\begin{cases} 0.1 &\\text{if } persists(l_i.targetEndpoint.rda_j) \\\\ 0.5 &\\text{if } caches(l_i.targetEndpoint.rda_j) \\\\ 0.25 &\\text{else } \\end{cases}   }{|l.targetEndpoint.RDA|} } { |C| }",
+        "calculationFormula": "\\frac{ \\displaystyle\\sum_{i=1}^{|L|} \\begin{cases} 0.1 &\\text{if } isSend(l_i)  \\\\ 0.5 &\\text{if } isCommand(l_i) \\\\ 0.2 &\\text{else } \\end{cases} + \\frac{\\displaystyle\\sum_{j=1}^{|l.targetEndpoint.RDA_E|} \\begin{cases} 0.1 &\\text{if } persists(l_i.targetEndpoint.rda_j) \\\\ 0.5 &\\text{if } caches(l_i.targetEndpoint.rda_j) \\\\ 0.25 &\\text{else } \\end{cases}   }{|l.targetEndpoint.RDA_E|} } { |C| }",
         "helperFunctions": ["isSend: l \\to (l.targetEndpoint.kind = \\text{\"send event\"})",
             "isCommand: l \\to (l.targetEndpoint.kind = \\text{\"command\"})",
             "persists: rda \\to (rda.usage\\_relation = \\text{\"persistence\"})",
@@ -2190,7 +2190,7 @@ const measures = {
     "couplingOfServicesBasedOnUsedDataAggregates": {
         "name": "Coupling of services based on used data aggregates",
         "calculation": "Data Aggregates used by both two services / All Data Aggregates used by two services",
-        "calculationFormula": "\\frac{ |\\Set{ da | da \\in DA \\land \\exists (c_x, da) \\in c_x.RDA } \\cap \\Set{ da | da \\in DA \\land \\exists (c_y, da) \\in c_y.RDA }|  }{|\\Set{ da | da \\in DA \\land \\exists (c_x, da) \\in c_x.RDA } \\cup \\Set{ da | da \\in DA \\land \\exists (c_y, da) \\in c_y.RDA }|}",
+        "calculationFormula": "\\frac{ |\\Set{ da | da \\in DA \\land \\exists (c_x, da) \\in c_x.RDA_C } \\cap \\Set{ da | da \\in DA \\land \\exists (c_y, da) \\in c_y.RDA_C }|  }{|\\Set{ da | da \\in DA \\land \\exists (c_x, da) \\in c_x.RDA_C } \\cup \\Set{ da | da \\in DA \\land \\exists (c_y, da) \\in c_y.RDA_C }|}",
         "helperFunctions": [],
         "sources": ["Peng2022"],
         "applicableEntities": [ENTITIES.COMPONENT], // TODO actually Component Pair
@@ -2299,7 +2299,7 @@ const measures = {
     "dataAggregateConvergenceAcrossComponents": {
         "name": "Data aggregate convergence across components",
         "calculation": "((sum-of(number of data aggregates used in a service) for all services) / Number of Services) + ((sum-of(Services that use a data aggregate) for all data aggregates) / Number of Data Aggregates)",
-        "calculationFormula": "\\frac{\\displaystyle\\sum_{i=1}^{|C|} |c_i.RDA|}{|C|} + \\frac{\\displaystyle\\sum_{i=1}^{|DA|} |\\Set{ c | \\exists c.RDA (c.RDA.da = da_i)}| }{ |DA| }",
+        "calculationFormula": "\\frac{\\displaystyle\\sum_{i=1}^{|C|} |c_i.RDA_C|}{|C|} + \\frac{\\displaystyle\\sum_{i=1}^{|DA|} |\\Set{ c | \\exists c.RDA_C (c.RDA_C.da = da_i)}| }{ |DA| }",
         "helperFunctions": [],
         "sources": ["Kazemi2013", "Ma2009"],
         "applicableEntities": [ENTITIES.SYSTEM],
@@ -2721,7 +2721,7 @@ const measures = {
     "serviceSize": {
         "name": "Size of a service",
         "calculation": "\"Number of Data Aggregates used in a service\" + \"Number of Components that are linked to a component\"",
-        "calculationFormula": "|c.RDA| + |\\Set{ c' | \\exists l \\in L (l.sourceComponent = c' \\land l.targetEndpoint \\in c.providedEndpoints) }|",
+        "calculationFormula": "|c.RDA_C| + |\\Set{ c' | \\exists l \\in L (l.sourceComponent = c' \\land l.targetEndpoint \\in c.providedEndpoints) }|",
         "helperFunctions": [],
         "sources": ["Asik2017"],
         "applicableEntities": [ENTITIES.COMPONENT],
@@ -2729,7 +2729,7 @@ const measures = {
     "resourceCount": {
         "name": "Data aggregate count",
         "calculation": "Number of Data Aggregates used in a service",
-        "calculationFormula": "|s.RDA|",
+        "calculationFormula": "|s.RDA_C|",
         "helperFunctions": [],
         "sources": ["Asik2017"],
         "applicableEntities": [ENTITIES.COMPONENT],
@@ -2809,7 +2809,7 @@ const measures = {
     "ratioOfCachedDataAggregates": {
         "name": "Ratio of cached data aggregates",
         "calculation": "Sum-of(Cached usage of a Data Aggregate in a Component) / Sum-of(Cached and uncached usage of a Data Aggregate in a Component",
-        "calculationFormula": "\\frac{\\displaystyle\\sum_{i=1}^{|C|} \\displaystyle\\sum_{j=1}^{|c_i.RDA|} \\begin{cases} 1 &\\text{if } c_i.rda_j.usage\\_relation = \"cached\\text{-}usage\" \\\\ 0 &\\text{else } \\end{cases}}{ \\displaystyle\\sum_{i=1}^{|C|} \\displaystyle\\sum_{j=1}^{|c_i.RDA|} \\begin{cases} 1 &\\text{if } c_i.rda_j.usage\\_relation = \"cached\\text{-}usage\" \\lor c_i.rda_j.usage\\_relation = \\text{\"usage\"} \\\\ 0 &\\text{else } \\end{cases} }",
+        "calculationFormula": "\\frac{\\displaystyle\\sum_{i=1}^{|C|} \\displaystyle\\sum_{j=1}^{|c_i.RDA_C|} \\begin{cases} 1 &\\text{if } c_i.rda_j.usage\\_relation = \"cached\\text{-}usage\" \\\\ 0 &\\text{else } \\end{cases}}{ \\displaystyle\\sum_{i=1}^{|C|} \\displaystyle\\sum_{j=1}^{|c_i.RDA_C|} \\begin{cases} 1 &\\text{if } c_i.rda_j.usage\\_relation = \"cached\\text{-}usage\" \\lor c_i.rda_j.usage\\_relation = \\text{\"usage\"} \\\\ 0 &\\text{else } \\end{cases} }",
         "helperFunctions": [],
         "sources": ["new"],
         "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM],
@@ -2817,11 +2817,11 @@ const measures = {
     "dataReplicationAlongRequestTrace": {
         "name": "Data replication along request trace",
         "calculation": "Average(Replication of Data Aggregates along request trace)",
-        "calculationFormula": "\\frac{replicationAlong(rt)+ replicationInEndpoint(rt)}{ \\displaystyle\\sum_{i=1}^{|rt.involvedLinks|} |rt.involvedLinks_i.RDA| + |rt.referencedEndpoint.RDA|}",
+        "calculationFormula": "\\frac{replicationAlong(rt)+ replicationInEndpoint(rt)}{ \\displaystyle\\sum_{i=1}^{|rt.involvedLinks|} |rt.involvedLinks_i.RDA_E| + |rt.referencedEndpoint.RDA_E|}",
         "helperFunctions": [
             "replicationAlong: rt \\to \\bigg( \\displaystyle\\sum_{i=1}^{|rt.involvedLinks|}  replicatedDAs(rt.involvedLinks_i) \\bigg)",
-            "replicatedDAs: link \\to \\bigg( \\displaystyle\\sum_{j=1}^{|link.targetEndpoint.RDA|} \\begin{cases} 1 &\\text{if } replicated(link.targetEndpoint.rda_j) \\\\ 0 &\\text{else } \\end{cases} \\bigg)",
-            "replicationInE: rt \\to \\bigg( \\displaystyle\\sum_{i=1}^{|rt.referencedEndpoint.RDA|} \\begin{cases} 1 &\\text{if } replicated(rt.referencedEndpoint.rda_i)\\\\ 0 &\\text{else } \\end{cases} \\bigg)",
+            "replicatedDAs: link \\to \\bigg( \\displaystyle\\sum_{j=1}^{|link.targetEndpoint.RDA_E|} \\begin{cases} 1 &\\text{if } replicated(link.targetEndpoint.rda_j) \\\\ 0 &\\text{else } \\end{cases} \\bigg)",
+            "replicationInE: rt \\to \\bigg( \\displaystyle\\sum_{i=1}^{|rt.referencedEndpoint.RDA_E|} \\begin{cases} 1 &\\text{if } replicated(rt.referencedEndpoint.rda_i)\\\\ 0 &\\text{else } \\end{cases} \\bigg)",
             "replicated: rda \\to (rda.usage\\_relation = \"cached\\text{-}usage\" \\lor rt.involvedLinks_i.rda_j.usage\\_relation = \\text{\"persistence\"})"],
         "sources": ["new"],
         "applicableEntities": [ENTITIES.REQUEST_TRACE],
@@ -2882,7 +2882,7 @@ const measures = {
         "name": "Secrets stored in vault",
         "calculation": "Backing Data of type secret stored in vault / All backing data of type secret",
         "calculationFormula": "\\frac{|\\Set{bd | bd \\in BD \\land bd.kind = \\text{\"secret\"} \\land storedOnlyInVault(bd) }|}{ |\\Set{bd | bd \\in BD \\land bd.kind = \\text{\"secret\"}}| }",
-        "helperFunctions": ["storedOnlyInVault: bd \\to (\\exists vault \\in BS (vault.kind = \\text{\"vault\"} \\land \\exists (vault,bd) \\in vault.RBD ((vault,bd).usage\\_relation = \\text{\"persistence\"})) \\land \\nexists (c,bd) ((c,bd) \\in c.RBD \\land (c \\notin BS \\lor c.kind \\neq \\text{\"vault\"}) \\land (c,bd).usage\\_relation = \\text{\"persistence\"})))"],
+        "helperFunctions": ["storedOnlyInVault: bd \\to (\\exists vault \\in BS (vault.kind = \\text{\"vault\"} \\land \\exists (vault,bd) \\in vault.RBD_C ((vault,bd).usage\\_relation = \\text{\"persistence\"})) \\land \\nexists (c,bd) ((c,bd) \\in c.RBD_C \\land (c \\notin BS \\lor c.kind \\neq \\text{\"vault\"}) \\land (c,bd).usage\\_relation = \\text{\"persistence\"})))"],
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE]
     },
@@ -3042,7 +3042,7 @@ const measures = {
         "name": "Configuration stored in config service",
         "calculation": "Backing Data of type config stored in config service / All backing data of type config",
         "calculationFormula": "\\frac{ |\\Set{ bd | bd \\in BD \\land bd.kind = \\text{\"config\"} \\land storedInConfigService(bd) }| }{ |\\Set{ bd | bd \\in BD \\land bd.kind = \\text{\"config\"}}|  }",
-        "helperFunctions": ["storedInConfigService: bd  \\to (\\exists bs \\in BS (bs.providedFunctionality = \\text{\"configuration\"}) \\land \\exists (bs,bd) \\in bs.RBD ((bs,bd).usage\\_relation = \\text{\"persistence\"}))"],
+        "helperFunctions": ["storedInConfigService: bd  \\to (\\exists bs \\in BS (bs.providedFunctionality = \\text{\"configuration\"}) \\land \\exists (bs,bd) \\in bs.RBD_C ((bs,bd).usage\\_relation = \\text{\"persistence\"}))"],
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE]
     },
@@ -3134,9 +3134,9 @@ const measures = {
         "calculation": "Average(Separated Read and Write Access to Data Aggregate by Endpoint(s)) over all Data Aggregates",
         "calculationFormula": "\\frac{ \\displaystyle\\sum_{i=1}^{|DA|} \\begin{cases} 1 &\\text{if } separated(da_i)  \\\\ 0 & else \\end{cases} }{|DA|}",
         "helperFunctions": [
-            "persists: c,da \\to (\\exists (c,da) \\in c.RDA ((c,da).usage_relation = \\text{\"persistence\"}))",
-            "separatedRead: da \\to (\\exists c_1,c_2 \\in C (c_1 \\neq c_2 \\land persists(c_1,da) \\land persists(c_2,da) \\land \\exists (e_1,da) (e_1 \\in c_1.providedEndpoints  \\land \\exists(e_1, da) \\in e_1.RDA \\land e_1.kind = \\text{\"query\"} \\land \\nexists (e_2,da) (e_2 \\in c_1.providedEndpoints \\land (e_2,da) \\in e_2.RDA \\land e_2.kind = \\text{\"command\"})) \\land \\exists (e_3,da) (e_3 \\in c_2.providedEndpoints \\land \\exists (e_3,da) \\in e_3.RDA \\land e_3.kind = \\text{\"command\"})))",
-            "separatedWrite: da \\to (\\exists c_1,c_2 \\in C (c_1 \\neq c_2 \\land persists(c_1,da) \\land persists(c_2,da) \\land \\exists (e_1,da) (e_1 \\in c_1.providedEndpoints  \\land \\exists(e_1, da) \\in e_1.RDA \\land e_1.kind = \\text{\"command\"} \\land \\nexists (e_2,da) (e_2 \\in c_1.providedEndpoints \\land (e_2,da) \\in e_2.RDA \\land e_2.kind = \\text{\"query\"})) \\land \\exists (e_3,da) (e_3 \\in c_2.providedEndpoints \\land \\exists (e_3,da) \\in e_3.RDA \\land e_3.kind = \\text{\"query\"})))",
+            "persists: c,da \\to (\\exists (c,da) \\in c.RDA_C ((c,da).usage_relation = \\text{\"persistence\"}))",
+            "separatedRead: da \\to (\\exists c_1,c_2 \\in C (c_1 \\neq c_2 \\land persists(c_1,da) \\land persists(c_2,da) \\land \\exists (e_1,da) (e_1 \\in c_1.providedEndpoints  \\land \\exists(e_1, da) \\in e_1.RDA_E \\land e_1.kind = \\text{\"query\"} \\land \\nexists (e_2,da) (e_2 \\in c_1.providedEndpoints \\land (e_2,da) \\in e_2.RDA_E \\land e_2.kind = \\text{\"command\"})) \\land \\exists (e_3,da) (e_3 \\in c_2.providedEndpoints \\land \\exists (e_3,da) \\in e_3.RDA_E \\land e_3.kind = \\text{\"command\"})))",
+            "separatedWrite: da \\to (\\exists c_1,c_2 \\in C (c_1 \\neq c_2 \\land persists(c_1,da) \\land persists(c_2,da) \\land \\exists (e_1,da) (e_1 \\in c_1.providedEndpoints  \\land \\exists(e_1, da) \\in e_1.RDA_E \\land e_1.kind = \\text{\"command\"} \\land \\nexists (e_2,da) (e_2 \\in c_1.providedEndpoints \\land (e_2,da) \\in e_2.RDA_E \\land e_2.kind = \\text{\"query\"})) \\land \\exists (e_3,da) (e_3 \\in c_2.providedEndpoints \\land \\exists (e_3,da) \\in e_3.RDA_E \\land e_3.kind = \\text{\"query\"})))",
             "separated: da \\to (separatedRead(da) \\lor separatedWrite(da))",
         ],
         "sources": ["new"],
@@ -3153,7 +3153,7 @@ const measures = {
     "dataAggregateSpread": {
         "name": "Data aggregate spread",
         "calculation": "Average(Number of services using a data aggregate / Number of Services) for all data aggregates",
-        "calculationFormula": "\\frac{ \\displaystyle\\sum_{i=1}^{|DA|} \\frac{\\sum_{j=1}^{|S|} \\begin{cases} 1 &\\text{if } \\exists (c_j,da_i) \\in c_j.RDA \\\\ 0 &\\text{else } \\end{cases} }{|S|} }{|DA|}",
+        "calculationFormula": "\\frac{ \\displaystyle\\sum_{i=1}^{|DA|} \\frac{\\sum_{j=1}^{|S|} \\begin{cases} 1 &\\text{if } \\exists (c_j,da_i) \\in c_j.RDA_C \\\\ 0 &\\text{else } \\end{cases} }{|S|} }{|DA|}",
         "helperFunctions": [],
         "sources": ["new"],
         "applicableEntities": [ENTITIES.SYSTEM]
