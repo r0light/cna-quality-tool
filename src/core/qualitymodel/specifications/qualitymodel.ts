@@ -388,7 +388,7 @@ const productFactors = {
         "categories": ["businessDomain", "dataManagement"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.ENDPOINT, ENTITIES.LINK],
         "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM],
-        "sources": [{ "key": "Reznik2019", "section": "9 Microservices Architecture" }, { "key": "Adkins2020", "section": "7 Use Microservices" }, { "key": "Goniwada2021", "section": "3 Polylithic Architecture Principle (Build separate services for different business functionalitites) " }],
+        "sources": [{ "key": "Reznik2019", "section": "9 Microservices Architecture" }, { "key": "Adkins2020", "section": "7 Use Microservices" }, { "key": "Goniwada2021", "section": "3 Polylithic Architecture Principle (Build separate services for different business functionalities) " }],
         "measures": ["totalServiceInterfaceCohesion", "cohesivenessOfService", "cohesionOfAServiceBasedOnOtherEndpointsCalled", "lackOfCohesion", "averageLackOfCohesion", "serviceSize", "unreachableEndpointCount"],
         "evaluations": [
             {
@@ -450,7 +450,7 @@ const productFactors = {
     },
     "separationByGateways": {
         "name": "Separation by gateways",
-        "description": "Individual components or groups of components are separated through gateways. That means communication is proxied and controlled at specific gateway components. It also abstracts one part of a system from another so that it can be reused by different components without needing direct links to components that actually provide the needed functionality. This way, communication can also be redirected when component endpoints change without changing the gateway endpoint. Also incoming communication from outside of a system can be directed at external endpoints of a central component (the gateway).",
+        "description": "Individual components or groups of components are separated through gateways. That means communication is proxied and controlled at specific gateway components. It also abstracts one part of a system from another so that it can be reused by different components without needing direct links to components that actually provide the needed functionality. This way, communication can also be redirected when component endpoints change without changing the gateway endpoint. Also, incoming communication from outside of a system can be directed at external endpoints of a central component (the gateway).",
         "categories": ["networkCommunication", "businessDomain"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.PROXY_BACKING_SERVICE, ENTITIES.ENDPOINT, ENTITIES.LINK],
         "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
@@ -677,7 +677,7 @@ const productFactors = {
         "categories": ["applicationAdministration", "networkCommunication"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.BACKING_SERVICE, ENTITIES.REQUEST_TRACE],
         "applicableEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
-        "sources": [{ "key": "Davis2019", "section": "11.3" }, { "key": "Scholl2019", "section": "6 Use Correlation IDs" }, { "key": "Richardson2019", "section": "11.3.3 AUsing the Distributed tracing pattern" }, { "key": "Garrison2017", "section": "7 Debugging and Tracing" }, { "key": "Reznik2019", "section": "10 Observability" }, { "key": "Arundel2019", "section": "15 Tracing" }, { "key": "Bastani2017", "section": "13 Distributed Tracing" }, { "key": "Ruecker2021", "section": "11 Observability and Distributed Tracing Tools (Use Distributed Tracing)" }, { "key": "Goniwada2021", "section": "19 One Source of Truth" }],
+        "sources": [{ "key": "Davis2019", "section": "11.3" }, { "key": "Scholl2019", "section": "6 Use Correlation IDs" }, { "key": "Richardson2019", "section": "11.3.3 Using the Distributed tracing pattern" }, { "key": "Garrison2017", "section": "7 Debugging and Tracing" }, { "key": "Reznik2019", "section": "10 Observability" }, { "key": "Arundel2019", "section": "15 Tracing" }, { "key": "Bastani2017", "section": "13 Distributed Tracing" }, { "key": "Ruecker2021", "section": "11 Observability and Distributed Tracing Tools (Use Distributed Tracing)" }, { "key": "Goniwada2021", "section": "19 One Source of Truth" }],
         "measures": ["distributedTracingSupport"],
         "evaluations": [{
             "targetEntities": [ENTITIES.COMPONENT, ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE],
@@ -733,7 +733,7 @@ const productFactors = {
     },
     "dynamicScheduling": {
         "name": "Dynamic scheduling",
-        "description": "Resource provisioning to deployed components is dynamic and automated so that every component is ensured to have the resources it needs and only that many resources are provisioned wich are really needed at the same time. This requires dynamic adjustments to resources to adapt to changing environments. This capability should be part of the used infrastructure.",
+        "description": "Resource provisioning to deployed components is dynamic and automated so that every component is ensured to have the resources it needs and only that many resources are provisioned which are really needed at the same time. This requires dynamic adjustments to resources to adapt to changing environments. This capability should be part of the used infrastructure.",
         "categories": ["applicationAdministration", "cloudInfrastructure"],
         "relevantEntities": [ENTITIES.INFRASTRUCTURE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
@@ -876,7 +876,7 @@ const productFactors = {
     },
     "sparsity": {
         "name": "Sparsity",
-        "description": "The more sparse a system is, the less components there are which need to be operated and maintained by the developers of a system. This covers all types of components, such as services, backing services, storage backing services, and also the infrastructure.",
+        "description": "The more sparse a system is, the fewer components there are which need to be operated and maintained by the developers of a system. This covers all types of components, such as services, backing services, storage backing services, and also the infrastructure.",
         "categories": ["applicationAdministration", "businessDomain"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.LINK, ENTITIES.ENDPOINT, ENTITIES.INFRASTRUCTURE],
         "applicableEntities": [ENTITIES.SYSTEM],
@@ -1007,7 +1007,7 @@ const productFactors = {
     },
     "verticalDataReplication": {
         "name": "Vertical data replication",
-        "description": "Data is replicated vertically, that means across a request trace so that it is available closer to where a request initially comes in. Typically caching is used for vertical data replication.",
+        "description": "Data is replicated vertically, that means across a request trace so that it is available closer to where a request initially comes in. Typically, caching is used for vertical data replication.",
         "categories": ["applicationAdministration", "dataManagement"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.DATA_AGGREGATE, ENTITIES.REQUEST_TRACE],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.REQUEST_TRACE, ENTITIES.COMPONENT],
@@ -1110,7 +1110,7 @@ const productFactors = {
     },
     "cloudVendorAbstraction": {
         "name": "Cloud vendor abstraction",
-        "description": "The managed infrastructure and backing services used by a system and provided by a cloud vendor are based on unified or standardized interfaces so that vendor specifics are abstracted and a system could potentially be transferred to a another cloud vendor offering the same unified or standardized interfaces.",
+        "description": "The managed infrastructure and backing services used by a system and provided by a cloud vendor are based on unified or standardized interfaces so that vendor specifics are abstracted and a system could potentially be transferred to another cloud vendor offering the same unified or standardized interfaces.",
         "categories": ["applicationAdministration", "cloudInfrastructure"],
         "relevantEntities": [ENTITIES.INFRASTRUCTURE, ENTITIES.COMPONENT],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE],
@@ -1139,7 +1139,7 @@ const productFactors = {
     },
     "configurationManagement": {
         "name": "Configuration management",
-        "description": "Configuration values which are specific to an environment are managed separately in a consistent way. Through this, components are more portable across environments and configuration can change independently from components.",
+        "description": "Configuration values which are specific to an environment are managed separately in a consistent way. Through this, components are more portable across environments and configuration can change independently of components.",
         "categories": ["applicationAdministration", "dataManagement"],
         "relevantEntities": [ENTITIES.BACKING_DATA, ENTITIES.INFRASTRUCTURE, ENTITIES.COMPONENT],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
@@ -1419,7 +1419,7 @@ const productFactors = {
     },
     "circuitBreakedCommunication": {
         "name": "Circuit breaked communication",
-        "description": "For links a circuit breaker implementation is used which avoids unnecessary communication and therefore waiting time if a communication is known to fail. Instead the circuit breaker immediately returns an error response of a default response, is possible, while periodically retrying communication in the background.",
+        "description": "For links a circuit breaker implementation is used which avoids unnecessary communication and therefore waiting time if a communication is known to fail. Instead, the circuit breaker immediately returns an error response of a default response, is possible, while periodically retrying communication in the background.",
         "categories": ["networkCommunication"],
         "relevantEntities": [ENTITIES.COMPONENT, ENTITIES.LINK, ENTITIES.ENDPOINT],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.REQUEST_TRACE],
@@ -3047,8 +3047,8 @@ const measures = {
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.COMPONENT, ENTITIES.INFRASTRUCTURE]
     },
     "ratioOfEndpointsCoveredByContract": {
-        "name": "Ratio of endpoints covered by contract",
-        "calculation": "Endpoints documented by contract / All endpoints",
+        "name": "Ratio of endpoints covered by a contract",
+        "calculation": "Endpoints documented by a contract / All endpoints",
         "calculationFormula": "\\frac{ |\\Set{ e | e \\in E \\land e.documentedBy \\neq \\emptyset \\land isContract(e.documentedBy) } | }{|E|}",
         "helperFunctions": ["isContract: a \\to (a.type = \"Spring.CloudContract\" \\lor a.type = \"Pact.Contract\")"],
         "sources": ["new"],
