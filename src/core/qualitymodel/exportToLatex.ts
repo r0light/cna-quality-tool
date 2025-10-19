@@ -578,6 +578,8 @@ fs.writeFile(`./${outerDir}/measures.csv`, `${exportMeasuresAsCSV}`, (err) => {
 })
 
 let usedMeasuresOutput = measuresToExport.filter(measure => measure.status === "IN USE");
+let usedMeasuresLiteratureOutput = usedMeasuresOutput.filter(measure => !measure.sources.includes("new"));
+let usedMeasuresNewOutput = usedMeasuresOutput.filter(measure => measure.sources.includes("new"));
 let notUsedMeasuresOutput = measuresToExport.filter(measure => measure.status !== "IN USE");
 
 function formatMeasureForExport(measureToExport: LatexMeasure) {
@@ -592,14 +594,19 @@ function formatMeasureForExport(measureToExport: LatexMeasure) {
 
     return `\\textbf{${measureToExport.name}} \\refstepcounter{measure}\\label{measure:${measureToExport.id}}  & ${measureToExport.status}  \\\\
     Formula: &  \\\\
-    \\multicolumn{2}{|>{\\centering\\arraybackslash}p{15.05cm}|}{$\\displaystyle ${measureToExport.formula}$}  \\\\ ${helperFunctions} \\cline{1-2}
+    \\multicolumn{2}{|>{\\centering\\arraybackslash}p{15.05cm}|}{$\\displaystyle ${measureToExport.formula.replaceAll("\\frac", "\\cfrac")}$ ${helperFunctions.length === 0 ? "\\newline" : ""} }  \\\\ ${helperFunctions.replaceAll("\\frac", "\\cfrac")} \\cline{1-2}
     Applicable Entities: & Associated Factor:  \\\\
     ${measureToExport.entities.map(entity => `\\textbf{\\${entity}}`).join(", ")} & \\textbf{\\${measureToExport.factorKey}} \\\\
     Associated Quality Aspects: & Literature Sources: \\\\
-    ${measureToExport.qualityAspects.map(qa => `\\textbf{\\${qa}}`).join(", ")} & ${measureToExport.sources.map(source => source === "new" ? source : `\\cite{${source}}`).join(", ")} \\\\ \\hline`;
+    ${measureToExport.qualityAspects.map(qa => `\\textbf{\\${qa}}`).join(", ")} & ${measureToExport.sources.map(source => source === "new" ? source : `\\cite{${source}}`).join(", ")} `; // explicitly no \\\\ \\hline 
 }
 
+const measureSnippetsPath = `./${outerDir}/measureSnippets`;
+
+fs.mkdirSync(measureSnippetsPath, { recursive: true });
+
 function exportMeasures(measuresToExport: LatexMeasure[], measuresPerTable: number, caption: string) {
+
     let measuresTableOutput = `
 
     \\newcounter{measure}
@@ -607,6 +614,14 @@ function exportMeasures(measuresToExport: LatexMeasure[], measuresPerTable: numb
     `;
     for (let i = 1; i < measuresToExport.length; i = i + measuresPerTable) {
         let currentMeasures = measuresToExport.slice(i, i + measuresPerTable);
+
+        currentMeasures.forEach(measureToExport => {
+            fs.writeFile(`${measureSnippetsPath}/${measureToExport.id}.tex`, `${formatMeasureForExport(measureToExport)}`, (err) => {
+                if (err) {
+                    console.error(`Could not export measure ${measureToExport.id} to LaTeX snippet`)
+                }
+            })
+        })
 
         measuresTableOutput += `
         \\begin{table}[h]
@@ -616,7 +631,7 @@ function exportMeasures(measuresToExport: LatexMeasure[], measuresPerTable: numb
             \\def\\arraystretch{1.2}
             \\begin{tabularx}{\\linewidth}{|Xr|}
                 \\hline
-                ${currentMeasures.map(formatMeasureForExport).join("\\hline \n")}
+                ${currentMeasures.map(measureToExport => `\\input{measureSnippets/${measureToExport.id}.tex}`).join("\\\\ \\hline \\hline \n")} \\\\ \\hline
             \\end{tabularx}%
         \\end{table}
     `;
@@ -635,7 +650,13 @@ function exportMeasureCommands(measuresToExport: LatexMeasure[]) {
 }
 
 
-fs.writeFile(`./${outerDir}/usedMeasures.tex`, `${exportMeasures(usedMeasuresOutput, 4, "Architectural measures")}`, (err) => {
+fs.writeFile(`./${outerDir}/usedMeasuresLiterature.tex`, `${exportMeasures(usedMeasuresLiteratureOutput, 4, "Architectural measures from literature")}`, (err) => {
+    if (err) {
+        console.error(`Could not export measures to LaTeX`)
+    }
+})
+
+fs.writeFile(`./${outerDir}/usedMeasuresNew.tex`, `${exportMeasures(usedMeasuresNewOutput, 4, "Architectural measures, newly formulated")}`, (err) => {
     if (err) {
         console.error(`Could not export measures to LaTeX`)
     }
@@ -647,7 +668,7 @@ fs.writeFile(`./${outerDir}/usedMeasuresCommands.tex`, `${exportMeasureCommands(
     }
 })
 
-fs.writeFile(`./${outerDir}/unusedMeasures.tex`, `${exportMeasures(notUsedMeasuresOutput, 4, "Additional architectural measures")}`, (err) => {
+fs.writeFile(`./${outerDir}/unusedMeasures.tex`, `${exportMeasures(notUsedMeasuresOutput, 5, "Additional architectural measures")}`, (err) => {
     if (err) {
         console.error(`Could not export measures to LaTeX`)
     }

@@ -2577,7 +2577,7 @@ const measures = {
     "numberOfAvailabilityZonesUsedByInfrastructure": {
         "name": "Number of availability zones used by infrastructure",
         "calculation": "Number of unique availability zones in which the infrastructure is running",
-        "calculationFormula": "",
+        "calculationFormula": "| \\Set{ az | \\exists i \\in I \\land az \\in i.availability\\_zone) } |",
         "helperFunctions": [],
         "sources": ["Guerron2020", "Baranwal2014"],
         "applicableEntities": [ENTITIES.SYSTEM, ENTITIES.INFRASTRUCTURE, ENTITIES.REQUEST_TRACE],
