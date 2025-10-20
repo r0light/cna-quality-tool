@@ -839,9 +839,9 @@ const productFactorEvaluationImplementation: {
             return "none";
         } else if (numberOfAvailabilityZonesUsedByStorageServices as number > 1 && numberOfAvailabilityZonesUsedByStorageServices as number < 3) {
             return "low";
-        } else if (numberOfAvailabilityZonesUsedByStorageServices as number >= 3 && numberOfAvailabilityZonesUsedByStorageServices as number < 5) {
+        } else if (numberOfAvailabilityZonesUsedByStorageServices as number >= 3 && numberOfAvailabilityZonesUsedByStorageServices as number < 4) {
             return "moderate";
-        } else if (numberOfAvailabilityZonesUsedByStorageServices as number >= 5) {
+        } else if (numberOfAvailabilityZonesUsedByStorageServices as number >= 4) {
             return "high";
         }
     },
@@ -856,9 +856,9 @@ const productFactorEvaluationImplementation: {
             return "none";
         } else if (numberOfAvailabilityZonesUsedByServices as number > 1 && numberOfAvailabilityZonesUsedByServices as number < 3) {
             return "low";
-        } else if (numberOfAvailabilityZonesUsedByServices as number >= 3 && numberOfAvailabilityZonesUsedByServices as number < 5) {
+        } else if (numberOfAvailabilityZonesUsedByServices as number >= 3 && numberOfAvailabilityZonesUsedByServices as number < 4) {
             return "moderate";
-        } else if (numberOfAvailabilityZonesUsedByServices as number >= 5) {
+        } else if (numberOfAvailabilityZonesUsedByServices as number >= 4) {
             return "high";
         }
     },
@@ -873,9 +873,9 @@ const productFactorEvaluationImplementation: {
             return "none";
         } else if (numberOfAvailabilityZonesUsedByInfrastructure as number > 1 && numberOfAvailabilityZonesUsedByInfrastructure as number < 3) {
             return "low";
-        } else if (numberOfAvailabilityZonesUsedByInfrastructure as number >= 3 && numberOfAvailabilityZonesUsedByInfrastructure as number < 5) {
+        } else if (numberOfAvailabilityZonesUsedByInfrastructure as number >= 3 && numberOfAvailabilityZonesUsedByInfrastructure as number < 4) {
             return "moderate";
-        } else if (numberOfAvailabilityZonesUsedByInfrastructure as number >= 5) {
+        } else if (numberOfAvailabilityZonesUsedByInfrastructure as number >= 4) {
             return "high";
         }
     },
