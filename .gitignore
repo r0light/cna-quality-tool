@@ -30,3 +30,6 @@ built
 /docs/aux
 
 .vscode
+
+
+latex-generated-qualitymodel/
