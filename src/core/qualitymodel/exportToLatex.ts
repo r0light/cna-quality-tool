@@ -71,6 +71,7 @@ for (const factor of qualityModelInstance.productFactors) {
 
     let categories = factor.getCategories.map(categoryKey => qualityModelInstance.factorCategories.find(category => category.categoryKey === categoryKey).categoryName).join(", ");
 
+    output += `\\noindent\n`;
     output += `\\begin{minipage}{\\textwidth}\n`;
     output += `${indent()}\\begin{mdframed}[backgroundcolor=black!6]\n`;
     output += `${indent(2)}\\refstepcounter{productfactor}\\label{productfactor:${factor.getId}}\n`;
